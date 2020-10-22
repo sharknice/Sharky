@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>8.0</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="s2clientprotocol\common.proto" />
+    <None Remove="s2clientprotocol\data.proto" />
+    <None Remove="s2clientprotocol\debug.proto" />
+    <None Remove="s2clientprotocol\error.proto" />
+    <None Remove="s2clientprotocol\query.proto" />
+    <None Remove="s2clientprotocol\raw.proto" />
+    <None Remove="s2clientprotocol\sc2api.proto" />
+    <None Remove="s2clientprotocol\score.proto" />
+    <None Remove="s2clientprotocol\spatial.proto" />
+    <None Remove="s2clientprotocol\ui.proto" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Google.Protobuf" Version="3.13.0" />
+    <PackageReference Include="Grpc.Tools" Version="2.32.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Protobuf Include="s2clientprotocol\common.proto" />
+    <Protobuf Include="s2clientprotocol\data.proto" />
+    <Protobuf Include="s2clientprotocol\debug.proto" />
+    <Protobuf Include="s2clientprotocol\error.proto" />
+    <Protobuf Include="s2clientprotocol\query.proto" />
+    <Protobuf Include="s2clientprotocol\raw.proto" />
+    <Protobuf Include="s2clientprotocol\sc2api.proto" />
+    <Protobuf Include="s2clientprotocol\score.proto" />
+    <Protobuf Include="s2clientprotocol\spatial.proto" />
+    <Protobuf Include="s2clientprotocol\ui.proto" />
+  </ItemGroup>
+
+</Project>
