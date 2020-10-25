@@ -1,7 +1,5 @@
 ﻿using SC2APIProtocol;
-using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Sharky.Managers
 {

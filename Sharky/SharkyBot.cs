@@ -1,31 +1,55 @@
 ﻿using SC2APIProtocol;
+using Sharky.Managers;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Sharky
 {
     public class SharkyBot : ISharkyBot
     {
-        public SharkyBot()
+        List<IManager> Managers;
+        List<SC2APIProtocol.Action> Actions;
+
+        public SharkyBot(List<IManager> managers)
         {
+            Managers = managers;
         }
 
         public void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)
         {
             Console.WriteLine($"Game Version: {pingResponse.GameVersion}");
 
-            throw new NotImplementedException();
+            foreach (var manager in Managers)
+            {
+                manager.OnStart(gameInfo, data, pingResponse, observation, playerId, opponentId);
+            }
         }
 
         public void OnEnd(ResponseObservation observation, Result result)
         {
-            throw new NotImplementedException();
+            foreach (var manager in Managers)
+            {
+                manager.OnEnd(observation, result);
+            }
         }
 
         public IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
         {
-            throw new NotImplementedException();
+            Actions = new List<SC2APIProtocol.Action>();
+
+            try
+            {
+                foreach (var manager in Managers)
+                {
+                    Actions.AddRange(manager.OnFrame(observation));
+                }
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception.ToString());
+            }
+
+            return Actions;
         }
     }
 }
