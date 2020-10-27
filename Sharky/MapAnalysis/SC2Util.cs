@@ -30,12 +30,12 @@ namespace Sharky.MapAnalysis
             return data.Data[pixelID];
         }
 
-        public static bool GetTilePlacable(int x, int y)
-        {
-            if (x < 0 || y < 0 || x >= Shark.Bot.GameInfo.StartRaw.PlacementGrid.Size.X || y >= Shark.Bot.GameInfo.StartRaw.PlacementGrid.Size.Y)
-                return false;
-            return SC2Util.GetDataValue(Shark.Bot.GameInfo.StartRaw.PlacementGrid, x, y) != 0;
-        }
+        //public static bool GetTilePlacable(int x, int y)
+        //{
+        //    if (x < 0 || y < 0 || x >= Shark.Bot.GameInfo.StartRaw.PlacementGrid.Size.X || y >= Shark.Bot.GameInfo.StartRaw.PlacementGrid.Size.Y)
+        //        return false;
+        //    return SC2Util.GetDataValue(Shark.Bot.GameInfo.StartRaw.PlacementGrid, x, y) != 0;
+        //}
 
         public static Point2D Point(float x, float y)
         {
@@ -103,10 +103,10 @@ namespace Sharky.MapAnalysis
             return Point(pos.X, pos.Y);
         }
 
-        public static Point To3D(Point2D pos)
-        {
-            return Point(pos.X, pos.Y, Shark.Bot.MapAnalyzer.MapHeight((int)pos.X, (int)pos.Y));
-        }
+        //public static Point To3D(Point2D pos)
+        //{
+        //    return Point(pos.X, pos.Y, Shark.Bot.MapAnalyzer.MapHeight((int)pos.X, (int)pos.Y));
+        //}
 
         public static Point2D Normalize(Point2D point)
         {

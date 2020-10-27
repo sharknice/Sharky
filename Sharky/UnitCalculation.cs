@@ -53,93 +53,93 @@ namespace Sharky
             PreviousUnit = previousUnit;
             Unit = unit;
 
-            var unitRange = UnitStats.GetRange(unit);
-            if (unitRange == 0)
-            {
-                Range = 0;
-            }
-            else
-            {
-                Range = unitRange + unit.Radius;
-            }
+            //var unitRange = UnitStats.GetRange(unit);
+            //if (unitRange == 0)
+            //{
+            //    Range = 0;
+            //}
+            //else
+            //{
+            //    Range = unitRange + unit.Radius;
+            //}
 
-            var endX = (float)Math.Sin(unit.Facing) * Range;
-            var endY = (float)Math.Cos(unit.Facing) * Range;
-            Start = new Vector2(unit.Pos.X, unit.Pos.Y);
-            End = new Vector2(endX + unit.Pos.X, endY + unit.Pos.Y);
+            //var endX = (float)Math.Sin(unit.Facing) * Range;
+            //var endY = (float)Math.Cos(unit.Facing) * Range;
+            //Start = new Vector2(unit.Pos.X, unit.Pos.Y);
+            //End = new Vector2(endX + unit.Pos.X, endY + unit.Pos.Y);
 
-            DamageRadius = 1; // TODO: get damage radius
-            EstimatedCooldown = 0; // TODO: get estimated cooldown
+            //DamageRadius = 1; // TODO: get damage radius
+            //EstimatedCooldown = 0; // TODO: get estimated cooldown
 
-            DamageAir = false;
-            if (UnitTypes.CanAttackAir(unit.UnitType))
-            {
-                DamageAir = true;
-            }
-            DamageGround = false;
-            if (UnitTypes.CanAttackGround(unit.UnitType))
-            {
-                DamageGround = true;
-            }
-            Damage = UnitStats.GetDamage(unit);
-            Dps = UnitStats.GetDps(unit);
-            Weapon = UnitStats.GetWeapon(unit);
-            Weapons = UnitTypes.LookUp[unit.UnitType].Weapons.ToList();
-            if (Weapons == null)
-            {
-                Weapons = new List<Weapon>();
-                if (Weapon != null)
-                {
-                    Weapons.Add(Weapon);
-                }
-            }
+            //DamageAir = false;
+            //if (UnitTypes.CanAttackAir(unit.UnitType))
+            //{
+            //    DamageAir = true;
+            //}
+            //DamageGround = false;
+            //if (UnitTypes.CanAttackGround(unit.UnitType))
+            //{
+            //    DamageGround = true;
+            //}
+            //Damage = UnitStats.GetDamage(unit);
+            //Dps = UnitStats.GetDps(unit);
+            //Weapon = UnitStats.GetWeapon(unit);
+            //Weapons = UnitTypes.LookUp[unit.UnitType].Weapons.ToList();
+            //if (Weapons == null)
+            //{
+            //    Weapons = new List<Weapon>();
+            //    if (Weapon != null)
+            //    {
+            //        Weapons.Add(Weapon);
+            //    }
+            //}
 
-            SimulatedHitpoints = Unit.Health + Unit.Shield;
-            if (Unit.BuffIds.Contains((uint)Buffs.IMMORTALOVERLOAD))
-            {
-                SimulatedHitpoints += 100;
-            }
-            if (unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISM)
-            {
-                SimulatedHitpoints += 500;
-            }
+            //SimulatedHitpoints = Unit.Health + Unit.Shield;
+            //if (Unit.BuffIds.Contains((uint)Buffs.IMMORTALOVERLOAD))
+            //{
+            //    SimulatedHitpoints += 100;
+            //}
+            //if (unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISM)
+            //{
+            //    SimulatedHitpoints += 500;
+            //}
 
-            if (UnitTypes.ZergTypes.Contains(Unit.UnitType))
-            {
-                SimulatedHealPerSecond = 0.38f;
-            }
-            else if (repairers > 0 && UnitTypes.TerranRepairableTypes.Contains(Unit.UnitType))
-            {
-                SimulatedHealPerSecond = (float)(unit.HealthMax / (UnitTypes.LookUp[unit.UnitType].BuildTime / Shark.Bot.FramesPerSecond)) * repairers;
-            }
-            else if (Unit.UnitType == (uint)UnitTypes.TERRAN_MEDIVAC && Unit.Energy > 10)
-            {
-                SimulatedHealPerSecond = 12.6f;
-            }
-            else if (Unit.UnitType == (uint)UnitTypes.ZERG_QUEEN && Unit.Energy >= 50)
-            {
-                SimulatedHealPerSecond = 20;
-            }
-            else
-            {
-                SimulatedHealPerSecond = 0;
-            }
+            //if (UnitTypes.ZergTypes.Contains(Unit.UnitType))
+            //{
+            //    SimulatedHealPerSecond = 0.38f;
+            //}
+            //else if (repairers > 0 && UnitTypes.TerranRepairableTypes.Contains(Unit.UnitType))
+            //{
+            //    SimulatedHealPerSecond = (float)(unit.HealthMax / (UnitTypes.LookUp[unit.UnitType].BuildTime / Shark.Bot.FramesPerSecond)) * repairers;
+            //}
+            //else if (Unit.UnitType == (uint)UnitTypes.TERRAN_MEDIVAC && Unit.Energy > 10)
+            //{
+            //    SimulatedHealPerSecond = 12.6f;
+            //}
+            //else if (Unit.UnitType == (uint)UnitTypes.ZERG_QUEEN && Unit.Energy >= 50)
+            //{
+            //    SimulatedHealPerSecond = 20;
+            //}
+            //else
+            //{
+            //    SimulatedHealPerSecond = 0;
+            //}
 
-            if (Unit.UnitType == (uint)UnitTypes.PROTOSS_COLOSSUS && Shark.Bot.Observation.Observation.RawData.Player.UpgradeIds.Contains(UpgradeType.ExtendedThermalLance))
-            {
-                Range = 9;
-            }
+            //if (Unit.UnitType == (uint)UnitTypes.PROTOSS_COLOSSUS && Shark.Bot.Observation.Observation.RawData.Player.UpgradeIds.Contains(UpgradeType.ExtendedThermalLance))
+            //{
+            //    Range = 9;
+            //}
 
-            if (Unit.UnitType == (uint)UnitTypes.TERRAN_BUNKER && Unit.BuildProgress == 1) // assume 4 marines
-            {
-                Range = 6;
-                DamageAir = true;
-                DamageGround = true;
-                Damage = 6;
-                Dps = Damage * 4 / 0.61f;
-            }
+            //if (Unit.UnitType == (uint)UnitTypes.TERRAN_BUNKER && Unit.BuildProgress == 1) // assume 4 marines
+            //{
+            //    Range = 6;
+            //    DamageAir = true;
+            //    DamageGround = true;
+            //    Damage = 6;
+            //    Dps = Damage * 4 / 0.61f;
+            //}
 
-            Attributes = UnitTypes.LookUp[unit.UnitType].Attributes;
+            //Attributes = UnitTypes.LookUp[unit.UnitType].Attributes;
 
             EnemiesInRange = new List<UnitCalculation>();
             EnemiesInRangeOf = new List<UnitCalculation>();

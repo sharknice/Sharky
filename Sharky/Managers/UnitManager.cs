@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Sharky.Managers
 {
-    class UnitManager : SharkyManager
+    public class UnitManager : SharkyManager
     {
         float NearbyDistance = 25;
 
@@ -15,7 +15,7 @@ namespace Sharky.Managers
         ConcurrentDictionary<ulong, UnitCalculation> SelfUnits;
         ConcurrentDictionary<ulong, UnitCalculation> NeutralUnits;
 
-        ConcurrentDictionary<ulong, UnitCommander> Commanders;
+        public ConcurrentDictionary<ulong, UnitCommander> Commanders;
 
         int EnemyDeaths;
         int SelfDeaths;
@@ -26,6 +26,8 @@ namespace Sharky.Managers
             EnemyUnits = new ConcurrentDictionary<ulong, UnitCalculation>();
             SelfUnits = new ConcurrentDictionary<ulong, UnitCalculation>();
             NeutralUnits = new ConcurrentDictionary<ulong, UnitCalculation>();
+
+            Commanders = new ConcurrentDictionary<ulong, UnitCommander>();
 
             EnemyDeaths = 0;
             SelfDeaths = 0;
@@ -104,11 +106,11 @@ namespace Sharky.Managers
 
                 allyAttack.Value.NearbyAllies = SelfUnits.Where(a => a.Key != allyAttack.Key && Vector2.DistanceSquared(new Vector2(allyAttack.Value.Unit.Pos.X, allyAttack.Value.Unit.Pos.Y), new Vector2(a.Value.Unit.Pos.X, a.Value.Unit.Pos.Y)) <= NearbyDistance * NearbyDistance).Select(a => a.Value).ToList();
 
-                var commander = new UnitCommander(allyAttack);
+                var commander = new UnitCommander(allyAttack.Value);
                 Commanders.AddOrUpdate(allyAttack.Value.Unit.Tag, commander, (tag, existingCommander) =>
                 {
                     commander = existingCommander;
-                    commander.UnitCalculation = allyAttack;
+                    commander.UnitCalculation = allyAttack.Value;
                     return commander;
                 });
             }

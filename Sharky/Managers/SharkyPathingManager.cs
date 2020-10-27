@@ -32,27 +32,27 @@ namespace Sharky.Managers
 
         public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
         {
-            MillisecondsUntilUpdate -= (1 / shark.FramesPerSecond) * 1000;
-            if (MillisecondsUntilUpdate > 0) { return new List<SC2APIProtocol.Action>(); }
-            MillisecondsUntilUpdate = MillisecondsPerUpdate;
+            //MillisecondsUntilUpdate -= (1 / shark.FramesPerSecond) * 1000;
+            //if (MillisecondsUntilUpdate > 0) { return new List<SC2APIProtocol.Action>(); }
+            //MillisecondsUntilUpdate = MillisecondsPerUpdate;
 
-            var buildings = shark.EnemyAttacks.Where(e => UnitTypes.BuildingTypes.Contains(e.Value.Unit.UnitType)).Select(e => e.Value).Concat(shark.AllyAttacks.Where(e => UnitTypes.BuildingTypes.Contains(e.Value.Unit.UnitType)).Select(e => e.Value));
-            var currentBuildingCount = buildings.Count();
-            if (LastBuildingCount != currentBuildingCount)
-            {
-                SharkyPathFinder.UpdateBuildingGrid(buildings, observation.Observation.RawData.Units.Where(u => UnitTypes.MineralFields.Contains(u.UnitType) || UnitTypes.GasGeysers.Contains(u.UnitType) || u.Alliance == Alliance.Neutral));
-            }
-            LastBuildingCount = currentBuildingCount;
+            //var buildings = shark.EnemyAttacks.Where(e => UnitTypes.BuildingTypes.Contains(e.Value.Unit.UnitType)).Select(e => e.Value).Concat(shark.AllyAttacks.Where(e => UnitTypes.BuildingTypes.Contains(e.Value.Unit.UnitType)).Select(e => e.Value));
+            //var currentBuildingCount = buildings.Count();
+            //if (LastBuildingCount != currentBuildingCount)
+            //{
+            //    SharkyPathFinder.UpdateBuildingGrid(buildings, observation.Observation.RawData.Units.Where(u => UnitTypes.MineralFields.Contains(u.UnitType) || UnitTypes.GasGeysers.Contains(u.UnitType) || u.Alliance == Alliance.Neutral));
+            //}
+            //LastBuildingCount = currentBuildingCount;
 
-            var currentVisibleEnemyUnitCount = observation.Observation.RawData.Units.Where(u => u.Alliance == Alliance.Enemy).Count();
-            if (LastVisibleEnemyUnitCount != currentVisibleEnemyUnitCount)
-            {
-                SharkyPathFinder.UpdateGroundDamageGrid(shark.EnemyAttacks.Where(e => e.Value.DamageGround).Select(e => e.Value));
-                SharkyPathFinder.UpdateEnemyVisionGroundGrid(shark.EnemyAttacks.Values);
-                SharkyPathFinder.UpdateEnemyVisionGrid(shark.EnemyAttacks.Values);
-                SharkyPathFinder.UpdateAirDamageGrid(shark.EnemyAttacks.Where(e => e.Value.DamageAir).Select(e => e.Value));
-            }
-            LastVisibleEnemyUnitCount = currentVisibleEnemyUnitCount;
+            //var currentVisibleEnemyUnitCount = observation.Observation.RawData.Units.Where(u => u.Alliance == Alliance.Enemy).Count();
+            //if (LastVisibleEnemyUnitCount != currentVisibleEnemyUnitCount)
+            //{
+            //    SharkyPathFinder.UpdateGroundDamageGrid(shark.EnemyAttacks.Where(e => e.Value.DamageGround).Select(e => e.Value));
+            //    SharkyPathFinder.UpdateEnemyVisionGroundGrid(shark.EnemyAttacks.Values);
+            //    SharkyPathFinder.UpdateEnemyVisionGrid(shark.EnemyAttacks.Values);
+            //    SharkyPathFinder.UpdateAirDamageGrid(shark.EnemyAttacks.Where(e => e.Value.DamageAir).Select(e => e.Value));
+            //}
+            //LastVisibleEnemyUnitCount = currentVisibleEnemyUnitCount;
 
             return new List<SC2APIProtocol.Action>();
         }
