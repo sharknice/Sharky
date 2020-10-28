@@ -2,27 +2,35 @@
 using Sharky.Managers;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Sharky
 {
     public class SharkyBot : ISharkyBot
     {
         List<IManager> Managers;
+        DebugManager DebugManager;
         List<SC2APIProtocol.Action> Actions;
 
-        public SharkyBot(List<IManager> managers)
+        public SharkyBot(List<IManager> managers, DebugManager debugManager)
         {
             Managers = managers;
+            DebugManager = debugManager;
         }
 
         public void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)
         {
             Console.WriteLine($"Game Version: {pingResponse.GameVersion}");
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
 
             foreach (var manager in Managers)
             {
                 manager.OnStart(gameInfo, data, pingResponse, observation, playerId, opponentId);
             }
+
+            stopwatch.Stop();
+            Console.WriteLine($"OnStart: {stopwatch.ElapsedMilliseconds} ms");
         }
 
         public void OnEnd(ResponseObservation observation, Result result)
@@ -37,6 +45,9 @@ namespace Sharky
         {
             Actions = new List<SC2APIProtocol.Action>();
 
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
             try
             {
                 foreach (var manager in Managers)
@@ -48,6 +59,9 @@ namespace Sharky
             {
                 Console.WriteLine(exception.ToString());
             }
+
+            stopwatch.Stop();
+            DebugManager.DrawText($"OnFrame: {stopwatch.ElapsedMilliseconds}");
 
             return Actions;
         }

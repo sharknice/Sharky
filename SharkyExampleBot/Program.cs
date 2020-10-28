@@ -44,7 +44,7 @@ namespace SharkyExampleBot
             var microManager = new MicroManager(unitManager, microTasks);
             managers.Add(microManager);
 
-            var sharkyBot = new SharkyBot(managers);
+            var sharkyBot = new SharkyBot(managers, debugManager);
 
             var myRace = Race.Protoss;
             if (args.Length == 0)
