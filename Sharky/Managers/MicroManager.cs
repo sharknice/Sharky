@@ -6,10 +6,10 @@ namespace Sharky.Managers
 {
     public class MicroManager : SharkyManager
     {      
-        UnitManager UnitManager;
+        IUnitManager UnitManager;
         List<IMicroTask> MicroTasks;
 
-        public MicroManager(UnitManager unitManager, List<IMicroTask> microTasks)
+        public MicroManager(IUnitManager unitManager, List<IMicroTask> microTasks)
         {
             UnitManager = unitManager;
             MicroTasks = microTasks;

@@ -25,9 +25,9 @@ namespace Sharky
             LastTargetTag = 0;
         }
 
-        public ActionRawUnitCommand Order(Abilities ability, Point2D targetLocation = null, ulong targetTag = 0)
+        public ActionRawUnitCommand Order(Abilities ability, Point2D targetLocation = null, ulong targetTag = 0, bool allowSpam = false)
         {
-            if (ability == LastAbility && targetLocation == LastTargetLocation && targetTag == LastTargetTag)
+            if (!allowSpam && ability == LastAbility && targetTag == LastTargetTag && ((targetLocation == null && LastTargetLocation == null) || (targetLocation.X == LastTargetLocation.X && targetLocation.Y == LastTargetLocation.Y)))
             {
                 return null; // if new action is exactly the same, don't do anything to prevent apm spam
             }

@@ -1,10 +1,10 @@
 ﻿using SC2APIProtocol;
+using Sharky.Managers;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Text;
 
 namespace Sharky
 {
@@ -48,98 +48,108 @@ namespace Sharky
         /// </summary>
         public ConcurrentBag<ulong> Attackers { get; set; }
 
-        public UnitCalculation(Unit previousUnit, Unit unit, int repairers)
+        public List<UnitClassification> UnitClassifications { get; set; }
+
+        public UnitCalculation(Unit previousUnit, Unit unit, int repairers, UnitDataManager unitDataManager, SharkyOptions sharkyOptions)
         {
             PreviousUnit = previousUnit;
             Unit = unit;
 
-            //var unitRange = UnitStats.GetRange(unit);
-            //if (unitRange == 0)
-            //{
-            //    Range = 0;
-            //}
-            //else
-            //{
-            //    Range = unitRange + unit.Radius;
-            //}
+            UnitClassifications = new List<UnitClassification>();
+            if (unitDataManager.UnitData[unit.UnitType].Attributes.Contains(SC2APIProtocol.Attribute.Structure))
+            {
+            }
+            else if (unit.UnitType == (uint)UnitTypes.TERRAN_SCV || unit.UnitType == (uint)UnitTypes.TERRAN_MULE || unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE || unit.UnitType == (uint)UnitTypes.ZERG_DRONE || unit.UnitType == (uint)UnitTypes.ZERG_QUEEN)
+            {
+                UnitClassifications.Add(UnitClassification.Worker);
+            }
+            else
+            {
+                UnitClassifications.Add(UnitClassification.ArmyUnit);
+            }
 
-            //var endX = (float)Math.Sin(unit.Facing) * Range;
-            //var endY = (float)Math.Cos(unit.Facing) * Range;
-            //Start = new Vector2(unit.Pos.X, unit.Pos.Y);
-            //End = new Vector2(endX + unit.Pos.X, endY + unit.Pos.Y);
+            var unitRange = unitDataManager.GetRange(unit);
+            if (unitRange == 0)
+            {
+                Range = 0;
+            }
+            else
+            {
+                Range = unitRange + unit.Radius;
+            }
 
-            //DamageRadius = 1; // TODO: get damage radius
-            //EstimatedCooldown = 0; // TODO: get estimated cooldown
+            var endX = (float)Math.Sin(unit.Facing) * Range;
+            var endY = (float)Math.Cos(unit.Facing) * Range;
+            Start = new Vector2(unit.Pos.X, unit.Pos.Y);
+            End = new Vector2(endX + unit.Pos.X, endY + unit.Pos.Y);
 
-            //DamageAir = false;
-            //if (UnitTypes.CanAttackAir(unit.UnitType))
-            //{
-            //    DamageAir = true;
-            //}
-            //DamageGround = false;
-            //if (UnitTypes.CanAttackGround(unit.UnitType))
-            //{
-            //    DamageGround = true;
-            //}
-            //Damage = UnitStats.GetDamage(unit);
-            //Dps = UnitStats.GetDps(unit);
-            //Weapon = UnitStats.GetWeapon(unit);
-            //Weapons = UnitTypes.LookUp[unit.UnitType].Weapons.ToList();
-            //if (Weapons == null)
-            //{
-            //    Weapons = new List<Weapon>();
-            //    if (Weapon != null)
-            //    {
-            //        Weapons.Add(Weapon);
-            //    }
-            //}
+            DamageRadius = 1; // TODO: get damage radius
+            EstimatedCooldown = 0; // TODO: get estimated cooldown
 
-            //SimulatedHitpoints = Unit.Health + Unit.Shield;
-            //if (Unit.BuffIds.Contains((uint)Buffs.IMMORTALOVERLOAD))
-            //{
-            //    SimulatedHitpoints += 100;
-            //}
-            //if (unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISM)
-            //{
-            //    SimulatedHitpoints += 500;
-            //}
+            DamageAir = false;
+            if (unitDataManager.CanAttackAir(unit.UnitType))
+            {
+                DamageAir = true;
+            }
+            DamageGround = false;
+            if (unitDataManager.CanAttackGround(unit.UnitType))
+            {
+                DamageGround = true;
+            }
+            Damage = unitDataManager.GetDamage(unit);
+            Dps = unitDataManager.GetDps(unit);
+            Weapon = unitDataManager.GetWeapon(unit);
+            Weapons = unitDataManager.UnitData[unit.UnitType].Weapons.ToList();
+            if (Weapons == null)
+            {
+                Weapons = new List<Weapon>();
+                if (Weapon != null)
+                {
+                    Weapons.Add(Weapon);
+                }
+            }
 
-            //if (UnitTypes.ZergTypes.Contains(Unit.UnitType))
-            //{
-            //    SimulatedHealPerSecond = 0.38f;
-            //}
-            //else if (repairers > 0 && UnitTypes.TerranRepairableTypes.Contains(Unit.UnitType))
-            //{
-            //    SimulatedHealPerSecond = (float)(unit.HealthMax / (UnitTypes.LookUp[unit.UnitType].BuildTime / Shark.Bot.FramesPerSecond)) * repairers;
-            //}
-            //else if (Unit.UnitType == (uint)UnitTypes.TERRAN_MEDIVAC && Unit.Energy > 10)
-            //{
-            //    SimulatedHealPerSecond = 12.6f;
-            //}
-            //else if (Unit.UnitType == (uint)UnitTypes.ZERG_QUEEN && Unit.Energy >= 50)
-            //{
-            //    SimulatedHealPerSecond = 20;
-            //}
-            //else
-            //{
-            //    SimulatedHealPerSecond = 0;
-            //}
+            SimulatedHitpoints = Unit.Health + Unit.Shield;
+            if (Unit.BuffIds.Contains((uint)Buffs.IMMORTALOVERLOAD))
+            {
+                SimulatedHitpoints += 100;
+            }
+            if (unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISM)
+            {
+                SimulatedHitpoints += 500;
+            }
 
-            //if (Unit.UnitType == (uint)UnitTypes.PROTOSS_COLOSSUS && Shark.Bot.Observation.Observation.RawData.Player.UpgradeIds.Contains(UpgradeType.ExtendedThermalLance))
-            //{
-            //    Range = 9;
-            //}
+            if (unitDataManager.ZergTypes.Contains((UnitTypes)Unit.UnitType))
+            {
+                SimulatedHealPerSecond = 0.38f;
+            }
+            else if (repairers > 0 && unitDataManager.UnitData[unit.UnitType].Attributes.Contains(SC2APIProtocol.Attribute.Mechanical))
+            {
+                SimulatedHealPerSecond = (float)(unit.HealthMax / (unitDataManager.UnitData[unit.UnitType].BuildTime / sharkyOptions.FramesPerSecond)) * repairers;
+            }
+            else if (Unit.UnitType == (uint)UnitTypes.TERRAN_MEDIVAC && Unit.Energy > 10)
+            {
+                SimulatedHealPerSecond = 12.6f;
+            }
+            else if (Unit.UnitType == (uint)UnitTypes.ZERG_QUEEN && Unit.Energy >= 50)
+            {
+                SimulatedHealPerSecond = 20;
+            }
+            else
+            {
+                SimulatedHealPerSecond = 0;
+            }
 
-            //if (Unit.UnitType == (uint)UnitTypes.TERRAN_BUNKER && Unit.BuildProgress == 1) // assume 4 marines
-            //{
-            //    Range = 6;
-            //    DamageAir = true;
-            //    DamageGround = true;
-            //    Damage = 6;
-            //    Dps = Damage * 4 / 0.61f;
-            //}
+            if (Unit.UnitType == (uint)UnitTypes.TERRAN_BUNKER && Unit.BuildProgress == 1) // assume 4 marines
+            {
+                Range = 6;
+                DamageAir = true;
+                DamageGround = true;
+                Damage = 6;
+                Dps = Damage * 4 / 0.61f;
+            }
 
-            //Attributes = UnitTypes.LookUp[unit.UnitType].Attributes;
+            Attributes = unitDataManager.UnitData[unit.UnitType].Attributes;
 
             EnemiesInRange = new List<UnitCalculation>();
             EnemiesInRangeOf = new List<UnitCalculation>();

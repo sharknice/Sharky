@@ -7,22 +7,28 @@ using System.Threading.Tasks;
 
 namespace Sharky.Managers
 {
-    public class UnitManager : SharkyManager
+    public class UnitManager : IUnitManager
     {
+        UnitDataManager UnitDataManager;
+        SharkyOptions SharkyOptions;
+
         float NearbyDistance = 25;
 
         ConcurrentDictionary<ulong, UnitCalculation> EnemyUnits;
         ConcurrentDictionary<ulong, UnitCalculation> SelfUnits;
         ConcurrentDictionary<ulong, UnitCalculation> NeutralUnits;
 
-        public ConcurrentDictionary<ulong, UnitCommander> Commanders;
+        public ConcurrentDictionary<ulong, UnitCommander> Commanders { get; private set; }
 
         int EnemyDeaths;
         int SelfDeaths;
         int NeutralDeaths;
 
-        public UnitManager()
+        public UnitManager(UnitDataManager unitDataManager, SharkyOptions sharkyOptions)
         {
+            UnitDataManager = unitDataManager;
+            SharkyOptions = sharkyOptions;
+
             EnemyUnits = new ConcurrentDictionary<ulong, UnitCalculation>();
             SelfUnits = new ConcurrentDictionary<ulong, UnitCalculation>();
             NeutralUnits = new ConcurrentDictionary<ulong, UnitCalculation>();
@@ -34,7 +40,7 @@ namespace Sharky.Managers
             NeutralDeaths = 0;
         }
 
-        public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
+        public IEnumerable<Action> OnFrame(ResponseObservation observation)
         {
             if (observation.Observation.RawData.Event != null && observation.Observation.RawData.Event.DeadUnits != null)
             {
@@ -64,7 +70,7 @@ namespace Sharky.Managers
                 if (unit.Alliance == Alliance.Enemy)
                 {
                     var repairingUnitCount = repairers.Where(u => u.Alliance == Alliance.Enemy && Vector2.DistanceSquared(new Vector2(u.Pos.X, u.Pos.Y), new Vector2(unit.Pos.X, unit.Pos.Y)) < (1.0 + u.Radius + unit.Radius) * (0.1 + u.Radius + unit.Radius)).Count();
-                    var attack = new UnitCalculation(unit, unit, repairingUnitCount);
+                    var attack = new UnitCalculation(unit, unit, repairingUnitCount, UnitDataManager, SharkyOptions);
                     EnemyUnits.AddOrUpdate(unit.Tag, attack, (tag, existingAttack) =>
                     {
                         attack.PreviousUnit = existingAttack.Unit;
@@ -73,7 +79,7 @@ namespace Sharky.Managers
                 }
                 else if (unit.Alliance == Alliance.Self)
                 {
-                    var attack = new UnitCalculation(unit, unit, 0);
+                    var attack = new UnitCalculation(unit, unit, 0, UnitDataManager, SharkyOptions);
                     SelfUnits.AddOrUpdate(unit.Tag, attack, (tag, existingAttack) =>
                     {
                         attack.PreviousUnit = existingAttack.Unit;
@@ -133,6 +139,14 @@ namespace Sharky.Managers
                 return false;
             }
             return true;
+        }
+
+        public void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)
+        {
+        }
+
+        public void OnEnd(ResponseObservation observation, Result result)
+        {
         }
     }
 }

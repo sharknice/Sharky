@@ -1,4 +1,5 @@
-﻿using Sharky.MicroControllers;
+﻿using Sharky.Managers;
+using Sharky.MicroControllers;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 
@@ -9,10 +10,13 @@ namespace Sharky.MicroTasks
         public List<UnitCommander> UnitCommanders { get; set; }
 
         IMicroController MicroController;
+        ITargetingManager TargetingManager;
 
-        public AttackTask(IMicroController microController)
+        public AttackTask(IMicroController microController, ITargetingManager targetingManager)
         {
             MicroController = microController;
+            TargetingManager = targetingManager;
+
             UnitCommanders = new List<UnitCommander>();
         }
 
@@ -20,7 +24,7 @@ namespace Sharky.MicroTasks
         {
             foreach (var commander in commanders)
             {
-                if (!commander.Value.Claimed)
+                if (!commander.Value.Claimed && commander.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.ArmyUnit))
                 {
                     commander.Value.Claimed = true;
                     UnitCommanders.Add(commander.Value);
@@ -30,7 +34,7 @@ namespace Sharky.MicroTasks
 
         public IEnumerable<SC2APIProtocol.Action> PerformActions()
         {
-            return MicroController.Attack(UnitCommanders, new SC2APIProtocol.Point2D { X = 10, Y = 10 }, new SC2APIProtocol.Point2D { X = 10, Y = 10 });
+            return MicroController.Attack(UnitCommanders, TargetingManager.AttackPoint, TargetingManager.DefensePoint);
         }
     }
 }
