@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using Sharky.Builds;
 using System.Collections.Generic;
 
 namespace Sharky.Managers
@@ -44,6 +45,19 @@ namespace Sharky.Managers
         public int Minerals { get; private set; }
         public int VespeneGas { get; private set; }
 
+        MacroSetup MacroSetup;
+        UnitManager UnitManager;
+        UnitDataManager UnitDataManager;
+        BuildingBuilder BuildingBuilder;
+
+        public MacroManager(MacroSetup macroSetup, UnitManager unitManager, UnitDataManager unitDataManager, BuildingBuilder buildingBuilder)
+        {
+            MacroSetup = macroSetup;
+            UnitManager = unitManager;
+            UnitDataManager = unitDataManager;
+            BuildingBuilder = buildingBuilder;
+        }
+
         public override void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)
         {
             foreach (var playerInfo in gameInfo.PlayerInfo)
@@ -54,107 +68,102 @@ namespace Sharky.Managers
                 }
             }
 
-            SetupUnits(Race);
-            SetupProduction(Race);
-            SetupTech(Race);
-            SetupDefensiveBuildings(Race);
+            MacroSetup.SetupMacro(this, Race);
         }
 
         public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
         {
+            var commands = new List<ActionRawUnitCommand>();
+
             FoodUsed = (int)observation.Observation.PlayerCommon.FoodUsed;
             Minerals = (int)observation.Observation.PlayerCommon.Minerals;
             VespeneGas = (int)observation.Observation.PlayerCommon.Vespene;
 
-            return new List<SC2APIProtocol.Action>();
-        }
+            // TODO: change pylonsinmineralline etc. to only build when you need a pylon anyways, unless toggle is off for it
+            //CannonsInMineralLine();
+            //CannonsAtProxy();
+            //CannonAtEveryBase();
+            //ShieldsAtExpansions();
 
-        void SetupUnits(Race race)
-        {
-            Units = new List<UnitTypes>();
+            commands.AddRange(BuildSupply());
 
-            if (race == Race.Protoss)
+            //BuildGas();
+            commands.AddRange(BuildProductionBuildings());
+
+            commands.AddRange(BuildTechBuildings());
+            //BuildUnits();
+
+            var actions = new List<Action>();
+            foreach (var command in commands)
             {
-                NexusUnits = new List<UnitTypes> { UnitTypes.PROTOSS_PROBE, UnitTypes.PROTOSS_MOTHERSHIP };
-                GatewayUnits = new List<UnitTypes> { UnitTypes.PROTOSS_ZEALOT, UnitTypes.PROTOSS_STALKER, UnitTypes.PROTOSS_SENTRY, UnitTypes.PROTOSS_ADEPT, UnitTypes.PROTOSS_HIGHTEMPLAR, UnitTypes.PROTOSS_DARKTEMPLAR };
-                RoboticsFacilityUnits = new List<UnitTypes> { UnitTypes.PROTOSS_OBSERVER, UnitTypes.PROTOSS_IMMORTAL, UnitTypes.PROTOSS_WARPPRISM, UnitTypes.PROTOSS_COLOSSUS, UnitTypes.PROTOSS_DISRUPTOR };
-                StargateUnits = new List<UnitTypes> { UnitTypes.PROTOSS_PHOENIX, UnitTypes.PROTOSS_ORACLE, UnitTypes.PROTOSS_VOIDRAY, UnitTypes.PROTOSS_TEMPEST, UnitTypes.PROTOSS_CARRIER };
-
-                Units.AddRange(NexusUnits);
-                Units.AddRange(GatewayUnits);
-                Units.AddRange(RoboticsFacilityUnits);
-                Units.AddRange(StargateUnits);
-                Units.Add(UnitTypes.PROTOSS_ARCHON);
-            }
-
-            DesiredUnitCounts = new Dictionary<UnitTypes, int>();
-            BuildUnits = new Dictionary<UnitTypes, bool>();
-            foreach (var unitType in Units)
-            {
-                DesiredUnitCounts[unitType] = 0;
-                BuildUnits[unitType] = false;
-            }
-        }
-
-        void SetupProduction(Race race)
-        {
-            DesiredProductionCounts = new Dictionary<UnitTypes, int>();
-            BuildProduction = new Dictionary<UnitTypes, bool>();
-            if (race == Race.Protoss)
-            {
-                Production = new List<UnitTypes> {
-                    UnitTypes.PROTOSS_NEXUS, UnitTypes.PROTOSS_GATEWAY, UnitTypes.PROTOSS_ROBOTICSFACILITY, UnitTypes.PROTOSS_STARGATE
+                var action = new Action
+                {
+                    ActionRaw = new ActionRaw
+                    {
+                        UnitCommand = command
+                    }
                 };
+                actions.Add(action);
             }
 
-            foreach (var productionType in Production)
-            {
-                DesiredProductionCounts[productionType] = 0;
-                BuildProduction[productionType] = false;
-            }
-
-            if (race == Race.Protoss)
-            {
-                DesiredProductionCounts[UnitTypes.PROTOSS_NEXUS] = 1;
-            }
+            return actions;
         }
 
-        void SetupTech(Race race)
+        private List<ActionRawUnitCommand> BuildSupply()
         {
-            DesiredTechCounts = new Dictionary<UnitTypes, int>();
-            BuildTech = new Dictionary<UnitTypes, bool>();
+            var commands = new List<ActionRawUnitCommand>();
 
-            if (race == Race.Protoss)
+            if (BuildPylon)
             {
-                Tech = new List<UnitTypes> {
-                    UnitTypes.PROTOSS_CYBERNETICSCORE, UnitTypes.PROTOSS_FORGE, UnitTypes.PROTOSS_ROBOTICSBAY, UnitTypes.PROTOSS_TWILIGHTCOUNCIL, UnitTypes.PROTOSS_FLEETBEACON, UnitTypes.PROTOSS_TEMPLARARCHIVE, UnitTypes.PROTOSS_DARKSHRINE
-                };
+                var unitData = UnitDataManager.BuildingData[UnitTypes.PROTOSS_PYLON];
+                var command = BuildingBuilder.BuildBuilding(this, UnitTypes.PROTOSS_PYLON, unitData);
+                if (command != null)
+                {
+                    commands.Add(command);
+                }
             }
 
-            foreach (var techType in Tech)
-            {
-                DesiredTechCounts[techType] = 0;
-                BuildTech[techType] = false;
-            }
+            return commands;
         }
 
-        void SetupDefensiveBuildings(Race race)
+        private List<ActionRawUnitCommand> BuildProductionBuildings()
         {
-            DesiredDefensiveBuildingsCounts = new Dictionary<UnitTypes, int>();
-            BuildDefensiveBuildings = new Dictionary<UnitTypes, bool>();
+            var commands = new List<ActionRawUnitCommand>();
 
-            if (race == Race.Protoss)
+            foreach (var unit in BuildProduction)
             {
-                DefensiveBuildings = new List<UnitTypes> {
-                    UnitTypes.PROTOSS_PHOTONCANNON, UnitTypes.PROTOSS_SHIELDBATTERY
-                };
+                if (unit.Value)
+                {
+                    var unitData = UnitDataManager.BuildingData[unit.Key];
+                    var command = BuildingBuilder.BuildBuilding(this, unit.Key, unitData);
+                    if (command != null)
+                    {
+                        commands.Add(command);
+                    }
+                }
             }
 
-            foreach (var defensiveBuildingsType in DefensiveBuildings)
+            return commands;
+        }
+
+        private List<ActionRawUnitCommand> BuildTechBuildings()
+        {
+            var commands = new List<ActionRawUnitCommand>();
+
+            foreach (var unit in BuildTech)
             {
-                DesiredDefensiveBuildingsCounts[defensiveBuildingsType] = 0;
-                BuildDefensiveBuildings[defensiveBuildingsType] = false;
+                if (unit.Value)
+                {
+                    var unitData = UnitDataManager.BuildingData[unit.Key];
+                    var command = BuildingBuilder.BuildBuilding(this, unit.Key, unitData);
+                    if (command != null)
+                    {
+                        commands.Add(command);
+                    }
+                }
             }
+
+            return commands;
         }
     }
 }

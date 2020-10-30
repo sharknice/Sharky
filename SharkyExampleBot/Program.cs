@@ -1,6 +1,7 @@
 ﻿using SC2APIProtocol;
 using Sharky;
 using Sharky.Builds;
+using Sharky.Builds.BuildingPlacement;
 using Sharky.Builds.Protoss;
 using Sharky.Managers;
 using Sharky.MicroControllers;
@@ -37,7 +38,10 @@ namespace SharkyExampleBot
             managers.Add(targetingManager);
 
             var buildOptions = new BuildOptions { StrictGasCount = false, StrictSupplyCount = false, StrictWorkerCount = false };
-            var macroManager = new MacroManager();
+            var macroSetup = new MacroSetup();
+            var buildingPlacement = new BuildingPlacement(new ProtossBuildingPlacement(unitManager));
+            var buildingBuilder = new BuildingBuilder(unitManager, targetingManager, buildingPlacement, unitDataManager);
+            var macroManager = new MacroManager(macroSetup, unitManager, unitDataManager, buildingBuilder);
             managers.Add(macroManager);
             
             var builds = new Dictionary<string, ISharkyBuild>();

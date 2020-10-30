@@ -14,9 +14,9 @@ namespace Sharky.Managers
 
         float NearbyDistance = 25;
 
-        ConcurrentDictionary<ulong, UnitCalculation> EnemyUnits;
-        ConcurrentDictionary<ulong, UnitCalculation> SelfUnits;
-        ConcurrentDictionary<ulong, UnitCalculation> NeutralUnits;
+        public ConcurrentDictionary<ulong, UnitCalculation> EnemyUnits { get; private set; }
+        public ConcurrentDictionary<ulong, UnitCalculation> SelfUnits { get; private set; }
+        public ConcurrentDictionary<ulong, UnitCalculation> NeutralUnits { get; private set; }
 
         public ConcurrentDictionary<ulong, UnitCommander> Commanders { get; private set; }
 

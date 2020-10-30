@@ -20,6 +20,8 @@ namespace Sharky.Managers
         public HashSet<UnitTypes> ProtossTypes { get; private set; }
         public HashSet<UnitTypes> TerranTypes { get; private set; }
 
+        public HashSet<Buffs> CarryingResourceBuffs { get; private set; }
+
         public UnitDataManager()
         {
             UnitData = new Dictionary<UnitTypes, UnitTypeData>();
@@ -86,6 +88,14 @@ namespace Sharky.Managers
             BuildingData.Add(UnitTypes.PROTOSS_ROBOTICSFACILITY, new BuildingTypeData { Ability = Abilities.BUILD_ROBOTICSFACILITY, Size = 3, Minerals = 150, Gas = 100 });
             BuildingData.Add(UnitTypes.PROTOSS_CYBERNETICSCORE, new BuildingTypeData { Ability = Abilities.BUILD_CYBERNETICSCORE, Size = 3, Minerals = 150, });
             BuildingData.Add(UnitTypes.PROTOSS_SHIELDBATTERY, new BuildingTypeData { Ability = Abilities.BUILD_SHIELDBATTERY, Size = 2, Minerals = 100 });
+
+            CarryingResourceBuffs = new HashSet<Buffs> {
+                Buffs.CARRYHARVESTABLEVESPENEGEYSERGAS,
+                Buffs.CARRYHARVESTABLEVESPENEGEYSERGASPROTOSS,
+                Buffs.CARRYHARVESTABLEVESPENEGEYSERGASZERG,
+                Buffs.CARRYHIGHYIELDMINERALFIELDMINERALS,
+                Buffs.CARRYMINERALFIELDMINERALS
+            };
         }
 
         public override void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)
