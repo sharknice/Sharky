@@ -2,47 +2,30 @@
 using Sharky.Builds;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 
 namespace Sharky.Managers
 {
     public class BuildManager : SharkyManager
     {
-        // do what build.cs and sharkbuild.cs does, has a SharkyBuild, switches builds, builds the actual units, or calls something to build the actual units
-        BuildOptions BuildOptions;
+        DebugManager DebugManager;
+        MacroManager Macro;
+        BuildChoices BuildChoices;
 
-        List<UnitTypes> Units;
-        Dictionary<UnitTypes, int> DesiredUnitCounts;
-        Dictionary<UnitTypes, bool> BuildUnits;
+        IMacroBalancer MacroBalancer;
+        ISharkyBuild CurrentBuild;
+        List<string> BuildSequence;
 
-        List<UnitTypes> Production;
-        Dictionary<UnitTypes, int> DesiredProductionCounts;
-        Dictionary<UnitTypes, bool> BuildProduction;
-
-        List<UnitTypes> Tech;
-        Dictionary<UnitTypes, int> DesiredTechCounts;
-        Dictionary<UnitTypes, bool> BuildTech;
-
-        List<UnitTypes> DefensiveBuildings;
-        Dictionary<UnitTypes, int> DesiredDefensiveBuildingsCounts;
-        Dictionary<UnitTypes, bool> BuildDefensiveBuildings;
-
-        Dictionary<UnitTypes, bool> DesiredUpgrades;
-
-        public List<UnitTypes> NexusUnits;
-        public List<UnitTypes> GatewayUnits;
-        public List<UnitTypes> RoboticsFacilityUnits;
-        public List<UnitTypes> StargateUnits;
-
-        public List<UnitTypes> BarracksUnits;
-        public List<UnitTypes> FactoryUnits;
-        public List<UnitTypes> StarportUnits;
+        Dictionary<int, string> BuildHistory { get; set; }
 
         Race ActualRace;
 
-        public BuildManager(BuildOptions buildOptions)
+        public BuildManager(MacroManager macro, BuildChoices buildChoices, DebugManager debugManager, IMacroBalancer macroBalancer)
         {
-            BuildOptions = buildOptions;
+            Macro = macro;
+            BuildChoices = buildChoices;
+            DebugManager = debugManager;
+            MacroBalancer = macroBalancer;
         }
 
         public override void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)
@@ -54,31 +37,68 @@ namespace Sharky.Managers
                     ActualRace = playerInfo.RaceActual;
                 }
             }
-            SetupUnits(ActualRace);
+
+            var enemyRace = Race.Zerg;
+            var enemyName = "test";
+            var buildSequences = BuildChoices.BuildSequences[enemyRace.ToString()];
+            if (!string.IsNullOrWhiteSpace(enemyName) && BuildChoices.BuildSequences.ContainsKey(enemyName))
+            {
+                buildSequences = BuildChoices.BuildSequences[enemyName];
+            }
+
+            BuildSequence = buildSequences.First(); //BuildDecisionManager.GetBestBuild(enemyBot, buildSequences, gameInfo.MapName, EnemyBotManager.Enemies, EnemyRace, ChatManager);
+
+            BuildHistory = new Dictionary<int, string>();
+            SwitchBuild(BuildSequence.First(), 0);
         }
 
         public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
         {
+            DebugManager.DrawText("Build: " + CurrentBuild.Name());
+            DebugManager.DrawText("Sequence: " + string.Join(", ", BuildSequence));
+
+            var counterTransition = CurrentBuild.CounterTransition();
+            if (counterTransition != null && counterTransition.Count() > 0)
+            {
+                BuildSequence = counterTransition;
+                SwitchBuild(BuildSequence[0], (int)observation.Observation.GameLoop);
+            }
+            else if (CurrentBuild.Transition())
+            {
+                var buildSequenceIndex = BuildSequence.FindIndex(b => b == CurrentBuild.Name());
+                if (buildSequenceIndex != -1 && BuildSequence.Count() > buildSequenceIndex + 1)
+                {
+                    SwitchBuild(BuildSequence[buildSequenceIndex + 1], (int)observation.Observation.GameLoop);
+                }
+                else
+                {
+                    TransitionBuild((int)observation.Observation.GameLoop);
+                }
+            }
+
+            CurrentBuild.OnFrame(observation);
+
+            MacroBalancer.BalanceSupply();
+            MacroBalancer.BalanceGases();
+            MacroBalancer.BalanceTech();
+            MacroBalancer.BalanceProduction();
+            MacroBalancer.BalanceProductionBuildings();
+            MacroBalancer.BalanceGasWorkers();
+
             return new List<SC2APIProtocol.Action>();
         }
 
-        void SetupUnits(Race race)
+        void SwitchBuild(string buildName, int frame)
         {
-            Units = new List<UnitTypes>();
+            BuildHistory[frame] = buildName;
+            CurrentBuild = BuildChoices.Builds[buildName];
+            CurrentBuild.StartBuild(frame);
+        }
 
-            if (race == Race.Protoss)
-            {
-                NexusUnits = new List<UnitTypes> { UnitTypes.PROTOSS_PROBE, UnitTypes.PROTOSS_MOTHERSHIP };
-                GatewayUnits = new List<UnitTypes> { UnitTypes.PROTOSS_ZEALOT, UnitTypes.PROTOSS_STALKER, UnitTypes.PROTOSS_SENTRY, UnitTypes.PROTOSS_ADEPT, UnitTypes.PROTOSS_HIGHTEMPLAR, UnitTypes.PROTOSS_DARKTEMPLAR };
-                RoboticsFacilityUnits = new List<UnitTypes> { UnitTypes.PROTOSS_OBSERVER, UnitTypes.PROTOSS_IMMORTAL, UnitTypes.PROTOSS_WARPPRISM, UnitTypes.PROTOSS_COLOSSUS, UnitTypes.PROTOSS_DISRUPTOR };
-                StargateUnits = new List<UnitTypes> { UnitTypes.PROTOSS_PHOENIX, UnitTypes.PROTOSS_ORACLE, UnitTypes.PROTOSS_VOIDRAY, UnitTypes.PROTOSS_TEMPEST, UnitTypes.PROTOSS_CARRIER };
-
-                Units.AddRange(NexusUnits);
-                Units.AddRange(GatewayUnits);
-                Units.AddRange(RoboticsFacilityUnits);
-                Units.AddRange(StargateUnits);
-                Units.Add(UnitTypes.PROTOSS_ARCHON);
-            }
+        void TransitionBuild(int frame)
+        {
+            BuildSequence = BuildChoices.BuildSequences["Transition"][new Random().Next(BuildChoices.BuildSequences["Transition"].Count)];
+            SwitchBuild(BuildSequence[0], frame);
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using SC2APIProtocol;
 using Sharky;
 using Sharky.Builds;
+using Sharky.Builds.Protoss;
 using Sharky.Managers;
 using Sharky.MicroControllers;
 using Sharky.MicroTasks;
@@ -36,7 +37,24 @@ namespace SharkyExampleBot
             managers.Add(targetingManager);
 
             var buildOptions = new BuildOptions { StrictGasCount = false, StrictSupplyCount = false, StrictWorkerCount = false };
-            var buildManager = new BuildManager(buildOptions);
+            var macroManager = new MacroManager();
+            managers.Add(macroManager);
+            
+            var builds = new Dictionary<string, ISharkyBuild>();
+            var antiMassMarine = new AntiMassMarine(buildOptions, macroManager, unitManager);
+            var sequences = new List<List<string>>();
+            sequences.Add( new List<string> { antiMassMarine.Name() });
+            builds[antiMassMarine.Name()] = antiMassMarine;
+            var buildSequences = new Dictionary<string, List<List<string>>>();
+            buildSequences[Race.Terran.ToString()] = sequences;
+            buildSequences[Race.Zerg.ToString()] = sequences;
+            buildSequences[Race.Protoss.ToString()] = sequences;
+            buildSequences[Race.Random.ToString()] = sequences;
+            buildSequences["transition"] = sequences;
+
+            var macroBalancer = new MacroBalancer(buildOptions, unitManager, macroManager, unitDataManager);
+            var buildChoices = new BuildChoices { Builds = builds, BuildSequences = buildSequences };
+            var buildManager = new BuildManager(macroManager, buildChoices, debugManager, macroBalancer);
             managers.Add(buildManager);
 
             var microTasks = new List<IMicroTask>();

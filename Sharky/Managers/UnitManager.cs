@@ -124,6 +124,16 @@ namespace Sharky.Managers
             return new List<SC2APIProtocol.Action>();
         }
 
+        public int Count(UnitTypes unitType)
+        {
+            return SelfUnits.Count(u => u.Value.Unit.UnitType == (uint)unitType);
+        }
+
+        public int Completed(UnitTypes unitType)
+        {
+            return SelfUnits.Count(u => u.Value.Unit.UnitType == (uint)unitType && u.Value.Unit.BuildProgress == 1);
+        }
+
         private bool CanDamage(Weapon weapon, Unit unit)
         {
             if (weapon == null || weapon.Damage == 0)

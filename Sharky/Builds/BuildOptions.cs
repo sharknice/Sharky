@@ -5,6 +5,7 @@
         public bool StrictWorkerCount { get; set; }
         public bool StrictSupplyCount { get; set; }
         public bool StrictGasCount { get; set; }
+        public ProtossBuildOptions ProtossBuildOptions { get; set; }
 
         public BuildOptions()
         {
