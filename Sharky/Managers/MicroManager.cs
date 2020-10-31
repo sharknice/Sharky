@@ -17,6 +17,8 @@ namespace Sharky.Managers
 
         public override IEnumerable<Action> OnFrame(ResponseObservation observation)
         {
+            var frame = (int)observation.Observation.GameLoop;
+
             foreach (var microTask in MicroTasks)
             {
                 microTask.ClaimUnits(UnitManager.Commanders); // determine which MicroTask units should be a part of, save it on the UnitCommander
@@ -25,7 +27,7 @@ namespace Sharky.Managers
             var actions = new List<Action>();
             foreach (var microTask in MicroTasks)
             {
-                actions.AddRange(microTask.PerformActions());
+                actions.AddRange(microTask.PerformActions(frame));
             }
             return actions;
         }

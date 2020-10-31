@@ -5,58 +5,58 @@ namespace Sharky.Builds.Protoss
 {
     public class AntiMassMarine : SharkyBuild
     {
-        public AntiMassMarine(BuildOptions buildOptions, MacroManager macro, UnitManager unitManager) : base(buildOptions, macro, unitManager)
+        public AntiMassMarine(BuildOptions buildOptions, MacroManager macroManager, UnitManager unitManager) : base(buildOptions, macroManager, unitManager)
         {
 
         }
 
         public override void OnFrame(ResponseObservation observation)
         {
-            if (Macro.FoodUsed >= 15)
+            if (MacroManager.FoodUsed >= 15)
             {
-                if (Macro.DesiredProductionCounts[UnitTypes.PROTOSS_GATEWAY] < 1)
+                if (MacroManager.DesiredProductionCounts[UnitTypes.PROTOSS_GATEWAY] < 1)
                 {
-                    Macro.DesiredProductionCounts[UnitTypes.PROTOSS_GATEWAY] = 1;
+                    MacroManager.DesiredProductionCounts[UnitTypes.PROTOSS_GATEWAY] = 1;
                 }
             }
-            if (Macro.FoodUsed >= 17 && UnitManager.Count(UnitTypes.PROTOSS_GATEWAY) > 0)
+            if (MacroManager.FoodUsed >= 17 && UnitManager.Count(UnitTypes.PROTOSS_GATEWAY) > 0)
             {
-                if (Macro.DesiredGases < 1)
+                if (MacroManager.DesiredGases < 1)
                 {
-                    Macro.DesiredGases = 1;
+                    MacroManager.DesiredGases = 1;
                 }
             }
-            if (Macro.FoodUsed >= 18 && UnitManager.Count(UnitTypes.PROTOSS_GATEWAY) > 0)
+            if (MacroManager.FoodUsed >= 18 && UnitManager.Count(UnitTypes.PROTOSS_GATEWAY) > 0)
             {
-                if (Macro.DesiredGases < 2)
+                if (MacroManager.DesiredGases < 2)
                 {
-                    Macro.DesiredGases = 2;
+                    MacroManager.DesiredGases = 2;
                 }
             }
             if (UnitManager.Count(UnitTypes.PROTOSS_GATEWAY) > 0)
             {
-                if (Macro.DesiredTechCounts[UnitTypes.PROTOSS_CYBERNETICSCORE] < 1)
+                if (MacroManager.DesiredTechCounts[UnitTypes.PROTOSS_CYBERNETICSCORE] < 1)
                 {
-                    Macro.DesiredTechCounts[UnitTypes.PROTOSS_CYBERNETICSCORE] = 1;
+                    MacroManager.DesiredTechCounts[UnitTypes.PROTOSS_CYBERNETICSCORE] = 1;
                 }
                 //NexusAbilityManager.SaveEnergy = true;
             }
 
             if (UnitManager.Count(UnitTypes.PROTOSS_GATEWAY) > 0 && UnitManager.Count(UnitTypes.PROTOSS_CYBERNETICSCORE) > 0)
             {
-                if (Macro.DesiredProductionCounts[UnitTypes.PROTOSS_GATEWAY] < 3)
+                if (MacroManager.DesiredProductionCounts[UnitTypes.PROTOSS_GATEWAY] < 3)
                 {
-                    Macro.DesiredProductionCounts[UnitTypes.PROTOSS_GATEWAY] = 3;
+                    MacroManager.DesiredProductionCounts[UnitTypes.PROTOSS_GATEWAY] = 3;
                 }
             }
 
             if (UnitManager.Completed(UnitTypes.PROTOSS_CYBERNETICSCORE) > 0)
             {
-                if (Macro.DesiredUnitCounts[UnitTypes.PROTOSS_STALKER] < 20)
+                if (MacroManager.DesiredUnitCounts[UnitTypes.PROTOSS_STALKER] < 20)
                 {
-                    Macro.DesiredUnitCounts[UnitTypes.PROTOSS_STALKER] = 20;
+                    MacroManager.DesiredUnitCounts[UnitTypes.PROTOSS_STALKER] = 20;
                 }
-                Macro.DesiredUpgrades[Upgrades.WARPGATERESEARCH] = true;
+                MacroManager.DesiredUpgrades[Upgrades.WARPGATERESEARCH] = true;
                 //NexusAbilityManager.PriotitizedAbilities.Add(UpgradeType.LookUp[Upgrades.WARPGATERESEARCH].Ability);
                 //if (shark.Observation.Observation.RawData.Player.UpgradeIds.Contains(Upgrades.WARPGATERESEARCH))
                 //{
@@ -83,11 +83,11 @@ namespace Sharky.Builds.Protoss
                 BuildOptions.ProtossBuildOptions.ShieldsAtDefensivePoint = 4;
             }
 
-            if (Macro.FoodUsed >= 50)
+            if (MacroManager.FoodUsed >= 50)
             {
-                if (Macro.DesiredProductionCounts[UnitTypes.PROTOSS_NEXUS] < 2)
+                if (MacroManager.DesiredProductionCounts[UnitTypes.PROTOSS_NEXUS] < 2)
                 {
-                    Macro.DesiredProductionCounts[UnitTypes.PROTOSS_NEXUS] = 2;
+                    MacroManager.DesiredProductionCounts[UnitTypes.PROTOSS_NEXUS] = 2;
                 }
             }
         }

@@ -41,7 +41,7 @@ namespace SharkyExampleBot
             var macroSetup = new MacroSetup();
             var buildingPlacement = new BuildingPlacement(new ProtossBuildingPlacement(unitManager));
             var buildingBuilder = new BuildingBuilder(unitManager, targetingManager, buildingPlacement, unitDataManager);
-            var macroManager = new MacroManager(macroSetup, unitManager, unitDataManager, buildingBuilder);
+            var macroManager = new MacroManager(macroSetup, unitManager, unitDataManager, buildingBuilder, sharkyOptions);
             managers.Add(macroManager);
             
             var builds = new Dictionary<string, ISharkyBuild>();

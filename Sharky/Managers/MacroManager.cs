@@ -1,6 +1,7 @@
 ﻿using SC2APIProtocol;
 using Sharky.Builds;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Sharky.Managers
 {
@@ -42,20 +43,24 @@ namespace Sharky.Managers
         public Race Race;
 
         public int FoodUsed { get; private set; }
+        public int FoodLeft { get; private set; }
         public int Minerals { get; private set; }
         public int VespeneGas { get; private set; }
+        public int Frame { get; private set; }
 
         MacroSetup MacroSetup;
-        UnitManager UnitManager;
+        IUnitManager UnitManager;
         UnitDataManager UnitDataManager;
         BuildingBuilder BuildingBuilder;
+        SharkyOptions SharkyOptions;
 
-        public MacroManager(MacroSetup macroSetup, UnitManager unitManager, UnitDataManager unitDataManager, BuildingBuilder buildingBuilder)
+        public MacroManager(MacroSetup macroSetup, IUnitManager unitManager, UnitDataManager unitDataManager, BuildingBuilder buildingBuilder, SharkyOptions sharkyOptions)
         {
             MacroSetup = macroSetup;
             UnitManager = unitManager;
             UnitDataManager = unitDataManager;
             BuildingBuilder = buildingBuilder;
+            SharkyOptions = sharkyOptions;
         }
 
         public override void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)
@@ -76,8 +81,10 @@ namespace Sharky.Managers
             var commands = new List<ActionRawUnitCommand>();
 
             FoodUsed = (int)observation.Observation.PlayerCommon.FoodUsed;
+            FoodLeft = (int)observation.Observation.PlayerCommon.FoodCap - FoodUsed;
             Minerals = (int)observation.Observation.PlayerCommon.Minerals;
             VespeneGas = (int)observation.Observation.PlayerCommon.Vespene;
+            Frame = (int)observation.Observation.GameLoop;
 
             // TODO: change pylonsinmineralline etc. to only build when you need a pylon anyways, unless toggle is off for it
             //CannonsInMineralLine();
@@ -87,11 +94,11 @@ namespace Sharky.Managers
 
             commands.AddRange(BuildSupply());
 
-            //BuildGas();
+            commands.AddRange(BuildGas());
             commands.AddRange(BuildProductionBuildings());
 
             commands.AddRange(BuildTechBuildings());
-            //BuildUnits();
+            commands.AddRange(ProduceUnits());
 
             var actions = new List<Action>();
             foreach (var command in commands)
@@ -107,6 +114,58 @@ namespace Sharky.Managers
             }
 
             return actions;
+        }
+
+        private List<ActionRawUnitCommand> ProduceUnits()
+        {
+            var commands = new List<ActionRawUnitCommand>();
+            foreach (var unit in BuildUnits)
+            {
+                if (unit.Value && unit.Key != UnitTypes.PROTOSS_ARCHON)
+                {
+                    var unitData = UnitDataManager.TrainingData[unit.Key];
+                    if (unitData.Food <= FoodLeft && unitData.Minerals <= Minerals && unitData.Gas <= VespeneGas)
+                    {
+                        var building = UnitManager.Commanders.Where(c => unitData.ProducingUnits.Contains((UnitTypes)c.Value.UnitCalculation.Unit.UnitType) && !c.Value.UnitCalculation.Unit.IsActive && c.Value.UnitCalculation.Unit.BuildProgress == 1 && c.Value.WarpInOffCooldown(Frame, SharkyOptions.FramesPerSecond, UnitDataManager));
+                        if (building.Count() > 0)
+                        {
+                            if (building.First().Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPGATE)
+                            {
+                                //if (attacking)
+                                //{
+                                //    location = WarpInPlacer.FindPlacement(attackinglocation);
+                                //}
+                                //else
+                                //{
+                                //    location = WarpInPlacer.FindPlacement(defenselocation);
+                                //}
+
+                                //building.First().Value.Order((int)unitData.WarpInAbility, location);
+                            }
+                            else
+                            {
+                                commands.Add(building.First().Value.Order(Frame, unitData.Ability));
+                            }
+                        }
+                    }
+                }
+                else if (unit.Value && unit.Key == UnitTypes.PROTOSS_ARCHON)
+                {
+                    var templar = UnitManager.Commanders.Where(c => c.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_HIGHTEMPLAR || c.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_DARKTEMPLAR);
+                    var merges = templar.Count(a => a.Value.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.MORPH_ARCHON));
+                    if (merges + UnitManager.Count(UnitTypes.PROTOSS_ARCHON) < DesiredUnitCounts[UnitTypes.PROTOSS_ARCHON])
+                    {
+                        var mergables = templar.Where(c => !c.Value.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.MORPH_ARCHON || o.AbilityId == (uint)Abilities.MORPH_ARCHON + 1));
+                        if (mergables.Count() >= 2)
+                        {
+                            var commanders = mergables.OrderBy(c => c.Value.UnitCalculation.Unit.Energy).Take(2);
+                            commanders.First().Value.Merge(commanders.Last().Value.UnitCalculation.Unit.Tag);
+                        }
+                    }
+                }
+            }
+
+            return commands;
         }
 
         private List<ActionRawUnitCommand> BuildSupply()

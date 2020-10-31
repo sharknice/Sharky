@@ -32,9 +32,9 @@ namespace Sharky.MicroTasks
             }
         }
 
-        public IEnumerable<SC2APIProtocol.Action> PerformActions()
+        public IEnumerable<SC2APIProtocol.Action> PerformActions(int frame)
         {
-            return MicroController.Attack(UnitCommanders, TargetingManager.AttackPoint, TargetingManager.DefensePoint);
+            return MicroController.Attack(UnitCommanders, TargetingManager.AttackPoint, TargetingManager.DefensePoint, frame);
         }
     }
 }

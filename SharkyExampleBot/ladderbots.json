@@ -1,0 +1,10 @@
+﻿{
+  "Bots": {
+    "SharkyExampleBot": {
+      "Race": "Protoss",
+      "Type": "dotnetcore",
+      "RootPath": "./",
+      "FileName": "SharkyExampleBot.dll"
+    }
+  }
+}

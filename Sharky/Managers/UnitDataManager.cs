@@ -9,6 +9,7 @@ namespace Sharky.Managers
     {
         public Dictionary<UnitTypes, UnitTypeData> UnitData { get; private set; }
         public Dictionary<UnitTypes, BuildingTypeData> BuildingData { get; private set; }
+        public Dictionary<UnitTypes, TrainingTypeData> TrainingData { get; private set; }
 
         /// <summary>
         /// key is ability, value is the unitType it belongs to
@@ -19,6 +20,9 @@ namespace Sharky.Managers
         public HashSet<UnitTypes> ZergTypes { get; private set; }
         public HashSet<UnitTypes> ProtossTypes { get; private set; }
         public HashSet<UnitTypes> TerranTypes { get; private set; }
+
+        public Dictionary<Abilities, float> AbilityCooldownTimes { get; private set; }
+        public Dictionary<Abilities, float> WarpInCooldownTimes { get; private set; }
 
         public HashSet<Buffs> CarryingResourceBuffs { get; private set; }
 
@@ -88,6 +92,19 @@ namespace Sharky.Managers
             BuildingData.Add(UnitTypes.PROTOSS_ROBOTICSFACILITY, new BuildingTypeData { Ability = Abilities.BUILD_ROBOTICSFACILITY, Size = 3, Minerals = 150, Gas = 100 });
             BuildingData.Add(UnitTypes.PROTOSS_CYBERNETICSCORE, new BuildingTypeData { Ability = Abilities.BUILD_CYBERNETICSCORE, Size = 3, Minerals = 150, });
             BuildingData.Add(UnitTypes.PROTOSS_SHIELDBATTERY, new BuildingTypeData { Ability = Abilities.BUILD_SHIELDBATTERY, Size = 2, Minerals = 100 });
+
+            TrainingData = new Dictionary<UnitTypes, TrainingTypeData>();
+
+            TrainingData.Add(UnitTypes.TERRAN_BARRACKSTECHLAB, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_BARRACKS }, Minerals = 50, Gas = 25, Ability = Abilities.BUILD_TECHLAB_BARRACKS, IsAddOn = true });
+            TrainingData.Add(UnitTypes.TERRAN_BARRACKSREACTOR, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_BARRACKS }, Minerals = 50, Gas = 50, Ability = Abilities.BUILD_REACTOR_BARRACKS, IsAddOn = true });
+
+            TrainingData.Add(UnitTypes.PROTOSS_PROBE, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_NEXUS }, Minerals = 50, Food = 1, Ability = Abilities.TRAIN_PROBE });
+            TrainingData.Add(UnitTypes.PROTOSS_ZEALOT, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_GATEWAY, UnitTypes.PROTOSS_WARPGATE }, Minerals = 100, Food = 2, Ability = Abilities.TRAIN_ZEALOT, WarpInAbility = Abilities.TRAINWARP_ZEALOT });
+
+
+            AbilityCooldownTimes = new Dictionary<Abilities, float> { { Abilities.EFFECT_BLINK_STALKER, 10 }, { Abilities.EFFECT_SHADOWSTRIDE, 14 }, { Abilities.EFFECT_TIMEWARP, 7.1f }, { Abilities.EFFECT_PURIFICATIONNOVA, 21.4f }, { Abilities.EFFECT_PSISTORM, 1.43f }, { Abilities.EFFECT_VOIDRAYPRISMATICALIGNMENT, 42.9f }, { Abilities.EFFECT_ORACLEREVELATION, 10f }, { Abilities.BEHAVIOR_PULSARBEAMON, 4f } };
+            WarpInCooldownTimes = new Dictionary<Abilities, float> { { Abilities.TRAINWARP_ADEPT, 20f }, { Abilities.TRAINWARP_DARKTEMPLAR, 32f }, { Abilities.TRAINWARP_HIGHTEMPLAR, 32f }, { Abilities.TRAINWARP_SENTRY, 23f }, { Abilities.TRAINWARP_STALKER, 23f }, { Abilities.TRAINWARP_ZEALOT, 20f } };
+
 
             CarryingResourceBuffs = new HashSet<Buffs> {
                 Buffs.CARRYHARVESTABLEVESPENEGEYSERGAS,

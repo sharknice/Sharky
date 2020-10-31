@@ -5,12 +5,12 @@ namespace Sharky.MicroControllers
 {
     public class MicroController : IMicroController
     {
-        public List<Action> Attack(List<UnitCommander> commanders, Point2D target, Point2D defensivePoint)
+        public List<Action> Attack(List<UnitCommander> commanders, Point2D target, Point2D defensivePoint, int frame)
         {
             var actions = new List<Action>();
             foreach (var commander in commanders)
             {
-                var unitCommand = commander.Order(Abilities.ATTACK_ATTACK, target);
+                var unitCommand = commander.Order(frame, Abilities.ATTACK_ATTACK, target);
                 if (unitCommand != null)
                 {
                     var action = new Action
@@ -26,12 +26,12 @@ namespace Sharky.MicroControllers
             return actions;
         }
 
-        public List<Action> Retreat(List<UnitCommander> commanders, Point2D defensivePoint)
+        public List<Action> Retreat(List<UnitCommander> commanders, Point2D defensivePoint, int frame)
         {
             var actions = new List<Action>();
             foreach (var commander in commanders)
             {
-                var unitCommand = commander.Order(Abilities.MOVE, defensivePoint);
+                var unitCommand = commander.Order(frame, Abilities.MOVE, defensivePoint);
                 if (unitCommand != null)
                 {
                     var action = new Action

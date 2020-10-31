@@ -10,4 +10,10 @@
     <ProjectReference Include="..\Sharky\Sharky.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="ladderbots.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

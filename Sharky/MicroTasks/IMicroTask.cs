@@ -9,6 +9,6 @@ namespace Sharky.MicroTasks
         List<UnitCommander> UnitCommanders { get; set; }
 
         void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders);
-        IEnumerable<Action> PerformActions();
+        IEnumerable<Action> PerformActions(int frame);
     }
 }

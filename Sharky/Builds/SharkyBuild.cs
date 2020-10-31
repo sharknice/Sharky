@@ -8,13 +8,13 @@ namespace Sharky.Builds
     public abstract class SharkyBuild : ISharkyBuild
     {
         protected BuildOptions BuildOptions;
-        protected MacroManager Macro;
+        protected MacroManager MacroManager;
         protected UnitManager UnitManager;
 
-        public SharkyBuild(BuildOptions buildOptions, MacroManager macro, UnitManager unitManager)
+        public SharkyBuild(BuildOptions buildOptions, MacroManager macroManager, UnitManager unitManager)
         {
             BuildOptions = buildOptions;
-            Macro = macro;
+            MacroManager = macroManager;
             UnitManager = unitManager;
         }
 
@@ -41,22 +41,22 @@ namespace Sharky.Builds
             BuildOptions.StrictSupplyCount = false;
             BuildOptions.StrictWorkerCount = false;
 
-            foreach (var u in Macro.Units)
+            foreach (var u in MacroManager.Units)
             {
-                Macro.DesiredUnitCounts[u] = 0;
+                MacroManager.DesiredUnitCounts[u] = 0;
             }
-            foreach (var u in Macro.Production)
+            foreach (var u in MacroManager.Production)
             {
-                Macro.DesiredProductionCounts[u] = 0;
+                MacroManager.DesiredProductionCounts[u] = 0;
             }
 
-            if (Macro.Race == SC2APIProtocol.Race.Protoss)
+            if (MacroManager.Race == SC2APIProtocol.Race.Protoss)
             {
-                Macro.DesiredProductionCounts[UnitTypes.PROTOSS_NEXUS] = 1;
+                MacroManager.DesiredProductionCounts[UnitTypes.PROTOSS_NEXUS] = 1;
             }
-            else if (Macro.Race == SC2APIProtocol.Race.Protoss)
+            else if (MacroManager.Race == SC2APIProtocol.Race.Protoss)
             {
-                Macro.DesiredProductionCounts[UnitTypes.TERRAN_COMMANDCENTER] = 1;
+                MacroManager.DesiredProductionCounts[UnitTypes.TERRAN_COMMANDCENTER] = 1;
             }
         }
 
