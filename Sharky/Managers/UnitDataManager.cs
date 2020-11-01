@@ -21,6 +21,10 @@ namespace Sharky.Managers
         public HashSet<UnitTypes> ProtossTypes { get; private set; }
         public HashSet<UnitTypes> TerranTypes { get; private set; }
 
+        public HashSet<UnitTypes> MineralFieldTypes { get; private set; }
+        public HashSet<UnitTypes> GasGeyserTypes { get; private set; }
+        public HashSet<UnitTypes> GasGeyserRefineryTypes { get; private set; }
+
         public Dictionary<Abilities, float> AbilityCooldownTimes { get; private set; }
         public Dictionary<Abilities, float> WarpInCooldownTimes { get; private set; }
 
@@ -112,6 +116,42 @@ namespace Sharky.Managers
                 Buffs.CARRYHARVESTABLEVESPENEGEYSERGASZERG,
                 Buffs.CARRYHIGHYIELDMINERALFIELDMINERALS,
                 Buffs.CARRYMINERALFIELDMINERALS
+            };
+
+            MineralFieldTypes = new HashSet<UnitTypes>
+            {
+                UnitTypes.NEUTRAL_BATTLESTATIONMINERALFIELD,
+                UnitTypes.NEUTRAL_BATTLESTATIONMINERALFIELD750,
+                UnitTypes.NEUTRAL_MINERALFIELD,
+                UnitTypes.NEUTRAL_MINERALFIELD750,
+                UnitTypes.NEUTRAL_PURIFIERMINERALFIELD,
+                UnitTypes.NEUTRAL_PURIFIERMINERALFIELD750,
+                UnitTypes.NEUTRAL_PURIFIERRICHMINERALFIELD,
+                UnitTypes.NEUTRAL_PURIFIERRICHMINERALFIELD750,
+                UnitTypes.NEUTRAL_RICHMINERALFIELD,
+                UnitTypes.NEUTRAL_RICHMINERALFIELD750,
+                UnitTypes.NEUTRAL_LABMINERALFIELD,
+                UnitTypes.NEUTRAL_LABMINERALFIELD750
+            };
+
+            GasGeyserTypes = new HashSet<UnitTypes>
+            {
+                UnitTypes.NEUTRAL_VESPENEGEYSER,
+                UnitTypes.NEUTRAL_SPACEPLATFORMGEYSER,
+                UnitTypes.NEUTRAL_SHAKURASVESPENEGEYSER,
+                UnitTypes.NEUTRAL_RICHVESPENEGEYSER,
+                UnitTypes.NEUTRAL_PURIFIERVESPENEGEYSER,
+                UnitTypes.NEUTRAL_PROTOSSVESPENEGEYSER,
+                UnitTypes.ZERG_EXTRACTOR,
+                UnitTypes.PROTOSS_ASSIMILATOR,
+                UnitTypes.TERRAN_REFINERY
+            };
+
+            GasGeyserRefineryTypes = new HashSet<UnitTypes>
+            {
+                UnitTypes.ZERG_EXTRACTOR,
+                UnitTypes.PROTOSS_ASSIMILATOR,
+                UnitTypes.TERRAN_REFINERY
             };
         }
 

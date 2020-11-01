@@ -42,7 +42,21 @@ namespace Sharky.Builds
             return null;
         }
 
-        private Point2D GetReferenceLocation(Point2D buildLocation)
+        public ActionRawUnitCommand BuildGas(MacroManager macroManager, BuildingTypeData unitData, Unit geyser)
+        {
+            if (unitData.Minerals <= macroManager.Minerals && unitData.Gas <= macroManager.VespeneGas)
+            {
+                var worker = GetWorker(new Point2D { X = geyser.Pos.X, Y = geyser.Pos.Y });
+                if (worker != null)
+                {
+                    return worker.Order(macroManager.Frame, unitData.Ability, null, geyser.Tag);
+                }
+            }
+
+            return null;
+        }
+
+        public Point2D GetReferenceLocation(Point2D buildLocation)
         {
             var nexus = UnitManager.Commanders.Values.Where(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.ResourceCenter)).OrderBy(c => Vector2.DistanceSquared(new Vector2(c.UnitCalculation.Unit.Pos.X, c.UnitCalculation.Unit.Pos.Y), new Vector2(buildLocation.X, buildLocation.Y))).FirstOrDefault();
             if (nexus != null)
