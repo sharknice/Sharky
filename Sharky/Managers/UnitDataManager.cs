@@ -30,6 +30,9 @@ namespace Sharky.Managers
 
         public HashSet<Buffs> CarryingResourceBuffs { get; private set; }
 
+        public HashSet<Abilities> MiningAbilities { get; private set; }
+        public HashSet<Abilities> GatheringAbilities { get; private set; }
+
         public UnitDataManager()
         {
             UnitData = new Dictionary<UnitTypes, UnitTypeData>();
@@ -104,7 +107,21 @@ namespace Sharky.Managers
 
             TrainingData.Add(UnitTypes.PROTOSS_PROBE, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_NEXUS }, Minerals = 50, Food = 1, Ability = Abilities.TRAIN_PROBE });
             TrainingData.Add(UnitTypes.PROTOSS_ZEALOT, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_GATEWAY, UnitTypes.PROTOSS_WARPGATE }, Minerals = 100, Food = 2, Ability = Abilities.TRAIN_ZEALOT, WarpInAbility = Abilities.TRAINWARP_ZEALOT });
-
+            TrainingData.Add(UnitTypes.PROTOSS_SENTRY, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_GATEWAY, UnitTypes.PROTOSS_WARPGATE }, Minerals = 50, Gas = 100, Food = 2, Ability = Abilities.TRAIN_SENTRY, WarpInAbility = Abilities.TRAINWARP_SENTRY });
+            TrainingData.Add(UnitTypes.PROTOSS_STALKER, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_GATEWAY, UnitTypes.PROTOSS_WARPGATE }, Minerals = 125, Gas = 50, Food = 2, Ability = Abilities.TRAIN_STALKER, WarpInAbility = Abilities.TRAINWARP_STALKER });
+            TrainingData.Add(UnitTypes.PROTOSS_ADEPT, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_GATEWAY, UnitTypes.PROTOSS_WARPGATE }, Minerals = 100, Gas = 25, Food = 2, Ability = Abilities.TRAIN_ADEPT, WarpInAbility = Abilities.TRAINWARP_ADEPT });
+            TrainingData.Add(UnitTypes.PROTOSS_HIGHTEMPLAR, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_GATEWAY, UnitTypes.PROTOSS_WARPGATE }, Minerals = 50, Gas = 150, Food = 2, Ability = Abilities.TRAIN_HIGHTEMPLAR, WarpInAbility = Abilities.TRAINWARP_HIGHTEMPLAR });
+            TrainingData.Add(UnitTypes.PROTOSS_DARKTEMPLAR, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_GATEWAY, UnitTypes.PROTOSS_WARPGATE }, Minerals = 125, Gas = 125, Food = 2, Ability = Abilities.TRAIN_DARKTEMPLAR, WarpInAbility = Abilities.TRAINWARP_DARKTEMPLAR });
+            TrainingData.Add(UnitTypes.PROTOSS_OBSERVER, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_ROBOTICSFACILITY }, Minerals = 25, Gas = 75, Food = 1, Ability = Abilities.TRAIN_OBSERVER });
+            TrainingData.Add(UnitTypes.PROTOSS_WARPPRISM, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_ROBOTICSFACILITY }, Minerals = 200, Food = 2, Ability = Abilities.TRAIN_WARPPRISM });
+            TrainingData.Add(UnitTypes.PROTOSS_IMMORTAL, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_ROBOTICSFACILITY }, Minerals = 275, Gas = 100, Food = 4, Ability = Abilities.TRAIN_IMMORTAL });
+            TrainingData.Add(UnitTypes.PROTOSS_COLOSSUS, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_ROBOTICSFACILITY }, Minerals = 300, Gas = 200, Food = 6, Ability = Abilities.TRAIN_COLOSSUS });
+            TrainingData.Add(UnitTypes.PROTOSS_DISRUPTOR, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_ROBOTICSFACILITY }, Minerals = 150, Gas = 150, Food = 3, Ability = Abilities.TRAIN_DISRUPTOR });
+            TrainingData.Add(UnitTypes.PROTOSS_PHOENIX, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_STARGATE }, Minerals = 150, Gas = 100, Food = 2, Ability = Abilities.TRAIN_PHOENIX });
+            TrainingData.Add(UnitTypes.PROTOSS_ORACLE, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_STARGATE }, Minerals = 150, Gas = 150, Food = 3, Ability = Abilities.TRAIN_ORACLE });
+            TrainingData.Add(UnitTypes.PROTOSS_VOIDRAY, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_STARGATE }, Minerals = 200, Gas = 150, Food = 4, Ability = Abilities.TRAIN_VOIDRAY });
+            TrainingData.Add(UnitTypes.PROTOSS_TEMPEST, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_STARGATE }, Minerals = 250, Gas = 175, Food = 5, Ability = Abilities.TRAIN_TEMPEST });
+            TrainingData.Add(UnitTypes.PROTOSS_CARRIER, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_STARGATE }, Minerals = 350, Gas = 250, Food = 6, Ability = Abilities.TRAIN_CARRIER });
 
             AbilityCooldownTimes = new Dictionary<Abilities, float> { { Abilities.EFFECT_BLINK_STALKER, 10 }, { Abilities.EFFECT_SHADOWSTRIDE, 14 }, { Abilities.EFFECT_TIMEWARP, 7.1f }, { Abilities.EFFECT_PURIFICATIONNOVA, 21.4f }, { Abilities.EFFECT_PSISTORM, 1.43f }, { Abilities.EFFECT_VOIDRAYPRISMATICALIGNMENT, 42.9f }, { Abilities.EFFECT_ORACLEREVELATION, 10f }, { Abilities.BEHAVIOR_PULSARBEAMON, 4f } };
             WarpInCooldownTimes = new Dictionary<Abilities, float> { { Abilities.TRAINWARP_ADEPT, 20f }, { Abilities.TRAINWARP_DARKTEMPLAR, 32f }, { Abilities.TRAINWARP_HIGHTEMPLAR, 32f }, { Abilities.TRAINWARP_SENTRY, 23f }, { Abilities.TRAINWARP_STALKER, 23f }, { Abilities.TRAINWARP_ZEALOT, 20f } };
@@ -152,6 +169,26 @@ namespace Sharky.Managers
                 UnitTypes.ZERG_EXTRACTOR,
                 UnitTypes.PROTOSS_ASSIMILATOR,
                 UnitTypes.TERRAN_REFINERY
+            };
+
+            MiningAbilities = new HashSet<Abilities>
+            {
+                Abilities.HARVEST_GATHER,
+                Abilities.HARVEST_GATHER_DRONE,
+                Abilities.HARVEST_GATHER_PROBE,
+                Abilities.HARVEST_GATHER_SCV,
+                Abilities.HARVEST_RETURN,
+                Abilities.HARVEST_RETURN_DRONE,
+                Abilities.HARVEST_RETURN_MULE,
+                Abilities.HARVEST_RETURN_PROBE,
+                Abilities.HARVEST_RETURN_SCV
+            };
+            GatheringAbilities = new HashSet<Abilities>
+            {
+                Abilities.HARVEST_GATHER,
+                Abilities.HARVEST_GATHER_DRONE,
+                Abilities.HARVEST_GATHER_PROBE,
+                Abilities.HARVEST_GATHER_SCV
             };
         }
 

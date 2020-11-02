@@ -59,9 +59,13 @@ namespace Sharky
             if (unitDataManager.UnitData[(UnitTypes)unit.UnitType].Attributes.Contains(SC2APIProtocol.Attribute.Structure))
             {
             }
-            else if (unit.UnitType == (uint)UnitTypes.TERRAN_SCV || unit.UnitType == (uint)UnitTypes.TERRAN_MULE || unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE || unit.UnitType == (uint)UnitTypes.ZERG_DRONE || unit.UnitType == (uint)UnitTypes.ZERG_QUEEN)
+            else if (unit.UnitType == (uint)UnitTypes.TERRAN_SCV || unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE || unit.UnitType == (uint)UnitTypes.ZERG_DRONE)
             {
                 UnitClassifications.Add(UnitClassification.Worker);
+            }
+            else if (unit.UnitType == (uint)UnitTypes.ZERG_QUEEN || unit.UnitType == (uint)UnitTypes.TERRAN_MULE)
+            {
+
             }
             else
             {

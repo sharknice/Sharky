@@ -66,6 +66,8 @@ namespace Sharky.Managers
             SharkyOptions = sharkyOptions;
             BaseManager = baseManager;
             TargetingManager = targetingManager;
+
+            DesiredUpgrades = new Dictionary<Upgrades, bool>();
         }
 
         public override void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)
@@ -179,7 +181,7 @@ namespace Sharky.Managers
             if (BuildGas && Minerals >= 75)
             {
                 var unitData = UnitDataManager.BuildingData[UnitTypes.PROTOSS_ASSIMILATOR];
-                var takenGases = UnitManager.SelfUnits.Where(u => UnitDataManager.GasGeyserRefineryTypes.Contains((UnitTypes)u.Value.Unit.UnitType));
+                var takenGases = UnitManager.SelfUnits.Where(u => UnitDataManager.GasGeyserRefineryTypes.Contains((UnitTypes)u.Value.Unit.UnitType)).Concat(UnitManager.EnemyUnits.Where(u => UnitDataManager.GasGeyserRefineryTypes.Contains((UnitTypes)u.Value.Unit.UnitType)));
                 var openGeysers = BaseManager.BaseLocations.SelectMany(b => b.VespeneGeysers).Where(g => g.VespeneContents > 0 && !takenGases.Any(t => t.Value.Unit.Pos.X == g.Pos.X && t.Value.Unit.Pos.Y == g.Pos.Y));
                 if (openGeysers.Count() > 0)
                 {

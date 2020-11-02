@@ -44,7 +44,7 @@ namespace Sharky.Managers
         {
             if (observation.Observation.RawData.Event != null && observation.Observation.RawData.Event.DeadUnits != null)
             {
-                foreach (ulong tag in observation.Observation.RawData.Event.DeadUnits)
+                foreach (var tag in observation.Observation.RawData.Event.DeadUnits)
                 {
                     if (EnemyUnits.TryRemove(tag, out UnitCalculation removedEnemy))
                     {
@@ -81,6 +81,15 @@ namespace Sharky.Managers
                 {
                     var attack = new UnitCalculation(unit, unit, 0, UnitDataManager, SharkyOptions);
                     SelfUnits.AddOrUpdate(unit.Tag, attack, (tag, existingAttack) =>
+                    {
+                        attack.PreviousUnit = existingAttack.Unit;
+                        return attack;
+                    });
+                }
+                else if (unit.Alliance == Alliance.Neutral)
+                {
+                    var attack = new UnitCalculation(unit, unit, 0, UnitDataManager, SharkyOptions);
+                    NeutralUnits.AddOrUpdate(unit.Tag, attack, (tag, existingAttack) =>
                     {
                         attack.PreviousUnit = existingAttack.Unit;
                         return attack;

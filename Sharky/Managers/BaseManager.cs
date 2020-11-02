@@ -9,6 +9,7 @@ namespace Sharky.Managers
     public class BaseManager : SharkyManager
     {
         public List<BaseLocation> BaseLocations { get; private set; }
+        public BaseLocation MainBase { get; private set; }
 
         ImageData PlacementGrid;
 
@@ -67,7 +68,7 @@ namespace Sharky.Managers
             }
 
             var gasses = new List<Unit>();
-            foreach (Unit unit in observation.Observation.RawData.Units)
+            foreach (var unit in observation.Observation.RawData.Units)
             {
                 if (UnitDataManager.GasGeyserTypes.Contains((UnitTypes)unit.UnitType))
                 {
@@ -76,10 +77,29 @@ namespace Sharky.Managers
             }
             gasses = gasses.OrderBy(g => g.Pos.X).ThenBy(g => g.Pos.Y).ToList();
 
-            foreach (BaseLocation loc in BaseLocations)
+            foreach (var location in BaseLocations)
             {
-                DetermineFinalLocation(loc, gasses);
+                DetermineFinalLocation(location, gasses);
             }
+
+            var startingUnit = observation.Observation.RawData.Units.FirstOrDefault(u => u.Alliance == Alliance.Self);
+            MainBase = BaseLocations.OrderBy(b => Vector2.DistanceSquared(new Vector2(startingUnit.Pos.X, startingUnit.Pos.Y), new Vector2(b.Location.X, b.Location.Y))).FirstOrDefault();
+        }
+
+        public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
+        {
+            if (observation.Observation.RawData.Event != null && observation.Observation.RawData.Event.DeadUnits != null)
+            {
+                foreach (var tag in observation.Observation.RawData.Event.DeadUnits)
+                {
+                    foreach (var baseLocation in BaseLocations)
+                    {
+                        baseLocation.MineralFields.RemoveAll(m => m.Tag == tag);
+                    }
+                }
+            }
+
+            return new List<SC2APIProtocol.Action>();
         }
 
         private void DetermineFinalLocation(BaseLocation baseLocation, List<Unit> gasses)

@@ -12,6 +12,7 @@
             StrictWorkerCount = false;
             StrictSupplyCount = false;
             StrictGasCount = false;
+            ProtossBuildOptions = new ProtossBuildOptions { PylonsAtDefensivePoint = 0, ShieldsAtDefensivePoint = 0 };
         }
     }
 }
