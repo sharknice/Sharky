@@ -31,7 +31,7 @@ namespace Sharky
             AbilityOrderTimes = new Dictionary<Abilities, int>();
         }
 
-        public ActionRawUnitCommand Order(int frame, Abilities ability, Point2D targetLocation = null, ulong targetTag = 0, bool allowSpam = false)
+        public Action Order(int frame, Abilities ability, Point2D targetLocation = null, ulong targetTag = 0, bool allowSpam = false)
         {
             if (!allowSpam && ability == LastAbility && targetTag == LastTargetTag && ((targetLocation == null && LastTargetLocation == null) || (targetLocation.X == LastTargetLocation.X && targetLocation.Y == LastTargetLocation.Y)) && AbilityOrderTimes[ability] > frame + SpamFrames)
             {
@@ -55,16 +55,33 @@ namespace Sharky
             LastTargetTag = targetTag;
             AbilityOrderTimes[ability] = frame;
 
-            return command;
+            var action = new Action
+            {
+                ActionRaw = new ActionRaw
+                {
+                    UnitCommand = command
+                }
+            };
+
+            return action;
         }
 
-        public ActionRawUnitCommand Merge(ulong targetTag)
+        public Action Merge(ulong targetTag)
         {
             var command = new ActionRawUnitCommand();
             command.AbilityId = (int)Abilities.MORPH_ARCHON;
             command.UnitTags.Add(UnitCalculation.Unit.Tag);
             command.UnitTags.Add(targetTag);
-            return command;
+
+            var action = new Action
+            {
+                ActionRaw = new ActionRaw
+                {
+                    UnitCommand = command
+                }
+            };
+
+            return action;
         }
 
         public bool AbilityOffCooldown(Abilities ability, int frame, float framesPerSecond, UnitDataManager unitDataManager)

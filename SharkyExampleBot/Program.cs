@@ -39,12 +39,15 @@ namespace SharkyExampleBot
 
             var buildOptions = new BuildOptions { StrictGasCount = false, StrictSupplyCount = false, StrictWorkerCount = false };
             var macroSetup = new MacroSetup();
-            var buildingPlacement = new BuildingPlacement(new ProtossBuildingPlacement(unitManager, unitDataManager, debugManager));
+            var protossBuildingPlacement = new ProtossBuildingPlacement(unitManager, unitDataManager, debugManager);
+            var buildingPlacement = new BuildingPlacement(protossBuildingPlacement);
             var buildingBuilder = new BuildingBuilder(unitManager, targetingManager, buildingPlacement, unitDataManager);
             var baseManager = new BaseManager(unitDataManager);
             managers.Add(baseManager);
 
-            var macroManager = new MacroManager(macroSetup, unitManager, unitDataManager, buildingBuilder, sharkyOptions, baseManager, targetingManager);
+            var attackData = new AttackData();
+
+            var macroManager = new MacroManager(macroSetup, unitManager, unitDataManager, buildingBuilder, sharkyOptions, baseManager, targetingManager, attackData, protossBuildingPlacement);
             managers.Add(macroManager);
             
             var builds = new Dictionary<string, ISharkyBuild>();
@@ -52,22 +55,25 @@ namespace SharkyExampleBot
             var sequences = new List<List<string>>();
             sequences.Add( new List<string> { antiMassMarine.Name() });
             builds[antiMassMarine.Name()] = antiMassMarine;
-            var buildSequences = new Dictionary<string, List<List<string>>>();
-            buildSequences[Race.Terran.ToString()] = sequences;
-            buildSequences[Race.Zerg.ToString()] = sequences;
-            buildSequences[Race.Protoss.ToString()] = sequences;
-            buildSequences[Race.Random.ToString()] = sequences;
-            buildSequences["transition"] = sequences;
+            var buildSequences = new Dictionary<string, List<List<string>>>
+            {
+                [Race.Terran.ToString()] = sequences,
+                [Race.Zerg.ToString()] = sequences,
+                [Race.Protoss.ToString()] = sequences,
+                [Race.Random.ToString()] = sequences,
+                ["transition"] = sequences
+            };
 
             var macroBalancer = new MacroBalancer(buildOptions, unitManager, macroManager, unitDataManager);
             var buildChoices = new BuildChoices { Builds = builds, BuildSequences = buildSequences };
             var buildManager = new BuildManager(macroManager, buildChoices, debugManager, macroBalancer);
             managers.Add(buildManager);
 
-            var microTasks = new List<IMicroTask>();
-            microTasks.Add(new AttackTask(new MicroController(), targetingManager));
-            microTasks.Add(new MiningTask(unitDataManager, baseManager, unitManager));
-
+            var microTasks = new List<IMicroTask>
+            {
+                new AttackTask(new MicroController(), targetingManager, macroManager, attackData),
+                new MiningTask(unitDataManager, baseManager, unitManager)
+            };
             var microManager = new MicroManager(unitManager, microTasks);
             managers.Add(microManager);
 

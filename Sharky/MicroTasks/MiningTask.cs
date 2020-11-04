@@ -82,16 +82,9 @@ namespace Sharky.MicroTasks
                 
                 if (idealGasWorkers.Count() > 0)
                 {
-                    var unitCommand = idealGasWorkers.FirstOrDefault().Order(frame, Abilities.HARVEST_GATHER, null, refinery.Key);
-                    if (unitCommand != null)
+                    var action = idealGasWorkers.FirstOrDefault().Order(frame, Abilities.HARVEST_GATHER, null, refinery.Key);
+                    if (action != null)
                     {
-                        var action = new SC2APIProtocol.Action
-                        {
-                            ActionRaw = new ActionRaw
-                            {
-                                UnitCommand = unitCommand
-                            }
-                        };
                         actions.Add(action);
                     }
                 }
@@ -109,16 +102,9 @@ namespace Sharky.MicroTasks
                 var mineralField = BaseManager.MainBase.MineralFields.OrderBy(m => Vector2.DistanceSquared(new Vector2(m.Pos.X, m.Pos.Y), new Vector2(worker.UnitCalculation.Unit.Pos.X, worker.UnitCalculation.Unit.Pos.Y))).FirstOrDefault();
                 if (mineralField != null)
                 {
-                    var unitCommand = worker.Order(frame, Abilities.HARVEST_GATHER, null, mineralField.Tag);
-                    if (unitCommand != null)
+                    var action = worker.Order(frame, Abilities.HARVEST_GATHER, null, mineralField.Tag);
+                    if (action != null)
                     {
-                        var action = new SC2APIProtocol.Action
-                        {
-                            ActionRaw = new ActionRaw
-                            {
-                                UnitCommand = unitCommand
-                            }
-                        };
                         actions.Add(action);
                     }
                 }
@@ -134,16 +120,9 @@ namespace Sharky.MicroTasks
             {
                 foreach (var worker in miningAssignment.Workers)
                 {
-                    var unitCommand = worker.Order(frame, Abilities.HARVEST_GATHER, null, miningAssignment.ResourceUnit.Tag);
-                    if (unitCommand != null)
+                    var action = worker.Order(frame, Abilities.HARVEST_GATHER, null, miningAssignment.ResourceUnit.Tag);
+                    if (action != null)
                     {
-                        var action = new SC2APIProtocol.Action
-                        {
-                            ActionRaw = new ActionRaw
-                            {
-                                UnitCommand = unitCommand
-                            }
-                        };
                         actions.Add(action);
                     }
                 }

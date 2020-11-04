@@ -10,12 +10,13 @@ namespace Sharky.Managers
         public Dictionary<UnitTypes, UnitTypeData> UnitData { get; private set; }
         public Dictionary<UnitTypes, BuildingTypeData> BuildingData { get; private set; }
         public Dictionary<UnitTypes, TrainingTypeData> TrainingData { get; private set; }
+        public Dictionary<Upgrades, TrainingTypeData> UpgradeData { get; private set; }
 
         /// <summary>
         /// key is ability, value is the unitType it belongs to
         /// </summary>
         Dictionary<Abilities, UnitTypes> UnitAbilities;
-        RepeatedField<uint> UpgradeIds;
+        public RepeatedField<uint> ResearchedUpgrades;
 
         public HashSet<UnitTypes> ZergTypes { get; private set; }
         public HashSet<UnitTypes> ProtossTypes { get; private set; }
@@ -123,6 +124,9 @@ namespace Sharky.Managers
             TrainingData.Add(UnitTypes.PROTOSS_TEMPEST, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_STARGATE }, Minerals = 250, Gas = 175, Food = 5, Ability = Abilities.TRAIN_TEMPEST });
             TrainingData.Add(UnitTypes.PROTOSS_CARRIER, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_STARGATE }, Minerals = 350, Gas = 250, Food = 6, Ability = Abilities.TRAIN_CARRIER });
 
+            UpgradeData = new Dictionary<Upgrades, TrainingTypeData>();
+            UpgradeData.Add(Upgrades.WARPGATERESEARCH, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_CYBERNETICSCORE }, Minerals = 50, Gas = 50, Ability = Abilities.RESEARCH_WARPGATE });
+
             AbilityCooldownTimes = new Dictionary<Abilities, float> { { Abilities.EFFECT_BLINK_STALKER, 10 }, { Abilities.EFFECT_SHADOWSTRIDE, 14 }, { Abilities.EFFECT_TIMEWARP, 7.1f }, { Abilities.EFFECT_PURIFICATIONNOVA, 21.4f }, { Abilities.EFFECT_PSISTORM, 1.43f }, { Abilities.EFFECT_VOIDRAYPRISMATICALIGNMENT, 42.9f }, { Abilities.EFFECT_ORACLEREVELATION, 10f }, { Abilities.BEHAVIOR_PULSARBEAMON, 4f } };
             WarpInCooldownTimes = new Dictionary<Abilities, float> { { Abilities.TRAINWARP_ADEPT, 20f }, { Abilities.TRAINWARP_DARKTEMPLAR, 32f }, { Abilities.TRAINWARP_HIGHTEMPLAR, 32f }, { Abilities.TRAINWARP_SENTRY, 23f }, { Abilities.TRAINWARP_STALKER, 23f }, { Abilities.TRAINWARP_ZEALOT, 20f } };
 
@@ -206,7 +210,7 @@ namespace Sharky.Managers
 
         public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
         {
-            UpgradeIds = observation.Observation.RawData.Player.UpgradeIds;
+            ResearchedUpgrades = observation.Observation.RawData.Player.UpgradeIds;
             return new List<SC2APIProtocol.Action>();
         }
 
@@ -217,7 +221,7 @@ namespace Sharky.Managers
             {
                 if (unitType == UnitTypes.PROTOSS_PHOENIX)
                 {
-                    if (UpgradeIds.Contains((uint)Upgrades.PHOENIXRANGEUPGRADE))
+                    if (ResearchedUpgrades.Contains((uint)Upgrades.PHOENIXRANGEUPGRADE))
                     {
                         weapon.Range = 7;
                     }
@@ -228,7 +232,7 @@ namespace Sharky.Managers
                 }
                 if (unitType == UnitTypes.PROTOSS_COLOSSUS)
                 {
-                    if (UpgradeIds.Contains((uint)Upgrades.EXTENDEDTHERMALLANCE))
+                    if (ResearchedUpgrades.Contains((uint)Upgrades.EXTENDEDTHERMALLANCE))
                     {
                         weapon.Range = 9;
                     }

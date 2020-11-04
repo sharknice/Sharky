@@ -1,5 +1,7 @@
 ﻿using SC2APIProtocol;
 using Sharky.Builds;
+using Sharky.Builds.BuildingPlacement;
+using Sharky.MicroTasks;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -45,6 +47,7 @@ namespace Sharky.Managers
 
         public int FoodUsed { get; private set; }
         public int FoodLeft { get; private set; }
+        public int FoodArmy { get; private set; }
         public int Minerals { get; private set; }
         public int VespeneGas { get; private set; }
         public int Frame { get; private set; }
@@ -56,8 +59,10 @@ namespace Sharky.Managers
         SharkyOptions SharkyOptions;
         BaseManager BaseManager;
         TargetingManager TargetingManager;
+        AttackData AttackData;
+        ProtossBuildingPlacement ProtossBuildingPlacement;
 
-        public MacroManager(MacroSetup macroSetup, IUnitManager unitManager, UnitDataManager unitDataManager, BuildingBuilder buildingBuilder, SharkyOptions sharkyOptions, BaseManager baseManager, TargetingManager targetingManager)
+        public MacroManager(MacroSetup macroSetup, IUnitManager unitManager, UnitDataManager unitDataManager, BuildingBuilder buildingBuilder, SharkyOptions sharkyOptions, BaseManager baseManager, TargetingManager targetingManager, AttackData attackData, ProtossBuildingPlacement protossBuildingPlacement)
         {
             MacroSetup = macroSetup;
             UnitManager = unitManager;
@@ -66,6 +71,8 @@ namespace Sharky.Managers
             SharkyOptions = sharkyOptions;
             BaseManager = baseManager;
             TargetingManager = targetingManager;
+            AttackData = attackData;
+            ProtossBuildingPlacement = protossBuildingPlacement;
 
             DesiredUpgrades = new Dictionary<Upgrades, bool>();
         }
@@ -85,10 +92,11 @@ namespace Sharky.Managers
 
         public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
         {
-            var commands = new List<ActionRawUnitCommand>();
+            var actions = new List<Action>();
 
             FoodUsed = (int)observation.Observation.PlayerCommon.FoodUsed;
             FoodLeft = (int)observation.Observation.PlayerCommon.FoodCap - FoodUsed;
+            FoodArmy = (int)observation.Observation.PlayerCommon.FoodArmy;
             Minerals = (int)observation.Observation.PlayerCommon.Minerals;
             VespeneGas = (int)observation.Observation.PlayerCommon.Vespene;
             Frame = (int)observation.Observation.GameLoop;
@@ -99,33 +107,48 @@ namespace Sharky.Managers
             //CannonAtEveryBase();
             //ShieldsAtExpansions();
 
-            commands.AddRange(BuildSupply());
+            actions.AddRange(BuildSupply());
 
-            commands.AddRange(BuildVespeneGas());
-            commands.AddRange(BuildProductionBuildings());
+            actions.AddRange(BuildVespeneGas());
+            actions.AddRange(BuildProductionBuildings());
 
-            commands.AddRange(BuildTechBuildings());
-            commands.AddRange(ProduceUnits());
-
-            var actions = new List<Action>();
-            foreach (var command in commands)
-            {
-                var action = new Action
-                {
-                    ActionRaw = new ActionRaw
-                    {
-                        UnitCommand = command
-                    }
-                };
-                actions.Add(action);
-            }
+            actions.AddRange(BuildTechBuildings());
+            actions.AddRange(ResearchUpgrades());
+            actions.AddRange(ProduceUnits());
 
             return actions;
         }
 
-        private List<ActionRawUnitCommand> ProduceUnits()
+        private List<Action> ResearchUpgrades()
         {
-            var commands = new List<ActionRawUnitCommand>();
+            var commands = new List<Action>();
+
+            foreach (var upgrade in DesiredUpgrades)
+            {
+                if (upgrade.Value && !UnitDataManager.ResearchedUpgrades.Contains((uint)upgrade.Key))
+                {
+                    var upgradeData = UnitDataManager.UpgradeData[upgrade.Key];
+
+                    if (!UnitManager.Commanders.Any(c => upgradeData.ProducingUnits.Contains((UnitTypes)c.Value.UnitCalculation.Unit.UnitType) && c.Value.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (int)upgradeData.Ability)))
+                    {
+                        var building = UnitManager.Commanders.Where(c => upgradeData.ProducingUnits.Contains((UnitTypes)c.Value.UnitCalculation.Unit.UnitType) && !c.Value.UnitCalculation.Unit.IsActive && c.Value.UnitCalculation.Unit.BuildProgress == 1);
+                        if (building.Count() > 0)
+                        {
+                            if (upgradeData.Minerals <= Minerals && upgradeData.Gas <= VespeneGas)
+                            {
+                                commands.Add(building.First().Value.Order(Frame, upgradeData.Ability));
+                            }
+                        }
+                    }
+                }
+            }
+
+            return commands;
+        }
+
+        private List<Action> ProduceUnits()
+        {
+            var commands = new List<Action>();
             foreach (var unit in BuildUnits)
             {
                 if (unit.Value && unit.Key != UnitTypes.PROTOSS_ARCHON)
@@ -136,22 +159,36 @@ namespace Sharky.Managers
                         var building = UnitManager.Commanders.Where(c => unitData.ProducingUnits.Contains((UnitTypes)c.Value.UnitCalculation.Unit.UnitType) && !c.Value.UnitCalculation.Unit.IsActive && c.Value.UnitCalculation.Unit.BuildProgress == 1 && c.Value.WarpInOffCooldown(Frame, SharkyOptions.FramesPerSecond, UnitDataManager));
                         if (building.Count() > 0)
                         {
-                            if (building.First().Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPGATE)
+                            if (building.First().Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_GATEWAY && UnitDataManager.ResearchedUpgrades.Contains((uint)Upgrades.WARPGATERESEARCH))
                             {
-                                //if (attacking)
-                                //{
-                                //    location = WarpInPlacer.FindPlacement(attackinglocation);
-                                //}
-                                //else
-                                //{
-                                //    location = WarpInPlacer.FindPlacement(defenselocation);
-                                //}
+                                var action = building.First().Value.Order(Frame, Abilities.RESEARCH_WARPGATE);
+                                if (action != null)
+                                {
+                                    commands.Add(action);
+                                }
+                            }
+                            else if (building.First().Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPGATE)
+                            {
+                                var targetLocation = TargetingManager.DefensePoint;
+                                if (AttackData.Attacking)
+                                {
+                                    targetLocation = AttackData.ArmyPoint;
+                                }
 
-                                //building.First().Value.Order((int)unitData.WarpInAbility, location);
+                                var location = ProtossBuildingPlacement.FindProductionPlacement(targetLocation, 1, 10000, 0);
+                                var action = building.First().Value.Order(Frame, unitData.WarpInAbility, location);
+                                if (action != null)
+                                {
+                                    commands.Add(action);
+                                }
                             }
                             else
                             {
-                                commands.Add(building.First().Value.Order(Frame, unitData.Ability));
+                                var action = building.First().Value.Order(Frame, unitData.Ability);
+                                if (action != null)
+                                {
+                                    commands.Add(action);
+                                }
                             }
                         }
                     }
@@ -166,7 +203,11 @@ namespace Sharky.Managers
                         if (mergables.Count() >= 2)
                         {
                             var commanders = mergables.OrderBy(c => c.Value.UnitCalculation.Unit.Energy).Take(2);
-                            commanders.First().Value.Merge(commanders.Last().Value.UnitCalculation.Unit.Tag);
+                            var action = commanders.First().Value.Merge(commanders.Last().Value.UnitCalculation.Unit.Tag);
+                            if (action != null)
+                            {
+                                commands.Add(action);
+                            }
                         }
                     }
                 }
@@ -175,9 +216,9 @@ namespace Sharky.Managers
             return commands;
         }
 
-        private List<ActionRawUnitCommand> BuildVespeneGas()
+        private List<Action> BuildVespeneGas()
         {
-            var commands = new List<ActionRawUnitCommand>();
+            var commands = new List<Action>();
             if (BuildGas && Minerals >= 75)
             {
                 var unitData = UnitDataManager.BuildingData[UnitTypes.PROTOSS_ASSIMILATOR];
@@ -202,9 +243,9 @@ namespace Sharky.Managers
             return commands;
         }
 
-        private List<ActionRawUnitCommand> BuildSupply()
+        private List<Action> BuildSupply()
         {
-            var commands = new List<ActionRawUnitCommand>();
+            var commands = new List<Action>();
 
             if (BuildPylon)
             {
@@ -219,9 +260,9 @@ namespace Sharky.Managers
             return commands;
         }
 
-        private List<ActionRawUnitCommand> BuildProductionBuildings()
+        private List<Action> BuildProductionBuildings()
         {
-            var commands = new List<ActionRawUnitCommand>();
+            var commands = new List<Action>();
 
             foreach (var unit in BuildProduction)
             {
@@ -239,9 +280,9 @@ namespace Sharky.Managers
             return commands;
         }
 
-        private List<ActionRawUnitCommand> BuildTechBuildings()
+        private List<Action> BuildTechBuildings()
         {
-            var commands = new List<ActionRawUnitCommand>();
+            var commands = new List<Action>();
 
             foreach (var unit in BuildTech)
             {

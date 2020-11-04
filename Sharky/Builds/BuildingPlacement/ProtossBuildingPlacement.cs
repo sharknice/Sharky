@@ -66,7 +66,7 @@ namespace Sharky.Builds.BuildingPlacement
             return null;
         }
 
-        public Point2D FindProductionPlacement(Point2D target, int size, float maxDistance, float minimumMineralProximinity = 4)
+        public Point2D FindProductionPlacement(Point2D target, float size, float maxDistance, float minimumMineralProximinity = 4)
         {
             var powerSources = UnitManager.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && c.UnitCalculation.Unit.BuildProgress == 1).OrderBy(c => Vector2.DistanceSquared(new Vector2(c.UnitCalculation.Unit.Pos.X, c.UnitCalculation.Unit.Pos.Y), new Vector2(target.X, target.Y)));
             foreach (var powerSource in powerSources)
@@ -74,7 +74,7 @@ namespace Sharky.Builds.BuildingPlacement
                 var x = powerSource.UnitCalculation.Unit.Pos.X;
                 var y = powerSource.UnitCalculation.Unit.Pos.Y;
                 var radius = size / 2f;
-                var powerRadius = 7f;
+                var powerRadius = 7 - (size / 2f);
 
                 // start at 12 o'clock then rotate around 12 times, increase radius by 1 until it's more than powerRadius
                 while (radius < powerRadius)
@@ -92,6 +92,7 @@ namespace Sharky.Builds.BuildingPlacement
 
                             if (clashes.Count() == 0)
                             {
+                                DebugManager.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
                                 return point;
                             }
                         }

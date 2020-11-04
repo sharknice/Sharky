@@ -1,7 +1,10 @@
-﻿using Sharky.Managers;
+﻿using SC2APIProtocol;
+using Sharky.Managers;
 using Sharky.MicroControllers;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
+using System.Numerics;
 
 namespace Sharky.MicroTasks
 {
@@ -11,11 +14,15 @@ namespace Sharky.MicroTasks
 
         IMicroController MicroController;
         ITargetingManager TargetingManager;
+        MacroManager MacroManager;
+        AttackData AttackData;
 
-        public AttackTask(IMicroController microController, ITargetingManager targetingManager)
+        public AttackTask(IMicroController microController, ITargetingManager targetingManager, MacroManager macroManager, AttackData attackData)
         {
             MicroController = microController;
             TargetingManager = targetingManager;
+            MacroManager = macroManager;
+            AttackData = attackData;
 
             UnitCommanders = new List<UnitCommander>();
         }
@@ -34,7 +41,26 @@ namespace Sharky.MicroTasks
 
         public IEnumerable<SC2APIProtocol.Action> PerformActions(int frame)
         {
-            return MicroController.Attack(UnitCommanders, TargetingManager.AttackPoint, TargetingManager.DefensePoint, frame);
+            var vectors = UnitCommanders.Select(u => new Vector2(u.UnitCalculation.Unit.Pos.X, u.UnitCalculation.Unit.Pos.Y));
+            if (vectors.Count() > 0)
+            {
+                AttackData.ArmyPoint = new Point2D { X = vectors.Average(v => v.X), Y = vectors.Average(v => v.Y) };
+            }
+            else
+            {
+                AttackData.ArmyPoint = TargetingManager.AttackPoint;
+            }
+
+            if (MacroManager.FoodArmy >= 30)
+            {
+                AttackData.Attacking = true;
+                return MicroController.Attack(UnitCommanders, TargetingManager.AttackPoint, TargetingManager.DefensePoint, frame);
+            }
+            else
+            {
+                AttackData.Attacking = false;
+                return MicroController.Retreat(UnitCommanders, TargetingManager.DefensePoint, frame);
+            }
         }
     }
 }

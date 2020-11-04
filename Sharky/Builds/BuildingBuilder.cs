@@ -22,7 +22,7 @@ namespace Sharky.Builds
             UnitDataManager = unitDataManager;
         }
 
-        public ActionRawUnitCommand BuildBuilding(MacroManager macroManager, UnitTypes unitType, BuildingTypeData unitData)
+        public Action BuildBuilding(MacroManager macroManager, UnitTypes unitType, BuildingTypeData unitData)
         {
             if (unitData.Minerals <= macroManager.Minerals && unitData.Gas <= macroManager.VespeneGas)
             {
@@ -42,7 +42,7 @@ namespace Sharky.Builds
             return null;
         }
 
-        public ActionRawUnitCommand BuildGas(MacroManager macroManager, BuildingTypeData unitData, Unit geyser)
+        public Action BuildGas(MacroManager macroManager, BuildingTypeData unitData, Unit geyser)
         {
             if (unitData.Minerals <= macroManager.Minerals && unitData.Gas <= macroManager.VespeneGas)
             {

@@ -21,7 +21,7 @@ namespace Sharky.Managers
 
             foreach (var microTask in MicroTasks)
             {
-                microTask.ClaimUnits(UnitManager.Commanders); // determine which MicroTask units should be a part of, save it on the UnitCommander
+                microTask.ClaimUnits(UnitManager.Commanders);
             }
 
             var actions = new List<Action>();
