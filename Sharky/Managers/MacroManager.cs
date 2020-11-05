@@ -175,7 +175,7 @@ namespace Sharky.Managers
                                     targetLocation = AttackData.ArmyPoint;
                                 }
 
-                                var location = ProtossBuildingPlacement.FindProductionPlacement(targetLocation, 1, 10000, 0);
+                                var location = ProtossBuildingPlacement.FindProductionPlacement(targetLocation, 1, 10000, 0); // TODO: change to find warpinlocation, don't warp in where there is already a unit, check if walkable instead of placeable
                                 var action = building.First().Value.Order(Frame, unitData.WarpInAbility, location);
                                 if (action != null)
                                 {

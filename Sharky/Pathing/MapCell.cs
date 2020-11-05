@@ -2,7 +2,7 @@
 {
     public class MapCell
     {
-        public float TerrainHeight { get; set; }
+        public int TerrainHeight { get; set; }
         public bool Walkable { get; set; }
         public bool Buildable { get; set; }
         public bool CurrentlyBuildable { get; set; }

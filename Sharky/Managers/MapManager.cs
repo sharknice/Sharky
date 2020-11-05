@@ -28,7 +28,24 @@ namespace Sharky.Managers
 
         public override void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)
         {
-            // TODO: update MapData with gameInfo.StartRaw.PathingGrid
+            var placementGrid = gameInfo.StartRaw.PlacementGrid;
+            var heightGrid = gameInfo.StartRaw.TerrainHeight;
+            var pathingGrid = gameInfo.StartRaw.PathingGrid;
+            MapData.MapWidth = pathingGrid.Size.X;
+            MapData.MapHeight = pathingGrid.Size.Y;
+            MapData.Map = new Dictionary<int, Dictionary<int, MapCell>>();
+            for (var x = 0; x < pathingGrid.Size.X; x++)
+            {
+                var row = new Dictionary<int, MapCell>();
+                for (var y = 0; y < pathingGrid.Size.Y; y++)
+                {
+                    var walkable = GetDataValueBit(pathingGrid, x, y);
+                    var height = GetDataValueByte(heightGrid, x, y);
+                    var placeable = GetDataValueBit(placementGrid, x, y);
+                    row[y] = new MapCell { Walkable = walkable, TerrainHeight = height, Buildable = placeable, CurrentlyBuildable = placeable, EnemyAirDpsInRange = 0, EnemyGroundDpsInRange = 0, InEnemyVision = false, InSelfVision = false, NumberOfAllies = 0, NumberOfEnemies = 0, PoweredBySelfPylon = false, SelfAirDpsInRange = 0, SelfGroundDpsInRange = 0 };
+                }
+                MapData.Map[x] = row;
+            }
         }
 
         public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
@@ -56,6 +73,19 @@ namespace Sharky.Managers
             //LastVisibleEnemyUnitCount = currentVisibleEnemyUnitCount;
 
             return new List<SC2APIProtocol.Action>();
+        }
+
+        bool GetDataValueBit(ImageData data, int x, int y)
+        {
+            int pixelID = x + y * data.Size.X;
+            int byteLocation = pixelID / 8;
+            int bitLocation = pixelID % 8;
+            return ((data.Data[byteLocation] & 1 << (7 - bitLocation)) == 0) ? false : true;
+        }
+        int GetDataValueByte(ImageData data, int x, int y)
+        {
+            int pixelID = x + y * data.Size.X;
+            return data.Data[pixelID];
         }
     }
 }

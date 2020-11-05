@@ -6,6 +6,7 @@ using Sharky.Builds.Protoss;
 using Sharky.Managers;
 using Sharky.MicroControllers;
 using Sharky.MicroTasks;
+using Sharky.Pathing;
 using System.Collections.Generic;
 
 namespace SharkyExampleBot
@@ -31,6 +32,10 @@ namespace SharkyExampleBot
             managers.Add(debugManager);
             var unitDataManager = new UnitDataManager();
             managers.Add(unitDataManager);
+            var mapData = new MapData();
+            var mapManager = new MapManager(mapData);
+            managers.Add(mapManager);
+
             var unitManager = new UnitManager(unitDataManager, sharkyOptions);
             managers.Add(unitManager);
 
@@ -39,7 +44,7 @@ namespace SharkyExampleBot
 
             var buildOptions = new BuildOptions { StrictGasCount = false, StrictSupplyCount = false, StrictWorkerCount = false };
             var macroSetup = new MacroSetup();
-            var protossBuildingPlacement = new ProtossBuildingPlacement(unitManager, unitDataManager, debugManager);
+            var protossBuildingPlacement = new ProtossBuildingPlacement(unitManager, unitDataManager, debugManager, mapData);
             var buildingPlacement = new BuildingPlacement(protossBuildingPlacement);
             var buildingBuilder = new BuildingBuilder(unitManager, targetingManager, buildingPlacement, unitDataManager);
             var baseManager = new BaseManager(unitDataManager);

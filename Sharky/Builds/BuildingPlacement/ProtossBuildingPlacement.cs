@@ -1,5 +1,6 @@
 ﻿using SC2APIProtocol;
 using Sharky.Managers;
+using Sharky.Pathing;
 using System;
 using System.Linq;
 using System.Numerics;
@@ -11,12 +12,14 @@ namespace Sharky.Builds.BuildingPlacement
         UnitManager UnitManager;
         UnitDataManager UnitDataManager;
         DebugManager DebugManager;
+        MapData MapData;
 
-        public ProtossBuildingPlacement(UnitManager unitManager, UnitDataManager unitDataManager, DebugManager debugManager)
+        public ProtossBuildingPlacement(UnitManager unitManager, UnitDataManager unitDataManager, DebugManager debugManager, MapData mapData)
         {
             UnitManager = unitManager;
             UnitDataManager = unitDataManager;
             DebugManager = debugManager;
+            MapData = mapData;
         }
 
         public Point2D FindPlacement(Point2D target, UnitTypes unitType, int size)
@@ -107,7 +110,13 @@ namespace Sharky.Builds.BuildingPlacement
 
         private bool AreaBuildable(float x, float y, float radius)
         {
-            return true; // TODO: check the map if this grid area is buildable
+            if (x - radius < 0 || y - radius < 0 || x + radius >= MapData.MapWidth || y + radius >= MapData.MapHeight)
+            {
+                return false;
+            }
+            return MapData.Map[(int)x][(int)y].CurrentlyBuildable && MapData.Map[(int)x][(int)y + (int)radius].CurrentlyBuildable && MapData.Map[(int)x][(int)y - (int)radius].CurrentlyBuildable
+                && MapData.Map[(int)x + (int)radius][(int)y].CurrentlyBuildable && MapData.Map[(int)x + (int)radius][(int)y + (int)radius].CurrentlyBuildable && MapData.Map[(int)x + (int)radius][(int)y - (int)radius].CurrentlyBuildable
+                && MapData.Map[(int)x - (int)radius][(int)y].CurrentlyBuildable && MapData.Map[(int)x - (int)radius][(int)y + (int)radius].CurrentlyBuildable && MapData.Map[(int)x - (int)radius][(int)y - (int)radius].CurrentlyBuildable; 
         }
 
         private bool Blocked(float x, float y, float radius)
