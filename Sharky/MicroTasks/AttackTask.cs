@@ -14,14 +14,14 @@ namespace Sharky.MicroTasks
 
         IMicroController MicroController;
         ITargetingManager TargetingManager;
-        MacroManager MacroManager;
+        MacroData MacroData;
         AttackData AttackData;
 
-        public AttackTask(IMicroController microController, ITargetingManager targetingManager, MacroManager macroManager, AttackData attackData)
+        public AttackTask(IMicroController microController, ITargetingManager targetingManager, MacroData macroData, AttackData attackData)
         {
             MicroController = microController;
             TargetingManager = targetingManager;
-            MacroManager = macroManager;
+            MacroData = macroData;
             AttackData = attackData;
 
             UnitCommanders = new List<UnitCommander>();
@@ -51,7 +51,7 @@ namespace Sharky.MicroTasks
                 AttackData.ArmyPoint = TargetingManager.AttackPoint;
             }
 
-            if (MacroManager.FoodArmy >= 30)
+            if (MacroData.FoodArmy >= 30)
             {
                 AttackData.Attacking = true;
                 return MicroController.Attack(UnitCommanders, TargetingManager.AttackPoint, TargetingManager.DefensePoint, frame);

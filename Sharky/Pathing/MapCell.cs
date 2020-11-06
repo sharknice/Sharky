@@ -11,6 +11,9 @@
         public int NumberOfAllies { get; set; }
         public float EnemyGroundDpsInRange { get; set; }
         public float EnemyAirDpsInRange { get; set; }
+        public float EnemyGroundSplashDpsInRange { get; set; }
+        public float EnemyAirSplashDpsInRange { get; set; }
+        public float EnemyZerglingDps { get; set; }
         public float SelfGroundDpsInRange { get; set; }
         public float SelfAirDpsInRange { get; set; }
         public bool InEnemyVision { get; set; }

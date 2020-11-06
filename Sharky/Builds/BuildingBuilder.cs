@@ -22,9 +22,9 @@ namespace Sharky.Builds
             UnitDataManager = unitDataManager;
         }
 
-        public Action BuildBuilding(MacroManager macroManager, UnitTypes unitType, BuildingTypeData unitData)
+        public Action BuildBuilding(MacroData macroData, UnitTypes unitType, BuildingTypeData unitData)
         {
-            if (unitData.Minerals <= macroManager.Minerals && unitData.Gas <= macroManager.VespeneGas)
+            if (unitData.Minerals <= macroData.Minerals && unitData.Gas <= macroData.VespeneGas)
             {
                 var location = GetReferenceLocation(TargetingManager.DefensePoint);
                 var placementLocation = BuildingPlacement.FindPlacement(location, unitType, unitData.Size);
@@ -34,7 +34,7 @@ namespace Sharky.Builds
                     var worker = GetWorker(placementLocation);
                     if (worker != null)
                     {
-                        return worker.Order(macroManager.Frame, unitData.Ability, placementLocation);
+                        return worker.Order(macroData.Frame, unitData.Ability, placementLocation);
                     }
                 }
              }
@@ -42,14 +42,14 @@ namespace Sharky.Builds
             return null;
         }
 
-        public Action BuildGas(MacroManager macroManager, BuildingTypeData unitData, Unit geyser)
+        public Action BuildGas(MacroData macroData, BuildingTypeData unitData, Unit geyser)
         {
-            if (unitData.Minerals <= macroManager.Minerals && unitData.Gas <= macroManager.VespeneGas)
+            if (unitData.Minerals <= macroData.Minerals && unitData.Gas <= macroData.VespeneGas)
             {
                 var worker = GetWorker(new Point2D { X = geyser.Pos.X, Y = geyser.Pos.Y });
                 if (worker != null)
                 {
-                    return worker.Order(macroManager.Frame, unitData.Ability, null, geyser.Tag);
+                    return worker.Order(macroData.Frame, unitData.Ability, null, geyser.Tag);
                 }
             }
 

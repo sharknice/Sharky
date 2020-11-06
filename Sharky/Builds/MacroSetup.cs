@@ -1,104 +1,103 @@
 ﻿using SC2APIProtocol;
-using Sharky.Managers;
 using System.Collections.Generic;
 
 namespace Sharky.Builds
 {
     public class MacroSetup
     {
-        public void SetupMacro(MacroManager macroManager, Race race)
+        public void SetupMacro(MacroData macroData)
         {
-            SetupUnits(macroManager, race);
-            SetupProduction(macroManager, race);
-            SetupTech(macroManager, race);
-            SetupDefensiveBuildings(macroManager, race);
+            SetupUnits(macroData);
+            SetupProduction(macroData);
+            SetupTech(macroData);
+            SetupDefensiveBuildings(macroData);
         }
 
-        void SetupUnits(MacroManager macroManager, Race race)
+        void SetupUnits(MacroData macroData)
         {
-            macroManager.Units = new List<UnitTypes>();
+            macroData.Units = new List<UnitTypes>();
 
-            if (race == Race.Protoss)
+            if (macroData.Race == Race.Protoss)
             {
-                macroManager.NexusUnits = new List<UnitTypes> { UnitTypes.PROTOSS_PROBE, UnitTypes.PROTOSS_MOTHERSHIP };
-                macroManager.GatewayUnits = new List<UnitTypes> { UnitTypes.PROTOSS_ZEALOT, UnitTypes.PROTOSS_STALKER, UnitTypes.PROTOSS_SENTRY, UnitTypes.PROTOSS_ADEPT, UnitTypes.PROTOSS_HIGHTEMPLAR, UnitTypes.PROTOSS_DARKTEMPLAR };
-                macroManager.RoboticsFacilityUnits = new List<UnitTypes> { UnitTypes.PROTOSS_OBSERVER, UnitTypes.PROTOSS_IMMORTAL, UnitTypes.PROTOSS_WARPPRISM, UnitTypes.PROTOSS_COLOSSUS, UnitTypes.PROTOSS_DISRUPTOR };
-                macroManager.StargateUnits = new List<UnitTypes> { UnitTypes.PROTOSS_PHOENIX, UnitTypes.PROTOSS_ORACLE, UnitTypes.PROTOSS_VOIDRAY, UnitTypes.PROTOSS_TEMPEST, UnitTypes.PROTOSS_CARRIER };
+                macroData.NexusUnits = new List<UnitTypes> { UnitTypes.PROTOSS_PROBE, UnitTypes.PROTOSS_MOTHERSHIP };
+                macroData.GatewayUnits = new List<UnitTypes> { UnitTypes.PROTOSS_ZEALOT, UnitTypes.PROTOSS_STALKER, UnitTypes.PROTOSS_SENTRY, UnitTypes.PROTOSS_ADEPT, UnitTypes.PROTOSS_HIGHTEMPLAR, UnitTypes.PROTOSS_DARKTEMPLAR };
+                macroData.RoboticsFacilityUnits = new List<UnitTypes> { UnitTypes.PROTOSS_OBSERVER, UnitTypes.PROTOSS_IMMORTAL, UnitTypes.PROTOSS_WARPPRISM, UnitTypes.PROTOSS_COLOSSUS, UnitTypes.PROTOSS_DISRUPTOR };
+                macroData.StargateUnits = new List<UnitTypes> { UnitTypes.PROTOSS_PHOENIX, UnitTypes.PROTOSS_ORACLE, UnitTypes.PROTOSS_VOIDRAY, UnitTypes.PROTOSS_TEMPEST, UnitTypes.PROTOSS_CARRIER };
 
-                macroManager.Units.AddRange(macroManager.NexusUnits);
-                macroManager.Units.AddRange(macroManager.GatewayUnits);
-                macroManager.Units.AddRange(macroManager.RoboticsFacilityUnits);
-                macroManager.Units.AddRange(macroManager.StargateUnits);
-                macroManager.Units.Add(UnitTypes.PROTOSS_ARCHON);
+                macroData.Units.AddRange(macroData.NexusUnits);
+                macroData.Units.AddRange(macroData.GatewayUnits);
+                macroData.Units.AddRange(macroData.RoboticsFacilityUnits);
+                macroData.Units.AddRange(macroData.StargateUnits);
+                macroData.Units.Add(UnitTypes.PROTOSS_ARCHON);
             }
 
-            macroManager.DesiredUnitCounts = new Dictionary<UnitTypes, int>();
-            macroManager.BuildUnits = new Dictionary<UnitTypes, bool>();
-            foreach (var unitType in macroManager.Units)
+            macroData.DesiredUnitCounts = new Dictionary<UnitTypes, int>();
+            macroData.BuildUnits = new Dictionary<UnitTypes, bool>();
+            foreach (var unitType in macroData.Units)
             {
-                macroManager.DesiredUnitCounts[unitType] = 0;
-                macroManager.BuildUnits[unitType] = false;
+                macroData.DesiredUnitCounts[unitType] = 0;
+                macroData.BuildUnits[unitType] = false;
             }
         }
 
-        void SetupProduction(MacroManager macroManager, Race race)
+        void SetupProduction(MacroData macroData)
         {
-            macroManager.DesiredProductionCounts = new Dictionary<UnitTypes, int>();
-            macroManager.BuildProduction = new Dictionary<UnitTypes, bool>();
-            if (race == Race.Protoss)
+            macroData.DesiredProductionCounts = new Dictionary<UnitTypes, int>();
+            macroData.BuildProduction = new Dictionary<UnitTypes, bool>();
+            if (macroData.Race == Race.Protoss)
             {
-                macroManager.Production = new List<UnitTypes> {
+                macroData.Production = new List<UnitTypes> {
                     UnitTypes.PROTOSS_NEXUS, UnitTypes.PROTOSS_GATEWAY, UnitTypes.PROTOSS_ROBOTICSFACILITY, UnitTypes.PROTOSS_STARGATE
                 };
             }
 
-            foreach (var productionType in macroManager.Production)
+            foreach (var productionType in macroData.Production)
             {
-                macroManager.DesiredProductionCounts[productionType] = 0;
-                macroManager.BuildProduction[productionType] = false;
+                macroData.DesiredProductionCounts[productionType] = 0;
+                macroData.BuildProduction[productionType] = false;
             }
 
-            if (race == Race.Protoss)
+            if (macroData.Race == Race.Protoss)
             {
-                macroManager.DesiredProductionCounts[UnitTypes.PROTOSS_NEXUS] = 1;
+                macroData.DesiredProductionCounts[UnitTypes.PROTOSS_NEXUS] = 1;
             }
         }
 
-        void SetupTech(MacroManager macroManager, Race race)
+        void SetupTech(MacroData macroData)
         {
-            macroManager.DesiredTechCounts = new Dictionary<UnitTypes, int>();
-            macroManager.BuildTech = new Dictionary<UnitTypes, bool>();
+            macroData.DesiredTechCounts = new Dictionary<UnitTypes, int>();
+            macroData.BuildTech = new Dictionary<UnitTypes, bool>();
 
-            if (race == Race.Protoss)
+            if (macroData.Race == Race.Protoss)
             {
-                macroManager.Tech = new List<UnitTypes> {
+                macroData.Tech = new List<UnitTypes> {
                     UnitTypes.PROTOSS_CYBERNETICSCORE, UnitTypes.PROTOSS_FORGE, UnitTypes.PROTOSS_ROBOTICSBAY, UnitTypes.PROTOSS_TWILIGHTCOUNCIL, UnitTypes.PROTOSS_FLEETBEACON, UnitTypes.PROTOSS_TEMPLARARCHIVE, UnitTypes.PROTOSS_DARKSHRINE
                 };
             }
 
-            foreach (var techType in macroManager.Tech)
+            foreach (var techType in macroData.Tech)
             {
-                macroManager.DesiredTechCounts[techType] = 0;
-                macroManager.BuildTech[techType] = false;
+                macroData.DesiredTechCounts[techType] = 0;
+                macroData.BuildTech[techType] = false;
             }
         }
 
-        void SetupDefensiveBuildings(MacroManager macroManager, Race race)
+        void SetupDefensiveBuildings(MacroData macroData)
         {
-            macroManager.DesiredDefensiveBuildingsCounts = new Dictionary<UnitTypes, int>();
-            macroManager.BuildDefensiveBuildings = new Dictionary<UnitTypes, bool>();
+            macroData.DesiredDefensiveBuildingsCounts = new Dictionary<UnitTypes, int>();
+            macroData.BuildDefensiveBuildings = new Dictionary<UnitTypes, bool>();
 
-            if (race == Race.Protoss)
+            if (macroData.Race == Race.Protoss)
             {
-                macroManager.DefensiveBuildings = new List<UnitTypes> {
+                macroData.DefensiveBuildings = new List<UnitTypes> {
                     UnitTypes.PROTOSS_PHOTONCANNON, UnitTypes.PROTOSS_SHIELDBATTERY
                 };
             }
 
-            foreach (var defensiveBuildingsType in macroManager.DefensiveBuildings)
+            foreach (var defensiveBuildingsType in macroData.DefensiveBuildings)
             {
-                macroManager.DesiredDefensiveBuildingsCounts[defensiveBuildingsType] = 0;
-                macroManager.BuildDefensiveBuildings[defensiveBuildingsType] = false;
+                macroData.DesiredDefensiveBuildingsCounts[defensiveBuildingsType] = 0;
+                macroData.BuildDefensiveBuildings[defensiveBuildingsType] = false;
             }
         }
     }

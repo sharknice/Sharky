@@ -51,12 +51,13 @@ namespace SharkyExampleBot
             managers.Add(baseManager);
 
             var attackData = new AttackData();
-
-            var macroManager = new MacroManager(macroSetup, unitManager, unitDataManager, buildingBuilder, sharkyOptions, baseManager, targetingManager, attackData, protossBuildingPlacement);
+            var warpInPlacement = new WarpInPlacement(unitManager, debugManager, mapData);
+            var macroData = new MacroData();
+            var macroManager = new MacroManager(macroSetup, unitManager, unitDataManager, buildingBuilder, sharkyOptions, baseManager, targetingManager, attackData, warpInPlacement, macroData);
             managers.Add(macroManager);
             
             var builds = new Dictionary<string, ISharkyBuild>();
-            var antiMassMarine = new AntiMassMarine(buildOptions, macroManager, unitManager);
+            var antiMassMarine = new AntiMassMarine(buildOptions, macroData, unitManager);
             var sequences = new List<List<string>>();
             sequences.Add( new List<string> { antiMassMarine.Name() });
             builds[antiMassMarine.Name()] = antiMassMarine;
@@ -69,14 +70,14 @@ namespace SharkyExampleBot
                 ["transition"] = sequences
             };
 
-            var macroBalancer = new MacroBalancer(buildOptions, unitManager, macroManager, unitDataManager);
+            var macroBalancer = new MacroBalancer(buildOptions, unitManager, macroData, unitDataManager);
             var buildChoices = new BuildChoices { Builds = builds, BuildSequences = buildSequences };
             var buildManager = new BuildManager(macroManager, buildChoices, debugManager, macroBalancer);
             managers.Add(buildManager);
 
             var microTasks = new List<IMicroTask>
             {
-                new AttackTask(new MicroController(), targetingManager, macroManager, attackData),
+                new AttackTask(new MicroController(), targetingManager, macroData, attackData),
                 new MiningTask(unitDataManager, baseManager, unitManager)
             };
             var microManager = new MicroManager(unitManager, microTasks);

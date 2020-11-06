@@ -9,14 +9,14 @@ namespace Sharky.Builds
     {
         BuildOptions BuildOptions;
         UnitManager UnitManager;
-        MacroManager MacroManager;
+        MacroData MacroData;
         UnitDataManager UnitDataManager;
 
-        public MacroBalancer(BuildOptions buildOptions, UnitManager unitManager, MacroManager macroManager, UnitDataManager unitDataManager)
+        public MacroBalancer(BuildOptions buildOptions, UnitManager unitManager, MacroData macroData, UnitDataManager unitDataManager)
         {
             BuildOptions = buildOptions;
             UnitManager = unitManager;
-            MacroManager = macroManager;
+            MacroData = macroData;
             UnitDataManager = unitDataManager;
         }
 
@@ -30,43 +30,43 @@ namespace Sharky.Builds
             if (!BuildOptions.StrictSupplyCount)
             {
                 var productionCapacity = UnitManager.Count(UnitTypes.PROTOSS_NEXUS) + (UnitManager.Count(UnitTypes.PROTOSS_GATEWAY) * 2) + (UnitManager.Count(UnitTypes.PROTOSS_ROBOTICSFACILITY) * 6) + (UnitManager.Count(UnitTypes.PROTOSS_STARGATE) * 6);
-                MacroManager.DesiredPylons = (int)Math.Ceiling(((MacroManager.FoodUsed - (UnitManager.Count(UnitTypes.PROTOSS_NEXUS) * 12)) / 8.0) + (productionCapacity / 8.0));
+                MacroData.DesiredPylons = (int)Math.Ceiling(((MacroData.FoodUsed - (UnitManager.Count(UnitTypes.PROTOSS_NEXUS) * 12)) / 8.0) + (productionCapacity / 8.0));
             }
 
-            MacroManager.BuildPylon = MacroManager.DesiredPylons > UnitManager.Count(UnitTypes.PROTOSS_PYLON) + UnitManager.Commanders.Values.Count(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.BUILD_PYLON));
+            MacroData.BuildPylon = MacroData.DesiredPylons > UnitManager.Count(UnitTypes.PROTOSS_PYLON) + UnitManager.Commanders.Values.Count(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.BUILD_PYLON));
         }
 
         public void BalanceGases()
         {
             if (!BuildOptions.StrictGasCount)
             {
-                MacroManager.DesiredGases = UnitManager.Commanders.Values.Count(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS && c.UnitCalculation.Unit.BuildProgress > .7) * 2;
+                MacroData.DesiredGases = UnitManager.Commanders.Values.Count(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS && c.UnitCalculation.Unit.BuildProgress > .7) * 2;
             }
 
-            MacroManager.BuildGas = MacroManager.DesiredGases > UnitManager.Count(UnitTypes.PROTOSS_ASSIMILATOR) + UnitManager.Commanders.Values.Count(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.BUILD_ASSIMILATOR));
+            MacroData.BuildGas = MacroData.DesiredGases > UnitManager.Count(UnitTypes.PROTOSS_ASSIMILATOR) + UnitManager.Commanders.Values.Count(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.BUILD_ASSIMILATOR));
         }
 
         public void BalanceTech()
         {
-            foreach (var u in MacroManager.Tech)
+            foreach (var u in MacroData.Tech)
             {
                 var unitData = UnitDataManager.BuildingData[u];
-                MacroManager.BuildTech[u] = UnitManager.Count(u) < MacroManager.DesiredTechCounts[u] + UnitManager.Commanders.Values.Count(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
+                MacroData.BuildTech[u] = UnitManager.Count(u) < MacroData.DesiredTechCounts[u] + UnitManager.Commanders.Values.Count(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
             }
         }
 
         public void BalanceProductionBuildings()
         {
-            foreach (var u in MacroManager.Production)
+            foreach (var u in MacroData.Production)
             {
                 var unitData = UnitDataManager.BuildingData[u];
-                MacroManager.BuildProduction[u] = UnitManager.Count(u) < MacroManager.DesiredProductionCounts[u] + UnitManager.Commanders.Values.Count(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
+                MacroData.BuildProduction[u] = UnitManager.Count(u) < MacroData.DesiredProductionCounts[u] + UnitManager.Commanders.Values.Count(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
             }
         }
 
         public void BalanceProduction()
         {
-            BalanceProduction(MacroManager.Units);
+            BalanceProduction(MacroData.Units);
 
             var nexuss = UnitManager.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS && c.UnitCalculation.Unit.BuildProgress == 1 && !c.UnitCalculation.Unit.IsActive).Count();
             var gateways = UnitManager.Commanders.Values.Where(c => (c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPGATE || c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_GATEWAY) && c.UnitCalculation.Unit.BuildProgress == 1 && !c.UnitCalculation.Unit.IsActive).Count();
@@ -76,38 +76,38 @@ namespace Sharky.Builds
             var unitTypes = new List<UnitTypes>();
             for (int index = 0; index < nexuss; index++)
             {
-                unitTypes.AddRange(MacroManager.NexusUnits);
+                unitTypes.AddRange(MacroData.NexusUnits);
             }
             for (int index = 0; index < gateways; index++)
             {
-                unitTypes.AddRange(MacroManager.GatewayUnits);
+                unitTypes.AddRange(MacroData.GatewayUnits);
             }
             for (int index = 0; index < robos; index++)
             {
-                unitTypes.AddRange(MacroManager.RoboticsFacilityUnits);
+                unitTypes.AddRange(MacroData.RoboticsFacilityUnits);
             }
             for (int index = 0; index < stargates; index++)
             {
-                unitTypes.AddRange(MacroManager.StargateUnits);
+                unitTypes.AddRange(MacroData.StargateUnits);
             }
 
             BalanceProduction(unitTypes);
 
-            if (MacroManager.NexusUnits.Where(u => MacroManager.BuildUnits[u]).Count() > 1)
+            if (MacroData.NexusUnits.Where(u => MacroData.BuildUnits[u]).Count() > 1)
             {
-                BalanceProduction(MacroManager.NexusUnits);
+                BalanceProduction(MacroData.NexusUnits);
             }
-            if (MacroManager.GatewayUnits.Where(u => MacroManager.BuildUnits[u]).Count() > 1)
+            if (MacroData.GatewayUnits.Where(u => MacroData.BuildUnits[u]).Count() > 1)
             {
-                BalanceProduction(MacroManager.GatewayUnits);
+                BalanceProduction(MacroData.GatewayUnits);
             }
-            if (MacroManager.RoboticsFacilityUnits.Where(u => MacroManager.BuildUnits[u]).Count() > 1)
+            if (MacroData.RoboticsFacilityUnits.Where(u => MacroData.BuildUnits[u]).Count() > 1)
             {
-                BalanceProduction(MacroManager.RoboticsFacilityUnits);
+                BalanceProduction(MacroData.RoboticsFacilityUnits);
             }
-            if (MacroManager.StargateUnits.Where(u => MacroManager.BuildUnits[u]).Count() > 1)
+            if (MacroData.StargateUnits.Where(u => MacroData.BuildUnits[u]).Count() > 1)
             {
-                BalanceProduction(MacroManager.StargateUnits);
+                BalanceProduction(MacroData.StargateUnits);
             }
 
             if (!BuildOptions.StrictWorkerCount)
@@ -119,48 +119,48 @@ namespace Sharky.Builds
 
                 if (UnitManager.Count(UnitTypes.PROTOSS_PROBE) < desiredProbes && UnitManager.Count(UnitTypes.PROTOSS_PROBE) < 70)
                 {
-                    MacroManager.BuildUnits[UnitTypes.PROTOSS_PROBE] = true;
+                    MacroData.BuildUnits[UnitTypes.PROTOSS_PROBE] = true;
                 }
                 else
                 {
-                    MacroManager.BuildUnits[UnitTypes.PROTOSS_PROBE] = false;
+                    MacroData.BuildUnits[UnitTypes.PROTOSS_PROBE] = false;
                 }
             }
         }
 
         public void BalanceProduction(List<UnitTypes> unitTypes)
         {
-            var desiredTotal = unitTypes.Sum(u => MacroManager.DesiredUnitCounts[u]);
+            var desiredTotal = unitTypes.Sum(u => MacroData.DesiredUnitCounts[u]);
             var currentTotal = unitTypes.Sum(u => UnitManager.Count(u));
             var numberOfTypes = unitTypes.Count();
 
             foreach (var u in unitTypes)
             {
-                var desiredRatio = MacroManager.DesiredUnitCounts[u] / (double)desiredTotal;
+                var desiredRatio = MacroData.DesiredUnitCounts[u] / (double)desiredTotal;
 
                 var count = UnitManager.Count(u);
                 if (u == UnitTypes.PROTOSS_WARPPRISM) { count += UnitManager.Count(UnitTypes.PROTOSS_WARPPRISMPHASING); }
 
                 var actualRatio = count / (double)currentTotal;
 
-                if (MacroManager.DesiredUnitCounts[u] == 1 && count == 0)
+                if (MacroData.DesiredUnitCounts[u] == 1 && count == 0)
                 {
-                    MacroManager.BuildUnits[u] = true;
+                    MacroData.BuildUnits[u] = true;
                 }
-                else if (actualRatio > desiredRatio || count >= MacroManager.DesiredUnitCounts[u])
+                else if (actualRatio > desiredRatio || count >= MacroData.DesiredUnitCounts[u])
                 {
-                    if (MacroManager.DesiredUnitCounts[u] < MacroManager.DesiredUnitCounts[u] && MacroManager.Minerals > 350 && UnitDataManager.UnitData[u].VespeneCost == 0)
+                    if (MacroData.DesiredUnitCounts[u] < MacroData.DesiredUnitCounts[u] && MacroData.Minerals > 350 && UnitDataManager.UnitData[u].VespeneCost == 0)
                     {
-                        MacroManager.BuildUnits[u] = true;
+                        MacroData.BuildUnits[u] = true;
                     }
                     else
                     {
-                        MacroManager.BuildUnits[u] = false;
+                        MacroData.BuildUnits[u] = false;
                     }
                 }
                 else
                 {
-                    MacroManager.BuildUnits[u] = true;
+                    MacroData.BuildUnits[u] = true;
                 }
             }
         }
