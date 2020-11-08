@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using Sharky.Pathing;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,9 @@ namespace Sharky.Managers
     {
         UnitDataManager UnitDataManager;
         SharkyOptions SharkyOptions;
+        TargetPriorityService TargetPriorityService;
+        CollisionCalculator CollisionCalculator;
+        MapDataService MapDataService;
 
         float NearbyDistance = 25;
 
@@ -24,10 +28,13 @@ namespace Sharky.Managers
         int SelfDeaths;
         int NeutralDeaths;
 
-        public UnitManager(UnitDataManager unitDataManager, SharkyOptions sharkyOptions)
+        public UnitManager(UnitDataManager unitDataManager, SharkyOptions sharkyOptions, TargetPriorityService targetPriorityService, CollisionCalculator collisionCalculator, MapDataService mapDataService)
         {
             UnitDataManager = unitDataManager;
             SharkyOptions = sharkyOptions;
+            TargetPriorityService = targetPriorityService;
+            CollisionCalculator = collisionCalculator;
+            MapDataService = mapDataService;
 
             EnemyUnits = new ConcurrentDictionary<ulong, UnitCalculation>();
             SelfUnits = new ConcurrentDictionary<ulong, UnitCalculation>();
@@ -63,6 +70,14 @@ namespace Sharky.Managers
                 }
             }
 
+            foreach (var enemy in EnemyUnits.Select(e => e.Value).ToList()) // if we can see this area of the map and the unit isn't there anymore remove it (we just remove it because visible units will get re-added below)
+            {
+                if (MapDataService.SelfVisible(enemy.Unit.Pos))
+                {
+                    EnemyUnits.TryRemove(enemy.Unit.Tag, out UnitCalculation removed);
+                }
+            }
+
             var repairers = observation.Observation.RawData.Units.Where(u => u.UnitType == (uint)UnitTypes.TERRAN_SCV || u.UnitType == (uint)UnitTypes.TERRAN_MULE);
 
             Parallel.ForEach(observation.Observation.RawData.Units, (unit) =>
@@ -71,29 +86,29 @@ namespace Sharky.Managers
                 {
                     var repairingUnitCount = repairers.Where(u => u.Alliance == Alliance.Enemy && Vector2.DistanceSquared(new Vector2(u.Pos.X, u.Pos.Y), new Vector2(unit.Pos.X, unit.Pos.Y)) < (1.0 + u.Radius + unit.Radius) * (0.1 + u.Radius + unit.Radius)).Count();
                     var attack = new UnitCalculation(unit, unit, repairingUnitCount, UnitDataManager, SharkyOptions);
-                    EnemyUnits.AddOrUpdate(unit.Tag, attack, (tag, existingAttack) =>
+                    if (EnemyUnits.TryGetValue(unit.Tag, out UnitCalculation existing))
                     {
-                        attack.PreviousUnit = existingAttack.Unit;
-                        return attack;
-                    });
+                        attack.PreviousUnit = existing.Unit;
+                    }
+                    EnemyUnits[unit.Tag] = attack;
                 }
                 else if (unit.Alliance == Alliance.Self)
                 {
                     var attack = new UnitCalculation(unit, unit, 0, UnitDataManager, SharkyOptions);
-                    SelfUnits.AddOrUpdate(unit.Tag, attack, (tag, existingAttack) =>
+                    if (SelfUnits.TryGetValue(unit.Tag, out UnitCalculation existing))
                     {
-                        attack.PreviousUnit = existingAttack.Unit;
-                        return attack;
-                    });
+                        attack.PreviousUnit = existing.Unit;
+                    }
+                    SelfUnits[unit.Tag] = attack;
                 }
                 else if (unit.Alliance == Alliance.Neutral)
                 {
                     var attack = new UnitCalculation(unit, unit, 0, UnitDataManager, SharkyOptions);
-                    NeutralUnits.AddOrUpdate(unit.Tag, attack, (tag, existingAttack) =>
+                    if (NeutralUnits.TryGetValue(unit.Tag, out UnitCalculation existing))
                     {
-                        attack.PreviousUnit = existingAttack.Unit;
-                        return attack;
-                    });
+                        attack.PreviousUnit = existing.Unit;
+                    }
+                    NeutralUnits[unit.Tag] = attack;
                 }
             });
 
@@ -101,12 +116,12 @@ namespace Sharky.Managers
             {
                 foreach (var enemyAttack in EnemyUnits)
                 {
-                    if (CanDamage(allyAttack.Value.Weapon, enemyAttack.Value.Unit) && Vector2.DistanceSquared(new Vector2(allyAttack.Value.Unit.Pos.X, allyAttack.Value.Unit.Pos.Y), new Vector2(enemyAttack.Value.Unit.Pos.X, enemyAttack.Value.Unit.Pos.Y)) <= (allyAttack.Value.Range + allyAttack.Value.Unit.Radius + enemyAttack.Value.Unit.Radius) * (allyAttack.Value.Range + allyAttack.Value.Unit.Radius + enemyAttack.Value.Unit.Radius))
+                    if (CanDamage(allyAttack.Value.Weapons, enemyAttack.Value.Unit) && Vector2.DistanceSquared(new Vector2(allyAttack.Value.Unit.Pos.X, allyAttack.Value.Unit.Pos.Y), new Vector2(enemyAttack.Value.Unit.Pos.X, enemyAttack.Value.Unit.Pos.Y)) <= (allyAttack.Value.Range + allyAttack.Value.Unit.Radius + enemyAttack.Value.Unit.Radius) * (allyAttack.Value.Range + allyAttack.Value.Unit.Radius + enemyAttack.Value.Unit.Radius))
                     {
                         allyAttack.Value.EnemiesInRange.Add(enemyAttack.Value);
                         enemyAttack.Value.EnemiesInRangeOf.Add(allyAttack.Value);
                     }
-                    if (CanDamage(enemyAttack.Value.Weapon, allyAttack.Value.Unit) && Vector2.DistanceSquared(new Vector2(allyAttack.Value.Unit.Pos.X, allyAttack.Value.Unit.Pos.Y), new Vector2(enemyAttack.Value.Unit.Pos.X, enemyAttack.Value.Unit.Pos.Y)) <= (enemyAttack.Value.Range + allyAttack.Value.Unit.Radius + enemyAttack.Value.Unit.Radius) * (enemyAttack.Value.Range + allyAttack.Value.Unit.Radius + enemyAttack.Value.Unit.Radius))
+                    if (CanDamage(enemyAttack.Value.Weapons, allyAttack.Value.Unit) && Vector2.DistanceSquared(new Vector2(allyAttack.Value.Unit.Pos.X, allyAttack.Value.Unit.Pos.Y), new Vector2(enemyAttack.Value.Unit.Pos.X, enemyAttack.Value.Unit.Pos.Y)) <= (enemyAttack.Value.Range + allyAttack.Value.Unit.Radius + enemyAttack.Value.Unit.Radius) * (enemyAttack.Value.Range + allyAttack.Value.Unit.Radius + enemyAttack.Value.Unit.Radius))
                     {
                         enemyAttack.Value.EnemiesInRange.Add(allyAttack.Value);
                         allyAttack.Value.EnemiesInRangeOf.Add(enemyAttack.Value);
@@ -130,7 +145,38 @@ namespace Sharky.Managers
                 });
             }
 
+            foreach (var selfUnit in SelfUnits)
+            {
+                if (selfUnit.Value.TargetPriorityCalculation == null)
+                {
+                    var priorityCalculation = TargetPriorityService.CalculateTargetPriority(selfUnit.Value);
+                    selfUnit.Value.TargetPriorityCalculation = priorityCalculation;
+                    foreach (var nearbyUnit in selfUnit.Value.NearbyAllies)
+                    {
+                        nearbyUnit.TargetPriorityCalculation = priorityCalculation;
+                    }
+                }
+
+                selfUnit.Value.Attackers = GetTargettedAttacks(selfUnit.Value).ToList();
+            }
+
             return new List<SC2APIProtocol.Action>();
+        }
+
+        ConcurrentBag<UnitCalculation> GetTargettedAttacks(UnitCalculation unitCalculation)
+        {
+            var attacks = new ConcurrentBag<UnitCalculation>();
+            var center = new Vector2(unitCalculation.Unit.Pos.X, unitCalculation.Unit.Pos.Y);
+
+            Parallel.ForEach(unitCalculation.NearbyEnemies, (enemyAttack) =>
+            {
+                if (CanDamage(enemyAttack.Weapons, unitCalculation.Unit) && CollisionCalculator.Collides(center, unitCalculation.Unit.Radius, enemyAttack.Start, enemyAttack.End))
+                {
+                    attacks.Add(enemyAttack);
+                }
+            });
+
+            return attacks;
         }
 
         public int Count(UnitTypes unitType)
@@ -143,21 +189,21 @@ namespace Sharky.Managers
             return SelfUnits.Count(u => u.Value.Unit.UnitType == (uint)unitType && u.Value.Unit.BuildProgress == 1);
         }
 
-        private bool CanDamage(Weapon weapon, Unit unit)
+        public bool CanDamage(IEnumerable<Weapon> weapons, Unit unit)
         {
-            if (weapon == null || weapon.Damage == 0)
+            if (weapons.Count() == 0 || weapons.All(w => w.Damage == 0))
             {
                 return false;
             }
-            if ((unit.IsFlying || unit.BuffIds.Contains((uint)Buffs.GRAVITONBEAM)) && weapon.Type == Weapon.Types.TargetType.Ground)
+            if ((unit.IsFlying || unit.UnitType == (uint)UnitTypes.PROTOSS_COLOSSUS || unit.BuffIds.Contains((uint)Buffs.GRAVITONBEAM)) && weapons.Any(w => w.Type == Weapon.Types.TargetType.Air || w.Type == Weapon.Types.TargetType.Any))
             {
-                return false;
+                return true;
             }
-            if (!unit.IsFlying && weapon.Type == Weapon.Types.TargetType.Air && unit.UnitType != (uint)UnitTypes.PROTOSS_COLOSSUS)
+            if (!unit.IsFlying && weapons.Any(w => w.Type == Weapon.Types.TargetType.Ground || w.Type == Weapon.Types.TargetType.Any))
             {
-                return false;
+                return true;
             }
-            return true;
+            return false;
         }
 
         public void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)

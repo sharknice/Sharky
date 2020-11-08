@@ -46,9 +46,10 @@ namespace Sharky
         /// <summary>
         /// list of units attacking this unit
         /// </summary>
-        public ConcurrentBag<ulong> Attackers { get; set; }
+        public List<UnitCalculation> Attackers { get; set; }
 
         public List<UnitClassification> UnitClassifications { get; set; }
+        public TargetPriorityCalculation TargetPriorityCalculation { get; set; }
 
         public UnitCalculation(Unit previousUnit, Unit unit, int repairers, UnitDataManager unitDataManager, SharkyOptions sharkyOptions)
         {
@@ -159,7 +160,7 @@ namespace Sharky
             EnemiesInRangeOf = new List<UnitCalculation>();
             NearbyAllies = new List<UnitCalculation>();
             NearbyEnemies = new List<UnitCalculation>();
-            Attackers = new ConcurrentBag<ulong>();
+            Attackers = new List<UnitCalculation>();
         }
 
         public float SimulatedDamagePerSecond(IEnumerable<SC2APIProtocol.Attribute> includedAttributes, bool air, bool ground)

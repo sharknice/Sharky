@@ -9,7 +9,7 @@ namespace Sharky
         public bool Claimed;
         public UnitCalculation UnitCalculation;
 
-        UnitCalculation BestTarget;
+        public UnitCalculation BestTarget { get; set; }
 
         Abilities LastAbility;
         Point2D LastTargetLocation;

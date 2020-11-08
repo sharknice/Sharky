@@ -36,7 +36,11 @@ namespace SharkyExampleBot
             var mapManager = new MapManager(mapData);
             managers.Add(mapManager);
 
-            var unitManager = new UnitManager(unitDataManager, sharkyOptions);
+            var mapDataService = new MapDataService(mapData);
+
+            var targetPriorityService = new TargetPriorityService(unitDataManager);
+            var collisionCalculator = new CollisionCalculator();
+            var unitManager = new UnitManager(unitDataManager, sharkyOptions, targetPriorityService, collisionCalculator, mapDataService);
             managers.Add(unitManager);
 
             var targetingManager = new TargetingManager();
@@ -74,10 +78,12 @@ namespace SharkyExampleBot
             var buildChoices = new BuildChoices { Builds = builds, BuildSequences = buildSequences };
             var buildManager = new BuildManager(macroManager, buildChoices, debugManager, macroBalancer);
             managers.Add(buildManager);
-
+         
+            var individualMicroControllers = new Dictionary<UnitTypes, IIndividualMicroController>();
+            var individualMicroController = new IndividualMicroController(mapDataService, unitDataManager, unitManager, sharkyOptions, MicroPriority.LiveAndAttack, true);
             var microTasks = new List<IMicroTask>
             {
-                new AttackTask(new MicroController(), targetingManager, macroData, attackData),
+                new AttackTask(new MicroController(individualMicroControllers, individualMicroController), targetingManager, macroData, attackData),
                 new MiningTask(unitDataManager, baseManager, unitManager)
             };
             var microManager = new MicroManager(unitManager, microTasks);

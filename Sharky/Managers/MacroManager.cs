@@ -135,7 +135,7 @@ namespace Sharky.Managers
                                     targetLocation = AttackData.ArmyPoint;
                                 }
 
-                                var location = WarpInPlacement.FindPlacement(targetLocation, unit.Key, 0);
+                                var location = WarpInPlacement.FindPlacement(targetLocation, unit.Key, 1);
                                 var action = building.First().Value.Order(MacroData.Frame, unitData.WarpInAbility, location);
                                 if (action != null)
                                 {

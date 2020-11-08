@@ -26,6 +26,13 @@ namespace Sharky.Managers
         public HashSet<UnitTypes> GasGeyserTypes { get; private set; }
         public HashSet<UnitTypes> GasGeyserRefineryTypes { get; private set; }
 
+        public HashSet<UnitTypes> GroundSplashDamagers { get; private set; }
+        public HashSet<UnitTypes> AirSplashDamagers { get; private set; }
+        public HashSet<UnitTypes> CloakableAttackers { get; private set; }
+        public HashSet<UnitTypes> DetectionTypes { get; private set; }
+        public HashSet<UnitTypes> AbilityDetectionTypes { get; private set; }
+        public HashSet<UnitTypes> NoWeaponCooldownTypes { get; private set; }
+
         public Dictionary<Abilities, float> AbilityCooldownTimes { get; private set; }
         public Dictionary<Abilities, float> WarpInCooldownTimes { get; private set; }
 
@@ -193,6 +200,67 @@ namespace Sharky.Managers
                 Abilities.HARVEST_GATHER_DRONE,
                 Abilities.HARVEST_GATHER_PROBE,
                 Abilities.HARVEST_GATHER_SCV
+            };
+
+            GroundSplashDamagers = new HashSet<UnitTypes>
+            {
+                UnitTypes.TERRAN_SIEGETANKSIEGED,
+                UnitTypes.TERRAN_PLANETARYFORTRESS,
+                UnitTypes.TERRAN_HELLION,
+                UnitTypes.TERRAN_HELLIONTANK,
+                UnitTypes.TERRAN_WIDOWMINEBURROWED,
+                UnitTypes.PROTOSS_ARCHON,
+                UnitTypes.PROTOSS_HIGHTEMPLAR,
+                UnitTypes.PROTOSS_COLOSSUS,
+                UnitTypes.ZERG_BANELING,
+                UnitTypes.ZERG_BANELINGBURROWED,
+                UnitTypes.ZERG_INFESTOR,
+                UnitTypes.ZERG_INFESTORBURROWED,
+                UnitTypes.ZERG_LURKERMPBURROWED
+            };
+
+            AirSplashDamagers = new HashSet<UnitTypes>
+            {
+                UnitTypes.TERRAN_THOR,
+                UnitTypes.TERRAN_LIBERATOR,
+                UnitTypes.TERRAN_WIDOWMINEBURROWED,
+                UnitTypes.PROTOSS_ARCHON,
+                UnitTypes.PROTOSS_HIGHTEMPLAR,
+                UnitTypes.ZERG_INFESTOR,
+                UnitTypes.ZERG_INFESTORBURROWED,
+            };
+
+            CloakableAttackers = new HashSet<UnitTypes>
+            {
+                UnitTypes.PROTOSS_DARKTEMPLAR,
+                UnitTypes.TERRAN_GHOST,
+                UnitTypes.TERRAN_BANSHEE
+            };
+
+            DetectionTypes = new HashSet<UnitTypes>
+            {
+                UnitTypes.TERRAN_MISSILETURRET,
+                UnitTypes.PROTOSS_PHOTONCANNON,
+                UnitTypes.ZERG_SPORECRAWLER,
+                UnitTypes.ZERG_SPORECRAWLERUPROOTED,
+                UnitTypes.PROTOSS_OBSERVER,
+                UnitTypes.TERRAN_RAVEN,
+                UnitTypes.ZERG_OVERSEER
+            };
+
+            AbilityDetectionTypes = new HashSet<UnitTypes>
+            {
+                UnitTypes.PROTOSS_ORACLE,
+                UnitTypes.TERRAN_GHOST,
+                UnitTypes.TERRAN_ORBITALCOMMAND,
+                UnitTypes.ZERG_INFESTOR,
+                UnitTypes.ZERG_INFESTORBURROWED
+            };
+
+            NoWeaponCooldownTypes = new HashSet<UnitTypes>
+            {
+                UnitTypes.PROTOSS_ORACLE,
+                UnitTypes.PROTOSS_VOIDRAY
             };
         }
 
