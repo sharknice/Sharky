@@ -50,15 +50,21 @@ namespace Sharky
 
         public List<UnitClassification> UnitClassifications { get; set; }
         public TargetPriorityCalculation TargetPriorityCalculation { get; set; }
+        public UnitTypeData UnitTypeData { get; set; }
 
         public UnitCalculation(Unit previousUnit, Unit unit, int repairers, UnitDataManager unitDataManager, SharkyOptions sharkyOptions)
         {
             PreviousUnit = previousUnit;
             Unit = unit;
+            UnitTypeData = unitDataManager.UnitData[(UnitTypes)unit.UnitType];
 
             UnitClassifications = new List<UnitClassification>();
-            if (unitDataManager.UnitData[(UnitTypes)unit.UnitType].Attributes.Contains(SC2APIProtocol.Attribute.Structure))
+            if (UnitTypeData.Attributes.Contains(SC2APIProtocol.Attribute.Structure))
             {
+                if (unitDataManager.ResourceCenterTypes.Contains((UnitTypes)unit.UnitType))
+                {
+                    UnitClassifications.Add(UnitClassification.ResourceCenter);
+                }
             }
             else if (unit.UnitType == (uint)UnitTypes.TERRAN_SCV || unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE || unit.UnitType == (uint)UnitTypes.ZERG_DRONE)
             {
@@ -104,7 +110,7 @@ namespace Sharky
             Damage = unitDataManager.GetDamage(unit);
             Dps = unitDataManager.GetDps(unit);
             Weapon = unitDataManager.GetWeapon(unit);
-            Weapons = unitDataManager.UnitData[(UnitTypes)unit.UnitType].Weapons.ToList();
+            Weapons = UnitTypeData.Weapons.ToList();
             if (Weapons == null)
             {
                 Weapons = new List<Weapon>();
@@ -128,9 +134,9 @@ namespace Sharky
             {
                 SimulatedHealPerSecond = 0.38f;
             }
-            else if (repairers > 0 && unitDataManager.UnitData[(UnitTypes)unit.UnitType].Attributes.Contains(SC2APIProtocol.Attribute.Mechanical))
+            else if (repairers > 0 && UnitTypeData.Attributes.Contains(SC2APIProtocol.Attribute.Mechanical))
             {
-                SimulatedHealPerSecond = (float)(unit.HealthMax / (unitDataManager.UnitData[(UnitTypes)unit.UnitType].BuildTime / sharkyOptions.FramesPerSecond)) * repairers;
+                SimulatedHealPerSecond = (float)(unit.HealthMax / (UnitTypeData.BuildTime / sharkyOptions.FramesPerSecond)) * repairers;
             }
             else if (Unit.UnitType == (uint)UnitTypes.TERRAN_MEDIVAC && Unit.Energy > 10)
             {
@@ -154,7 +160,7 @@ namespace Sharky
                 Dps = Damage * 4 / 0.61f;
             }
 
-            Attributes = unitDataManager.UnitData[(UnitTypes)unit.UnitType].Attributes;
+            Attributes = UnitTypeData.Attributes;
 
             EnemiesInRange = new List<UnitCalculation>();
             EnemiesInRangeOf = new List<UnitCalculation>();

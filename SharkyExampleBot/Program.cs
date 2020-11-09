@@ -15,14 +15,28 @@ namespace SharkyExampleBot
     {
         public static void Main(string[] args)
         {
+            var gameConnection = new GameConnection();
+            var sharkyBot = CreateBot(gameConnection);
+
+            var myRace = Race.Protoss;
+            if (args.Length == 0)
+            {
+                gameConnection.RunSinglePlayer(sharkyBot, @"DeathAuraLE.SC2Map", myRace, Race.Protoss, Difficulty.VeryHard).Wait();
+            }
+            else
+            {
+                gameConnection.RunLadder(sharkyBot, myRace, args).Wait();
+            }
+        }
+
+        private static SharkyBot CreateBot(GameConnection gameConnection)
+        {
             var debug = false;
 #if DEBUG
             debug = true;
 #endif
 
             var framesPerSecond = 22.4f;
-
-            GameConnection gameConnection = new GameConnection();
 
             var sharkyOptions = new SharkyOptions { Debug = debug, FramesPerSecond = framesPerSecond };
 
@@ -43,7 +57,10 @@ namespace SharkyExampleBot
             var unitManager = new UnitManager(unitDataManager, sharkyOptions, targetPriorityService, collisionCalculator, mapDataService);
             managers.Add(unitManager);
 
-            var targetingManager = new TargetingManager();
+            var baseManager = new BaseManager(unitDataManager);
+            managers.Add(baseManager);
+
+            var targetingManager = new TargetingManager(unitManager, unitDataManager, mapDataService, baseManager);
             managers.Add(targetingManager);
 
             var buildOptions = new BuildOptions { StrictGasCount = false, StrictSupplyCount = false, StrictWorkerCount = false };
@@ -51,19 +68,18 @@ namespace SharkyExampleBot
             var protossBuildingPlacement = new ProtossBuildingPlacement(unitManager, unitDataManager, debugManager, mapData);
             var buildingPlacement = new BuildingPlacement(protossBuildingPlacement);
             var buildingBuilder = new BuildingBuilder(unitManager, targetingManager, buildingPlacement, unitDataManager);
-            var baseManager = new BaseManager(unitDataManager);
-            managers.Add(baseManager);
+
 
             var attackData = new AttackData();
             var warpInPlacement = new WarpInPlacement(unitManager, debugManager, mapData);
             var macroData = new MacroData();
             var macroManager = new MacroManager(macroSetup, unitManager, unitDataManager, buildingBuilder, sharkyOptions, baseManager, targetingManager, attackData, warpInPlacement, macroData);
             managers.Add(macroManager);
-            
+
             var builds = new Dictionary<string, ISharkyBuild>();
             var antiMassMarine = new AntiMassMarine(buildOptions, macroData, unitManager);
             var sequences = new List<List<string>>();
-            sequences.Add( new List<string> { antiMassMarine.Name() });
+            sequences.Add(new List<string> { antiMassMarine.Name() });
             builds[antiMassMarine.Name()] = antiMassMarine;
             var buildSequences = new Dictionary<string, List<List<string>>>
             {
@@ -78,7 +94,7 @@ namespace SharkyExampleBot
             var buildChoices = new BuildChoices { Builds = builds, BuildSequences = buildSequences };
             var buildManager = new BuildManager(macroManager, buildChoices, debugManager, macroBalancer);
             managers.Add(buildManager);
-         
+
             var individualMicroControllers = new Dictionary<UnitTypes, IIndividualMicroController>();
             var individualMicroController = new IndividualMicroController(mapDataService, unitDataManager, unitManager, sharkyOptions, MicroPriority.LiveAndAttack, true);
             var microTasks = new List<IMicroTask>
@@ -89,17 +105,7 @@ namespace SharkyExampleBot
             var microManager = new MicroManager(unitManager, microTasks);
             managers.Add(microManager);
 
-            var sharkyBot = new SharkyBot(managers, debugManager);
-
-            var myRace = Race.Protoss;
-            if (args.Length == 0)
-            {
-                gameConnection.RunSinglePlayer(sharkyBot, @"DeathAuraLE.SC2Map", myRace, Race.Terran, Difficulty.VeryHard).Wait();
-            }
-            else
-            {
-                gameConnection.RunLadder(sharkyBot, myRace, args).Wait();
-            }
+            return new SharkyBot(managers, debugManager);
         }
     }
 }

@@ -34,7 +34,7 @@ namespace Sharky.Builds.BuildingPlacement
             }
         }
 
-        public Point2D FindPylonPlacement(Point2D reference, float maxDistance, float minimumMineralProximinity = 4)
+        public Point2D FindPylonPlacement(Point2D reference, float maxDistance, float minimumMineralProximinity = 5)
         {
             var x = reference.X;
             var y = reference.Y;
@@ -51,13 +51,14 @@ namespace Sharky.Builds.BuildingPlacement
                     var point = new Point2D { X = x + (float)(radius * Math.Cos(angle)), Y = y + (float)(radius * Math.Sin(angle)) };
                     //DebugManager.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
 
-                    if (AreaBuildable(point.X, point.Y, 1) && !Blocked(point.X, point.Y, 1))
+                    if (AreaBuildable(point.X, point.Y, 1.5f) && !Blocked(point.X, point.Y, 1.5f))
                     {
-                        var mineralFields = UnitManager.NeutralUnits.Where(u => UnitDataManager.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType));
+                        var mineralFields = UnitManager.NeutralUnits.Where(u => UnitDataManager.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType) || UnitDataManager.GasGeyserTypes.Contains((UnitTypes)u.Value.Unit.UnitType));
                         var clashes = mineralFields.Where(u => Vector2.DistanceSquared(new Vector2(u.Value.Unit.Pos.X, u.Value.Unit.Pos.Y), new Vector2(point.X, point.Y)) < (minimumMineralProximinity * minimumMineralProximinity));
 
                         if (clashes.Count() == 0)
                         {
+                            DebugManager.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
                             return point;
                         }
                     }

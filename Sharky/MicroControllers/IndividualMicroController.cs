@@ -328,8 +328,8 @@ namespace Sharky.MicroControllers
             {
                 if (commander.UnitCalculation.Range > closestEnemy.Range)
                 {
-                    var speed = UnitDataManager.UnitData[(UnitTypes)commander.UnitCalculation.Unit.UnitType].MovementSpeed;
-                    var enemySpeed = UnitDataManager.UnitData[(UnitTypes)closestEnemy.Unit.UnitType].MovementSpeed;
+                    var speed = commander.UnitCalculation.UnitTypeData.MovementSpeed;
+                    var enemySpeed = closestEnemy.UnitTypeData.MovementSpeed;
                     if (closestEnemy.Unit.BuffIds.Contains((uint)Buffs.MEDIVACSPEEDBOOST))
                     {
                         enemySpeed = 5.94f;
@@ -380,7 +380,7 @@ namespace Sharky.MicroControllers
             UnitCalculation bestAttack = null;
             if (attacks.Count > 0)
             {
-                var oneShotKills = attacks.Where(a => a.Unit.Health + a.Unit.Shield < GetDamage(commander.UnitCalculation.Weapon, a.Unit, UnitDataManager.UnitData[(UnitTypes)a.Unit.UnitType]) && !a.Unit.BuffIds.Contains((uint)Buffs.IMMORTALOVERLOAD));
+                var oneShotKills = attacks.Where(a => a.Unit.Health + a.Unit.Shield < GetDamage(commander.UnitCalculation.Weapon, a.Unit, a.UnitTypeData) && !a.Unit.BuffIds.Contains((uint)Buffs.IMMORTALOVERLOAD));
                 if (oneShotKills.Count() > 0)
                 {
                     if (existingAttackOrder != null)
@@ -525,6 +525,11 @@ namespace Sharky.MicroControllers
         protected virtual bool GroupUp(UnitCommander commander, Point2D target, Point2D groupCenter, bool attack, int frame, out SC2APIProtocol.Action action)
         {
             action = null;
+            if (commander.UnitCalculation.NearbyEnemies.Any())
+            {
+                return false;
+            }
+
             if (frame > SharkyOptions.FramesPerSecond * 10 * 60 && UnitManager.EnemyUnits.Count() < 10)
             {
                 return false; // stop grouping up when searching for the last enemy units to finish the game
@@ -696,8 +701,8 @@ namespace Sharky.MicroControllers
                         }
                         if (existingReduction != null)
                         {
-                            var existing = existingReduction.Dps / TimeToKill(weapon, existingReduction.Unit, UnitDataManager.UnitData[(UnitTypes)existingReduction.Unit.UnitType]);
-                            var best = bestDpsReduction.Dps / TimeToKill(weapon, bestDpsReduction.Unit, UnitDataManager.UnitData[(UnitTypes)bestDpsReduction.Unit.UnitType]);
+                            var existing = existingReduction.Dps / TimeToKill(weapon, existingReduction.Unit, existingReduction.UnitTypeData);
+                            var best = bestDpsReduction.Dps / TimeToKill(weapon, bestDpsReduction.Unit, bestDpsReduction.UnitTypeData);
                             if (existing * 1.25 > best)
                             {
                                 return existingReduction; // just keep attacking the same unit
@@ -727,8 +732,8 @@ namespace Sharky.MicroControllers
                         }
                         if (existingReduction != null)
                         {
-                            var existing = existingReduction.Dps / TimeToKill(weapon, existingReduction.Unit, UnitDataManager.UnitData[(UnitTypes)existingReduction.Unit.UnitType]);
-                            var best = bestDpsReduction.Dps / TimeToKill(weapon, bestDpsReduction.Unit, UnitDataManager.UnitData[(UnitTypes)bestDpsReduction.Unit.UnitType]);
+                            var existing = existingReduction.Dps / TimeToKill(weapon, existingReduction.Unit, existingReduction.UnitTypeData);
+                            var best = bestDpsReduction.Dps / TimeToKill(weapon, bestDpsReduction.Unit, bestDpsReduction.UnitTypeData);
                             if (existing * 1.25 > best)
                             {
                                 return existingReduction; // just keep attacking the same unit
@@ -760,8 +765,8 @@ namespace Sharky.MicroControllers
                     }
                     if (existingReduction != null)
                     {
-                        var existing = existingReduction.Dps / TimeToKill(weapon, existingReduction.Unit, UnitDataManager.UnitData[(UnitTypes)existingReduction.Unit.UnitType]);
-                        var best = bestDpsReduction.Dps / TimeToKill(weapon, bestDpsReduction.Unit, UnitDataManager.UnitData[(UnitTypes)bestDpsReduction.Unit.UnitType]);
+                        var existing = existingReduction.Dps / TimeToKill(weapon, existingReduction.Unit, existingReduction.UnitTypeData);
+                        var best = bestDpsReduction.Dps / TimeToKill(weapon, bestDpsReduction.Unit, bestDpsReduction.UnitTypeData);
                         if (existing * 1.25 > best)
                         {
                             return existingReduction; // just keep attacking the same unit
@@ -845,7 +850,7 @@ namespace Sharky.MicroControllers
 
         protected virtual UnitCalculation GetBestDpsReduction(UnitCommander commander, Weapon weapon, IEnumerable<UnitCalculation> primaryTargets, IEnumerable<UnitCalculation> secondaryTargets)
         {
-            var bestDpsReduction = primaryTargets.OrderByDescending(enemy => enemy.Dps / TimeToKill(weapon, enemy.Unit, UnitDataManager.UnitData[(UnitTypes)enemy.Unit.UnitType])).ThenBy(u => Vector2.DistanceSquared(new Vector2(u.Unit.Pos.X, u.Unit.Pos.Y), new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y))).FirstOrDefault();
+            var bestDpsReduction = primaryTargets.OrderByDescending(enemy => enemy.Dps / TimeToKill(weapon, enemy.Unit, enemy.UnitTypeData)).ThenBy(u => Vector2.DistanceSquared(new Vector2(u.Unit.Pos.X, u.Unit.Pos.Y), new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y))).FirstOrDefault();
 
             return bestDpsReduction;
         }

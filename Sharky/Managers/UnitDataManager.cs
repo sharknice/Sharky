@@ -33,6 +33,8 @@ namespace Sharky.Managers
         public HashSet<UnitTypes> AbilityDetectionTypes { get; private set; }
         public HashSet<UnitTypes> NoWeaponCooldownTypes { get; private set; }
 
+        public HashSet<UnitTypes> ResourceCenterTypes { get; private set; }
+
         public Dictionary<Abilities, float> AbilityCooldownTimes { get; private set; }
         public Dictionary<Abilities, float> WarpInCooldownTimes { get; private set; }
 
@@ -261,6 +263,19 @@ namespace Sharky.Managers
             {
                 UnitTypes.PROTOSS_ORACLE,
                 UnitTypes.PROTOSS_VOIDRAY
+            };
+
+            ResourceCenterTypes = new HashSet<UnitTypes>
+            {
+                UnitTypes.TERRAN_COMMANDCENTER,
+                UnitTypes.TERRAN_COMMANDCENTERFLYING,
+                UnitTypes.TERRAN_ORBITALCOMMAND,
+                UnitTypes.TERRAN_ORBITALCOMMANDFLYING,
+                UnitTypes.TERRAN_PLANETARYFORTRESS,
+                UnitTypes.PROTOSS_NEXUS,
+                UnitTypes.ZERG_HATCHERY,
+                UnitTypes.ZERG_LAIR,
+                UnitTypes.ZERG_HIVE
             };
         }
 

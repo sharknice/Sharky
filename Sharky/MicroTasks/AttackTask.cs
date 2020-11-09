@@ -51,15 +51,17 @@ namespace Sharky.MicroTasks
                 AttackData.ArmyPoint = TargetingManager.AttackPoint;
             }
 
+            var attackPoint = TargetingManager.GetAttackPoint(AttackData.ArmyPoint);
+
             if (MacroData.FoodArmy >= 30)
             {
                 AttackData.Attacking = true;
-                return MicroController.Attack(UnitCommanders, TargetingManager.AttackPoint, TargetingManager.DefensePoint, frame);
+                return MicroController.Attack(UnitCommanders, attackPoint, TargetingManager.DefensePoint, AttackData.ArmyPoint, frame);
             }
             else
             {
                 AttackData.Attacking = false;
-                return MicroController.Retreat(UnitCommanders, TargetingManager.DefensePoint, frame);
+                return MicroController.Retreat(UnitCommanders, TargetingManager.DefensePoint, AttackData.ArmyPoint, frame);
             }
         }
     }

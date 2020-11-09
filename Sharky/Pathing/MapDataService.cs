@@ -6,7 +6,7 @@ namespace Sharky.Pathing
 {
     public class MapDataService
     {
-        MapData MapData;
+        public MapData MapData { get; set; }
 
         public MapDataService(MapData mapData)
         {
