@@ -1,6 +1,7 @@
 ﻿using SC2APIProtocol;
 using Sharky.Managers;
 using System.Collections.Generic;
+using System.Numerics;
 
 namespace Sharky
 {
@@ -10,6 +11,9 @@ namespace Sharky
         public UnitCalculation UnitCalculation;
 
         public UnitCalculation BestTarget { get; set; }
+
+        public int RetreatPathFrame { get; set; }
+        public IEnumerable<Vector2> RetreatPath { get; set; }
 
         Abilities LastAbility;
         Point2D LastTargetLocation;
@@ -29,6 +33,8 @@ namespace Sharky
             LastTargetLocation = null;
             LastTargetTag = 0;
             AbilityOrderTimes = new Dictionary<Abilities, int>();
+            RetreatPathFrame = 0;
+            RetreatPath = new List<Vector2>();
         }
 
         public Action Order(int frame, Abilities ability, Point2D targetLocation = null, ulong targetTag = 0, bool allowSpam = false)

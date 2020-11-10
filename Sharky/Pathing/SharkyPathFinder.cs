@@ -9,37 +9,125 @@ using System.Numerics;
 
 namespace Sharky.Pathing
 {
-    public class SharkyPathFinder
+    public class SharkyPathFinder // TODO: use MapData to create the grids
     {
-        // TODO: make a map that have all this information (terrainheight, walkable, buildable, currentlybuildable, poweredbyselfpylon, numberofenemies, numberofallies, enemyGroundDpsInRange, enemyAirDpsInRange, selfGroundDpsInRange, selfAirDpsInRange, inenemyvision, selfvisability), then build the mapgrids from it
+        Grid GroundDamageGrid;
+        int GroundDamageLastUpdate;
+        int AirDamageLastUpdate;
 
-        private Grid MapGrid;
-        private Grid BuildingGrid;
-        private Grid GroundDamageGrid;
-        private Grid AirDamageGrid;
-        private Grid EnemyVisionGrid;
-        private Grid EnemyVisionGroundGrid;
-        private Grid EnemyDetectionGrid;
-        private Grid EnemyDetectionGroundGrid; // includes ground and buildings, can't walk through them
+        Grid MapGrid;
+        Grid BuildingGrid;
+        Grid AirDamageGrid;
+        Grid EnemyVisionGrid;
+        Grid EnemyVisionGroundGrid;
+        Grid EnemyDetectionGrid;
+        Grid EnemyDetectionGroundGrid; // includes ground and buildings, can't walk through them
 
-        private PathFinder PathFinder;
+        PathFinder PathFinder;
+        MapData MapData;
+        MapDataService MapDataService;
 
-        public SharkyPathFinder(PathFinder pathFinder)
+        public SharkyPathFinder(PathFinder pathFinder, MapData mapData, MapDataService mapDataService)
         {
             PathFinder = pathFinder;
+            MapData = mapData;
+            MapDataService = mapDataService;
+
+            GroundDamageLastUpdate = -1;
+            AirDamageLastUpdate = -1;
         }
 
-        public void CreateMapGrid(ImageData pathingGrid)
+        public IEnumerable<Vector2> GetSafeGroundPath(float startX, float startY, float endX, float endY, int frame)
         {
-            var gridSize = new GridSize(columns: pathingGrid.Size.X, rows: pathingGrid.Size.Y);
+            var grid = GetGroundDamageGrid(frame);
+            var path = GetPath(grid, startX, startY, endX, endY);
+            if (path.Count() == 0)
+            {
+                var cells = MapDataService.GetCells(startX, startY, 1);
+                var best = cells.Where(c => c.Walkable).OrderBy(c => c.EnemyGroundDpsInRange).FirstOrDefault();
+                if (best != null)
+                {
+                    path = new List<Vector2> { new Vector2(startX, startY), new Vector2(best.X, best.Y) };
+                }
+            }
+
+            return path;
+        }
+
+        public IEnumerable<Vector2> GetSafeAirPath(float startX, float startY, float endX, float endY, int frame)
+        {
+            var grid = GetAirDamageGrid(frame);
+            var path = GetPath(grid, startX, startY, endX, endY);
+            if (path.Count() == 0)
+            {
+                var cells = MapDataService.GetCells(startX, startY, 1);
+                var best = cells.OrderBy(c => c.EnemyAirDpsInRange).FirstOrDefault();
+                if (best != null)
+                {
+                    path = new List<Vector2> { new Vector2(startX, startY), new Vector2(best.X, best.Y) };
+                }
+            }
+
+            return path;
+        }
+
+        public Grid GetGroundDamageGrid(int frame)
+        {
+            if (GroundDamageLastUpdate < frame)
+            {
+                var gridSize = new GridSize(columns: MapData.MapWidth, rows: MapData.MapHeight);
+                var cellSize = new Size(Distance.FromMeters(1), Distance.FromMeters(1));
+                var traversalVelocity = Velocity.FromMetersPerSecond(1);
+                GroundDamageGrid = Grid.CreateGridWithLateralAndDiagonalConnections(gridSize, cellSize, traversalVelocity);
+                for (var x = 0; x < MapData.MapWidth; x++)
+                {
+                    for (var y = 0; y < MapData.MapHeight; y++)
+                    {
+                        if (!MapData.Map[x][y].Walkable || MapData.Map[x][y].EnemyGroundDpsInRange > 0)
+                        {
+                            GroundDamageGrid.DisconnectNode(new GridPosition(x, y));
+                        }
+                    }
+                }
+                GroundDamageLastUpdate = frame;
+            }
+            return GroundDamageGrid;
+        }
+
+        public Grid GetAirDamageGrid(int frame)
+        {
+            if (AirDamageLastUpdate < frame)
+            {
+                var gridSize = new GridSize(columns: MapData.MapWidth, rows: MapData.MapHeight);
+                var cellSize = new Size(Distance.FromMeters(1), Distance.FromMeters(1));
+                var traversalVelocity = Velocity.FromMetersPerSecond(1);
+                AirDamageGrid = Grid.CreateGridWithLateralAndDiagonalConnections(gridSize, cellSize, traversalVelocity);
+                for (var x = 0; x < MapData.MapWidth; x++)
+                {
+                    for (var y = 0; y < MapData.MapHeight; y++)
+                    {
+                        if (!MapData.Map[x][y].Walkable || MapData.Map[x][y].EnemyAirDpsInRange > 0)
+                        {
+                            AirDamageGrid.DisconnectNode(new GridPosition(x, y));
+                        }
+                    }
+                }
+                AirDamageLastUpdate = frame;
+            }
+            return AirDamageGrid;
+        }
+
+        public void CreateMapGrid()
+        {
+            var gridSize = new GridSize(columns: MapData.MapWidth, rows: MapData.MapHeight);
             var cellSize = new Size(Distance.FromMeters(1), Distance.FromMeters(1));
             var traversalVelocity = Velocity.FromMetersPerSecond(1);
             MapGrid = Grid.CreateGridWithLateralAndDiagonalConnections(gridSize, cellSize, traversalVelocity);
-            for (var x = 0; x < pathingGrid.Size.X; x++)
+            for (var x = 0; x < MapData.MapWidth; x++)
             {
-                for (var y = 0; y < pathingGrid.Size.Y; y++)
+                for (var y = 0; y < MapData.MapHeight; y++)
                 {
-                    if (!GetDataValueBit(pathingGrid, x, y))
+                    if (!MapData.Map[x][y].Walkable)
                     {
                         MapGrid.DisconnectNode(new GridPosition(x, y));
                     }
@@ -65,38 +153,6 @@ namespace Sharky.Pathing
                 foreach (var node in nodes)
                 {
                     BuildingGrid.DisconnectNode(node);
-                }
-            }
-        }
-
-        public void UpdateGroundDamageGrid(IEnumerable<UnitCalculation> enemyUnits)
-        {
-            GroundDamageGrid = BuildingGrid;
-            foreach (var enemy in enemyUnits)
-            {
-                if (enemy.DamageGround)
-                {
-                    var nodes = GetNodesInRange(enemy.Unit.Pos, enemy.Range + 2, GroundDamageGrid.Columns, GroundDamageGrid.Rows);
-                    foreach (var node in nodes)
-                    {
-                        GroundDamageGrid.DisconnectNode(node);
-                    }
-                }
-            }
-        }
-
-        public void UpdateAirDamageGrid(IEnumerable<UnitCalculation> enemyUnits)
-        {
-            AirDamageGrid = Grid.CreateGridWithLateralAndDiagonalConnections(MapGrid.GridSize, new Size(Distance.FromMeters(1), Distance.FromMeters(1)), Velocity.FromMetersPerSecond(1));
-            foreach (var enemy in enemyUnits)
-            {
-                if (enemy.DamageAir)
-                {
-                    var nodes = GetNodesInRange(enemy.Unit.Pos, enemy.Range + 2, AirDamageGrid.Columns, AirDamageGrid.Rows);
-                    foreach (var node in nodes)
-                    {
-                        AirDamageGrid.DisconnectNode(node);
-                    }
                 }
             }
         }
@@ -193,16 +249,6 @@ namespace Sharky.Pathing
             }
         }
 
-        public IEnumerable<Vector2> GetSafeAirPath(float startX, float startY, float endX, float endY)
-        {
-            return GetPath(AirDamageGrid, startX, startY, endX, endY);
-        }
-
-        public IEnumerable<Vector2> GetSafeGroundPath(float startX, float startY, float endX, float endY)
-        {
-            return GetPath(GroundDamageGrid, startX, startY, endX, endY);
-        }
-
         public IEnumerable<Vector2> GetHiddenAirPath(float startX, float startY, float endX, float endY)
         {
             return GetPath(EnemyVisionGrid, startX, startY, endX, endY);
@@ -211,14 +257,6 @@ namespace Sharky.Pathing
         public IEnumerable<Vector2> GetHiddenGroundPath(float startX, float startY, float endX, float endY)
         {
             return GetPath(EnemyVisionGroundGrid, startX, startY, endX, endY);
-        }
-
-        private bool GetDataValueBit(ImageData data, int x, int y)
-        {
-            int pixelID = x + y * data.Size.X;
-            int byteLocation = pixelID / 8;
-            int bitLocation = pixelID % 8;
-            return ((data.Data[byteLocation] & 1 << (7 - bitLocation)) == 0) ? false : true;
         }
     }
 }

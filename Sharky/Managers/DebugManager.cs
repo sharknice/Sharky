@@ -11,12 +11,16 @@ namespace Sharky.Managers
         Request DrawRequest;
         int TextLine;
 
+        Color DefaultColor;
+
         public DebugManager(GameConnection gameConnection, SharkyOptions sharkyOptions)
         {
             GameConnection = gameConnection;
             SharkyOptions = sharkyOptions;
 
             ResetDrawRequest();
+
+            DefaultColor = new Color() { R = 255, G = 0, B = 0 };
         }
 
         public override IEnumerable<Action> OnFrame(ResponseObservation observation)
@@ -39,11 +43,15 @@ namespace Sharky.Managers
             }
         }
 
-        public void DrawSphere(Point point)
+        public void DrawSphere(Point point, float radius = 2, Color color = null)
         {
             if (SharkyOptions.Debug)
             {
-                DrawRequest.Debug.Debug[0].Draw.Spheres.Add(new DebugSphere() { Color = new Color() { R = 255, G = 0, B = 0 }, R = 2, P = point });
+                if (color == null)
+                {
+                    color = DefaultColor;
+                }
+                DrawRequest.Debug.Debug[0].Draw.Spheres.Add(new DebugSphere() { Color = color, R = radius, P = point });
             }
         }
 

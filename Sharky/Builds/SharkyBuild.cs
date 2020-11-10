@@ -10,12 +10,14 @@ namespace Sharky.Builds
         protected BuildOptions BuildOptions;
         protected MacroData MacroData;
         protected UnitManager UnitManager;
+        protected AttackData AttackData;
 
-        public SharkyBuild(BuildOptions buildOptions, MacroData macroData, UnitManager unitManager)
+        public SharkyBuild(BuildOptions buildOptions, MacroData macroData, UnitManager unitManager, AttackData attackData)
         {
             BuildOptions = buildOptions;
             MacroData = macroData;
             UnitManager = unitManager;
+            AttackData = attackData;
         }
 
         public virtual List<string> CounterTransition()
@@ -54,9 +56,13 @@ namespace Sharky.Builds
             {
                 MacroData.DesiredProductionCounts[UnitTypes.PROTOSS_NEXUS] = 1;
             }
-            else if (MacroData.Race == SC2APIProtocol.Race.Protoss)
+            else if (MacroData.Race == SC2APIProtocol.Race.Terran)
             {
                 MacroData.DesiredProductionCounts[UnitTypes.TERRAN_COMMANDCENTER] = 1;
+            }
+            else if (MacroData.Race == SC2APIProtocol.Race.Zerg)
+            {
+                MacroData.DesiredProductionCounts[UnitTypes.ZERG_HATCHERY] = 1;
             }
         }
 

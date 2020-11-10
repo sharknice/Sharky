@@ -15,6 +15,8 @@ namespace Sharky.MicroControllers
         protected MapDataService MapDataService;
         protected UnitDataManager UnitDataManager;
         protected UnitManager UnitManager;
+        protected DebugManager DebugManager;
+        protected SharkyPathFinder SharkyPathFinder;
         protected SharkyOptions SharkyOptions;
         protected MicroPriority MicroPriority;
 
@@ -25,11 +27,13 @@ namespace Sharky.MicroControllers
         protected float AvoidDamageDistance;
         protected float LooseFormationDistance;
 
-        public IndividualMicroController(MapDataService mapDataService, UnitDataManager unitDataManager, UnitManager unitManager, SharkyOptions sharkyOptions, MicroPriority microPriority, bool groupUpEnabled)
+        public IndividualMicroController(MapDataService mapDataService, UnitDataManager unitDataManager, UnitManager unitManager, DebugManager debugManager, SharkyPathFinder sharkyPathFinder, SharkyOptions sharkyOptions, MicroPriority microPriority, bool groupUpEnabled)
         {
             MapDataService = mapDataService;
             UnitDataManager = unitDataManager;
             UnitManager = unitManager;
+            DebugManager = debugManager;
+            SharkyPathFinder = sharkyPathFinder;
             SharkyOptions = sharkyOptions;
             MicroPriority = microPriority;
             GroupUpEnabled = groupUpEnabled;
@@ -346,27 +350,54 @@ namespace Sharky.MicroControllers
                 }
             }
 
-            // TODO: retreat pathing
-            //if (commander.RetreatPathFrame + 5 < frame)
-            //{
-            //    if (commander.UnitCalculation.Unit.IsFlying)
-            //    {
-            //        commander.RetreatPath = SharkPathFinder.GetSafeAirPath(defensivePoint.X, defensivePoint.Y, commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y);
-            //    }
-            //    else
-            //    {
-            //        commander.RetreatPath = SharkPathFinder.GetSafeGroundPath(defensivePoint.X, defensivePoint.Y, commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y);
-            //    }
-            //    commander.RetreatPathFrame = frame;
-            //}
+            if (closestEnemy != null && commander.RetreatPathFrame + 5 < frame)
+            {
+                if (commander.UnitCalculation.Unit.IsFlying)
+                {
+                    commander.RetreatPath = SharkyPathFinder.GetSafeAirPath(defensivePoint.X, defensivePoint.Y, commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y, frame);
+                }
+                else
+                {
+                    commander.RetreatPath = SharkyPathFinder.GetSafeGroundPath(defensivePoint.X, defensivePoint.Y, commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y, frame);
+                }
+                commander.RetreatPathFrame = frame;
+            }
 
-            //if (FollowPath(commander, commander.RetreatPath))
-            //{
-            //    return;
-            //}
+            if (FollowPath(commander, commander.RetreatPath, frame, out action)) { return true; }
 
             action = commander.Order(frame, Abilities.MOVE, defensivePoint);
             return true;
+        }
+
+        protected bool FollowPath(UnitCommander commander, IEnumerable<Vector2> path, int frame, out SC2APIProtocol.Action action)
+        {
+            action = null;
+
+            if (path.Count() > 1)
+            {
+                if (SharkyOptions.Debug)
+                {
+                    var thing = path.ToList();
+
+                    DebugManager.DrawSphere(new Point { X = thing[0].X, Y = thing[0].Y, Z = commander.UnitCalculation.Unit.Pos.Z }, 1, new Color { R = 0, G = 0, B = 255 });
+                    for (int index = 0; index < thing.Count - 1; index++)
+                    {
+                        DebugManager.DrawLine(new Point { X = thing[index].X, Y = thing[index].Y, Z = commander.UnitCalculation.Unit.Pos.Z + 1 }, new Point { X = thing[index + 1].X, Y = thing[index + 1].Y, Z = commander.UnitCalculation.Unit.Pos.Z + 1 }, new Color { R = 0, G = 0, B = 255 });
+                    }
+                }
+
+                var position = new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y);
+                foreach (var point in path.Skip(1))
+                {
+                    if (Vector2.DistanceSquared(position, point) > 1)
+                    {
+                        action = commander.Order(frame, Abilities.MOVE, new Point2D { X = point.X, Y = point.Y });
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         protected virtual UnitCalculation GetBestTarget(UnitCommander commander, Point2D target)
@@ -1032,12 +1063,26 @@ namespace Sharky.MicroControllers
 
         protected virtual bool GroundAttackersFilter(UnitCommander commander, UnitCalculation enemyAttack)
         {
-            return true;
+            var count = enemyAttack.Attackers.Count(c => c.Unit.UnitType == commander.UnitCalculation.Unit.UnitType);
+
+            if (commander.UnitCalculation.Unit.Orders.Any(o => o.TargetUnitTag == enemyAttack.Unit.Tag) && commander.UnitCalculation.EnemiesInRange.Any(e => e.Unit.Tag == enemyAttack.Unit.Tag))
+            {
+                return true;
+            }
+
+            return count * commander.UnitCalculation.Damage > enemyAttack.Unit.Health + enemyAttack.Unit.Shield + enemyAttack.SimulatedHealPerSecond;
         }
 
         protected virtual bool AirAttackersFilter(UnitCommander commander, UnitCalculation enemyAttack)
         {
-            return true;
+            var count = enemyAttack.Attackers.Count(c => c.Unit.UnitType == commander.UnitCalculation.Unit.UnitType);
+
+            if (commander.UnitCalculation.Unit.Orders.Any(o => o.TargetUnitTag == enemyAttack.Unit.Tag) && commander.UnitCalculation.EnemiesInRange.Any(e => e.Unit.Tag == enemyAttack.Unit.Tag))
+            {
+                return true;
+            }
+
+            return count * commander.UnitCalculation.Damage > enemyAttack.Unit.Health + enemyAttack.Unit.Shield + enemyAttack.SimulatedHealPerSecond;
         }
 
         protected bool InRange(Point targetLocation, Point unitLocation, float range)

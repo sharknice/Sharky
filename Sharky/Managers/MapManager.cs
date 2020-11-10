@@ -1,8 +1,6 @@
 ﻿using SC2APIProtocol;
 using Sharky.Pathing;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Sharky.Managers
 {
@@ -42,7 +40,7 @@ namespace Sharky.Managers
                     var walkable = GetDataValueBit(pathingGrid, x, y);
                     var height = GetDataValueByte(heightGrid, x, y);
                     var placeable = GetDataValueBit(placementGrid, x, y);
-                    row[y] = new MapCell { Walkable = walkable, TerrainHeight = height, Buildable = placeable, CurrentlyBuildable = placeable, EnemyAirDpsInRange = 0, EnemyGroundDpsInRange = 0, InEnemyVision = false, InSelfVision = false, NumberOfAllies = 0, NumberOfEnemies = 0, PoweredBySelfPylon = false, SelfAirDpsInRange = 0, SelfGroundDpsInRange = 0 };
+                    row[y] = new MapCell { X = x, Y = y, Walkable = walkable, TerrainHeight = height, Buildable = placeable, CurrentlyBuildable = placeable, EnemyAirDpsInRange = 0, EnemyGroundDpsInRange = 0, InEnemyVision = false, InSelfVision = false, NumberOfAllies = 0, NumberOfEnemies = 0, PoweredBySelfPylon = false, SelfAirDpsInRange = 0, SelfGroundDpsInRange = 0 };
                 }
                 MapData.Map[x] = row;
             }

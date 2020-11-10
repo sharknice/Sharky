@@ -474,6 +474,9 @@
         UNLOADUNIT_MEDIVAC = 397,   // Target: None.
         UNLOADUNIT_NYDASNETWORK = 1440,  // Target: None.
         UNLOADUNIT_OVERLORD = 1409,  // Target: None.
-        UNLOADUNIT_WARPPRISM = 914   // Target: None.
+        UNLOADUNIT_WARPPRISM = 914,   // Target: None.
+
+        CHRONOBOOST = 3755,
+        CHRONOBOOSTED = 281,
     }
 }

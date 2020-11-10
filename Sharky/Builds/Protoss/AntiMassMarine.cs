@@ -1,13 +1,35 @@
 ﻿using SC2APIProtocol;
 using Sharky.Managers;
+using Sharky.Managers.Protoss;
+using System.Collections.Generic;
 
 namespace Sharky.Builds.Protoss
 {
-    public class AntiMassMarine : SharkyBuild
+    public class AntiMassMarine : ProtossSharkyBuild
     {
-        public AntiMassMarine(BuildOptions buildOptions, MacroData macroData, UnitManager unitManager) : base(buildOptions, macroData, unitManager)
+        public AntiMassMarine(BuildOptions buildOptions, MacroData macroData, UnitManager unitManager, AttackData attackData, NexusManager nexusManager) : base(buildOptions, macroData, unitManager, attackData, nexusManager)
         {
 
+        }
+
+        public override void StartBuild(int frame)
+        {
+            base.StartBuild(frame);
+
+            BuildOptions.StrictGasCount = true;
+
+            NexusManager.ChronodUpgrades = new HashSet<Upgrades>
+            {
+                Upgrades.WARPGATERESEARCH
+            };
+
+            NexusManager.ChronodUnits = new HashSet<UnitTypes>
+            {
+                UnitTypes.PROTOSS_PROBE,
+                UnitTypes.PROTOSS_STALKER
+            };
+
+            AttackData.ArmyFoodAttack = 5;
         }
 
         public override void OnFrame(ResponseObservation observation)
@@ -32,6 +54,7 @@ namespace Sharky.Builds.Protoss
                 {
                     MacroData.DesiredGases = 2;
                 }
+                BuildOptions.StrictGasCount = false;
             }
             if (UnitManager.Count(UnitTypes.PROTOSS_GATEWAY) > 0)
             {
@@ -39,7 +62,7 @@ namespace Sharky.Builds.Protoss
                 {
                     MacroData.DesiredTechCounts[UnitTypes.PROTOSS_CYBERNETICSCORE] = 1;
                 }
-                //NexusAbilityManager.SaveEnergy = true;
+                NexusManager.ChronodUnits.Remove(UnitTypes.PROTOSS_PROBE);
             }
 
             if (UnitManager.Count(UnitTypes.PROTOSS_GATEWAY) > 0 && UnitManager.Count(UnitTypes.PROTOSS_CYBERNETICSCORE) > 0)
@@ -56,12 +79,6 @@ namespace Sharky.Builds.Protoss
                 {
                     MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_STALKER] = 20;
                 }
-                MacroData.DesiredUpgrades[Upgrades.WARPGATERESEARCH] = true;
-                //NexusAbilityManager.PriotitizedAbilities.Add(UpgradeType.LookUp[Upgrades.WARPGATERESEARCH].Ability);
-                //if (shark.Observation.Observation.RawData.Player.UpgradeIds.Contains(Upgrades.WARPGATERESEARCH))
-                //{
-                //    shark.NexusAbilityManager.SaveEnergy = false;
-                //}
             }
 
             if (UnitManager.Count(UnitTypes.PROTOSS_STALKER) > 0)
@@ -90,6 +107,11 @@ namespace Sharky.Builds.Protoss
                     MacroData.DesiredProductionCounts[UnitTypes.PROTOSS_NEXUS] = 2;
                 }
             }
+        }
+
+        public override bool Transition()
+        {
+            return MacroData.FoodUsed > 50 && UnitManager.Count(UnitTypes.PROTOSS_NEXUS) > 1;
         }
     }
 }

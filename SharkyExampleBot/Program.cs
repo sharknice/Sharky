@@ -4,6 +4,7 @@ using Sharky.Builds;
 using Sharky.Builds.BuildingPlacement;
 using Sharky.Builds.Protoss;
 using Sharky.Managers;
+using Sharky.Managers.Protoss;
 using Sharky.MicroControllers;
 using Sharky.MicroTasks;
 using Sharky.Pathing;
@@ -21,13 +22,15 @@ namespace SharkyExampleBot
             var myRace = Race.Protoss;
             if (args.Length == 0)
             {
-                gameConnection.RunSinglePlayer(sharkyBot, @"DeathAuraLE.SC2Map", myRace, Race.Protoss, Difficulty.VeryHard).Wait();
+                gameConnection.RunSinglePlayer(sharkyBot, @"DeathAuraLE.SC2Map", myRace, Race.Zerg, Difficulty.VeryHard).Wait();
             }
             else
             {
                 gameConnection.RunLadder(sharkyBot, myRace, args).Wait();
             }
         }
+
+        // TODO: defaultBot where you just pass in builds
 
         private static SharkyBot CreateBot(GameConnection gameConnection)
         {
@@ -70,16 +73,21 @@ namespace SharkyExampleBot
             var buildingBuilder = new BuildingBuilder(unitManager, targetingManager, buildingPlacement, unitDataManager);
 
 
-            var attackData = new AttackData();
+            var attackData = new AttackData { ArmyFoodAttack = 30, Attacking = false, CustomAttackFunction = false };
             var warpInPlacement = new WarpInPlacement(unitManager, debugManager, mapData);
             var macroData = new MacroData();
             var macroManager = new MacroManager(macroSetup, unitManager, unitDataManager, buildingBuilder, sharkyOptions, baseManager, targetingManager, attackData, warpInPlacement, macroData);
             managers.Add(macroManager);
 
+            var nexusManager = new NexusManager(unitManager, unitDataManager);
+            managers.Add(nexusManager);
+
             var builds = new Dictionary<string, ISharkyBuild>();
-            var antiMassMarine = new AntiMassMarine(buildOptions, macroData, unitManager);
+            var antiMassMarine = new AntiMassMarine(buildOptions, macroData, unitManager, attackData, nexusManager);
+            var fourGate = new FourGate(buildOptions, macroData, unitManager, attackData, nexusManager, unitDataManager);
             var sequences = new List<List<string>>();
-            sequences.Add(new List<string> { antiMassMarine.Name() });
+            sequences.Add(new List<string> { fourGate.Name(), antiMassMarine.Name() });
+            builds[fourGate.Name()] = fourGate;
             builds[antiMassMarine.Name()] = antiMassMarine;
             var buildSequences = new Dictionary<string, List<List<string>>>
             {
@@ -95,8 +103,10 @@ namespace SharkyExampleBot
             var buildManager = new BuildManager(macroManager, buildChoices, debugManager, macroBalancer);
             managers.Add(buildManager);
 
+            var sharkyPathFinder = new SharkyPathFinder(new Roy_T.AStar.Paths.PathFinder(), mapData, mapDataService);
+
             var individualMicroControllers = new Dictionary<UnitTypes, IIndividualMicroController>();
-            var individualMicroController = new IndividualMicroController(mapDataService, unitDataManager, unitManager, sharkyOptions, MicroPriority.LiveAndAttack, true);
+            var individualMicroController = new IndividualMicroController(mapDataService, unitDataManager, unitManager, debugManager, sharkyPathFinder, sharkyOptions, MicroPriority.LiveAndAttack, true);
             var microTasks = new List<IMicroTask>
             {
                 new AttackTask(new MicroController(individualMicroControllers, individualMicroController), targetingManager, macroData, attackData),

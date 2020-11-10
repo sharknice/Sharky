@@ -15,7 +15,39 @@ namespace Sharky.Pathing
 
         public List<MapCell> GetCells(float x, float y, float radius)
         {
-            return new List<MapCell>();
+            var cells = new List<MapCell>();
+
+            var xMin = (int)Math.Floor(x - radius);
+            var xMax = (int)Math.Ceiling(x + radius);
+            int yMin = (int)Math.Floor(y - radius);
+            int yMax = (int)Math.Ceiling(y + radius);
+
+            if (xMin < 0)
+            {
+                xMin = 0;
+            }
+            if (xMax >= MapData.MapWidth)
+            {
+                xMax = MapData.MapWidth - 1;
+            }
+            if (yMin < 0)
+            {
+                yMin = 0;
+            }
+            if (yMax >= MapData.MapHeight)
+            {
+                yMax = MapData.MapHeight - 1;
+            }
+
+            for (var currentX = xMin; currentX <= xMax; currentX++)
+            {
+                for (var currentY = yMin; currentY <= yMax; currentY++)
+                {
+                    cells.Add(MapData.Map[currentX][currentY]);
+                }
+            }
+
+            return cells;
         }
 
         public bool PathWalkable(float startX, float startY, float endX, float endY)
