@@ -9,9 +9,13 @@ namespace Sharky.Builds.Protoss
     {
         UnitDataManager UnitDataManager;
 
-        public FourGate(BuildOptions buildOptions, MacroData macroData, UnitManager unitManager, AttackData attackData, NexusManager nexusManager, UnitDataManager unitDataManager) : base(buildOptions, macroData, unitManager, attackData, nexusManager)
+        bool OpeningAttackChatSent;
+
+        public FourGate(BuildOptions buildOptions, MacroData macroData, UnitManager unitManager, AttackData attackData, IChatManager chatManager, NexusManager nexusManager, UnitDataManager unitDataManager) : base(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager)
         {
             UnitDataManager = unitDataManager;
+
+            OpeningAttackChatSent = false;
         }
 
         public override void StartBuild(int frame)
@@ -139,12 +143,11 @@ namespace Sharky.Builds.Protoss
                 }
             }
 
-            // TODO: chat manager cheese chats, load them from settings file and allow build specific based on that
-            //if (!MacroData.CheeseChatSent && UnitManager.Count(UnitTypes.PROTOSS_STALKER) > 4) // TODO: do this for other cheeses
-            //{
-            //    ChatManager.SendCheeseChat();
-            //    MacroData.CheeseChatSent = true;
-            //}
+            if (!OpeningAttackChatSent && MacroData.FoodArmy > 10)
+            {
+                ChatManager.SendChatType("FourGate-FirstAttack");
+                OpeningAttackChatSent = true;
+            }
         }
 
         public override bool Transition()

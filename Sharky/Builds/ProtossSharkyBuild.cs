@@ -7,7 +7,7 @@ namespace Sharky.Builds
     {
         protected NexusManager NexusManager;
 
-        public ProtossSharkyBuild(BuildOptions buildOptions, MacroData macroData, UnitManager unitManager, AttackData attackData, NexusManager nexusManager) : base(buildOptions, macroData, unitManager, attackData)
+        public ProtossSharkyBuild(BuildOptions buildOptions, MacroData macroData, UnitManager unitManager, AttackData attackData, IChatManager chatManager, NexusManager nexusManager) : base(buildOptions, macroData, unitManager, attackData, chatManager)
         {
             NexusManager = nexusManager;
         }

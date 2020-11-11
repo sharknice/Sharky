@@ -7,7 +7,7 @@ namespace Sharky.Builds.Protoss
 {
     public class AntiMassMarine : ProtossSharkyBuild
     {
-        public AntiMassMarine(BuildOptions buildOptions, MacroData macroData, UnitManager unitManager, AttackData attackData, NexusManager nexusManager) : base(buildOptions, macroData, unitManager, attackData, nexusManager)
+        public AntiMassMarine(BuildOptions buildOptions, MacroData macroData, UnitManager unitManager, AttackData attackData, IChatManager chatManager, NexusManager nexusManager) : base(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager)
         {
 
         }

@@ -11,13 +11,15 @@ namespace Sharky.Builds
         protected MacroData MacroData;
         protected UnitManager UnitManager;
         protected AttackData AttackData;
+        protected IChatManager ChatManager;
 
-        public SharkyBuild(BuildOptions buildOptions, MacroData macroData, UnitManager unitManager, AttackData attackData)
+        public SharkyBuild(BuildOptions buildOptions, MacroData macroData, UnitManager unitManager, AttackData attackData, IChatManager chatManager)
         {
             BuildOptions = buildOptions;
             MacroData = macroData;
             UnitManager = unitManager;
             AttackData = attackData;
+            ChatManager = chatManager;
         }
 
         public virtual List<string> CounterTransition()

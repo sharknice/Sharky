@@ -3,12 +3,14 @@ using Sharky;
 using Sharky.Builds;
 using Sharky.Builds.BuildingPlacement;
 using Sharky.Builds.Protoss;
+using Sharky.Chat;
 using Sharky.Managers;
 using Sharky.Managers.Protoss;
 using Sharky.MicroControllers;
 using Sharky.MicroTasks;
 using Sharky.Pathing;
 using System.Collections.Generic;
+using System.Net.Http;
 
 namespace SharkyExampleBot
 {
@@ -82,9 +84,15 @@ namespace SharkyExampleBot
             var nexusManager = new NexusManager(unitManager, unitDataManager);
             managers.Add(nexusManager);
 
+            var httpClient = new HttpClient();
+            var chatHistory = new ChatHistory();
+            var chatDataService = new ChatDataService();
+            var chatManager = new ChatManager(httpClient, chatHistory, sharkyOptions, chatDataService);
+            managers.Add(chatManager);
+
             var builds = new Dictionary<string, ISharkyBuild>();
-            var antiMassMarine = new AntiMassMarine(buildOptions, macroData, unitManager, attackData, nexusManager);
-            var fourGate = new FourGate(buildOptions, macroData, unitManager, attackData, nexusManager, unitDataManager);
+            var antiMassMarine = new AntiMassMarine(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager);
+            var fourGate = new FourGate(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager, unitDataManager);
             var sequences = new List<List<string>>();
             sequences.Add(new List<string> { fourGate.Name(), antiMassMarine.Name() });
             builds[fourGate.Name()] = fourGate;
