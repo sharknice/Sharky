@@ -9,7 +9,7 @@ using System.Numerics;
 
 namespace Sharky.Pathing
 {
-    public class SharkyPathFinder // TODO: use MapData to create the grids
+    public class SharkyPathFinder : IPathFinder
     {
         Grid GroundDamageGrid;
         int GroundDamageLastUpdate;
@@ -71,7 +71,7 @@ namespace Sharky.Pathing
             return path;
         }
 
-        public Grid GetGroundDamageGrid(int frame)
+        Grid GetGroundDamageGrid(int frame)
         {
             if (GroundDamageLastUpdate < frame)
             {
@@ -94,7 +94,7 @@ namespace Sharky.Pathing
             return GroundDamageGrid;
         }
 
-        public Grid GetAirDamageGrid(int frame)
+        Grid GetAirDamageGrid(int frame)
         {
             if (AirDamageLastUpdate < frame)
             {
@@ -117,7 +117,7 @@ namespace Sharky.Pathing
             return AirDamageGrid;
         }
 
-        public void CreateMapGrid()
+        void CreateMapGrid()
         {
             var gridSize = new GridSize(columns: MapData.MapWidth, rows: MapData.MapHeight);
             var cellSize = new Size(Distance.FromMeters(1), Distance.FromMeters(1));
@@ -135,7 +135,7 @@ namespace Sharky.Pathing
             }
         }
 
-        public void UpdateBuildingGrid(IEnumerable<UnitCalculation> buildings, IEnumerable<Unit> resourceUnits)
+        void UpdateBuildingGrid(IEnumerable<UnitCalculation> buildings, IEnumerable<Unit> resourceUnits)
         {
             // TODO: store the old buildings, if the buildings are the same don't update, just return
             BuildingGrid = MapGrid;
@@ -157,7 +157,7 @@ namespace Sharky.Pathing
             }
         }
 
-        public void UpdateEnemyVisionGrid(IEnumerable<UnitCalculation> enemyUnits)
+        void UpdateEnemyVisionGrid(IEnumerable<UnitCalculation> enemyUnits)
         {
             EnemyVisionGrid = Grid.CreateGridWithLateralAndDiagonalConnections(MapGrid.GridSize, new Size(Distance.FromMeters(1), Distance.FromMeters(1)), Velocity.FromMetersPerSecond(1));
             foreach (var enemy in enemyUnits)
@@ -170,7 +170,7 @@ namespace Sharky.Pathing
             }
         }
 
-        public void UpdateEnemyVisionGroundGrid(IEnumerable<UnitCalculation> enemyUnits)
+        void UpdateEnemyVisionGroundGrid(IEnumerable<UnitCalculation> enemyUnits)
         {
             EnemyVisionGroundGrid = BuildingGrid;
             foreach (var enemy in enemyUnits)
@@ -249,12 +249,12 @@ namespace Sharky.Pathing
             }
         }
 
-        public IEnumerable<Vector2> GetHiddenAirPath(float startX, float startY, float endX, float endY)
+        IEnumerable<Vector2> GetHiddenAirPath(float startX, float startY, float endX, float endY)
         {
             return GetPath(EnemyVisionGrid, startX, startY, endX, endY);
         }
 
-        public IEnumerable<Vector2> GetHiddenGroundPath(float startX, float startY, float endX, float endY)
+        IEnumerable<Vector2> GetHiddenGroundPath(float startX, float startY, float endX, float endY)
         {
             return GetPath(EnemyVisionGroundGrid, startX, startY, endX, endY);
         }

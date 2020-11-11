@@ -62,7 +62,7 @@ namespace SharkyExampleBot
             var unitManager = new UnitManager(unitDataManager, sharkyOptions, targetPriorityService, collisionCalculator, mapDataService);
             managers.Add(unitManager);
 
-            var baseManager = new BaseManager(unitDataManager);
+            var baseManager = new BaseManager(unitDataManager, unitManager);
             managers.Add(baseManager);
 
             var targetingManager = new TargetingManager(unitManager, unitDataManager, mapDataService, baseManager);
@@ -70,8 +70,9 @@ namespace SharkyExampleBot
 
             var buildOptions = new BuildOptions { StrictGasCount = false, StrictSupplyCount = false, StrictWorkerCount = false };
             var macroSetup = new MacroSetup();
-            var protossBuildingPlacement = new ProtossBuildingPlacement(unitManager, unitDataManager, debugManager, mapData);
-            var buildingPlacement = new BuildingPlacement(protossBuildingPlacement);
+            var buildingService = new BuildingService(mapData, unitManager);
+            var protossBuildingPlacement = new ProtossBuildingPlacement(unitManager, unitDataManager, debugManager, mapData, buildingService);
+            var buildingPlacement = new BuildingPlacement(protossBuildingPlacement, baseManager, unitManager, buildingService);
             var buildingBuilder = new BuildingBuilder(unitManager, targetingManager, buildingPlacement, unitDataManager);
 
 
@@ -90,20 +91,32 @@ namespace SharkyExampleBot
             var chatManager = new ChatManager(httpClient, chatHistory, sharkyOptions, chatDataService);
             managers.Add(chatManager);
 
-            var builds = new Dictionary<string, ISharkyBuild>();
             var antiMassMarine = new AntiMassMarine(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager);
             var fourGate = new FourGate(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager, unitDataManager);
-            var sequences = new List<List<string>>();
-            sequences.Add(new List<string> { fourGate.Name(), antiMassMarine.Name() });
-            builds[fourGate.Name()] = fourGate;
-            builds[antiMassMarine.Name()] = antiMassMarine;
+            var nexusFirst = new NexusFirst(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager);
+            var robo = new Robo(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager);
+
+            var builds = new Dictionary<string, ISharkyBuild>
+            {
+                [nexusFirst.Name()] = nexusFirst,
+                [robo.Name()] = robo,
+                [fourGate.Name()] = fourGate,
+                [antiMassMarine.Name()] = antiMassMarine
+            };
+
+            var sequences = new List<List<string>>
+            {
+                new List<string> { nexusFirst.Name(), robo.Name() },
+                new List<string> { antiMassMarine.Name(), fourGate.Name() }
+            };
+
             var buildSequences = new Dictionary<string, List<List<string>>>
             {
                 [Race.Terran.ToString()] = sequences,
                 [Race.Zerg.ToString()] = sequences,
                 [Race.Protoss.ToString()] = sequences,
                 [Race.Random.ToString()] = sequences,
-                ["transition"] = sequences
+                ["Transition"] = sequences
             };
 
             var macroBalancer = new MacroBalancer(buildOptions, unitManager, macroData, unitDataManager);

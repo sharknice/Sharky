@@ -60,7 +60,7 @@ namespace Sharky.Builds
             foreach (var u in MacroData.Production)
             {
                 var unitData = UnitDataManager.BuildingData[u];
-                MacroData.BuildProduction[u] = UnitManager.Count(u) < MacroData.DesiredProductionCounts[u] + UnitManager.Commanders.Values.Count(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
+                MacroData.BuildProduction[u] = UnitManager.EquivalentTypeCount(u) < MacroData.DesiredProductionCounts[u] + UnitManager.Commanders.Values.Count(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
             }
         }
 
@@ -112,12 +112,12 @@ namespace Sharky.Builds
 
             if (!BuildOptions.StrictWorkerCount)
             {
-                var nexuses = UnitManager.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS);
-                var completedNexuses = nexuses.Where(n => n.UnitCalculation.Unit.BuildProgress == 1);
-                var buildingNexusCount = nexuses.Count(n => n.UnitCalculation.Unit.BuildProgress < 1);
-                var desiredProbes = completedNexuses.Sum(n => n.UnitCalculation.Unit.IdealHarvesters + 4) + (buildingNexusCount * 22) + 1; // +4 because 2 are inside the gases and you can't see them
+                var resourceCenters = UnitManager.Commanders.Values.Where(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.ResourceCenter));
+                var completedResourceCenters = resourceCenters.Where(n => n.UnitCalculation.Unit.BuildProgress == 1);
+                var buildingResourceCentersCount = resourceCenters.Count(n => n.UnitCalculation.Unit.BuildProgress < 1);
+                var desiredWorkers = completedResourceCenters.Sum(n => n.UnitCalculation.Unit.IdealHarvesters + 4) + (buildingResourceCentersCount * 22) + 1; // +4 because 2 are inside the gases and you can't see them
 
-                if (UnitManager.Count(UnitTypes.PROTOSS_PROBE) < desiredProbes && UnitManager.Count(UnitTypes.PROTOSS_PROBE) < 70)
+                if (UnitManager.Count(UnitTypes.PROTOSS_PROBE) < desiredWorkers && UnitManager.Count(UnitTypes.PROTOSS_PROBE) < 70)
                 {
                     MacroData.BuildUnits[UnitTypes.PROTOSS_PROBE] = true;
                 }
@@ -149,7 +149,7 @@ namespace Sharky.Builds
                 }
                 else if (actualRatio > desiredRatio || count >= MacroData.DesiredUnitCounts[u])
                 {
-                    if (MacroData.DesiredUnitCounts[u] < MacroData.DesiredUnitCounts[u] && MacroData.Minerals > 350 && UnitDataManager.UnitData[u].VespeneCost == 0)
+                    if (MacroData.DesiredUnitCounts[u] < MacroData.DesiredUnitCounts[u] && MacroData.Minerals > 350 && UnitDataManager.UnitData[u].VespeneCost == 0) // TODO: this has got to be wrong
                     {
                         MacroData.BuildUnits[u] = true;
                     }

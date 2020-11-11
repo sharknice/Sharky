@@ -14,13 +14,13 @@ namespace Sharky.Managers
         UnitDataManager UnitDataManager;
         BuildingBuilder BuildingBuilder;
         SharkyOptions SharkyOptions;
-        BaseManager BaseManager;
+        IBaseManager BaseManager;
         TargetingManager TargetingManager;
         AttackData AttackData;
         IBuildingPlacement WarpInPlacement;
         MacroData MacroData;
 
-        public MacroManager(MacroSetup macroSetup, IUnitManager unitManager, UnitDataManager unitDataManager, BuildingBuilder buildingBuilder, SharkyOptions sharkyOptions, BaseManager baseManager, TargetingManager targetingManager, AttackData attackData, IBuildingPlacement warpInPlacement, MacroData macroData)
+        public MacroManager(MacroSetup macroSetup, IUnitManager unitManager, UnitDataManager unitDataManager, BuildingBuilder buildingBuilder, SharkyOptions sharkyOptions, IBaseManager baseManager, TargetingManager targetingManager, AttackData attackData, IBuildingPlacement warpInPlacement, MacroData macroData)
         {
             MacroSetup = macroSetup;
             UnitManager = unitManager;

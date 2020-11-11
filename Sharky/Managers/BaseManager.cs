@@ -6,18 +6,21 @@ using System.Numerics;
 
 namespace Sharky.Managers
 {
-    public class BaseManager : SharkyManager
+    public class BaseManager : SharkyManager, IBaseManager
     {
         public List<BaseLocation> BaseLocations { get; private set; }
+        public List<BaseLocation> SelfBases { get; private set; }
         public BaseLocation MainBase { get; private set; }
 
         ImageData PlacementGrid;
 
         UnitDataManager UnitDataManager;
+        UnitManager UnitManager;
 
-        public BaseManager(UnitDataManager unitDataManager)
+        public BaseManager(UnitDataManager unitDataManager, UnitManager unitManager)
         {
             UnitDataManager = unitDataManager;
+            UnitManager = unitManager;
             BaseLocations = new List<BaseLocation>();
         }
 
@@ -83,7 +86,10 @@ namespace Sharky.Managers
             }
 
             var startingUnit = observation.Observation.RawData.Units.FirstOrDefault(u => u.Alliance == Alliance.Self);
-            MainBase = BaseLocations.OrderBy(b => Vector2.DistanceSquared(new Vector2(startingUnit.Pos.X, startingUnit.Pos.Y), new Vector2(b.Location.X, b.Location.Y))).FirstOrDefault();
+
+            BaseLocations = BaseLocations.OrderBy(b => Vector2.DistanceSquared(new Vector2(startingUnit.Pos.X, startingUnit.Pos.Y), new Vector2(b.Location.X, b.Location.Y))).ToList();
+            MainBase = BaseLocations.FirstOrDefault();
+            SelfBases = new List<BaseLocation> { MainBase };
         }
 
         public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
@@ -99,10 +105,21 @@ namespace Sharky.Managers
                 }
             }
 
+            UpdateSelfBases();
+
             return new List<SC2APIProtocol.Action>();
         }
 
-        private void DetermineFinalLocation(BaseLocation baseLocation, List<Unit> gasses)
+        void UpdateSelfBases()
+        {
+            if (SelfBases.Count() != UnitManager.EquivalentTypeCount(UnitTypes.PROTOSS_NEXUS) + UnitManager.EquivalentTypeCount(UnitTypes.TERRAN_COMMANDCENTER) + UnitManager.EquivalentTypeCount(UnitTypes.ZERG_HATCHERY))
+            {
+                var resourceCenters = UnitManager.SelfUnits.Values.Where(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter));
+                SelfBases = BaseLocations.Where(b => resourceCenters.Any(r => Vector2.DistanceSquared(new Vector2(r.Unit.Pos.X, r.Unit.Pos.Y), new Vector2(b.Location.X, b.Location.Y)) < 25)).ToList();
+            }
+        }
+
+        void DetermineFinalLocation(BaseLocation baseLocation, List<Unit> gasses)
         {
             for (int i = 0; i < gasses.Count; i++)
             {
@@ -225,7 +242,7 @@ namespace Sharky.Managers
             }
         }
 
-        private float checkPosition(Point2D position, BaseLocation location)
+        float checkPosition(Point2D position, BaseLocation location)
         {
             foreach (var mineralField in location.MineralFields)
             {

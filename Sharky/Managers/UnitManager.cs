@@ -184,9 +184,95 @@ namespace Sharky.Managers
             return SelfUnits.Count(u => u.Value.Unit.UnitType == (uint)unitType);
         }
 
+        public int EquivalentTypeCount(UnitTypes unitType)
+        {
+            var count = Count(unitType);
+            if (unitType == UnitTypes.PROTOSS_GATEWAY)
+            {
+                count += Count(UnitTypes.PROTOSS_WARPGATE);
+            }
+            else if (unitType == UnitTypes.ZERG_HATCHERY)
+            {
+                count += Count(UnitTypes.ZERG_HIVE);
+                count += Count(UnitTypes.ZERG_LAIR);
+            }
+            else if (unitType == UnitTypes.TERRAN_COMMANDCENTER)
+            {
+                count += Count(UnitTypes.TERRAN_COMMANDCENTERFLYING);
+                count += Count(UnitTypes.TERRAN_ORBITALCOMMAND);
+                count += Count(UnitTypes.TERRAN_ORBITALCOMMANDFLYING);
+                count += Count(UnitTypes.TERRAN_PLANETARYFORTRESS);
+            }
+            else if (unitType == UnitTypes.TERRAN_SUPPLYDEPOT)
+            {
+                count += Count(UnitTypes.TERRAN_SUPPLYDEPOTLOWERED);
+            }
+            else if (unitType == UnitTypes.TERRAN_BARRACKS)
+            {
+                count += Count(UnitTypes.TERRAN_BARRACKSFLYING);
+            }
+            else if (unitType == UnitTypes.TERRAN_FACTORY)
+            {
+                count += Count(UnitTypes.TERRAN_FACTORYFLYING);
+            }
+            else if (unitType == UnitTypes.TERRAN_STARPORT)
+            {
+                count += Count(UnitTypes.TERRAN_STARPORTFLYING);
+            }
+            else if (unitType == UnitTypes.ZERG_SPIRE)
+            {
+                count += Count(UnitTypes.ZERG_GREATERSPIRE);
+            }
+
+            return count;
+        }
+
         public int Completed(UnitTypes unitType)
         {
             return SelfUnits.Count(u => u.Value.Unit.UnitType == (uint)unitType && u.Value.Unit.BuildProgress == 1);
+        }
+
+        public int EquivalentTypeCompleted(UnitTypes unitType)
+        {
+            var completed = Completed(unitType);
+            if (unitType == UnitTypes.PROTOSS_GATEWAY)
+            {
+                completed += Completed(UnitTypes.PROTOSS_WARPGATE);
+            }
+            else if (unitType == UnitTypes.ZERG_HATCHERY)
+            {
+                completed += Completed(UnitTypes.ZERG_HIVE);
+                completed += Completed(UnitTypes.ZERG_LAIR);
+            }
+            else if (unitType == UnitTypes.TERRAN_COMMANDCENTER)
+            {
+                completed += Completed(UnitTypes.TERRAN_COMMANDCENTERFLYING);
+                completed += Completed(UnitTypes.TERRAN_ORBITALCOMMAND);
+                completed += Completed(UnitTypes.TERRAN_ORBITALCOMMANDFLYING);
+                completed += Completed(UnitTypes.TERRAN_PLANETARYFORTRESS);
+            }
+            else if (unitType == UnitTypes.TERRAN_SUPPLYDEPOT)
+            {
+                completed += Completed(UnitTypes.TERRAN_SUPPLYDEPOTLOWERED);
+            }
+            else if (unitType == UnitTypes.TERRAN_BARRACKS)
+            {
+                completed += Completed(UnitTypes.TERRAN_BARRACKSFLYING);
+            }
+            else if (unitType == UnitTypes.TERRAN_FACTORY)
+            {
+                completed += Completed(UnitTypes.TERRAN_FACTORYFLYING);
+            }
+            else if (unitType == UnitTypes.TERRAN_STARPORT)
+            {
+                completed += Completed(UnitTypes.TERRAN_STARPORTFLYING);
+            }
+            else if (unitType == UnitTypes.ZERG_SPIRE)
+            {
+                completed += Completed(UnitTypes.ZERG_GREATERSPIRE);
+            }
+
+            return completed;
         }
 
         public bool CanDamage(IEnumerable<Weapon> weapons, Unit unit)

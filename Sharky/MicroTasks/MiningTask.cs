@@ -13,10 +13,10 @@ namespace Sharky.MicroTasks
         public List<UnitCommander> UnitCommanders { get; set; }
 
         UnitDataManager UnitDataManager;
-        BaseManager BaseManager;
+        IBaseManager BaseManager;
         UnitManager UnitManager;
 
-        public MiningTask(UnitDataManager unitDataManager, BaseManager baseManager, UnitManager unitManager)
+        public MiningTask(UnitDataManager unitDataManager, IBaseManager baseManager, UnitManager unitManager)
         {
             UnitDataManager = unitDataManager;
             BaseManager = baseManager;
@@ -54,6 +54,8 @@ namespace Sharky.MicroTasks
 
             commands.AddRange(MineGas(frame));
             commands.AddRange(MineWithIdleWorkers(frame));
+
+            commands.AddRange(TransferWorkers(frame));
 
             return commands;
         }
@@ -99,13 +101,17 @@ namespace Sharky.MicroTasks
 
             foreach (var worker in GetIdleWorkers())
             {
-                var mineralField = BaseManager.MainBase.MineralFields.OrderBy(m => Vector2.DistanceSquared(new Vector2(m.Pos.X, m.Pos.Y), new Vector2(worker.UnitCalculation.Unit.Pos.X, worker.UnitCalculation.Unit.Pos.Y))).FirstOrDefault();
-                if (mineralField != null)
+                var baseLocation = BaseManager.SelfBases.Where(b => b.ResourceCenter.BuildProgress > .9).OrderBy(b => b.ResourceCenter.AssignedHarvesters - b.ResourceCenter.IdealHarvesters).FirstOrDefault();
+                if (baseLocation != null)
                 {
-                    var action = worker.Order(frame, Abilities.HARVEST_GATHER, null, mineralField.Tag);
-                    if (action != null)
+                    var mineralField = baseLocation.MineralFields.OrderBy(m => Vector2.DistanceSquared(new Vector2(m.Pos.X, m.Pos.Y), new Vector2(worker.UnitCalculation.Unit.Pos.X, worker.UnitCalculation.Unit.Pos.Y))).FirstOrDefault();
+                    if (mineralField != null)
                     {
-                        actions.Add(action);
+                        var action = worker.Order(frame, Abilities.HARVEST_GATHER, null, mineralField.Tag);
+                        if (action != null)
+                        {
+                            actions.Add(action);
+                        }
                     }
                 }
             }

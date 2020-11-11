@@ -15,9 +15,9 @@ namespace Sharky.Managers
         UnitManager UnitManager;
         UnitDataManager UnitDataManager;
         MapDataService MapDataService;
-        BaseManager BaseManager;
+        IBaseManager BaseManager;
 
-        public TargetingManager(UnitManager unitManager, UnitDataManager unitDataManager, MapDataService mapDataService, BaseManager baseManager)
+        public TargetingManager(UnitManager unitManager, UnitDataManager unitDataManager, MapDataService mapDataService, IBaseManager baseManager)
         {
             UnitManager = unitManager;
             UnitDataManager = unitDataManager;
