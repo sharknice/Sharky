@@ -95,19 +95,22 @@ namespace SharkyExampleBot
             var fourGate = new FourGate(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager, unitDataManager);
             var nexusFirst = new NexusFirst(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager);
             var robo = new Robo(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager);
+            var protossRobo = new ProtossRobo(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager, sharkyOptions);
 
             var builds = new Dictionary<string, ISharkyBuild>
             {
                 [nexusFirst.Name()] = nexusFirst,
                 [robo.Name()] = robo,
+                [protossRobo.Name()] = protossRobo,
                 [fourGate.Name()] = fourGate,
                 [antiMassMarine.Name()] = antiMassMarine
             };
 
             var sequences = new List<List<string>>
             {
-                new List<string> { nexusFirst.Name(), robo.Name() },
-                new List<string> { antiMassMarine.Name(), fourGate.Name() }
+                new List<string> { nexusFirst.Name(), robo.Name(), protossRobo.Name() },
+                new List<string> { antiMassMarine.Name() },
+                new List<string> { fourGate.Name() }
             };
 
             var buildSequences = new Dictionary<string, List<List<string>>>
@@ -125,6 +128,7 @@ namespace SharkyExampleBot
             managers.Add(buildManager);
 
             var sharkyPathFinder = new SharkyPathFinder(new Roy_T.AStar.Paths.PathFinder(), mapData, mapDataService);
+            var sharkySimplePathFinder = new SharkySimplePathFinder(mapDataService);
 
             var individualMicroControllers = new Dictionary<UnitTypes, IIndividualMicroController>();
             var individualMicroController = new IndividualMicroController(mapDataService, unitDataManager, unitManager, debugManager, sharkyPathFinder, sharkyOptions, MicroPriority.LiveAndAttack, true);

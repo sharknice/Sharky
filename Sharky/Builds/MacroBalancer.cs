@@ -51,7 +51,11 @@ namespace Sharky.Builds
             foreach (var u in MacroData.Tech)
             {
                 var unitData = UnitDataManager.BuildingData[u];
-                MacroData.BuildTech[u] = UnitManager.Count(u) < MacroData.DesiredTechCounts[u] + UnitManager.Commanders.Values.Count(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
+                MacroData.BuildTech[u] = UnitManager.Count(u) < MacroData.DesiredTechCounts[u];
+                if (MacroData.BuildTech[u] && UnitManager.Commanders.Values.Any(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability)))
+                {
+                    MacroData.BuildTech[u] = false;
+                }
             }
         }
 
@@ -60,7 +64,12 @@ namespace Sharky.Builds
             foreach (var u in MacroData.Production)
             {
                 var unitData = UnitDataManager.BuildingData[u];
-                MacroData.BuildProduction[u] = UnitManager.EquivalentTypeCount(u) < MacroData.DesiredProductionCounts[u] + UnitManager.Commanders.Values.Count(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
+                MacroData.BuildProduction[u] = UnitManager.EquivalentTypeCount(u) < MacroData.DesiredProductionCounts[u];
+                if (MacroData.BuildProduction[u] && UnitManager.Commanders.Values.Any(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability)))
+                {
+                    MacroData.BuildProduction[u] = false;
+                }
+
             }
         }
 
@@ -139,6 +148,13 @@ namespace Sharky.Builds
                 var desiredRatio = MacroData.DesiredUnitCounts[u] / (double)desiredTotal;
 
                 var count = UnitManager.Count(u);
+                if (u == UnitTypes.PROTOSS_ARCHON)
+                {
+                    continue;
+                }
+
+                var trainingData = UnitDataManager.TrainingData[u];
+                count += UnitManager.SelfUnits.Count(u => trainingData.ProducingUnits.Contains((UnitTypes)u.Value.Unit.UnitType) && u.Value.Unit.Orders.Any(o => o.AbilityId == (uint)trainingData.Ability));
                 if (u == UnitTypes.PROTOSS_WARPPRISM) { count += UnitManager.Count(UnitTypes.PROTOSS_WARPPRISMPHASING); }
 
                 var actualRatio = count / (double)currentTotal;

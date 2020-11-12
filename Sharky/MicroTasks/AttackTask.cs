@@ -44,7 +44,17 @@ namespace Sharky.MicroTasks
             var vectors = UnitCommanders.Select(u => new Vector2(u.UnitCalculation.Unit.Pos.X, u.UnitCalculation.Unit.Pos.Y));
             if (vectors.Count() > 0)
             {
-                AttackData.ArmyPoint = new Point2D { X = vectors.Average(v => v.X), Y = vectors.Average(v => v.Y) };
+                var average = new Vector2(vectors.Average(v => v.X), vectors.Average(v => v.Y));
+                var trimmed = vectors.Where(v => Vector2.DistanceSquared(average, v) < 200);
+                if (trimmed.Count() > 0)
+                {
+                    var trimmedAverage = new Point2D { X = trimmed.Average(v => v.X), Y = trimmed.Average(v => v.Y) };
+                    AttackData.ArmyPoint = trimmedAverage;
+                }
+                else
+                {
+                    AttackData.ArmyPoint = new Point2D { X = average.X, Y = average.Y };
+                }
             }
             else
             {

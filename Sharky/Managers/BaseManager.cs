@@ -85,10 +85,11 @@ namespace Sharky.Managers
                 DetermineFinalLocation(location, gasses);
             }
 
-            var startingUnit = observation.Observation.RawData.Units.FirstOrDefault(u => u.Alliance == Alliance.Self);
+            var startingUnit = observation.Observation.RawData.Units.FirstOrDefault(u => u.Alliance == Alliance.Self && UnitDataManager.ResourceCenterTypes.Contains((UnitTypes)u.UnitType));
 
             BaseLocations = BaseLocations.OrderBy(b => Vector2.DistanceSquared(new Vector2(startingUnit.Pos.X, startingUnit.Pos.Y), new Vector2(b.Location.X, b.Location.Y))).ToList();
             MainBase = BaseLocations.FirstOrDefault();
+            MainBase.ResourceCenter = startingUnit;
             SelfBases = new List<BaseLocation> { MainBase };
         }
 
@@ -116,6 +117,44 @@ namespace Sharky.Managers
             {
                 var resourceCenters = UnitManager.SelfUnits.Values.Where(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter));
                 SelfBases = BaseLocations.Where(b => resourceCenters.Any(r => Vector2.DistanceSquared(new Vector2(r.Unit.Pos.X, r.Unit.Pos.Y), new Vector2(b.Location.X, b.Location.Y)) < 25)).ToList();
+                foreach (var selfBase in SelfBases)
+                {
+                    selfBase.ResourceCenter = resourceCenters.FirstOrDefault(r => Vector2.DistanceSquared(new Vector2(r.Unit.Pos.X, r.Unit.Pos.Y), new Vector2(selfBase.Location.X, selfBase.Location.Y)) < 25).Unit;
+                }
+            }
+            foreach (var selfBase in SelfBases)
+            {
+                if (UnitManager.SelfUnits.TryGetValue(selfBase.ResourceCenter.Tag, out UnitCalculation updatedUnit))
+                {
+                    if (updatedUnit != null)
+                    {
+                        selfBase.ResourceCenter = updatedUnit.Unit;
+                    }
+                }
+
+                for (var index = 0; index < selfBase.MineralFields.Count; index++)
+                {
+                    if (selfBase.MineralFields[index].DisplayType == DisplayType.Snapshot)
+                    {
+                        var visibleMineral = UnitManager.NeutralUnits.FirstOrDefault(m => m.Value.Unit.DisplayType == DisplayType.Visible && m.Value.Unit.Pos.X == selfBase.MineralFields[index].Pos.X && m.Value.Unit.Pos.Y == selfBase.MineralFields[index].Pos.Y).Value;
+                        if (visibleMineral != null)
+                        {
+                            selfBase.MineralFields[index] = visibleMineral.Unit;
+                        }
+                    }
+                }
+
+                for (var index = 0; index < selfBase.VespeneGeysers.Count; index++)
+                {
+                    if (selfBase.VespeneGeysers[index].DisplayType == DisplayType.Snapshot)
+                    {
+                        var visibleGeyser = UnitManager.NeutralUnits.FirstOrDefault(m => m.Value.Unit.DisplayType == DisplayType.Visible && m.Value.Unit.Pos.X == selfBase.VespeneGeysers[index].Pos.X && m.Value.Unit.Pos.Y == selfBase.VespeneGeysers[index].Pos.Y).Value;
+                        if (visibleGeyser != null)
+                        {
+                            selfBase.VespeneGeysers[index] = visibleGeyser.Unit;
+                        }
+                    }
+                }
             }
         }
 

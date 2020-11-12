@@ -70,15 +70,5 @@ namespace Sharky.MicroControllers
         {
             return new List<Action>();
         }
-
-        protected virtual Point2D GetGroupCenter(List<UnitCommander> commanders)
-        {
-            var vectors = commanders.Select(u => new Vector2(u.UnitCalculation.Unit.Pos.X, u.UnitCalculation.Unit.Pos.Y));
-            if (vectors.Count() > 0)
-            {
-                return new Point2D { X = vectors.Average(v => v.X), Y = vectors.Average(v => v.Y) };
-            }
-            return null;
-        }
     }
 }

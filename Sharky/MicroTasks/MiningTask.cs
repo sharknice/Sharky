@@ -119,6 +119,34 @@ namespace Sharky.MicroTasks
             return actions;
         }
 
+        List<SC2APIProtocol.Action> TransferWorkers(int frame)
+        {
+            var actions = new List<SC2APIProtocol.Action>();
+
+            var oversaturatedBase = BaseManager.SelfBases.Where(b => b.ResourceCenter.BuildProgress == 1 && b.ResourceCenter.AssignedHarvesters > b.ResourceCenter.IdealHarvesters).OrderByDescending(b => b.ResourceCenter.AssignedHarvesters - b.ResourceCenter.IdealHarvesters).FirstOrDefault();         
+            if (oversaturatedBase != null)
+            {
+                var undersaturatedBase = BaseManager.SelfBases.Where(b => b.ResourceCenter.BuildProgress > .9 && !b.ResourceCenter.HasIdealHarvesters).OrderBy(b => b.ResourceCenter.AssignedHarvesters - b.ResourceCenter.IdealHarvesters).FirstOrDefault();
+                if (undersaturatedBase != null)
+                {
+                    var refinereries = UnitManager.SelfUnits.Where(u => UnitDataManager.GasGeyserRefineryTypes.Contains((UnitTypes)u.Value.Unit.UnitType) && u.Value.Unit.BuildProgress >= .95f);
+                    var worker = UnitCommanders.Where(c => c.UnitCalculation.Unit.Orders.Any(o => UnitDataManager.GatheringAbilities.Contains((Abilities)o.AbilityId) && !refinereries.Select(r => r.Key).Contains(o.TargetUnitTag))).OrderBy(w => Vector2.DistanceSquared(new Vector2(w.UnitCalculation.Unit.Pos.X, w.UnitCalculation.Unit.Pos.Y), new Vector2(oversaturatedBase.Location.X, oversaturatedBase.Location.Y))).FirstOrDefault();
+                    var mineralField = undersaturatedBase.MineralFields.OrderBy(m => Vector2.DistanceSquared(new Vector2(m.Pos.X, m.Pos.Y), new Vector2(worker.UnitCalculation.Unit.Pos.X, worker.UnitCalculation.Unit.Pos.Y))).FirstOrDefault();
+                    if (mineralField != null)
+                    {
+                        var action = worker.Order(frame, Abilities.HARVEST_GATHER, null, mineralField.Tag);
+                        if (action != null)
+                        {
+                            actions.Add(action);
+                            return actions;
+                        }
+                    }
+                }
+            }
+
+            return actions;
+        }
+
         List<SC2APIProtocol.Action> SplitWorkers(int frame)
         {
             var actions = new List<SC2APIProtocol.Action>();

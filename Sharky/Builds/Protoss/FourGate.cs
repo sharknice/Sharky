@@ -152,7 +152,7 @@ namespace Sharky.Builds.Protoss
 
         public override bool Transition()
         {
-            return UnitManager.Count(UnitTypes.PROTOSS_NEXUS) > 1 && UnitManager.Count(UnitTypes.PROTOSS_GATEWAY) >= 4;
+            return UnitManager.Count(UnitTypes.PROTOSS_NEXUS) > 1 && UnitManager.EquivalentTypeCount(UnitTypes.PROTOSS_GATEWAY) >= 4;
         }
     }
 }

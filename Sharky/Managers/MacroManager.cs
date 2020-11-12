@@ -125,6 +125,7 @@ namespace Sharky.Managers
                                 if (action != null)
                                 {
                                     commands.Add(action);
+                                    return commands;
                                 }
                             }
                             else if (building.First().Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPGATE)
@@ -140,6 +141,7 @@ namespace Sharky.Managers
                                 if (action != null)
                                 {
                                     commands.Add(action);
+                                    return commands;
                                 }
                             }
                             else
@@ -148,6 +150,7 @@ namespace Sharky.Managers
                                 if (action != null)
                                 {
                                     commands.Add(action);
+                                    return commands;
                                 }
                             }
                         }
@@ -167,6 +170,7 @@ namespace Sharky.Managers
                             if (action != null)
                             {
                                 commands.Add(action);
+                                return commands;
                             }
                         }
                     }
@@ -194,6 +198,7 @@ namespace Sharky.Managers
                         if (command != null)
                         {
                             commands.Add(command);
+                            return commands;
                         }
                     }
                     
@@ -214,6 +219,7 @@ namespace Sharky.Managers
                 if (command != null)
                 {
                     commands.Add(command);
+                    return commands;
                 }
             }
 
@@ -233,6 +239,7 @@ namespace Sharky.Managers
                     if (command != null)
                     {
                         commands.Add(command);
+                        return commands;
                     }
                 }
             }
@@ -253,6 +260,7 @@ namespace Sharky.Managers
                     if (command != null)
                     {
                         commands.Add(command);
+                        return commands;
                     }
                 }
             }

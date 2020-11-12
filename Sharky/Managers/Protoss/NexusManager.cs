@@ -25,7 +25,7 @@ namespace Sharky.Managers.Protoss
         {
             var actions = new List<SC2APIProtocol.Action>();
 
-            var nexus = UnitManager.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS).OrderBy(c => c.UnitCalculation.Unit.Energy).FirstOrDefault();
+            var nexus = UnitManager.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS).OrderByDescending(c => c.UnitCalculation.Unit.Energy).FirstOrDefault();
             if (nexus != null)
             {
                 var action = ChronoBoost(nexus, (int)observation.Observation.GameLoop);
