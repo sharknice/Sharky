@@ -47,6 +47,11 @@ namespace Sharky.MicroControllers
 
         public virtual SC2APIProtocol.Action Attack(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
+            if (commander.UnitCalculation.Unit.IsSelected)
+            {
+                var breakpoint = true;
+            }
+
             SC2APIProtocol.Action action = null;
 
             // TODO: all the SHarkMicroController.cs stuff
@@ -582,6 +587,7 @@ namespace Sharky.MicroControllers
 
                 if (attack)
                 {
+                    DebugManager.DrawSphere(new Point { X = groupCenter.X, Y = groupCenter.Y, Z = 10 });
                     action = commander.Order(frame, Abilities.ATTACK, groupCenter);
                 }
                 else

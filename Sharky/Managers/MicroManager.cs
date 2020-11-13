@@ -1,15 +1,17 @@
 ﻿using SC2APIProtocol;
 using Sharky.MicroTasks;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Sharky.Managers
 {
     public class MicroManager : SharkyManager
     {      
         IUnitManager UnitManager;
-        List<IMicroTask> MicroTasks;
 
-        public MicroManager(IUnitManager unitManager, List<IMicroTask> microTasks)
+        public Dictionary<string, IMicroTask> MicroTasks;
+
+        public MicroManager(IUnitManager unitManager, Dictionary<string, IMicroTask> microTasks)
         {
             UnitManager = unitManager;
             MicroTasks = microTasks;
@@ -19,14 +21,17 @@ namespace Sharky.Managers
         {
             var frame = (int)observation.Observation.GameLoop;
 
-            foreach (var microTask in MicroTasks)
-            {
-                microTask.ClaimUnits(UnitManager.Commanders);
-            }
-
             var actions = new List<Action>();
-            foreach (var microTask in MicroTasks)
+            foreach (var microTask in MicroTasks.Values.OrderBy(m => m.Priority))
             {
+                if (observation.Observation.RawData.Event != null && observation.Observation.RawData.Event.DeadUnits != null)
+                {
+                    foreach (var tag in observation.Observation.RawData.Event.DeadUnits)
+                    {
+                        microTask.UnitCommanders.RemoveAll(c => c.UnitCalculation.Unit.Tag == tag);
+                    }
+                }
+                microTask.ClaimUnits(UnitManager.Commanders);
                 actions.AddRange(microTask.PerformActions(frame));
             }
             return actions;

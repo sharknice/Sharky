@@ -11,18 +11,20 @@ namespace Sharky.MicroTasks
     public class AttackTask : IMicroTask
     {
         public List<UnitCommander> UnitCommanders { get; set; }
+        public int Priority { get; private set; }
 
         IMicroController MicroController;
         ITargetingManager TargetingManager;
         MacroData MacroData;
         AttackData AttackData;
 
-        public AttackTask(IMicroController microController, ITargetingManager targetingManager, MacroData macroData, AttackData attackData)
+        public AttackTask(IMicroController microController, ITargetingManager targetingManager, MacroData macroData, AttackData attackData, int priority)
         {
             MicroController = microController;
             TargetingManager = targetingManager;
             MacroData = macroData;
             AttackData = attackData;
+            Priority = priority;
 
             UnitCommanders = new List<UnitCommander>();
         }
@@ -67,6 +69,15 @@ namespace Sharky.MicroTasks
             {
                 AttackData.Attacking = MacroData.FoodArmy >= AttackData.ArmyFoodAttack;
             }
+
+            // if there are enemies near base
+
+            // if armypoint is closer to enemies than it is to attackpoint
+            // send enough army there to win fight with winprobability > 2
+            // send the rest of the army to attack point, if not attacking send rest to defense too
+
+            // find all the enemies near friendly structures, 
+            // get enemy and it's nearbyallies, make that a group, get any other enemies not in it
 
             if (AttackData.Attacking)
             {
