@@ -15,13 +15,15 @@ namespace Sharky.MicroTasks
 
         IMicroController MicroController;
         ITargetingManager TargetingManager;
+        UnitManager UnitManager;
         MacroData MacroData;
         AttackData AttackData;
 
-        public AttackTask(IMicroController microController, ITargetingManager targetingManager, MacroData macroData, AttackData attackData, int priority)
+        public AttackTask(IMicroController microController, ITargetingManager targetingManager, UnitManager unitManager, MacroData macroData, AttackData attackData, int priority)
         {
             MicroController = microController;
             TargetingManager = targetingManager;
+            UnitManager = unitManager;
             MacroData = macroData;
             AttackData = attackData;
             Priority = priority;
@@ -70,14 +72,17 @@ namespace Sharky.MicroTasks
                 AttackData.Attacking = MacroData.FoodArmy >= AttackData.ArmyFoodAttack;
             }
 
-            // if there are enemies near base
-
-            // if armypoint is closer to enemies than it is to attackpoint
-            // send enough army there to win fight with winprobability > 2
-            // send the rest of the army to attack point, if not attacking send rest to defense too
-
-            // find all the enemies near friendly structures, 
-            // get enemy and it's nearbyallies, make that a group, get any other enemies not in it
+            var attackingEnemies = UnitManager.SelfUnits.Where(u => u.Value.UnitClassifications.Contains(UnitClassification.ResourceCenter) || u.Value.UnitClassifications.Contains(UnitClassification.ProductionStructure)).SelectMany(u => u.Value.NearbyEnemies).Distinct();
+            if (attackingEnemies.Count() > 0)
+            {
+                var armyPoint = new Vector2(AttackData.ArmyPoint.X, AttackData.ArmyPoint.Y);
+                var distanceToAttackPoint = Vector2.DistanceSquared(armyPoint, new Vector2(attackPoint.X, attackPoint.Y));
+                var closerEnemies = attackingEnemies.Where(e => Vector2.DistanceSquared(new Vector2(e.Unit.Pos.X, e.Unit.Pos.Y), armyPoint) < distanceToAttackPoint);
+                if (closerEnemies.Count() > 0)
+                {
+                    return SplitArmy(frame, closerEnemies, attackPoint);
+                }
+            }
 
             if (AttackData.Attacking)
             {
@@ -87,6 +92,108 @@ namespace Sharky.MicroTasks
             {
                 return MicroController.Retreat(UnitCommanders, TargetingManager.DefensePoint, AttackData.ArmyPoint, frame);
             }
+        }
+
+        IEnumerable<SC2APIProtocol.Action> SplitArmy(int frame, IEnumerable<UnitCalculation> closerEnemies, Point2D attackPoint)
+        {
+            var actions = new List<SC2APIProtocol.Action>();
+
+            var enemyGroups = GetEnemyGroups(closerEnemies);
+            var availableCommanders = UnitCommanders.ToList();
+            foreach (var enemyGroup in enemyGroups)
+            {
+                var selfGroup = GetDefenseGroup(enemyGroup, availableCommanders);
+                availableCommanders.RemoveAll(a => selfGroup.Any(s => a.UnitCalculation.Unit.Tag == s.UnitCalculation.Unit.Tag));
+
+                var groupVectors = selfGroup.Select(u => new Vector2(u.UnitCalculation.Unit.Pos.X, u.UnitCalculation.Unit.Pos.Y));
+                var groupPoint = new Point2D { X = groupVectors.Average(v => v.X), Y = groupVectors.Average(v => v.Y) };
+                actions.AddRange(MicroController.Attack(selfGroup, attackPoint, TargetingManager.DefensePoint, groupPoint, frame));
+            }
+
+            if (availableCommanders.Count() > 0)
+            {
+                var groupVectors = availableCommanders.Select(u => new Vector2(u.UnitCalculation.Unit.Pos.X, u.UnitCalculation.Unit.Pos.Y));
+                var groupPoint = new Point2D { X = groupVectors.Average(v => v.X), Y = groupVectors.Average(v => v.Y) };
+                if (AttackData.Attacking)
+                {
+                    actions.AddRange(MicroController.Attack(availableCommanders, attackPoint, TargetingManager.DefensePoint, groupPoint, frame));
+                }
+                else
+                {
+                    actions.AddRange(MicroController.Attack(availableCommanders, new Point2D { X = closerEnemies.FirstOrDefault().Unit.Pos.X, Y = closerEnemies.FirstOrDefault().Unit.Pos.Y }, TargetingManager.DefensePoint, groupPoint, frame));
+                }
+            }
+
+            return actions;
+        }
+
+        List<UnitCommander> GetDefenseGroup(List<UnitCalculation> enemyGroup, List<UnitCommander> unitCommanders)
+        {
+            var position = enemyGroup.FirstOrDefault().Unit.Pos;
+            var enemyGroupLocation = new Vector2(position.X, position.Y);
+
+            var enemyHealth = enemyGroup.Sum(e => e.SimulatedHitpoints);
+            var enemyDps = enemyGroup.Sum(e => e.SimulatedDamagePerSecond(new List<Attribute>(), true, true));
+            var enemyHps = enemyGroup.Sum(e => e.SimulatedHealPerSecond);
+            var enemyAttributes = enemyGroup.SelectMany(e => e.Attributes).Distinct();
+
+            var counterGroup = new List<UnitCommander>();
+
+            foreach (var commander in unitCommanders)
+            {
+                counterGroup.Add(commander);
+
+                var wwinnability = CalculateWinability(counterGroup, enemyAttributes, enemyHps, enemyHealth, enemyDps);
+                if (wwinnability > 2)
+                {
+                    return counterGroup;
+                }
+            }
+
+            return counterGroup;
+        }
+
+        float CalculateWinability(List<UnitCommander> counterGroup, IEnumerable<Attribute> enemyAttributes, float enemyHps, float enemyHealth, float enemyDps)
+        {
+            var allyHealth = counterGroup.Sum(c => c.UnitCalculation.SimulatedHitpoints);
+            var allyDps = counterGroup.Sum(c => c.UnitCalculation.SimulatedDamagePerSecond(enemyAttributes, true, true));
+            var allyHps = counterGroup.Sum(c => c.UnitCalculation.SimulatedHealPerSecond);
+
+            var secondsToKillEnemies = 600f;
+            if (allyDps - enemyHps > 0)
+            {
+                secondsToKillEnemies = enemyHealth / (allyDps - enemyHps);
+            }
+
+            var secondsToKillAllies = 600f;
+            if (enemyDps - allyHps > 0)
+            {
+                secondsToKillAllies = allyHealth / (enemyDps - allyHps);
+            }
+
+            return secondsToKillAllies / secondsToKillEnemies;
+        }
+
+        List<List<UnitCalculation>> GetEnemyGroups(IEnumerable<UnitCalculation> closerEnemies)
+        {
+            var enemyGroups = new List<List<UnitCalculation>>();
+            foreach (var enemy in closerEnemies)
+            {
+                if (!enemyGroups.Any(g => g.Any(e => e.Unit.Tag == enemy.Unit.Tag)))
+                {
+                    var group = new List<UnitCalculation>();
+                    group.Add(enemy);
+                    foreach (var nearbyEnemy in UnitManager.EnemyUnits[enemy.Unit.Tag].NearbyAllies)
+                    {
+                        if (!enemyGroups.Any(g => g.Any(e => e.Unit.Tag == nearbyEnemy.Unit.Tag)))
+                        {
+                            group.Add(nearbyEnemy);
+                        }
+                    }
+                    enemyGroups.Add(group);
+                }
+            }
+            return enemyGroups;
         }
     }
 }

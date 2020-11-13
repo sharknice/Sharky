@@ -134,7 +134,8 @@ namespace SharkyExampleBot
             var individualMicroController = new IndividualMicroController(mapDataService, unitDataManager, unitManager, debugManager, sharkyPathFinder, sharkyOptions, MicroPriority.LiveAndAttack, true);
             
             var miningTask = new MiningTask(unitDataManager, baseManager, unitManager, 1);
-            var attackTask = new AttackTask(new MicroController(individualMicroControllers, individualMicroController), targetingManager, macroData, attackData, 2);
+            var microController = new MicroController(individualMicroControllers, individualMicroController);
+            var attackTask = new AttackTask(microController, targetingManager, unitManager, macroData, attackData, 2);
 
             var microTasks = new Dictionary<string, IMicroTask>
             {
