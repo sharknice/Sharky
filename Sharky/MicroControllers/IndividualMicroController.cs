@@ -85,7 +85,7 @@ namespace Sharky.MicroControllers
             return null;
         }
 
-        protected bool Move(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, Formation formation, int frame, out SC2APIProtocol.Action action)
+        protected virtual bool Move(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, Formation formation, int frame, out SC2APIProtocol.Action action)
         {
             action = null;
             if (!commander.UnitCalculation.TargetPriorityCalculation.Overwhelm && MicroPriority != MicroPriority.AttackForward && (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.Retreat || commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.FullRetreat))
@@ -93,6 +93,15 @@ namespace Sharky.MicroControllers
                 if (Retreat(commander, target, defensivePoint, frame, out action)) { return true; }
             }
 
+            if (SpecialCaseMove(commander, target, defensivePoint, groupCenter, bestTarget, formation, frame, out action)) { return true; }
+
+            if (MoveAway(commander, target, defensivePoint, frame, out action)) { return true; }
+
+            return NavigateToTarget(commander, target, groupCenter, bestTarget, formation, frame, out action);
+        }
+
+        protected virtual bool SpecialCaseMove(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, Formation formation, int frame, out SC2APIProtocol.Action action)
+        {
             if (AvoidPurificationNovas(commander, target, defensivePoint, frame, out action)) { return true; }
 
             // TODO: special case movement
@@ -123,9 +132,7 @@ namespace Sharky.MicroControllers
             //    return true;
             //}
 
-            if (MoveAway(commander, target, defensivePoint, frame, out action)) { return true; }
-
-            return NavigateToTarget(commander, target, groupCenter, bestTarget, formation, frame, out action);
+            return false;
         }
 
         protected virtual bool NavigateToTarget(UnitCommander commander, Point2D target, Point2D groupCenter, UnitCalculation bestTarget, Formation formation, int frame, out SC2APIProtocol.Action action)
