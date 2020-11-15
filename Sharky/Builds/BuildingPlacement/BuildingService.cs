@@ -30,7 +30,7 @@ namespace Sharky.Builds.BuildingPlacement
 
         public bool Blocked(float x, float y, float radius)
         {
-            if (UnitManager.NeutralUnits.Any(u => Vector2.DistanceSquared(new Vector2(x, y), new Vector2(u.Value.Unit.Pos.X, u.Value.Unit.Pos.Y)) < (u.Value.Unit.Radius + radius) * (u.Value.Unit.Radius + radius)))
+            if (UnitManager.NeutralUnits.Any(u => Vector2.DistanceSquared(new Vector2(x, y), new Vector2(u.Value.Unit.Pos.X, u.Value.Unit.Pos.Y)) < (u.Value.Unit.Radius + .5 + radius) * (u.Value.Unit.Radius + .5 + radius)))
             {
                 return true;
             }

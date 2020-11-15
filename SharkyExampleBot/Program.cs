@@ -24,7 +24,7 @@ namespace SharkyExampleBot
             var myRace = Race.Protoss;
             if (args.Length == 0)
             {
-                gameConnection.RunSinglePlayer(sharkyBot, @"DeathAuraLE.SC2Map", myRace, Race.Zerg, Difficulty.VeryHard).Wait();
+                gameConnection.RunSinglePlayer(sharkyBot, @"AutomatonLE.SC2Map", myRace, Race.Zerg, Difficulty.VeryHard).Wait();
             }
             else
             {
@@ -91,11 +91,34 @@ namespace SharkyExampleBot
             var chatManager = new ChatManager(httpClient, chatHistory, sharkyOptions, chatDataService);
             managers.Add(chatManager);
 
+            var sharkyPathFinder = new SharkyPathFinder(new Roy_T.AStar.Paths.PathFinder(), mapData, mapDataService);
+            var sharkySimplePathFinder = new SharkySimplePathFinder(mapDataService);
+
+            var individualMicroControllers = new Dictionary<UnitTypes, IIndividualMicroController>();
+            var individualMicroController = new IndividualMicroController(mapDataService, unitDataManager, unitManager, debugManager, sharkyPathFinder, sharkyOptions, MicroPriority.LiveAndAttack, true);
+
+            var defenseService = new DefenseService(unitManager);
+            var microController = new MicroController(individualMicroControllers, individualMicroController);
+
+            var defenseSquadTask = new DefenseSquadTask(unitManager, targetingManager, defenseService, microController, new List<DesiredUnitsClaim>(), 0, false);
+            var miningTask = new MiningTask(unitDataManager, baseManager, unitManager, 1);          
+            var attackTask = new AttackTask(microController, targetingManager, unitManager, defenseService, macroData, attackData, 2);
+
+            var microTasks = new Dictionary<string, IMicroTask>
+            {
+                [defenseSquadTask.GetType().Name] = defenseSquadTask,
+                [miningTask.GetType().Name] = miningTask,
+                [attackTask.GetType().Name] = attackTask
+            };
+
+            var microManager = new MicroManager(unitManager, microTasks);
+            managers.Add(microManager);
+
             var antiMassMarine = new AntiMassMarine(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager);
             var fourGate = new FourGate(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager, unitDataManager);
             var nexusFirst = new NexusFirst(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager);
             var robo = new Robo(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager);
-            var protossRobo = new ProtossRobo(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager, sharkyOptions);
+            var protossRobo = new ProtossRobo(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager, sharkyOptions, microManager);
 
             var builds = new Dictionary<string, ISharkyBuild>
             {
@@ -126,25 +149,6 @@ namespace SharkyExampleBot
             var buildChoices = new BuildChoices { Builds = builds, BuildSequences = buildSequences };
             var buildManager = new BuildManager(macroManager, buildChoices, debugManager, macroBalancer);
             managers.Add(buildManager);
-
-            var sharkyPathFinder = new SharkyPathFinder(new Roy_T.AStar.Paths.PathFinder(), mapData, mapDataService);
-            var sharkySimplePathFinder = new SharkySimplePathFinder(mapDataService);
-
-            var individualMicroControllers = new Dictionary<UnitTypes, IIndividualMicroController>();
-            var individualMicroController = new IndividualMicroController(mapDataService, unitDataManager, unitManager, debugManager, sharkyPathFinder, sharkyOptions, MicroPriority.LiveAndAttack, true);
-            
-            var miningTask = new MiningTask(unitDataManager, baseManager, unitManager, 1);
-            var microController = new MicroController(individualMicroControllers, individualMicroController);
-            var attackTask = new AttackTask(microController, targetingManager, unitManager, macroData, attackData, 2);
-
-            var microTasks = new Dictionary<string, IMicroTask>
-            {
-                [miningTask.GetType().Name] = miningTask,
-                [attackTask.GetType().Name] = attackTask
-            };
-
-            var microManager = new MicroManager(unitManager, microTasks);
-            managers.Add(microManager);
 
             return new SharkyBot(managers, debugManager);
         }

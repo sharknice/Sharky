@@ -1,6 +1,7 @@
 ﻿using SC2APIProtocol;
 using Sharky.Managers;
 using Sharky.Managers.Protoss;
+using Sharky.MicroTasks;
 using System.Collections.Generic;
 
 namespace Sharky.Builds.Protoss
@@ -8,10 +9,12 @@ namespace Sharky.Builds.Protoss
     public class ProtossRobo : ProtossSharkyBuild
     {
         SharkyOptions SharkyOptions;
+        MicroManager MicroManager;
 
-        public ProtossRobo(BuildOptions buildOptions, MacroData macroData, UnitManager unitManager, AttackData attackData, IChatManager chatManager, NexusManager nexusManager, SharkyOptions sharkyOptions) : base(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager)
+        public ProtossRobo(BuildOptions buildOptions, MacroData macroData, UnitManager unitManager, AttackData attackData, IChatManager chatManager, NexusManager nexusManager, SharkyOptions sharkyOptions, MicroManager microManager) : base(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager)
         {
             SharkyOptions = sharkyOptions;
+            MicroManager = microManager;
         }
 
         public override void StartBuild(int frame)
@@ -40,6 +43,12 @@ namespace Sharky.Builds.Protoss
             //    var defenseTask = new DefenseSquadTask(MacroData.Main, UnitTypes.ADEPT)
             //}
             // TODO: EnemyRace
+            if (MicroManager.MicroTasks.ContainsKey("DefenseSquadTask"))
+            {
+                var defenseSquadTask = (DefenseSquadTask)MicroManager.MicroTasks["DefenseSquadTask"];
+                defenseSquadTask.DesiredUnitsClaims = new List<DesiredUnitsClaim> { new DesiredUnitsClaim(UnitTypes.PROTOSS_STALKER, 1) };
+                defenseSquadTask.Enable();
+            }
         }
 
         public override void OnFrame(ResponseObservation observation)

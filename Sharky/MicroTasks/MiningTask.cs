@@ -1,5 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.Managers;
+﻿using Sharky.Managers;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -11,7 +10,7 @@ namespace Sharky.MicroTasks
     public class MiningTask : IMicroTask
     {
         public List<UnitCommander> UnitCommanders { get; set; }
-        public int Priority { get; private set; }
+        public float Priority { get; private set; }
 
         UnitDataManager UnitDataManager;
         IBaseManager BaseManager;
