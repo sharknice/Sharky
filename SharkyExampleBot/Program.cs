@@ -7,6 +7,7 @@ using Sharky.Chat;
 using Sharky.Managers;
 using Sharky.Managers.Protoss;
 using Sharky.MicroControllers;
+using Sharky.MicroControllers.Protoss;
 using Sharky.MicroTasks;
 using Sharky.Pathing;
 using System.Collections.Generic;
@@ -24,7 +25,7 @@ namespace SharkyExampleBot
             var myRace = Race.Protoss;
             if (args.Length == 0)
             {
-                gameConnection.RunSinglePlayer(sharkyBot, @"AutomatonLE.SC2Map", myRace, Race.Protoss, Difficulty.VeryHard).Wait();
+                gameConnection.RunSinglePlayer(sharkyBot, @"AutomatonLE.SC2Map", myRace, Race.Terran, Difficulty.VeryHard).Wait();
             }
             else
             {
@@ -93,9 +94,14 @@ namespace SharkyExampleBot
 
             var sharkyPathFinder = new SharkyPathFinder(new Roy_T.AStar.Paths.PathFinder(), mapData, mapDataService);
             var sharkySimplePathFinder = new SharkySimplePathFinder(mapDataService);
-
-            var individualMicroControllers = new Dictionary<UnitTypes, IIndividualMicroController>();
+        
             var individualMicroController = new IndividualMicroController(mapDataService, unitDataManager, unitManager, debugManager, sharkyPathFinder, sharkyOptions, MicroPriority.LiveAndAttack, true);
+        
+            var zealotMicroController = new ZealotMicroController(mapDataService, unitDataManager, unitManager, debugManager, sharkyPathFinder, sharkyOptions, MicroPriority.AttackForward, true);
+            var sentryMicroController = new SentryMicroController(mapDataService, unitDataManager, unitManager, debugManager, sharkyPathFinder, sharkyOptions, MicroPriority.AttackForward, true);
+            var individualMicroControllers = new Dictionary<UnitTypes, IIndividualMicroController>();
+            individualMicroControllers.Add(UnitTypes.PROTOSS_ZEALOT, zealotMicroController);
+            individualMicroControllers.Add(UnitTypes.PROTOSS_SENTRY, sentryMicroController);
 
             var defenseService = new DefenseService(unitManager);
             var microController = new MicroController(individualMicroControllers, individualMicroController);

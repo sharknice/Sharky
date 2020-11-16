@@ -154,7 +154,6 @@ namespace Sharky.Builds
                 }
 
                 var trainingData = UnitDataManager.TrainingData[u];
-                //count += UnitManager.SelfUnits.Count(u => trainingData.ProducingUnits.Contains((UnitTypes)u.Value.Unit.UnitType) && u.Value.Unit.Orders.Any(o => o.AbilityId == (uint)trainingData.Ability));
                 if (u == UnitTypes.PROTOSS_WARPPRISM) { count += UnitManager.Count(UnitTypes.PROTOSS_WARPPRISMPHASING); }
 
                 var actualRatio = count / (double)currentTotal;

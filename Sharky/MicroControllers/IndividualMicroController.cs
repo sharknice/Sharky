@@ -58,7 +58,7 @@ namespace Sharky.MicroControllers
             var formation = GetDesiredFormation(commander);
             var bestTarget = GetBestTarget(commander, target);
 
-            if (OffensiveAbility(commander, target, defensivePoint, groupCenter, bestTarget, out action)) { return action; }
+            if (OffensiveAbility(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
 
             if (WeaponReady(commander))
             {
@@ -954,7 +954,7 @@ namespace Sharky.MicroControllers
             return commander.UnitCalculation.Unit.WeaponCooldown == 0;
         }
 
-        protected virtual bool OffensiveAbility(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, out SC2APIProtocol.Action action)
+        protected virtual bool OffensiveAbility(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out SC2APIProtocol.Action action)
         {
             action = null;
             return false;
