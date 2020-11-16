@@ -24,7 +24,7 @@ namespace SharkyExampleBot
             var myRace = Race.Protoss;
             if (args.Length == 0)
             {
-                gameConnection.RunSinglePlayer(sharkyBot, @"AutomatonLE.SC2Map", myRace, Race.Zerg, Difficulty.VeryHard).Wait();
+                gameConnection.RunSinglePlayer(sharkyBot, @"AutomatonLE.SC2Map", myRace, Race.Protoss, Difficulty.VeryHard).Wait();
             }
             else
             {

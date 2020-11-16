@@ -133,6 +133,7 @@ namespace Sharky.Managers
             TrainingData.Add(UnitTypes.PROTOSS_VOIDRAY, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_STARGATE }, Minerals = 200, Gas = 150, Food = 4, Ability = Abilities.TRAIN_VOIDRAY });
             TrainingData.Add(UnitTypes.PROTOSS_TEMPEST, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_STARGATE }, Minerals = 250, Gas = 175, Food = 5, Ability = Abilities.TRAIN_TEMPEST });
             TrainingData.Add(UnitTypes.PROTOSS_CARRIER, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_STARGATE }, Minerals = 350, Gas = 250, Food = 6, Ability = Abilities.TRAIN_CARRIER });
+            TrainingData.Add(UnitTypes.PROTOSS_ARCHON, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_HIGHTEMPLAR, UnitTypes.PROTOSS_DARKTEMPLAR }, Minerals = 0, Gas = 0, Food = 0, Ability = Abilities.MORPH_ARCHON });
 
             UpgradeData = new Dictionary<Upgrades, TrainingTypeData>();
             UpgradeData.Add(Upgrades.WARPGATERESEARCH, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_CYBERNETICSCORE }, Minerals = 50, Gas = 50, Ability = Abilities.RESEARCH_WARPGATE });

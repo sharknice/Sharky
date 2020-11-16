@@ -491,6 +491,7 @@ namespace Sharky.MicroControllers
             {
                 var fakeMainBase = new Unit(commander.UnitCalculation.Unit);
                 fakeMainBase.Pos = new Point { X = target.X, Y = target.Y, Z = 1 };
+                fakeMainBase.Alliance = Alliance.Enemy;
                 return new UnitCalculation(fakeMainBase, fakeMainBase, 0, UnitDataManager, SharkyOptions);
             }
             var unitsNearEnemyMain = UnitManager.EnemyUnits.Values.Where(e => InRange(target, e.Unit.Pos, 20));
@@ -1076,6 +1077,8 @@ namespace Sharky.MicroControllers
 
         protected virtual bool GroundAttackersFilter(UnitCommander commander, UnitCalculation enemyAttack)
         {
+            return true;
+            // TODO: make this faster, it slows the game down substantially
             var count = enemyAttack.Attackers.Count(c => c.Unit.UnitType == commander.UnitCalculation.Unit.UnitType);
 
             if (commander.UnitCalculation.Unit.Orders.Any(o => o.TargetUnitTag == enemyAttack.Unit.Tag) && commander.UnitCalculation.EnemiesInRange.Any(e => e.Unit.Tag == enemyAttack.Unit.Tag))
@@ -1088,6 +1091,8 @@ namespace Sharky.MicroControllers
 
         protected virtual bool AirAttackersFilter(UnitCommander commander, UnitCalculation enemyAttack)
         {
+            return true;
+            // TODO: make this faster, it slows the game down substantially
             var count = enemyAttack.Attackers.Count(c => c.Unit.UnitType == commander.UnitCalculation.Unit.UnitType);
 
             if (commander.UnitCalculation.Unit.Orders.Any(o => o.TargetUnitTag == enemyAttack.Unit.Tag) && commander.UnitCalculation.EnemiesInRange.Any(e => e.Unit.Tag == enemyAttack.Unit.Tag))

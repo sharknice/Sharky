@@ -184,6 +184,12 @@ namespace Sharky.Managers
             return SelfUnits.Count(u => u.Value.Unit.UnitType == (uint)unitType);
         }
 
+        public int UnitsInProgressCount(UnitTypes unitType)
+        {
+            var unitData = UnitDataManager.TrainingData[unitType];
+            return SelfUnits.Count(u => unitData.ProducingUnits.Contains((UnitTypes)u.Value.Unit.UnitType) && u.Value.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
+        }
+
         public int EquivalentTypeCount(UnitTypes unitType)
         {
             var count = Count(unitType);
