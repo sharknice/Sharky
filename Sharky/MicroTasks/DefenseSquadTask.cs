@@ -82,6 +82,7 @@ namespace Sharky.MicroTasks
                 {
                     return SplitDefenders(frame, attackingEnemies);
                 }
+                return MicroController.Retreat(UnitCommanders, TargetingManager.DefensePoint, TargetingManager.DefensePoint, frame);
             }
 
             return new List<SC2APIProtocol.Action>();

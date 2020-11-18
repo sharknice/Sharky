@@ -94,14 +94,19 @@ namespace SharkyExampleBot
 
             var sharkyPathFinder = new SharkyPathFinder(new Roy_T.AStar.Paths.PathFinder(), mapData, mapDataService);
             var sharkySimplePathFinder = new SharkySimplePathFinder(mapDataService);
+            var noPathFinder = new SharkyNoPathFinder();
+
+            var individualMicroController = new IndividualMicroController(mapDataService, unitDataManager, unitManager, debugManager, noPathFinder, sharkyOptions, MicroPriority.LiveAndAttack, true);
         
-            var individualMicroController = new IndividualMicroController(mapDataService, unitDataManager, unitManager, debugManager, sharkyPathFinder, sharkyOptions, MicroPriority.LiveAndAttack, true);
-        
-            var zealotMicroController = new ZealotMicroController(mapDataService, unitDataManager, unitManager, debugManager, sharkyPathFinder, sharkyOptions, MicroPriority.AttackForward, true);
-            var sentryMicroController = new SentryMicroController(mapDataService, unitDataManager, unitManager, debugManager, sharkyPathFinder, sharkyOptions, MicroPriority.AttackForward, true);
-            var individualMicroControllers = new Dictionary<UnitTypes, IIndividualMicroController>();
-            individualMicroControllers.Add(UnitTypes.PROTOSS_ZEALOT, zealotMicroController);
-            individualMicroControllers.Add(UnitTypes.PROTOSS_SENTRY, sentryMicroController);
+            var zealotMicroController = new ZealotMicroController(mapDataService, unitDataManager, unitManager, debugManager, noPathFinder, sharkyOptions, MicroPriority.AttackForward, true);
+            var sentryMicroController = new SentryMicroController(mapDataService, unitDataManager, unitManager, debugManager, noPathFinder, sharkyOptions, MicroPriority.StayOutOfRange, true);
+            var observerMicroController = new IndividualMicroController(mapDataService, unitDataManager, unitManager, debugManager, noPathFinder, sharkyOptions, MicroPriority.StayOutOfRange, true);
+            var individualMicroControllers = new Dictionary<UnitTypes, IIndividualMicroController>
+            {
+                { UnitTypes.PROTOSS_ZEALOT, zealotMicroController },
+                { UnitTypes.PROTOSS_SENTRY, sentryMicroController },
+                { UnitTypes.PROTOSS_OBSERVER, observerMicroController }
+            };
 
             var defenseService = new DefenseService(unitManager);
             var microController = new MicroController(individualMicroControllers, individualMicroController);

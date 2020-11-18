@@ -20,6 +20,11 @@ namespace Sharky.MicroControllers.Protoss
                 return true;
             }
 
+            if (Hallucinate(commander, frame, out action))
+            {
+                return true;
+            }
+
             return false;
         }
 
@@ -39,6 +44,20 @@ namespace Sharky.MicroControllers.Protoss
             return false;
         }
 
-        // TODO: hallucinate archons if near enemies without detection
+        bool Hallucinate(UnitCommander commander, int frame, out SC2APIProtocol.Action action)
+        {
+            action = null;
+            if (commander.UnitCalculation.Unit.Energy < 75)
+            {
+                return false;
+            }
+
+            if (commander.UnitCalculation.NearbyEnemies.Count(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit)) > 3 && !commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Detector)))
+            {
+                action = commander.Order(frame, Abilities.HALLUCINATION_ARCHON);
+                return true;
+            }
+            return false;
+        }
     }
 }

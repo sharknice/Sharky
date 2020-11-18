@@ -157,7 +157,7 @@ namespace Sharky.Managers
                     }
                 }
 
-                selfUnit.Value.Attackers = GetTargettedAttacks(selfUnit.Value).ToList();
+                selfUnit.Value.Attackers = new List<UnitCalculation>(); //GetTargettedAttacks(selfUnit.Value).ToList();
             }
 
             return new List<SC2APIProtocol.Action>();
@@ -168,7 +168,7 @@ namespace Sharky.Managers
             var attacks = new ConcurrentBag<UnitCalculation>();
             var center = new Vector2(unitCalculation.Unit.Pos.X, unitCalculation.Unit.Pos.Y);
 
-            Parallel.ForEach(unitCalculation.NearbyEnemies, (enemyAttack) =>
+            Parallel.ForEach(unitCalculation.EnemiesInRangeOf, (enemyAttack) =>
             {
                 if (CanDamage(enemyAttack.Weapons, unitCalculation.Unit) && CollisionCalculator.Collides(center, unitCalculation.Unit.Radius, enemyAttack.Start, enemyAttack.End))
                 {
