@@ -1,5 +1,9 @@
 ﻿using SC2APIProtocol;
 using Sharky.Builds;
+using Sharky.Builds.BuildChoosing;
+using Sharky.Chat;
+using Sharky.EnemyPlayer;
+using Sharky.EnemyStrategies;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +15,8 @@ namespace Sharky.Managers
         DebugManager DebugManager;
         MacroManager Macro;
         BuildChoices BuildChoices;
+        IBuildDecisionService BuildDecisionService;
+        IEnemyPlayerService EnemyPlayerService;
 
         IMacroBalancer MacroBalancer;
         ISharkyBuild CurrentBuild;
@@ -19,13 +25,22 @@ namespace Sharky.Managers
         Dictionary<int, string> BuildHistory { get; set; }
 
         Race ActualRace;
+        Race EnemyRace;
+        string MapName;
+        EnemyPlayer.EnemyPlayer EnemyPlayer;
+        ChatHistory ChatHistory;
+        EnemyStrategyHistory EnemyStrategyHistory;
 
-        public BuildManager(MacroManager macro, BuildChoices buildChoices, DebugManager debugManager, IMacroBalancer macroBalancer)
+        public BuildManager(MacroManager macro, BuildChoices buildChoices, DebugManager debugManager, IMacroBalancer macroBalancer, IBuildDecisionService buildDecisionService, IEnemyPlayerService enemyPlayerService, ChatHistory chatHistory, EnemyStrategyHistory enemyStrategyHistory)
         {
             Macro = macro;
             BuildChoices = buildChoices;
             DebugManager = debugManager;
             MacroBalancer = macroBalancer;
+            BuildDecisionService = buildDecisionService;
+            EnemyPlayerService = enemyPlayerService;
+            ChatHistory = chatHistory;
+            EnemyStrategyHistory = enemyStrategyHistory;
         }
 
         public override void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)
@@ -36,17 +51,31 @@ namespace Sharky.Managers
                 {
                     ActualRace = playerInfo.RaceActual;
                 }
+                else
+                {
+                    EnemyRace = playerInfo.RaceRequested;
+                }
             }
 
-            var enemyRace = Race.Zerg;
-            var enemyName = "test";
-            var buildSequences = BuildChoices.BuildSequences[enemyRace.ToString()];
-            if (!string.IsNullOrWhiteSpace(enemyName) && BuildChoices.BuildSequences.ContainsKey(enemyName))
+            EnemyPlayer = EnemyPlayerService.Enemies.FirstOrDefault(e => e.Id == opponentId);
+            if (opponentId == "test")
             {
-                buildSequences = BuildChoices.BuildSequences[enemyName];
+                EnemyPlayer = new EnemyPlayer.EnemyPlayer { ChatMatches = new List<string>(), Games = new List<Game>(), Id = opponentId, Name = "test" };
+            }
+            if (EnemyPlayer == null)
+            {
+                EnemyPlayer = new EnemyPlayer.EnemyPlayer { ChatMatches = new List<string>(), Games = new List<Game>(), Id = opponentId, Name = string.Empty };
             }
 
-            BuildSequence = buildSequences.First(); //BuildDecisionManager.GetBestBuild(enemyBot, buildSequences, gameInfo.MapName, EnemyBotManager.Enemies, EnemyRace, ChatManager);
+
+            var buildSequences = BuildChoices.BuildSequences[EnemyRace.ToString()];
+            if (!string.IsNullOrWhiteSpace(EnemyPlayer.Name) && BuildChoices.BuildSequences.ContainsKey(EnemyPlayer.Name))
+            {
+                buildSequences = BuildChoices.BuildSequences[EnemyPlayer.Name];
+            }
+
+            MapName = gameInfo.MapName;
+            BuildSequence = BuildDecisionService.GetBestBuild(EnemyPlayer, buildSequences, MapName, EnemyPlayerService.Enemies, EnemyRace);
 
             BuildHistory = new Dictionary<int, string>();
             SwitchBuild(BuildSequence.First(), 0);
@@ -86,6 +115,12 @@ namespace Sharky.Managers
             MacroBalancer.BalanceGasWorkers();
 
             return new List<SC2APIProtocol.Action>();
+        }
+
+        public override void OnEnd(ResponseObservation observation, Result result)
+        {
+            var game = new Game { DateTime = DateTime.Now, EnemyRace = EnemyRace, Length = (int)observation.Observation.GameLoop, MapName = MapName, Result = (int)result, EnemyId = EnemyPlayer.Id, Builds = BuildHistory, EnemyStrategies = EnemyStrategyHistory.History, EnemyChat = ChatHistory.EnemyChatHistory, MyChat = ChatHistory.MyChatHistory };
+            EnemyPlayerService.SaveGame(game);
         }
 
         void SwitchBuild(string buildName, int frame)

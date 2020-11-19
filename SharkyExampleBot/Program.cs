@@ -1,9 +1,11 @@
 ﻿using SC2APIProtocol;
 using Sharky;
 using Sharky.Builds;
+using Sharky.Builds.BuildChoosing;
 using Sharky.Builds.BuildingPlacement;
 using Sharky.Builds.Protoss;
 using Sharky.Chat;
+using Sharky.EnemyPlayer;
 using Sharky.EnemyStrategies;
 using Sharky.EnemyStrategies.Protoss;
 using Sharky.EnemyStrategies.Terran;
@@ -93,7 +95,9 @@ namespace SharkyExampleBot
             var httpClient = new HttpClient();
             var chatHistory = new ChatHistory();
             var chatDataService = new ChatDataService();
-            var chatManager = new ChatManager(httpClient, chatHistory, sharkyOptions, chatDataService);
+            var enemyNameService = new EnemyNameService();
+            var enemyPlayerService = new EnemyPlayerService(enemyNameService);
+            var chatManager = new ChatManager(httpClient, chatHistory, sharkyOptions, chatDataService, enemyPlayerService, enemyNameService);
             managers.Add(chatManager);
 
             var sharkyPathFinder = new SharkyPathFinder(new Roy_T.AStar.Paths.PathFinder(), mapData, mapDataService);
@@ -178,7 +182,8 @@ namespace SharkyExampleBot
 
             var macroBalancer = new MacroBalancer(buildOptions, unitManager, macroData, unitDataManager);
             var buildChoices = new BuildChoices { Builds = builds, BuildSequences = buildSequences };
-            var buildManager = new BuildManager(macroManager, buildChoices, debugManager, macroBalancer);
+            var buildDecisionService = new BuildDecisionService(chatManager);
+            var buildManager = new BuildManager(macroManager, buildChoices, debugManager, macroBalancer, buildDecisionService, enemyPlayerService, chatHistory, enemyStrategyHistory);
             managers.Add(buildManager);
 
             return new SharkyBot(managers, debugManager);

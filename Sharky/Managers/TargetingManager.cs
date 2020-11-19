@@ -87,7 +87,7 @@ namespace Sharky.Managers
             // TODO: if we have vision of AttackPoint find a new AttackPoint, choose a random base location
             if (MapDataService.SelfVisible(AttackPoint))
             {
-                var bases = BaseManager.BaseLocations.Where(b => MapDataService.SelfVisible(b.Location));
+                var bases = BaseManager.BaseLocations.Where(b => !MapDataService.SelfVisible(b.Location));
                 if (bases.Count() == 0)
                 {
                     // TODO: find a random spot on the map and check there

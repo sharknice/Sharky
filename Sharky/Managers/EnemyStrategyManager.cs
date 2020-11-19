@@ -6,7 +6,7 @@ namespace Sharky.Managers
 {
     public class EnemyStrategyManager : SharkyManager
     {
-        List<IEnemyStrategy> EnemyStrategies;
+        public List<IEnemyStrategy> EnemyStrategies { get; private set; }
 
         public EnemyStrategyManager(List<IEnemyStrategy> enemyStrategies)
         {

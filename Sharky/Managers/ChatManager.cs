@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using SC2APIProtocol;
 using Sharky.Chat;
+using Sharky.EnemyPlayer;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +20,8 @@ namespace Sharky.Managers
         ChatHistory ChatHistory;
         SharkyOptions SharkyOptions;
         IChatDataService ChatDataService;
+        IEnemyPlayerService EnemyPlayerManager;
+        IEnemyNameService EnemyNameService;
 
         List<Action> ChatActions;
 
@@ -37,19 +40,14 @@ namespace Sharky.Managers
 
         bool ApiEnabled;
 
-        // TODO: load multiple json files for chat messages
-
-        // TODO: special chats, ex: greetings, greetings specific to enemies, build specific cheese chat and generic cheese chat, if it exists use it, otherwise don't say anything, first check build specific cheese chat, if nothing, use generic cheese chat
-        // dictionary, key is the type, value is responses list of list of strings for multiple line replies
-
-        // general chat response files
-        // triggers, responses list of list of strings for multiple line replies, type, frequency
-        public ChatManager(HttpClient httpClient, ChatHistory chatHistory, SharkyOptions sharkyOptions, IChatDataService chatDataService)
+        public ChatManager(HttpClient httpClient, ChatHistory chatHistory, SharkyOptions sharkyOptions, IChatDataService chatDataService, IEnemyPlayerService enemyPlayerManager, IEnemyNameService enemyNameService)
         {
             HttpClient = httpClient;
             ChatHistory = chatHistory;
             SharkyOptions = sharkyOptions;
             ChatDataService = chatDataService;
+            EnemyPlayerManager = enemyPlayerManager;
+            EnemyNameService = enemyNameService;
 
             ApiEnabled = false;
             
@@ -76,7 +74,7 @@ namespace Sharky.Managers
 
             ConversationName = $"starcraft-{Enemy.PlayerId}-{DateTimeOffset.Now.ToUnixTimeMilliseconds()}";
 
-            EnemyName = string.Empty; // TODO: enemy name manager EnemyNameManager.GetEnemyNameFromId(opponentId, EnemyBotManager.Enemies);
+            EnemyName = EnemyNameService.GetEnemyNameFromId(opponentId, EnemyPlayerManager.Enemies);
 
             ChatHistory.EnemyChatHistory = new Dictionary<int, string>();
             ChatHistory.MyChatHistory = new Dictionary<int, string>();
@@ -189,7 +187,7 @@ namespace Sharky.Managers
                     ChatHistory.EnemyChatHistory[frame] = chatReceived.Message;
                     if (string.IsNullOrEmpty(EnemyName))
                     {
-                        //EnemyName = EnemyNameManager.GetNameFromChat(chat.message, EnemyBotManager.Enemies); // TODO: get enemy name
+                        EnemyName = EnemyNameService.GetNameFromChat(chat.message, EnemyPlayerManager.Enemies);
                     }
                     GetChatResponseAsync(chat, frame);
                 }
