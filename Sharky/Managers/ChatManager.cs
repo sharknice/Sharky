@@ -244,7 +244,7 @@ namespace Sharky.Managers
                         chatData.LastResponseFrame = frame;
                         LastResponseTimes[chatData.Type] = frame;
                         var message = ChatDataService.GetChatMessage(chatData, matchData, EnemyName);
-                        SendChatMessage(message);
+                        SendChatMessages(message);
                         return true;
                     }
                 }

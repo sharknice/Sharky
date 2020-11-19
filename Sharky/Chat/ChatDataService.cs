@@ -99,16 +99,19 @@ namespace Sharky.Chat
             return null;
         }
 
-        public string GetChatMessage(ChatData chatData, Match matchData, string enemyName)
+        public List<string> GetChatMessage(ChatData chatData, Match matchData, string enemyName)
         {
-            var response = chatData.Responses[Random.Next(chatData.Responses.Count)];
+            var responses = chatData.Responses[Random.Next(chatData.Responses.Count)];
             var name = enemyName;
             if (string.IsNullOrEmpty(name))
             {
                 name = "opponent";
             }
-            response = response.Replace("{0}", name).Replace("{match}", matchData.Groups[1].Value);
-            return response;
+            for (var index = 0; index < responses.Count; index++)
+            {
+                responses[index] = responses[index].Replace("{name}", name).Replace("{match}", matchData.Groups[1].Value);
+            }
+            return responses;
         }
     }
 }

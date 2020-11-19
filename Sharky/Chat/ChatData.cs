@@ -21,7 +21,7 @@ namespace Sharky.Chat
         public List<string> Triggers { get; set; }
 
         [JsonProperty("responses")]
-        public List<string> Responses { get; set; }
+        public List<List<string>> Responses { get; set; }
 
         [JsonProperty("type")]
         public TypeEnum Type { get; set; }

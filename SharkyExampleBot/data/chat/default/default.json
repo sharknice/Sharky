@@ -1,0 +1,39 @@
+[
+  {
+    "triggers": [ " gg ", "good game" ],
+    "responses": [
+      [ "gg" ],
+      [ "gg {name}" ],
+      [ "good game" ],
+      [ "good game {name}" ],
+      [ "good", "game" ]
+    ],
+    "type": "goodGame",
+    "frequency": 600
+  },
+  {
+    "triggers": [ "thank", "thx", " ty " ],
+    "responses": [
+      [ "You're welcome {name}." ],
+      [ "You're welcome." ],
+      [ "you're welcome" ],
+      [ "you're welcome {name}" ],
+      [ "np" ],
+      [ ";)" ]
+    ],
+    "type": "chat",
+    "frequency": 30
+  },
+  {
+    "triggers": [ "how are you" ],
+    "responses": [
+      [ "good" ],
+      [ "good, you?" ],
+      [ "good", "you?" ],
+      [ "fine" ],
+      [ "great now that you're here ;)" ]
+    ],
+    "type": "chat",
+    "frequency": 30
+  }
+]

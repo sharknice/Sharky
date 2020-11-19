@@ -11,6 +11,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="data\chat\default\default.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="data\chat\type\attacks.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

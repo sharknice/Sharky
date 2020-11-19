@@ -7,7 +7,7 @@ namespace Sharky.Chat
     {
         List<ChatData> DefaultChataData { get; }
         List<string> GetChatTypeMessage(ChatTypeData chatTypeData, string enemyName);
-        public ChatTypeData GetChatTypeData(string chatType);
-        public string GetChatMessage(ChatData chatData, Match matchData, string enemyName);
+        ChatTypeData GetChatTypeData(string chatType);
+        List<string> GetChatMessage(ChatData chatData, Match matchData, string enemyName);
     }
 }
