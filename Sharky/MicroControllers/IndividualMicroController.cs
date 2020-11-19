@@ -595,7 +595,7 @@ namespace Sharky.MicroControllers
 
                 if (attack)
                 {
-                    DebugManager.DrawSphere(new Point { X = groupCenter.X, Y = groupCenter.Y, Z = 10 });
+                    //DebugManager.DrawSphere(new Point { X = groupCenter.X, Y = groupCenter.Y, Z = 10 });
                     action = commander.Order(frame, Abilities.ATTACK, groupCenter);
                 }
                 else

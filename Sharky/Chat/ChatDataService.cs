@@ -73,7 +73,10 @@ namespace Sharky.Chat
             {
                 name = "opponent";
             }
-            responses.ForEach(r => r.Replace("{name}", name));
+            for (var index = 0; index < responses.Count; index++)
+            {
+                responses[index] = responses[index].Replace("{name}", name);
+            }
             return responses;
         }
 

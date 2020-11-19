@@ -4,6 +4,10 @@ using Sharky.Builds;
 using Sharky.Builds.BuildingPlacement;
 using Sharky.Builds.Protoss;
 using Sharky.Chat;
+using Sharky.EnemyStrategies;
+using Sharky.EnemyStrategies.Protoss;
+using Sharky.EnemyStrategies.Terran;
+using Sharky.EnemyStrategies.Zerg;
 using Sharky.Managers;
 using Sharky.Managers.Protoss;
 using Sharky.MicroControllers;
@@ -112,18 +116,34 @@ namespace SharkyExampleBot
             var microController = new MicroController(individualMicroControllers, individualMicroController);
 
             var defenseSquadTask = new DefenseSquadTask(unitManager, targetingManager, defenseService, microController, new List<DesiredUnitsClaim>(), 0, false);
+            var workerScoutTask = new WorkerScoutTask(unitDataManager, targetingManager, mapDataService, true, 0.5f);
             var miningTask = new MiningTask(unitDataManager, baseManager, unitManager, 1);          
             var attackTask = new AttackTask(microController, targetingManager, unitManager, defenseService, macroData, attackData, 2);
 
             var microTasks = new Dictionary<string, IMicroTask>
             {
                 [defenseSquadTask.GetType().Name] = defenseSquadTask,
+                [workerScoutTask.GetType().Name] = workerScoutTask,
                 [miningTask.GetType().Name] = miningTask,
                 [attackTask.GetType().Name] = attackTask
             };
 
             var microManager = new MicroManager(unitManager, microTasks);
             managers.Add(microManager);
+
+            var enemyStrategyHistory = new EnemyStrategyHistory();
+            var enemyStrategies = new List<IEnemyStrategy>
+            {
+                new Proxy(enemyStrategyHistory, chatManager, unitManager, sharkyOptions, targetingManager),
+                new WorkerRush(enemyStrategyHistory, chatManager, unitManager, sharkyOptions, targetingManager),
+                new AdeptRush(enemyStrategyHistory, chatManager, unitManager, sharkyOptions),
+                new MarineRush(enemyStrategyHistory, chatManager, unitManager, sharkyOptions),
+                new MassVikings(enemyStrategyHistory, chatManager, unitManager, sharkyOptions),
+                new ZerglingRush(enemyStrategyHistory, chatManager, unitManager, sharkyOptions)
+            };
+
+            var enemyStrategyManager = new EnemyStrategyManager(enemyStrategies);
+            managers.Add(enemyStrategyManager);
 
             var antiMassMarine = new AntiMassMarine(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager);
             var fourGate = new FourGate(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager, unitDataManager);

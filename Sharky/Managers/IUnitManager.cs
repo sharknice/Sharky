@@ -9,6 +9,7 @@ namespace Sharky.Managers
         ConcurrentDictionary<ulong, UnitCalculation> SelfUnits { get; }
         ConcurrentDictionary<ulong, UnitCalculation> NeutralUnits { get; }
         int Count(UnitTypes unitType);
+        int EnemyCount(UnitTypes unitType);
         int Completed(UnitTypes unitType);
     }
 }

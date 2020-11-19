@@ -11,11 +11,15 @@ namespace Sharky.Managers
     {
         public Point2D AttackPoint { get; private set; }
         public Point2D DefensePoint { get; private set; }
+        public Point2D SelfMainBasePoint { get; private set; }
+        public Point2D EnemyMainBasePoint { get; private set; }
 
         UnitManager UnitManager;
         UnitDataManager UnitDataManager;
         MapDataService MapDataService;
         IBaseManager BaseManager;
+
+        int baseCount;
 
         public TargetingManager(UnitManager unitManager, UnitDataManager unitDataManager, MapDataService mapDataService, IBaseManager baseManager)
         {
@@ -23,6 +27,8 @@ namespace Sharky.Managers
             UnitDataManager = unitDataManager;
             MapDataService = mapDataService;
             BaseManager = baseManager;
+
+            baseCount = 0;
         }
 
         public void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)
@@ -30,10 +36,12 @@ namespace Sharky.Managers
             foreach (var location in gameInfo.StartRaw.StartLocations)
             {
                 AttackPoint = location;
+                EnemyMainBasePoint = location;
             }
             foreach (var unit in observation.Observation.RawData.Units.Where(u => u.Alliance == Alliance.Self && UnitDataManager.UnitData[(UnitTypes)u.UnitType].Attributes.Contains(SC2APIProtocol.Attribute.Structure)))
             {
                 DefensePoint = new Point2D { X = unit.Pos.X, Y = unit.Pos.Y };
+                SelfMainBasePoint = new Point2D { X = unit.Pos.X, Y = unit.Pos.Y };
                 return;
             }
         }
@@ -44,7 +52,28 @@ namespace Sharky.Managers
 
         public IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
         {
+            UpdateDefensePoint();
+
             return new List<SC2APIProtocol.Action>();
+        }
+
+        void UpdateDefensePoint()
+        {
+            if (baseCount != BaseManager.SelfBases.Count())
+            {
+                var ordered = BaseManager.SelfBases.OrderBy(b => Vector2.DistanceSquared(new Vector2(b.Location.X, b.Location.Y), new Vector2(AttackPoint.X, AttackPoint.Y)));
+                var closestBase = ordered.FirstOrDefault();
+                if (closestBase != null)
+                {
+                    DefensePoint = closestBase.Location;
+                }
+                var farthestBase = ordered.LastOrDefault();
+                if (farthestBase != null)
+                {
+                    SelfMainBasePoint = farthestBase.Location;
+                }
+                baseCount = BaseManager.SelfBases.Count();
+            }
         }
 
         public Point2D GetAttackPoint(Point2D armyPoint)

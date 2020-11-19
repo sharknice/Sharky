@@ -26,7 +26,7 @@ namespace Sharky.Builds
         {
             if (unitData.Minerals <= macroData.Minerals && unitData.Gas <= macroData.VespeneGas)
             {
-                var location = GetReferenceLocation(TargetingManager.DefensePoint);
+                var location = GetReferenceLocation(TargetingManager.SelfMainBasePoint);
                 var placementLocation = BuildingPlacement.FindPlacement(location, unitType, unitData.Size);
                 
                 if (placementLocation != null)

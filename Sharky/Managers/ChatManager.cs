@@ -89,15 +89,7 @@ namespace Sharky.Managers
 
             if (!GreetingSent && observation.Observation.GameLoop > 20)
             {
-                if (string.IsNullOrEmpty(EnemyName))
-                {
-                    SendChatMessage($"gl hf much love!");
-                }
-                else
-                {
-                    SendChatMessage($"gl hf much love {EnemyName}!");
-                }
-
+                SendChatType($"{EnemyName}-Greeting");
                 GreetingSent = true;
             }
 

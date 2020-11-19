@@ -1,0 +1,26 @@
+[
+  {
+    "ChatType": "EnemyStrategy",
+    "Messages": [
+      [ "Oh", "That's interesting" ],
+      [ "hmmm" ],
+      [ "I see that" ]
+    ]
+  },
+  {
+    "ChatType": "Proxy-EnemyStrategy",
+    "Messages": [
+      [ "Uh", "why is your building over here?" ],
+      [ "This isn't your base {name}" ],
+      [ "What is that" ]
+    ]
+  },
+  {
+    "ChatType": "MarineRush-EnemyStrategy",
+    "Messages": [
+      [ "So", "many", "marines" ],
+      [ "That's a lot of marines" ]
+    ]
+  }
+
+]

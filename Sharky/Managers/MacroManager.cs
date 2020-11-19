@@ -190,7 +190,7 @@ namespace Sharky.Managers
                 var openGeysers = BaseManager.BaseLocations.SelectMany(b => b.VespeneGeysers).Where(g => g.VespeneContents > 0 && !takenGases.Any(t => t.Value.Unit.Pos.X == g.Pos.X && t.Value.Unit.Pos.Y == g.Pos.Y));
                 if (openGeysers.Count() > 0)
                 {
-                    var baseLocation = BuildingBuilder.GetReferenceLocation(TargetingManager.DefensePoint);
+                    var baseLocation = BuildingBuilder.GetReferenceLocation(TargetingManager.SelfMainBasePoint);
                     var closestGyeser = openGeysers.OrderBy(o => Vector2.DistanceSquared(new Vector2(baseLocation.X, baseLocation.Y), new Vector2(o.Pos.X, o.Pos.Y))).FirstOrDefault();
                     if (closestGyeser != null)
                     {
