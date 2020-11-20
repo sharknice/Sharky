@@ -109,7 +109,7 @@ namespace Sharky.Builds.Protoss
             }
         }
 
-        public override bool Transition()
+        public override bool Transition(int frame)
         {
             return MacroData.FoodUsed > 50 && UnitManager.Count(UnitTypes.PROTOSS_NEXUS) > 1;
         }

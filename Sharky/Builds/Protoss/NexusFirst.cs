@@ -7,8 +7,11 @@ namespace Sharky.Builds.Protoss
 {
     public class NexusFirst : ProtossSharkyBuild
     {
-        public NexusFirst(BuildOptions buildOptions, MacroData macroData, UnitManager unitManager, AttackData attackData, IChatManager chatManager, NexusManager nexusManager) : base(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager)
+        ProtossCounterTransitioner ProtossCounterTransitioner;
+
+        public NexusFirst(BuildOptions buildOptions, MacroData macroData, UnitManager unitManager, AttackData attackData, IChatManager chatManager, NexusManager nexusManager, ProtossCounterTransitioner protossCounterTransitioner) : base(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager)
         {
+            ProtossCounterTransitioner = protossCounterTransitioner;
         }
 
         public override void StartBuild(int frame)
@@ -70,9 +73,14 @@ namespace Sharky.Builds.Protoss
             }
         }
 
-        public override bool Transition()
+        public override bool Transition(int frame)
         {
             return UnitManager.Count(UnitTypes.PROTOSS_NEXUS) > 1 && UnitManager.Count(UnitTypes.PROTOSS_CYBERNETICSCORE) > 0;
+        }
+
+        public override List<string> CounterTransition(int frame)
+        {
+            return ProtossCounterTransitioner.DefaultCounterTransition(frame);
         }
     }
 }

@@ -6,14 +6,11 @@ using System.Linq;
 
 namespace Sharky.MicroTasks
 {
-    public class WorkerScoutTask : IMicroTask
+    public class WorkerScoutTask : MicroTask
     {
         UnitDataManager UnitDataManager;
         ITargetingManager TargetingManager;
         MapDataService MapDataService;
-
-        public List<UnitCommander> UnitCommanders { get; set; }
-        public float Priority { get; private set; }
 
         bool Enabled { get; set; }
 
@@ -46,7 +43,7 @@ namespace Sharky.MicroTasks
             Enabled = false;
         }
 
-        public void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
+        public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
         {
             if (Enabled)
             {
@@ -78,7 +75,7 @@ namespace Sharky.MicroTasks
             }
         }
 
-        public IEnumerable<SC2APIProtocol.Action> PerformActions(int frame)
+        public override IEnumerable<SC2APIProtocol.Action> PerformActions(int frame)
         {
             var commands = new List<SC2APIProtocol.Action>();
 

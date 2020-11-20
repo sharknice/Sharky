@@ -8,11 +8,8 @@ using System.Numerics;
 
 namespace Sharky.MicroTasks
 {
-    public class AttackTask : IMicroTask
+    public class AttackTask : MicroTask
     {
-        public List<UnitCommander> UnitCommanders { get; set; }
-        public float Priority { get; private set; }
-
         IMicroController MicroController;
         ITargetingManager TargetingManager;
         UnitManager UnitManager;
@@ -33,7 +30,7 @@ namespace Sharky.MicroTasks
             UnitCommanders = new List<UnitCommander>();
         }
 
-        public void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
+        public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
         {
             foreach (var commander in commanders)
             {
@@ -45,7 +42,7 @@ namespace Sharky.MicroTasks
             }
         }
 
-        public IEnumerable<SC2APIProtocol.Action> PerformActions(int frame)
+        public override IEnumerable<SC2APIProtocol.Action> PerformActions(int frame)
         {
             var vectors = UnitCommanders.Select(u => new Vector2(u.UnitCalculation.Unit.Pos.X, u.UnitCalculation.Unit.Pos.Y));
             if (vectors.Count() > 0)

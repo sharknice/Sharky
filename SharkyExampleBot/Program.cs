@@ -31,7 +31,7 @@ namespace SharkyExampleBot
             var myRace = Race.Protoss;
             if (args.Length == 0)
             {
-                gameConnection.RunSinglePlayer(sharkyBot, @"AutomatonLE.SC2Map", myRace, Race.Terran, Difficulty.VeryHard).Wait();
+                gameConnection.RunSinglePlayer(sharkyBot, @"AutomatonLE.SC2Map", myRace, Race.Random, Difficulty.VeryHard).Wait();
             }
             else
             {
@@ -68,6 +68,9 @@ namespace SharkyExampleBot
             var collisionCalculator = new CollisionCalculator();
             var unitManager = new UnitManager(unitDataManager, sharkyOptions, targetPriorityService, collisionCalculator, mapDataService);
             managers.Add(unitManager);
+
+            var enemyRaceManager = new EnemyRaceManager(unitManager, unitDataManager);
+            managers.Add(enemyRaceManager);
 
             var baseManager = new BaseManager(unitDataManager, unitManager);
             managers.Add(baseManager);
@@ -136,24 +139,26 @@ namespace SharkyExampleBot
             managers.Add(microManager);
 
             var enemyStrategyHistory = new EnemyStrategyHistory();
-            var enemyStrategies = new List<IEnemyStrategy>
+            var enemyStrategies = new Dictionary<string, IEnemyStrategy>
             {
-                new Proxy(enemyStrategyHistory, chatManager, unitManager, sharkyOptions, targetingManager),
-                new WorkerRush(enemyStrategyHistory, chatManager, unitManager, sharkyOptions, targetingManager),
-                new AdeptRush(enemyStrategyHistory, chatManager, unitManager, sharkyOptions),
-                new MarineRush(enemyStrategyHistory, chatManager, unitManager, sharkyOptions),
-                new MassVikings(enemyStrategyHistory, chatManager, unitManager, sharkyOptions),
-                new ZerglingRush(enemyStrategyHistory, chatManager, unitManager, sharkyOptions)
+                ["Proxy"] = new Proxy(enemyStrategyHistory, chatManager, unitManager, sharkyOptions, targetingManager),
+                ["WorkerRush"] = new WorkerRush(enemyStrategyHistory, chatManager, unitManager, sharkyOptions, targetingManager),
+                ["AdeptRush"] = new AdeptRush(enemyStrategyHistory, chatManager, unitManager, sharkyOptions),
+                ["MarineRush"] = new MarineRush(enemyStrategyHistory, chatManager, unitManager, sharkyOptions),
+                ["MassVikings"] = new MassVikings(enemyStrategyHistory, chatManager, unitManager, sharkyOptions),
+                ["ZerglingRush"] = new ZerglingRush(enemyStrategyHistory, chatManager, unitManager, sharkyOptions)
             };
 
             var enemyStrategyManager = new EnemyStrategyManager(enemyStrategies);
             managers.Add(enemyStrategyManager);
 
+            var protossCounterTransitioner = new ProtossCounterTransitioner(enemyStrategyManager, sharkyOptions);
+
             var antiMassMarine = new AntiMassMarine(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager);
             var fourGate = new FourGate(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager, unitDataManager);
-            var nexusFirst = new NexusFirst(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager);
+            var nexusFirst = new NexusFirst(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager, protossCounterTransitioner);
             var robo = new Robo(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager);
-            var protossRobo = new ProtossRobo(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager, sharkyOptions, microManager);
+            var protossRobo = new ProtossRobo(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager, sharkyOptions, microManager, enemyRaceManager);
 
             var builds = new Dictionary<string, ISharkyBuild>
             {
@@ -181,9 +186,12 @@ namespace SharkyExampleBot
             };
 
             var macroBalancer = new MacroBalancer(buildOptions, unitManager, macroData, unitDataManager);
-            var buildChoices = new BuildChoices { Builds = builds, BuildSequences = buildSequences };
+            var buildChoices = new Dictionary<Race, BuildChoices>
+            {
+                { Race.Protoss, new BuildChoices { Builds = builds, BuildSequences = buildSequences } }
+            };
             var buildDecisionService = new BuildDecisionService(chatManager);
-            var buildManager = new BuildManager(macroManager, buildChoices, debugManager, macroBalancer, buildDecisionService, enemyPlayerService, chatHistory, enemyStrategyHistory);
+            var buildManager = new BuildManager(buildChoices, debugManager, macroBalancer, buildDecisionService, enemyPlayerService, chatHistory, enemyStrategyHistory);
             managers.Add(buildManager);
 
             return new SharkyBot(managers, debugManager);

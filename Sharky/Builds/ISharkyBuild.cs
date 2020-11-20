@@ -8,7 +8,7 @@ namespace Sharky.Builds
         string Name();
         void StartBuild(int frame);
         void OnFrame(ResponseObservation observation);
-        bool Transition();
-        List<string> CounterTransition();
+        bool Transition(int frame);
+        List<string> CounterTransition(int frame);
     }
 }

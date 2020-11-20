@@ -6,9 +6,9 @@ namespace Sharky.Managers
 {
     public class EnemyStrategyManager : SharkyManager
     {
-        public List<IEnemyStrategy> EnemyStrategies { get; private set; }
+        public Dictionary<string, IEnemyStrategy> EnemyStrategies { get; private set; }
 
-        public EnemyStrategyManager(List<IEnemyStrategy> enemyStrategies)
+        public EnemyStrategyManager(Dictionary<string, IEnemyStrategy> enemyStrategies)
         {
             EnemyStrategies = enemyStrategies;
         }
@@ -17,12 +17,12 @@ namespace Sharky.Managers
         {
             var frame = (int)observation.Observation.GameLoop;
 
-            foreach (var enemyStrategy in EnemyStrategies)
+            foreach (var enemyStrategy in EnemyStrategies.Values)
             {
                 enemyStrategy.OnFrame(frame);
             }
 
-            return new List<Action>(); ;
+            return new List<Action>();
         }
     }
 }

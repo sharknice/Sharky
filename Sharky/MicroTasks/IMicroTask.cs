@@ -6,9 +6,10 @@ namespace Sharky.MicroTasks
 {
     public interface IMicroTask
     {
-        float Priority { get; }
+        float Priority { get; set; }
         List<UnitCommander> UnitCommanders { get; set; }
         void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders);
         IEnumerable<Action> PerformActions(int frame);
+        void ResetClaimedUnits();
     }
 }

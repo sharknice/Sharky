@@ -10,11 +10,13 @@ namespace Sharky.Builds.Protoss
     {
         SharkyOptions SharkyOptions;
         MicroManager MicroManager;
+        EnemyRaceManager EnemyRaceManager;
 
-        public ProtossRobo(BuildOptions buildOptions, MacroData macroData, UnitManager unitManager, AttackData attackData, IChatManager chatManager, NexusManager nexusManager, SharkyOptions sharkyOptions, MicroManager microManager) : base(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager)
+        public ProtossRobo(BuildOptions buildOptions, MacroData macroData, UnitManager unitManager, AttackData attackData, IChatManager chatManager, NexusManager nexusManager, SharkyOptions sharkyOptions, MicroManager microManager, EnemyRaceManager enemyRaceManager) : base(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager)
         {
             SharkyOptions = sharkyOptions;
             MicroManager = microManager;
+            EnemyRaceManager = enemyRaceManager;
         }
 
         public override void StartBuild(int frame)
@@ -33,21 +35,22 @@ namespace Sharky.Builds.Protoss
 
             MacroData.DesiredProductionCounts[UnitTypes.PROTOSS_NEXUS] = 1;
 
-            // TODO: be able to add MicroTasks
-            //if (EnemyRace == SC2APIProtocol.Race.Protoss)
-            //{
-            //    var defenseTask = new DefenseSquadTask(MacroData.Main, UnitTypes.PROTOSS_STALKER)
-            //}
-            //else
-            //{
-            //    var defenseTask = new DefenseSquadTask(MacroData.Main, UnitTypes.ADEPT)
-            //}
-            // TODO: EnemyRace
+            var desiredUnitsClaim = new DesiredUnitsClaim(UnitTypes.PROTOSS_ADEPT, 1);
+            if (EnemyRaceManager.EnemyRace == Race.Protoss)
+            {
+                desiredUnitsClaim = new DesiredUnitsClaim(UnitTypes.PROTOSS_STALKER, 1);
+            }
+            
             if (MicroManager.MicroTasks.ContainsKey("DefenseSquadTask"))
             {
                 var defenseSquadTask = (DefenseSquadTask)MicroManager.MicroTasks["DefenseSquadTask"];
-                defenseSquadTask.DesiredUnitsClaims = new List<DesiredUnitsClaim> { new DesiredUnitsClaim(UnitTypes.PROTOSS_STALKER, 1) };
+                defenseSquadTask.DesiredUnitsClaims = new List<DesiredUnitsClaim> { desiredUnitsClaim };
                 defenseSquadTask.Enable();
+
+                if (MicroManager.MicroTasks.ContainsKey("AttackTask"))
+                {
+                    MicroManager.MicroTasks["AttackTask"].ResetClaimedUnits();
+                }
             }
         }
 

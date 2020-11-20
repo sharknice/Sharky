@@ -8,16 +8,12 @@ using System.Numerics;
 
 namespace Sharky.MicroTasks
 {
-    public class DefenseSquadTask : IMicroTask
+    public class DefenseSquadTask : MicroTask
     {
         UnitManager UnitManager;
         TargetingManager TargetingManager;
         DefenseService DefenseService;
         IMicroController MicroController;
-
-        public List<UnitCommander> UnitCommanders { get; set; }
-        public float Priority { get; private set; }
-
         bool Enabled { get; set; }
 
         public List<DesiredUnitsClaim> DesiredUnitsClaims { get; set; }
@@ -51,7 +47,7 @@ namespace Sharky.MicroTasks
             Enabled = false;
         }
 
-        public void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
+        public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
         {
             if (Enabled)
             {
@@ -73,7 +69,7 @@ namespace Sharky.MicroTasks
             }
         }
 
-        public IEnumerable<SC2APIProtocol.Action> PerformActions(int frame)
+        public override IEnumerable<SC2APIProtocol.Action> PerformActions(int frame)
         {
             if (Enabled)
             {

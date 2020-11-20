@@ -117,7 +117,7 @@ namespace Sharky.Builds.Protoss
             }
         }
 
-        public override bool Transition()
+        public override bool Transition(int frame)
         {
             return UnitManager.Completed(UnitTypes.PROTOSS_ROBOTICSFACILITY) > 0 && UnitManager.Completed(UnitTypes.PROTOSS_NEXUS) > 0;
         }

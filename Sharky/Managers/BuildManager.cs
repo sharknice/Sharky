@@ -13,8 +13,7 @@ namespace Sharky.Managers
     public class BuildManager : SharkyManager
     {
         DebugManager DebugManager;
-        MacroManager Macro;
-        BuildChoices BuildChoices;
+        Dictionary<Race, BuildChoices> BuildChoices;
         IBuildDecisionService BuildDecisionService;
         IEnemyPlayerService EnemyPlayerService;
 
@@ -31,9 +30,8 @@ namespace Sharky.Managers
         ChatHistory ChatHistory;
         EnemyStrategyHistory EnemyStrategyHistory;
 
-        public BuildManager(MacroManager macro, BuildChoices buildChoices, DebugManager debugManager, IMacroBalancer macroBalancer, IBuildDecisionService buildDecisionService, IEnemyPlayerService enemyPlayerService, ChatHistory chatHistory, EnemyStrategyHistory enemyStrategyHistory)
+        public BuildManager(Dictionary<Race, BuildChoices> buildChoices, DebugManager debugManager, IMacroBalancer macroBalancer, IBuildDecisionService buildDecisionService, IEnemyPlayerService enemyPlayerService, ChatHistory chatHistory, EnemyStrategyHistory enemyStrategyHistory)
         {
-            Macro = macro;
             BuildChoices = buildChoices;
             DebugManager = debugManager;
             MacroBalancer = macroBalancer;
@@ -68,10 +66,10 @@ namespace Sharky.Managers
             }
 
 
-            var buildSequences = BuildChoices.BuildSequences[EnemyRace.ToString()];
-            if (!string.IsNullOrWhiteSpace(EnemyPlayer.Name) && BuildChoices.BuildSequences.ContainsKey(EnemyPlayer.Name))
+            var buildSequences = BuildChoices[ActualRace].BuildSequences[EnemyRace.ToString()];
+            if (!string.IsNullOrWhiteSpace(EnemyPlayer.Name) && BuildChoices[ActualRace].BuildSequences.ContainsKey(EnemyPlayer.Name))
             {
-                buildSequences = BuildChoices.BuildSequences[EnemyPlayer.Name];
+                buildSequences = BuildChoices[ActualRace].BuildSequences[EnemyPlayer.Name];
             }
 
             MapName = gameInfo.MapName;
@@ -86,22 +84,24 @@ namespace Sharky.Managers
             DebugManager.DrawText("Build: " + CurrentBuild.Name());
             DebugManager.DrawText("Sequence: " + string.Join(", ", BuildSequence));
 
-            var counterTransition = CurrentBuild.CounterTransition();
+            var frame = (int)observation.Observation.GameLoop;
+
+            var counterTransition = CurrentBuild.CounterTransition(frame);
             if (counterTransition != null && counterTransition.Count() > 0)
             {
                 BuildSequence = counterTransition;
-                SwitchBuild(BuildSequence[0], (int)observation.Observation.GameLoop);
+                SwitchBuild(BuildSequence[0], frame);
             }
-            else if (CurrentBuild.Transition())
+            else if (CurrentBuild.Transition(frame))
             {
                 var buildSequenceIndex = BuildSequence.FindIndex(b => b == CurrentBuild.Name());
                 if (buildSequenceIndex != -1 && BuildSequence.Count() > buildSequenceIndex + 1)
                 {
-                    SwitchBuild(BuildSequence[buildSequenceIndex + 1], (int)observation.Observation.GameLoop);
+                    SwitchBuild(BuildSequence[buildSequenceIndex + 1], frame);
                 }
                 else
                 {
-                    TransitionBuild((int)observation.Observation.GameLoop);
+                    TransitionBuild(frame);
                 }
             }
 
@@ -126,13 +126,13 @@ namespace Sharky.Managers
         void SwitchBuild(string buildName, int frame)
         {
             BuildHistory[frame] = buildName;
-            CurrentBuild = BuildChoices.Builds[buildName];
+            CurrentBuild = BuildChoices[ActualRace].Builds[buildName];
             CurrentBuild.StartBuild(frame);
         }
 
         void TransitionBuild(int frame)
         {
-            BuildSequence = BuildChoices.BuildSequences["Transition"][new Random().Next(BuildChoices.BuildSequences["Transition"].Count)];
+            BuildSequence = BuildChoices[ActualRace].BuildSequences["Transition"][new Random().Next(BuildChoices[ActualRace].BuildSequences["Transition"].Count)];
             SwitchBuild(BuildSequence[0], frame);
         }
     }
