@@ -8,16 +8,22 @@ namespace Sharky.Builds.BuildingPlacement
     public class BuildingPlacement : IBuildingPlacement
     {
         IBuildingPlacement ProtossBuildingPlacement;
+        IBuildingPlacement TerranBuildingPlacement;
+        IBuildingPlacement ZergBuildingPlacement;
         IBaseManager BaseManager;
         UnitManager UnitManager;
         BuildingService BuildingService;
+        UnitDataManager UnitDataManager;
 
-        public BuildingPlacement(IBuildingPlacement protossBuildingPlacement, IBaseManager baseManager, UnitManager unitManager, BuildingService buildingService)
+        public BuildingPlacement(IBuildingPlacement protossBuildingPlacement, IBuildingPlacement terranBuildingPlacement, IBuildingPlacement zergBuildingPlacement, IBaseManager baseManager, UnitManager unitManager, BuildingService buildingService, UnitDataManager unitDataManager)
         {
             ProtossBuildingPlacement = protossBuildingPlacement;
+            TerranBuildingPlacement = terranBuildingPlacement;
+            ZergBuildingPlacement = zergBuildingPlacement;
             BaseManager = baseManager;
             UnitManager = unitManager;
             BuildingService = buildingService;
+            UnitDataManager = unitDataManager;
         }
 
         public Point2D FindPlacement(Point2D target, UnitTypes unitType, int size)
@@ -27,7 +33,18 @@ namespace Sharky.Builds.BuildingPlacement
                 return GetResourceCenterLocation();
             }
 
-            return ProtossBuildingPlacement.FindPlacement(target, unitType, size);
+            if (UnitDataManager.TerranTypes.Contains(unitType))
+            {
+                return TerranBuildingPlacement.FindPlacement(target, unitType, size);
+            }
+            else if (UnitDataManager.ProtossTypes.Contains(unitType))
+            {
+                return ProtossBuildingPlacement.FindPlacement(target, unitType, size);
+            }
+            else
+            {
+                return ZergBuildingPlacement.FindPlacement(target, unitType, size);
+            }          
         }
 
         private Point2D GetResourceCenterLocation()

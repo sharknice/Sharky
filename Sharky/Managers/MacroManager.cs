@@ -223,6 +223,17 @@ namespace Sharky.Managers
                 }
             }
 
+            if (MacroData.BuildSupplyDepot)
+            {
+                var unitData = UnitDataManager.BuildingData[UnitTypes.TERRAN_SUPPLYDEPOT];
+                var command = BuildingBuilder.BuildBuilding(MacroData, UnitTypes.TERRAN_SUPPLYDEPOT, unitData);
+                if (command != null)
+                {
+                    commands.Add(command);
+                    return commands;
+                }
+            }
+
             return commands;
         }
 

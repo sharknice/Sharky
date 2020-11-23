@@ -4,6 +4,7 @@ using Sharky.Builds;
 using Sharky.Builds.BuildChoosing;
 using Sharky.Builds.BuildingPlacement;
 using Sharky.Builds.Protoss;
+using Sharky.Builds.Terran;
 using Sharky.Chat;
 using Sharky.EnemyPlayer;
 using Sharky.EnemyStrategies;
@@ -82,7 +83,8 @@ namespace SharkyExampleBot
             var macroSetup = new MacroSetup();
             var buildingService = new BuildingService(mapData, unitManager);
             var protossBuildingPlacement = new ProtossBuildingPlacement(unitManager, unitDataManager, debugManager, mapData, buildingService);
-            var buildingPlacement = new BuildingPlacement(protossBuildingPlacement, baseManager, unitManager, buildingService);
+            var terranBuildingPlacement = new TerranBuildingPlacement(unitManager, unitDataManager, debugManager, mapData, buildingService);
+            var buildingPlacement = new BuildingPlacement(protossBuildingPlacement, terranBuildingPlacement, terranBuildingPlacement, baseManager, unitManager, buildingService, unitDataManager);
             var buildingBuilder = new BuildingBuilder(unitManager, targetingManager, buildingPlacement, unitDataManager);
 
 
@@ -107,7 +109,7 @@ namespace SharkyExampleBot
             var sharkySimplePathFinder = new SharkySimplePathFinder(mapDataService);
             var noPathFinder = new SharkyNoPathFinder();
 
-            var individualMicroController = new IndividualMicroController(mapDataService, unitDataManager, unitManager, debugManager, noPathFinder, sharkyOptions, MicroPriority.LiveAndAttack, true);
+            var individualMicroController = new IndividualMicroController(mapDataService, unitDataManager, unitManager, debugManager, noPathFinder, sharkyOptions, MicroPriority.LiveAndAttack, false);
         
             var zealotMicroController = new ZealotMicroController(mapDataService, unitDataManager, unitManager, debugManager, noPathFinder, sharkyOptions, MicroPriority.AttackForward, true);
             var sentryMicroController = new SentryMicroController(mapDataService, unitDataManager, unitManager, debugManager, noPathFinder, sharkyOptions, MicroPriority.StayOutOfRange, true);
@@ -160,7 +162,7 @@ namespace SharkyExampleBot
             var robo = new Robo(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager);
             var protossRobo = new ProtossRobo(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager, sharkyOptions, microManager, enemyRaceManager);
 
-            var builds = new Dictionary<string, ISharkyBuild>
+            var protossBuilds = new Dictionary<string, ISharkyBuild>
             {
                 [nexusFirst.Name()] = nexusFirst,
                 [robo.Name()] = robo,
@@ -168,27 +170,44 @@ namespace SharkyExampleBot
                 [fourGate.Name()] = fourGate,
                 [antiMassMarine.Name()] = antiMassMarine
             };
-
-            var sequences = new List<List<string>>
+            var protossSequences = new List<List<string>>
             {
                 new List<string> { nexusFirst.Name(), robo.Name(), protossRobo.Name() },
                 new List<string> { antiMassMarine.Name() },
                 new List<string> { fourGate.Name() }
             };
-
-            var buildSequences = new Dictionary<string, List<List<string>>>
+            var protossBuildSequences = new Dictionary<string, List<List<string>>>
             {
-                [Race.Terran.ToString()] = sequences,
-                [Race.Zerg.ToString()] = sequences,
-                [Race.Protoss.ToString()] = sequences,
-                [Race.Random.ToString()] = sequences,
-                ["Transition"] = sequences
+                [Race.Terran.ToString()] = protossSequences,
+                [Race.Zerg.ToString()] = protossSequences,
+                [Race.Protoss.ToString()] = protossSequences,
+                [Race.Random.ToString()] = protossSequences,
+                ["Transition"] = protossSequences
+            };
+
+            var massMarine = new MassMarines(buildOptions, macroData, unitManager, attackData, chatManager);
+            var terranBuilds = new Dictionary<string, ISharkyBuild>
+            {
+                [massMarine.Name()] = massMarine,
+            };
+            var terranSequences = new List<List<string>>
+            {
+                new List<string> { massMarine.Name() }
+            };
+            var terranBuildSequences = new Dictionary<string, List<List<string>>>
+            {
+                [Race.Terran.ToString()] = terranSequences,
+                [Race.Zerg.ToString()] = terranSequences,
+                [Race.Protoss.ToString()] = terranSequences,
+                [Race.Random.ToString()] = terranSequences,
+                ["Transition"] = terranSequences
             };
 
             var macroBalancer = new MacroBalancer(buildOptions, unitManager, macroData, unitDataManager);
             var buildChoices = new Dictionary<Race, BuildChoices>
             {
-                { Race.Protoss, new BuildChoices { Builds = builds, BuildSequences = buildSequences } }
+                { Race.Protoss, new BuildChoices { Builds = protossBuilds, BuildSequences = protossBuildSequences } },
+                { Race.Terran, new BuildChoices { Builds = terranBuilds, BuildSequences = terranBuildSequences } }
             };
             var buildDecisionService = new BuildDecisionService(chatManager);
             var buildManager = new BuildManager(buildChoices, debugManager, macroBalancer, buildDecisionService, enemyPlayerService, chatHistory, enemyStrategyHistory);

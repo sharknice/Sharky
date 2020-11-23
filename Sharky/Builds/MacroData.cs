@@ -32,12 +32,16 @@ namespace Sharky
         public List<UnitTypes> RoboticsFacilityUnits;
         public List<UnitTypes> StargateUnits;
 
+        public List<UnitTypes> CommandCenterUnits;
         public List<UnitTypes> BarracksUnits;
         public List<UnitTypes> FactoryUnits;
         public List<UnitTypes> StarportUnits;
 
         public int DesiredPylons;
+        public bool BuildSupplyDepot;
+        public int DesiredSupplyDepots;
         public bool BuildPylon;
+
         public int FoodUsed { get; set; }
         public int FoodLeft { get; set; }
         public int FoodArmy { get; set; }

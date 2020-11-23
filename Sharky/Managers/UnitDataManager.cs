@@ -93,6 +93,7 @@ namespace Sharky.Managers
             BuildingData.Add(UnitTypes.TERRAN_STARPORT, new BuildingTypeData { Ability = Abilities.BUILD_STARPORT, Size = 2, Minerals = 150, Gas = 100 });
             BuildingData.Add(UnitTypes.TERRAN_ARMORY, new BuildingTypeData { Ability = Abilities.BUILD_ARMORY, Size = 3, Minerals = 150, Gas = 100 });
             BuildingData.Add(UnitTypes.TERRAN_FUSIONCORE, new BuildingTypeData { Ability = Abilities.BUILD_FUSIONCORE, Size = 3, Minerals = 150, Gas = 150 });
+            BuildingData.Add(UnitTypes.TERRAN_GHOSTACADEMY, new BuildingTypeData { Ability = Abilities.BUILD_GHOSTACADEMY, Size = 3, Minerals = 150, Gas = 50 });
 
             BuildingData.Add(UnitTypes.PROTOSS_NEXUS, new BuildingTypeData { Ability = Abilities.BUILD_NEXUS, Size = 5, Minerals = 400 });
             BuildingData.Add(UnitTypes.PROTOSS_PYLON, new BuildingTypeData { Ability = Abilities.BUILD_PYLON, Size = 2, Minerals = 100 });
@@ -134,6 +135,24 @@ namespace Sharky.Managers
             TrainingData.Add(UnitTypes.PROTOSS_TEMPEST, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_STARGATE }, Minerals = 250, Gas = 175, Food = 5, Ability = Abilities.TRAIN_TEMPEST });
             TrainingData.Add(UnitTypes.PROTOSS_CARRIER, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_STARGATE }, Minerals = 350, Gas = 250, Food = 6, Ability = Abilities.TRAIN_CARRIER });
             TrainingData.Add(UnitTypes.PROTOSS_ARCHON, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_HIGHTEMPLAR, UnitTypes.PROTOSS_DARKTEMPLAR }, Minerals = 0, Gas = 0, Food = 0, Ability = Abilities.MORPH_ARCHON });
+
+            TrainingData.Add(UnitTypes.TERRAN_SCV, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_COMMANDCENTER, UnitTypes.TERRAN_ORBITALCOMMAND, UnitTypes.TERRAN_PLANETARYFORTRESS }, Minerals = 50, Food = 1, Ability = Abilities.TRAIN_SCV });
+            TrainingData.Add(UnitTypes.TERRAN_MARINE, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_BARRACKS }, Minerals = 50, Food = 1, Ability = Abilities.TRAIN_MARINE });
+            TrainingData.Add(UnitTypes.TERRAN_MARAUDER, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_BARRACKS }, Minerals = 100, Gas = 25, Food = 2, Ability = Abilities.TRAIN_MARAUDER });
+            TrainingData.Add(UnitTypes.TERRAN_REAPER, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_BARRACKS }, Minerals = 50, Gas = 50, Food = 1, Ability = Abilities.TRAIN_REAPER });
+            TrainingData.Add(UnitTypes.TERRAN_GHOST, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_BARRACKS }, Minerals = 150, Gas = 125, Food = 2, Ability = Abilities.TRAIN_GHOST });
+            TrainingData.Add(UnitTypes.TERRAN_HELLION, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_FACTORY }, Minerals = 100, Food = 2, Ability = Abilities.TRAIN_HELLION });
+            TrainingData.Add(UnitTypes.TERRAN_HELLIONTANK, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_FACTORY }, Minerals = 100, Food = 2, Ability = Abilities.TRAIN_HELLION });
+            TrainingData.Add(UnitTypes.TERRAN_CYCLONE, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_FACTORY }, Minerals = 150, Gas = 100, Food = 3, Ability = Abilities.TRAIN_CYCLONE });
+            TrainingData.Add(UnitTypes.TERRAN_SIEGETANK, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_FACTORY }, Minerals = 150, Gas = 125, Food = 3, Ability = Abilities.TRAIN_SIEGETANK });
+            TrainingData.Add(UnitTypes.TERRAN_WIDOWMINE, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_FACTORY }, Minerals = 75, Gas = 75, Food = 2, Ability = Abilities.TRAIN_WIDOWMINE });
+            TrainingData.Add(UnitTypes.TERRAN_THOR, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_FACTORY }, Minerals = 300, Gas = 200, Food = 6, Ability = Abilities.TRAIN_THOR });
+            TrainingData.Add(UnitTypes.TERRAN_VIKINGFIGHTER, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_STARPORT }, Minerals = 150, Gas = 75, Food = 2, Ability = Abilities.TRAIN_VIKINGFIGHTER });
+            TrainingData.Add(UnitTypes.TERRAN_MEDIVAC, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_STARPORT }, Minerals = 100, Gas = 100, Food = 2, Ability = Abilities.TRAIN_MEDIVAC });
+            TrainingData.Add(UnitTypes.TERRAN_LIBERATOR, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_STARPORT }, Minerals = 150, Gas = 150, Food = 3, Ability = Abilities.TRAIN_LIBERATOR });
+            TrainingData.Add(UnitTypes.TERRAN_RAVEN, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_STARPORT }, Minerals = 100, Gas = 200, Food = 2, Ability = Abilities.TRAIN_RAVEN });
+            TrainingData.Add(UnitTypes.TERRAN_BANSHEE, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_STARPORT }, Minerals = 150, Gas = 100, Food = 3, Ability = Abilities.TRAIN_BANSHEE });
+            TrainingData.Add(UnitTypes.TERRAN_BATTLECRUISER, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_STARPORT }, Minerals = 400, Gas = 300, Food = 6, Ability = Abilities.TRAIN_BATTLECRUISER });
 
             UpgradeData = new Dictionary<Upgrades, TrainingTypeData>();
             UpgradeData.Add(Upgrades.WARPGATERESEARCH, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_CYBERNETICSCORE }, Minerals = 50, Gas = 50, Ability = Abilities.RESEARCH_WARPGATE });
