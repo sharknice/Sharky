@@ -19,8 +19,9 @@ namespace Sharky.Managers
         AttackData AttackData;
         IBuildingPlacement WarpInPlacement;
         MacroData MacroData;
+        Morpher Morpher;
 
-        public MacroManager(MacroSetup macroSetup, IUnitManager unitManager, UnitDataManager unitDataManager, BuildingBuilder buildingBuilder, SharkyOptions sharkyOptions, IBaseManager baseManager, TargetingManager targetingManager, AttackData attackData, IBuildingPlacement warpInPlacement, MacroData macroData)
+        public MacroManager(MacroSetup macroSetup, IUnitManager unitManager, UnitDataManager unitDataManager, BuildingBuilder buildingBuilder, SharkyOptions sharkyOptions, IBaseManager baseManager, TargetingManager targetingManager, AttackData attackData, IBuildingPlacement warpInPlacement, MacroData macroData, Morpher morpher)
         {
             MacroSetup = macroSetup;
             UnitManager = unitManager;
@@ -33,6 +34,7 @@ namespace Sharky.Managers
             WarpInPlacement = warpInPlacement;
 
             MacroData = macroData;
+            Morpher = morpher;
 
             MacroData.DesiredUpgrades = new Dictionary<Upgrades, bool>();
         }
@@ -71,8 +73,10 @@ namespace Sharky.Managers
 
             actions.AddRange(BuildVespeneGas());
             actions.AddRange(BuildProductionBuildings());
+            actions.AddRange(MorphBuildings());
 
             actions.AddRange(BuildTechBuildings());
+            actions.AddRange(BuildAddOns());
             actions.AddRange(ResearchUpgrades());
             actions.AddRange(ProduceUnits());
 
@@ -185,7 +189,7 @@ namespace Sharky.Managers
             var commands = new List<Action>();
             if (MacroData.BuildGas && MacroData.Minerals >= 75)
             {
-                var unitData = UnitDataManager.BuildingData[UnitTypes.PROTOSS_ASSIMILATOR];
+                var unitData = GetGasTypeData();
                 var takenGases = UnitManager.SelfUnits.Where(u => UnitDataManager.GasGeyserRefineryTypes.Contains((UnitTypes)u.Value.Unit.UnitType)).Concat(UnitManager.EnemyUnits.Where(u => UnitDataManager.GasGeyserRefineryTypes.Contains((UnitTypes)u.Value.Unit.UnitType)));
                 var openGeysers = BaseManager.BaseLocations.SelectMany(b => b.VespeneGeysers).Where(g => g.VespeneContents > 0 && !takenGases.Any(t => t.Value.Unit.Pos.X == g.Pos.X && t.Value.Unit.Pos.Y == g.Pos.Y));
                 if (openGeysers.Count() > 0)
@@ -206,6 +210,22 @@ namespace Sharky.Managers
             }
 
             return commands;
+        }
+
+        private BuildingTypeData GetGasTypeData()
+        {
+            if (MacroData.Race == Race.Protoss)
+            {
+                return UnitDataManager.BuildingData[UnitTypes.PROTOSS_ASSIMILATOR];
+            }
+            else if (MacroData.Race == Race.Terran)
+            {
+                return UnitDataManager.BuildingData[UnitTypes.TERRAN_REFINERY];
+            }
+            else
+            {
+                return UnitDataManager.BuildingData[UnitTypes.ZERG_EXTRACTOR];
+            }
         }
 
         private List<Action> BuildSupply()
@@ -258,6 +278,27 @@ namespace Sharky.Managers
             return commands;
         }
 
+        private List<Action> MorphBuildings()
+        {
+            var commands = new List<Action>();
+
+            foreach (var unit in MacroData.Morph)
+            {
+                if (unit.Value)
+                {
+                    var unitData = UnitDataManager.MorphData[unit.Key];
+                    var command = Morpher.MorphBuilding(MacroData, unitData);
+                    if (command != null)
+                    {
+                        commands.Add(command);
+                        return commands;
+                    }
+                }
+            }
+
+            return commands;
+        }
+
         private List<Action> BuildTechBuildings()
         {
             var commands = new List<Action>();
@@ -268,6 +309,27 @@ namespace Sharky.Managers
                 {
                     var unitData = UnitDataManager.BuildingData[unit.Key];
                     var command = BuildingBuilder.BuildBuilding(MacroData, unit.Key, unitData);
+                    if (command != null)
+                    {
+                        commands.Add(command);
+                        return commands;
+                    }
+                }
+            }
+
+            return commands;
+        }
+
+        private List<Action> BuildAddOns()
+        {
+            var commands = new List<Action>();
+
+            foreach (var unit in MacroData.BuildAddOns)
+            {
+                if (unit.Value)
+                {
+                    var unitData = UnitDataManager.AddOnData[unit.Key];
+                    var command = BuildingBuilder.BuildAddOn(MacroData, unitData);
                     if (command != null)
                     {
                         commands.Add(command);

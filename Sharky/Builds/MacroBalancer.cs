@@ -85,12 +85,28 @@ namespace Sharky.Builds
             }
         }
 
+        public void BalanceAddOns()
+        {
+            foreach (var u in MacroData.AddOns)
+            {
+                MacroData.BuildAddOns[u] = UnitManager.Count(u) < MacroData.DesiredAddOnCounts[u];
+            }
+        }
+
         public void BalanceProductionBuildings()
         {
             foreach (var u in MacroData.Production)
             {
                 var unitData = UnitDataManager.BuildingData[u];
                 MacroData.BuildProduction[u] = UnitManager.EquivalentTypeCount(u) + UnitManager.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability)) < MacroData.DesiredProductionCounts[u];
+            }
+        }
+
+        public void BalanceMorphs()
+        {
+            foreach (var u in MacroData.Morphs)
+            {
+                MacroData.Morph[u] = UnitManager.EquivalentTypeCount(u) < MacroData.DesiredMorphCounts[u];
             }
         }
 

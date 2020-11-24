@@ -17,6 +17,7 @@ using Sharky.MicroControllers;
 using Sharky.MicroControllers.Protoss;
 using Sharky.MicroTasks;
 using Sharky.Pathing;
+using Sharky.TypeData;
 using System.Collections.Generic;
 using System.Net.Http;
 
@@ -29,7 +30,7 @@ namespace SharkyExampleBot
             var gameConnection = new GameConnection();
             var sharkyBot = CreateBot(gameConnection);
 
-            var myRace = Race.Protoss;
+            var myRace = Race.Terran;
             if (args.Length == 0)
             {
                 gameConnection.RunSinglePlayer(sharkyBot, @"AutomatonLE.SC2Map", myRace, Race.Random, Difficulty.VeryHard).Wait();
@@ -57,7 +58,14 @@ namespace SharkyExampleBot
 
             var debugManager = new DebugManager(gameConnection, sharkyOptions);
             managers.Add(debugManager);
-            var unitDataManager = new UnitDataManager();
+
+            var upgradeDataService = new UpgradeDataService();
+            var buildingDataService = new BuildingDataService();
+            var trainingDataService = new TrainingDataService();
+            var addOnDataService = new AddOnDataService();
+            var morphDataService = new MorphDataService();
+
+            var unitDataManager = new UnitDataManager(upgradeDataService, buildingDataService, trainingDataService, addOnDataService, morphDataService);
             managers.Add(unitDataManager);
             var mapData = new MapData();
             var mapManager = new MapManager(mapData);
@@ -91,7 +99,8 @@ namespace SharkyExampleBot
             var attackData = new AttackData { ArmyFoodAttack = 30, Attacking = false, CustomAttackFunction = false };
             var warpInPlacement = new WarpInPlacement(unitManager, debugManager, mapData);
             var macroData = new MacroData();
-            var macroManager = new MacroManager(macroSetup, unitManager, unitDataManager, buildingBuilder, sharkyOptions, baseManager, targetingManager, attackData, warpInPlacement, macroData);
+            var morpher = new Morpher(unitManager, unitDataManager, sharkyOptions);
+            var macroManager = new MacroManager(macroSetup, unitManager, unitDataManager, buildingBuilder, sharkyOptions, baseManager, targetingManager, attackData, warpInPlacement, macroData, morpher);
             managers.Add(macroManager);
 
             var nexusManager = new NexusManager(unitManager, unitDataManager);
@@ -186,13 +195,16 @@ namespace SharkyExampleBot
             };
 
             var massMarine = new MassMarines(buildOptions, macroData, unitManager, attackData, chatManager);
+            var battleCruisers = new BattleCruisers(buildOptions, macroData, unitManager, attackData, chatManager);
             var terranBuilds = new Dictionary<string, ISharkyBuild>
             {
                 [massMarine.Name()] = massMarine,
+                [battleCruisers.Name()] = battleCruisers,
             };
             var terranSequences = new List<List<string>>
             {
-                new List<string> { massMarine.Name() }
+                new List<string> { battleCruisers.Name() },
+                new List<string> { massMarine.Name(), battleCruisers.Name() }
             };
             var terranBuildSequences = new Dictionary<string, List<List<string>>>
             {

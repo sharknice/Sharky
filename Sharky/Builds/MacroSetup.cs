@@ -9,7 +9,9 @@ namespace Sharky.Builds
         {
             SetupUnits(macroData);
             SetupProduction(macroData);
+            SetupMorphs(macroData);
             SetupTech(macroData);
+            SetupAddOns(macroData);
             SetupDefensiveBuildings(macroData);
         }
 
@@ -89,6 +91,24 @@ namespace Sharky.Builds
             }
         }
 
+        void SetupMorphs(MacroData macroData)
+        {
+            macroData.DesiredMorphCounts = new Dictionary<UnitTypes, int>();
+            macroData.Morph = new Dictionary<UnitTypes, bool>();
+            if (macroData.Race == Race.Terran)
+            {
+                macroData.Morphs = new List<UnitTypes> {
+                    UnitTypes.TERRAN_ORBITALCOMMAND, UnitTypes.TERRAN_PLANETARYFORTRESS
+                };
+            }
+
+            foreach (var productionType in macroData.Morphs)
+            {
+                macroData.DesiredMorphCounts[productionType] = 0;
+                macroData.Morph[productionType] = false;
+            }
+        }
+
         void SetupTech(MacroData macroData)
         {
             macroData.DesiredTechCounts = new Dictionary<UnitTypes, int>();
@@ -111,6 +131,25 @@ namespace Sharky.Builds
             {
                 macroData.DesiredTechCounts[techType] = 0;
                 macroData.BuildTech[techType] = false;
+            }
+        }
+
+        void SetupAddOns(MacroData macroData)
+        {
+            macroData.DesiredAddOnCounts = new Dictionary<UnitTypes, int>();
+            macroData.BuildAddOns = new Dictionary<UnitTypes, bool>();
+
+            if (macroData.Race == Race.Terran)
+            {
+                macroData.AddOns = new List<UnitTypes> {
+                    UnitTypes.TERRAN_BARRACKSREACTOR, UnitTypes.TERRAN_BARRACKSTECHLAB, UnitTypes.TERRAN_FACTORYREACTOR, UnitTypes.TERRAN_FACTORYTECHLAB, UnitTypes.TERRAN_STARPORTREACTOR, UnitTypes.TERRAN_STARPORTTECHLAB
+                };
+            }
+
+            foreach (var techType in macroData.AddOns)
+            {
+                macroData.DesiredAddOnCounts[techType] = 0;
+                macroData.BuildAddOns[techType] = false;
             }
         }
 

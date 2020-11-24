@@ -12,8 +12,11 @@ namespace Sharky
 
         public List<UnitTypes> Production;
         public Dictionary<UnitTypes, int> DesiredProductionCounts;
-
         public Dictionary<UnitTypes, bool> BuildProduction;
+
+        public List<UnitTypes> Morphs;
+        public Dictionary<UnitTypes, int> DesiredMorphCounts;
+        public Dictionary<UnitTypes, bool> Morph;
 
         public List<UnitTypes> Tech;
         public Dictionary<UnitTypes, int> DesiredTechCounts;
@@ -26,6 +29,10 @@ namespace Sharky
         public Dictionary<Upgrades, bool> DesiredUpgrades;
         public int DesiredGases;
         public bool BuildGas;
+
+        public List<UnitTypes> AddOns;
+        public Dictionary<UnitTypes, int> DesiredAddOnCounts;
+        public Dictionary<UnitTypes, bool> BuildAddOns;
 
         public List<UnitTypes> NexusUnits;
         public List<UnitTypes> GatewayUnits;

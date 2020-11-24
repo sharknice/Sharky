@@ -110,8 +110,10 @@ namespace Sharky.Managers
             MacroBalancer.BalanceSupply();
             MacroBalancer.BalanceGases();
             MacroBalancer.BalanceTech();
+            MacroBalancer.BalanceAddOns();
             MacroBalancer.BalanceProduction();
             MacroBalancer.BalanceProductionBuildings();
+            MacroBalancer.BalanceMorphs();
             MacroBalancer.BalanceGasWorkers();
 
             return new List<SC2APIProtocol.Action>();

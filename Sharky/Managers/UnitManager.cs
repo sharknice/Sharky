@@ -214,6 +214,10 @@ namespace Sharky.Managers
                 count += Count(UnitTypes.TERRAN_ORBITALCOMMANDFLYING);
                 count += Count(UnitTypes.TERRAN_PLANETARYFORTRESS);
             }
+            else if (unitType == UnitTypes.TERRAN_ORBITALCOMMAND)
+            {
+                count += Count(UnitTypes.TERRAN_ORBITALCOMMANDFLYING);
+            }
             else if (unitType == UnitTypes.TERRAN_SUPPLYDEPOT)
             {
                 count += Count(UnitTypes.TERRAN_SUPPLYDEPOTLOWERED);

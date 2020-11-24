@@ -8,7 +8,6 @@ namespace Sharky.Builds
 {
     public class BuildingBuilder
     {
-
         IUnitManager UnitManager;
         ITargetingManager TargetingManager;
         IBuildingPlacement BuildingPlacement;
@@ -39,6 +38,23 @@ namespace Sharky.Builds
                 }
              }
 
+            return null;
+        }
+
+        public Action BuildAddOn(MacroData macroData, TrainingTypeData unitData)
+        {
+            if (unitData.Minerals <= macroData.Minerals && unitData.Gas <= macroData.VespeneGas)
+            {
+                var building = UnitManager.Commanders.Where(c => unitData.ProducingUnits.Contains((UnitTypes)c.Value.UnitCalculation.Unit.UnitType) && !c.Value.UnitCalculation.Unit.IsActive && c.Value.UnitCalculation.Unit.BuildProgress == 1 && !c.Value.UnitCalculation.Unit.HasAddOnTag);
+                if (building.Count() > 0)
+                {
+                    var action = building.First().Value.Order(macroData.Frame, unitData.Ability);
+                    if (action != null)
+                    {
+                        return action;
+                    }
+                }
+            }
             return null;
         }
 
