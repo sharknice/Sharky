@@ -111,6 +111,7 @@ namespace Sharky.Managers
             MacroBalancer.BalanceGases();
             MacroBalancer.BalanceTech();
             MacroBalancer.BalanceAddOns();
+            MacroBalancer.BalanceDefensiveBuildings();
             MacroBalancer.BalanceProduction();
             MacroBalancer.BalanceProductionBuildings();
             MacroBalancer.BalanceMorphs();

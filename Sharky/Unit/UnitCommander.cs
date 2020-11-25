@@ -14,6 +14,7 @@ namespace Sharky
 
         public int RetreatPathFrame { get; set; }
         public IEnumerable<Vector2> RetreatPath { get; set; }
+        public int LastOrderFrame { get; private set; }
 
         Abilities LastAbility;
         Point2D LastTargetLocation;
@@ -35,6 +36,8 @@ namespace Sharky
             AbilityOrderTimes = new Dictionary<Abilities, int>();
             RetreatPathFrame = 0;
             RetreatPath = new List<Vector2>();
+
+            LastOrderFrame = 0;
         }
 
         public Action Order(int frame, Abilities ability, Point2D targetLocation = null, ulong targetTag = 0, bool allowSpam = false)
@@ -68,6 +71,8 @@ namespace Sharky
                     UnitCommand = command
                 }
             };
+
+            LastOrderFrame = frame;
 
             return action;
         }

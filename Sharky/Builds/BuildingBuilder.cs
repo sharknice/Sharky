@@ -21,11 +21,15 @@ namespace Sharky.Builds
             UnitDataManager = unitDataManager;
         }
 
-        public Action BuildBuilding(MacroData macroData, UnitTypes unitType, BuildingTypeData unitData)
+        public Action BuildBuilding(MacroData macroData, UnitTypes unitType, BuildingTypeData unitData, Point2D generalLocation = null)
         {
             if (unitData.Minerals <= macroData.Minerals && unitData.Gas <= macroData.VespeneGas)
             {
-                var location = GetReferenceLocation(TargetingManager.SelfMainBasePoint);
+                var location = generalLocation;
+                if (location == null)
+                {
+                    location = GetReferenceLocation(TargetingManager.SelfMainBasePoint);
+                }
                 var placementLocation = BuildingPlacement.FindPlacement(location, unitType, unitData.Size);
                 
                 if (placementLocation != null)

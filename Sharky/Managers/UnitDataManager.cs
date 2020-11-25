@@ -25,6 +25,9 @@ namespace Sharky.Managers
         public HashSet<UnitTypes> ProtossTypes { get; private set; }
         public HashSet<UnitTypes> TerranTypes { get; private set; }
 
+        public HashSet<UnitTypes> TechLabTypes { get; private set; }
+        public HashSet<UnitTypes> ReactorTypes { get; private set; }
+
         public HashSet<UnitTypes> MineralFieldTypes { get; private set; }
         public HashSet<UnitTypes> GasGeyserTypes { get; private set; }
         public HashSet<UnitTypes> GasGeyserRefineryTypes { get; private set; }
@@ -91,6 +94,18 @@ namespace Sharky.Managers
             AbilityCooldownTimes = new Dictionary<Abilities, float> { { Abilities.EFFECT_BLINK_STALKER, 10 }, { Abilities.EFFECT_SHADOWSTRIDE, 14 }, { Abilities.EFFECT_TIMEWARP, 7.1f }, { Abilities.EFFECT_PURIFICATIONNOVA, 21.4f }, { Abilities.EFFECT_PSISTORM, 1.43f }, { Abilities.EFFECT_VOIDRAYPRISMATICALIGNMENT, 42.9f }, { Abilities.EFFECT_ORACLEREVELATION, 10f }, { Abilities.BEHAVIOR_PULSARBEAMON, 4f } };
             WarpInCooldownTimes = new Dictionary<Abilities, float> { { Abilities.TRAINWARP_ADEPT, 20f }, { Abilities.TRAINWARP_DARKTEMPLAR, 32f }, { Abilities.TRAINWARP_HIGHTEMPLAR, 32f }, { Abilities.TRAINWARP_SENTRY, 23f }, { Abilities.TRAINWARP_STALKER, 23f }, { Abilities.TRAINWARP_ZEALOT, 20f } };
 
+
+            TechLabTypes = new HashSet<UnitTypes> {
+                UnitTypes.TERRAN_BARRACKSTECHLAB,
+                UnitTypes.TERRAN_FACTORYTECHLAB,
+                UnitTypes.TERRAN_STARPORTTECHLAB
+            };
+
+            ReactorTypes = new HashSet<UnitTypes> {
+                UnitTypes.TERRAN_BARRACKSREACTOR,
+                UnitTypes.TERRAN_FACTORYREACTOR,
+                UnitTypes.TERRAN_STARPORTREACTOR
+            };
 
             CarryingResourceBuffs = new HashSet<Buffs> {
                 Buffs.CARRYHARVESTABLEVESPENEGEYSERGAS,

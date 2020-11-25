@@ -93,6 +93,15 @@ namespace Sharky.Builds
             }
         }
 
+        public void BalanceDefensiveBuildings()
+        {
+            foreach (var u in MacroData.DefensiveBuildings)
+            {
+                var unitData = UnitDataManager.BuildingData[u];
+                MacroData.BuildDefensiveBuildings[u] = UnitManager.Count(u) + UnitManager.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability)) < MacroData.DesiredDefensiveBuildingsCounts[u];
+            }
+        }
+
         public void BalanceProductionBuildings()
         {
             foreach (var u in MacroData.Production)

@@ -33,7 +33,7 @@ namespace SharkyExampleBot
             var myRace = Race.Terran;
             if (args.Length == 0)
             {
-                gameConnection.RunSinglePlayer(sharkyBot, @"AutomatonLE.SC2Map", myRace, Race.Random, Difficulty.VeryHard).Wait();
+                gameConnection.RunSinglePlayer(sharkyBot, @"AutomatonLE.SC2Map", myRace, Race.Random, Difficulty.VeryEasy).Wait();
             }
             else
             {
@@ -196,15 +196,18 @@ namespace SharkyExampleBot
 
             var massMarine = new MassMarines(buildOptions, macroData, unitManager, attackData, chatManager);
             var battleCruisers = new BattleCruisers(buildOptions, macroData, unitManager, attackData, chatManager);
+            var everyTerranUnit = new EveryTerranUnit(buildOptions, macroData, unitManager, attackData, chatManager);
             var terranBuilds = new Dictionary<string, ISharkyBuild>
             {
                 [massMarine.Name()] = massMarine,
                 [battleCruisers.Name()] = battleCruisers,
+                [everyTerranUnit.Name()] = everyTerranUnit
             };
             var terranSequences = new List<List<string>>
             {
+                new List<string> { massMarine.Name(), battleCruisers.Name() },
+                new List<string> { everyTerranUnit.Name() },
                 new List<string> { battleCruisers.Name() },
-                new List<string> { massMarine.Name(), battleCruisers.Name() }
             };
             var terranBuildSequences = new Dictionary<string, List<List<string>>>
             {

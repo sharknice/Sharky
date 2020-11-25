@@ -157,6 +157,9 @@ namespace Sharky.Builds
         {
             macroData.DesiredDefensiveBuildingsCounts = new Dictionary<UnitTypes, int>();
             macroData.BuildDefensiveBuildings = new Dictionary<UnitTypes, bool>();
+            macroData.DesiredDefensiveBuildingsAtDefensivePoint = new Dictionary<UnitTypes, int>();
+            macroData.DesiredDefensiveBuildingsAtEveryBase = new Dictionary<UnitTypes, int>();
+            macroData.DefensiveBuildingMaximumDistance = 10;
 
             if (macroData.Race == Race.Protoss)
             {
@@ -170,11 +173,19 @@ namespace Sharky.Builds
                     UnitTypes.TERRAN_MISSILETURRET, UnitTypes.TERRAN_BUNKER, UnitTypes.TERRAN_SENSORTOWER
                 };
             }
+            else if (macroData.Race == Race.Zerg)
+            {
+                macroData.DefensiveBuildings = new List<UnitTypes> {
+                    UnitTypes.ZERG_SPINECRAWLER, UnitTypes.ZERG_SPORECRAWLER
+                };
+            }
 
             foreach (var defensiveBuildingsType in macroData.DefensiveBuildings)
             {
-                macroData.DesiredDefensiveBuildingsCounts[defensiveBuildingsType] = 0;
+                macroData.DesiredDefensiveBuildingsCounts[defensiveBuildingsType] = 0;             
                 macroData.BuildDefensiveBuildings[defensiveBuildingsType] = false;
+                macroData.DesiredDefensiveBuildingsAtDefensivePoint[defensiveBuildingsType] = 0;
+                macroData.DesiredDefensiveBuildingsAtEveryBase[defensiveBuildingsType] = 0;
             }
         }
     }

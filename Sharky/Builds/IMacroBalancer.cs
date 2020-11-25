@@ -6,6 +6,7 @@
         void BalanceGases();
         void BalanceTech();
         void BalanceAddOns();
+        void BalanceDefensiveBuildings();
         void BalanceProduction();
         void BalanceProductionBuildings();
         void BalanceMorphs();

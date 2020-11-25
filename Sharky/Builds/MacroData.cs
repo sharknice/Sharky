@@ -25,6 +25,9 @@ namespace Sharky
         public List<UnitTypes> DefensiveBuildings;
         public Dictionary<UnitTypes, int> DesiredDefensiveBuildingsCounts;
         public Dictionary<UnitTypes, bool> BuildDefensiveBuildings;
+        public Dictionary<UnitTypes, int> DesiredDefensiveBuildingsAtDefensivePoint;
+        public Dictionary<UnitTypes, int> DesiredDefensiveBuildingsAtEveryBase;
+        public float DefensiveBuildingMaximumDistance { get; set; }
 
         public Dictionary<Upgrades, bool> DesiredUpgrades;
         public int DesiredGases;

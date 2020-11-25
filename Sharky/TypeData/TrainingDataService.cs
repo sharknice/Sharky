@@ -33,21 +33,21 @@ namespace Sharky.TypeData
 
                 { UnitTypes.TERRAN_SCV, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_COMMANDCENTER, UnitTypes.TERRAN_ORBITALCOMMAND, UnitTypes.TERRAN_PLANETARYFORTRESS }, Minerals = 50, Food = 1, Ability = Abilities.TRAIN_SCV } },
                 { UnitTypes.TERRAN_MARINE, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_BARRACKS }, Minerals = 50, Food = 1, Ability = Abilities.TRAIN_MARINE } },
-                { UnitTypes.TERRAN_MARAUDER, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_BARRACKS }, Minerals = 100, Gas = 25, Food = 2, Ability = Abilities.TRAIN_MARAUDER } },
+                { UnitTypes.TERRAN_MARAUDER, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_BARRACKS }, Minerals = 100, Gas = 25, Food = 2, Ability = Abilities.TRAIN_MARAUDER, RequiresTechLab = true } },
                 { UnitTypes.TERRAN_REAPER, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_BARRACKS }, Minerals = 50, Gas = 50, Food = 1, Ability = Abilities.TRAIN_REAPER } },
-                { UnitTypes.TERRAN_GHOST, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_BARRACKS }, Minerals = 150, Gas = 125, Food = 2, Ability = Abilities.TRAIN_GHOST } },
+                { UnitTypes.TERRAN_GHOST, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_BARRACKS }, Minerals = 150, Gas = 125, Food = 2, Ability = Abilities.TRAIN_GHOST, RequiresTechLab = true } },
                 { UnitTypes.TERRAN_HELLION, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_FACTORY }, Minerals = 100, Food = 2, Ability = Abilities.TRAIN_HELLION } },
-                { UnitTypes.TERRAN_HELLIONTANK, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_FACTORY }, Minerals = 100, Food = 2, Ability = Abilities.TRAIN_HELLION } },
-                { UnitTypes.TERRAN_CYCLONE, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_FACTORY }, Minerals = 150, Gas = 100, Food = 3, Ability = Abilities.TRAIN_CYCLONE } },
-                { UnitTypes.TERRAN_SIEGETANK, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_FACTORY }, Minerals = 150, Gas = 125, Food = 3, Ability = Abilities.TRAIN_SIEGETANK } },
+                { UnitTypes.TERRAN_HELLIONTANK, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_FACTORY }, Minerals = 100, Food = 2, Ability = Abilities.TRAIN_HELLBAT } },
+                { UnitTypes.TERRAN_CYCLONE, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_FACTORY }, Minerals = 150, Gas = 100, Food = 3, Ability = Abilities.TRAIN_CYCLONE, RequiresTechLab = true } },
+                { UnitTypes.TERRAN_SIEGETANK, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_FACTORY }, Minerals = 150, Gas = 125, Food = 3, Ability = Abilities.TRAIN_SIEGETANK, RequiresTechLab = true } },
                 { UnitTypes.TERRAN_WIDOWMINE, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_FACTORY }, Minerals = 75, Gas = 75, Food = 2, Ability = Abilities.TRAIN_WIDOWMINE } },
-                { UnitTypes.TERRAN_THOR, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_FACTORY }, Minerals = 300, Gas = 200, Food = 6, Ability = Abilities.TRAIN_THOR } },
+                { UnitTypes.TERRAN_THOR, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_FACTORY }, Minerals = 300, Gas = 200, Food = 6, Ability = Abilities.TRAIN_THOR, RequiresTechLab = true } },
                 { UnitTypes.TERRAN_VIKINGFIGHTER, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_STARPORT }, Minerals = 150, Gas = 75, Food = 2, Ability = Abilities.TRAIN_VIKINGFIGHTER } },
                 { UnitTypes.TERRAN_MEDIVAC, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_STARPORT }, Minerals = 100, Gas = 100, Food = 2, Ability = Abilities.TRAIN_MEDIVAC } },
                 { UnitTypes.TERRAN_LIBERATOR, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_STARPORT }, Minerals = 150, Gas = 150, Food = 3, Ability = Abilities.TRAIN_LIBERATOR } },
-                { UnitTypes.TERRAN_RAVEN, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_STARPORT }, Minerals = 100, Gas = 200, Food = 2, Ability = Abilities.TRAIN_RAVEN } },
-                { UnitTypes.TERRAN_BANSHEE, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_STARPORT }, Minerals = 150, Gas = 100, Food = 3, Ability = Abilities.TRAIN_BANSHEE } },
-                { UnitTypes.TERRAN_BATTLECRUISER, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_STARPORT }, Minerals = 400, Gas = 300, Food = 6, Ability = Abilities.TRAIN_BATTLECRUISER } }
+                { UnitTypes.TERRAN_RAVEN, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_STARPORT }, Minerals = 100, Gas = 200, Food = 2, Ability = Abilities.TRAIN_RAVEN, RequiresTechLab = true } },
+                { UnitTypes.TERRAN_BANSHEE, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_STARPORT }, Minerals = 150, Gas = 100, Food = 3, Ability = Abilities.TRAIN_BANSHEE, RequiresTechLab = true } },
+                { UnitTypes.TERRAN_BATTLECRUISER, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_STARPORT }, Minerals = 400, Gas = 300, Food = 6, Ability = Abilities.TRAIN_BATTLECRUISER, RequiresTechLab = true } }
             };
         }
     }

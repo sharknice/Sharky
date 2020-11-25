@@ -55,10 +55,10 @@ namespace Sharky.TypeData
                 { Upgrades.TERRANINFANTRYARMORSLEVEL2, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_ENGINEERINGBAY }, Minerals = 175, Gas = 175, Ability = Abilities.RESEARCH_TERRANINFANTRYARMORLEVEL2 } },
                 { Upgrades.TERRANINFANTRYARMORSLEVEL3, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_ENGINEERINGBAY }, Minerals = 250, Gas = 250, Ability = Abilities.RESEARCH_TERRANINFANTRYARMORLEVEL3 } },
                 { Upgrades.HISECAUTOTRACKING, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_ENGINEERINGBAY }, Minerals = 100, Gas = 100, Ability = Abilities.RESEARCH_HISECAUTOTRACKING } },
-                { Upgrades.NEOSTEELFRAME, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_ENGINEERINGBAY }, Minerals = 150, Gas = 150, Ability = Abilities.RESEARCH_NEOSTEELFRAME } },
+                { Upgrades.TERRANBUILDINGARMOR, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_ENGINEERINGBAY }, Minerals = 150, Gas = 150, Ability = Abilities.RESEARCH_TERRANSTRUCTUREARMORUPGRADE } },
 
                 { Upgrades.PERSONALCLOAKING, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_GHOSTACADEMY }, Minerals = 150, Gas = 150, Ability = Abilities.RESEARCH_PERSONALCLOAKING } },
-                { Upgrades.ENHANCEDMUNITIONS, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_GHOSTACADEMY }, Minerals = 150, Gas = 150, Ability = Abilities.RESEARCH_ENHANCEDMUNITIONS } },
+                { Upgrades.ENHANCEDSHOCKWAVES, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_GHOSTACADEMY }, Minerals = 150, Gas = 150, Ability = Abilities.RESEARCH_ENHANCEDSHOCKWAVES } },
 
                 { Upgrades.TERRANVEHICLEWEAPONSLEVEL1, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_ARMORY }, Minerals = 100, Gas = 100, Ability = Abilities.RESEARCH_TERRANVEHICLEWEAPONSLEVEL1 } },
                 { Upgrades.TERRANVEHICLEWEAPONSLEVEL2, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_ARMORY }, Minerals = 175, Gas = 175, Ability = Abilities.RESEARCH_TERRANVEHICLEWEAPONSLEVEL2 } },
@@ -71,15 +71,15 @@ namespace Sharky.TypeData
                 { Upgrades.TERRANVEHICLEANDSHIPARMORSLEVEL3, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_ARMORY }, Minerals = 250, Gas = 250, Ability = Abilities.RESEARCH_TERRANVEHICLEANDSHIPPLATINGLEVEL3 } },
 
                 { Upgrades.BATTLECRUISERENABLESPECIALIZATIONS, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_FUSIONCORE }, Minerals = 150, Gas = 150, Ability = Abilities.RESEARCH_BATTLECRUISERWEAPONREFIT } },
-                { Upgrades.LIBERATORAGRANGEUPGRADE, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_FUSIONCORE }, Minerals = 150, Gas = 150, Ability = Abilities.RESEARCH_ADVANCEDBALLISTICS } },
-                { Upgrades.MEDIVACINCREASESPEEDBOOST, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_FUSIONCORE }, Minerals = 100, Gas = 100, Ability = Abilities.RESEARCH_RAPIDFIRELAUNCHERS } },
+                { Upgrades.LIBERATORAGRANGEUPGRADE, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_FUSIONCORE }, Minerals = 150, Gas = 150, Ability = Abilities.RESEARCH_BALLISTICRANGE } },
+                { Upgrades.MEDIVACINCREASESPEEDBOOST, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_FUSIONCORE }, Minerals = 100, Gas = 100, Ability = Abilities.RESEARCH_RAPIDREIGNITIONSYSTEM } },
 
                 { Upgrades.SHIELDWALL, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_BARRACKSTECHLAB }, Minerals = 100, Gas = 100, Ability = Abilities.RESEARCH_COMBATSHIELD } },
                 { Upgrades.STIMPACK, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_BARRACKSTECHLAB }, Minerals = 100, Gas = 100, Ability = Abilities.RESEARCH_STIMPACK } },
-                { Upgrades.HIGHCAPACITYBARRELS, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_BARRACKSTECHLAB }, Minerals = 50, Gas = 50, Ability = Abilities.RESEARCH_CONCUSSIVESHELLS } },
+                { Upgrades.PUNISHERGRENADES, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_BARRACKSTECHLAB }, Minerals = 50, Gas = 50, Ability = Abilities.RESEARCH_CONCUSSIVESHELLS } },
 
-                { Upgrades.PUNISHERGRENADES, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_FACTORYTECHLAB }, Minerals = 100, Gas = 100, Ability = Abilities.RESEARCH_INFERNALPREIGNITER } },
-                { Upgrades.MAGFIELDLAUNCHERS, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_FACTORYTECHLAB }, Minerals = 100, Gas = 100, Ability = Abilities.RESEARCH_MAGFIELDLAUNCHERS } },
+                { Upgrades.HIGHCAPACITYBARRELS, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_FACTORYTECHLAB }, Minerals = 100, Gas = 100, Ability = Abilities.RESEARCH_INFERNALPREIGNITER } },
+                { Upgrades.CYCLONELOCKONDAMAGE, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_FACTORYTECHLAB }, Minerals = 100, Gas = 100, Ability = Abilities.RESEARCH_CYCLONELOCKONDAMAGE } },
                 { Upgrades.DRILLCLAWS, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_FACTORYTECHLAB }, Minerals = 75, Gas = 75, Ability = Abilities.RESEARCH_DRILLINGCLAWS } },
                 { Upgrades.SMARTSERVOS, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_FACTORYTECHLAB }, Minerals = 100, Gas = 100, Ability = Abilities.RESEARCH_SMARTSERVOS } },
 

@@ -77,6 +77,11 @@ namespace Sharky.Managers
 
             actions.AddRange(BuildTechBuildings());
             actions.AddRange(BuildAddOns());
+
+            actions.AddRange(BuildDefensiveBuildings());
+            actions.AddRange(BuildDefensiveBuildingsAtDefensivePoint());
+            actions.AddRange(BuildDefensiveBuildingsAtEveryBase());
+
             actions.AddRange(ResearchUpgrades());
             actions.AddRange(ProduceUnits());
 
@@ -95,7 +100,7 @@ namespace Sharky.Managers
 
                     if (!UnitManager.Commanders.Any(c => upgradeData.ProducingUnits.Contains((UnitTypes)c.Value.UnitCalculation.Unit.UnitType) && c.Value.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (int)upgradeData.Ability)))
                     {
-                        var building = UnitManager.Commanders.Where(c => upgradeData.ProducingUnits.Contains((UnitTypes)c.Value.UnitCalculation.Unit.UnitType) && !c.Value.UnitCalculation.Unit.IsActive && c.Value.UnitCalculation.Unit.BuildProgress == 1);
+                        var building = UnitManager.Commanders.Where(c => upgradeData.ProducingUnits.Contains((UnitTypes)c.Value.UnitCalculation.Unit.UnitType) && !c.Value.UnitCalculation.Unit.IsActive && c.Value.UnitCalculation.Unit.BuildProgress == 1 && c.Value.LastOrderFrame != MacroData.Frame);
                         if (building.Count() > 0)
                         {
                             if (upgradeData.Minerals <= MacroData.Minerals && upgradeData.Gas <= MacroData.VespeneGas)
@@ -121,6 +126,21 @@ namespace Sharky.Managers
                     if (unitData.Food <= MacroData.FoodLeft && unitData.Minerals <= MacroData.Minerals && unitData.Gas <= MacroData.VespeneGas)
                     {
                         var building = UnitManager.Commanders.Where(c => unitData.ProducingUnits.Contains((UnitTypes)c.Value.UnitCalculation.Unit.UnitType) && !c.Value.UnitCalculation.Unit.IsActive && c.Value.UnitCalculation.Unit.BuildProgress == 1 && c.Value.WarpInOffCooldown(MacroData.Frame, SharkyOptions.FramesPerSecond, UnitDataManager));
+                        
+                        if (unitData.RequiresTechLab)
+                        {
+                            building = building.Where(b => b.Value.UnitCalculation.Unit.HasAddOnTag && UnitDataManager.TechLabTypes.Contains((UnitTypes)UnitManager.SelfUnits[b.Value.UnitCalculation.Unit.AddOnTag].Unit.UnitType));
+                        }
+                        else if (building.Count() == 0)
+                        {
+                            if (unitData.ProducingUnits.Contains(UnitTypes.TERRAN_BARRACKS) || unitData.ProducingUnits.Contains(UnitTypes.TERRAN_FACTORY) || unitData.ProducingUnits.Contains(UnitTypes.TERRAN_STARPORT))
+                            {
+                                building = UnitManager.Commanders.Where(c => unitData.ProducingUnits.Contains((UnitTypes)c.Value.UnitCalculation.Unit.UnitType) && c.Value.UnitCalculation.Unit.IsActive && c.Value.UnitCalculation.Unit.BuildProgress == 1 && c.Value.UnitCalculation.Unit.HasAddOnTag && 
+                                    UnitDataManager.ReactorTypes.Contains((UnitTypes)UnitManager.SelfUnits[c.Value.UnitCalculation.Unit.AddOnTag].Unit.UnitType) && c.Value.UnitCalculation.Unit.Orders.Count() == 1);
+                            }
+                        }
+
+
                         if (building.Count() > 0)
                         {
                             if (building.First().Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_GATEWAY && UnitDataManager.ResearchedUpgrades.Contains((uint)Upgrades.WARPGATERESEARCH))
@@ -335,6 +355,81 @@ namespace Sharky.Managers
                         commands.Add(command);
                         return commands;
                     }
+                }
+            }
+
+            return commands;
+        }
+
+        private List<Action> BuildDefensiveBuildings()
+        {
+            var commands = new List<Action>();
+
+            foreach (var unit in MacroData.BuildDefensiveBuildings)
+            {
+                if (unit.Value)
+                {
+                    var unitData = UnitDataManager.BuildingData[unit.Key];
+                    var command = BuildingBuilder.BuildBuilding(MacroData, unit.Key, unitData, TargetingManager.DefensePoint);
+                    if (command != null)
+                    {
+                        commands.Add(command);
+                        return commands;
+                    }
+                }
+            }
+
+            return commands;
+        }
+
+        private List<Action> BuildDefensiveBuildingsAtDefensivePoint()
+        {
+            var commands = new List<Action>();
+
+            foreach (var unit in MacroData.DesiredDefensiveBuildingsAtDefensivePoint)
+            {
+                if (unit.Value > 0)
+                {
+                    var unitData = UnitDataManager.BuildingData[unit.Key];
+                    if (UnitManager.SelfUnits.Count(u => u.Value.Unit.UnitType == (uint)unit.Key && Vector2.DistanceSquared(new Vector2(u.Value.Unit.Pos.X, u.Value.Unit.Pos.Y), new Vector2(TargetingManager.DefensePoint.X, TargetingManager.DefensePoint.Y)) < MacroData.DefensiveBuildingMaximumDistance * MacroData.DefensiveBuildingMaximumDistance) + UnitManager.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability)) < unit.Value)
+                    {
+                        var command = BuildingBuilder.BuildBuilding(MacroData, unit.Key, unitData, TargetingManager.DefensePoint);
+                        if (command != null)
+                        {
+                            commands.Add(command);
+                            return commands;
+                        }
+                    }
+                }
+            }
+
+            return commands;
+        }
+
+        private List<Action> BuildDefensiveBuildingsAtEveryBase()
+        {
+            var commands = new List<Action>();
+
+            foreach (var unit in MacroData.DesiredDefensiveBuildingsAtEveryBase)
+            {
+                if (unit.Value > 0)
+                {
+                    var unitData = UnitDataManager.BuildingData[unit.Key];
+
+                    var orderedBuildings = UnitManager.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
+                    foreach (var baseLocation in BaseManager.SelfBases)
+                    {
+                        if (UnitManager.SelfUnits.Count(u => u.Value.Unit.UnitType == (uint)unit.Key && Vector2.DistanceSquared(new Vector2(u.Value.Unit.Pos.X, u.Value.Unit.Pos.Y), new Vector2(baseLocation.Location.X, baseLocation.Location.Y)) < MacroData.DefensiveBuildingMaximumDistance * MacroData.DefensiveBuildingMaximumDistance) + orderedBuildings < unit.Value)
+                        {
+                            var command = BuildingBuilder.BuildBuilding(MacroData, unit.Key, unitData, baseLocation.Location);
+                            if (command != null)
+                            {
+                                commands.Add(command);
+                                return commands;
+                            }
+                        }
+                    }
+
                 }
             }
 
