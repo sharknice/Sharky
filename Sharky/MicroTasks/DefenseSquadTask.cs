@@ -3,6 +3,7 @@ using Sharky.Managers;
 using Sharky.MicroControllers;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 
@@ -15,6 +16,8 @@ namespace Sharky.MicroTasks
         DefenseService DefenseService;
         IMicroController MicroController;
         bool Enabled { get; set; }
+
+        float lastFrameTime;
 
         public List<DesiredUnitsClaim> DesiredUnitsClaims { get; set; }
 
@@ -73,18 +76,34 @@ namespace Sharky.MicroTasks
         {
             if (Enabled)
             {
+                var actions = new List<SC2APIProtocol.Action>();
+
+                if (lastFrameTime > 5)
+                {
+                    lastFrameTime = 0;
+                    return actions;
+                }
+                var stopwatch = new Stopwatch();
+                stopwatch.Start();
+
                 var attackingEnemies = UnitManager.SelfUnits.Where(u => u.Value.UnitClassifications.Contains(UnitClassification.ResourceCenter) || u.Value.UnitClassifications.Contains(UnitClassification.ProductionStructure)).SelectMany(u => u.Value.NearbyEnemies).Distinct();
                 if (attackingEnemies.Count() > 0)
                 {
-                    return SplitDefenders(frame, attackingEnemies);
+                    actions = SplitDefenders(frame, attackingEnemies);
+                    stopwatch.Stop();
+                    lastFrameTime = stopwatch.ElapsedMilliseconds;
+                    return actions;
                 }
-                return MicroController.Retreat(UnitCommanders, TargetingManager.DefensePoint, TargetingManager.DefensePoint, frame);
+                actions = MicroController.Retreat(UnitCommanders, TargetingManager.DefensePoint, TargetingManager.DefensePoint, frame);
+                stopwatch.Stop();
+                lastFrameTime = stopwatch.ElapsedMilliseconds;
+                return actions;
             }
 
             return new List<SC2APIProtocol.Action>();
         }
 
-        private IEnumerable<Action> SplitDefenders(int frame, IEnumerable<UnitCalculation> attackingEnemies)
+        private List<Action> SplitDefenders(int frame, IEnumerable<UnitCalculation> attackingEnemies)
         {
             var actions = new List<SC2APIProtocol.Action>();
 

@@ -3,6 +3,7 @@ using Sharky.Managers;
 using Sharky.MicroControllers;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 
@@ -17,6 +18,8 @@ namespace Sharky.MicroTasks
         MacroData MacroData;
         AttackData AttackData;
 
+        float lastFrameTime;
+
         public AttackTask(IMicroController microController, ITargetingManager targetingManager, UnitManager unitManager, DefenseService defenseService, MacroData macroData, AttackData attackData, int priority)
         {
             MicroController = microController;
@@ -28,6 +31,8 @@ namespace Sharky.MicroTasks
             Priority = priority;
 
             UnitCommanders = new List<UnitCommander>();
+
+            lastFrameTime = 0;
         }
 
         public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
@@ -44,6 +49,16 @@ namespace Sharky.MicroTasks
 
         public override IEnumerable<SC2APIProtocol.Action> PerformActions(int frame)
         {
+            var actions = new List<SC2APIProtocol.Action>();
+
+            if (lastFrameTime > 5)
+            {
+                lastFrameTime = 0;
+                return actions;
+            }
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
             var vectors = UnitCommanders.Select(u => new Vector2(u.UnitCalculation.Unit.Pos.X, u.UnitCalculation.Unit.Pos.Y));
             if (vectors.Count() > 0)
             {
@@ -79,21 +94,30 @@ namespace Sharky.MicroTasks
                 var closerEnemies = attackingEnemies.Where(e => Vector2.DistanceSquared(new Vector2(e.Unit.Pos.X, e.Unit.Pos.Y), armyPoint) < distanceToAttackPoint);
                 if (closerEnemies.Count() > 0)
                 {
-                    return SplitArmy(frame, closerEnemies, attackPoint);
+                    actions = SplitArmy(frame, closerEnemies, attackPoint);
+                    stopwatch.Stop();
+                    lastFrameTime = stopwatch.ElapsedMilliseconds;
+                    return actions;
                 }
             }
 
             if (AttackData.Attacking)
             {
-                return MicroController.Attack(UnitCommanders, attackPoint, TargetingManager.DefensePoint, AttackData.ArmyPoint, frame);
+                actions = MicroController.Attack(UnitCommanders, attackPoint, TargetingManager.DefensePoint, AttackData.ArmyPoint, frame);
+                stopwatch.Stop();
+                lastFrameTime = stopwatch.ElapsedMilliseconds;
+                return actions;
             }
             else
             {
-                return MicroController.Retreat(UnitCommanders, TargetingManager.DefensePoint, AttackData.ArmyPoint, frame);
+                actions = MicroController.Retreat(UnitCommanders, TargetingManager.DefensePoint, AttackData.ArmyPoint, frame);
+                stopwatch.Stop();
+                lastFrameTime = stopwatch.ElapsedMilliseconds;
+                return actions;
             }
         }
 
-        IEnumerable<SC2APIProtocol.Action> SplitArmy(int frame, IEnumerable<UnitCalculation> closerEnemies, Point2D attackPoint)
+        List<SC2APIProtocol.Action> SplitArmy(int frame, IEnumerable<UnitCalculation> closerEnemies, Point2D attackPoint)
         {
             var actions = new List<SC2APIProtocol.Action>();
 

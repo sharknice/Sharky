@@ -353,7 +353,7 @@ namespace Sharky.Managers
                     if (command != null)
                     {
                         commands.Add(command);
-                        return commands;
+                        continue;
                     }
                 }
             }
