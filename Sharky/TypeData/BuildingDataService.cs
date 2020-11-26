@@ -8,7 +8,7 @@ namespace Sharky.TypeData
         {
             return new Dictionary<UnitTypes, BuildingTypeData>
             {
-                { UnitTypes.TERRAN_COMMANDCENTER, new BuildingTypeData { Ability = Abilities.BUILD_COMMANDCENTER, Size = 2, Minerals = 400 } },
+                { UnitTypes.TERRAN_COMMANDCENTER, new BuildingTypeData { Ability = Abilities.BUILD_COMMANDCENTER, Size = 5, Minerals = 400 } },
                 { UnitTypes.TERRAN_SUPPLYDEPOT, new BuildingTypeData { Ability = Abilities.BUILD_SUPPLYDEPOT, Size = 2, Minerals = 100 } },
                 { UnitTypes.TERRAN_REFINERY, new BuildingTypeData { Ability = Abilities.BUILD_REFINERY, Size = 3, Minerals = 75 } },
                 { UnitTypes.TERRAN_BARRACKS, new BuildingTypeData { Ability = Abilities.BUILD_BARRACKS, Size = 3, Minerals = 150 } },
@@ -36,7 +36,24 @@ namespace Sharky.TypeData
                 { UnitTypes.PROTOSS_ROBOTICSBAY, new BuildingTypeData { Ability = Abilities.BUILD_ROBOTICSBAY, Size = 3, Minerals = 200, Gas = 200 } },
                 { UnitTypes.PROTOSS_ROBOTICSFACILITY, new BuildingTypeData { Ability = Abilities.BUILD_ROBOTICSFACILITY, Size = 3, Minerals = 150, Gas = 100 } },
                 { UnitTypes.PROTOSS_CYBERNETICSCORE, new BuildingTypeData { Ability = Abilities.BUILD_CYBERNETICSCORE, Size = 3, Minerals = 150, } },
-                { UnitTypes.PROTOSS_SHIELDBATTERY, new BuildingTypeData { Ability = Abilities.BUILD_SHIELDBATTERY, Size = 2, Minerals = 100 } }
+                { UnitTypes.PROTOSS_SHIELDBATTERY, new BuildingTypeData { Ability = Abilities.BUILD_SHIELDBATTERY, Size = 2, Minerals = 100 } },
+
+                { UnitTypes.ZERG_HATCHERY, new BuildingTypeData { Ability = Abilities.BUILD_HATCHERY, Size = 5, Minerals = 300 } },
+                { UnitTypes.ZERG_SPAWNINGPOOL, new BuildingTypeData { Ability = Abilities.BUILD_SPAWNINGPOOL, Size = 3, Minerals = 200 } },
+                { UnitTypes.ZERG_EVOLUTIONCHAMBER, new BuildingTypeData { Ability = Abilities.BUILD_EVOLUTIONCHAMBER, Size = 3, Minerals = 75 } },
+                { UnitTypes.ZERG_ROACHWARREN, new BuildingTypeData { Ability = Abilities.BUILD_ROACHWARREN, Size = 3, Minerals = 150 } },
+                { UnitTypes.ZERG_BANELINGNEST, new BuildingTypeData { Ability = Abilities.BUILD_BANELINGNEST, Size = 3, Minerals = 100, Gas = 50 } },
+                { UnitTypes.ZERG_EXTRACTOR, new BuildingTypeData { Ability = Abilities.BUILD_EXTRACTOR, Size = 3, Minerals = 25 } },
+                { UnitTypes.ZERG_SPINECRAWLER, new BuildingTypeData { Ability = Abilities.BUILD_SPINECRAWLER, Size = 2, Minerals = 100 } },
+                { UnitTypes.ZERG_SPORECRAWLER, new BuildingTypeData { Ability = Abilities.BUILD_BANELINGNEST, Size = 2, Minerals = 75 } },
+                { UnitTypes.ZERG_INFESTATIONPIT, new BuildingTypeData { Ability = Abilities.BUILD_INFESTATIONPIT, Size = 3, Minerals = 100, Gas = 100 } },
+                { UnitTypes.ZERG_HYDRALISKDEN, new BuildingTypeData { Ability = Abilities.BUILD_HYDRALISKDEN, Size = 3, Minerals = 100, Gas = 100 } },
+                { UnitTypes.ZERG_SPIRE, new BuildingTypeData { Ability = Abilities.BUILD_SPIRE, Size = 3, Minerals = 200, Gas = 200 } },
+                { UnitTypes.ZERG_NYDUSNETWORK, new BuildingTypeData { Ability = Abilities.BUILD_BANELINGNEST, Size = 3, Minerals = 150, Gas = 150 } },
+                { UnitTypes.ZERG_NYDUSCANAL, new BuildingTypeData { Ability = Abilities.BUILD_BANELINGNEST, Size = 3, Minerals = 75, Gas = 75 } },
+                { UnitTypes.ZERG_LURKERDENMP, new BuildingTypeData { Ability = Abilities.MORPH_LURKERDEN, Size = 3, Minerals = 100, Gas = 150 } },
+                { UnitTypes.ZERG_ULTRALISKCAVERN, new BuildingTypeData { Ability = Abilities.BUILD_ULTRALISKCAVERN, Size = 3, Minerals = 150, Gas = 200 } },
+                { UnitTypes.ZERG_LARVA, new BuildingTypeData { Ability = Abilities.INVALID } },
             };
         }
     }

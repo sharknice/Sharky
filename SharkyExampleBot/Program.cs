@@ -6,6 +6,7 @@ using Sharky.Builds.BuildingPlacement;
 using Sharky.Builds.MacroServices;
 using Sharky.Builds.Protoss;
 using Sharky.Builds.Terran;
+using Sharky.Builds.Zerg;
 using Sharky.Chat;
 using Sharky.EnemyPlayer;
 using Sharky.EnemyStrategies;
@@ -31,7 +32,7 @@ namespace SharkyExampleBot
             var gameConnection = new GameConnection();
             var sharkyBot = CreateBot(gameConnection);
 
-            var myRace = Race.Protoss;
+            var myRace = Race.Zerg;
             if (args.Length == 0)
             {
                 gameConnection.RunSinglePlayer(sharkyBot, @"AutomatonLE.SC2Map", myRace, Race.Random, Difficulty.VeryEasy).Wait();
@@ -224,11 +225,30 @@ namespace SharkyExampleBot
                 ["Transition"] = terranSequences
             };
 
+            var basicZerglingRush = new BasicZerglingRush(buildOptions, macroData, unitManager, attackData, chatManager);
+             var zergBuilds = new Dictionary<string, ISharkyBuild>
+            {
+                [basicZerglingRush.Name()] = basicZerglingRush
+            };
+            var zergSequences = new List<List<string>>
+            {
+                new List<string> { basicZerglingRush.Name() }
+            };
+            var zergBuildSequences = new Dictionary<string, List<List<string>>>
+            {
+                [Race.Terran.ToString()] = zergSequences,
+                [Race.Zerg.ToString()] = zergSequences,
+                [Race.Protoss.ToString()] = zergSequences,
+                [Race.Random.ToString()] = zergSequences,
+                ["Transition"] = zergSequences
+            };
+
             var macroBalancer = new MacroBalancer(buildOptions, unitManager, macroData, unitDataManager);
             var buildChoices = new Dictionary<Race, BuildChoices>
             {
                 { Race.Protoss, new BuildChoices { Builds = protossBuilds, BuildSequences = protossBuildSequences } },
-                { Race.Terran, new BuildChoices { Builds = terranBuilds, BuildSequences = terranBuildSequences } }
+                { Race.Terran, new BuildChoices { Builds = terranBuilds, BuildSequences = terranBuildSequences } },
+                { Race.Zerg, new BuildChoices { Builds = zergBuilds, BuildSequences = zergBuildSequences } }
             };
             var buildDecisionService = new BuildDecisionService(chatManager);
             var buildManager = new BuildManager(buildChoices, debugManager, macroBalancer, buildDecisionService, enemyPlayerService, chatHistory, enemyStrategyHistory);

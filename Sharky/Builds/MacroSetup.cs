@@ -44,6 +44,14 @@ namespace Sharky.Builds
                 macroData.Units.AddRange(macroData.FactoryUnits);
                 macroData.Units.AddRange(macroData.StarportUnits);
             }
+            else
+            {
+                macroData.HatcheryUnits = new List<UnitTypes> { UnitTypes.ZERG_QUEEN };
+                macroData.LarvaUnits = new List<UnitTypes> { UnitTypes.ZERG_DRONE, UnitTypes.ZERG_ZERGLING, UnitTypes.ZERG_ROACH, UnitTypes.ZERG_HYDRALISK, UnitTypes.ZERG_INFESTOR, UnitTypes.ZERG_HYDRALISK, UnitTypes.ZERG_MUTALISK, UnitTypes.ZERG_CORRUPTOR, UnitTypes.ZERG_ULTRALISK, UnitTypes.ZERG_VIPER };
+
+                macroData.Units.AddRange(macroData.HatcheryUnits);
+                macroData.Units.AddRange(macroData.LarvaUnits);
+            }
 
             macroData.DesiredUnitCounts = new Dictionary<UnitTypes, int>();
             macroData.BuildUnits = new Dictionary<UnitTypes, bool>();
@@ -70,6 +78,12 @@ namespace Sharky.Builds
                     UnitTypes.TERRAN_COMMANDCENTER, UnitTypes.TERRAN_BARRACKS, UnitTypes.TERRAN_FACTORY, UnitTypes.TERRAN_STARPORT
                 };
             }
+            else
+            {
+                macroData.Production = new List<UnitTypes> {
+                    UnitTypes.ZERG_HATCHERY, UnitTypes.ZERG_LARVA
+                };
+            }
 
             foreach (var productionType in macroData.Production)
             {
@@ -85,7 +99,7 @@ namespace Sharky.Builds
             {
                 macroData.DesiredProductionCounts[UnitTypes.TERRAN_COMMANDCENTER] = 1;
             }
-            else if (macroData.Race == Race.Zerg)
+            else
             {
                 macroData.DesiredProductionCounts[UnitTypes.ZERG_HATCHERY] = 1;
             }
@@ -95,7 +109,11 @@ namespace Sharky.Builds
         {
             macroData.DesiredMorphCounts = new Dictionary<UnitTypes, int>();
             macroData.Morph = new Dictionary<UnitTypes, bool>();
-            if (macroData.Race == Race.Terran)
+            if (macroData.Race == Race.Protoss)
+            {
+                macroData.Morphs = new List<UnitTypes>();
+            }
+            else if (macroData.Race == Race.Terran)
             {
                 macroData.Morphs = new List<UnitTypes> {
                     UnitTypes.TERRAN_ORBITALCOMMAND, UnitTypes.TERRAN_PLANETARYFORTRESS
@@ -103,7 +121,9 @@ namespace Sharky.Builds
             }
             else
             {
-                macroData.Morphs = new List<UnitTypes>();
+                macroData.Morphs = new List<UnitTypes> {
+                    UnitTypes.ZERG_LAIR, UnitTypes.ZERG_HIVE, UnitTypes.ZERG_GREATERSPIRE
+                };
             }
 
             foreach (var productionType in macroData.Morphs)
@@ -128,6 +148,12 @@ namespace Sharky.Builds
             {
                 macroData.Tech = new List<UnitTypes> {
                     UnitTypes.TERRAN_ENGINEERINGBAY, UnitTypes.TERRAN_GHOSTACADEMY, UnitTypes.TERRAN_ARMORY, UnitTypes.TERRAN_FUSIONCORE
+                };
+            }
+            else
+            {
+                macroData.Tech = new List<UnitTypes> {
+                    UnitTypes.ZERG_SPAWNINGPOOL, UnitTypes.ZERG_ROACHWARREN, UnitTypes.ZERG_BANELINGNEST, UnitTypes.ZERG_EVOLUTIONCHAMBER, UnitTypes.ZERG_INFESTATIONPIT, UnitTypes.ZERG_HYDRALISKDEN, UnitTypes.ZERG_LURKERDENMP, UnitTypes.ZERG_ULTRALISKCAVERN
                 };
             }
 
@@ -183,7 +209,7 @@ namespace Sharky.Builds
                     UnitTypes.TERRAN_MISSILETURRET, UnitTypes.TERRAN_BUNKER, UnitTypes.TERRAN_SENSORTOWER
                 };
             }
-            else if (macroData.Race == Race.Zerg)
+            else
             {
                 macroData.DefensiveBuildings = new List<UnitTypes> {
                     UnitTypes.ZERG_SPINECRAWLER, UnitTypes.ZERG_SPORECRAWLER

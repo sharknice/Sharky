@@ -31,6 +31,10 @@ namespace Sharky.Builds
             {
                 BalanceSupplyDepots();
             }
+            else
+            {
+                BalanceOverlords();
+            }
         }
 
         void BalancePylons()
@@ -48,11 +52,22 @@ namespace Sharky.Builds
         {
             if (!BuildOptions.StrictSupplyCount)
             {
-                var productionCapacity = UnitManager.Count(UnitTypes.TERRAN_COMMANDCENTER) + UnitManager.Count(UnitTypes.TERRAN_ORBITALCOMMAND) + UnitManager.Count(UnitTypes.TERRAN_PLANETARYFORTRESS) + (UnitManager.Count(UnitTypes.TERRAN_BARRACKS) * 2) + (UnitManager.Count(UnitTypes.TERRAN_FACTORY) * 6) + (UnitManager.Count(UnitTypes.TERRAN_STARPORT) * 6);
+                var productionCapacity = UnitManager.EquivalentTypeCompleted(UnitTypes.TERRAN_COMMANDCENTER) + (UnitManager.Count(UnitTypes.TERRAN_BARRACKS) * 2) + (UnitManager.Count(UnitTypes.TERRAN_FACTORY) * 6) + (UnitManager.Count(UnitTypes.TERRAN_STARPORT) * 6);
                 MacroData.DesiredSupplyDepots = (int)Math.Ceiling(((MacroData.FoodUsed - (UnitManager.EquivalentTypeCount(UnitTypes.TERRAN_COMMANDCENTER) * 12)) / 8.0) + (productionCapacity / 8.0));
             }
 
             MacroData.BuildSupplyDepot = MacroData.DesiredSupplyDepots > UnitManager.EquivalentTypeCount(UnitTypes.TERRAN_SUPPLYDEPOT) + UnitManager.Commanders.Values.Count(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_SCV && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.BUILD_SUPPLYDEPOT));
+        }
+
+        void BalanceOverlords()
+        {
+            if (!BuildOptions.StrictSupplyCount)
+            {
+                var productionCapacity = UnitManager.EquivalentTypeCompleted(UnitTypes.ZERG_HATCHERY) * 8;
+                MacroData.DesiredOverlords = (int)Math.Ceiling(((MacroData.FoodUsed - (UnitManager.EquivalentTypeCompleted(UnitTypes.ZERG_HATCHERY) * 6)) / 8.0) + (productionCapacity / 8.0));
+            }
+
+            MacroData.BuildOverlord = MacroData.DesiredOverlords > UnitManager.Count(UnitTypes.ZERG_OVERLORD) + UnitManager.Commanders.Values.Count(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.ZERG_EGG && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.TRAIN_OVERLORD));
         }
 
         public void BalanceGases()
@@ -131,6 +146,10 @@ namespace Sharky.Builds
             {
                 BalanceTerranProduction();
             }
+            else
+            {
+                BalanceZergProduction();
+            }
 
             if (!BuildOptions.StrictWorkerCount)
             {
@@ -138,6 +157,10 @@ namespace Sharky.Builds
                 var completedResourceCenters = resourceCenters.Where(n => n.UnitCalculation.Unit.BuildProgress == 1);
                 var buildingResourceCentersCount = resourceCenters.Count(n => n.UnitCalculation.Unit.BuildProgress < 1);
                 var desiredWorkers = completedResourceCenters.Sum(n => n.UnitCalculation.Unit.IdealHarvesters + 4) + (buildingResourceCentersCount * 22) + 1; // +4 because 2 are inside the gases and you can't see them
+                if (desiredWorkers > 70)
+                {
+                    desiredWorkers = 70;
+                }
 
                 var workerType = UnitTypes.PROTOSS_PROBE;
                 if (MacroData.Race == Race.Terran)
@@ -148,7 +171,10 @@ namespace Sharky.Builds
                 {
                     workerType = UnitTypes.ZERG_DRONE;
                 }
-                if (UnitManager.Count(workerType) < desiredWorkers && UnitManager.Count(workerType) < 70)
+
+                MacroData.DesiredUnitCounts[workerType] = desiredWorkers;
+
+                if (UnitManager.Count(workerType) < desiredWorkers && UnitManager.Count(workerType) + UnitManager.UnitsInProgressCount(workerType) < 70)
                 {
                     MacroData.BuildUnits[workerType] = true;
                 }
@@ -251,6 +277,11 @@ namespace Sharky.Builds
             {
                 BalanceProduction(MacroData.StarportUnits);
             }
+        }
+
+        public void BalanceZergProduction()
+        {
+            BalanceProduction(MacroData.Units);
         }
 
         public void BalanceProduction(List<UnitTypes> unitTypes)

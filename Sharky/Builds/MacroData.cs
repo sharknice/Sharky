@@ -49,13 +49,18 @@ namespace Sharky
         public List<UnitTypes> FactoryUnits;
         public List<UnitTypes> StarportUnits;
 
+        public List<UnitTypes> HatcheryUnits;
+        public List<UnitTypes> LarvaUnits;
+
         public int DesiredPylons;
+        public bool BuildPylon;
         public int DesiredPylonsAtEveryBase;
         public int DesiredPylonsAtDefensivePoint;
         public int DesiredPylonsAtEveryMineralLine;
         public bool BuildSupplyDepot;
         public int DesiredSupplyDepots;
-        public bool BuildPylon;
+        public bool BuildOverlord;
+        public int DesiredOverlords;
 
         public int FoodUsed { get; set; }
         public int FoodLeft { get; set; }

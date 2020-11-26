@@ -126,7 +126,7 @@ namespace Sharky.Managers
                 if (unit.Value && unit.Key != UnitTypes.PROTOSS_ARCHON)
                 {
                     var unitData = UnitDataManager.TrainingData[unit.Key];
-                    if (unitData.Food <= MacroData.FoodLeft && unitData.Minerals <= MacroData.Minerals && unitData.Gas <= MacroData.VespeneGas)
+                    if ((unitData.Food == 0 || unitData.Food <= MacroData.FoodLeft) && unitData.Minerals <= MacroData.Minerals && unitData.Gas <= MacroData.VespeneGas)
                     {
                         var building = UnitManager.Commanders.Where(c => unitData.ProducingUnits.Contains((UnitTypes)c.Value.UnitCalculation.Unit.UnitType) && !c.Value.UnitCalculation.Unit.IsActive && c.Value.UnitCalculation.Unit.BuildProgress == 1 && c.Value.WarpInOffCooldown(MacroData.Frame, SharkyOptions.FramesPerSecond, UnitDataManager));
                         
@@ -275,6 +275,11 @@ namespace Sharky.Managers
                     commands.Add(command);
                     return commands;
                 }
+            }
+
+            if (MacroData.BuildOverlord)
+            {
+                MacroData.BuildUnits[UnitTypes.ZERG_OVERLORD] = true;
             }
 
             return commands;
