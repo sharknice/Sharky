@@ -3,6 +3,7 @@ using Sharky;
 using Sharky.Builds;
 using Sharky.Builds.BuildChoosing;
 using Sharky.Builds.BuildingPlacement;
+using Sharky.Builds.MacroServices;
 using Sharky.Builds.Protoss;
 using Sharky.Builds.Terran;
 using Sharky.Chat;
@@ -30,7 +31,7 @@ namespace SharkyExampleBot
             var gameConnection = new GameConnection();
             var sharkyBot = CreateBot(gameConnection);
 
-            var myRace = Race.Terran;
+            var myRace = Race.Protoss;
             if (args.Length == 0)
             {
                 gameConnection.RunSinglePlayer(sharkyBot, @"AutomatonLE.SC2Map", myRace, Race.Random, Difficulty.VeryEasy).Wait();
@@ -100,7 +101,9 @@ namespace SharkyExampleBot
             var warpInPlacement = new WarpInPlacement(unitManager, debugManager, mapData);
             var macroData = new MacroData();
             var morpher = new Morpher(unitManager, unitDataManager, sharkyOptions);
-            var macroManager = new MacroManager(macroSetup, unitManager, unitDataManager, buildingBuilder, sharkyOptions, baseManager, targetingManager, attackData, warpInPlacement, macroData, morpher);
+            var buildPylonService = new BuildPylonService(macroData, buildingBuilder, unitDataManager, unitManager, baseManager, targetingManager);
+            var buildDefenseService = new BuildDefenseService(macroData, buildingBuilder, unitDataManager, unitManager, baseManager, targetingManager);
+            var macroManager = new MacroManager(macroSetup, unitManager, unitDataManager, buildingBuilder, sharkyOptions, baseManager, targetingManager, attackData, warpInPlacement, macroData, morpher, buildPylonService, buildDefenseService);
             managers.Add(macroManager);
 
             var nexusManager = new NexusManager(unitManager, unitDataManager);
@@ -170,9 +173,11 @@ namespace SharkyExampleBot
             var nexusFirst = new NexusFirst(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager, protossCounterTransitioner);
             var robo = new Robo(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager);
             var protossRobo = new ProtossRobo(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager, sharkyOptions, microManager, enemyRaceManager);
+            var everyProtossUnit = new EveryProtossUnit(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager);
 
             var protossBuilds = new Dictionary<string, ISharkyBuild>
             {
+                [everyProtossUnit.Name()] = everyProtossUnit,
                 [nexusFirst.Name()] = nexusFirst,
                 [robo.Name()] = robo,
                 [protossRobo.Name()] = protossRobo,
@@ -181,9 +186,10 @@ namespace SharkyExampleBot
             };
             var protossSequences = new List<List<string>>
             {
-                new List<string> { nexusFirst.Name(), robo.Name(), protossRobo.Name() },
-                new List<string> { antiMassMarine.Name() },
-                new List<string> { fourGate.Name() }
+                new List<string> { everyProtossUnit.Name() },
+                //new List<string> { nexusFirst.Name(), robo.Name(), protossRobo.Name() },
+                //new List<string> { antiMassMarine.Name() },
+                //new List<string> { fourGate.Name() }
             };
             var protossBuildSequences = new Dictionary<string, List<List<string>>>
             {

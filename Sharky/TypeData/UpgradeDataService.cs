@@ -16,31 +16,40 @@ namespace Sharky.TypeData
         public Dictionary<Upgrades, TrainingTypeData> ProtossUpgradeData()
         {
             return new Dictionary<Upgrades, TrainingTypeData>
-            {
-                { Upgrades.WARPGATERESEARCH, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_CYBERNETICSCORE }, Minerals = 50, Gas = 50, Ability = Abilities.RESEARCH_WARPGATE } },
+            {             
                 { Upgrades.PROTOSSGROUNDWEAPONSLEVEL1, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_FORGE }, Minerals = 100, Gas = 100, Ability = Abilities.RESEARCH_PROTOSSGROUNDWEAPONSLEVEL1 } },
                 { Upgrades.PROTOSSGROUNDWEAPONSLEVEL2, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_FORGE }, Minerals = 150, Gas = 150, Ability = Abilities.RESEARCH_PROTOSSGROUNDWEAPONSLEVEL2 } },
                 { Upgrades.PROTOSSGROUNDWEAPONSLEVEL3, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_FORGE }, Minerals = 200, Gas = 200, Ability = Abilities.RESEARCH_PROTOSSGROUNDWEAPONSLEVEL3 } },
                 { Upgrades.PROTOSSGROUNDARMORSLEVEL1, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_FORGE }, Minerals = 100, Gas = 100, Ability = Abilities.RESEARCH_PROTOSSGROUNDARMORLEVEL1 } },
                 { Upgrades.PROTOSSGROUNDARMORSLEVEL2, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_FORGE }, Minerals = 150, Gas = 150, Ability = Abilities.RESEARCH_PROTOSSGROUNDARMORLEVEL2 } },
                 { Upgrades.PROTOSSGROUNDARMORSLEVEL3, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_FORGE }, Minerals = 200, Gas = 200, Ability = Abilities.RESEARCH_PROTOSSGROUNDARMORLEVEL3 } },
+                { Upgrades.PROTOSSSHIELDSLEVEL1, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_FORGE }, Minerals = 150, Gas = 150, Ability = Abilities.RESEARCH_PROTOSSSHIELDSLEVEL1 } },
+                { Upgrades.PROTOSSSHIELDSLEVEL2, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_FORGE }, Minerals = 225, Gas = 225, Ability = Abilities.RESEARCH_PROTOSSSHIELDSLEVEL2 } },
+                { Upgrades.PROTOSSSHIELDSLEVEL3, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_FORGE }, Minerals = 300, Gas = 300, Ability = Abilities.RESEARCH_PROTOSSSHIELDSLEVEL3 } },
+
+                { Upgrades.WARPGATERESEARCH, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_CYBERNETICSCORE }, Minerals = 50, Gas = 50, Ability = Abilities.RESEARCH_WARPGATE } },
                 { Upgrades.PROTOSSAIRWEAPONSLEVEL1, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_CYBERNETICSCORE }, Minerals = 100, Gas = 100, Ability = Abilities.RESEARCH_PROTOSSAIRWEAPONSLEVEL1 } },
                 { Upgrades.PROTOSSAIRWEAPONSLEVEL2, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_CYBERNETICSCORE }, Minerals = 175, Gas = 175, Ability = Abilities.RESEARCH_PROTOSSAIRWEAPONSLEVEL2 } },
                 { Upgrades.PROTOSSAIRWEAPONSLEVEL3, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_CYBERNETICSCORE }, Minerals = 250, Gas = 250, Ability = Abilities.RESEARCH_PROTOSSAIRWEAPONSLEVEL3 } },
                 { Upgrades.PROTOSSAIRARMORSLEVEL1, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_CYBERNETICSCORE }, Minerals = 150, Gas = 150, Ability = Abilities.RESEARCH_PROTOSSAIRARMORLEVEL1 } },
                 { Upgrades.PROTOSSAIRARMORSLEVEL2, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_CYBERNETICSCORE }, Minerals = 225, Gas = 225, Ability = Abilities.RESEARCH_PROTOSSAIRARMORLEVEL2 } },
                 { Upgrades.PROTOSSAIRARMORSLEVEL3, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_CYBERNETICSCORE }, Minerals = 300, Gas = 300, Ability = Abilities.RESEARCH_PROTOSSAIRARMORLEVEL3 } },
-                { Upgrades.PROTOSSSHIELDSLEVEL1, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_FORGE }, Minerals = 150, Gas = 150, Ability = Abilities.RESEARCH_PROTOSSSHIELDSLEVEL1 } },
-                { Upgrades.PROTOSSSHIELDSLEVEL2, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_FORGE }, Minerals = 225, Gas = 225, Ability = Abilities.RESEARCH_PROTOSSSHIELDSLEVEL2 } },
-                { Upgrades.PROTOSSSHIELDSLEVEL3, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_FORGE }, Minerals = 300, Gas = 300, Ability = Abilities.RESEARCH_PROTOSSSHIELDSLEVEL3 } },
+
                 { Upgrades.GRAVITICDRIVE, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_ROBOTICSBAY }, Minerals = 100, Gas = 100, Ability = Abilities.RESEARCH_GRAVITICDRIVE } },
                 { Upgrades.EXTENDEDTHERMALLANCE, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_ROBOTICSBAY }, Minerals = 150, Gas = 150, Ability = Abilities.RESEARCH_EXTENDEDTHERMALLANCE } },
+                { Upgrades.OBSERVERGRAVITICBOOSTER, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_ROBOTICSBAY }, Minerals = 100, Gas = 100, Ability = Abilities.RESEARCH_GRAVITICBOOSTER } },
+
                 { Upgrades.PSISTORMTECH, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_TEMPLARARCHIVE }, Minerals = 200, Gas = 200, Ability = Abilities.RESEARCH_PSISTORM } },
+
                 { Upgrades.DARKTEMPLARBLINKUPGRADE, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_DARKSHRINE }, Minerals = 200, Gas = 200, Ability = Abilities.RESEARCH_SHADOWSTRIKE } },
+
                 { Upgrades.BLINKTECH, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_TWILIGHTCOUNCIL }, Minerals = 150, Gas = 150, Ability = Abilities.RESEARCH_BLINK } },
                 { Upgrades.CHARGE, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_TWILIGHTCOUNCIL }, Minerals = 100, Gas = 100, Ability = Abilities.RESEARCH_CHARGE } },
+                { Upgrades.ADEPTPIERCINGATTACK, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_TWILIGHTCOUNCIL }, Minerals = 100, Gas = 100, Ability = Abilities.RESEARCH_ADEPTRESONATINGGLAIVES } },
+
                 { Upgrades.TECTONICDESTABILIZERS, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_FLEETBEACON }, Minerals = 150, Gas = 150, Ability = Abilities.RESEARCH_TECTONICDESTABILIZERS } },
-                { Upgrades.PHOENIXRANGEUPGRADE, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_FLEETBEACON }, Minerals = 150, Gas = 150, Ability = Abilities.RESEARCH_PHOENIXANIONPULSECRYSTALS } }
+                { Upgrades.PHOENIXRANGEUPGRADE, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_FLEETBEACON }, Minerals = 150, Gas = 150, Ability = Abilities.RESEARCH_PHOENIXANIONPULSECRYSTALS } },
+                { Upgrades.VOIDRAYSPEEDUPGRADE, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_FLEETBEACON }, Minerals = 150, Gas = 150, Ability = Abilities.RESEARCH_VOIDRAYSPEEDUPGRADE } },
             };
         }
 

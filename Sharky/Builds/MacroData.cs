@@ -27,7 +27,9 @@ namespace Sharky
         public Dictionary<UnitTypes, bool> BuildDefensiveBuildings;
         public Dictionary<UnitTypes, int> DesiredDefensiveBuildingsAtDefensivePoint;
         public Dictionary<UnitTypes, int> DesiredDefensiveBuildingsAtEveryBase;
+        public Dictionary<UnitTypes, int> DesiredDefensiveBuildingsAtEveryMineralLine;
         public float DefensiveBuildingMaximumDistance { get; set; }
+        public float DefensiveBuildingMineralLineMaximumDistance { get; set; }
 
         public Dictionary<Upgrades, bool> DesiredUpgrades;
         public int DesiredGases;
@@ -48,6 +50,9 @@ namespace Sharky
         public List<UnitTypes> StarportUnits;
 
         public int DesiredPylons;
+        public int DesiredPylonsAtEveryBase;
+        public int DesiredPylonsAtDefensivePoint;
+        public int DesiredPylonsAtEveryMineralLine;
         public bool BuildSupplyDepot;
         public int DesiredSupplyDepots;
         public bool BuildPylon;

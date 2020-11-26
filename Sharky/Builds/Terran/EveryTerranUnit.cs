@@ -79,6 +79,7 @@ namespace Sharky.Builds.Terran
                 MacroData.DesiredDefensiveBuildingsAtDefensivePoint[UnitTypes.TERRAN_BUNKER] = 1;
 
                 MacroData.DesiredDefensiveBuildingsAtEveryBase[UnitTypes.TERRAN_MISSILETURRET] = 1;
+                MacroData.DesiredDefensiveBuildingsAtEveryMineralLine[UnitTypes.TERRAN_MISSILETURRET] = 1;
 
                 MacroData.DesiredUpgrades[Upgrades.TERRANINFANTRYARMORSLEVEL1] = true;
                 MacroData.DesiredUpgrades[Upgrades.TERRANINFANTRYARMORSLEVEL2] = true;

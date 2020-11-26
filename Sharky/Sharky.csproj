@@ -14,4 +14,8 @@
     <ProjectReference Include="..\RawS2ClientProtocol\RawS2ClientProtocol.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Builds\Zerg\" />
+  </ItemGroup>
+
 </Project>

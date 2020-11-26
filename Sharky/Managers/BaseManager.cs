@@ -83,6 +83,7 @@ namespace Sharky.Managers
             foreach (var location in BaseLocations)
             {
                 DetermineFinalLocation(location, gasses);
+                SetMineralLineLocation(location);
             }
 
             var startingUnit = observation.Observation.RawData.Units.FirstOrDefault(u => u.Alliance == Alliance.Self && UnitDataManager.ResourceCenterTypes.Contains((UnitTypes)u.UnitType));
@@ -156,6 +157,12 @@ namespace Sharky.Managers
                     }
                 }
             }
+        }
+
+        void SetMineralLineLocation(BaseLocation baseLocation)
+        {
+            var vectors = baseLocation.MineralFields.Select(m => new Vector2(m.Pos.X, m.Pos.Y));
+            baseLocation.MineralLineLocation = new Point2D { X = vectors.Average(v => v.X), Y = vectors.Average(v => v.Y) };
         }
 
         void DetermineFinalLocation(BaseLocation baseLocation, List<Unit> gasses)

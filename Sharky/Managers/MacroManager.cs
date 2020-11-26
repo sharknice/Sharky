@@ -1,6 +1,7 @@
 ﻿using SC2APIProtocol;
 using Sharky.Builds;
 using Sharky.Builds.BuildingPlacement;
+using Sharky.Builds.MacroServices;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -20,8 +21,10 @@ namespace Sharky.Managers
         IBuildingPlacement WarpInPlacement;
         MacroData MacroData;
         Morpher Morpher;
+        BuildPylonService BuildPylonService;
+        BuildDefenseService BuildDefenseService;
 
-        public MacroManager(MacroSetup macroSetup, IUnitManager unitManager, UnitDataManager unitDataManager, BuildingBuilder buildingBuilder, SharkyOptions sharkyOptions, IBaseManager baseManager, TargetingManager targetingManager, AttackData attackData, IBuildingPlacement warpInPlacement, MacroData macroData, Morpher morpher)
+        public MacroManager(MacroSetup macroSetup, IUnitManager unitManager, UnitDataManager unitDataManager, BuildingBuilder buildingBuilder, SharkyOptions sharkyOptions, IBaseManager baseManager, TargetingManager targetingManager, AttackData attackData, IBuildingPlacement warpInPlacement, MacroData macroData, Morpher morpher, BuildPylonService buildPylonService, BuildDefenseService buildDefenseService)
         {
             MacroSetup = macroSetup;
             UnitManager = unitManager;
@@ -35,6 +38,8 @@ namespace Sharky.Managers
 
             MacroData = macroData;
             Morpher = morpher;
+            BuildPylonService = buildPylonService;
+            BuildDefenseService = buildDefenseService;
 
             MacroData.DesiredUpgrades = new Dictionary<Upgrades, bool>();
         }
@@ -63,24 +68,22 @@ namespace Sharky.Managers
             MacroData.VespeneGas = (int)observation.Observation.PlayerCommon.Vespene;
             MacroData.Frame = (int)observation.Observation.GameLoop;
 
-            // TODO: change pylonsinmineralline etc. to only build when you need a pylon anyways, unless toggle is off for it
-            //CannonsInMineralLine();
-            //CannonsAtProxy();
-            //CannonAtEveryBase();
-            //ShieldsAtExpansions();
-
+            actions.AddRange(BuildPylonService.BuildPylonsAtEveryMineralLine());
+            actions.AddRange(BuildPylonService.BuildPylonsAtDefensivePoint());
+            actions.AddRange(BuildPylonService.BuildPylonsAtEveryBase());
             actions.AddRange(BuildSupply());
 
+            actions.AddRange(BuildDefenseService.BuildDefensiveBuildingsAtEveryMineralLine());
+            actions.AddRange(BuildDefenseService.BuildDefensiveBuildingsAtDefensivePoint());
+            actions.AddRange(BuildDefenseService.BuildDefensiveBuildingsAtEveryBase());
+            actions.AddRange(BuildDefenseService.BuildDefensiveBuildings());
+
             actions.AddRange(BuildVespeneGas());
-            actions.AddRange(BuildProductionBuildings());
+
             actions.AddRange(MorphBuildings());
-
-            actions.AddRange(BuildTechBuildings());
             actions.AddRange(BuildAddOns());
-
-            actions.AddRange(BuildDefensiveBuildings());
-            actions.AddRange(BuildDefensiveBuildingsAtDefensivePoint());
-            actions.AddRange(BuildDefensiveBuildingsAtEveryBase());
+            actions.AddRange(BuildProductionBuildings());
+            actions.AddRange(BuildTechBuildings());
 
             actions.AddRange(ResearchUpgrades());
             actions.AddRange(ProduceUnits());
@@ -355,81 +358,6 @@ namespace Sharky.Managers
                         commands.Add(command);
                         continue;
                     }
-                }
-            }
-
-            return commands;
-        }
-
-        private List<Action> BuildDefensiveBuildings()
-        {
-            var commands = new List<Action>();
-
-            foreach (var unit in MacroData.BuildDefensiveBuildings)
-            {
-                if (unit.Value)
-                {
-                    var unitData = UnitDataManager.BuildingData[unit.Key];
-                    var command = BuildingBuilder.BuildBuilding(MacroData, unit.Key, unitData, TargetingManager.DefensePoint);
-                    if (command != null)
-                    {
-                        commands.Add(command);
-                        return commands;
-                    }
-                }
-            }
-
-            return commands;
-        }
-
-        private List<Action> BuildDefensiveBuildingsAtDefensivePoint()
-        {
-            var commands = new List<Action>();
-
-            foreach (var unit in MacroData.DesiredDefensiveBuildingsAtDefensivePoint)
-            {
-                if (unit.Value > 0)
-                {
-                    var unitData = UnitDataManager.BuildingData[unit.Key];
-                    if (UnitManager.SelfUnits.Count(u => u.Value.Unit.UnitType == (uint)unit.Key && Vector2.DistanceSquared(new Vector2(u.Value.Unit.Pos.X, u.Value.Unit.Pos.Y), new Vector2(TargetingManager.DefensePoint.X, TargetingManager.DefensePoint.Y)) < MacroData.DefensiveBuildingMaximumDistance * MacroData.DefensiveBuildingMaximumDistance) + UnitManager.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability)) < unit.Value)
-                    {
-                        var command = BuildingBuilder.BuildBuilding(MacroData, unit.Key, unitData, TargetingManager.DefensePoint);
-                        if (command != null)
-                        {
-                            commands.Add(command);
-                            return commands;
-                        }
-                    }
-                }
-            }
-
-            return commands;
-        }
-
-        private List<Action> BuildDefensiveBuildingsAtEveryBase()
-        {
-            var commands = new List<Action>();
-
-            foreach (var unit in MacroData.DesiredDefensiveBuildingsAtEveryBase)
-            {
-                if (unit.Value > 0)
-                {
-                    var unitData = UnitDataManager.BuildingData[unit.Key];
-
-                    var orderedBuildings = UnitManager.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
-                    foreach (var baseLocation in BaseManager.SelfBases)
-                    {
-                        if (UnitManager.SelfUnits.Count(u => u.Value.Unit.UnitType == (uint)unit.Key && Vector2.DistanceSquared(new Vector2(u.Value.Unit.Pos.X, u.Value.Unit.Pos.Y), new Vector2(baseLocation.Location.X, baseLocation.Location.Y)) < MacroData.DefensiveBuildingMaximumDistance * MacroData.DefensiveBuildingMaximumDistance) + orderedBuildings < unit.Value)
-                        {
-                            var command = BuildingBuilder.BuildBuilding(MacroData, unit.Key, unitData, baseLocation.Location);
-                            if (command != null)
-                            {
-                                commands.Add(command);
-                                return commands;
-                            }
-                        }
-                    }
-
                 }
             }
 

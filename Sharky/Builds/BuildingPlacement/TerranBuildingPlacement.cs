@@ -24,16 +24,19 @@ namespace Sharky.Builds.BuildingPlacement
             BuildingService = buildingService;
         }
 
-        public Point2D FindPlacement(Point2D target, UnitTypes unitType, int size)
+        public Point2D FindPlacement(Point2D target, UnitTypes unitType, int size, bool ignoreResourceProximity = false, float maxDistance = 50)
         {
+            var mineralProximity = 2;
+            if (ignoreResourceProximity) { mineralProximity = 0; };
+
             if (unitType == UnitTypes.TERRAN_BARRACKS || unitType == UnitTypes.TERRAN_FACTORY || unitType == UnitTypes.TERRAN_STARPORT)
             {
-                return FindProductionPlacement(target, size, 50);
+                return FindProductionPlacement(target, size, maxDistance, mineralProximity);
             }
-            return FindTechPlacement(target, size, 50);
+            return FindTechPlacement(target, size, maxDistance, mineralProximity);
         }
 
-        public Point2D FindTechPlacement(Point2D reference, float size, float maxDistance, float minimumMineralProximinity = 5)
+        public Point2D FindTechPlacement(Point2D reference, float size, float maxDistance, float minimumMineralProximinity = 2)
         {
             var x = reference.X;
             var y = reference.Y;
@@ -51,12 +54,20 @@ namespace Sharky.Builds.BuildingPlacement
                     if (BuildingService.AreaBuildable(point.X, point.Y, size / 2.0f) && !BuildingService.Blocked(point.X, point.Y, size / 2.0f))
                     {
                         var mineralFields = UnitManager.NeutralUnits.Where(u => UnitDataManager.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType));
-                        var clashes = mineralFields.Where(u => Vector2.DistanceSquared(new Vector2(u.Value.Unit.Pos.X, u.Value.Unit.Pos.Y), new Vector2(point.X, point.Y)) < (minimumMineralProximinity * minimumMineralProximinity));
+                        var squared = (1 + minimumMineralProximinity + (size/2f)) * (1 + minimumMineralProximinity + (size / 2f));
+                        var clashes = mineralFields.Where(u => Vector2.DistanceSquared(new Vector2(u.Value.Unit.Pos.X, u.Value.Unit.Pos.Y), new Vector2(point.X, point.Y)) < squared);
 
                         if (clashes.Count() == 0)
                         {
-                            DebugManager.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
-                            return point;
+                            var productionStructures = UnitManager.SelfUnits.Where(u => u.Value.Unit.UnitType == (uint)UnitTypes.TERRAN_BARRACKS || u.Value.Unit.UnitType == (uint)UnitTypes.TERRAN_FACTORY || u.Value.Unit.UnitType == (uint)UnitTypes.TERRAN_STARPORT);
+                            if (!productionStructures.Any(u => Vector2.DistanceSquared(new Vector2(u.Value.Unit.Pos.X, u.Value.Unit.Pos.Y), new Vector2(point.X, point.Y)) < 16))
+                            {
+                                if (Vector2.DistanceSquared(new Vector2(reference.X, reference.Y), new Vector2(point.X, point.Y)) <= maxDistance * maxDistance)
+                                {
+                                    DebugManager.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
+                                    return point;
+                                }
+                            }
                         }
                     }
 

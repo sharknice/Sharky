@@ -21,7 +21,7 @@ namespace Sharky.Builds
             UnitDataManager = unitDataManager;
         }
 
-        public Action BuildBuilding(MacroData macroData, UnitTypes unitType, BuildingTypeData unitData, Point2D generalLocation = null)
+        public Action BuildBuilding(MacroData macroData, UnitTypes unitType, BuildingTypeData unitData, Point2D generalLocation = null, bool ignoreMineralProximity = false, float maxDistance = 50)
         {
             if (unitData.Minerals <= macroData.Minerals && unitData.Gas <= macroData.VespeneGas)
             {
@@ -30,7 +30,7 @@ namespace Sharky.Builds
                 {
                     location = GetReferenceLocation(TargetingManager.SelfMainBasePoint);
                 }
-                var placementLocation = BuildingPlacement.FindPlacement(location, unitType, unitData.Size);
+                var placementLocation = BuildingPlacement.FindPlacement(location, unitType, unitData.Size, ignoreMineralProximity, maxDistance);
                 
                 if (placementLocation != null)
                 {
@@ -59,6 +59,7 @@ namespace Sharky.Builds
                     }
                 }
             }
+
             return null;
         }
 

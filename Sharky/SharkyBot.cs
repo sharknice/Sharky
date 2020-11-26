@@ -50,9 +50,12 @@ namespace Sharky
 
             try
             {
+                var managerStopwatch = new Stopwatch();
                 foreach (var manager in Managers)
                 {
+                    managerStopwatch.Restart();
                     Actions.AddRange(manager.OnFrame(observation));
+                    DebugManager.DrawText($"{manager.GetType().Name}: {managerStopwatch.ElapsedMilliseconds}");
                 }
             }
             catch (Exception exception)

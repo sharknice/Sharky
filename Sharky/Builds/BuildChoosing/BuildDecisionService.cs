@@ -158,7 +158,7 @@ namespace Sharky.Builds.BuildChoosing
             debugMessage.Add($"Chosen Build Sequence: {string.Join(" ", bestBuildSequence)}");
             Console.WriteLine($"Record: Wins: {bestRecord.Wins.Count()} Losses: {bestRecord.Losses.Count()} Ties: {bestRecord.Ties.Count()}");
             debugMessage.Add($"Record: Wins: {bestRecord.Wins.Count()} Losses: {bestRecord.Losses.Count()} Ties: {bestRecord.Ties.Count()}");
-            ChatManager.SendDebugChatMessages(debugMessage);
+            //ChatManager.SendDebugChatMessages(debugMessage);
 
             return bestBuildSequence;
         }

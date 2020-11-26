@@ -101,6 +101,10 @@ namespace Sharky.Builds
                     UnitTypes.TERRAN_ORBITALCOMMAND, UnitTypes.TERRAN_PLANETARYFORTRESS
                 };
             }
+            else
+            {
+                macroData.Morphs = new List<UnitTypes>();
+            }
 
             foreach (var productionType in macroData.Morphs)
             {
@@ -145,6 +149,10 @@ namespace Sharky.Builds
                     UnitTypes.TERRAN_BARRACKSREACTOR, UnitTypes.TERRAN_BARRACKSTECHLAB, UnitTypes.TERRAN_FACTORYREACTOR, UnitTypes.TERRAN_FACTORYTECHLAB, UnitTypes.TERRAN_STARPORTREACTOR, UnitTypes.TERRAN_STARPORTTECHLAB
                 };
             }
+            else
+            {
+                macroData.AddOns = new List<UnitTypes>();
+            }
 
             foreach (var techType in macroData.AddOns)
             {
@@ -159,7 +167,9 @@ namespace Sharky.Builds
             macroData.BuildDefensiveBuildings = new Dictionary<UnitTypes, bool>();
             macroData.DesiredDefensiveBuildingsAtDefensivePoint = new Dictionary<UnitTypes, int>();
             macroData.DesiredDefensiveBuildingsAtEveryBase = new Dictionary<UnitTypes, int>();
-            macroData.DefensiveBuildingMaximumDistance = 10;
+            macroData.DesiredDefensiveBuildingsAtEveryMineralLine = new Dictionary<UnitTypes, int>();
+            macroData.DefensiveBuildingMaximumDistance = 20;
+            macroData.DefensiveBuildingMineralLineMaximumDistance = 10;
 
             if (macroData.Race == Race.Protoss)
             {
@@ -186,6 +196,7 @@ namespace Sharky.Builds
                 macroData.BuildDefensiveBuildings[defensiveBuildingsType] = false;
                 macroData.DesiredDefensiveBuildingsAtDefensivePoint[defensiveBuildingsType] = 0;
                 macroData.DesiredDefensiveBuildingsAtEveryBase[defensiveBuildingsType] = 0;
+                macroData.DesiredDefensiveBuildingsAtEveryMineralLine[defensiveBuildingsType] = 0;
             }
         }
     }

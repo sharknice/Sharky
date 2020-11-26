@@ -26,7 +26,7 @@ namespace Sharky.Builds.BuildingPlacement
             UnitDataManager = unitDataManager;
         }
 
-        public Point2D FindPlacement(Point2D target, UnitTypes unitType, int size)
+        public Point2D FindPlacement(Point2D target, UnitTypes unitType, int size, bool ignoreResourceProximity = false, float maxDistance = 50)
         {
             if (unitType == UnitTypes.PROTOSS_NEXUS || unitType == UnitTypes.TERRAN_COMMANDCENTER || unitType == UnitTypes.ZERG_HATCHERY)
             {
@@ -35,15 +35,15 @@ namespace Sharky.Builds.BuildingPlacement
 
             if (UnitDataManager.TerranTypes.Contains(unitType))
             {
-                return TerranBuildingPlacement.FindPlacement(target, unitType, size);
+                return TerranBuildingPlacement.FindPlacement(target, unitType, size, ignoreResourceProximity, maxDistance);
             }
             else if (UnitDataManager.ProtossTypes.Contains(unitType))
             {
-                return ProtossBuildingPlacement.FindPlacement(target, unitType, size);
+                return ProtossBuildingPlacement.FindPlacement(target, unitType, size, ignoreResourceProximity, maxDistance);
             }
             else
             {
-                return ZergBuildingPlacement.FindPlacement(target, unitType, size);
+                return ZergBuildingPlacement.FindPlacement(target, unitType, size, ignoreResourceProximity, maxDistance);
             }          
         }
 
