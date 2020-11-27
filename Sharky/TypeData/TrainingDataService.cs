@@ -61,6 +61,10 @@ namespace Sharky.TypeData
                 { UnitTypes.ZERG_CORRUPTOR, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.ZERG_LARVA }, Minerals = 150, Gas = 100, Food = 2, Ability = Abilities.TRAIN_CORRUPTOR } },
                 { UnitTypes.ZERG_VIPER, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.ZERG_LARVA }, Minerals = 100, Gas = 75, Food = 3, Ability = Abilities.TRAIN_VIPER } },
                 { UnitTypes.ZERG_ULTRALISK, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.ZERG_LARVA }, Minerals = 300, Gas = 200, Food = 6, Ability = Abilities.TRAIN_ULTRALISK } },
+
+                { UnitTypes.ZERG_BANELING, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.ZERG_ZERGLING }, Minerals = 25, Gas = 25, Ability = Abilities.TRAIN_BANELING } },
+                { UnitTypes.ZERG_RAVAGER, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.ZERG_ROACH }, Minerals = 25, Gas = 75, Food = 1, Ability = Abilities.MORPH_RAVAGER } },
+                { UnitTypes.ZERG_LURKERMP, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.ZERG_HYDRALISK }, Minerals = 50, Gas = 100, Food = 1, Ability = Abilities.MORPH_LURKER } },
             };
         }
     }

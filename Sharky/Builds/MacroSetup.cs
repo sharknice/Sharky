@@ -51,6 +51,9 @@ namespace Sharky.Builds
 
                 macroData.Units.AddRange(macroData.HatcheryUnits);
                 macroData.Units.AddRange(macroData.LarvaUnits);
+                macroData.Units.Add(UnitTypes.ZERG_BANELING);
+                macroData.Units.Add(UnitTypes.ZERG_RAVAGER);
+                macroData.Units.Add(UnitTypes.ZERG_LURKERMP);
             }
 
             macroData.DesiredUnitCounts = new Dictionary<UnitTypes, int>();
