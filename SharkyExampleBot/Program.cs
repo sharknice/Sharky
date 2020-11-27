@@ -229,13 +229,16 @@ namespace SharkyExampleBot
             };
 
             var basicZerglingRush = new BasicZerglingRush(buildOptions, macroData, unitManager, attackData, chatManager, microManager);
-             var zergBuilds = new Dictionary<string, ISharkyBuild>
+            var everyZergUnit = new EveryZergUnit(buildOptions, macroData, unitManager, attackData, chatManager);
+            var zergBuilds = new Dictionary<string, ISharkyBuild>
             {
+                [everyZergUnit.Name()] = everyZergUnit,
                 [basicZerglingRush.Name()] = basicZerglingRush
             };
             var zergSequences = new List<List<string>>
             {
-                new List<string> { basicZerglingRush.Name() }
+                new List<string> { everyZergUnit.Name() },
+                new List<string> { basicZerglingRush.Name(), everyZergUnit.Name() }
             };
             var zergBuildSequences = new Dictionary<string, List<List<string>>>
             {

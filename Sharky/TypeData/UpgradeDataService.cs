@@ -102,7 +102,45 @@ namespace Sharky.TypeData
         {
             return new Dictionary<Upgrades, TrainingTypeData>
             {
+                { Upgrades.BURROW, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.ZERG_HATCHERY, UnitTypes.ZERG_LAIR, UnitTypes.ZERG_HIVE }, Minerals = 100, Gas = 100, Ability = Abilities.RESEARCH_BURROW } },
+                { Upgrades.OVERLORDSPEED, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.ZERG_HATCHERY, UnitTypes.ZERG_LAIR, UnitTypes.ZERG_HIVE }, Minerals = 100, Gas = 100, Ability = Abilities.RESEARCH_PNEUMATIZEDCARAPACE } },
+
                 { Upgrades.ZERGLINGMOVEMENTSPEED, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.ZERG_SPAWNINGPOOL }, Minerals = 100, Gas = 100, Ability = Abilities.RESEARCH_ZERGLINGMETABOLICBOOST } },
+                { Upgrades.ZERGLINGATTACKSPEED, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.ZERG_SPAWNINGPOOL }, Minerals = 200, Gas = 200, Ability = Abilities.RESEARCH_ZERGLINGADRENALGLANDS } },
+
+                { Upgrades.ZERGMELEEWEAPONSLEVEL1, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.ZERG_EVOLUTIONCHAMBER }, Minerals = 100, Gas = 100, Ability = Abilities.RESEARCH_ZERGMELEEWEAPONSLEVEL1 } },
+                { Upgrades.ZERGMELEEWEAPONSLEVEL2, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.ZERG_EVOLUTIONCHAMBER }, Minerals = 150, Gas = 150, Ability = Abilities.RESEARCH_ZERGMELEEWEAPONSLEVEL2 } },
+                { Upgrades.ZERGMELEEWEAPONSLEVEL3, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.ZERG_EVOLUTIONCHAMBER }, Minerals = 200, Gas = 200, Ability = Abilities.RESEARCH_ZERGMELEEWEAPONSLEVEL3 } },
+                { Upgrades.ZERGMISSILEWEAPONSLEVEL1, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.ZERG_EVOLUTIONCHAMBER }, Minerals = 100, Gas = 100, Ability = Abilities.RESEARCH_ZERGMISSILEWEAPONSLEVEL1 } },
+                { Upgrades.ZERGMISSILEWEAPONSLEVEL2, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.ZERG_EVOLUTIONCHAMBER }, Minerals = 150, Gas = 150, Ability = Abilities.RESEARCH_ZERGMISSILEWEAPONSLEVEL2 } },
+                { Upgrades.ZERGMISSILEWEAPONSLEVEL3, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.ZERG_EVOLUTIONCHAMBER }, Minerals = 200, Gas = 200, Ability = Abilities.RESEARCH_ZERGMISSILEWEAPONSLEVEL3 } },
+                { Upgrades.ZERGGROUNDARMORSLEVEL1, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.ZERG_EVOLUTIONCHAMBER }, Minerals = 150, Gas = 150, Ability = Abilities.RESEARCH_ZERGGROUNDARMORLEVEL1 } },
+                { Upgrades.ZERGGROUNDARMORSLEVEL2, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.ZERG_EVOLUTIONCHAMBER }, Minerals = 225, Gas = 225, Ability = Abilities.RESEARCH_ZERGGROUNDARMORLEVEL2 } },
+                { Upgrades.ZERGGROUNDARMORSLEVEL3, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.ZERG_EVOLUTIONCHAMBER }, Minerals = 300, Gas = 300, Ability = Abilities.RESEARCH_ZERGGROUNDARMORLEVEL3 } },
+
+                { Upgrades.GLIALRECONSTITUTION, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.ZERG_ROACHWARREN }, Minerals = 100, Gas = 100, Ability = Abilities.RESEARCH_GLIALREGENERATION } },
+                { Upgrades.TUNNELINGCLAWS, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.ZERG_ROACHWARREN }, Minerals = 100, Gas = 100, Ability = Abilities.RESEARCH_TUNNELINGCLAWS } },
+
+                { Upgrades.CENTRIFICALHOOKS, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.ZERG_BANELINGNEST }, Minerals = 150, Gas = 150, Ability = Abilities.RESEARCH_CENTRIFUGALHOOKS } },
+
+                { Upgrades.INFESTORENERGYUPGRADE, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.ZERG_INFESTATIONPIT }, Minerals = 150, Gas = 150, Ability = Abilities.RESEARCH_PATHOGENGLANDS } },
+                { Upgrades.NEURALPARASITE, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.ZERG_INFESTATIONPIT }, Minerals = 150, Gas = 150, Ability = Abilities.EFFECT_NEURALPARASITE } },
+
+                { Upgrades.EVOLVEGROOVEDSPINES, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.ZERG_HYDRALISKDEN }, Minerals = 100, Gas = 100, Ability = Abilities.RESEARCH_GROOVEDSPINES } },
+                { Upgrades.EVOLVEMUSCULARAUGMENTS, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.ZERG_HYDRALISKDEN }, Minerals = 100, Gas = 100, Ability = Abilities.RESEARCH_MUSCULARAUGMENTS } },
+
+                { Upgrades.ZERGFLYERARMORSLEVEL1, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.ZERG_SPIRE, UnitTypes.ZERG_GREATERSPIRE }, Minerals = 150, Gas = 150, Ability = Abilities.RESEARCH_ZERGFLYERARMORLEVEL1 } },
+                { Upgrades.ZERGFLYERARMORSLEVEL2, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.ZERG_SPIRE, UnitTypes.ZERG_GREATERSPIRE }, Minerals = 225, Gas = 225, Ability = Abilities.RESEARCH_ZERGFLYERARMORLEVEL2 } },
+                { Upgrades.ZERGFLYERARMORSLEVEL3, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.ZERG_SPIRE, UnitTypes.ZERG_GREATERSPIRE }, Minerals = 300, Gas = 300, Ability = Abilities.RESEARCH_ZERGFLYERARMORLEVEL3 } },
+                { Upgrades.ZERGFLYERWEAPONSLEVEL1, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.ZERG_SPIRE, UnitTypes.ZERG_GREATERSPIRE }, Minerals = 100, Gas = 100, Ability = Abilities.RESEARCH_ZERGFLYERATTACKLEVEL1 } },
+                { Upgrades.ZERGFLYERWEAPONSLEVEL2, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.ZERG_SPIRE, UnitTypes.ZERG_GREATERSPIRE }, Minerals = 175, Gas = 175, Ability = Abilities.RESEARCH_ZERGFLYERATTACKLEVEL2 } },
+                { Upgrades.ZERGFLYERWEAPONSLEVEL3, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.ZERG_SPIRE, UnitTypes.ZERG_GREATERSPIRE }, Minerals = 250, Gas = 250, Ability = Abilities.RESEARCH_ZERGFLYERATTACKLEVEL3 } },
+
+                { Upgrades.LURKERSPEED, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.ZERG_LURKERDENMP }, Minerals = 150, Gas = 150, Ability = Abilities.RESEARCH_ADAPTIVETALONS } },
+                { Upgrades.LURKERRANGE, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.ZERG_LURKERDENMP }, Minerals = 150, Gas = 150, Ability = Abilities.RESEARCH_LURKERRANGE } },
+
+                { Upgrades.CHITINOUSPLATING, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.ZERG_ULTRALISKCAVERN }, Minerals = 150, Gas = 150, Ability = Abilities.RESEARCH_CHITINOUSPLATING } },
+                { Upgrades.ANABOLICSYNTHESIS, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.ZERG_ULTRALISKCAVERN }, Minerals = 150, Gas = 150, Ability = Abilities.RESEARCH_ANABOLICSYNTHESIS } }
             };
         }
     }

@@ -1,0 +1,222 @@
+﻿using SC2APIProtocol;
+using Sharky.Managers;
+
+namespace Sharky.Builds.Zerg
+{
+    public class EveryZergUnit : ZergSharkyBuild
+    {
+        public EveryZergUnit(BuildOptions buildOptions, MacroData macroData, UnitManager unitManager, AttackData attackData, IChatManager chatManager) : base(buildOptions, macroData, unitManager, attackData, chatManager)
+        {
+        }
+
+        public override void OnFrame(ResponseObservation observation)
+        {
+            if (MacroData.FoodUsed >= 15)
+            {
+                if (MacroData.DesiredTechCounts[UnitTypes.ZERG_SPAWNINGPOOL] < 1)
+                {
+                    MacroData.DesiredTechCounts[UnitTypes.ZERG_SPAWNINGPOOL] = 1;
+                }
+                if (MacroData.DesiredProductionCounts[UnitTypes.ZERG_HATCHERY] < 2)
+                {
+                    MacroData.DesiredProductionCounts[UnitTypes.ZERG_HATCHERY] = 2;
+                }
+                if (MacroData.DesiredTechCounts[UnitTypes.ZERG_EVOLUTIONCHAMBER] < 1)
+                {
+                    MacroData.DesiredTechCounts[UnitTypes.ZERG_EVOLUTIONCHAMBER] = 1;
+                }
+                MacroData.DesiredUpgrades[Upgrades.ZERGLINGMOVEMENTSPEED] = true;
+                MacroData.DesiredUpgrades[Upgrades.BURROW] = true;
+            }
+
+            if (UnitManager.Completed(UnitTypes.ZERG_SPAWNINGPOOL) > 0)
+            {
+                if (MacroData.DesiredTechCounts[UnitTypes.ZERG_BANELINGNEST] < 1)
+                {
+                    MacroData.DesiredTechCounts[UnitTypes.ZERG_BANELINGNEST] = 1;
+                }
+                if (MacroData.DesiredTechCounts[UnitTypes.ZERG_ROACHWARREN] < 1)
+                {
+                    MacroData.DesiredTechCounts[UnitTypes.ZERG_ROACHWARREN] = 1;
+                }
+                if (MacroData.DesiredMorphCounts[UnitTypes.ZERG_LAIR] < 1)
+                {
+                    MacroData.DesiredMorphCounts[UnitTypes.ZERG_LAIR] = 1;
+                }
+
+                if (MacroData.DesiredUnitCounts[UnitTypes.ZERG_ZERGLING] < 1)
+                {
+                    MacroData.DesiredUnitCounts[UnitTypes.ZERG_ZERGLING] = 1;
+                }
+                if (MacroData.DesiredUnitCounts[UnitTypes.ZERG_QUEEN] < 1)
+                {
+                    MacroData.DesiredUnitCounts[UnitTypes.ZERG_QUEEN] = 1;
+                }
+
+                if (MacroData.DesiredDefensiveBuildingsCounts[UnitTypes.ZERG_SPINECRAWLER] < 1)
+                {
+                    MacroData.DesiredDefensiveBuildingsCounts[UnitTypes.ZERG_SPINECRAWLER] = 1;
+                }
+                if (MacroData.DesiredDefensiveBuildingsCounts[UnitTypes.ZERG_SPORECRAWLER] < 1)
+                {
+                    MacroData.DesiredDefensiveBuildingsCounts[UnitTypes.ZERG_SPORECRAWLER] = 1;
+                }
+
+                MacroData.DesiredDefensiveBuildingsAtDefensivePoint[UnitTypes.ZERG_SPORECRAWLER] = 1;
+                MacroData.DesiredDefensiveBuildingsAtDefensivePoint[UnitTypes.ZERG_SPINECRAWLER] = 1;
+
+                MacroData.DesiredDefensiveBuildingsAtEveryBase[UnitTypes.ZERG_SPORECRAWLER] = 1;
+                MacroData.DesiredDefensiveBuildingsAtEveryMineralLine[UnitTypes.ZERG_SPORECRAWLER] = 1;
+
+                MacroData.DesiredUpgrades[Upgrades.OVERLORDSPEED] = true;
+            }
+
+            if (UnitManager.Completed(UnitTypes.ZERG_ROACHWARREN) > 0)
+            {
+                if (MacroData.DesiredUnitCounts[UnitTypes.ZERG_ROACH] < 1)
+                {
+                    MacroData.DesiredUnitCounts[UnitTypes.ZERG_ROACH] = 1;
+                }
+                if (MacroData.DesiredUnitCounts[UnitTypes.ZERG_RAVAGER] < 1)
+                {
+                    MacroData.DesiredUnitCounts[UnitTypes.ZERG_RAVAGER] = 1;
+                }
+
+                MacroData.DesiredUpgrades[Upgrades.GLIALRECONSTITUTION] = true;
+                MacroData.DesiredUpgrades[Upgrades.TUNNELINGCLAWS] = true;
+            }
+
+            if (UnitManager.Completed(UnitTypes.ZERG_BANELINGNEST) > 0)
+            {
+                if (MacroData.DesiredUnitCounts[UnitTypes.ZERG_BANELING] < 1)
+                {
+                    MacroData.DesiredUnitCounts[UnitTypes.ZERG_BANELING] = 1;
+                }
+
+                MacroData.DesiredUpgrades[Upgrades.CENTRIFICALHOOKS] = true;
+            }
+
+            if (UnitManager.Completed(UnitTypes.ZERG_LAIR) > 0)
+            {
+                if (MacroData.DesiredTechCounts[UnitTypes.ZERG_HYDRALISKDEN] < 1)
+                {
+                    MacroData.DesiredTechCounts[UnitTypes.ZERG_HYDRALISKDEN] = 1;
+                }
+                if (MacroData.DesiredTechCounts[UnitTypes.ZERG_SPIRE] < 1)
+                {
+                    MacroData.DesiredTechCounts[UnitTypes.ZERG_SPIRE] = 1;
+                }
+                if (MacroData.DesiredTechCounts[UnitTypes.ZERG_INFESTATIONPIT] < 1)
+                {
+                    MacroData.DesiredTechCounts[UnitTypes.ZERG_INFESTATIONPIT] = 1;
+                }
+                if (MacroData.DesiredProductionCounts[UnitTypes.ZERG_NYDUSNETWORK] < 1)
+                {
+                    MacroData.DesiredProductionCounts[UnitTypes.ZERG_NYDUSNETWORK] = 1;
+                }
+            }
+
+            if (UnitManager.Completed(UnitTypes.ZERG_INFESTATIONPIT) > 0)
+            {
+                if (MacroData.DesiredUnitCounts[UnitTypes.ZERG_INFESTOR] < 1)
+                {
+                    MacroData.DesiredUnitCounts[UnitTypes.ZERG_INFESTOR] = 1;
+                }
+                if (MacroData.DesiredUnitCounts[UnitTypes.ZERG_SWARMHOSTMP] < 1)
+                {
+                    MacroData.DesiredUnitCounts[UnitTypes.ZERG_SWARMHOSTMP] = 1;
+                }
+
+                MacroData.DesiredUpgrades[Upgrades.INFESTORENERGYUPGRADE] = true;
+                MacroData.DesiredUpgrades[Upgrades.NEURALPARASITE] = true;
+
+                if (MacroData.DesiredMorphCounts[UnitTypes.ZERG_HIVE] < 1)
+                {
+                    MacroData.DesiredMorphCounts[UnitTypes.ZERG_HIVE] = 1;
+                }
+            }
+
+            if (UnitManager.EquivalentTypeCompleted(UnitTypes.ZERG_HYDRALISKDEN) > 1)
+            {
+                if (MacroData.DesiredUnitCounts[UnitTypes.ZERG_HYDRALISK] < 1)
+                {
+                    MacroData.DesiredUnitCounts[UnitTypes.ZERG_HYDRALISK] = 1;
+                }
+
+                MacroData.DesiredUpgrades[Upgrades.EVOLVEGROOVEDSPINES] = true;
+                MacroData.DesiredUpgrades[Upgrades.EVOLVEMUSCULARAUGMENTS] = true;
+            }
+
+            if (UnitManager.Completed(UnitTypes.ZERG_SPIRE) > 0)
+            {
+                if (MacroData.DesiredUnitCounts[UnitTypes.ZERG_MUTALISK] < 1)
+                {
+                    MacroData.DesiredUnitCounts[UnitTypes.ZERG_MUTALISK] = 1;
+                }
+                if (MacroData.DesiredUnitCounts[UnitTypes.ZERG_CORRUPTOR] < 1)
+                {
+                    MacroData.DesiredUnitCounts[UnitTypes.ZERG_CORRUPTOR] = 1;
+                }
+
+                MacroData.DesiredUpgrades[Upgrades.ZERGFLYERARMORSLEVEL1] = true;
+                MacroData.DesiredUpgrades[Upgrades.ZERGFLYERARMORSLEVEL2] = true;
+                MacroData.DesiredUpgrades[Upgrades.ZERGFLYERARMORSLEVEL3] = true;
+                MacroData.DesiredUpgrades[Upgrades.ZERGFLYERWEAPONSLEVEL1] = true;
+                MacroData.DesiredUpgrades[Upgrades.ZERGFLYERWEAPONSLEVEL2] = true;
+                MacroData.DesiredUpgrades[Upgrades.ZERGFLYERWEAPONSLEVEL3] = true;
+
+                if (MacroData.DesiredMorphCounts[UnitTypes.ZERG_GREATERSPIRE] < 1)
+                {
+                    MacroData.DesiredMorphCounts[UnitTypes.ZERG_GREATERSPIRE] = 1;
+                }
+            }
+
+            if (UnitManager.Completed(UnitTypes.ZERG_HIVE) > 0)
+            {
+                if (MacroData.DesiredUnitCounts[UnitTypes.ZERG_VIPER] < 1)
+                {
+                    MacroData.DesiredUnitCounts[UnitTypes.ZERG_VIPER] = 1;
+                }
+                MacroData.DesiredUpgrades[Upgrades.ZERGLINGATTACKSPEED] = true;
+            }
+
+            if (UnitManager.Completed(UnitTypes.ZERG_LURKERDENMP) > 0)
+            {
+                if (MacroData.DesiredUnitCounts[UnitTypes.ZERG_LURKERMP] < 1)
+                {
+                    MacroData.DesiredUnitCounts[UnitTypes.ZERG_LURKERMP] = 1;
+                }
+
+                MacroData.DesiredUpgrades[Upgrades.LURKERRANGE] = true;
+                MacroData.DesiredUpgrades[Upgrades.LURKERSPEED] = true;
+            }
+
+            if (UnitManager.Completed(UnitTypes.ZERG_ULTRALISKCAVERN) > 0)
+            {
+                if (MacroData.DesiredUnitCounts[UnitTypes.ZERG_ULTRALISK] < 1)
+                {
+                    MacroData.DesiredUnitCounts[UnitTypes.ZERG_ULTRALISK] = 1;
+                }
+
+                MacroData.DesiredUpgrades[Upgrades.ANABOLICSYNTHESIS] = true;
+                MacroData.DesiredUpgrades[Upgrades.CHITINOUSPLATING] = true;
+            }
+
+            if (UnitManager.Completed(UnitTypes.ZERG_GREATERSPIRE) > 0)
+            {
+                if (MacroData.DesiredUnitCounts[UnitTypes.ZERG_BROODLORD] < 1)
+                {
+                    MacroData.DesiredUnitCounts[UnitTypes.ZERG_BROODLORD] = 1;
+                }
+            }
+
+            if (MacroData.Minerals > 500)
+            {
+                if (MacroData.DesiredProductionCounts[UnitTypes.ZERG_HATCHERY] <= UnitManager.EquivalentTypeCount(UnitTypes.ZERG_HATCHERY))
+                {
+                    MacroData.DesiredProductionCounts[UnitTypes.ZERG_HATCHERY]++;
+                }
+            }
+        }
+    }
+}
