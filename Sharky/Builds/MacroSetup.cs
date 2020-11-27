@@ -47,7 +47,7 @@ namespace Sharky.Builds
             else
             {
                 macroData.HatcheryUnits = new List<UnitTypes> { UnitTypes.ZERG_QUEEN };
-                macroData.LarvaUnits = new List<UnitTypes> { UnitTypes.ZERG_DRONE, UnitTypes.ZERG_ZERGLING, UnitTypes.ZERG_ROACH, UnitTypes.ZERG_HYDRALISK, UnitTypes.ZERG_INFESTOR, UnitTypes.ZERG_HYDRALISK, UnitTypes.ZERG_MUTALISK, UnitTypes.ZERG_CORRUPTOR, UnitTypes.ZERG_ULTRALISK, UnitTypes.ZERG_VIPER };
+                macroData.LarvaUnits = new List<UnitTypes> { UnitTypes.ZERG_OVERLORD, UnitTypes.ZERG_DRONE, UnitTypes.ZERG_ZERGLING, UnitTypes.ZERG_ROACH, UnitTypes.ZERG_HYDRALISK, UnitTypes.ZERG_INFESTOR, UnitTypes.ZERG_HYDRALISK, UnitTypes.ZERG_MUTALISK, UnitTypes.ZERG_CORRUPTOR, UnitTypes.ZERG_ULTRALISK, UnitTypes.ZERG_VIPER };
 
                 macroData.Units.AddRange(macroData.HatcheryUnits);
                 macroData.Units.AddRange(macroData.LarvaUnits);

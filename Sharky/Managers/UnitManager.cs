@@ -157,7 +157,8 @@ namespace Sharky.Managers
                     }
                 }
 
-                selfUnit.Value.Attackers = new List<UnitCalculation>(); //GetTargettedAttacks(selfUnit.Value).ToList();
+                //selfUnit.Value.Attackers = new List<UnitCalculation>();
+                selfUnit.Value.Attackers = GetTargettedAttacks(selfUnit.Value).ToList();
             }
 
             return new List<SC2APIProtocol.Action>();

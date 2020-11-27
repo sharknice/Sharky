@@ -58,27 +58,6 @@ namespace Sharky
             Unit = unit;
             UnitTypeData = unitDataManager.UnitData[(UnitTypes)unit.UnitType];
 
-            UnitClassifications = new List<UnitClassification>();
-            if (UnitTypeData.Attributes.Contains(SC2APIProtocol.Attribute.Structure))
-            {
-                if (unitDataManager.ResourceCenterTypes.Contains((UnitTypes)unit.UnitType))
-                {
-                    UnitClassifications.Add(UnitClassification.ResourceCenter);
-                }
-            }
-            else if (unit.UnitType == (uint)UnitTypes.TERRAN_SCV || unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE || unit.UnitType == (uint)UnitTypes.ZERG_DRONE)
-            {
-                UnitClassifications.Add(UnitClassification.Worker);
-            }
-            else if (unit.UnitType == (uint)UnitTypes.ZERG_QUEEN || unit.UnitType == (uint)UnitTypes.TERRAN_MULE)
-            {
-
-            }
-            else
-            {
-                UnitClassifications.Add(UnitClassification.ArmyUnit);
-            }
-
             var unitRange = unitDataManager.GetRange(unit);
             if (unitRange == 0)
             {
@@ -89,10 +68,10 @@ namespace Sharky
                 Range = unitRange + unit.Radius;
             }
 
-            var endX = (float)Math.Sin(unit.Facing) * Range;
-            var endY = (float)Math.Cos(unit.Facing) * Range;
+            var endX = (float)Math.Cos(unit.Facing) * Range;
+            var endY = (float)Math.Sin(unit.Facing) * Range;
             Start = new Vector2(unit.Pos.X, unit.Pos.Y);
-            End = new Vector2(endX + unit.Pos.X, endY + unit.Pos.Y);
+            End = new Vector2(endX + unit.Pos.X, endY - unit.Pos.Y);
 
             DamageRadius = 1; // TODO: get damage radius
             EstimatedCooldown = 0; // TODO: get estimated cooldown
@@ -161,6 +140,27 @@ namespace Sharky
             }
 
             Attributes = UnitTypeData.Attributes;
+
+            UnitClassifications = new List<UnitClassification>();
+            if (UnitTypeData.Attributes.Contains(SC2APIProtocol.Attribute.Structure))
+            {
+                if (unitDataManager.ResourceCenterTypes.Contains((UnitTypes)unit.UnitType))
+                {
+                    UnitClassifications.Add(UnitClassification.ResourceCenter);
+                }
+            }
+            else if (unit.UnitType == (uint)UnitTypes.TERRAN_SCV || unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE || unit.UnitType == (uint)UnitTypes.ZERG_DRONE)
+            {
+                UnitClassifications.Add(UnitClassification.Worker);
+            }
+            else if (unit.UnitType == (uint)UnitTypes.ZERG_QUEEN || unit.UnitType == (uint)UnitTypes.TERRAN_MULE)
+            {
+
+            }
+            else if (Damage > 0)
+            {
+                UnitClassifications.Add(UnitClassification.ArmyUnit);
+            }
 
             EnemiesInRange = new List<UnitCalculation>();
             EnemiesInRangeOf = new List<UnitCalculation>();

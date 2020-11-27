@@ -17,6 +17,7 @@ using Sharky.Managers;
 using Sharky.Managers.Protoss;
 using Sharky.MicroControllers;
 using Sharky.MicroControllers.Protoss;
+using Sharky.MicroControllers.Zerg;
 using Sharky.MicroTasks;
 using Sharky.Pathing;
 using Sharky.TypeData;
@@ -124,14 +125,16 @@ namespace SharkyExampleBot
 
             var individualMicroController = new IndividualMicroController(mapDataService, unitDataManager, unitManager, debugManager, noPathFinder, sharkyOptions, MicroPriority.LiveAndAttack, false);
         
-            var zealotMicroController = new ZealotMicroController(mapDataService, unitDataManager, unitManager, debugManager, noPathFinder, sharkyOptions, MicroPriority.AttackForward, true);
+            var zealotMicroController = new ZealotMicroController(mapDataService, unitDataManager, unitManager, debugManager, noPathFinder, sharkyOptions, MicroPriority.AttackForward, false);
             var sentryMicroController = new SentryMicroController(mapDataService, unitDataManager, unitManager, debugManager, noPathFinder, sharkyOptions, MicroPriority.StayOutOfRange, true);
             var observerMicroController = new IndividualMicroController(mapDataService, unitDataManager, unitManager, debugManager, noPathFinder, sharkyOptions, MicroPriority.StayOutOfRange, true);
+            var zerglingMicroController = new ZerglingMicroController(mapDataService, unitDataManager, unitManager, debugManager, noPathFinder, sharkyOptions, MicroPriority.AttackForward, false);
             var individualMicroControllers = new Dictionary<UnitTypes, IIndividualMicroController>
             {
                 { UnitTypes.PROTOSS_ZEALOT, zealotMicroController },
                 { UnitTypes.PROTOSS_SENTRY, sentryMicroController },
-                { UnitTypes.PROTOSS_OBSERVER, observerMicroController }
+                { UnitTypes.PROTOSS_OBSERVER, observerMicroController },
+                { UnitTypes.ZERG_ZERGLING, zerglingMicroController }
             };
 
             var defenseService = new DefenseService(unitManager);
@@ -225,7 +228,7 @@ namespace SharkyExampleBot
                 ["Transition"] = terranSequences
             };
 
-            var basicZerglingRush = new BasicZerglingRush(buildOptions, macroData, unitManager, attackData, chatManager);
+            var basicZerglingRush = new BasicZerglingRush(buildOptions, macroData, unitManager, attackData, chatManager, microManager);
              var zergBuilds = new Dictionary<string, ISharkyBuild>
             {
                 [basicZerglingRush.Name()] = basicZerglingRush

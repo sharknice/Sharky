@@ -102,6 +102,7 @@ namespace Sharky.TypeData
         {
             return new Dictionary<Upgrades, TrainingTypeData>
             {
+                { Upgrades.ZERGLINGMOVEMENTSPEED, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.ZERG_SPAWNINGPOOL }, Minerals = 100, Gas = 100, Ability = Abilities.RESEARCH_ZERGLINGMETABOLICBOOST } },
             };
         }
     }
