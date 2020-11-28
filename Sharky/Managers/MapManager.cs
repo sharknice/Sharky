@@ -40,7 +40,7 @@ namespace Sharky.Managers
                     var walkable = GetDataValueBit(pathingGrid, x, y);
                     var height = GetDataValueByte(heightGrid, x, y);
                     var placeable = GetDataValueBit(placementGrid, x, y);
-                    row[y] = new MapCell { X = x, Y = y, Walkable = walkable, TerrainHeight = height, Buildable = placeable, CurrentlyBuildable = placeable, EnemyAirDpsInRange = 0, EnemyGroundDpsInRange = 0, InEnemyVision = false, InSelfVision = false, NumberOfAllies = 0, NumberOfEnemies = 0, PoweredBySelfPylon = false, SelfAirDpsInRange = 0, SelfGroundDpsInRange = 0 };
+                    row[y] = new MapCell { X = x, Y = y, Walkable = walkable, TerrainHeight = height, Buildable = placeable, HasCreep = false, CurrentlyBuildable = placeable, EnemyAirDpsInRange = 0, EnemyGroundDpsInRange = 0, InEnemyVision = false, InSelfVision = false, NumberOfAllies = 0, NumberOfEnemies = 0, PoweredBySelfPylon = false, SelfAirDpsInRange = 0, SelfGroundDpsInRange = 0 };
                 }
                 MapData.Map[x] = row;
             }
@@ -48,14 +48,8 @@ namespace Sharky.Managers
 
         public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
         {
-            var visiblilityMap = observation.Observation.RawData.MapState.Visibility;
-            for (var x = 0; x < visiblilityMap.Size.X; x++)
-            {
-                for (var y = 0; y < visiblilityMap.Size.Y; y++)
-                {
-                    MapData.Map[x][y].InSelfVision = GetDataValueByte(visiblilityMap, x, y) == 2; // 2 is fully visible
-                }
-            }
+            UpdateVisibility(observation.Observation.RawData.MapState.Visibility);
+            UpdateCreep(observation.Observation.RawData.MapState.Creep);
 
             //MillisecondsUntilUpdate -= (1 / shark.FramesPerSecond) * 1000;
             //if (MillisecondsUntilUpdate > 0) { return new List<SC2APIProtocol.Action>(); }
@@ -80,6 +74,28 @@ namespace Sharky.Managers
             //LastVisibleEnemyUnitCount = currentVisibleEnemyUnitCount;
 
             return new List<SC2APIProtocol.Action>();
+        }
+
+        void UpdateCreep(ImageData creep)
+        {
+            for (var x = 0; x < creep.Size.X; x++)
+            {
+                for (var y = 0; y < creep.Size.Y; y++)
+                {
+                    MapData.Map[x][y].HasCreep = GetDataValueBit(creep, x, y);
+                }
+            }
+        }
+
+        void UpdateVisibility(ImageData visiblilityMap)
+        {
+            for (var x = 0; x < visiblilityMap.Size.X; x++)
+            {
+                for (var y = 0; y < visiblilityMap.Size.Y; y++)
+                {
+                    MapData.Map[x][y].InSelfVision = GetDataValueByte(visiblilityMap, x, y) == 2; // 2 is fully visible
+                }
+            }
         }
 
         bool GetDataValueBit(ImageData data, int x, int y)

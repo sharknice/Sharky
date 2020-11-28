@@ -51,7 +51,7 @@ namespace Sharky.TypeData
                 { UnitTypes.ZERG_SPIRE, new BuildingTypeData { Ability = Abilities.BUILD_SPIRE, Size = 3, Minerals = 200, Gas = 200 } },
                 { UnitTypes.ZERG_NYDUSNETWORK, new BuildingTypeData { Ability = Abilities.BUILD_NYDUSNETWORK, Size = 3, Minerals = 150, Gas = 150 } },
                 { UnitTypes.ZERG_NYDUSCANAL, new BuildingTypeData { Ability = Abilities.BUILD_NYDUSWORM, Size = 3, Minerals = 75, Gas = 75 } },
-                { UnitTypes.ZERG_LURKERDENMP, new BuildingTypeData { Ability = Abilities.MORPH_LURKERDEN, Size = 3, Minerals = 100, Gas = 150 } },
+                { UnitTypes.ZERG_LURKERDENMP, new BuildingTypeData { Ability = Abilities.BUILD_LURKERDEN, Size = 3, Minerals = 100, Gas = 150 } },
                 { UnitTypes.ZERG_ULTRALISKCAVERN, new BuildingTypeData { Ability = Abilities.BUILD_ULTRALISKCAVERN, Size = 3, Minerals = 150, Gas = 200 } },
                 { UnitTypes.ZERG_LARVA, new BuildingTypeData { Ability = Abilities.INVALID } },
             };

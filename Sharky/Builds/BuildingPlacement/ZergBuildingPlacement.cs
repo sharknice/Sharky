@@ -6,14 +6,14 @@ using System.Numerics;
 
 namespace Sharky.Builds.BuildingPlacement
 {
-    public class TerranBuildingPlacement : IBuildingPlacement
+    public class ZergBuildingPlacement : IBuildingPlacement
     {
         UnitManager UnitManager;
         UnitDataManager UnitDataManager;
         DebugManager DebugManager;
         BuildingService BuildingService;
 
-        public TerranBuildingPlacement(UnitManager unitManager, UnitDataManager unitDataManager, DebugManager debugManager, BuildingService buildingService)
+        public ZergBuildingPlacement(UnitManager unitManager, UnitDataManager unitDataManager, DebugManager debugManager, BuildingService buildingService)
         {
             UnitManager = unitManager;
             UnitDataManager = unitDataManager;
@@ -26,10 +26,6 @@ namespace Sharky.Builds.BuildingPlacement
             var mineralProximity = 2;
             if (ignoreResourceProximity) { mineralProximity = 0; };
 
-            if (unitType == UnitTypes.TERRAN_BARRACKS || unitType == UnitTypes.TERRAN_FACTORY || unitType == UnitTypes.TERRAN_STARPORT)
-            {
-                return FindProductionPlacement(target, size, maxDistance, mineralProximity);
-            }
             return FindTechPlacement(target, size, maxDistance, mineralProximity);
         }
 
@@ -48,10 +44,10 @@ namespace Sharky.Builds.BuildingPlacement
                 while (angle + (sliceSize / 2) < fullCircle)
                 {
                     var point = new Point2D { X = x + (float)(radius * Math.Cos(angle)), Y = y + (float)(radius * Math.Sin(angle)) };
-                    if (BuildingService.AreaBuildable(point.X, point.Y, size / 2.0f) && !BuildingService.Blocked(point.X, point.Y, size / 2.0f) && !BuildingService.HasCreep(point.X, point.Y, size / 2.0f))
+                    if (BuildingService.HasCreep(point.X, point.Y, size / 2.0f) && BuildingService.AreaBuildable(point.X, point.Y, size / 2.0f) && !BuildingService.Blocked(point.X, point.Y, size / 2.0f))
                     {
                         var mineralFields = UnitManager.NeutralUnits.Where(u => UnitDataManager.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType));
-                        var squared = (1 + minimumMineralProximinity + (size/2f)) * (1 + minimumMineralProximinity + (size / 2f));
+                        var squared = (1 + minimumMineralProximinity + (size / 2f)) * (1 + minimumMineralProximinity + (size / 2f));
                         var clashes = mineralFields.Where(u => Vector2.DistanceSquared(new Vector2(u.Value.Unit.Pos.X, u.Value.Unit.Pos.Y), new Vector2(point.X, point.Y)) < squared);
 
                         if (clashes.Count() == 0)
@@ -74,11 +70,6 @@ namespace Sharky.Builds.BuildingPlacement
             }
 
             return null;
-        }
-
-        public Point2D FindProductionPlacement(Point2D reference, float size, float maxDistance, float minimumMineralProximinity = 5)
-        {
-            return FindTechPlacement(reference, size + 4f, maxDistance, minimumMineralProximinity); // add to the radius to make room for the addon and completed units to exist
         }
     }
 }

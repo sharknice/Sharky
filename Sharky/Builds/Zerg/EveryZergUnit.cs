@@ -71,6 +71,19 @@ namespace Sharky.Builds.Zerg
                 MacroData.DesiredUpgrades[Upgrades.OVERLORDSPEED] = true;
             }
 
+            if (UnitManager.Completed(UnitTypes.ZERG_EVOLUTIONCHAMBER) > 0)
+            {
+                MacroData.DesiredUpgrades[Upgrades.ZERGMELEEWEAPONSLEVEL1] = true;
+                MacroData.DesiredUpgrades[Upgrades.ZERGMELEEWEAPONSLEVEL2] = true;
+                MacroData.DesiredUpgrades[Upgrades.ZERGMELEEWEAPONSLEVEL3] = true;
+                MacroData.DesiredUpgrades[Upgrades.ZERGMISSILEWEAPONSLEVEL1] = true;
+                MacroData.DesiredUpgrades[Upgrades.ZERGMISSILEWEAPONSLEVEL2] = true;
+                MacroData.DesiredUpgrades[Upgrades.ZERGMISSILEWEAPONSLEVEL3] = true;
+                MacroData.DesiredUpgrades[Upgrades.ZERGGROUNDARMORSLEVEL1] = true;
+                MacroData.DesiredUpgrades[Upgrades.ZERGGROUNDARMORSLEVEL2] = true;
+                MacroData.DesiredUpgrades[Upgrades.ZERGGROUNDARMORSLEVEL3] = true;
+            }
+
             if (UnitManager.Completed(UnitTypes.ZERG_ROACHWARREN) > 0)
             {
                 if (MacroData.DesiredUnitCounts[UnitTypes.ZERG_ROACH] < 1)
@@ -136,7 +149,7 @@ namespace Sharky.Builds.Zerg
                 }
             }
 
-            if (UnitManager.EquivalentTypeCompleted(UnitTypes.ZERG_HYDRALISKDEN) > 1)
+            if (UnitManager.EquivalentTypeCompleted(UnitTypes.ZERG_HYDRALISKDEN) > 0)
             {
                 if (MacroData.DesiredUnitCounts[UnitTypes.ZERG_HYDRALISK] < 1)
                 {
@@ -178,6 +191,15 @@ namespace Sharky.Builds.Zerg
                     MacroData.DesiredUnitCounts[UnitTypes.ZERG_VIPER] = 1;
                 }
                 MacroData.DesiredUpgrades[Upgrades.ZERGLINGATTACKSPEED] = true;
+
+                if (MacroData.DesiredTechCounts[UnitTypes.ZERG_ULTRALISKCAVERN] < 1)
+                {
+                    MacroData.DesiredTechCounts[UnitTypes.ZERG_ULTRALISKCAVERN] = 1;
+                }
+                if (MacroData.DesiredTechCounts[UnitTypes.ZERG_LURKERDENMP] < 1)
+                {
+                    MacroData.DesiredTechCounts[UnitTypes.ZERG_LURKERDENMP] = 1;
+                }
             }
 
             if (UnitManager.Completed(UnitTypes.ZERG_LURKERDENMP) > 0)

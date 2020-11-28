@@ -208,6 +208,10 @@ namespace Sharky.Managers
                 count += Count(UnitTypes.ZERG_HIVE);
                 count += Count(UnitTypes.ZERG_LAIR);
             }
+            else if (unitType == UnitTypes.ZERG_LAIR)
+            {
+                count += Count(UnitTypes.ZERG_HIVE);
+            }
             else if (unitType == UnitTypes.TERRAN_COMMANDCENTER)
             {
                 count += Count(UnitTypes.TERRAN_COMMANDCENTERFLYING);
@@ -259,6 +263,10 @@ namespace Sharky.Managers
             {
                 completed += Completed(UnitTypes.ZERG_HIVE);
                 completed += Completed(UnitTypes.ZERG_LAIR);
+            }
+            else if (unitType == UnitTypes.ZERG_LAIR)
+            {
+                completed += Completed(UnitTypes.ZERG_HIVE);
             }
             else if (unitType == UnitTypes.TERRAN_COMMANDCENTER)
             {

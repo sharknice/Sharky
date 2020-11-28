@@ -47,13 +47,14 @@ namespace Sharky.Builds
             else
             {
                 macroData.HatcheryUnits = new List<UnitTypes> { UnitTypes.ZERG_QUEEN };
-                macroData.LarvaUnits = new List<UnitTypes> { UnitTypes.ZERG_OVERLORD, UnitTypes.ZERG_DRONE, UnitTypes.ZERG_ZERGLING, UnitTypes.ZERG_ROACH, UnitTypes.ZERG_HYDRALISK, UnitTypes.ZERG_INFESTOR, UnitTypes.ZERG_HYDRALISK, UnitTypes.ZERG_MUTALISK, UnitTypes.ZERG_CORRUPTOR, UnitTypes.ZERG_ULTRALISK, UnitTypes.ZERG_VIPER };
+                macroData.LarvaUnits = new List<UnitTypes> { UnitTypes.ZERG_OVERLORD, UnitTypes.ZERG_DRONE, UnitTypes.ZERG_ZERGLING, UnitTypes.ZERG_ROACH, UnitTypes.ZERG_HYDRALISK, UnitTypes.ZERG_INFESTOR, UnitTypes.ZERG_HYDRALISK, UnitTypes.ZERG_MUTALISK, UnitTypes.ZERG_CORRUPTOR, UnitTypes.ZERG_ULTRALISK, UnitTypes.ZERG_VIPER, UnitTypes.ZERG_SWARMHOSTMP };
 
                 macroData.Units.AddRange(macroData.HatcheryUnits);
                 macroData.Units.AddRange(macroData.LarvaUnits);
                 macroData.Units.Add(UnitTypes.ZERG_BANELING);
                 macroData.Units.Add(UnitTypes.ZERG_RAVAGER);
                 macroData.Units.Add(UnitTypes.ZERG_LURKERMP);
+                macroData.Units.Add(UnitTypes.ZERG_BROODLORD);
             }
 
             macroData.DesiredUnitCounts = new Dictionary<UnitTypes, int>();
@@ -84,7 +85,7 @@ namespace Sharky.Builds
             else
             {
                 macroData.Production = new List<UnitTypes> {
-                    UnitTypes.ZERG_HATCHERY, UnitTypes.ZERG_LARVA
+                    UnitTypes.ZERG_HATCHERY, UnitTypes.ZERG_LARVA, UnitTypes.ZERG_NYDUSNETWORK
                 };
             }
 
@@ -156,7 +157,7 @@ namespace Sharky.Builds
             else
             {
                 macroData.Tech = new List<UnitTypes> {
-                    UnitTypes.ZERG_SPAWNINGPOOL, UnitTypes.ZERG_ROACHWARREN, UnitTypes.ZERG_BANELINGNEST, UnitTypes.ZERG_EVOLUTIONCHAMBER, UnitTypes.ZERG_INFESTATIONPIT, UnitTypes.ZERG_HYDRALISKDEN, UnitTypes.ZERG_LURKERDENMP, UnitTypes.ZERG_ULTRALISKCAVERN
+                    UnitTypes.ZERG_SPAWNINGPOOL, UnitTypes.ZERG_ROACHWARREN, UnitTypes.ZERG_BANELINGNEST, UnitTypes.ZERG_EVOLUTIONCHAMBER, UnitTypes.ZERG_INFESTATIONPIT, UnitTypes.ZERG_HYDRALISKDEN, UnitTypes.ZERG_LURKERDENMP, UnitTypes.ZERG_ULTRALISKCAVERN, UnitTypes.ZERG_SPIRE
                 };
             }
 

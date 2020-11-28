@@ -56,7 +56,7 @@ namespace Sharky.Builds.BuildingPlacement
                     var point = new Point2D { X = x + (float)(radius * Math.Cos(angle)), Y = y + (float)(radius * Math.Sin(angle)) };
                     //DebugManager.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
 
-                    if (BuildingService.AreaBuildable(point.X, point.Y, 1.5f) && !BuildingService.Blocked(point.X, point.Y, 1.5f))
+                    if (BuildingService.AreaBuildable(point.X, point.Y, 1.5f) && !BuildingService.Blocked(point.X, point.Y, 1.5f) && !BuildingService.HasCreep(point.X, point.Y, 1.5f))
                     {
                         var mineralFields = UnitManager.NeutralUnits.Where(u => UnitDataManager.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType) || UnitDataManager.GasGeyserTypes.Contains((UnitTypes)u.Value.Unit.UnitType));
                         var squared = (1 + minimumMineralProximinity + .5) * (1 + minimumMineralProximinity + .5);
@@ -98,7 +98,7 @@ namespace Sharky.Builds.BuildingPlacement
                     while (angle + (sliceSize / 2) < fullCircle)
                     {
                         var point = new Point2D { X = x + (float)(radius * Math.Cos(angle)), Y = y + (float)(radius * Math.Sin(angle)) };
-                        if (BuildingService.AreaBuildable(point.X, point.Y, size / 2.0f) && !BuildingService.Blocked(point.X, point.Y, size / 2.0f))
+                        if (BuildingService.AreaBuildable(point.X, point.Y, size / 2.0f) && !BuildingService.Blocked(point.X, point.Y, size / 2.0f) && !BuildingService.HasCreep(point.X, point.Y, size / 2.0f))
                         {
                             var mineralFields = UnitManager.NeutralUnits.Where(u => UnitDataManager.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType));
                             var squared = (1 + minimumMineralProximinity + (size / 2f)) * (1 + minimumMineralProximinity + (size / 2f));

@@ -9,6 +9,7 @@
         public bool Buildable { get; set; }
         public bool CurrentlyBuildable { get; set; }
         public bool PoweredBySelfPylon { get; set; }
+        public bool HasCreep { get; set; }
         public int NumberOfEnemies { get; set; }
         public int NumberOfAllies { get; set; }
         public float EnemyGroundDpsInRange { get; set; }

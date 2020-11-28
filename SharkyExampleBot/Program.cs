@@ -33,7 +33,7 @@ namespace SharkyExampleBot
             var gameConnection = new GameConnection();
             var sharkyBot = CreateBot(gameConnection);
 
-            var myRace = Race.Zerg;
+            var myRace = Race.Protoss;
             if (args.Length == 0)
             {
                 gameConnection.RunSinglePlayer(sharkyBot, @"AutomatonLE.SC2Map", myRace, Race.Random, Difficulty.VeryEasy).Wait();
@@ -94,8 +94,9 @@ namespace SharkyExampleBot
             var macroSetup = new MacroSetup();
             var buildingService = new BuildingService(mapData, unitManager);
             var protossBuildingPlacement = new ProtossBuildingPlacement(unitManager, unitDataManager, debugManager, mapData, buildingService);
-            var terranBuildingPlacement = new TerranBuildingPlacement(unitManager, unitDataManager, debugManager, mapData, buildingService);
-            var buildingPlacement = new BuildingPlacement(protossBuildingPlacement, terranBuildingPlacement, terranBuildingPlacement, baseManager, unitManager, buildingService, unitDataManager);
+            var terranBuildingPlacement = new TerranBuildingPlacement(unitManager, unitDataManager, debugManager, buildingService);
+            var zergBuildingPlacement = new ZergBuildingPlacement(unitManager, unitDataManager, debugManager, buildingService);
+            var buildingPlacement = new BuildingPlacement(protossBuildingPlacement, terranBuildingPlacement, zergBuildingPlacement, baseManager, unitManager, buildingService, unitDataManager);
             var buildingBuilder = new BuildingBuilder(unitManager, targetingManager, buildingPlacement, unitDataManager);
 
 
@@ -126,6 +127,7 @@ namespace SharkyExampleBot
             var individualMicroController = new IndividualMicroController(mapDataService, unitDataManager, unitManager, debugManager, noPathFinder, sharkyOptions, MicroPriority.LiveAndAttack, false);
         
             var zealotMicroController = new ZealotMicroController(mapDataService, unitDataManager, unitManager, debugManager, noPathFinder, sharkyOptions, MicroPriority.AttackForward, false);
+            var colossusMicroController = new ColossusMicroController(mapDataService, unitDataManager, unitManager, debugManager, noPathFinder, sharkyOptions, MicroPriority.AttackForward, false, collisionCalculator);
             var sentryMicroController = new SentryMicroController(mapDataService, unitDataManager, unitManager, debugManager, noPathFinder, sharkyOptions, MicroPriority.StayOutOfRange, true);
             var observerMicroController = new IndividualMicroController(mapDataService, unitDataManager, unitManager, debugManager, noPathFinder, sharkyOptions, MicroPriority.StayOutOfRange, true);
             var zerglingMicroController = new ZerglingMicroController(mapDataService, unitDataManager, unitManager, debugManager, noPathFinder, sharkyOptions, MicroPriority.AttackForward, false);

@@ -18,9 +18,9 @@ namespace Sharky.Builds
 
         public SC2APIProtocol.Action MorphBuilding(MacroData macroData, TrainingTypeData unitData)
         {
-            if (unitData.Food <= macroData.FoodLeft && unitData.Minerals <= macroData.Minerals && unitData.Gas <= macroData.VespeneGas)
+            if ((unitData.Food == 0 || unitData.Food <= macroData.FoodLeft) && unitData.Minerals <= macroData.Minerals && unitData.Gas <= macroData.VespeneGas)
             {
-                var building = UnitManager.Commanders.Where(c => unitData.ProducingUnits.Contains((UnitTypes)c.Value.UnitCalculation.Unit.UnitType) && !c.Value.UnitCalculation.Unit.IsActive && c.Value.UnitCalculation.Unit.BuildProgress == 1 && c.Value.WarpInOffCooldown(macroData.Frame, SharkyOptions.FramesPerSecond, UnitDataManager));
+                var building = UnitManager.Commanders.Where(c => unitData.ProducingUnits.Contains((UnitTypes)c.Value.UnitCalculation.Unit.UnitType) && !c.Value.UnitCalculation.Unit.IsActive && c.Value.UnitCalculation.Unit.BuildProgress == 1);
                 if (building.Count() > 0)
                 {
                     return building.First().Value.Order(macroData.Frame, unitData.Ability);

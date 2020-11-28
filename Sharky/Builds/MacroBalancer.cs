@@ -96,7 +96,7 @@ namespace Sharky.Builds
             foreach (var u in MacroData.Tech)
             {
                 var unitData = UnitDataManager.BuildingData[u];
-                MacroData.BuildTech[u] = UnitManager.Count(u) + UnitManager.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability)) < MacroData.DesiredTechCounts[u];
+                MacroData.BuildTech[u] = UnitManager.EquivalentTypeCount(u) + UnitManager.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability)) < MacroData.DesiredTechCounts[u];
             }
         }
 
@@ -130,7 +130,8 @@ namespace Sharky.Builds
         {
             foreach (var u in MacroData.Morphs)
             {
-                MacroData.Morph[u] = UnitManager.EquivalentTypeCount(u) < MacroData.DesiredMorphCounts[u];
+                var unitData = UnitDataManager.MorphData[u];
+                MacroData.Morph[u] = UnitManager.EquivalentTypeCount(u) + UnitManager.Commanders.Values.Count(c => unitData.ProducingUnits.Contains((UnitTypes)c.UnitCalculation.Unit.UnitType) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability)) < MacroData.DesiredMorphCounts[u];
             }
         }
 

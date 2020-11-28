@@ -1120,5 +1120,24 @@ namespace Sharky.MicroControllers
         {
             return Vector2.DistanceSquared(new Vector2(targetLocation.X, targetLocation.Y), new Vector2(unitLocation.X, unitLocation.Y)) <= (range * range);
         }
+
+        protected virtual bool Detected(UnitCommander commander)
+        {
+            foreach (var scan in UnitDataManager.Effects.Where(e => e.EffectId == 6))
+            {
+                if (InRange(scan.Pos[0], commander.UnitCalculation.Unit.Pos, scan.Radius + commander.UnitCalculation.Unit.Radius))
+                {
+                    return true;
+                }
+            }
+
+            if (commander.UnitCalculation.Unit.Health + commander.UnitCalculation.Unit.Shield < commander.UnitCalculation.PreviousUnit.Health + commander.UnitCalculation.PreviousUnit.Shield)
+            {
+                return true; // if getting attacked must be detected (unless it's by splash damage)
+            }
+
+            // TODO: get range of detection for units, calculate if this unit is in within detection range
+            return commander.UnitCalculation.NearbyEnemies.Any(e => UnitDataManager.DetectionTypes.Contains((UnitTypes)e.Unit.UnitType)) || commander.UnitCalculation.Unit.BuffIds.Any(b => b == (uint)Buffs.ORACLEREVELATION || b == (uint)Buffs.FUNGALGROWTH || b == (uint)Buffs.EMPDECLOAK);
+        }
     }
 }

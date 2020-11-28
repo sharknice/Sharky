@@ -124,7 +124,7 @@ namespace Sharky.TypeData
                 { Upgrades.CENTRIFICALHOOKS, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.ZERG_BANELINGNEST }, Minerals = 150, Gas = 150, Ability = Abilities.RESEARCH_CENTRIFUGALHOOKS } },
 
                 { Upgrades.INFESTORENERGYUPGRADE, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.ZERG_INFESTATIONPIT }, Minerals = 150, Gas = 150, Ability = Abilities.RESEARCH_PATHOGENGLANDS } },
-                { Upgrades.NEURALPARASITE, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.ZERG_INFESTATIONPIT }, Minerals = 150, Gas = 150, Ability = Abilities.EFFECT_NEURALPARASITE } },
+                { Upgrades.NEURALPARASITE, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.ZERG_INFESTATIONPIT }, Minerals = 150, Gas = 150, Ability = Abilities.RESEARCH_NEURALPARASITE } },
 
                 { Upgrades.EVOLVEGROOVEDSPINES, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.ZERG_HYDRALISKDEN }, Minerals = 100, Gas = 100, Ability = Abilities.RESEARCH_GROOVEDSPINES } },
                 { Upgrades.EVOLVEMUSCULARAUGMENTS, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.ZERG_HYDRALISKDEN }, Minerals = 100, Gas = 100, Ability = Abilities.RESEARCH_MUSCULARAUGMENTS } },

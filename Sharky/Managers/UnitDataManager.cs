@@ -21,6 +21,8 @@ namespace Sharky.Managers
         Dictionary<Abilities, UnitTypes> UnitAbilities;
         public RepeatedField<uint> ResearchedUpgrades;
 
+        public RepeatedField<Effect> Effects;
+
         public HashSet<UnitTypes> ZergTypes { get; private set; }
         public HashSet<UnitTypes> ProtossTypes { get; private set; }
         public HashSet<UnitTypes> TerranTypes { get; private set; }
@@ -261,6 +263,7 @@ namespace Sharky.Managers
         public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
         {
             ResearchedUpgrades = observation.Observation.RawData.Player.UpgradeIds;
+            Effects = observation.Observation.RawData.Effects;
             return new List<SC2APIProtocol.Action>();
         }
 
