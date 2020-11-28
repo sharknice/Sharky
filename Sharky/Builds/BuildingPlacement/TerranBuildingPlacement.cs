@@ -8,12 +8,12 @@ namespace Sharky.Builds.BuildingPlacement
 {
     public class TerranBuildingPlacement : IBuildingPlacement
     {
-        UnitManager UnitManager;
+        IUnitManager UnitManager;
         UnitDataManager UnitDataManager;
         DebugManager DebugManager;
         BuildingService BuildingService;
 
-        public TerranBuildingPlacement(UnitManager unitManager, UnitDataManager unitDataManager, DebugManager debugManager, BuildingService buildingService)
+        public TerranBuildingPlacement(IUnitManager unitManager, UnitDataManager unitDataManager, DebugManager debugManager, BuildingService buildingService)
         {
             UnitManager = unitManager;
             UnitDataManager = unitDataManager;

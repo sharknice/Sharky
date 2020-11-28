@@ -128,12 +128,21 @@ namespace SharkyExampleBot
         
             var zealotMicroController = new ZealotMicroController(mapDataService, unitDataManager, unitManager, debugManager, noPathFinder, sharkyOptions, MicroPriority.AttackForward, false);
             var colossusMicroController = new ColossusMicroController(mapDataService, unitDataManager, unitManager, debugManager, noPathFinder, sharkyOptions, MicroPriority.AttackForward, false, collisionCalculator);
+            var darkTemplarMicroController = new DarkTemplarMicroController(mapDataService, unitDataManager, unitManager, debugManager, noPathFinder, sharkyOptions, MicroPriority.AttackForward, false);
+            var disruptorMicroController = new DisruptorMicroController(mapDataService, unitDataManager, unitManager, debugManager, noPathFinder, sharkyOptions, MicroPriority.AttackForward, false);
+            var disruptorPhasedMicroController = new DisruptorPhasedMicroController(mapDataService, unitDataManager, unitManager, debugManager, noPathFinder, sharkyOptions, MicroPriority.AttackForward, false);
             var sentryMicroController = new SentryMicroController(mapDataService, unitDataManager, unitManager, debugManager, noPathFinder, sharkyOptions, MicroPriority.StayOutOfRange, true);
             var observerMicroController = new IndividualMicroController(mapDataService, unitDataManager, unitManager, debugManager, noPathFinder, sharkyOptions, MicroPriority.StayOutOfRange, true);
+            
             var zerglingMicroController = new ZerglingMicroController(mapDataService, unitDataManager, unitManager, debugManager, noPathFinder, sharkyOptions, MicroPriority.AttackForward, false);
+            
             var individualMicroControllers = new Dictionary<UnitTypes, IIndividualMicroController>
             {
                 { UnitTypes.PROTOSS_ZEALOT, zealotMicroController },
+                { UnitTypes.PROTOSS_COLOSSUS, colossusMicroController },
+                { UnitTypes.PROTOSS_DARKTEMPLAR, darkTemplarMicroController },
+                { UnitTypes.PROTOSS_DISRUPTOR, disruptorMicroController },
+                { UnitTypes.PROTOSS_DISRUPTORPHASED, disruptorPhasedMicroController },
                 { UnitTypes.PROTOSS_SENTRY, sentryMicroController },
                 { UnitTypes.PROTOSS_OBSERVER, observerMicroController },
                 { UnitTypes.ZERG_ZERGLING, zerglingMicroController }

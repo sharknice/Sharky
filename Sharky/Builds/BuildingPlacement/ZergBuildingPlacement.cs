@@ -8,12 +8,12 @@ namespace Sharky.Builds.BuildingPlacement
 {
     public class ZergBuildingPlacement : IBuildingPlacement
     {
-        UnitManager UnitManager;
+        IUnitManager UnitManager;
         UnitDataManager UnitDataManager;
         DebugManager DebugManager;
         BuildingService BuildingService;
 
-        public ZergBuildingPlacement(UnitManager unitManager, UnitDataManager unitDataManager, DebugManager debugManager, BuildingService buildingService)
+        public ZergBuildingPlacement(IUnitManager unitManager, UnitDataManager unitDataManager, DebugManager debugManager, BuildingService buildingService)
         {
             UnitManager = unitManager;
             UnitDataManager = unitDataManager;

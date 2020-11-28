@@ -2,11 +2,9 @@
 using Sharky.Managers;
 using Sharky.Pathing;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Threading.Tasks;
 
 namespace Sharky.MicroControllers
 {
@@ -259,15 +257,15 @@ namespace Sharky.MicroControllers
         {
             action = null;
 
-            var attacks = new ConcurrentBag<UnitCalculation>();
+            var attacks = new List<UnitCalculation>();
 
-            Parallel.ForEach(commander.UnitCalculation.NearbyEnemies, (enemyAttack) =>
+            foreach (var enemyAttack in commander.UnitCalculation.NearbyEnemies)
             {
                 if (UnitManager.CanDamage(enemyAttack.Weapons, commander.UnitCalculation.Unit) && InRange(commander.UnitCalculation.Unit.Pos, enemyAttack.Unit.Pos, UnitDataManager.GetRange(enemyAttack.Unit) + commander.UnitCalculation.Unit.Radius + enemyAttack.Unit.Radius + AvoidDamageDistance))
                 {
                     attacks.Add(enemyAttack);
                 }
-            });
+            }
 
             if (attacks.Count > 0)
             {
@@ -313,15 +311,15 @@ namespace Sharky.MicroControllers
             }
 
             var range = commander.UnitCalculation.Range;
-            var enemiesInRange = new ConcurrentBag<UnitCalculation>();
+            var enemiesInRange = new List<UnitCalculation>();
 
-            Parallel.ForEach(commander.UnitCalculation.NearbyEnemies, (enemyAttack) =>
+            foreach (var enemyAttack in commander.UnitCalculation.NearbyEnemies)
             {
                 if (UnitManager.CanDamage(enemyAttack.Weapons, commander.UnitCalculation.Unit) && InRange(commander.UnitCalculation.Unit.Pos, enemyAttack.Unit.Pos, range + commander.UnitCalculation.Unit.Radius + enemyAttack.Unit.Radius + AvoidDamageDistance))
                 {
                     enemiesInRange.Add(enemyAttack);
                 }
-            });
+            }
 
             var closestEnemy = enemiesInRange.OrderBy(u => Vector2.DistanceSquared(new Vector2(u.Unit.Pos.X, u.Unit.Pos.Y), new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y))).FirstOrDefault();
             if (closestEnemy == null)
@@ -420,7 +418,7 @@ namespace Sharky.MicroControllers
 
             var range = commander.UnitCalculation.Range;
 
-            var attacks = new ConcurrentBag<UnitCalculation>(commander.UnitCalculation.EnemiesInRange.Where(u => u.Unit.DisplayType != DisplayType.Hidden)); // units that are in range right now
+            var attacks = new List<UnitCalculation>(commander.UnitCalculation.EnemiesInRange.Where(u => u.Unit.DisplayType != DisplayType.Hidden)); // units that are in range right now
 
             UnitCalculation bestAttack = null;
             if (attacks.Count > 0)
@@ -467,14 +465,14 @@ namespace Sharky.MicroControllers
                 range = 10;
             }
             // TODO: don't go attack units super far away if there are still units that can't attack this unit, but are close
-            attacks = new ConcurrentBag<UnitCalculation>(); // nearby units not in range right now
-            Parallel.ForEach(commander.UnitCalculation.NearbyEnemies, (enemyAttack) =>
+            attacks = new List<UnitCalculation>(); // nearby units not in range right now
+            foreach (var enemyAttack in commander.UnitCalculation.NearbyEnemies)
             {
                 if (enemyAttack.Unit.DisplayType != DisplayType.Hidden && UnitManager.CanDamage(commander.UnitCalculation.Weapons, enemyAttack.Unit) && !InRange(enemyAttack.Unit.Pos, commander.UnitCalculation.Unit.Pos, range + enemyAttack.Unit.Radius + commander.UnitCalculation.Unit.Radius))
                 {
                     attacks.Add(enemyAttack);
                 }
-            });
+            }
             if (attacks.Count > 0)
             {
                 var bestOutOfRangeAttack = GetBestTargetFromList(commander, attacks, existingAttackOrder);
@@ -499,14 +497,14 @@ namespace Sharky.MicroControllers
             var unitsNearEnemyMain = UnitManager.EnemyUnits.Values.Where(e => InRange(target, e.Unit.Pos, 20));
             if (unitsNearEnemyMain.Count() > 0 && InRange(target, commander.UnitCalculation.Unit.Pos, 100))
             {
-                attacks = new ConcurrentBag<UnitCalculation>(); // enemies in the main enemy base
-                Parallel.ForEach(unitsNearEnemyMain, (enemyAttack) =>
+                attacks = new List<UnitCalculation>(); // enemies in the main enemy base
+                foreach (var enemyAttack in unitsNearEnemyMain)
                 {
                     if (enemyAttack.Unit.DisplayType != DisplayType.Hidden && UnitManager.CanDamage(commander.UnitCalculation.Weapons, enemyAttack.Unit))
                     {
                         attacks.Add(enemyAttack);
                     }
-                });
+                }
                 if (attacks.Count > 0)
                 {
                     var bestMainAttack = GetBestTargetFromList(commander, attacks, existingAttackOrder);

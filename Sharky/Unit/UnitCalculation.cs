@@ -153,11 +153,11 @@ namespace Sharky
             {
                 UnitClassifications.Add(UnitClassification.Worker);
             }
-            else if (unit.UnitType == (uint)UnitTypes.ZERG_QUEEN || unit.UnitType == (uint)UnitTypes.TERRAN_MULE)
+            else if (unit.UnitType == (uint)UnitTypes.ZERG_QUEEN || unit.UnitType == (uint)UnitTypes.TERRAN_MULE || unit.UnitType == (uint)UnitTypes.ZERG_OVERLORD)
             {
 
             }
-            else if (Damage > 0)
+            else
             {
                 UnitClassifications.Add(UnitClassification.ArmyUnit);
             }

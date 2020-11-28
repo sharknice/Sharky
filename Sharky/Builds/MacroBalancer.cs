@@ -9,11 +9,11 @@ namespace Sharky.Builds
     public class MacroBalancer : IMacroBalancer
     {
         BuildOptions BuildOptions;
-        UnitManager UnitManager;
+        IUnitManager UnitManager;
         MacroData MacroData;
         UnitDataManager UnitDataManager;
 
-        public MacroBalancer(BuildOptions buildOptions, UnitManager unitManager, MacroData macroData, UnitDataManager unitDataManager)
+        public MacroBalancer(BuildOptions buildOptions, IUnitManager unitManager, MacroData macroData, UnitDataManager unitDataManager)
         {
             BuildOptions = buildOptions;
             UnitManager = unitManager;

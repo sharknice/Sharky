@@ -9,13 +9,13 @@ namespace Sharky.Builds.BuildingPlacement
 {
     public class ProtossBuildingPlacement : IBuildingPlacement
     {
-        UnitManager UnitManager;
+        IUnitManager UnitManager;
         UnitDataManager UnitDataManager;
         DebugManager DebugManager;
         MapData MapData;
         BuildingService BuildingService;
 
-        public ProtossBuildingPlacement(UnitManager unitManager, UnitDataManager unitDataManager, DebugManager debugManager, MapData mapData, BuildingService buildingService)
+        public ProtossBuildingPlacement(IUnitManager unitManager, UnitDataManager unitDataManager, DebugManager debugManager, MapData mapData, BuildingService buildingService)
         {
             UnitManager = unitManager;
             UnitDataManager = unitDataManager;

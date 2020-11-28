@@ -9,9 +9,9 @@ namespace Sharky.Builds.BuildingPlacement
     public class BuildingService
     {
         MapData MapData;
-        UnitManager UnitManager;
+        IUnitManager UnitManager;
 
-        public BuildingService(MapData mapData, UnitManager unitManager)
+        public BuildingService(MapData mapData, IUnitManager unitManager)
         {
             MapData = mapData;
             UnitManager = unitManager;

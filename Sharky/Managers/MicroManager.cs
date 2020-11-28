@@ -24,13 +24,11 @@ namespace Sharky.Managers
             var actions = new List<Action>();
             foreach (var microTask in MicroTasks.Values.OrderBy(m => m.Priority))
             {
-                if (observation.Observation.RawData.Event != null && observation.Observation.RawData.Event.DeadUnits != null)
+                foreach (var tag in UnitManager.DeadUnits)
                 {
-                    foreach (var tag in observation.Observation.RawData.Event.DeadUnits)
-                    {
-                        microTask.UnitCommanders.RemoveAll(c => c.UnitCalculation.Unit.Tag == tag);
-                    }
+                    microTask.UnitCommanders.RemoveAll(c => c.UnitCalculation.Unit.Tag == tag);
                 }
+
                 microTask.ClaimUnits(UnitManager.Commanders);
                 actions.AddRange(microTask.PerformActions(frame));
             }

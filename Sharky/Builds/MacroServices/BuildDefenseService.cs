@@ -11,13 +11,13 @@ namespace Sharky.Builds.MacroServices
         MacroData MacroData;
         BuildingBuilder BuildingBuilder;
         UnitDataManager UnitDataManager;
-        UnitManager UnitManager;
+        IUnitManager UnitManager;
         BaseManager BaseManager;
         TargetingManager TargetingManager;
 
         int defensivePointLastFailFrame;
 
-        public BuildDefenseService(MacroData macroData, BuildingBuilder buildingBuilder, UnitDataManager unitDataManager, UnitManager unitManager, BaseManager baseManager, TargetingManager targetingManager)
+        public BuildDefenseService(MacroData macroData, BuildingBuilder buildingBuilder, UnitDataManager unitDataManager, IUnitManager unitManager, BaseManager baseManager, TargetingManager targetingManager)
         {
             MacroData = macroData;
             BuildingBuilder = buildingBuilder;

@@ -2,11 +2,9 @@
 using Sharky.Managers;
 using Sharky.Pathing;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Threading.Tasks;
 
 namespace Sharky.MicroControllers.Protoss
 {
@@ -23,8 +21,8 @@ namespace Sharky.MicroControllers.Protoss
         protected override UnitCalculation GetBestDpsReduction(UnitCommander commander, Weapon weapon, IEnumerable<UnitCalculation> primaryTargets, IEnumerable<UnitCalculation> secondaryTargets)
         {
             float splashRadius = 0.3f;
-            var dpsReductions = new ConcurrentDictionary<ulong, float>();
-            Parallel.ForEach(primaryTargets, (enemyAttack) =>
+            var dpsReductions = new Dictionary<ulong, float>();
+            foreach (var enemyAttack in primaryTargets)
             {
                 float dpsReduction = 0;
                 var attackLine = GetAttackLine(commander.UnitCalculation.Unit.Pos, enemyAttack.Unit.Pos);
@@ -36,7 +34,7 @@ namespace Sharky.MicroControllers.Protoss
                     }
                 }
                 dpsReductions[enemyAttack.Unit.Tag] = dpsReduction;
-            });
+            }
 
             var best = dpsReductions.OrderByDescending(x => x.Value).FirstOrDefault().Key;
             return primaryTargets.FirstOrDefault(t => t.Unit.Tag == best);

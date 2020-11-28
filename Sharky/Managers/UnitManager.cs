@@ -24,6 +24,8 @@ namespace Sharky.Managers
 
         public ConcurrentDictionary<ulong, UnitCommander> Commanders { get; private set; }
 
+        public List<ulong> DeadUnits { get; private set; }
+
         int EnemyDeaths;
         int SelfDeaths;
         int NeutralDeaths;
@@ -42,6 +44,8 @@ namespace Sharky.Managers
 
             Commanders = new ConcurrentDictionary<ulong, UnitCommander>();
 
+            DeadUnits = new List<ulong>();
+
             EnemyDeaths = 0;
             SelfDeaths = 0;
             NeutralDeaths = 0;
@@ -51,24 +55,41 @@ namespace Sharky.Managers
         {
             if (observation.Observation.RawData.Event != null && observation.Observation.RawData.Event.DeadUnits != null)
             {
-                foreach (var tag in observation.Observation.RawData.Event.DeadUnits)
-                {
-                    if (EnemyUnits.TryRemove(tag, out UnitCalculation removedEnemy))
-                    {
-                        EnemyDeaths++;
-                    }
-                    else if (SelfUnits.TryRemove(tag, out UnitCalculation removedAlly))
-                    {
-                        SelfDeaths++;
-                    }
-                    else if (NeutralUnits.TryRemove(tag, out UnitCalculation removedNeutral))
-                    {
-                        NeutralDeaths++;
-                    }
+                DeadUnits = observation.Observation.RawData.Event.DeadUnits.ToList();
+            }
+            else
+            {
+                DeadUnits = new List<ulong>();
+            }
 
-                    Commanders.TryRemove(tag, out UnitCommander removedCommander);
+            foreach (var unit in SelfUnits) // remove things like purification novas that don't have dead unit events
+            {
+                if (!observation.Observation.RawData.Units.Any(u => u.Tag == unit.Key))
+                {
+                    DeadUnits.Add(unit.Key);
                 }
             }
+
+            foreach (var tag in DeadUnits)
+            {
+                if (EnemyUnits.TryRemove(tag, out UnitCalculation removedEnemy))
+                {
+                    EnemyDeaths++;
+                }
+                else if (SelfUnits.TryRemove(tag, out UnitCalculation removedAlly))
+                {
+                    SelfDeaths++;
+                }
+                else if (NeutralUnits.TryRemove(tag, out UnitCalculation removedNeutral))
+                {
+                    NeutralDeaths++;
+                }
+
+                Commanders.TryRemove(tag, out UnitCommander removedCommander);
+            }
+
+
+            // TODO: remove disruptorphased because it doesn't get counted as a deadunit
 
             foreach (var enemy in EnemyUnits.Select(e => e.Value).ToList()) // if we can see this area of the map and the unit isn't there anymore remove it (we just remove it because visible units will get re-added below)
             {
@@ -157,7 +178,6 @@ namespace Sharky.Managers
                     }
                 }
 
-                //selfUnit.Value.Attackers = new List<UnitCalculation>();
                 selfUnit.Value.Attackers = GetTargettedAttacks(selfUnit.Value).ToList();
             }
 

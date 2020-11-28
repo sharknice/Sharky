@@ -1,11 +1,9 @@
 ﻿using SC2APIProtocol;
 using Sharky.Managers;
 using Sharky.Pathing;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Threading.Tasks;
 
 namespace Sharky.MicroControllers.Protoss
 {
@@ -27,20 +25,19 @@ namespace Sharky.MicroControllers.Protoss
             return null;
         }
 
-        private bool PurificationNova(UnitCommander commander,int frame, out SC2APIProtocol.Action action)
+        private bool PurificationNova(UnitCommander commander, int frame, out SC2APIProtocol.Action action)
         {
             action = null;
-
-            var attacks = new ConcurrentBag<UnitCalculation>();
+            var attacks = new List<UnitCalculation>();
             var center = new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y);
 
-            Parallel.ForEach(commander.UnitCalculation.NearbyEnemies, (enemyAttack) =>
+            foreach (var enemyAttack in commander.UnitCalculation.NearbyEnemies)
             {
                 if (!enemyAttack.Unit.IsFlying && enemyAttack.Damage > 0 && InRange(enemyAttack.Unit.Pos, commander.UnitCalculation.Unit.Pos, PurificationNovaRange + enemyAttack.Unit.Radius + commander.UnitCalculation.Unit.Radius)) // TODO: do actual pathing to see if the shot can make it there, if a wall is in the way it can't
                 {
                     attacks.Add(enemyAttack);
                 }
-            });
+            }
 
             if (attacks.Count > 0)
             {
@@ -95,11 +92,11 @@ namespace Sharky.MicroControllers.Protoss
             return 145 + bonusDamage - unitTypeData.Armor; // TODO: armor upgrades
         }
 
-        private Point2D GetBestAttack(UnitCalculation potentialAttack, IEnumerable<UnitCalculation> enemies, ConcurrentBag<UnitCalculation> splashableEnemies)
+        private Point2D GetBestAttack(UnitCalculation potentialAttack, IEnumerable<UnitCalculation> enemies, IList<UnitCalculation> splashableEnemies)
         {
             float splashRadius = 1.5f;
-            var killCounts = new ConcurrentDictionary<Point, float>();
-            Parallel.ForEach(enemies, (enemyAttack) =>
+            var killCounts = new Dictionary<Point, float>();
+            foreach (var enemyAttack in enemies)
             {
                 int killCount = 0;
                 foreach (var splashedEnemy in splashableEnemies)
@@ -123,11 +120,11 @@ namespace Sharky.MicroControllers.Protoss
                     }
                 }
                 killCounts[enemyAttack.Unit.Pos] = killCount;
-            });
+            }
 
             var best = killCounts.OrderByDescending(x => x.Value).FirstOrDefault();
 
-            if (best.Value == 0)
+            if (best.Value < 3) // only attack if going to kill >= 3 units
             {
                 return null;
             }

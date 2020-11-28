@@ -9,11 +9,11 @@ namespace Sharky.Builds.BuildingPlacement
 {
     public class WarpInPlacement : IBuildingPlacement
     {
-        UnitManager UnitManager;
+        IUnitManager UnitManager;
         DebugManager DebugManager;
         MapData MapData;
 
-        public WarpInPlacement(UnitManager unitManager, DebugManager debugManager, MapData mapData)
+        public WarpInPlacement(IUnitManager unitManager, DebugManager debugManager, MapData mapData)
         {
             UnitManager = unitManager;
             DebugManager = debugManager;

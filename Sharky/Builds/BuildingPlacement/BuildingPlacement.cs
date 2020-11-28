@@ -11,11 +11,11 @@ namespace Sharky.Builds.BuildingPlacement
         IBuildingPlacement TerranBuildingPlacement;
         IBuildingPlacement ZergBuildingPlacement;
         IBaseManager BaseManager;
-        UnitManager UnitManager;
+        IUnitManager UnitManager;
         BuildingService BuildingService;
         UnitDataManager UnitDataManager;
 
-        public BuildingPlacement(IBuildingPlacement protossBuildingPlacement, IBuildingPlacement terranBuildingPlacement, IBuildingPlacement zergBuildingPlacement, IBaseManager baseManager, UnitManager unitManager, BuildingService buildingService, UnitDataManager unitDataManager)
+        public BuildingPlacement(IBuildingPlacement protossBuildingPlacement, IBuildingPlacement terranBuildingPlacement, IBuildingPlacement zergBuildingPlacement, IBaseManager baseManager, IUnitManager unitManager, BuildingService buildingService, UnitDataManager unitDataManager)
         {
             ProtossBuildingPlacement = protossBuildingPlacement;
             TerranBuildingPlacement = terranBuildingPlacement;

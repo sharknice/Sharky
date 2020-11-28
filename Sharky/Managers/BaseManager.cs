@@ -15,9 +15,9 @@ namespace Sharky.Managers
         ImageData PlacementGrid;
 
         UnitDataManager UnitDataManager;
-        UnitManager UnitManager;
+        IUnitManager UnitManager;
 
-        public BaseManager(UnitDataManager unitDataManager, UnitManager unitManager)
+        public BaseManager(UnitDataManager unitDataManager, IUnitManager unitManager)
         {
             UnitDataManager = unitDataManager;
             UnitManager = unitManager;
@@ -96,14 +96,11 @@ namespace Sharky.Managers
 
         public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
         {
-            if (observation.Observation.RawData.Event != null && observation.Observation.RawData.Event.DeadUnits != null)
+            foreach (var tag in UnitManager.DeadUnits)
             {
-                foreach (var tag in observation.Observation.RawData.Event.DeadUnits)
+                foreach (var baseLocation in BaseLocations)
                 {
-                    foreach (var baseLocation in BaseLocations)
-                    {
-                        baseLocation.MineralFields.RemoveAll(m => m.Tag == tag);
-                    }
+                    baseLocation.MineralFields.RemoveAll(m => m.Tag == tag);
                 }
             }
 
