@@ -1,7 +1,5 @@
 ﻿using SC2APIProtocol;
 using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
 
 namespace Sharky.MicroControllers
 {
@@ -68,7 +66,27 @@ namespace Sharky.MicroControllers
 
         public List<Action> Idle(List<UnitCommander> commanders, Point2D target, Point2D defensivePoint, int frame)
         {
-            return new List<Action>();
+            var actions = new List<Action>();
+
+            foreach (var commander in commanders)
+            {
+                Action action;
+
+                if (IndividualMicroControllers.TryGetValue((UnitTypes)commander.UnitCalculation.Unit.UnitType, out var individualMicroController))
+                {
+                    action = individualMicroController.Idle(commander, defensivePoint, frame);
+                }
+                else
+                {
+                    action = IndividualMicroController.Idle(commander, defensivePoint, frame);
+                }
+
+                if (action != null)
+                {
+                    actions.Add(action);
+                }
+            }
+            return actions;
         }
     }
 }

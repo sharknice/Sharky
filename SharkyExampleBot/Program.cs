@@ -126,25 +126,41 @@ namespace SharkyExampleBot
 
             var individualMicroController = new IndividualMicroController(mapDataService, unitDataManager, unitManager, debugManager, noPathFinder, sharkyOptions, MicroPriority.LiveAndAttack, false);
         
-            var zealotMicroController = new ZealotMicroController(mapDataService, unitDataManager, unitManager, debugManager, noPathFinder, sharkyOptions, MicroPriority.AttackForward, false);
             var colossusMicroController = new ColossusMicroController(mapDataService, unitDataManager, unitManager, debugManager, noPathFinder, sharkyOptions, MicroPriority.AttackForward, false, collisionCalculator);
             var darkTemplarMicroController = new DarkTemplarMicroController(mapDataService, unitDataManager, unitManager, debugManager, noPathFinder, sharkyOptions, MicroPriority.AttackForward, false);
             var disruptorMicroController = new DisruptorMicroController(mapDataService, unitDataManager, unitManager, debugManager, noPathFinder, sharkyOptions, MicroPriority.AttackForward, false);
             var disruptorPhasedMicroController = new DisruptorPhasedMicroController(mapDataService, unitDataManager, unitManager, debugManager, noPathFinder, sharkyOptions, MicroPriority.AttackForward, false);
+            var mothershipMicroController = new MothershipMicroController(mapDataService, unitDataManager, unitManager, debugManager, noPathFinder, sharkyOptions, MicroPriority.AttackForward, false);
+            var oraclepMicroController = new OracleMicroController(mapDataService, unitDataManager, unitManager, debugManager, noPathFinder, sharkyOptions, MicroPriority.AttackForward, false);
+            var phoenixMicroController = new PhoenixMicroController(mapDataService, unitDataManager, unitManager, debugManager, noPathFinder, sharkyOptions, MicroPriority.AttackForward, false);
             var sentryMicroController = new SentryMicroController(mapDataService, unitDataManager, unitManager, debugManager, noPathFinder, sharkyOptions, MicroPriority.StayOutOfRange, true);
+            var stalkerMicroController = new StalkerMicroController(mapDataService, unitDataManager, unitManager, debugManager, noPathFinder, sharkyOptions, MicroPriority.AttackForward, false);
+            var tempestMicroController = new TempestMicroController(mapDataService, unitDataManager, unitManager, debugManager, noPathFinder, sharkyOptions, MicroPriority.AttackForward, false);
+            var voidrayMicroController = new VoidRayMicroController(mapDataService, unitDataManager, unitManager, debugManager, noPathFinder, sharkyOptions, MicroPriority.AttackForward, false);
+            var warpPrismpMicroController = new WarpPrismMicroController(mapDataService, unitDataManager, unitManager, debugManager, noPathFinder, sharkyOptions, MicroPriority.AttackForward, false, baseManager);
+            var zealotMicroController = new ZealotMicroController(mapDataService, unitDataManager, unitManager, debugManager, noPathFinder, sharkyOptions, MicroPriority.AttackForward, false);
             var observerMicroController = new IndividualMicroController(mapDataService, unitDataManager, unitManager, debugManager, noPathFinder, sharkyOptions, MicroPriority.StayOutOfRange, true);
-            
+
             var zerglingMicroController = new ZerglingMicroController(mapDataService, unitDataManager, unitManager, debugManager, noPathFinder, sharkyOptions, MicroPriority.AttackForward, false);
             
             var individualMicroControllers = new Dictionary<UnitTypes, IIndividualMicroController>
-            {
-                { UnitTypes.PROTOSS_ZEALOT, zealotMicroController },
+            {               
                 { UnitTypes.PROTOSS_COLOSSUS, colossusMicroController },
                 { UnitTypes.PROTOSS_DARKTEMPLAR, darkTemplarMicroController },
                 { UnitTypes.PROTOSS_DISRUPTOR, disruptorMicroController },
                 { UnitTypes.PROTOSS_DISRUPTORPHASED, disruptorPhasedMicroController },
+                { UnitTypes.PROTOSS_MOTHERSHIP, mothershipMicroController },
+                { UnitTypes.PROTOSS_ORACLE, oraclepMicroController },
+                { UnitTypes.PROTOSS_PHOENIX, phoenixMicroController },
                 { UnitTypes.PROTOSS_SENTRY, sentryMicroController },
+                { UnitTypes.PROTOSS_STALKER, stalkerMicroController },
+                { UnitTypes.PROTOSS_TEMPEST, tempestMicroController },
+                { UnitTypes.PROTOSS_VOIDRAY, voidrayMicroController },
+                { UnitTypes.PROTOSS_WARPPRISM, warpPrismpMicroController },
+                { UnitTypes.PROTOSS_WARPPRISMPHASING, warpPrismpMicroController },
+                { UnitTypes.PROTOSS_ZEALOT, zealotMicroController },
                 { UnitTypes.PROTOSS_OBSERVER, observerMicroController },
+
                 { UnitTypes.ZERG_ZERGLING, zerglingMicroController }
             };
 

@@ -69,6 +69,11 @@ namespace Sharky.Pathing
             return PathWalkable(point.X, point.Y, point.X, point.Y);
         }
 
+        public bool PathWalkable(Point point)
+        {
+            return PathWalkable(point.X, point.Y, point.X, point.Y);
+        }
+
         public bool PathFlyable(float startX, float startY, float endX, float endY)
         {
             if (endX < 0 || endY < 0 || endX >= MapData.MapWidth || endY >= MapData.MapHeight)

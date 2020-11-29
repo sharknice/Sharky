@@ -21,6 +21,8 @@ namespace Sharky
         ulong LastTargetTag;
 
         Dictionary<Abilities, int> AbilityOrderTimes;
+        public Dictionary<ulong, int> LoadTimes;
+
         int SpamFrames = 10;
 
         public UnitCommander(UnitCalculation unitCalculation)
@@ -34,6 +36,7 @@ namespace Sharky
             LastTargetLocation = null;
             LastTargetTag = 0;
             AbilityOrderTimes = new Dictionary<Abilities, int>();
+            LoadTimes = new Dictionary<ulong, int>();
             RetreatPathFrame = 0;
             RetreatPath = new List<Vector2>();
 
@@ -111,6 +114,21 @@ namespace Sharky
                 if (AbilityOrderTimes.ContainsKey(warpIn.Key))
                 {
                     if ((frame - AbilityOrderTimes[warpIn.Key]) / framesPerSecond < unitDataManager.WarpInCooldownTimes[warpIn.Key])
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        public bool WarpInAlmostOffCooldown(int frame, float framesPerSecond, UnitDataManager unitDataManager)
+        {
+            foreach (var warpIn in unitDataManager.WarpInCooldownTimes)
+            {
+                if (AbilityOrderTimes.ContainsKey(warpIn.Key))
+                {
+                    if ((frame - AbilityOrderTimes[warpIn.Key] - 10) / framesPerSecond < unitDataManager.WarpInCooldownTimes[warpIn.Key])
                     {
                         return false;
                     }

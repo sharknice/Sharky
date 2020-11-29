@@ -147,6 +147,11 @@ namespace Sharky
                 if (unitDataManager.ResourceCenterTypes.Contains((UnitTypes)unit.UnitType))
                 {
                     UnitClassifications.Add(UnitClassification.ResourceCenter);
+                    UnitClassifications.Add(UnitClassification.ProductionStructure);
+                }
+                if (unitDataManager.DefensiveStructureTypes.Contains((UnitTypes)unit.UnitType))
+                {
+                    UnitClassifications.Add(UnitClassification.DefensiveStructure);
                 }
             }
             else if (unit.UnitType == (uint)UnitTypes.TERRAN_SCV || unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE || unit.UnitType == (uint)UnitTypes.ZERG_DRONE)
@@ -160,6 +165,15 @@ namespace Sharky
             else
             {
                 UnitClassifications.Add(UnitClassification.ArmyUnit);
+            }
+
+            if (unitDataManager.DetectionTypes.Contains((UnitTypes)unit.UnitType))
+            {
+                UnitClassifications.Add(UnitClassification.Detector);
+            }
+            if (unitDataManager.AbilityDetectionTypes.Contains((UnitTypes)unit.UnitType))
+            {
+                UnitClassifications.Add(UnitClassification.DetectionCaster);
             }
 
             EnemiesInRange = new List<UnitCalculation>();

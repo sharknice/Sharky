@@ -70,7 +70,7 @@ namespace Sharky.MicroControllers
             return commander.Order(frame, Abilities.ATTACK, target);
         }
 
-        public virtual SC2APIProtocol.Action Idle(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame)
+        public virtual SC2APIProtocol.Action Idle(UnitCommander commander, Point2D defensivePoint, int frame)
         {
             return null;
         }
@@ -82,7 +82,10 @@ namespace Sharky.MicroControllers
                 if (Retreat(commander, defensivePoint, defensivePoint, frame, out SC2APIProtocol.Action action)) { return action; }
                 return commander.Order(frame, Abilities.MOVE, defensivePoint);
             }
-            return null;
+            else
+            {
+                return Idle(commander, defensivePoint, frame);
+            }
         }
 
         protected virtual bool Move(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, Formation formation, int frame, out SC2APIProtocol.Action action)
@@ -229,7 +232,6 @@ namespace Sharky.MicroControllers
             if (commander.UnitCalculation.TargetPriorityCalculation.Overwhelm || MicroPriority == MicroPriority.AttackForward)
             {
                 if (AvoidTargettedDamage(commander, target, defensivePoint, frame, out action)) { return true; }
-
 
                 if (commander.UnitCalculation.Unit.ShieldMax > 0 && commander.UnitCalculation.Unit.Shield < 25 && AvoidDamage(commander, target, defensivePoint, frame, out action)) // TODO: this only works for protoss, if we want it to work for zerg and terran it needs to change
                 {

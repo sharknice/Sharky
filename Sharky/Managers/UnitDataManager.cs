@@ -42,6 +42,7 @@ namespace Sharky.Managers
         public HashSet<UnitTypes> NoWeaponCooldownTypes { get; private set; }
 
         public HashSet<UnitTypes> ResourceCenterTypes { get; private set; }
+        public HashSet<UnitTypes> DefensiveStructureTypes { get; private set; }
 
         public Dictionary<Abilities, float> AbilityCooldownTimes { get; private set; }
         public Dictionary<Abilities, float> WarpInCooldownTimes { get; private set; }
@@ -246,6 +247,19 @@ namespace Sharky.Managers
                 UnitTypes.ZERG_LAIR,
                 UnitTypes.ZERG_HIVE
             };
+
+            DefensiveStructureTypes = new HashSet<UnitTypes>
+            {
+                UnitTypes.ZERG_SPORECRAWLER,
+                UnitTypes.ZERG_SPINECRAWLER,
+                UnitTypes.ZERG_SPORECRAWLERUPROOTED,
+                UnitTypes.ZERG_SPINECRAWLERUPROOTED,
+                UnitTypes.PROTOSS_SHIELDBATTERY,
+                UnitTypes.PROTOSS_PHOTONCANNON,
+                UnitTypes.TERRAN_PLANETARYFORTRESS,
+                UnitTypes.TERRAN_MISSILETURRET,
+                UnitTypes.TERRAN_BUNKER
+            };
         }
 
         public override void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)
@@ -385,6 +399,63 @@ namespace Sharky.Managers
                 }
             }
             return false;
+        }
+
+        public int CargoSize(UnitTypes unitType)
+        {
+            if (unitType == UnitTypes.PROTOSS_PROBE)
+            {
+                return 1;
+            }
+            if (unitType == UnitTypes.ZERG_DRONE || unitType == UnitTypes.ZERG_ZERGLING)
+            {
+                return 1;
+            }
+            if (unitType == UnitTypes.TERRAN_SCV || unitType == UnitTypes.TERRAN_MULE)
+            {
+                return 1;
+            }
+
+            if (unitType == UnitTypes.PROTOSS_ZEALOT || unitType == UnitTypes.PROTOSS_SENTRY || unitType == UnitTypes.PROTOSS_STALKER || unitType == UnitTypes.PROTOSS_ADEPT || unitType == UnitTypes.PROTOSS_HIGHTEMPLAR || unitType == UnitTypes.PROTOSS_DARKTEMPLAR)
+            {
+                return 2;
+            }
+            if (unitType == UnitTypes.ZERG_BANELING || unitType == UnitTypes.ZERG_HYDRALISK || unitType == UnitTypes.ZERG_INFESTOR || unitType == UnitTypes.ZERG_QUEEN || unitType == UnitTypes.ZERG_ROACH)
+            {
+                return 2;
+            }
+            if (unitType == UnitTypes.TERRAN_MARINE || unitType == UnitTypes.TERRAN_MARAUDER || unitType == UnitTypes.TERRAN_GHOST)
+            {
+                return 2;
+            }
+
+            if (unitType == UnitTypes.PROTOSS_IMMORTAL || unitType == UnitTypes.PROTOSS_DISRUPTOR || unitType == UnitTypes.PROTOSS_ARCHON)
+            {
+                return 4;
+            }
+            if (unitType == UnitTypes.ZERG_LURKERMP || unitType == UnitTypes.ZERG_RAVAGER || unitType == UnitTypes.ZERG_SWARMHOSTMP)
+            {
+                return 4;
+            }
+            if (unitType == UnitTypes.TERRAN_HELLION || unitType == UnitTypes.TERRAN_HELLIONTANK || unitType == UnitTypes.TERRAN_CYCLONE || unitType == UnitTypes.TERRAN_SIEGETANK)
+            {
+                return 4;
+            }
+
+            if (unitType == UnitTypes.PROTOSS_COLOSSUS)
+            {
+                return 8;
+            }
+            if (unitType == UnitTypes.ZERG_ULTRALISK)
+            {
+                return 8;
+            }
+            if (unitType == UnitTypes.TERRAN_THOR)
+            {
+                return 8;
+            }
+
+            return 100;
         }
     }
 }
