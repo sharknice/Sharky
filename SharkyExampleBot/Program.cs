@@ -21,6 +21,7 @@ using Sharky.MicroControllers.Zerg;
 using Sharky.MicroTasks;
 using Sharky.Pathing;
 using Sharky.TypeData;
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 
@@ -30,6 +31,7 @@ namespace SharkyExampleBot
     {
         public static void Main(string[] args)
         {
+            Console.WriteLine("starting");
             var gameConnection = new GameConnection();
             var sharkyBot = CreateBot(gameConnection);
 
@@ -78,7 +80,7 @@ namespace SharkyExampleBot
 
             var targetPriorityService = new TargetPriorityService(unitDataManager);
             var collisionCalculator = new CollisionCalculator();
-            var unitManager = new UnitManager(unitDataManager, sharkyOptions, targetPriorityService, collisionCalculator, mapDataService);
+            var unitManager = new UnitManager(unitDataManager, sharkyOptions, targetPriorityService, collisionCalculator, mapDataService, debugManager);
             managers.Add(unitManager);
 
             var enemyRaceManager = new EnemyRaceManager(unitManager, unitDataManager);
@@ -169,7 +171,7 @@ namespace SharkyExampleBot
 
             var defenseSquadTask = new DefenseSquadTask(unitManager, targetingManager, defenseService, microController, new List<DesiredUnitsClaim>(), 0, false);
             var workerScoutTask = new WorkerScoutTask(unitDataManager, targetingManager, mapDataService, true, 0.5f);
-            var miningTask = new MiningTask(unitDataManager, baseManager, unitManager, 1);          
+            var miningTask = new MiningTask(unitDataManager, baseManager, unitManager, 1, collisionCalculator, debugManager);          
             var attackTask = new AttackTask(microController, targetingManager, unitManager, defenseService, macroData, attackData, 2);
 
             var microTasks = new Dictionary<string, IMicroTask>

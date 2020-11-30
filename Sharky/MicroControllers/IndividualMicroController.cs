@@ -550,13 +550,13 @@ namespace Sharky.MicroControllers
                 return true;
             }
 
-            if (UnitDataManager.NoWeaponCooldownTypes.Contains((UnitTypes)commander.UnitCalculation.Unit.UnitType))
-            {
-                if (commander.UnitCalculation.NearbyEnemies.Any(a => a.UnitClassifications.Contains(UnitClassification.ArmyUnit) || a.UnitClassifications.Contains(UnitClassification.DefensiveStructure)))
-                {
-                    return false;
-                }
-            }
+            //if (UnitDataManager.NoWeaponCooldownTypes.Contains((UnitTypes)commander.UnitCalculation.Unit.UnitType))
+            //{
+            //    if (!commander.UnitCalculation.NearbyEnemies.Any(a => a.UnitClassifications.Contains(UnitClassification.ArmyUnit) || a.UnitClassifications.Contains(UnitClassification.DefensiveStructure)))
+            //    {
+            //        return false;
+            //    }
+            //}
 
             if (bestTarget != null && MicroPriority != MicroPriority.NavigateToLocation)
             {

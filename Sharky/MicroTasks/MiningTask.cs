@@ -12,13 +12,17 @@ namespace Sharky.MicroTasks
         UnitDataManager UnitDataManager;
         IBaseManager BaseManager;
         UnitManager UnitManager;
+        CollisionCalculator CollisionCalculator;
+        DebugManager DebugManager;
 
-        public MiningTask(UnitDataManager unitDataManager, IBaseManager baseManager, UnitManager unitManager, int priority)
+        public MiningTask(UnitDataManager unitDataManager, IBaseManager baseManager, UnitManager unitManager, int priority, CollisionCalculator collisionCalculator, DebugManager debugManager)
         {
             UnitDataManager = unitDataManager;
             BaseManager = baseManager;
             UnitManager = unitManager;
             Priority = priority;
+            CollisionCalculator = collisionCalculator;
+            DebugManager = debugManager;
 
             UnitCommanders = new List<UnitCommander>();
         }
@@ -50,6 +54,7 @@ namespace Sharky.MicroTasks
 
             var commands = new List<SC2APIProtocol.Action>();
 
+            commands.AddRange(ReturnResources(frame));
             commands.AddRange(MineGas(frame));
             commands.AddRange(MineWithIdleWorkers(frame));
 
@@ -62,6 +67,25 @@ namespace Sharky.MicroTasks
         {
             var incompleteRefineries = UnitManager.SelfUnits.Where(u => UnitDataManager.GasGeyserRefineryTypes.Contains((UnitTypes)u.Value.Unit.UnitType) && u.Value.Unit.BuildProgress < .95f).Select(u => u.Key);
             return UnitCommanders.Where(c => c.UnitCalculation.Unit.Orders.Count() == 0 || c.UnitCalculation.Unit.Orders.Any(o => incompleteRefineries.Contains(o.TargetUnitTag)));
+        }
+
+        List<SC2APIProtocol.Action> ReturnResources(int frame)
+        {
+            var actions = new List<SC2APIProtocol.Action>();
+
+            foreach (var worker in UnitCommanders.Where(u => u.UnitCalculation.NearbyAllies.Any(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISM) && u.UnitCalculation.Unit.BuffIds.Any(b => UnitDataManager.CarryingMineralBuffs.Contains((Buffs)b))))
+            {
+                if(worker.UnitCalculation.NearbyAllies.Any(a => (a.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISM) && Vector2.DistanceSquared(new Vector2(a.Unit.Pos.X, a.Unit.Pos.Y), new Vector2(worker.UnitCalculation.Unit.Pos.X, worker.UnitCalculation.Unit.Pos.Y)) < .1))
+                { 
+                    var action = worker.Order(frame, Abilities.HARVEST_RETURN);
+                    if (action != null)
+                    {
+                        actions.Add(action);
+                    }
+                }
+            }
+
+            return actions;
         }
 
         List<SC2APIProtocol.Action> MineGas(int frame)

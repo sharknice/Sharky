@@ -15,6 +15,7 @@ namespace Sharky.Managers
         TargetPriorityService TargetPriorityService;
         CollisionCalculator CollisionCalculator;
         MapDataService MapDataService;
+        DebugManager DebugManager;
 
         float NearbyDistance = 25;
 
@@ -30,13 +31,14 @@ namespace Sharky.Managers
         int SelfDeaths;
         int NeutralDeaths;
 
-        public UnitManager(UnitDataManager unitDataManager, SharkyOptions sharkyOptions, TargetPriorityService targetPriorityService, CollisionCalculator collisionCalculator, MapDataService mapDataService)
+        public UnitManager(UnitDataManager unitDataManager, SharkyOptions sharkyOptions, TargetPriorityService targetPriorityService, CollisionCalculator collisionCalculator, MapDataService mapDataService, DebugManager debugManager)
         {
             UnitDataManager = unitDataManager;
             SharkyOptions = sharkyOptions;
             TargetPriorityService = targetPriorityService;
             CollisionCalculator = collisionCalculator;
             MapDataService = mapDataService;
+            DebugManager = debugManager;
 
             EnemyUnits = new ConcurrentDictionary<ulong, UnitCalculation>();
             SelfUnits = new ConcurrentDictionary<ulong, UnitCalculation>();
@@ -62,7 +64,7 @@ namespace Sharky.Managers
                 DeadUnits = new List<ulong>();
             }
 
-            foreach (var unit in SelfUnits) // remove things like purification novas that don't have dead unit events
+            foreach (var unit in SelfUnits.Where(u => u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_DISRUPTORPHASED)) // remove things like purification novas that don't have dead unit events
             {
                 if (!observation.Observation.RawData.Units.Any(u => u.Tag == unit.Key))
                 {
@@ -88,8 +90,6 @@ namespace Sharky.Managers
                 Commanders.TryRemove(tag, out UnitCommander removedCommander);
             }
 
-
-            // TODO: remove disruptorphased because it doesn't get counted as a deadunit
 
             foreach (var enemy in EnemyUnits.Select(e => e.Value).ToList()) // if we can see this area of the map and the unit isn't there anymore remove it (we just remove it because visible units will get re-added below)
             {
@@ -179,6 +179,18 @@ namespace Sharky.Managers
                 }
 
                 selfUnit.Value.Attackers = GetTargettedAttacks(selfUnit.Value).ToList();
+            }
+
+            if (SharkyOptions.Debug)
+            {
+                foreach (var selfUnit in SelfUnits)
+                {
+                    DebugManager.DrawLine(selfUnit.Value.Unit.Pos, new Point { X = selfUnit.Value.End.X, Y = selfUnit.Value.End.Y, Z = selfUnit.Value.Unit.Pos.Z + 1f }, new SC2APIProtocol.Color { R = 0, B = 0, G = 255 });
+                }
+                foreach (var enemyUnit in EnemyUnits)
+                {
+                    DebugManager.DrawLine(enemyUnit.Value.Unit.Pos, new Point { X = enemyUnit.Value.End.X, Y = enemyUnit.Value.End.Y, Z = enemyUnit.Value.Unit.Pos.Z + 1f }, new SC2APIProtocol.Color { R = 255, B = 0, G = 0 });
+                }
             }
 
             return new List<SC2APIProtocol.Action>();

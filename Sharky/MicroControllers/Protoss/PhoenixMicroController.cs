@@ -38,14 +38,6 @@ namespace Sharky.MicroControllers.Protoss
                 return true;
             }
 
-            if (UnitDataManager.NoWeaponCooldownTypes.Contains((UnitTypes)commander.UnitCalculation.Unit.UnitType))
-            {
-                if (commander.UnitCalculation.NearbyEnemies.Any(a => a.UnitClassifications.Contains(UnitClassification.ArmyUnit) || a.UnitClassifications.Contains(UnitClassification.DefensiveStructure)))
-                {
-                    return false;
-                }
-            }
-
             if (bestTarget != null && MicroPriority != MicroPriority.NavigateToLocation)
             {
                 action = commander.Order(frame, Abilities.MOVE, GetPositionFromRange(bestTarget.Unit.Pos, commander.UnitCalculation.Unit.Pos, commander.UnitCalculation.Range));

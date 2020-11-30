@@ -48,6 +48,7 @@ namespace Sharky.Managers
         public Dictionary<Abilities, float> WarpInCooldownTimes { get; private set; }
 
         public HashSet<Buffs> CarryingResourceBuffs { get; private set; }
+        public HashSet<Buffs> CarryingMineralBuffs { get; private set; }
 
         public HashSet<Abilities> MiningAbilities { get; private set; }
         public HashSet<Abilities> GatheringAbilities { get; private set; }
@@ -114,6 +115,11 @@ namespace Sharky.Managers
                 Buffs.CARRYHARVESTABLEVESPENEGEYSERGAS,
                 Buffs.CARRYHARVESTABLEVESPENEGEYSERGASPROTOSS,
                 Buffs.CARRYHARVESTABLEVESPENEGEYSERGASZERG,
+                Buffs.CARRYHIGHYIELDMINERALFIELDMINERALS,
+                Buffs.CARRYMINERALFIELDMINERALS
+            };
+
+            CarryingMineralBuffs = new HashSet<Buffs> {
                 Buffs.CARRYHIGHYIELDMINERALFIELDMINERALS,
                 Buffs.CARRYMINERALFIELDMINERALS
             };

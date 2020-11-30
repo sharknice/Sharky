@@ -58,7 +58,7 @@ namespace Sharky.MicroControllers.Protoss
                 }
             }
 
-            // follow behind at the range of cloak field
+            // follow behind at the range of pickup
             var unitToSupport = GetSupportTarget(commander, target, defensivePoint);
 
             if (!commander.UnitCalculation.NearbyAllies.Any(a => a.Unit.Tag == unitToSupport.Unit.Tag))
@@ -73,7 +73,7 @@ namespace Sharky.MicroControllers.Protoss
                 }
             }
 
-            if (UnloadUnits(commander, frame, out action))
+            if (UnloadUnits(commander, defensivePoint, frame, out action))
             {
                 return true;
             }
@@ -230,11 +230,19 @@ namespace Sharky.MicroControllers.Protoss
             return new Point2D { X = target.X + (float)x, Y = target.Y - (float)y };
         }
 
-        bool UnloadUnits(UnitCommander commander, int frame, out SC2APIProtocol.Action action)
+        bool UnloadUnits(UnitCommander commander, Point2D defensivePoint, int frame, out SC2APIProtocol.Action action)
         {
             action = null;
 
-            if (commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.UNLOADALLAT_WARPPRISM)) { return false; }
+            if (commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.UNLOADALLAT_WARPPRISM)) {
+                // if a unit has been in there for more than a second, warp prism must be on unloadable ground, move to a new area then try again
+                if (commander.LoadTimes.Any(l => l.Value > 100))
+                {
+                    action = commander.Order(frame, Abilities.MOVE, defensivePoint);
+                }
+
+                return true; 
+            }
 
             if (!MapDataService.PathWalkable(commander.UnitCalculation.Unit.Pos))
             {
@@ -256,7 +264,7 @@ namespace Sharky.MicroControllers.Protoss
                 }
                 else
                 {
-                    var weapon = UnitManager.Commanders[passenger.Tag].UnitCalculation.Weapon;
+                    var weapon = UnitManager.SelfUnits[passenger.Tag].Weapon;
                     if (weapon == null || (frame - commander.LoadTimes[passenger.Tag]) / SharkyOptions.FramesPerSecond > weapon.Speed) // unload any units ready to fire
                     {
                         action = commander.Order(frame, Abilities.UNLOADALLAT_WARPPRISM, null, commander.UnitCalculation.Unit.Tag); // TODO: dropping a specific unit not working, can only drop all, change it if they ever fix the api
@@ -290,7 +298,7 @@ namespace Sharky.MicroControllers.Protoss
             friendlies = UnitManager.SelfUnits.Where(u => u.Value.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !u.Value.Unit.IsFlying
                             && !otherWarpPrisms.Any(o => DistanceSquared(o.Value, u.Value) < 64)
                                 && u.Value.NearbyEnemies.Any(e => DistanceSquared(u.Value, e) < 225)
-                            ).OrderBy(u => DistanceSquared(u.Value.NearbyEnemies.OrderBy(e => DistanceSquared(e, u.Value)).First(), u.Value));
+                            ).OrderBy(u => DistanceSquared(u.Value.NearbyEnemies.OrderBy(e => DistanceSquared(e, u.Value)).FirstOrDefault(), u.Value));
 
             if (friendlies.Count() > 0)
             {
@@ -301,7 +309,7 @@ namespace Sharky.MicroControllers.Protoss
             //get ally closest to target
             friendlies = UnitManager.SelfUnits.Where(u => u.Value.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !u.Value.Unit.IsFlying
                             && !otherWarpPrisms.Any(o => DistanceSquared(o.Value, u.Value) < 64)
-                            ).OrderBy(u => DistanceSquared(u.Value.NearbyEnemies.OrderBy(e => DistanceSquared(e, u.Value)).First(), u.Value));
+                            ).OrderBy(u => DistanceSquared(u.Value.NearbyEnemies.OrderBy(e => DistanceSquared(e, u.Value)).FirstOrDefault(), u.Value));
 
             if (friendlies.Count() > 0)
             {
@@ -311,7 +319,7 @@ namespace Sharky.MicroControllers.Protoss
             // if still none
             //get ally closest to target even if there is another warp prism nearby
             friendlies = UnitManager.SelfUnits.Where(u => u.Value.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !u.Value.Unit.IsFlying
-                            ).OrderBy(u => DistanceSquared(u.Value.NearbyEnemies.OrderBy(e => DistanceSquared(e, u.Value)).First(), u.Value));
+                            ).OrderBy(u => DistanceSquared(u.Value.NearbyEnemies.OrderBy(e => DistanceSquared(e, u.Value)).FirstOrDefault(), u.Value));
 
             if (friendlies.Count() > 0)
             {
@@ -384,11 +392,15 @@ namespace Sharky.MicroControllers.Protoss
         public override SC2APIProtocol.Action Retreat(UnitCommander commander, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
             // TODO: pick up nearby units that are retreating to help them retreat faster
-            return base.Retreat(commander, defensivePoint, groupCenter, frame);
+            return Idle(commander, defensivePoint, frame);
         }
 
         float DistanceSquared(UnitCalculation unit1, UnitCalculation unit2)
         {
+            if (unit1 == null || unit2 == null)
+            {
+                return 0;
+            }
             return Vector2.DistanceSquared(new Vector2(unit1.Unit.Pos.X, unit1.Unit.Pos.Y), new Vector2(unit2.Unit.Pos.X, unit2.Unit.Pos.Y));
         }
 
@@ -431,7 +443,7 @@ namespace Sharky.MicroControllers.Protoss
 
                         if (Vector2.DistanceSquared(new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y), new Vector2(miningLocation.X, miningLocation.Y)) < .5)
                         {
-                            var probe = commander.UnitCalculation.NearbyAllies.Where(a => a.Unit.BuffIds.Any(b => UnitDataManager.CarryingResourceBuffs.Contains((Buffs)b)) && InRange(a.Unit.Pos, commander.UnitCalculation.Unit.Pos, PickupRange) && !InRange(a.Unit.Pos, nexus.Value.Unit.Pos, nexus.Value.Unit.Radius + 1)).OrderByDescending(u => DistanceSquared(nexus.Value, u)).FirstOrDefault();
+                            var probe = commander.UnitCalculation.NearbyAllies.Where(a => a.Unit.BuffIds.Any(b => UnitDataManager.CarryingMineralBuffs.Contains((Buffs)b)) && InRange(a.Unit.Pos, commander.UnitCalculation.Unit.Pos, PickupRange) && !InRange(a.Unit.Pos, nexus.Value.Unit.Pos, nexus.Value.Unit.Radius + 1)).OrderByDescending(u => DistanceSquared(nexus.Value, u)).FirstOrDefault();
                             if (probe != null)
                             {
                                 action = commander.Order(frame, Abilities.LOAD, null, probe.Unit.Tag);

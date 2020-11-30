@@ -3,6 +3,7 @@ using Sharky.Managers;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 namespace Sharky
 {
@@ -65,6 +66,11 @@ namespace Sharky
 
             stopwatch.Stop();
             DebugManager.DrawText($"OnFrame: {stopwatch.ElapsedMilliseconds}");
+
+            if (Actions.Any(a => a == null))
+            {
+                Actions.RemoveAll(a => a == null); // TODO: figure out what is adding null actions
+            }
 
             return Actions;
         }

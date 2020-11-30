@@ -68,10 +68,10 @@ namespace Sharky
                 Range = unitRange + unit.Radius;
             }
 
-            var endX = (float)Math.Cos(unit.Facing) * Range;
-            var endY = (float)Math.Sin(unit.Facing) * Range;
+            var endX = (float)(Range * Math.Sin(unit.Facing + (Math.PI / 2)));
+            var endY = (float)(Range * Math.Cos(unit.Facing + (Math.PI / 2)));
             Start = new Vector2(unit.Pos.X, unit.Pos.Y);
-            End = new Vector2(endX + unit.Pos.X, endY - unit.Pos.Y);
+            End = new Vector2(endX + unit.Pos.X, unit.Pos.Y - endY);
 
             DamageRadius = 1; // TODO: get damage radius
             EstimatedCooldown = 0; // TODO: get estimated cooldown
