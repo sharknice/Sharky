@@ -68,10 +68,18 @@ namespace Sharky
                 Range = unitRange + unit.Radius;
             }
 
-            var endX = (float)(Range * Math.Sin(unit.Facing + (Math.PI / 2)));
-            var endY = (float)(Range * Math.Cos(unit.Facing + (Math.PI / 2)));
             Start = new Vector2(unit.Pos.X, unit.Pos.Y);
-            End = new Vector2(endX + unit.Pos.X, unit.Pos.Y - endY);
+
+            if (unit.UnitType == (uint)UnitTypes.PROTOSS_COLOSSUS || unit.UnitType == (uint)UnitTypes.PROTOSS_IMMORTAL || unit.UnitType == (uint)UnitTypes.PROTOSS_PHOTONCANNON || unit.UnitType == (uint)UnitTypes.PROTOSS_MOTHERSHIP)
+            {
+                End = Start; // facing is always 0 for these units, can't calculate where they're aiming
+            }
+            else
+            {
+                var endX = (float)(Range * Math.Sin(unit.Facing + (Math.PI / 2)));
+                var endY = (float)(Range * Math.Cos(unit.Facing + (Math.PI / 2)));
+                End = new Vector2(endX + unit.Pos.X, unit.Pos.Y - endY);
+            }
 
             DamageRadius = 1; // TODO: get damage radius
             EstimatedCooldown = 0; // TODO: get estimated cooldown
