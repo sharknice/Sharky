@@ -18,8 +18,9 @@ namespace Sharky.MicroControllers.Zerg
 
             if (commander.UnitCalculation.Unit.Health < 6)
             {
-                if (AvoidDamage(commander, target, defensivePoint, frame, out action)) { 
-                    return true; 
+                if (AvoidDamage(commander, target, defensivePoint, frame, out action))
+                {
+                    return true;
                 }
             }
 

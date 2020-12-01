@@ -70,7 +70,7 @@ namespace Sharky
 
             Start = new Vector2(unit.Pos.X, unit.Pos.Y);
 
-            if (unit.UnitType == (uint)UnitTypes.PROTOSS_COLOSSUS || unit.UnitType == (uint)UnitTypes.PROTOSS_IMMORTAL || unit.UnitType == (uint)UnitTypes.PROTOSS_PHOTONCANNON || unit.UnitType == (uint)UnitTypes.PROTOSS_MOTHERSHIP)
+            if (unit.UnitType == (uint)UnitTypes.PROTOSS_COLOSSUS || unit.UnitType == (uint)UnitTypes.PROTOSS_IMMORTAL || unit.UnitType == (uint)UnitTypes.PROTOSS_PHOTONCANNON || unit.UnitType == (uint)UnitTypes.PROTOSS_MOTHERSHIP || unit.UnitType == (uint)UnitTypes.TERRAN_MISSILETURRET)
             {
                 End = Start; // facing is always 0 for these units, can't calculate where they're aiming
             }
@@ -98,7 +98,7 @@ namespace Sharky
             Dps = unitDataManager.GetDps(unit);
             Weapon = unitDataManager.GetWeapon(unit);
             Weapons = UnitTypeData.Weapons.ToList();
-            if (Weapons == null)
+            if (Weapons == null || Weapons.Count() == 0)
             {
                 Weapons = new List<Weapon>();
                 if (Weapon != null)

@@ -1,16 +1,21 @@
 ﻿using SC2APIProtocol;
+using Sharky.Builds.BuildChoosing;
 using Sharky.Managers;
 using Sharky.Managers.Protoss;
+using Sharky.MicroTasks;
 using System.Collections.Generic;
 
 namespace Sharky.Builds.Protoss
 {
     public class Robo : ProtossSharkyBuild
     {
-        Race EnemyRace = Race.Terran;
+        EnemyRaceManager EnemyRaceManager;
+        MicroManager MicroManager;
 
-        public Robo(BuildOptions buildOptions, MacroData macroData, UnitManager unitManager, AttackData attackData, IChatManager chatManager, NexusManager nexusManager) : base(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager)
+        public Robo(BuildOptions buildOptions, MacroData macroData, UnitManager unitManager, AttackData attackData, IChatManager chatManager, NexusManager nexusManager, EnemyRaceManager enemyRaceManager, MicroManager microManager, ICounterTransitioner counterTransitioner) : base(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager, counterTransitioner)
         {
+            EnemyRaceManager = enemyRaceManager;
+            MicroManager = microManager;
         }
 
         public override void StartBuild(int frame)
@@ -32,21 +37,28 @@ namespace Sharky.Builds.Protoss
 
             MacroData.DesiredProductionCounts[UnitTypes.PROTOSS_NEXUS] = 1;
 
-            // TODO: be able to add MicroTasks
-            //if (EnemyRace == SC2APIProtocol.Race.Protoss)
-            //{
-            //    var defenseTask = new DefenseSquadTask(build.Main, UnitTypes.STALKER)
-            //}
-            //else
-            //{
-            //    var defenseTask = new DefenseSquadTask(build.Main, UnitTypes.ADEPT)
-            //}
-            // TODO: EnemyRace
+            var desiredUnitsClaim = new DesiredUnitsClaim(UnitTypes.PROTOSS_ADEPT, 1);
+            if (EnemyRaceManager.EnemyRace == Race.Protoss)
+            {
+                desiredUnitsClaim = new DesiredUnitsClaim(UnitTypes.PROTOSS_STALKER, 1);
+            }
+
+            if (MicroManager.MicroTasks.ContainsKey("DefenseSquadTask"))
+            {
+                var defenseSquadTask = (DefenseSquadTask)MicroManager.MicroTasks["DefenseSquadTask"];
+                defenseSquadTask.DesiredUnitsClaims = new List<DesiredUnitsClaim> { desiredUnitsClaim };
+                defenseSquadTask.Enable();
+
+                if (MicroManager.MicroTasks.ContainsKey("AttackTask"))
+                {
+                    MicroManager.MicroTasks["AttackTask"].ResetClaimedUnits();
+                }
+            }
         }
 
         public override void OnFrame(ResponseObservation observation)
         {
-            if (EnemyRace == SC2APIProtocol.Race.Protoss)
+            if (EnemyRaceManager.EnemyRace == SC2APIProtocol.Race.Protoss)
             {
                 if (MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_STALKER] < 1)
                 {
@@ -96,7 +108,7 @@ namespace Sharky.Builds.Protoss
                 MacroData.DesiredProductionCounts[UnitTypes.PROTOSS_ROBOTICSFACILITY] = 1;
             }
 
-            if (EnemyRace == SC2APIProtocol.Race.Terran)
+            if (EnemyRaceManager.EnemyRace == SC2APIProtocol.Race.Terran)
             {
                 if (MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_OBSERVER] < 1)
                 {

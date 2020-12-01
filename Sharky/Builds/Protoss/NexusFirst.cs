@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using Sharky.Builds.BuildChoosing;
 using Sharky.Managers;
 using Sharky.Managers.Protoss;
 using System.Collections.Generic;
@@ -7,9 +8,9 @@ namespace Sharky.Builds.Protoss
 {
     public class NexusFirst : ProtossSharkyBuild
     {
-        ProtossCounterTransitioner ProtossCounterTransitioner;
+       ICounterTransitioner ProtossCounterTransitioner;
 
-        public NexusFirst(BuildOptions buildOptions, MacroData macroData, UnitManager unitManager, AttackData attackData, IChatManager chatManager, NexusManager nexusManager, ProtossCounterTransitioner protossCounterTransitioner) : base(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager)
+        public NexusFirst(BuildOptions buildOptions, MacroData macroData, UnitManager unitManager, AttackData attackData, IChatManager chatManager, NexusManager nexusManager, ICounterTransitioner protossCounterTransitioner) : base(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager, protossCounterTransitioner)
         {
             ProtossCounterTransitioner = protossCounterTransitioner;
         }

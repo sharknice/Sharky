@@ -9,7 +9,7 @@ namespace Sharky.Builds.MacroServices
     public class BuildDefenseService
     {
         MacroData MacroData;
-        BuildingBuilder BuildingBuilder;
+        IBuildingBuilder BuildingBuilder;
         UnitDataManager UnitDataManager;
         IUnitManager UnitManager;
         BaseManager BaseManager;
@@ -17,7 +17,7 @@ namespace Sharky.Builds.MacroServices
 
         int defensivePointLastFailFrame;
 
-        public BuildDefenseService(MacroData macroData, BuildingBuilder buildingBuilder, UnitDataManager unitDataManager, IUnitManager unitManager, BaseManager baseManager, TargetingManager targetingManager)
+        public BuildDefenseService(MacroData macroData, IBuildingBuilder buildingBuilder, UnitDataManager unitDataManager, IUnitManager unitManager, BaseManager baseManager, TargetingManager targetingManager)
         {
             MacroData = macroData;
             BuildingBuilder = buildingBuilder;

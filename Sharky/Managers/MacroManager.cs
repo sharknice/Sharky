@@ -13,7 +13,7 @@ namespace Sharky.Managers
         MacroSetup MacroSetup;
         IUnitManager UnitManager;
         UnitDataManager UnitDataManager;
-        BuildingBuilder BuildingBuilder;
+        IBuildingBuilder BuildingBuilder;
         SharkyOptions SharkyOptions;
         IBaseManager BaseManager;
         TargetingManager TargetingManager;
@@ -24,7 +24,7 @@ namespace Sharky.Managers
         BuildPylonService BuildPylonService;
         BuildDefenseService BuildDefenseService;
 
-        public MacroManager(MacroSetup macroSetup, IUnitManager unitManager, UnitDataManager unitDataManager, BuildingBuilder buildingBuilder, SharkyOptions sharkyOptions, IBaseManager baseManager, TargetingManager targetingManager, AttackData attackData, IBuildingPlacement warpInPlacement, MacroData macroData, Morpher morpher, BuildPylonService buildPylonService, BuildDefenseService buildDefenseService)
+        public MacroManager(MacroSetup macroSetup, IUnitManager unitManager, UnitDataManager unitDataManager, IBuildingBuilder buildingBuilder, SharkyOptions sharkyOptions, IBaseManager baseManager, TargetingManager targetingManager, AttackData attackData, IBuildingPlacement warpInPlacement, MacroData macroData, Morpher morpher, BuildPylonService buildPylonService, BuildDefenseService buildDefenseService)
         {
             MacroSetup = macroSetup;
             UnitManager = unitManager;

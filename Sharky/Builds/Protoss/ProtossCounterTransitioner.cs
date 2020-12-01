@@ -1,9 +1,10 @@
-﻿using Sharky.Managers;
+﻿using Sharky.Builds.BuildChoosing;
+using Sharky.Managers;
 using System.Collections.Generic;
 
 namespace Sharky.Builds.Protoss
 {
-    public class ProtossCounterTransitioner
+    public class ProtossCounterTransitioner : ICounterTransitioner
     {
         EnemyStrategyManager EnemyStrategyManager;
         SharkyOptions SharkyOptions;

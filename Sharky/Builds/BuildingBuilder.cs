@@ -6,7 +6,7 @@ using System.Numerics;
 
 namespace Sharky.Builds
 {
-    public class BuildingBuilder
+    public class BuildingBuilder : IBuildingBuilder
     {
         IUnitManager UnitManager;
         ITargetingManager TargetingManager;

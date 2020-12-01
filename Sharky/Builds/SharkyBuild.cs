@@ -22,11 +22,6 @@ namespace Sharky.Builds
             ChatManager = chatManager;
         }
 
-        public virtual List<string> CounterTransition(int frame)
-        {
-            return null;
-        }
-
         public string Name()
         {
             return GetType().Name;
@@ -71,6 +66,11 @@ namespace Sharky.Builds
         public virtual bool Transition(int frame)
         {
             return false;
+        }
+
+        public virtual List<string> CounterTransition(int frame)
+        {
+            return null;
         }
     }
 }
