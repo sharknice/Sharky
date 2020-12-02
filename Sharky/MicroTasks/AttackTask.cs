@@ -103,14 +103,14 @@ namespace Sharky.MicroTasks
 
             if (AttackData.Attacking)
             {
-                actions = MicroController.Attack(UnitCommanders, attackPoint, TargetingManager.DefensePoint, AttackData.ArmyPoint, frame);
+                actions = MicroController.Attack(UnitCommanders, attackPoint, TargetingManager.ForwardDefensePoint, AttackData.ArmyPoint, frame);
                 stopwatch.Stop();
                 lastFrameTime = stopwatch.ElapsedMilliseconds;
                 return actions;
             }
             else
             {
-                actions = MicroController.Retreat(UnitCommanders, TargetingManager.DefensePoint, AttackData.ArmyPoint, frame);
+                actions = MicroController.Retreat(UnitCommanders, TargetingManager.ForwardDefensePoint, AttackData.ArmyPoint, frame);
                 stopwatch.Stop();
                 lastFrameTime = stopwatch.ElapsedMilliseconds;
                 return actions;
@@ -133,7 +133,7 @@ namespace Sharky.MicroTasks
                     var groupVectors = selfGroup.Select(u => new Vector2(u.UnitCalculation.Unit.Pos.X, u.UnitCalculation.Unit.Pos.Y));
                     var groupPoint = new Point2D { X = groupVectors.Average(v => v.X), Y = groupVectors.Average(v => v.Y) };
                     var defensePoint = new Point2D { X = enemyGroup.FirstOrDefault().Unit.Pos.X, Y = enemyGroup.FirstOrDefault().Unit.Pos.Y };
-                    actions.AddRange(MicroController.Attack(selfGroup, defensePoint, TargetingManager.DefensePoint, groupPoint, frame));
+                    actions.AddRange(MicroController.Attack(selfGroup, defensePoint, TargetingManager.ForwardDefensePoint, groupPoint, frame));
                 }
             }
 
@@ -143,11 +143,11 @@ namespace Sharky.MicroTasks
                 var groupPoint = new Point2D { X = groupVectors.Average(v => v.X), Y = groupVectors.Average(v => v.Y) };
                 if (AttackData.Attacking)
                 {
-                    actions.AddRange(MicroController.Attack(availableCommanders, attackPoint, TargetingManager.DefensePoint, groupPoint, frame));
+                    actions.AddRange(MicroController.Attack(availableCommanders, attackPoint, TargetingManager.ForwardDefensePoint, groupPoint, frame));
                 }
                 else
                 {
-                    actions.AddRange(MicroController.Attack(availableCommanders, new Point2D { X = closerEnemies.FirstOrDefault().Unit.Pos.X, Y = closerEnemies.FirstOrDefault().Unit.Pos.Y }, TargetingManager.DefensePoint, groupPoint, frame));
+                    actions.AddRange(MicroController.Attack(availableCommanders, new Point2D { X = closerEnemies.FirstOrDefault().Unit.Pos.X, Y = closerEnemies.FirstOrDefault().Unit.Pos.Y }, TargetingManager.ForwardDefensePoint, groupPoint, frame));
                 }
             }
 

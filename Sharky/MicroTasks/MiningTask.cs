@@ -12,17 +12,13 @@ namespace Sharky.MicroTasks
         UnitDataManager UnitDataManager;
         IBaseManager BaseManager;
         UnitManager UnitManager;
-        CollisionCalculator CollisionCalculator;
-        DebugManager DebugManager;
 
-        public MiningTask(UnitDataManager unitDataManager, IBaseManager baseManager, UnitManager unitManager, int priority, CollisionCalculator collisionCalculator, DebugManager debugManager)
+        public MiningTask(UnitDataManager unitDataManager, IBaseManager baseManager, UnitManager unitManager, int priority)
         {
             UnitDataManager = unitDataManager;
             BaseManager = baseManager;
             UnitManager = unitManager;
             Priority = priority;
-            CollisionCalculator = collisionCalculator;
-            DebugManager = debugManager;
 
             UnitCommanders = new List<UnitCommander>();
         }
@@ -127,7 +123,6 @@ namespace Sharky.MicroTasks
                 if (baseLocation != null)
                 {
                     var mineralField = baseLocation.MineralFields.OrderBy(m => worker.UnitCalculation.NearbyAllies.Count(a => Vector2.DistanceSquared(new Vector2(m.Pos.X, m.Pos.Y), new Vector2(a.Unit.Pos.X, a.Unit.Pos.Y)) < 3)).ThenBy(m => Vector2.DistanceSquared(new Vector2(m.Pos.X, m.Pos.Y), new Vector2(worker.UnitCalculation.Unit.Pos.X, worker.UnitCalculation.Unit.Pos.Y))).FirstOrDefault();
-                    //var mineralField = baseLocation.MineralFields.OrderBy(m => Vector2.DistanceSquared(new Vector2(m.Pos.X, m.Pos.Y), new Vector2(worker.UnitCalculation.Unit.Pos.X, worker.UnitCalculation.Unit.Pos.Y))).FirstOrDefault();
                     if (mineralField != null)
                     {
                         var action = worker.Order(frame, Abilities.HARVEST_GATHER, null, mineralField.Tag);

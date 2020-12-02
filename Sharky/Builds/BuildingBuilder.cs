@@ -1,6 +1,7 @@
 ﻿using SC2APIProtocol;
 using Sharky.Builds.BuildingPlacement;
 using Sharky.Managers;
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
@@ -21,7 +22,7 @@ namespace Sharky.Builds
             UnitDataManager = unitDataManager;
         }
 
-        public Action BuildBuilding(MacroData macroData, UnitTypes unitType, BuildingTypeData unitData, Point2D generalLocation = null, bool ignoreMineralProximity = false, float maxDistance = 50)
+        public Action BuildBuilding(MacroData macroData, UnitTypes unitType, BuildingTypeData unitData, Point2D generalLocation = null, bool ignoreMineralProximity = false, float maxDistance = 50, List<UnitCommander> workerPool = null)
         {
             if (unitData.Minerals <= macroData.Minerals && unitData.Gas <= macroData.VespeneGas)
             {
@@ -34,7 +35,7 @@ namespace Sharky.Builds
                 
                 if (placementLocation != null)
                 {
-                    var worker = GetWorker(placementLocation);
+                    var worker = GetWorker(placementLocation, workerPool);
                     if (worker != null)
                     {
                         return worker.Order(macroData.Frame, unitData.Ability, placementLocation);
@@ -45,17 +46,24 @@ namespace Sharky.Builds
             return null;
         }
 
-        public Action BuildAddOn(MacroData macroData, TrainingTypeData unitData)
+        public Action BuildAddOn(MacroData macroData, TrainingTypeData unitData, Point2D location = null, float maxDistance = 50)
         {
             if (unitData.Minerals <= macroData.Minerals && unitData.Gas <= macroData.VespeneGas)
             {
                 var building = UnitManager.Commanders.Where(c => unitData.ProducingUnits.Contains((UnitTypes)c.Value.UnitCalculation.Unit.UnitType) && !c.Value.UnitCalculation.Unit.IsActive && c.Value.UnitCalculation.Unit.BuildProgress == 1 && !c.Value.UnitCalculation.Unit.HasAddOnTag);
                 if (building.Count() > 0)
                 {
-                    var action = building.First().Value.Order(macroData.Frame, unitData.Ability);
-                    if (action != null)
+                    if (location != null)
                     {
-                        return action;
+                        building = building.Where(b => Vector2.DistanceSquared(new Vector2(location.X, location.Y), new Vector2(b.Value.UnitCalculation.Unit.Pos.X, b.Value.UnitCalculation.Unit.Pos.Y)) <= maxDistance * maxDistance);
+                    }
+                    if (building.Count() > 0)
+                    {
+                        var action = building.First().Value.Order(macroData.Frame, unitData.Ability);
+                        if (action != null)
+                        {
+                            return action;
+                        }
                     }
                 }
             }
@@ -96,27 +104,28 @@ namespace Sharky.Builds
             return buildLocation;
         }
 
-        private UnitCommander GetWorker(Point2D location)
+        private UnitCommander GetWorker(Point2D location, IEnumerable<UnitCommander> workers = null)
         {
-            var workers = UnitManager.Commanders.Where(c => c.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && !c.Value.UnitCalculation.Unit.BuffIds.Any(b => UnitDataManager.CarryingResourceBuffs.Contains((Buffs)b)) && !c.Value.UnitCalculation.Unit.Orders.Any(o => UnitDataManager.BuildingData.Values.Any(b => (uint)b.Ability == o.AbilityId)));
+            if (workers == null)
+            {
+                workers = UnitManager.Commanders.Values.Where(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && !c.UnitCalculation.Unit.BuffIds.Any(b => UnitDataManager.CarryingResourceBuffs.Contains((Buffs)b)));
+            }
+            var availableWorkers = workers.Where(c => !c.UnitCalculation.Unit.Orders.Any(o => UnitDataManager.BuildingData.Values.Any(b => (uint)b.Ability == o.AbilityId)));
 
-            //var minerals = UnitManager.NeutralUnits.Values.Where(u => u.Unit.UnitType == UnitTypes.NEUTRAL_MINERALFIELD)
-            //var probesNotMiningThisInstant = probes.Where(p => !minerals.Any(m => Vector2.DistanceSquared(new Vector2(m.Pos.X, m.Pos.Y), new Vector2(p.Value.Unit.Pos.X, p.Value.Unit.Pos.Y)) < 3));
-
-            var closestWorkers = workers.OrderBy(p => Vector2.DistanceSquared(new Vector2(p.Value.UnitCalculation.Unit.Pos.X, p.Value.UnitCalculation.Unit.Pos.Y), new Vector2(location.X, location.Y)));
+            var closestWorkers = availableWorkers.OrderBy(p => Vector2.DistanceSquared(new Vector2(p.UnitCalculation.Unit.Pos.X, p.UnitCalculation.Unit.Pos.Y), new Vector2(location.X, location.Y)));
             if (closestWorkers.Count() == 0)
             {
                 return null;
             }
             else
             {
-                var closest = closestWorkers.First().Value;
+                var closest = closestWorkers.First();
                 var pos = closest.UnitCalculation.Unit.Pos;
                 var distanceSquared = Vector2.DistanceSquared(new Vector2(pos.X, pos.Y), new Vector2(location.X, location.Y));
                 if (distanceSquared > 1000)
                 {
-                    closestWorkers = workers.OrderBy(p => Vector2.DistanceSquared(new Vector2(p.Value.UnitCalculation.Unit.Pos.X, p.Value.UnitCalculation.Unit.Pos.Y), new Vector2(location.X, location.Y)));
-                    pos = closestWorkers.First().Value.UnitCalculation.Unit.Pos;
+                    closestWorkers = workers.OrderBy(p => Vector2.DistanceSquared(new Vector2(p.UnitCalculation.Unit.Pos.X, p.UnitCalculation.Unit.Pos.Y), new Vector2(location.X, location.Y)));
+                    pos = closestWorkers.First().UnitCalculation.Unit.Pos;
 
                     if (Vector2.DistanceSquared(new Vector2(pos.X, pos.Y), new Vector2(location.X, location.Y)) > distanceSquared)
                     {
@@ -124,11 +133,11 @@ namespace Sharky.Builds
                     }
                     else
                     {
-                        return closestWorkers.First().Value;
+                        return closestWorkers.First();
                     }
                 }
             }
-            return closestWorkers.First().Value;
+            return closestWorkers.First();
         }
     }
 }

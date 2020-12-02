@@ -13,6 +13,8 @@ namespace Sharky.Builds
             SetupTech(macroData);
             SetupAddOns(macroData);
             SetupDefensiveBuildings(macroData);
+
+            macroData.Proxies = new Dictionary<string, ProxyData>();
         }
 
         void SetupUnits(MacroData macroData)

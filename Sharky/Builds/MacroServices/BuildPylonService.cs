@@ -12,12 +12,12 @@ namespace Sharky.Builds.MacroServices
         IBuildingBuilder BuildingBuilder;
         UnitDataManager UnitDataManager;
         UnitManager UnitManager;
-        BaseManager BaseManager;
-        TargetingManager TargetingManager;
+        IBaseManager BaseManager;
+        ITargetingManager TargetingManager;
 
         int defensivePointLastFailFrame;
 
-        public BuildPylonService(MacroData macroData, IBuildingBuilder buildingBuilder, UnitDataManager unitDataManager, UnitManager unitManager, BaseManager baseManager, TargetingManager targetingManager)
+        public BuildPylonService(MacroData macroData, IBuildingBuilder buildingBuilder, UnitDataManager unitDataManager, UnitManager unitManager, IBaseManager baseManager, ITargetingManager targetingManager)
         {
             MacroData = macroData;
             BuildingBuilder = buildingBuilder;
@@ -102,9 +102,9 @@ namespace Sharky.Builds.MacroServices
 
                 var orderedBuildings = UnitManager.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
 
-                if (UnitManager.SelfUnits.Count(u => u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && Vector2.DistanceSquared(new Vector2(u.Value.Unit.Pos.X, u.Value.Unit.Pos.Y), new Vector2(TargetingManager.DefensePoint.X, TargetingManager.DefensePoint.Y)) < MacroData.DefensiveBuildingMineralLineMaximumDistance * MacroData.DefensiveBuildingMineralLineMaximumDistance) + orderedBuildings < MacroData.DesiredPylonsAtDefensivePoint)
+                if (UnitManager.SelfUnits.Count(u => u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && Vector2.DistanceSquared(new Vector2(u.Value.Unit.Pos.X, u.Value.Unit.Pos.Y), new Vector2(TargetingManager.MainDefensePoint.X, TargetingManager.MainDefensePoint.Y)) < MacroData.DefensiveBuildingMineralLineMaximumDistance * MacroData.DefensiveBuildingMineralLineMaximumDistance) + orderedBuildings < MacroData.DesiredPylonsAtDefensivePoint)
                 {
-                    var command = BuildPylon(TargetingManager.DefensePoint, true, MacroData.DefensiveBuildingMineralLineMaximumDistance);
+                    var command = BuildPylon(TargetingManager.MainDefensePoint, true, MacroData.DefensiveBuildingMineralLineMaximumDistance);
                     if (command != null)
                     {
                         commands.Add(command);

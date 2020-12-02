@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using Sharky.Builds;
 using System.Collections.Generic;
 
 namespace Sharky
@@ -61,6 +62,8 @@ namespace Sharky
         public int DesiredSupplyDepots;
         public bool BuildOverlord;
         public int DesiredOverlords;
+
+        public Dictionary<string, ProxyData> Proxies { get; set; }
 
         public int FoodUsed { get; set; }
         public int FoodLeft { get; set; }

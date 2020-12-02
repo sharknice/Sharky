@@ -12,7 +12,7 @@ namespace Sharky.MicroTasks
     public class DefenseSquadTask : MicroTask
     {
         UnitManager UnitManager;
-        TargetingManager TargetingManager;
+        ITargetingManager TargetingManager;
         DefenseService DefenseService;
         IMicroController MicroController;
         bool Enabled { get; set; }
@@ -21,7 +21,7 @@ namespace Sharky.MicroTasks
 
         public List<DesiredUnitsClaim> DesiredUnitsClaims { get; set; }
 
-        public DefenseSquadTask(UnitManager unitManager, TargetingManager targetingManager, DefenseService defenseService, IMicroController microController, List<DesiredUnitsClaim> desiredUnitsClaims, float priority, bool enabled = true)
+        public DefenseSquadTask(UnitManager unitManager, ITargetingManager targetingManager, DefenseService defenseService, IMicroController microController, List<DesiredUnitsClaim> desiredUnitsClaims, float priority, bool enabled = true)
         {
             UnitManager = unitManager;
             TargetingManager = targetingManager;
@@ -94,7 +94,7 @@ namespace Sharky.MicroTasks
                     lastFrameTime = stopwatch.ElapsedMilliseconds;
                     return actions;
                 }
-                actions = MicroController.Retreat(UnitCommanders, TargetingManager.DefensePoint, TargetingManager.DefensePoint, frame);
+                actions = MicroController.Retreat(UnitCommanders, TargetingManager.MainDefensePoint, TargetingManager.MainDefensePoint, frame);
                 stopwatch.Stop();
                 lastFrameTime = stopwatch.ElapsedMilliseconds;
                 return actions;
@@ -119,7 +119,7 @@ namespace Sharky.MicroTasks
                     var groupVectors = selfGroup.Select(u => new Vector2(u.UnitCalculation.Unit.Pos.X, u.UnitCalculation.Unit.Pos.Y));
                     var groupPoint = new Point2D { X = groupVectors.Average(v => v.X), Y = groupVectors.Average(v => v.Y) };
                     var defensePoint = new Point2D { X = enemyGroup.FirstOrDefault().Unit.Pos.X, Y = enemyGroup.FirstOrDefault().Unit.Pos.Y };
-                    actions.AddRange(MicroController.Attack(selfGroup, defensePoint, TargetingManager.DefensePoint, groupPoint, frame));
+                    actions.AddRange(MicroController.Attack(selfGroup, defensePoint, TargetingManager.MainDefensePoint, groupPoint, frame));
                 }
             }
 
@@ -127,7 +127,7 @@ namespace Sharky.MicroTasks
             {
                 var groupVectors = availableCommanders.Select(u => new Vector2(u.UnitCalculation.Unit.Pos.X, u.UnitCalculation.Unit.Pos.Y));
                 var groupPoint = new Point2D { X = groupVectors.Average(v => v.X), Y = groupVectors.Average(v => v.Y) };
-                actions.AddRange(MicroController.Attack(availableCommanders, new Point2D { X = attackingEnemies.FirstOrDefault().Unit.Pos.X, Y = attackingEnemies.FirstOrDefault().Unit.Pos.Y }, TargetingManager.DefensePoint, groupPoint, frame));
+                actions.AddRange(MicroController.Attack(availableCommanders, new Point2D { X = attackingEnemies.FirstOrDefault().Unit.Pos.X, Y = attackingEnemies.FirstOrDefault().Unit.Pos.Y }, TargetingManager.MainDefensePoint, groupPoint, frame));
             }
 
             return actions;

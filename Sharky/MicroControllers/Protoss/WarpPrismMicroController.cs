@@ -11,9 +11,9 @@ namespace Sharky.MicroControllers.Protoss
     {
         int PickupRange = 5;
 
-        BaseManager BaseManager;
+        IBaseManager BaseManager;
 
-        public WarpPrismMicroController(MapDataService mapDataService, UnitDataManager unitDataManager, UnitManager unitManager, DebugManager debugManager, IPathFinder sharkyPathFinder, SharkyOptions sharkyOptions, MicroPriority microPriority, bool groupUpEnabled, BaseManager baseManager)
+        public WarpPrismMicroController(MapDataService mapDataService, UnitDataManager unitDataManager, UnitManager unitManager, DebugManager debugManager, IPathFinder sharkyPathFinder, SharkyOptions sharkyOptions, MicroPriority microPriority, bool groupUpEnabled, IBaseManager baseManager)
             : base(mapDataService, unitDataManager, unitManager, debugManager, sharkyPathFinder, sharkyOptions, microPriority, groupUpEnabled)
         {
             BaseManager = baseManager;

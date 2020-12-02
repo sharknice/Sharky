@@ -5,6 +5,7 @@ using Sharky.Builds.BuildChoosing;
 using Sharky.Managers;
 using Sharky.Managers.Protoss;
 using Sharky.MicroTasks;
+using Sharky.Proxy;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -17,19 +18,26 @@ namespace SharkyExampleBot.Builds
         MicroManager MicroManager;
         EnemyRaceManager EnemyRaceManager;
         UnitDataManager UnitDataManager;
+        ProxyLocationService ProxyLocationService;
 
         bool OpeningAttackChatSent;
         bool CancelledProxyChatSent;
 
-        public ProxyVoidRay(BuildOptions buildOptions, MacroData macroData, UnitManager unitManager, AttackData attackData, IChatManager chatManager, NexusManager nexusManager, SharkyOptions sharkyOptions, MicroManager microManager, EnemyRaceManager enemyRaceManager, ICounterTransitioner counterTransitioner, UnitDataManager unitDataManager) : base(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager, counterTransitioner)
+        ProxyTask ProxyTask;
+
+        public ProxyVoidRay(BuildOptions buildOptions, MacroData macroData, UnitManager unitManager, AttackData attackData, IChatManager chatManager, NexusManager nexusManager, SharkyOptions sharkyOptions, MicroManager microManager, EnemyRaceManager enemyRaceManager, ICounterTransitioner counterTransitioner, UnitDataManager unitDataManager, ProxyLocationService proxyLocationService) : base(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager, counterTransitioner)
         {
             SharkyOptions = sharkyOptions;
             MicroManager = microManager;
             EnemyRaceManager = enemyRaceManager;
             UnitDataManager = unitDataManager;
+            ProxyLocationService = proxyLocationService;
 
             OpeningAttackChatSent = false;
             CancelledProxyChatSent = false;
+
+            ProxyTask = new ProxyTask(UnitDataManager, false, 0.9f, MacroData, string.Empty, MicroManager);
+            ProxyTask.ProxyName = GetType().Name;
         }
 
         public override void StartBuild(int frame)
@@ -61,10 +69,30 @@ namespace SharkyExampleBot.Builds
                     MicroManager.MicroTasks["AttackTask"].ResetClaimedUnits();
                 }
             }
+
+            MicroManager.MicroTasks["ProxyVoidRay"] = ProxyTask;   
+            var proxyLocation = ProxyLocationService.GetCliffProxyLocation();
+            MacroData.Proxies[ProxyTask.ProxyName] = new ProxyData(proxyLocation, MacroData);
+
+            AttackData.CustomAttackFunction = true;
+        }
+
+        void SetAttack()
+        {
+            if (UnitManager.Completed(UnitTypes.PROTOSS_VOIDRAY) > 1)
+            {
+                AttackData.Attacking = true;
+            }
+            else if (UnitManager.Completed(UnitTypes.PROTOSS_VOIDRAY) == 0)
+            {
+                AttackData.Attacking = false;
+            }
         }
 
         public override void OnFrame(ResponseObservation observation)
         {
+            SetAttack();
+
             if (MacroData.FoodUsed >= 14)
             {
                 if (MacroData.DesiredPylons < 1)
@@ -103,7 +131,8 @@ namespace SharkyExampleBot.Builds
                 {
                     MacroData.DesiredTechCounts[UnitTypes.PROTOSS_CYBERNETICSCORE] = 1;
                 }
-                // TODO: start the ProxyTask
+                ProxyTask.Enable();
+                MacroData.Proxies[ProxyTask.ProxyName].DesiredPylons = 1;
             }
             if (UnitManager.Completed(UnitTypes.PROTOSS_CYBERNETICSCORE) > 0)
             {
@@ -112,9 +141,9 @@ namespace SharkyExampleBot.Builds
                     MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_STALKER] = 1;
                 }
 
-                if (MacroData.DesiredProductionCounts[UnitTypes.PROTOSS_STARGATE] < 1)
+                if (MacroData.Proxies[ProxyTask.ProxyName].DesiredProductionCounts[UnitTypes.PROTOSS_STARGATE] < 1)
                 {
-                    MacroData.DesiredProductionCounts[UnitTypes.PROTOSS_STARGATE] = 1;
+                    MacroData.Proxies[ProxyTask.ProxyName].DesiredProductionCounts[UnitTypes.PROTOSS_STARGATE] = 1;
                 }
             }
 
@@ -122,6 +151,12 @@ namespace SharkyExampleBot.Builds
             {
                 BuildOptions.StrictSupplyCount = false;
                 MacroData.DesiredUpgrades[Upgrades.WARPGATERESEARCH] = true;
+
+                MacroData.Proxies[ProxyTask.ProxyName].DesiredPylons = 2;
+                if (MacroData.Proxies[ProxyTask.ProxyName].DesiredDefensiveBuildingsCounts[UnitTypes.PROTOSS_SHIELDBATTERY] < 2)
+                {
+                    MacroData.Proxies[ProxyTask.ProxyName].DesiredDefensiveBuildingsCounts[UnitTypes.PROTOSS_SHIELDBATTERY] = 2;
+                }
 
                 if (MacroData.DesiredProductionCounts[UnitTypes.PROTOSS_GATEWAY] < 2)
                 {
@@ -151,7 +186,7 @@ namespace SharkyExampleBot.Builds
 
             if (MacroData.Frame > SharkyOptions.FramesPerSecond * 4 * 60)
             {
-                // TODO: end proxy task
+                ProxyTask.Disable();
             }
 
             if (!OpeningAttackChatSent && MacroData.FoodArmy > 10)
@@ -165,11 +200,9 @@ namespace SharkyExampleBot.Builds
         {
             bool transition = false;
 
-            // TODO: proxy task location
-            var proxyLocation = new Point2D { X = 200, Y = 200 };
             if (UnitManager.Count(UnitTypes.PROTOSS_STARGATE) < 1)
             {
-                if (UnitManager.EnemyUnits.Any(e => Vector2.DistanceSquared(new Vector2(e.Value.Unit.Pos.X, e.Value.Unit.Pos.Y), new Vector2(proxyLocation.X, proxyLocation.Y)) < 100))
+                if (UnitManager.EnemyUnits.Any(e => Vector2.DistanceSquared(new Vector2(e.Value.Unit.Pos.X, e.Value.Unit.Pos.Y), new Vector2(MacroData.Proxies[ProxyTask.ProxyName].Location.X, MacroData.Proxies[ProxyTask.ProxyName].Location.Y)) < 100))
                 {
                     if (!CancelledProxyChatSent)
                     {
@@ -187,7 +220,7 @@ namespace SharkyExampleBot.Builds
 
             if (transition)
             {
-                // TODO: end proxy task
+                ProxyTask.Disable();
                 return true;
             }
 

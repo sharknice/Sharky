@@ -19,6 +19,7 @@ using Sharky.MicroControllers.Protoss;
 using Sharky.MicroControllers.Zerg;
 using Sharky.MicroTasks;
 using Sharky.Pathing;
+using Sharky.Proxy;
 using Sharky.TypeData;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -36,8 +37,8 @@ namespace Sharky.DefaultBot
         public MapManager MapManager { get; set; }
         public UnitManager UnitManager { get; set; }
         public EnemyRaceManager EnemyRaceManager { get; set; }
-        public BaseManager BaseManager { get; set; }
-        public TargetingManager TargetingManager { get; set; }
+        public IBaseManager BaseManager { get; set; }
+        public ITargetingManager TargetingManager { get; set; }
         public MacroManager MacroManager { get; set; }
         public NexusManager NexusManager { get; set; }
         public ChatManager ChatManager { get; set; }
@@ -56,11 +57,13 @@ namespace Sharky.DefaultBot
         public BuildingService BuildingService { get; set; }
         public BuildPylonService BuildPylonService { get; set; }
         public BuildDefenseService BuildDefenseService { get; set; }
+        public BuildProxyService BuildProxyService { get; set; }
         public ChatDataService ChatDataService { get; set; }
         public EnemyNameService EnemyNameService { get; set; }
         public EnemyPlayerService EnemyPlayerService { get; set; }
         public DefenseService DefenseService { get; set; }
         public IBuildDecisionService BuildDecisionService { get; set; }
+        public ProxyLocationService ProxyLocationService { get; set; }
 
         public MapData MapData { get; set; }
         public BuildOptions BuildOptions { get; set; }
@@ -100,8 +103,10 @@ namespace Sharky.DefaultBot
             var framesPerSecond = 22.4f;
 
             SharkyOptions = new SharkyOptions { Debug = debug, FramesPerSecond = framesPerSecond };
+            MacroData = new MacroData();
 
             Managers = new List<IManager>();
+
 
             DebugManager = new DebugManager(gameConnection, SharkyOptions);
             Managers.Add(DebugManager);
@@ -132,7 +137,7 @@ namespace Sharky.DefaultBot
             BaseManager = new BaseManager(UnitDataManager, UnitManager);
             Managers.Add(BaseManager);
 
-            TargetingManager = new TargetingManager(UnitManager, UnitDataManager, MapDataService, BaseManager);
+            TargetingManager = new TargetingManager(UnitManager, UnitDataManager, MapDataService, BaseManager, MacroData);
             Managers.Add(TargetingManager);
 
             BuildOptions = new BuildOptions { StrictGasCount = false, StrictSupplyCount = false, StrictWorkerCount = false };
@@ -146,12 +151,10 @@ namespace Sharky.DefaultBot
 
             AttackData = new AttackData { ArmyFoodAttack = 30, Attacking = false, CustomAttackFunction = false };
             WarpInPlacement = new WarpInPlacement(UnitManager, DebugManager, MapData);
-            MacroData = new MacroData();
+            
             Morpher = new Morpher(UnitManager, UnitDataManager, SharkyOptions);
             BuildPylonService = new BuildPylonService(MacroData, BuildingBuilder, UnitDataManager, UnitManager, BaseManager, TargetingManager);
             BuildDefenseService = new BuildDefenseService(MacroData, BuildingBuilder, UnitDataManager, UnitManager, BaseManager, TargetingManager);
-            MacroManager = new MacroManager(MacroSetup, UnitManager, UnitDataManager, BuildingBuilder, SharkyOptions, BaseManager, TargetingManager, AttackData, WarpInPlacement, MacroData, Morpher, BuildPylonService, BuildDefenseService);
-            Managers.Add(MacroManager);
 
             NexusManager = new NexusManager(UnitManager, UnitDataManager);
             Managers.Add(NexusManager);
@@ -167,6 +170,7 @@ namespace Sharky.DefaultBot
             SharkyPathFinder = new SharkyPathFinder(new Roy_T.AStar.Paths.PathFinder(), MapData, MapDataService);
             SharkySimplePathFinder = new SharkySimplePathFinder(MapDataService);
             NoPathFinder = new SharkyNoPathFinder();
+            ProxyLocationService = new ProxyLocationService(BaseManager, TargetingManager);
 
             IndividualMicroController = new IndividualMicroController(MapDataService, UnitDataManager, UnitManager, DebugManager, NoPathFinder, SharkyOptions, MicroPriority.LiveAndAttack, false);
 
@@ -213,7 +217,7 @@ namespace Sharky.DefaultBot
 
             var defenseSquadTask = new DefenseSquadTask(UnitManager, TargetingManager, DefenseService, MicroController, new List<DesiredUnitsClaim>(), 0, false);
             var workerScoutTask = new WorkerScoutTask(UnitDataManager, TargetingManager, MapDataService, true, 0.5f);
-            var miningTask = new MiningTask(UnitDataManager, BaseManager, UnitManager, 1, CollisionCalculator, DebugManager);
+            var miningTask = new MiningTask(UnitDataManager, BaseManager, UnitManager, 1);
             var attackTask = new AttackTask(MicroController, TargetingManager, UnitManager, DefenseService, MacroData, AttackData, 2);
 
             MicroTasks = new Dictionary<string, IMicroTask>
@@ -227,10 +231,14 @@ namespace Sharky.DefaultBot
             MicroManager = new MicroManager(UnitManager, MicroTasks);
             Managers.Add(MicroManager);
 
+            BuildProxyService = new BuildProxyService(MacroData, BuildingBuilder, UnitDataManager, UnitManager, BaseManager, TargetingManager, Morpher, MicroManager);
+            MacroManager = new MacroManager(MacroSetup, UnitManager, UnitDataManager, BuildingBuilder, SharkyOptions, BaseManager, TargetingManager, AttackData, WarpInPlacement, MacroData, Morpher, BuildPylonService, BuildDefenseService, BuildProxyService);
+            Managers.Add(MacroManager);
+
             EnemyStrategyHistory = new EnemyStrategyHistory();
             EnemyStrategies = new Dictionary<string, IEnemyStrategy>
             {
-                ["Proxy"] = new Proxy(EnemyStrategyHistory, ChatManager, UnitManager, SharkyOptions, TargetingManager),
+                ["Proxy"] = new EnemyStrategies.Proxy(EnemyStrategyHistory, ChatManager, UnitManager, SharkyOptions, TargetingManager),
                 ["WorkerRush"] = new WorkerRush(EnemyStrategyHistory, ChatManager, UnitManager, SharkyOptions, TargetingManager),
                 ["AdeptRush"] = new AdeptRush(EnemyStrategyHistory, ChatManager, UnitManager, SharkyOptions),
                 ["MarineRush"] = new MarineRush(EnemyStrategyHistory, ChatManager, UnitManager, SharkyOptions),

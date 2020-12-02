@@ -16,15 +16,16 @@ namespace Sharky.Managers
         IBuildingBuilder BuildingBuilder;
         SharkyOptions SharkyOptions;
         IBaseManager BaseManager;
-        TargetingManager TargetingManager;
+        ITargetingManager TargetingManager;
         AttackData AttackData;
         IBuildingPlacement WarpInPlacement;
         MacroData MacroData;
         Morpher Morpher;
         BuildPylonService BuildPylonService;
         BuildDefenseService BuildDefenseService;
+        BuildProxyService BuildProxyService;
 
-        public MacroManager(MacroSetup macroSetup, IUnitManager unitManager, UnitDataManager unitDataManager, IBuildingBuilder buildingBuilder, SharkyOptions sharkyOptions, IBaseManager baseManager, TargetingManager targetingManager, AttackData attackData, IBuildingPlacement warpInPlacement, MacroData macroData, Morpher morpher, BuildPylonService buildPylonService, BuildDefenseService buildDefenseService)
+        public MacroManager(MacroSetup macroSetup, IUnitManager unitManager, UnitDataManager unitDataManager, IBuildingBuilder buildingBuilder, SharkyOptions sharkyOptions, IBaseManager baseManager, ITargetingManager targetingManager, AttackData attackData, IBuildingPlacement warpInPlacement, MacroData macroData, Morpher morpher, BuildPylonService buildPylonService, BuildDefenseService buildDefenseService, BuildProxyService buildProxyService)
         {
             MacroSetup = macroSetup;
             UnitManager = unitManager;
@@ -40,6 +41,7 @@ namespace Sharky.Managers
             Morpher = morpher;
             BuildPylonService = buildPylonService;
             BuildDefenseService = buildDefenseService;
+            BuildProxyService = buildProxyService;
 
             MacroData.DesiredUpgrades = new Dictionary<Upgrades, bool>();
         }
@@ -67,6 +69,13 @@ namespace Sharky.Managers
             MacroData.Minerals = (int)observation.Observation.PlayerCommon.Minerals;
             MacroData.VespeneGas = (int)observation.Observation.PlayerCommon.Vespene;
             MacroData.Frame = (int)observation.Observation.GameLoop;
+
+            actions.AddRange(BuildProxyService.BuildPylons());
+            actions.AddRange(BuildProxyService.MorphBuildings());
+            actions.AddRange(BuildProxyService.BuildAddOns());
+            actions.AddRange(BuildProxyService.BuildDefensiveBuildings());
+            actions.AddRange(BuildProxyService.BuildProductionBuildings());    
+            actions.AddRange(BuildProxyService.BuildTechBuildings());
 
             actions.AddRange(BuildPylonService.BuildPylonsAtEveryMineralLine());
             actions.AddRange(BuildPylonService.BuildPylonsAtDefensivePoint());
@@ -157,7 +166,7 @@ namespace Sharky.Managers
                             }
                             else if (building.First().Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPGATE)
                             {
-                                var targetLocation = TargetingManager.DefensePoint;
+                                var targetLocation = TargetingManager.ForwardDefensePoint;
                                 if (AttackData.Attacking)
                                 {
                                     targetLocation = AttackData.ArmyPoint;

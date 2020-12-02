@@ -10,7 +10,8 @@ namespace Sharky.Managers
     public class TargetingManager : ITargetingManager
     {
         public Point2D AttackPoint { get; private set; }
-        public Point2D DefensePoint { get; private set; }
+        public Point2D MainDefensePoint { get; private set; }
+        public Point2D ForwardDefensePoint { get; private set; }
         public Point2D SelfMainBasePoint { get; private set; }
         public Point2D EnemyMainBasePoint { get; private set; }
 
@@ -18,15 +19,17 @@ namespace Sharky.Managers
         UnitDataManager UnitDataManager;
         MapDataService MapDataService;
         IBaseManager BaseManager;
+        MacroData MacroData;
 
         int baseCount;
 
-        public TargetingManager(UnitManager unitManager, UnitDataManager unitDataManager, MapDataService mapDataService, IBaseManager baseManager)
+        public TargetingManager(UnitManager unitManager, UnitDataManager unitDataManager, MapDataService mapDataService, IBaseManager baseManager, MacroData macroData)
         {
             UnitManager = unitManager;
             UnitDataManager = unitDataManager;
             MapDataService = mapDataService;
             BaseManager = baseManager;
+            MacroData = macroData;
 
             baseCount = 0;
         }
@@ -40,7 +43,8 @@ namespace Sharky.Managers
             }
             foreach (var unit in observation.Observation.RawData.Units.Where(u => u.Alliance == Alliance.Self && UnitDataManager.UnitData[(UnitTypes)u.UnitType].Attributes.Contains(SC2APIProtocol.Attribute.Structure)))
             {
-                DefensePoint = new Point2D { X = unit.Pos.X, Y = unit.Pos.Y };
+                MainDefensePoint = new Point2D { X = unit.Pos.X, Y = unit.Pos.Y };
+                ForwardDefensePoint = new Point2D { X = unit.Pos.X, Y = unit.Pos.Y };
                 SelfMainBasePoint = new Point2D { X = unit.Pos.X, Y = unit.Pos.Y };
                 return;
             }
@@ -65,7 +69,8 @@ namespace Sharky.Managers
                 var closestBase = ordered.FirstOrDefault();
                 if (closestBase != null)
                 {
-                    DefensePoint = closestBase.Location;
+                    MainDefensePoint = closestBase.Location;
+                    ForwardDefensePoint = closestBase.Location;
                 }
                 var farthestBase = ordered.LastOrDefault();
                 if (farthestBase != null)
@@ -73,6 +78,13 @@ namespace Sharky.Managers
                     SelfMainBasePoint = farthestBase.Location;
                 }
                 baseCount = BaseManager.SelfBases.Count();
+            }
+            foreach (var task in MacroData.Proxies)
+            {
+                if (task.Value.Enabled)
+                {
+                    ForwardDefensePoint = task.Value.Location;
+                }
             }
         }
 

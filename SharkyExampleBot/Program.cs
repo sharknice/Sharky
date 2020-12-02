@@ -19,7 +19,7 @@ namespace SharkyExampleBot
             var defaultSharkyBot = new DefaultSharkyBot(gameConnection);
 
             // TODO: make example roach rush build
-            var proxyVoidRay = new ProxyVoidRay(defaultSharkyBot.BuildOptions, defaultSharkyBot.MacroData, defaultSharkyBot.UnitManager, defaultSharkyBot.AttackData, defaultSharkyBot.ChatManager, defaultSharkyBot.NexusManager, defaultSharkyBot.SharkyOptions, defaultSharkyBot.MicroManager, defaultSharkyBot.EnemyRaceManager, defaultSharkyBot.ProtossCounterTransitioner, defaultSharkyBot.UnitDataManager);
+            var proxyVoidRay = new ProxyVoidRay(defaultSharkyBot.BuildOptions, defaultSharkyBot.MacroData, defaultSharkyBot.UnitManager, defaultSharkyBot.AttackData, defaultSharkyBot.ChatManager, defaultSharkyBot.NexusManager, defaultSharkyBot.SharkyOptions, defaultSharkyBot.MicroManager, defaultSharkyBot.EnemyRaceManager, defaultSharkyBot.ProtossCounterTransitioner, defaultSharkyBot.UnitDataManager, defaultSharkyBot.ProxyLocationService);
             var everyProtossUnit = new EveryProtossUnit(defaultSharkyBot.BuildOptions, defaultSharkyBot.MacroData, defaultSharkyBot.UnitManager, defaultSharkyBot.AttackData, defaultSharkyBot.ChatManager, defaultSharkyBot.NexusManager, defaultSharkyBot.ProtossCounterTransitioner);
             var protossBuilds = new Dictionary<string, ISharkyBuild>
             {
