@@ -11,5 +11,8 @@ namespace Sharky.MicroTasks
         void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders);
         IEnumerable<Action> PerformActions(int frame);
         void ResetClaimedUnits();
+        void Enable();
+        void Disable();
+        bool Enabled { get; }
     }
 }

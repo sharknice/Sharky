@@ -21,6 +21,8 @@ namespace Sharky.MicroTasks
             Priority = priority;
 
             UnitCommanders = new List<UnitCommander>();
+
+            Enabled = true;
         }
 
         public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)

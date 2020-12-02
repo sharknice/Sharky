@@ -33,6 +33,7 @@ namespace Sharky.MicroTasks
             UnitCommanders = new List<UnitCommander>();
 
             lastFrameTime = 0;
+            Enabled = true;
         }
 
         public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
@@ -83,7 +84,7 @@ namespace Sharky.MicroTasks
 
             if (!AttackData.CustomAttackFunction)
             {
-                AttackData.Attacking = MacroData.FoodArmy >= AttackData.ArmyFoodAttack;
+                AttackData.Attacking = MacroData.FoodArmy >= AttackData.ArmyFoodAttack || MacroData.FoodUsed > 190;
             }
 
             var attackingEnemies = UnitManager.SelfUnits.Where(u => u.Value.UnitClassifications.Contains(UnitClassification.ResourceCenter) || u.Value.UnitClassifications.Contains(UnitClassification.ProductionStructure)).SelectMany(u => u.Value.NearbyEnemies).Distinct();

@@ -46,7 +46,7 @@ namespace SharkyExampleBot
             var myRace = Race.Protoss;
             if (args.Length == 0)
             {
-                gameConnection.RunSinglePlayer(sharkyBot, @"AutomatonLE.SC2Map", myRace, Race.Random, Difficulty.VeryEasy).Wait();
+                gameConnection.RunSinglePlayer(sharkyBot, @"AutomatonLE.SC2Map", myRace, Race.Random, Difficulty.VeryHard).Wait();
             }
             else
             {

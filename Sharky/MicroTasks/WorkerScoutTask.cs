@@ -12,8 +12,6 @@ namespace Sharky.MicroTasks
         ITargetingManager TargetingManager;
         MapDataService MapDataService;
 
-        bool Enabled { get; set; }
-
         bool started { get; set; }
 
         public WorkerScoutTask(UnitDataManager unitDataManager, ITargetingManager targetingManager, MapDataService mapDataService, bool enabled, float priority)
@@ -27,48 +25,29 @@ namespace Sharky.MicroTasks
             Enabled = enabled;
         }
 
-        public void Enable()
-        {
-            Enabled = true;
-        }
-
-        public void Disable()
-        {
-            foreach (var commander in UnitCommanders)
-            {
-                commander.Claimed = false;
-            }
-            UnitCommanders = new List<UnitCommander>();
-
-            Enabled = false;
-        }
-
         public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
         {
-            if (Enabled)
+            if (UnitCommanders.Count() == 0)
             {
-                if (UnitCommanders.Count() == 0)
+                if (started)
                 {
-                    if (started)
-                    {
-                        Disable();
-                        return;
-                    }
+                    Disable();
+                    return;
+                }
 
-                    foreach (var commander in commanders)
+                foreach (var commander in commanders)
+                {
+                    if (!commander.Value.Claimed && commander.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker))
                     {
-                        if (!commander.Value.Claimed && commander.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker))
+                        if (commander.Value.UnitCalculation.Unit.Orders.Any(o => !UnitDataManager.MiningAbilities.Contains((Abilities)o.AbilityId)))
                         {
-                            if (commander.Value.UnitCalculation.Unit.Orders.Any(o => !UnitDataManager.MiningAbilities.Contains((Abilities)o.AbilityId)))
-                            {
-                            }
-                            else
-                            {
-                                commander.Value.Claimed = true;
-                                UnitCommanders.Add(commander.Value);
-                                started = true;
-                                return;
-                            }
+                        }
+                        else
+                        {
+                            commander.Value.Claimed = true;
+                            UnitCommanders.Add(commander.Value);
+                            started = true;
+                            return;
                         }
                     }
                 }

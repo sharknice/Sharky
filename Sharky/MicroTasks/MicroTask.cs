@@ -9,6 +9,8 @@ namespace Sharky.MicroTasks
         public List<UnitCommander> UnitCommanders { get; set; }
         public float Priority { get; set; }
 
+        public bool Enabled { get; protected set; }
+
         public virtual void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
         {
             throw new NotImplementedException();
@@ -26,6 +28,22 @@ namespace Sharky.MicroTasks
                 commander.Claimed = false;
             }
             UnitCommanders = new List<UnitCommander>();
+        }
+
+        public virtual void Enable()
+        {
+            Enabled = true;
+        }
+
+        public virtual void Disable()
+        {
+            foreach (var commander in UnitCommanders)
+            {
+                commander.Claimed = false;
+            }
+            UnitCommanders = new List<UnitCommander>();
+
+            Enabled = false;
         }
     }
 }

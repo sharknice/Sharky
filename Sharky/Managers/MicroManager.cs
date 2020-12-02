@@ -22,7 +22,7 @@ namespace Sharky.Managers
             var frame = (int)observation.Observation.GameLoop;
 
             var actions = new List<Action>();
-            foreach (var microTask in MicroTasks.Values.OrderBy(m => m.Priority))
+            foreach (var microTask in MicroTasks.Values.Where(m => m.Enabled).OrderBy(m => m.Priority))
             {
                 foreach (var tag in UnitManager.DeadUnits)
                 {

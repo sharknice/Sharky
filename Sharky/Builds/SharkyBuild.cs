@@ -36,6 +36,7 @@ namespace Sharky.Builds
         {
             Console.WriteLine($"{frame} Build: {Name()}");
 
+            AttackData.CustomAttackFunction = false;
             BuildOptions.StrictGasCount = false;
             BuildOptions.StrictSupplyCount = false;
             BuildOptions.StrictWorkerCount = false;
