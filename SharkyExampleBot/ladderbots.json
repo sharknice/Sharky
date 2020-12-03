@@ -1,10 +1,10 @@
 {
   "Bots": {
     "SharkyExampleBot": {
-      "Race": "Protoss",
-      "Type": "dotnetcore",
+      "Race": "Random",
+      "Type": "cppwin32",
       "RootPath": "./",
-      "FileName": "SharkyExampleBot.dll"
+      "FileName": "SharkyExampleBot.exe"
     }
   }
 }
