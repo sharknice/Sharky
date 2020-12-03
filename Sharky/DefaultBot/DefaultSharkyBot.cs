@@ -84,7 +84,7 @@ namespace Sharky.DefaultBot
         public IPathFinder NoPathFinder { get; set; }
         public EnemyStrategyHistory EnemyStrategyHistory { get; set; }
         public Dictionary<string, IEnemyStrategy> EnemyStrategies { get; set; }
-        public ICounterTransitioner ProtossCounterTransitioner { get; set; }
+        public ICounterTransitioner EmptyCounterTransitioner { get; set; }
         public MacroBalancer MacroBalancer { get; set; }
         public Dictionary<Race, BuildChoices> BuildChoices { get; set; }
 
@@ -249,14 +249,14 @@ namespace Sharky.DefaultBot
             EnemyStrategyManager = new EnemyStrategyManager(EnemyStrategies);
             Managers.Add(EnemyStrategyManager);
 
-            ProtossCounterTransitioner = new ProtossCounterTransitioner(EnemyStrategyManager, SharkyOptions);
+            EmptyCounterTransitioner = new EmptyCounterTransitioner(EnemyStrategyManager, SharkyOptions);
 
-            var antiMassMarine = new AntiMassMarine(BuildOptions, MacroData, UnitManager, AttackData, ChatManager, NexusManager, ProtossCounterTransitioner);
-            var fourGate = new FourGate(BuildOptions, MacroData, UnitManager, AttackData, ChatManager, NexusManager, UnitDataManager, ProtossCounterTransitioner);
-            var nexusFirst = new NexusFirst(BuildOptions, MacroData, UnitManager, AttackData, ChatManager, NexusManager, ProtossCounterTransitioner);
-            var robo = new Robo(BuildOptions, MacroData, UnitManager, AttackData, ChatManager, NexusManager, EnemyRaceManager, MicroManager, ProtossCounterTransitioner);
-            var protossRobo = new ProtossRobo(BuildOptions, MacroData, UnitManager, AttackData, ChatManager, NexusManager, SharkyOptions, MicroManager, EnemyRaceManager, ProtossCounterTransitioner);
-            var everyProtossUnit = new EveryProtossUnit(BuildOptions, MacroData, UnitManager, AttackData, ChatManager, NexusManager, ProtossCounterTransitioner);
+            var antiMassMarine = new AntiMassMarine(BuildOptions, MacroData, UnitManager, AttackData, ChatManager, NexusManager, EmptyCounterTransitioner);
+            var fourGate = new FourGate(BuildOptions, MacroData, UnitManager, AttackData, ChatManager, NexusManager, UnitDataManager, EmptyCounterTransitioner);
+            var nexusFirst = new NexusFirst(BuildOptions, MacroData, UnitManager, AttackData, ChatManager, NexusManager, EmptyCounterTransitioner);
+            var robo = new Robo(BuildOptions, MacroData, UnitManager, AttackData, ChatManager, NexusManager, EnemyRaceManager, MicroManager, EmptyCounterTransitioner);
+            var protossRobo = new ProtossRobo(BuildOptions, MacroData, UnitManager, AttackData, ChatManager, NexusManager, SharkyOptions, MicroManager, EnemyRaceManager, EmptyCounterTransitioner);
+            var everyProtossUnit = new EveryProtossUnit(BuildOptions, MacroData, UnitManager, AttackData, ChatManager, NexusManager, EmptyCounterTransitioner);
 
             var protossBuilds = new Dictionary<string, ISharkyBuild>
             {

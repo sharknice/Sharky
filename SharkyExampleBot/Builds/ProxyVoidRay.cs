@@ -16,7 +16,6 @@ namespace SharkyExampleBot.Builds
     {
         SharkyOptions SharkyOptions;
         MicroManager MicroManager;
-        EnemyRaceManager EnemyRaceManager;
         UnitDataManager UnitDataManager;
         ProxyLocationService ProxyLocationService;
 
@@ -25,11 +24,10 @@ namespace SharkyExampleBot.Builds
 
         ProxyTask ProxyTask;
 
-        public ProxyVoidRay(BuildOptions buildOptions, MacroData macroData, UnitManager unitManager, AttackData attackData, IChatManager chatManager, NexusManager nexusManager, SharkyOptions sharkyOptions, MicroManager microManager, EnemyRaceManager enemyRaceManager, ICounterTransitioner counterTransitioner, UnitDataManager unitDataManager, ProxyLocationService proxyLocationService) : base(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager, counterTransitioner)
+        public ProxyVoidRay(BuildOptions buildOptions, MacroData macroData, UnitManager unitManager, AttackData attackData, IChatManager chatManager, NexusManager nexusManager, SharkyOptions sharkyOptions, MicroManager microManager, ICounterTransitioner counterTransitioner, UnitDataManager unitDataManager, ProxyLocationService proxyLocationService) : base(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager, counterTransitioner)
         {
             SharkyOptions = sharkyOptions;
             MicroManager = microManager;
-            EnemyRaceManager = enemyRaceManager;
             UnitDataManager = unitDataManager;
             ProxyLocationService = proxyLocationService;
 
@@ -82,6 +80,11 @@ namespace SharkyExampleBot.Builds
             if (UnitManager.Completed(UnitTypes.PROTOSS_VOIDRAY) > 1)
             {
                 AttackData.Attacking = true;
+                if (!OpeningAttackChatSent)
+                {
+                    ChatManager.SendChatType("ProxyVoidRay-FirstAttack");
+                    OpeningAttackChatSent = true;
+                }
             }
             else if (UnitManager.Completed(UnitTypes.PROTOSS_VOIDRAY) == 0)
             {
@@ -187,12 +190,6 @@ namespace SharkyExampleBot.Builds
             if (MacroData.Frame > SharkyOptions.FramesPerSecond * 4 * 60)
             {
                 ProxyTask.Disable();
-            }
-
-            if (!OpeningAttackChatSent && MacroData.FoodArmy > 10)
-            {
-                ChatManager.SendChatType("ProxyVoidRay-FirstAttack");
-                OpeningAttackChatSent = true;
             }
         }
 

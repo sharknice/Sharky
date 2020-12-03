@@ -1,7 +1,6 @@
 ﻿using SC2APIProtocol;
 using Sharky.Managers;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -70,7 +69,9 @@ namespace Sharky
 
             Start = new Vector2(unit.Pos.X, unit.Pos.Y);
 
-            if (unit.UnitType == (uint)UnitTypes.PROTOSS_COLOSSUS || unit.UnitType == (uint)UnitTypes.PROTOSS_IMMORTAL || unit.UnitType == (uint)UnitTypes.PROTOSS_PHOTONCANNON || unit.UnitType == (uint)UnitTypes.PROTOSS_MOTHERSHIP || unit.UnitType == (uint)UnitTypes.TERRAN_MISSILETURRET)
+            if (unit.UnitType == (uint)UnitTypes.PROTOSS_COLOSSUS || unit.UnitType == (uint)UnitTypes.PROTOSS_IMMORTAL || unit.UnitType == (uint)UnitTypes.PROTOSS_PHOTONCANNON || unit.UnitType == (uint)UnitTypes.PROTOSS_MOTHERSHIP
+                || unit.UnitType == (uint)UnitTypes.TERRAN_MISSILETURRET
+                || unit.UnitType == (uint)UnitTypes.ZERG_SPORECRAWLER || unit.UnitType == (uint)UnitTypes.ZERG_SPINECRAWLER)
             {
                 End = Start; // facing is always 0 for these units, can't calculate where they're aiming
             }

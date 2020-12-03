@@ -3,6 +3,10 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>8.0</LangVersion>
+    <Authors>Sharknice</Authors>
+    <Description>The Sharky Framework.  A StarCraft 2 API framework for creating StarCraft 2 bots</Description>
+    <PackageProjectUrl>https://github.com/sharknice/Sharky</PackageProjectUrl>
+    <PackageTags>StarCraft, SC2, SC2AI, bot</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

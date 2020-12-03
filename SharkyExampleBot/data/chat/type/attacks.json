@@ -1,8 +1,22 @@
 [
   {
-    "ChatType": "Fourgate-FirstAttack",
+    "ChatType": "FirstAttack",
     "Messages": [
       [ ":)", ":D" ]
+    ]
+  },
+  {
+    "ChatType": "ProxyVoidRay-FirstAttack",
+    "Messages": [
+      [ "Enjoy the laser show {name}!" ],
+      [ "Are you ready for a laser show?" ],
+      [ "I hope you like lasers {name}!"]
+    ]
+  },
+  {
+    "ChatType": "ProxyVoidRay-CancelledAttack",
+    "Messages": [
+      [ "The show has been cancelled due to bad weather", ":(" ]
     ]
   }
 ]

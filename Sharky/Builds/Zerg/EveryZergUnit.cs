@@ -127,6 +127,14 @@ namespace Sharky.Builds.Zerg
                 {
                     MacroData.DesiredProductionCounts[UnitTypes.ZERG_NYDUSNETWORK] = 1;
                 }
+                if (MacroData.DesiredUnitCounts[UnitTypes.ZERG_OVERSEER] < 1)
+                {
+                    MacroData.DesiredUnitCounts[UnitTypes.ZERG_OVERSEER] = 1;
+                }
+                if (MacroData.DesiredUnitCounts[UnitTypes.ZERG_OVERLORDTRANSPORT] < 1)
+                {
+                    MacroData.DesiredUnitCounts[UnitTypes.ZERG_OVERLORDTRANSPORT] = 1;
+                }
             }
 
             if (UnitManager.Completed(UnitTypes.ZERG_INFESTATIONPIT) > 0)

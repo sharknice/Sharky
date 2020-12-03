@@ -57,6 +57,8 @@ namespace Sharky.Builds
                 macroData.Units.Add(UnitTypes.ZERG_RAVAGER);
                 macroData.Units.Add(UnitTypes.ZERG_LURKERMP);
                 macroData.Units.Add(UnitTypes.ZERG_BROODLORD);
+                macroData.Units.Add(UnitTypes.ZERG_OVERSEER);
+                macroData.Units.Add(UnitTypes.ZERG_OVERLORDTRANSPORT);
             }
 
             macroData.DesiredUnitCounts = new Dictionary<UnitTypes, int>();

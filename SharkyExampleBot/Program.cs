@@ -14,44 +14,79 @@ namespace SharkyExampleBot
         public static void Main(string[] args)
         {
             Console.WriteLine("starting");
+
+            // first we need to create a game connection for the SC2 api. The bot uses this to communicate with the game
             var gameConnection = new GameConnection();
 
+            // We get a default bot that has everything setup.  You can manually create one instead if you want to more heavily customize it.  
             var defaultSharkyBot = new DefaultSharkyBot(gameConnection);
 
-            // TODO: make example roach rush build
-            var proxyVoidRay = new ProxyVoidRay(defaultSharkyBot.BuildOptions, defaultSharkyBot.MacroData, defaultSharkyBot.UnitManager, defaultSharkyBot.AttackData, defaultSharkyBot.ChatManager, defaultSharkyBot.NexusManager, defaultSharkyBot.SharkyOptions, defaultSharkyBot.MicroManager, defaultSharkyBot.EnemyRaceManager, defaultSharkyBot.ProtossCounterTransitioner, defaultSharkyBot.UnitDataManager, defaultSharkyBot.ProxyLocationService);
-            var everyProtossUnit = new EveryProtossUnit(defaultSharkyBot.BuildOptions, defaultSharkyBot.MacroData, defaultSharkyBot.UnitManager, defaultSharkyBot.AttackData, defaultSharkyBot.ChatManager, defaultSharkyBot.NexusManager, defaultSharkyBot.ProtossCounterTransitioner);
-            var protossBuilds = new Dictionary<string, ISharkyBuild>
-            {
-                [proxyVoidRay.Name()] = proxyVoidRay,
-                [everyProtossUnit.Name()] = everyProtossUnit
-            };
-            var protosSequences = new List<List<string>>
-            {
-                new List<string> { proxyVoidRay.Name(), everyProtossUnit.Name() }
-            };
-            var protossBuildSequences = new Dictionary<string, List<List<string>>>
-            {
-                [Race.Terran.ToString()] = protosSequences,
-                [Race.Zerg.ToString()] = protosSequences,
-                [Race.Protoss.ToString()] = protosSequences,
-                [Race.Random.ToString()] = protosSequences,
-                ["Transition"] = protosSequences
-            };
+            // we configure the bot with our own protoss builds
+            defaultSharkyBot.BuildChoices[Race.Protoss] = GetProtossBuildChoices(defaultSharkyBot);
 
-            defaultSharkyBot.BuildChoices[Race.Protoss] = new BuildChoices { Builds = protossBuilds, BuildSequences = protossBuildSequences };
+            // we create a bot with the modified default bot we made
+            var sharkyExampleBot = defaultSharkyBot.CreateBot(defaultSharkyBot.Managers, defaultSharkyBot.DebugManager);
 
-            var sharkyBot = defaultSharkyBot.CreateBot(defaultSharkyBot.Managers, defaultSharkyBot.DebugManager);
-
-            var myRace = Race.Protoss;
+            var myRace = Race.Zerg;
             if (args.Length == 0)
             {
-                gameConnection.RunSinglePlayer(sharkyBot, @"AutomatonLE.SC2Map", myRace, Race.Random, Difficulty.VeryHard).Wait();
+                // if there are no arguments passed we play against a comptuer opponent
+                gameConnection.RunSinglePlayer(sharkyExampleBot, @"AutomatonLE.SC2Map", myRace, Race.Random, Difficulty.VeryEasy).Wait();
             }
             else
             {
-                gameConnection.RunLadder(sharkyBot, myRace, args).Wait();
+                // when a bot runs on the ladder it will pass arguments for a specific map, enemy, etc.
+                gameConnection.RunLadder(sharkyExampleBot, myRace, args).Wait();
             }
+        }
+
+        static BuildChoices GetProtossBuildChoices(DefaultSharkyBot defaultSharkyBot)
+        {
+            // we can use this to switch builds mid-game if we detect certain strategies
+            var protossCounterTransitioner = new ProtossCounterTransitioner(defaultSharkyBot.EnemyStrategyManager, defaultSharkyBot.SharkyOptions);
+
+            // We create all of our builds
+            var proxyVoidRay = new ProxyVoidRay(defaultSharkyBot.BuildOptions, defaultSharkyBot.MacroData, defaultSharkyBot.UnitManager, defaultSharkyBot.AttackData, defaultSharkyBot.ChatManager, defaultSharkyBot.NexusManager, defaultSharkyBot.SharkyOptions, defaultSharkyBot.MicroManager, protossCounterTransitioner, defaultSharkyBot.UnitDataManager, defaultSharkyBot.ProxyLocationService);
+            var zealotRush = new ZealotRush(defaultSharkyBot.BuildOptions, defaultSharkyBot.MacroData, defaultSharkyBot.UnitManager, defaultSharkyBot.AttackData, defaultSharkyBot.ChatManager, defaultSharkyBot.NexusManager, protossCounterTransitioner);
+            var robo = new Robo(defaultSharkyBot.BuildOptions, defaultSharkyBot.MacroData, defaultSharkyBot.UnitManager, defaultSharkyBot.AttackData, defaultSharkyBot.ChatManager, defaultSharkyBot.NexusManager, defaultSharkyBot.EnemyRaceManager, defaultSharkyBot.MicroManager, protossCounterTransitioner);
+            var nexusFirst = new NexusFirst(defaultSharkyBot.BuildOptions, defaultSharkyBot.MacroData, defaultSharkyBot.UnitManager, defaultSharkyBot.AttackData, defaultSharkyBot.ChatManager, defaultSharkyBot.NexusManager, protossCounterTransitioner);
+            var protossRobo = new ProtossRobo(defaultSharkyBot.BuildOptions, defaultSharkyBot.MacroData, defaultSharkyBot.UnitManager, defaultSharkyBot.AttackData, defaultSharkyBot.ChatManager, defaultSharkyBot.NexusManager, defaultSharkyBot.SharkyOptions, defaultSharkyBot.MicroManager, defaultSharkyBot.EnemyRaceManager, protossCounterTransitioner);
+
+            // We add all the builds to a build dictionary which we will later pass to the BuildChoices. 
+            var protossBuilds = new Dictionary<string, ISharkyBuild>
+            {
+                [proxyVoidRay.Name()] = proxyVoidRay,
+                [zealotRush.Name()] = zealotRush,
+                [robo.Name()] = robo,
+                [nexusFirst.Name()] = nexusFirst,
+                [protossRobo.Name()] = protossRobo,
+            };
+
+            // we create build sequences to be used by each matchup
+            var defaultSequences = new List<List<string>>
+            {
+                new List<string> { nexusFirst.Name(), robo.Name(), protossRobo.Name() },
+                new List<string> { proxyVoidRay.Name() }
+            };
+            var zergSequences = new List<List<string>>
+            {
+                new List<string> { zealotRush.Name() },
+                new List<string> { proxyVoidRay.Name() }
+            };
+            var transitionSequences = new List<List<string>>
+            {
+                new List<string> { robo.Name(), protossRobo.Name() }
+            };
+            var protossBuildSequences = new Dictionary<string, List<List<string>>>
+            {
+                [Race.Terran.ToString()] = defaultSequences,
+                [Race.Zerg.ToString()] = zergSequences,
+                [Race.Protoss.ToString()] = defaultSequences,
+                [Race.Random.ToString()] = defaultSequences,
+                ["Transition"] = transitionSequences
+            };
+
+            return new BuildChoices { Builds = protossBuilds, BuildSequences = protossBuildSequences };
         }
     }
 }

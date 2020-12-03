@@ -225,7 +225,7 @@ namespace Sharky.Managers
         public int UnitsInProgressCount(UnitTypes unitType)
         {
             var unitData = UnitDataManager.TrainingData[unitType];
-            return SelfUnits.Count(u => (unitData.ProducingUnits.Contains((UnitTypes)u.Value.Unit.UnitType) || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_EGG) && u.Value.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
+            return SelfUnits.Count(u => (unitData.ProducingUnits.Contains((UnitTypes)u.Value.Unit.UnitType) || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_EGG || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_OVERLORDCOCOON || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_TRANSPORTOVERLORDCOCOON) && u.Value.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
         }
 
         public int EquivalentTypeCount(UnitTypes unitType)
