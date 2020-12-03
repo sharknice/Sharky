@@ -12,7 +12,7 @@ namespace SharkyExampleBot.Builds
     {
         bool OpeningAttackChatSent;
 
-        public ZealotRush(BuildOptions buildOptions, MacroData macroData, UnitManager unitManager, AttackData attackData, IChatManager chatManager, NexusManager nexusManager, ICounterTransitioner counterTransitioner) : base(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager, counterTransitioner)
+        public ZealotRush(BuildOptions buildOptions, MacroData macroData, IUnitManager unitManager, AttackData attackData, IChatManager chatManager, NexusManager nexusManager, ICounterTransitioner counterTransitioner) : base(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager, counterTransitioner)
         {
             OpeningAttackChatSent = false;
         }

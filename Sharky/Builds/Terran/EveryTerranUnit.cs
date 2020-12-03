@@ -5,7 +5,7 @@ namespace Sharky.Builds.Terran
 {
     public class EveryTerranUnit : TerranSharkyBuild
     {
-        public EveryTerranUnit(BuildOptions buildOptions, MacroData macroData, UnitManager unitManager, AttackData attackData, IChatManager chatManager) : base(buildOptions, macroData, unitManager, attackData, chatManager)
+        public EveryTerranUnit(BuildOptions buildOptions, MacroData macroData, IUnitManager unitManager, AttackData attackData, IChatManager chatManager) : base(buildOptions, macroData, unitManager, attackData, chatManager)
         {
 
         }

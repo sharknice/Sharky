@@ -11,9 +11,9 @@ namespace Sharky.MicroTasks
     {
         UnitDataManager UnitDataManager;
         IBaseManager BaseManager;
-        UnitManager UnitManager;
+        IUnitManager UnitManager;
 
-        public MiningTask(UnitDataManager unitDataManager, IBaseManager baseManager, UnitManager unitManager, int priority)
+        public MiningTask(UnitDataManager unitDataManager, IBaseManager baseManager, IUnitManager unitManager, float priority)
         {
             UnitDataManager = unitDataManager;
             BaseManager = baseManager;

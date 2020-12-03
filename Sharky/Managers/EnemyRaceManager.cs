@@ -8,10 +8,10 @@ namespace Sharky.Managers
     {
         public Race EnemyRace { get; private set; }
 
-        UnitManager UnitManager;
+        IUnitManager UnitManager;
         UnitDataManager UnitDataManager;
 
-        public EnemyRaceManager(UnitManager unitManager, UnitDataManager unitDataManager)
+        public EnemyRaceManager(IUnitManager unitManager, UnitDataManager unitDataManager)
         {
             UnitManager = unitManager;
             UnitDataManager = unitDataManager;

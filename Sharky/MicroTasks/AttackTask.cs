@@ -13,14 +13,14 @@ namespace Sharky.MicroTasks
     {
         IMicroController MicroController;
         ITargetingManager TargetingManager;
-        UnitManager UnitManager;
+        IUnitManager UnitManager;
         DefenseService DefenseService;
         MacroData MacroData;
         AttackData AttackData;
 
         float lastFrameTime;
 
-        public AttackTask(IMicroController microController, ITargetingManager targetingManager, UnitManager unitManager, DefenseService defenseService, MacroData macroData, AttackData attackData, int priority)
+        public AttackTask(IMicroController microController, ITargetingManager targetingManager, IUnitManager unitManager, DefenseService defenseService, MacroData macroData, AttackData attackData, float priority)
         {
             MicroController = microController;
             TargetingManager = targetingManager;

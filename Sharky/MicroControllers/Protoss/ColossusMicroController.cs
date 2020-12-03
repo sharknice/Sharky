@@ -12,7 +12,7 @@ namespace Sharky.MicroControllers.Protoss
     {
         CollisionCalculator CollisionCalculator;
 
-        public ColossusMicroController(MapDataService mapDataService, UnitDataManager unitDataManager, UnitManager unitManager, DebugManager debugManager, IPathFinder sharkyPathFinder, SharkyOptions sharkyOptions, MicroPriority microPriority, bool groupUpEnabled, CollisionCalculator collisionCalculator)
+        public ColossusMicroController(MapDataService mapDataService, UnitDataManager unitDataManager, IUnitManager unitManager, DebugManager debugManager, IPathFinder sharkyPathFinder, SharkyOptions sharkyOptions, MicroPriority microPriority, bool groupUpEnabled, CollisionCalculator collisionCalculator)
             : base(mapDataService, unitDataManager, unitManager, debugManager, sharkyPathFinder, sharkyOptions, microPriority, groupUpEnabled)
         {
             CollisionCalculator = collisionCalculator;

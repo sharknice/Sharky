@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using SC2APIProtocol;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace Sharky.Managers
@@ -16,5 +17,6 @@ namespace Sharky.Managers
         int EquivalentTypeCount(UnitTypes unitType);
         int EquivalentTypeCompleted(UnitTypes unitType);
         int UnitsInProgressCount(UnitTypes unitType);
+        bool CanDamage(IEnumerable<Weapon> weapons, Unit unit);
     }
 }

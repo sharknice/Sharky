@@ -6,13 +6,13 @@ namespace Sharky.Managers.Protoss
 {
     public class NexusManager : SharkyManager
     {
-        UnitManager UnitManager;
+        IUnitManager UnitManager;
         UnitDataManager UnitDataManager;
 
         public HashSet<UnitTypes> ChronodUnits { get; set; }
         public HashSet<Upgrades> ChronodUpgrades { get; set; }
 
-        public NexusManager(UnitManager unitManager, UnitDataManager unitDataManager)
+        public NexusManager(IUnitManager unitManager, UnitDataManager unitDataManager)
         {
             UnitManager = unitManager;
             UnitDataManager = unitDataManager;

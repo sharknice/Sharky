@@ -10,7 +10,7 @@ namespace Sharky.Builds
         protected NexusManager NexusManager;
         protected ICounterTransitioner CounterTransitioner;
 
-        public ProtossSharkyBuild(BuildOptions buildOptions, MacroData macroData, UnitManager unitManager, AttackData attackData, IChatManager chatManager, NexusManager nexusManager, ICounterTransitioner counterTransitioner) : base(buildOptions, macroData, unitManager, attackData, chatManager)
+        public ProtossSharkyBuild(BuildOptions buildOptions, MacroData macroData, IUnitManager unitManager, AttackData attackData, IChatManager chatManager, NexusManager nexusManager, ICounterTransitioner counterTransitioner) : base(buildOptions, macroData, unitManager, attackData, chatManager)
         {
             NexusManager = nexusManager;
             CounterTransitioner = counterTransitioner;

@@ -8,7 +8,7 @@ namespace Sharky.Builds.Zerg
     {
         MicroManager MicroManager;
 
-        public BasicZerglingRush(BuildOptions buildOptions, MacroData macroData, UnitManager unitManager, AttackData attackData, IChatManager chatManager, MicroManager microManager) : base(buildOptions, macroData, unitManager, attackData, chatManager)
+        public BasicZerglingRush(BuildOptions buildOptions, MacroData macroData, IUnitManager unitManager, AttackData attackData, IChatManager chatManager, MicroManager microManager) : base(buildOptions, macroData, unitManager, attackData, chatManager)
         {
             MicroManager = microManager;
         }

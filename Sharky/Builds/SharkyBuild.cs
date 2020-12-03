@@ -9,11 +9,11 @@ namespace Sharky.Builds
     {
         protected BuildOptions BuildOptions;
         protected MacroData MacroData;
-        protected UnitManager UnitManager;
+        protected IUnitManager UnitManager;
         protected AttackData AttackData;
         protected IChatManager ChatManager;
 
-        public SharkyBuild(BuildOptions buildOptions, MacroData macroData, UnitManager unitManager, AttackData attackData, IChatManager chatManager)
+        public SharkyBuild(BuildOptions buildOptions, MacroData macroData, IUnitManager unitManager, AttackData attackData, IChatManager chatManager)
         {
             BuildOptions = buildOptions;
             MacroData = macroData;

@@ -8,9 +8,9 @@ namespace Sharky.MicroTasks
 {
     public class DefenseService
     {
-        UnitManager UnitManager;
+        IUnitManager UnitManager;
 
-        public DefenseService(UnitManager unitManager)
+        public DefenseService(IUnitManager unitManager)
         {
             UnitManager = unitManager;
         }

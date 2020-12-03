@@ -24,7 +24,7 @@ namespace SharkyExampleBot.Builds
 
         ProxyTask ProxyTask;
 
-        public ProxyVoidRay(BuildOptions buildOptions, MacroData macroData, UnitManager unitManager, AttackData attackData, IChatManager chatManager, NexusManager nexusManager, SharkyOptions sharkyOptions, MicroManager microManager, ICounterTransitioner counterTransitioner, UnitDataManager unitDataManager, ProxyLocationService proxyLocationService) : base(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager, counterTransitioner)
+        public ProxyVoidRay(BuildOptions buildOptions, MacroData macroData, IUnitManager unitManager, AttackData attackData, IChatManager chatManager, NexusManager nexusManager, SharkyOptions sharkyOptions, MicroManager microManager, ICounterTransitioner counterTransitioner, UnitDataManager unitDataManager, ProxyLocationService proxyLocationService) : base(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager, counterTransitioner)
         {
             SharkyOptions = sharkyOptions;
             MicroManager = microManager;

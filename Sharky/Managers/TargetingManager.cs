@@ -15,7 +15,7 @@ namespace Sharky.Managers
         public Point2D SelfMainBasePoint { get; private set; }
         public Point2D EnemyMainBasePoint { get; private set; }
 
-        UnitManager UnitManager;
+        IUnitManager UnitManager;
         UnitDataManager UnitDataManager;
         MapDataService MapDataService;
         IBaseManager BaseManager;
@@ -23,7 +23,7 @@ namespace Sharky.Managers
 
         int baseCount;
 
-        public TargetingManager(UnitManager unitManager, UnitDataManager unitDataManager, MapDataService mapDataService, IBaseManager baseManager, MacroData macroData)
+        public TargetingManager(IUnitManager unitManager, UnitDataManager unitDataManager, MapDataService mapDataService, IBaseManager baseManager, MacroData macroData)
         {
             UnitManager = unitManager;
             UnitDataManager = unitDataManager;

@@ -11,7 +11,7 @@ namespace Sharky.MicroTasks
 {
     public class DefenseSquadTask : MicroTask
     {
-        UnitManager UnitManager;
+        IUnitManager UnitManager;
         ITargetingManager TargetingManager;
         DefenseService DefenseService;
         IMicroController MicroController;
@@ -20,7 +20,7 @@ namespace Sharky.MicroTasks
 
         public List<DesiredUnitsClaim> DesiredUnitsClaims { get; set; }
 
-        public DefenseSquadTask(UnitManager unitManager, ITargetingManager targetingManager, DefenseService defenseService, IMicroController microController, List<DesiredUnitsClaim> desiredUnitsClaims, float priority, bool enabled = true)
+        public DefenseSquadTask(IUnitManager unitManager, ITargetingManager targetingManager, DefenseService defenseService, IMicroController microController, List<DesiredUnitsClaim> desiredUnitsClaims, float priority, bool enabled = true)
         {
             UnitManager = unitManager;
             TargetingManager = targetingManager;

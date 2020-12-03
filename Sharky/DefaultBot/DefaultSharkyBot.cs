@@ -35,7 +35,7 @@ namespace Sharky.DefaultBot
 
         public UnitDataManager UnitDataManager { get; set; }
         public MapManager MapManager { get; set; }
-        public UnitManager UnitManager { get; set; }
+        public IUnitManager UnitManager { get; set; }
         public EnemyRaceManager EnemyRaceManager { get; set; }
         public IBaseManager BaseManager { get; set; }
         public ITargetingManager TargetingManager { get; set; }
@@ -218,6 +218,7 @@ namespace Sharky.DefaultBot
             var defenseSquadTask = new DefenseSquadTask(UnitManager, TargetingManager, DefenseService, MicroController, new List<DesiredUnitsClaim>(), 0, false);
             var workerScoutTask = new WorkerScoutTask(UnitDataManager, TargetingManager, MapDataService, true, 0.5f);
             var miningTask = new MiningTask(UnitDataManager, BaseManager, UnitManager, 1);
+            var queenInjectTask = new QueenInjectsTask(UnitManager, 1.1f);
             var attackTask = new AttackTask(MicroController, TargetingManager, UnitManager, DefenseService, MacroData, AttackData, 2);
 
             MicroTasks = new Dictionary<string, IMicroTask>
@@ -225,6 +226,7 @@ namespace Sharky.DefaultBot
                 [defenseSquadTask.GetType().Name] = defenseSquadTask,
                 [workerScoutTask.GetType().Name] = workerScoutTask,
                 [miningTask.GetType().Name] = miningTask,
+                [queenInjectTask.GetType().Name] = queenInjectTask,
                 [attackTask.GetType().Name] = attackTask
             };
 

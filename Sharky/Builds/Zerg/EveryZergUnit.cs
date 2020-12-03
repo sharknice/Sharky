@@ -5,7 +5,7 @@ namespace Sharky.Builds.Zerg
 {
     public class EveryZergUnit : ZergSharkyBuild
     {
-        public EveryZergUnit(BuildOptions buildOptions, MacroData macroData, UnitManager unitManager, AttackData attackData, IChatManager chatManager) : base(buildOptions, macroData, unitManager, attackData, chatManager)
+        public EveryZergUnit(BuildOptions buildOptions, MacroData macroData, IUnitManager unitManager, AttackData attackData, IChatManager chatManager) : base(buildOptions, macroData, unitManager, attackData, chatManager)
         {
         }
 

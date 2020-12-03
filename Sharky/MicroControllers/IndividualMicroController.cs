@@ -12,7 +12,7 @@ namespace Sharky.MicroControllers
     {
         protected MapDataService MapDataService;
         protected UnitDataManager UnitDataManager;
-        protected UnitManager UnitManager;
+        protected IUnitManager UnitManager;
         protected DebugManager DebugManager;
         protected IPathFinder SharkyPathFinder;
         protected SharkyOptions SharkyOptions;
@@ -25,7 +25,7 @@ namespace Sharky.MicroControllers
         protected float AvoidDamageDistance;
         protected float LooseFormationDistance;
 
-        public IndividualMicroController(MapDataService mapDataService, UnitDataManager unitDataManager, UnitManager unitManager, DebugManager debugManager, IPathFinder sharkyPathFinder, SharkyOptions sharkyOptions, MicroPriority microPriority, bool groupUpEnabled)
+        public IndividualMicroController(MapDataService mapDataService, UnitDataManager unitDataManager, IUnitManager unitManager, DebugManager debugManager, IPathFinder sharkyPathFinder, SharkyOptions sharkyOptions, MicroPriority microPriority, bool groupUpEnabled)
         {
             MapDataService = mapDataService;
             UnitDataManager = unitDataManager;

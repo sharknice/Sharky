@@ -11,13 +11,13 @@ namespace Sharky.Builds.MacroServices
         MacroData MacroData;
         IBuildingBuilder BuildingBuilder;
         UnitDataManager UnitDataManager;
-        UnitManager UnitManager;
+        IUnitManager UnitManager;
         IBaseManager BaseManager;
         ITargetingManager TargetingManager;
 
         int defensivePointLastFailFrame;
 
-        public BuildPylonService(MacroData macroData, IBuildingBuilder buildingBuilder, UnitDataManager unitDataManager, UnitManager unitManager, IBaseManager baseManager, ITargetingManager targetingManager)
+        public BuildPylonService(MacroData macroData, IBuildingBuilder buildingBuilder, UnitDataManager unitDataManager, IUnitManager unitManager, IBaseManager baseManager, ITargetingManager targetingManager)
         {
             MacroData = macroData;
             BuildingBuilder = buildingBuilder;
