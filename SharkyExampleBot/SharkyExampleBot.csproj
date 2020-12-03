@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\RawS2ClientProtocol\S2ClientProtocol.csproj" />
+    <ProjectReference Include="..\S2ClientProtocol\S2ClientProtocol.csproj" />
     <ProjectReference Include="..\Sharky\Sharky.csproj" />
   </ItemGroup>
 

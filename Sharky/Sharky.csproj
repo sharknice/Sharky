@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\RawS2ClientProtocol\S2ClientProtocol.csproj" />
+    <ProjectReference Include="..\S2ClientProtocol\S2ClientProtocol.csproj" />
   </ItemGroup>
 
 </Project>
