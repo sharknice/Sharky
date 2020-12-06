@@ -58,7 +58,7 @@ namespace Sharky.MicroTasks
                     return;
                 }
 
-                foreach (var commander in commanders)
+                foreach (var commander in commanders.OrderBy(c => c.Value.UnitCalculation.Unit.BuffIds.Count()))
                 {
                     if (!commander.Value.Claimed && commander.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker))
                     {

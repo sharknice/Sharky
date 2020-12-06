@@ -1,8 +1,8 @@
 ﻿using SC2APIProtocol;
 using Sharky.Managers;
+using Sharky.Pathing;
 using System;
 using System.Linq;
-using System.Numerics;
 
 namespace Sharky.Proxy
 {
@@ -10,19 +10,22 @@ namespace Sharky.Proxy
     {
         IBaseManager BaseManager;
         ITargetingManager TargetingManager;
+        IPathFinder PathFinder;
 
-        public ProxyLocationService(IBaseManager baseManager, ITargetingManager targetingManager)
+        public ProxyLocationService(IBaseManager baseManager, ITargetingManager targetingManager, IPathFinder pathFinder)
         {
             BaseManager = baseManager;
             TargetingManager = targetingManager;
+            PathFinder = pathFinder;
         }
 
         public Point2D GetCliffProxyLocation()
         {
-            int proxyBase = 2;
+            int proxyBase = 3;
             // TODO: specific maps are layed out different, need to change proxybase for those, need to use the walking distance, not the air distance
 
-            var baseLocation = BaseManager.BaseLocations.OrderBy(b => Vector2.DistanceSquared(new Vector2(b.Location.X, b.Location.Y), new Vector2(TargetingManager.EnemyMainBasePoint.X, TargetingManager.EnemyMainBasePoint.Y))).Take(proxyBase).Last().Location;
+            var orderedLocations = BaseManager.BaseLocations.OrderBy(b => PathFinder.GetGroundPath(TargetingManager.EnemyMainBasePoint.X, TargetingManager.EnemyMainBasePoint.Y, b.Location.X, b.Location.Y, 0).Count());
+            var baseLocation = orderedLocations.Take(proxyBase).Last().Location;
 
             var angle = Math.Atan2(TargetingManager.EnemyMainBasePoint.Y - baseLocation.Y, baseLocation.X - TargetingManager.EnemyMainBasePoint.X);
             var x = 8 * Math.Cos(angle);

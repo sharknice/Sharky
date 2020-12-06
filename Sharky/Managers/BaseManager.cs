@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using Sharky.Pathing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,11 +17,13 @@ namespace Sharky.Managers
 
         UnitDataManager UnitDataManager;
         IUnitManager UnitManager;
+        IPathFinder PathFinder;
 
-        public BaseManager(UnitDataManager unitDataManager, IUnitManager unitManager)
+        public BaseManager(UnitDataManager unitDataManager, IUnitManager unitManager, IPathFinder pathFinder)
         {
             UnitDataManager = unitDataManager;
             UnitManager = unitManager;
+            PathFinder = pathFinder;
             BaseLocations = new List<BaseLocation>();
         }
 
@@ -88,7 +91,8 @@ namespace Sharky.Managers
 
             var startingUnit = observation.Observation.RawData.Units.FirstOrDefault(u => u.Alliance == Alliance.Self && UnitDataManager.ResourceCenterTypes.Contains((UnitTypes)u.UnitType));
 
-            BaseLocations = BaseLocations.OrderBy(b => Vector2.DistanceSquared(new Vector2(startingUnit.Pos.X, startingUnit.Pos.Y), new Vector2(b.Location.X, b.Location.Y))).ToList();
+            //BaseLocations = BaseLocations.OrderBy(b => Vector2.DistanceSquared(new Vector2(startingUnit.Pos.X, startingUnit.Pos.Y), new Vector2(b.Location.X, b.Location.Y))).ToList();
+            BaseLocations = BaseLocations.OrderBy(b => PathFinder.GetGroundPath(startingUnit.Pos.X + 4, startingUnit.Pos.Y + 4, b.Location.X, b.Location.Y, 0).Count()).ToList();
             MainBase = BaseLocations.FirstOrDefault();
             MainBase.ResourceCenter = startingUnit;
             SelfBases = new List<BaseLocation> { MainBase };

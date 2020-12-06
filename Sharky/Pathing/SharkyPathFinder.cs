@@ -2,6 +2,7 @@
 using Roy_T.AStar.Paths;
 using Roy_T.AStar.Primitives;
 using SC2APIProtocol;
+using Sharky.Managers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,8 +15,9 @@ namespace Sharky.Pathing
         Grid GroundDamageGrid;
         int GroundDamageLastUpdate;
         int AirDamageLastUpdate;
+        int MapLastUpdate;
 
-        Grid MapGrid;
+        Grid WalkGrid;
         Grid BuildingGrid;
         Grid AirDamageGrid;
         Grid EnemyVisionGrid;
@@ -26,15 +28,24 @@ namespace Sharky.Pathing
         PathFinder PathFinder;
         MapData MapData;
         MapDataService MapDataService;
+        DebugManager DebugManager;
 
-        public SharkyPathFinder(PathFinder pathFinder, MapData mapData, MapDataService mapDataService)
+        public SharkyPathFinder(PathFinder pathFinder, MapData mapData, MapDataService mapDataService, DebugManager debugManager)
         {
             PathFinder = pathFinder;
             MapData = mapData;
             MapDataService = mapDataService;
+            DebugManager = debugManager;
 
             GroundDamageLastUpdate = -1;
             AirDamageLastUpdate = -1;
+            MapLastUpdate = -1;
+        }
+
+        public IEnumerable<Vector2> GetGroundPath(float startX, float startY, float endX, float endY, int frame)
+        {
+            var grid = GetMapGrid(frame);
+            return GetPath(grid, startX, startY, endX, endY);
         }
 
         public IEnumerable<Vector2> GetSafeGroundPath(float startX, float startY, float endX, float endY, int frame)
@@ -117,28 +128,37 @@ namespace Sharky.Pathing
             return AirDamageGrid;
         }
 
-        void CreateMapGrid()
+        Grid GetMapGrid(int frame)
         {
-            var gridSize = new GridSize(columns: MapData.MapWidth, rows: MapData.MapHeight);
-            var cellSize = new Size(Distance.FromMeters(1), Distance.FromMeters(1));
-            var traversalVelocity = Velocity.FromMetersPerSecond(1);
-            MapGrid = Grid.CreateGridWithLateralAndDiagonalConnections(gridSize, cellSize, traversalVelocity);
-            for (var x = 0; x < MapData.MapWidth; x++)
+            if (MapLastUpdate < frame)
             {
-                for (var y = 0; y < MapData.MapHeight; y++)
+                var gridSize = new GridSize(columns: MapData.MapWidth, rows: MapData.MapHeight);
+                var cellSize = new Size(Distance.FromMeters(1), Distance.FromMeters(1));
+                var traversalVelocity = Velocity.FromMetersPerSecond(1);
+                WalkGrid = Grid.CreateGridWithLateralAndDiagonalConnections(gridSize, cellSize, traversalVelocity);
+                for (var x = 0; x < MapData.MapWidth; x++)
                 {
-                    if (!MapData.Map[x][y].Walkable)
+                    for (var y = 0; y < MapData.MapHeight; y++)
                     {
-                        MapGrid.DisconnectNode(new GridPosition(x, y));
+                        if (!MapData.Map[x][y].Walkable)
+                        {
+                            WalkGrid.DisconnectNode(new GridPosition(x, y));
+                            //DebugManager.DrawSphere(new Point { X = x, Y = y, Z = MapData.Map[x][y].TerrainHeight + 1 }, 2, new Color { R = 0, G = 255, B = 0 });
+                        }
+                        else
+                        {
+                            //DebugManager.DrawSphere(new Point { X = x, Y = y, Z = MapData.Map[x][y].TerrainHeight + 1 }, 2, new Color { R = 255, G = 0, B = 0 });
+                        }
                     }
                 }
             }
+            return WalkGrid;
         }
 
         void UpdateBuildingGrid(IEnumerable<UnitCalculation> buildings, IEnumerable<Unit> resourceUnits)
         {
             // TODO: store the old buildings, if the buildings are the same don't update, just return
-            BuildingGrid = MapGrid;
+            BuildingGrid = WalkGrid;
             foreach (var building in buildings)
             {
                 var nodes = GetNodesInRange(building.Unit.Pos, building.Unit.Radius, BuildingGrid.Columns, BuildingGrid.Rows);
@@ -159,7 +179,7 @@ namespace Sharky.Pathing
 
         void UpdateEnemyVisionGrid(IEnumerable<UnitCalculation> enemyUnits)
         {
-            EnemyVisionGrid = Grid.CreateGridWithLateralAndDiagonalConnections(MapGrid.GridSize, new Size(Distance.FromMeters(1), Distance.FromMeters(1)), Velocity.FromMetersPerSecond(1));
+            EnemyVisionGrid = Grid.CreateGridWithLateralAndDiagonalConnections(WalkGrid.GridSize, new Size(Distance.FromMeters(1), Distance.FromMeters(1)), Velocity.FromMetersPerSecond(1));
             foreach (var enemy in enemyUnits)
             {
                 var nodes = GetNodesInRange(enemy.Unit.Pos, 11, EnemyVisionGrid.Columns, EnemyVisionGrid.Rows); // TODO: get sight range of every unit, // TODO: units on low ground can't see high ground

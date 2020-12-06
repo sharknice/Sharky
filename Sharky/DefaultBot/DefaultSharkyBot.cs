@@ -134,7 +134,11 @@ namespace Sharky.DefaultBot
             EnemyRaceManager = new EnemyRaceManager(UnitManager, UnitDataManager);
             Managers.Add(EnemyRaceManager);
 
-            BaseManager = new BaseManager(UnitDataManager, UnitManager);
+            SharkyPathFinder = new SharkyPathFinder(new Roy_T.AStar.Paths.PathFinder(), MapData, MapDataService, DebugManager);
+            SharkySimplePathFinder = new SharkySimplePathFinder(MapDataService);
+            NoPathFinder = new SharkyNoPathFinder();
+
+            BaseManager = new BaseManager(UnitDataManager, UnitManager, SharkyPathFinder);
             Managers.Add(BaseManager);
 
             TargetingManager = new TargetingManager(UnitManager, UnitDataManager, MapDataService, BaseManager, MacroData);
@@ -167,10 +171,7 @@ namespace Sharky.DefaultBot
             ChatManager = new ChatManager(HttpClient, ChatHistory, SharkyOptions, ChatDataService, EnemyPlayerService, EnemyNameService);
             Managers.Add(ChatManager);
 
-            SharkyPathFinder = new SharkyPathFinder(new Roy_T.AStar.Paths.PathFinder(), MapData, MapDataService);
-            SharkySimplePathFinder = new SharkySimplePathFinder(MapDataService);
-            NoPathFinder = new SharkyNoPathFinder();
-            ProxyLocationService = new ProxyLocationService(BaseManager, TargetingManager);
+            ProxyLocationService = new ProxyLocationService(BaseManager, TargetingManager, SharkyPathFinder);
 
             IndividualMicroController = new IndividualMicroController(MapDataService, UnitDataManager, UnitManager, DebugManager, NoPathFinder, SharkyOptions, MicroPriority.LiveAndAttack, false);
 

@@ -34,5 +34,10 @@ namespace Sharky.Pathing
             }
             return new List<Vector2>();
         }
+
+        public IEnumerable<Vector2> GetGroundPath(float startX, float startY, float endX, float endY, int frame)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }
