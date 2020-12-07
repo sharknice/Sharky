@@ -11,6 +11,7 @@ namespace Sharky
         public UnitCalculation UnitCalculation;
 
         public UnitCalculation BestTarget { get; set; }
+        public UnitRole UnitRole { get; set; }
 
         public int RetreatPathFrame { get; set; }
         public IEnumerable<Vector2> RetreatPath { get; set; }
