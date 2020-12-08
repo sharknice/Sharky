@@ -15,6 +15,7 @@ namespace Sharky.MicroControllers
         protected IUnitManager UnitManager;
         protected DebugManager DebugManager;
         protected IPathFinder SharkyPathFinder;
+        IBaseManager BaseManager;
         protected SharkyOptions SharkyOptions;
         protected MicroPriority MicroPriority;
 
@@ -25,13 +26,14 @@ namespace Sharky.MicroControllers
         protected float AvoidDamageDistance;
         protected float LooseFormationDistance;
 
-        public IndividualMicroController(MapDataService mapDataService, UnitDataManager unitDataManager, IUnitManager unitManager, DebugManager debugManager, IPathFinder sharkyPathFinder, SharkyOptions sharkyOptions, MicroPriority microPriority, bool groupUpEnabled)
+        public IndividualMicroController(MapDataService mapDataService, UnitDataManager unitDataManager, IUnitManager unitManager, DebugManager debugManager, IPathFinder sharkyPathFinder, IBaseManager baseManager, SharkyOptions sharkyOptions, MicroPriority microPriority, bool groupUpEnabled)
         {
             MapDataService = mapDataService;
             UnitDataManager = unitDataManager;
             UnitManager = unitManager;
             DebugManager = debugManager;
             SharkyPathFinder = sharkyPathFinder;
+            BaseManager = baseManager;
             SharkyOptions = sharkyOptions;
             MicroPriority = microPriority;
             GroupUpEnabled = groupUpEnabled;
@@ -100,6 +102,11 @@ namespace Sharky.MicroControllers
             }
             else
             {
+                if (WorkerEscapeSurround(commander, target, defensivePoint, frame, out action))
+                {
+                    return action;
+                }
+
                 if (AvoidTargettedOneHitKills(commander, target, defensivePoint, frame, out action)) 
                 { 
                     return action; 
@@ -1041,6 +1048,30 @@ namespace Sharky.MicroControllers
             }
 
             return Formation.Normal;
+        }
+
+        protected virtual bool WorkerEscapeSurround(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out SC2APIProtocol.Action action)
+        {
+            action = null;
+
+            if (commander.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker))
+            {
+                if (commander.UnitCalculation.EnemiesInRangeOf.Count() > 0)
+                {
+                    var selfBase = BaseManager.SelfBases.FirstOrDefault();
+                    if (selfBase != null)
+                    {
+                        var mineralField = selfBase.MineralFields.FirstOrDefault();
+                        if (mineralField != null)
+                        {
+                            action = commander.Order(frame, Abilities.HARVEST_GATHER, null, mineralField.Tag);
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
         }
 
         protected virtual bool AvoidTargettedOneHitKills(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out SC2APIProtocol.Action action)

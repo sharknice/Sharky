@@ -35,14 +35,8 @@ namespace Sharky.MicroTasks
             {
                 if (!commander.Value.Claimed && commander.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker))
                 {
-                    if (commander.Value.UnitCalculation.Unit.Orders.Any(o => !UnitDataManager.MiningAbilities.Contains((Abilities)o.AbilityId)))
-                    {
-                    }
-                    else
-                    {
-                        commander.Value.Claimed = true;
-                        UnitCommanders.Add(commander.Value);
-                    }
+                    commander.Value.Claimed = true;
+                    UnitCommanders.Add(commander.Value);
                 }
             }
         }
