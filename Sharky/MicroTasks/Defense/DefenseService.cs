@@ -24,17 +24,23 @@ namespace Sharky.MicroTasks
             var enemyDps = enemyGroup.Sum(e => e.SimulatedDamagePerSecond(new List<Attribute>(), true, true));
             var enemyHps = enemyGroup.Sum(e => e.SimulatedHealPerSecond);
             var enemyAttributes = enemyGroup.SelectMany(e => e.Attributes).Distinct();
+            var hasGround = enemyGroup.All(e => e.Unit.IsFlying);
+            var hasAir = enemyGroup.All(e => e.Unit.IsFlying);
+            var cloakable = enemyGroup.Any(e => e.UnitClassifications.Contains(UnitClassification.Cloakable));
 
             var counterGroup = new List<UnitCommander>();
 
             foreach (var commander in unitCommanders)
             {
-                counterGroup.Add(commander);
-
-                var wwinnability = CalculateWinability(counterGroup, enemyAttributes, enemyHps, enemyHealth, enemyDps);
-                if (wwinnability > 2)
+                if ((hasGround && commander.UnitCalculation.DamageGround) || (hasAir && commander.UnitCalculation.DamageAir) || (cloakable && (commander.UnitCalculation.UnitClassifications.Contains(UnitClassification.Detector) || commander.UnitCalculation.UnitClassifications.Contains(UnitClassification.DetectionCaster))))
                 {
-                    return counterGroup;
+                    counterGroup.Add(commander);
+
+                    var wwinnability = CalculateWinability(counterGroup, enemyAttributes, enemyHps, enemyHealth, enemyDps);
+                    if (wwinnability > 2)
+                    {
+                        return counterGroup;
+                    }
                 }
             }
 

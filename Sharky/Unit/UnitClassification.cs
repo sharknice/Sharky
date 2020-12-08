@@ -8,6 +8,7 @@
         ProductionStructure,
         ResourceCenter,
         Detector,
-        DetectionCaster
+        DetectionCaster,
+        Cloakable
     }
 }

@@ -18,6 +18,7 @@ using Sharky.MicroControllers;
 using Sharky.MicroControllers.Protoss;
 using Sharky.MicroControllers.Zerg;
 using Sharky.MicroTasks;
+using Sharky.MicroTasks.Mining;
 using Sharky.Pathing;
 using Sharky.Proxy;
 using Sharky.TypeData;
@@ -217,8 +218,9 @@ namespace Sharky.DefaultBot
             MicroController = new MicroController(IndividualMicroControllers, IndividualMicroController);
 
             var defenseSquadTask = new DefenseSquadTask(UnitManager, TargetingManager, DefenseService, MicroController, new List<DesiredUnitsClaim>(), 0, false);
-            var workerScoutTask = new WorkerScoutTask(UnitDataManager, TargetingManager, MapDataService, true, 0.5f);
-            var miningTask = new MiningTask(UnitDataManager, BaseManager, UnitManager, 1);
+            var workerScoutTask = new WorkerScoutTask(UnitDataManager, TargetingManager, MapDataService, true, 0.5f, IndividualMicroController);
+            var miningDefenseService = new MiningDefenseService(BaseManager, UnitManager);
+            var miningTask = new MiningTask(UnitDataManager, BaseManager, UnitManager, 1, miningDefenseService);
             var queenInjectTask = new QueenInjectsTask(UnitManager, 1.1f);
             var attackTask = new AttackTask(MicroController, TargetingManager, UnitManager, DefenseService, MacroData, AttackData, 2);
 

@@ -78,6 +78,49 @@ namespace Sharky.MicroControllers
             return null;
         }
 
+        public virtual SC2APIProtocol.Action Scout(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame)
+        {
+            SC2APIProtocol.Action action = null;
+
+            if (WeaponReady(commander))
+            {
+                var bestTarget = GetBestTarget(commander, target);
+                if (bestTarget != null && bestTarget.UnitClassifications.Contains(UnitClassification.Worker) && commander.UnitCalculation.EnemiesInRange.Any(e => e.Unit.Tag == bestTarget.Unit.Tag))
+                {
+                    if (AttackBestTarget(commander, target, defensivePoint, target, bestTarget, frame, out action)) 
+                    { 
+                        return action; 
+                    }
+                }
+            }
+
+            if (!MapDataService.SelfVisible(target))
+            {
+               return commander.Order(frame, Abilities.MOVE, target);
+            }
+            else
+            {
+                if (AvoidTargettedOneHitKills(commander, target, defensivePoint, frame, out action)) 
+                { 
+                    return action; 
+                }
+
+                if (AvoidTargettedDamage(commander, target, defensivePoint, frame, out action))
+                {
+                    return action;
+                }
+
+                if (AvoidDamage(commander, target, defensivePoint, frame, out action))
+                {
+                    return action;
+                }
+
+                // TODO: circle around base
+            }
+
+            return null;
+        }
+
         public virtual SC2APIProtocol.Action Retreat(UnitCommander commander, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
             if (Vector2.DistanceSquared(new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y), new Vector2(defensivePoint.X, defensivePoint.Y)) > 100)

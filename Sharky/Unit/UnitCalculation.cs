@@ -184,6 +184,10 @@ namespace Sharky
             {
                 UnitClassifications.Add(UnitClassification.DetectionCaster);
             }
+            if (unitDataManager.CloakableAttackers.Contains((UnitTypes)unit.UnitType))
+            {
+                UnitClassifications.Add(UnitClassification.Cloakable);
+            }
 
             EnemiesInRange = new List<UnitCalculation>();
             EnemiesInRangeOf = new List<UnitCalculation>();
