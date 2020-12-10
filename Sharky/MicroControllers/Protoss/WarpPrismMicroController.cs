@@ -234,6 +234,8 @@ namespace Sharky.MicroControllers.Protoss
         {
             action = null;
 
+            // TODO: if already unloading all return false and it will unload as it moves?
+
             if (commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.UNLOADALLAT_WARPPRISM)) {
                 // if a unit has been in there for more than a second, warp prism must be on unloadable ground, move to a new area then try again
                 if (commander.LoadTimes.Any(l => l.Value > 100))

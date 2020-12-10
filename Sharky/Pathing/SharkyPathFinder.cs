@@ -42,13 +42,13 @@ namespace Sharky.Pathing
             MapLastUpdate = -1;
         }
 
-        public IEnumerable<Vector2> GetGroundPath(float startX, float startY, float endX, float endY, int frame)
+        public List<Vector2> GetGroundPath(float startX, float startY, float endX, float endY, int frame)
         {
             var grid = GetMapGrid(frame);
             return GetPath(grid, startX, startY, endX, endY);
         }
 
-        public IEnumerable<Vector2> GetSafeGroundPath(float startX, float startY, float endX, float endY, int frame)
+        public List<Vector2> GetSafeGroundPath(float startX, float startY, float endX, float endY, int frame)
         {
             var grid = GetGroundDamageGrid(frame);
             var path = GetPath(grid, startX, startY, endX, endY);
@@ -65,7 +65,7 @@ namespace Sharky.Pathing
             return path;
         }
 
-        public IEnumerable<Vector2> GetSafeAirPath(float startX, float startY, float endX, float endY, int frame)
+        public List<Vector2> GetSafeAirPath(float startX, float startY, float endX, float endY, int frame)
         {
             var grid = GetAirDamageGrid(frame);
             var path = GetPath(grid, startX, startY, endX, endY);
@@ -117,7 +117,7 @@ namespace Sharky.Pathing
                 {
                     for (var y = 0; y < MapData.MapHeight; y++)
                     {
-                        if (!MapData.Map[x][y].Walkable || MapData.Map[x][y].EnemyAirDpsInRange > 0)
+                        if (MapData.Map[x][y].EnemyAirDpsInRange > 0)
                         {
                             AirDamageGrid.DisconnectNode(new GridPosition(x, y));
                         }
@@ -240,7 +240,7 @@ namespace Sharky.Pathing
             return nodes;
         }
 
-        private IEnumerable<Vector2> GetPath(Grid grid, float startX, float startY, float endX, float endY)
+        private List<Vector2> GetPath(Grid grid, float startX, float startY, float endX, float endY)
         {
             if (startX >= grid.GridSize.Columns)
             {
@@ -261,7 +261,7 @@ namespace Sharky.Pathing
             try
             {
                 var path = PathFinder.FindPath(new GridPosition((int)startX, (int)startY), new GridPosition((int)endX, (int)endY), grid);
-                return path.Edges.Reverse().Select(e => new Vector2(e.End.Position.X, e.End.Position.Y));
+                return path.Edges.Reverse().Select(e => new Vector2(e.End.Position.X, e.End.Position.Y)).ToList();
             }
             catch (Exception e)
             {

@@ -65,7 +65,7 @@ namespace Sharky.MicroControllers.Protoss
             var bestGravitonTarget = GetBestGravitonBeamTarget(commander, target);
             if (bestGravitonTarget != null)
             {
-                commander.Order(frame, Abilities.EFFECT_GRAVITONBEAM, null, bestGravitonTarget.Unit.Tag);
+                action = commander.Order(frame, Abilities.EFFECT_GRAVITONBEAM, null, bestGravitonTarget.Unit.Tag);
                 return true;
             }
 

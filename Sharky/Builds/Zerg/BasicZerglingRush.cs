@@ -23,6 +23,7 @@ namespace Sharky.Builds.Zerg
             MacroData.DesiredGases = 0;
 
             AttackData.ArmyFoodAttack = 3;
+            AttackData.ArmyFoodRetreat = 3;
 
             MacroData.DesiredUnitCounts[UnitTypes.ZERG_DRONE] = 10;
             MacroData.DesiredUnitCounts[UnitTypes.ZERG_OVERLORD] = 1;

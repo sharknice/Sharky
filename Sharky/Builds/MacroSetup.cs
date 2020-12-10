@@ -202,7 +202,7 @@ namespace Sharky.Builds
             macroData.DesiredDefensiveBuildingsAtDefensivePoint = new Dictionary<UnitTypes, int>();
             macroData.DesiredDefensiveBuildingsAtEveryBase = new Dictionary<UnitTypes, int>();
             macroData.DesiredDefensiveBuildingsAtEveryMineralLine = new Dictionary<UnitTypes, int>();
-            macroData.DefensiveBuildingMaximumDistance = 20;
+            macroData.DefensiveBuildingMaximumDistance = 15;
             macroData.DefensiveBuildingMineralLineMaximumDistance = 10;
 
             if (macroData.Race == Race.Protoss)

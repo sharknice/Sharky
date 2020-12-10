@@ -34,6 +34,7 @@ namespace Sharky.MicroTasks
                 MicroManager.MicroTasks["MiningTask"].ResetClaimedUnits();
             }
             Enabled = true;
+            started = false;
         }
 
         public override void Disable()

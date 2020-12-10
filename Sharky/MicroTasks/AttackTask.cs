@@ -84,7 +84,17 @@ namespace Sharky.MicroTasks
 
             if (!AttackData.CustomAttackFunction)
             {
-                AttackData.Attacking = MacroData.FoodArmy >= AttackData.ArmyFoodAttack || MacroData.FoodUsed > 190;
+                if (AttackData.Attacking)
+                {
+                    if (MacroData.FoodUsed < AttackData.ArmyFoodRetreat)
+                    {
+                        AttackData.Attacking = false;
+                    }
+                }
+                else
+                {
+                    AttackData.Attacking = MacroData.FoodArmy >= AttackData.ArmyFoodAttack || MacroData.FoodUsed > 190;
+                }
             }
 
             var attackingEnemies = UnitManager.SelfUnits.Where(u => u.Value.UnitClassifications.Contains(UnitClassification.ResourceCenter) || u.Value.UnitClassifications.Contains(UnitClassification.ProductionStructure)).SelectMany(u => u.Value.NearbyEnemies).Distinct();

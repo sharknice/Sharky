@@ -13,7 +13,7 @@ namespace Sharky.Pathing
             MapDataService = mapDataService;
         }
 
-        public IEnumerable<Vector2> GetSafeGroundPath(float startX, float startY, float endX, float endY, int frame)
+        public List<Vector2> GetSafeGroundPath(float startX, float startY, float endX, float endY, int frame)
         {
             var cells = MapDataService.GetCells(startX, startY, 1);
             var best = cells.Where(c => c.Walkable).OrderBy(c => c.EnemyGroundDpsInRange).FirstOrDefault();
@@ -24,7 +24,7 @@ namespace Sharky.Pathing
             return new List<Vector2>();
         }
 
-        public IEnumerable<Vector2> GetSafeAirPath(float startX, float startY, float endX, float endY, int frame)
+        public List<Vector2> GetSafeAirPath(float startX, float startY, float endX, float endY, int frame)
         {
             var cells = MapDataService.GetCells(startX, startY, 1);
             var best = cells.OrderBy(c => c.EnemyAirDpsInRange).FirstOrDefault();
@@ -35,7 +35,7 @@ namespace Sharky.Pathing
             return new List<Vector2>();
         }
 
-        public IEnumerable<Vector2> GetGroundPath(float startX, float startY, float endX, float endY, int frame)
+        public List<Vector2> GetGroundPath(float startX, float startY, float endX, float endY, int frame)
         {
             throw new System.NotImplementedException();
         }

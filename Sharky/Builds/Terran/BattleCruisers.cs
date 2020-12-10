@@ -15,6 +15,7 @@ namespace Sharky.Builds.Terran
             base.StartBuild(frame);
 
             AttackData.ArmyFoodAttack = 5;
+            AttackData.ArmyFoodRetreat = 5;
         }
 
         public override void OnFrame(ResponseObservation observation)
@@ -61,6 +62,7 @@ namespace Sharky.Builds.Terran
             if (UnitManager.Completed(UnitTypes.TERRAN_STARPORT) > 0)
             {
                 AttackData.ArmyFoodAttack = 50;
+                AttackData.ArmyFoodRetreat = 30;
                 if (MacroData.DesiredTechCounts[UnitTypes.TERRAN_FUSIONCORE] < 1)
                 {
                     MacroData.DesiredTechCounts[UnitTypes.TERRAN_FUSIONCORE] = 1;

@@ -1,12 +1,17 @@
 ﻿using SC2APIProtocol;
 using Sharky.Pathing;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Numerics;
 
 namespace Sharky.Managers
 {
     public class MapManager : SharkyManager
     {
+        IUnitManager UnitManager;
         MapData MapData;
+        SharkyOptions SharkyOptions;
 
         private int LastBuildingCount;
         private int LastVisibleEnemyUnitCount;
@@ -14,13 +19,15 @@ namespace Sharky.Managers
         private readonly int MillisecondsPerUpdate;
         private double MillisecondsUntilUpdate;
 
-        public MapManager(MapData mapData)
+        public MapManager(MapData mapData, IUnitManager unitManager, SharkyOptions sharkyOptions)
         {
             MapData = mapData;
+            UnitManager = unitManager;
+            SharkyOptions = sharkyOptions;
 
             LastBuildingCount = 0;
             LastVisibleEnemyUnitCount = 0;
-            MillisecondsPerUpdate = 1000;
+            MillisecondsPerUpdate = 500;
             MillisecondsUntilUpdate = 0;
         }
 
@@ -51,9 +58,12 @@ namespace Sharky.Managers
             UpdateVisibility(observation.Observation.RawData.MapState.Visibility);
             UpdateCreep(observation.Observation.RawData.MapState.Creep);
 
-            //MillisecondsUntilUpdate -= (1 / shark.FramesPerSecond) * 1000;
-            //if (MillisecondsUntilUpdate > 0) { return new List<SC2APIProtocol.Action>(); }
-            //MillisecondsUntilUpdate = MillisecondsPerUpdate;
+            MillisecondsUntilUpdate -= (1 / SharkyOptions.FramesPerSecond) * 1000;
+            if (MillisecondsUntilUpdate > 0) { return new List<SC2APIProtocol.Action>(); }
+            MillisecondsUntilUpdate = MillisecondsPerUpdate;
+
+            UpdateEnemyAirDpsInRange();
+
 
             //var buildings = shark.EnemyAttacks.Where(e => UnitTypes.BuildingTypes.Contains(e.Value.Unit.UnitType)).Select(e => e.Value).Concat(shark.AllyAttacks.Where(e => UnitTypes.BuildingTypes.Contains(e.Value.Unit.UnitType)).Select(e => e.Value));
             //var currentBuildingCount = buildings.Count();
@@ -73,7 +83,65 @@ namespace Sharky.Managers
             //}
             //LastVisibleEnemyUnitCount = currentVisibleEnemyUnitCount;
 
+
+
             return new List<SC2APIProtocol.Action>();
+        }
+
+        void UpdateEnemyAirDpsInRange()
+        {
+            for (var x = 0; x < MapData.MapWidth; x++)
+            {
+                for (var y = 0; y < MapData.MapHeight; y++)
+                {
+                    MapData.Map[x][y].EnemyAirDpsInRange = 0;
+                }
+            }
+
+            foreach (var enemy in UnitManager.EnemyUnits.Where(e => e.Value.DamageAir && e.Value.Unit.BuildProgress == 1))
+            {
+                var nodes = GetNodesInRange(enemy.Value.Unit.Pos, enemy.Value.Range + 2, MapData.MapWidth, MapData.MapHeight);
+                foreach (var node in nodes)
+                {
+                    MapData.Map[(int)node.X][(int)node.Y].EnemyAirDpsInRange += enemy.Value.Dps;
+                }
+            }
+        }
+
+        private List<Vector2> GetNodesInRange(Point position, float range, int columns, int rows)
+        {
+            var nodes = new List<Vector2>();
+            var xMin = (int)Math.Floor(position.X - range);
+            var xMax = (int)Math.Ceiling(position.X + range);
+            int yMin = (int)Math.Floor(position.Y - range);
+            int yMax = (int)Math.Ceiling(position.Y + range);
+
+            if (xMin < 0)
+            {
+                xMin = 0;
+            }
+            if (xMax >= columns)
+            {
+                xMax = columns - 1;
+            }
+            if (yMin < 0)
+            {
+                yMin = 0;
+            }
+            if (yMax >= rows)
+            {
+                yMax = rows - 1;
+            }
+
+            for (int x = xMin; x <= xMax; x++)
+            {
+                for (int y = yMin; y <= yMax; y++)
+                {
+                    nodes.Add(new Vector2(x, y));
+                }
+            }
+
+            return nodes;
         }
 
         void UpdateCreep(ImageData creep)

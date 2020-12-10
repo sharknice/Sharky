@@ -122,14 +122,12 @@ namespace Sharky.DefaultBot
             Managers.Add(UnitDataManager);
 
             MapData = new MapData();
-            MapManager = new MapManager(MapData);
-            Managers.Add(MapManager);
-
             MapDataService = new MapDataService(MapData);
-
             TargetPriorityService = new TargetPriorityService(UnitDataManager);
             CollisionCalculator = new CollisionCalculator();
             UnitManager = new UnitManager(UnitDataManager, SharkyOptions, TargetPriorityService, CollisionCalculator, MapDataService, DebugManager);
+            MapManager = new MapManager(MapData, UnitManager, SharkyOptions);
+            Managers.Add(MapManager);
             Managers.Add(UnitManager);
 
             EnemyRaceManager = new EnemyRaceManager(UnitManager, UnitDataManager);
@@ -154,7 +152,7 @@ namespace Sharky.DefaultBot
             BuildingPlacement = new BuildingPlacement(ProtossBuildingPlacement, TerranBuildingPlacement, ZergBuildingPlacement, BaseManager, UnitManager, BuildingService, UnitDataManager);
             BuildingBuilder = new BuildingBuilder(UnitManager, TargetingManager, BuildingPlacement, UnitDataManager);
 
-            AttackData = new AttackData { ArmyFoodAttack = 30, Attacking = false, CustomAttackFunction = false };
+            AttackData = new AttackData { ArmyFoodAttack = 30, ArmyFoodRetreat = 25, Attacking = false, CustomAttackFunction = false };
             WarpInPlacement = new WarpInPlacement(UnitManager, DebugManager, MapData);
             
             Morpher = new Morpher(UnitManager, UnitDataManager, SharkyOptions);

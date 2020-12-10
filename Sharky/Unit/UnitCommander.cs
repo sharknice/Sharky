@@ -14,7 +14,8 @@ namespace Sharky
         public UnitRole UnitRole { get; set; }
 
         public int RetreatPathFrame { get; set; }
-        public IEnumerable<Vector2> RetreatPath { get; set; }
+        public List<Vector2> RetreatPath { get; set; }
+        public int RetreatPathIndex { get; set; }
         public int LastOrderFrame { get; private set; }
 
         Abilities LastAbility;
@@ -40,6 +41,7 @@ namespace Sharky
             LoadTimes = new Dictionary<ulong, int>();
             RetreatPathFrame = 0;
             RetreatPath = new List<Vector2>();
+            RetreatPathIndex = 0;
 
             LastOrderFrame = 0;
         }

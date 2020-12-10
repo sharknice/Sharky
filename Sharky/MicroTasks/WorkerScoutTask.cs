@@ -72,49 +72,5 @@ namespace Sharky.MicroTasks
 
             return commands;
         }
-
-        //IEnumerable<SC2APIProtocol.Action> AttackEnemiesInRange(int frame)
-        //{
-        //    var commands = new List<SC2APIProtocol.Action>();
-
-        //    foreach (var commander in UnitCommanders)
-        //    {
-        //        var enemy = commander.UnitCalculation.EnemiesInRange.OrderBy(e => e.Unit.Shield + e.Unit.Health).FirstOrDefault();
-        //        if (enemy != null && commander.UnitCalculation.Unit.WeaponCooldown == 0)
-        //        {
-        //            var action = commander.Order(frame, Abilities.ATTACK, null, enemy.Unit.Tag);
-        //            if (action != null)
-        //            {
-        //                commands.Add(action);
-        //            }
-        //        }
-        //    }
-
-        //    return commands;
-        //}
-
-        //IEnumerable<SC2APIProtocol.Action> ScoutEnemyMain(int frame)
-        //{
-        //    var commands = new List<SC2APIProtocol.Action>();
-
-        //    if (!MapDataService.SelfVisible(TargetingManager.EnemyMainBasePoint))
-        //    {
-        //        foreach (var commander in UnitCommanders)
-        //        {
-        //            var action = commander.Order(frame, Abilities.MOVE, TargetingManager.EnemyMainBasePoint);
-        //            if (action != null)
-        //            {
-        //                commands.Add(action);
-        //            }
-        //        }
-        //    }
-        //    else
-        //    {
-        //        // TODO: circle around base
-        //        // don't die
-        //    }
-
-        //    return commands;
-        //}
     }
 }

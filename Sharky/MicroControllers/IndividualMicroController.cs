@@ -390,8 +390,7 @@ namespace Sharky.MicroControllers
         protected bool Retreat(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out SC2APIProtocol.Action action)
         {
             action = null;
-
-            
+          
             // if you can outrun and outrange the enemy do that isntead of a full on retreat
             var closestEnemy = commander.UnitCalculation.NearbyEnemies.OrderBy(u => Vector2.DistanceSquared(new Vector2(u.Unit.Pos.X, u.Unit.Pos.Y), new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y))).FirstOrDefault();
 
@@ -417,7 +416,7 @@ namespace Sharky.MicroControllers
                 }
             }
 
-            if (closestEnemy != null && commander.RetreatPathFrame + 5 < frame)
+            if (closestEnemy != null && commander.RetreatPathFrame + 20 < frame)
             {
                 if (commander.UnitCalculation.Unit.IsFlying)
                 {
@@ -428,41 +427,72 @@ namespace Sharky.MicroControllers
                     commander.RetreatPath = SharkyPathFinder.GetSafeGroundPath(defensivePoint.X, defensivePoint.Y, commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y, frame);
                 }
                 commander.RetreatPathFrame = frame;
+                commander.RetreatPathIndex = 1;
             }
 
-            if (FollowPath(commander, commander.RetreatPath, frame, out action)) { return true; }
+            if (FollowPath(commander, frame, out action)) { return true; }
 
             action = commander.Order(frame, Abilities.MOVE, defensivePoint);
             return true;
         }
 
-        protected bool FollowPath(UnitCommander commander, IEnumerable<Vector2> path, int frame, out SC2APIProtocol.Action action)
+        protected bool FollowPath(UnitCommander commander, int frame, out SC2APIProtocol.Action action)
         {
+            // TODO: this doesn't work well, it flies zig sag which goes very slow, need to smooth out the points somehow or something
+
             action = null;
 
-            if (path.Count() > 1)
+            if (commander.RetreatPath.Count() > 0)
             {
                 if (SharkyOptions.Debug)
                 {
-                    var thing = path.ToList();
-
-                    DebugManager.DrawSphere(new Point { X = thing[0].X, Y = thing[0].Y, Z = commander.UnitCalculation.Unit.Pos.Z }, 1, new Color { R = 0, G = 0, B = 255 });
+                    var thing = commander.RetreatPath.ToList();
                     for (int index = 0; index < thing.Count - 1; index++)
                     {
                         DebugManager.DrawLine(new Point { X = thing[index].X, Y = thing[index].Y, Z = commander.UnitCalculation.Unit.Pos.Z + 1 }, new Point { X = thing[index + 1].X, Y = thing[index + 1].Y, Z = commander.UnitCalculation.Unit.Pos.Z + 1 }, new Color { R = 0, G = 0, B = 255 });
                     }
                 }
 
-                var position = new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y);
-                foreach (var point in path.Skip(1))
+                if (commander.RetreatPathIndex < commander.RetreatPath.Count())
                 {
-                    if (Vector2.DistanceSquared(position, point) > 1)
+                    var point = commander.RetreatPath[commander.RetreatPathIndex];
+
+                    action = commander.Order(frame, Abilities.MOVE, new Point2D { X = point.X, Y = point.Y });
+                    DebugManager.DrawSphere(new Point { X = point.X, Y = point.Y, Z = commander.UnitCalculation.Unit.Pos.Z }, 1, new Color { R = 0, G = 0, B = 255 });
+
+                    if (Vector2.DistanceSquared(new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y), point) < 2)
                     {
-                        action = commander.Order(frame, Abilities.MOVE, new Point2D { X = point.X, Y = point.Y });
-                        return true;
+                        commander.RetreatPathIndex++;
                     }
+
+                    return true;
                 }
             }
+
+
+            //if (path.Count() > 1)
+            //{
+            //    if (SharkyOptions.Debug)
+            //    {
+            //        var thing = path.ToList();
+            //        DebugManager.DrawSphere(new Point { X = point.X, Y = point.Y, Z = commander.UnitCalculation.Unit.Pos.Z }, 1, new Color { R = 0, G = 0, B = 255 });
+
+            //        for (int index = 0; index < thing.Count - 1; index++)
+            //        {
+            //            DebugManager.DrawLine(new Point { X = thing[index].X, Y = thing[index].Y, Z = commander.UnitCalculation.Unit.Pos.Z + 1 }, new Point { X = thing[index + 1].X, Y = thing[index + 1].Y, Z = commander.UnitCalculation.Unit.Pos.Z + 1 }, new Color { R = 0, G = 0, B = 255 });
+            //        }
+            //    }
+
+            //    var position = new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y);
+            //    foreach (var point in path.Reverse())
+            //    {
+            //        if (Vector2.DistanceSquared(position, point) < 4)
+            //        {
+            //            action = commander.Order(frame, Abilities.MOVE, new Point2D { X = point.X, Y = point.Y });
+            //            return true;
+            //        }
+            //    }
+            //}
 
             return false;
         }

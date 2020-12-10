@@ -27,6 +27,7 @@ namespace Sharky.Builds.Protoss
             };
 
             AttackData.ArmyFoodAttack = 50;
+            AttackData.ArmyFoodRetreat = 30;
         }
 
         public override void OnFrame(ResponseObservation observation)

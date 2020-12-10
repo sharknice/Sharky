@@ -40,6 +40,7 @@ namespace Sharky.Builds.Protoss
             MacroData.DesiredProductionCounts[UnitTypes.PROTOSS_NEXUS] = 1;
 
             AttackData.ArmyFoodAttack = 8;
+            AttackData.ArmyFoodRetreat = 5;
         }
 
         public override void OnFrame(ResponseObservation observation)
