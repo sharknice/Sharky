@@ -210,7 +210,7 @@ namespace Sharky.MicroTasks
 
         void GetNextTarget()
         {
-            Target = BaseManager.BaseLocations.OrderBy(b => Vector2.DistanceSquared(new Vector2(b.Location.X, b.Location.Y), new Vector2(TargetingManager.EnemyMainBasePoint.X, TargetingManager.EnemyMainBasePoint.Y))).Skip(TargetIndex + 1).First().Location;
+            Target = BaseManager.BaseLocations.OrderBy(b => Vector2.DistanceSquared(new Vector2(b.Location.X, b.Location.Y), new Vector2(TargetingManager.EnemyMainBasePoint.X, TargetingManager.EnemyMainBasePoint.Y))).Skip(TargetIndex + 1).First().MineralLineLocation;
             TargetIndex++;
             if (TargetIndex > 3)
             {

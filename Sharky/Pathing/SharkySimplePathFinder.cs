@@ -37,7 +37,24 @@ namespace Sharky.Pathing
 
         public List<Vector2> GetGroundPath(float startX, float startY, float endX, float endY, int frame)
         {
-            throw new System.NotImplementedException();
+            var cells = MapDataService.GetCells(startX, startY, 1);
+            var best = cells.Where(c => c.Walkable).FirstOrDefault();
+            if (best != null)
+            {
+                return new List<Vector2> { new Vector2(startX, startY), new Vector2(best.X, best.Y) };
+            }
+            return new List<Vector2>();
+        }
+
+        public List<Vector2> GetUndetectedGroundPath(float startX, float startY, float endX, float endY, int frame)
+        {
+            var cells = MapDataService.GetCells(startX, startY, 1);
+            var best = cells.Where(c => c.Walkable).OrderBy(c => c.InEnemyDetection).FirstOrDefault();
+            if (best != null)
+            {
+                return new List<Vector2> { new Vector2(startX, startY), new Vector2(best.X, best.Y) };
+            }
+            return new List<Vector2>();
         }
     }
 }

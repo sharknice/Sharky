@@ -12,8 +12,10 @@ namespace Sharky.Pathing
 {
     public class SharkyPathFinder : IPathFinder
     {
-        Grid GroundDamageGrid;
-        int GroundDamageLastUpdate;
+        Grid GroundDamageGrid; // TDOO: include buildings for ground grids, can't walk through them
+        int GroundDamageLastUpdate; 
+        Grid GroundDetectionGrid;
+        int GroundDetectionLastUpdate;
         int AirDamageLastUpdate;
         int MapLastUpdate;
 
@@ -23,7 +25,7 @@ namespace Sharky.Pathing
         Grid EnemyVisionGrid;
         Grid EnemyVisionGroundGrid;
         Grid EnemyDetectionGrid;
-        Grid EnemyDetectionGroundGrid; // includes ground and buildings, can't walk through them
+        
 
         PathFinder PathFinder;
         MapData MapData;
@@ -38,6 +40,7 @@ namespace Sharky.Pathing
             DebugManager = debugManager;
 
             GroundDamageLastUpdate = -1;
+            GroundDetectionLastUpdate = -1;
             AirDamageLastUpdate = -1;
             MapLastUpdate = -1;
         }
@@ -82,6 +85,23 @@ namespace Sharky.Pathing
             return path;
         }
 
+        public List<Vector2> GetUndetectedGroundPath(float startX, float startY, float endX, float endY, int frame)
+        {
+            var grid = GetGroundDetectionGrid(frame);
+            var path = GetPath(grid, startX, startY, endX, endY);
+            if (path.Count() == 0)
+            {
+                var cells = MapDataService.GetCells(startX, startY, 1);
+                var best = cells.Where(c => c.Walkable).OrderBy(c => c.EnemyGroundDpsInRange).FirstOrDefault();
+                if (best != null)
+                {
+                    path = new List<Vector2> { new Vector2(startX, startY), new Vector2(best.X, best.Y) };
+                }
+            }
+
+            return path;
+        }
+
         Grid GetGroundDamageGrid(int frame)
         {
             if (GroundDamageLastUpdate < frame)
@@ -103,6 +123,29 @@ namespace Sharky.Pathing
                 GroundDamageLastUpdate = frame;
             }
             return GroundDamageGrid;
+        }
+
+        Grid GetGroundDetectionGrid(int frame)
+        {
+            if (GroundDetectionLastUpdate < frame)
+            {
+                var gridSize = new GridSize(columns: MapData.MapWidth, rows: MapData.MapHeight);
+                var cellSize = new Size(Distance.FromMeters(1), Distance.FromMeters(1));
+                var traversalVelocity = Velocity.FromMetersPerSecond(1);
+                GroundDetectionGrid = Grid.CreateGridWithLateralAndDiagonalConnections(gridSize, cellSize, traversalVelocity);
+                for (var x = 0; x < MapData.MapWidth; x++)
+                {
+                    for (var y = 0; y < MapData.MapHeight; y++)
+                    {
+                        if (!MapData.Map[x][y].Walkable || MapData.Map[x][y].InEnemyDetection)
+                        {
+                            GroundDetectionGrid.DisconnectNode(new GridPosition(x, y));
+                        }
+                    }
+                }
+                GroundDetectionLastUpdate = frame;
+            }
+            return GroundDetectionGrid;
         }
 
         Grid GetAirDamageGrid(int frame)
@@ -269,12 +312,12 @@ namespace Sharky.Pathing
             }
         }
 
-        IEnumerable<Vector2> GetHiddenAirPath(float startX, float startY, float endX, float endY)
+        List<Vector2> GetHiddenAirPath(float startX, float startY, float endX, float endY)
         {
             return GetPath(EnemyVisionGrid, startX, startY, endX, endY);
         }
 
-        IEnumerable<Vector2> GetHiddenGroundPath(float startX, float startY, float endX, float endY)
+        List<Vector2> GetHiddenGroundPath(float startX, float startY, float endX, float endY)
         {
             return GetPath(EnemyVisionGroundGrid, startX, startY, endX, endY);
         }

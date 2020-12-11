@@ -21,7 +21,12 @@ namespace Sharky.Pathing
 
         public List<Vector2> GetGroundPath(float startX, float startY, float endX, float endY, int frame)
         {
-            throw new System.NotImplementedException();
+            return new List<Vector2>();
+        }
+
+        public List<Vector2> GetUndetectedGroundPath(float startX, float startY, float endX, float endY, int frame)
+        {
+            return new List<Vector2>();
         }
     }
 }

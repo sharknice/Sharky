@@ -15,14 +15,16 @@ namespace Sharky.MicroTasks
         IBaseManager BaseManager;
         IUnitManager UnitManager;
         MiningDefenseService MiningDefenseService;
+        MacroData MacroData;
 
-        public MiningTask(UnitDataManager unitDataManager, IBaseManager baseManager, IUnitManager unitManager, float priority, MiningDefenseService miningDefenseService)
+        public MiningTask(UnitDataManager unitDataManager, IBaseManager baseManager, IUnitManager unitManager, float priority, MiningDefenseService miningDefenseService, MacroData macroData)
         {
             UnitDataManager = unitDataManager;
             BaseManager = baseManager;
             UnitManager = unitManager;
             Priority = priority;
             MiningDefenseService = miningDefenseService;
+            MacroData = macroData;
 
             UnitCommanders = new List<UnitCommander>();
 
@@ -91,7 +93,23 @@ namespace Sharky.MicroTasks
             var refinereries = UnitManager.SelfUnits.Where(u => UnitDataManager.GasGeyserRefineryTypes.Contains((UnitTypes)u.Value.Unit.UnitType) && u.Value.Unit.BuildProgress >= .95f);
             var unsaturatedRefineries = refinereries.Where(u => u.Value.Unit.AssignedHarvesters < u.Value.Unit.IdealHarvesters);
 
-            if (unsaturatedRefineries.Count() > 0)
+            if (MacroData.VespeneGas > 600 && MacroData.Minerals < 100)
+            {
+                var usedRefineries = refinereries.Where(u => u.Value.Unit.AssignedHarvesters > 1);
+                foreach (var refinery in usedRefineries)
+                {
+                    var worker = UnitCommanders.Where(u => u.UnitCalculation.Unit.Orders.Any(o => o.TargetUnitTag == refinery.Key)).FirstOrDefault();
+                    if (worker != null)
+                    {
+                        var action = worker.Order(frame, Abilities.STOP);
+                        if (action != null)
+                        {
+                            actions.Add(action);
+                        }
+                    }
+                }
+            }
+            else if ((MacroData.VespeneGas < 1000 || MacroData.Minerals > 1000) && unsaturatedRefineries.Count() > 0)
             {
                 var refinery = unsaturatedRefineries.FirstOrDefault();
                 var idealGasWorkers = GetIdleWorkers();

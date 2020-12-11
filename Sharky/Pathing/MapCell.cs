@@ -21,5 +21,6 @@
         public float SelfAirDpsInRange { get; set; }
         public bool InEnemyVision { get; set; }
         public bool InSelfVision { get; set; }
+        public bool InEnemyDetection { get; set; }
     }
 }

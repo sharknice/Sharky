@@ -249,7 +249,7 @@ namespace Sharky.MicroControllers.Protoss
             return base.AttackBestTarget(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action);
         }
 
-        protected virtual bool AttackBestTargetInRange(UnitCommander commander, Point2D target, UnitCalculation bestTarget, int frame, out SC2APIProtocol.Action action)
+        protected override bool AttackBestTargetInRange(UnitCommander commander, Point2D target, UnitCalculation bestTarget, int frame, out SC2APIProtocol.Action action)
         {
             action = null;
             if (bestTarget != null && (bestTarget.UnitClassifications.Contains(UnitClassification.Worker) || !commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker))))

@@ -218,7 +218,7 @@ namespace Sharky.DefaultBot
             var defenseSquadTask = new DefenseSquadTask(UnitManager, TargetingManager, DefenseService, MicroController, new List<DesiredUnitsClaim>(), 0, false);
             var workerScoutTask = new WorkerScoutTask(UnitDataManager, TargetingManager, MapDataService, true, 0.5f, IndividualMicroController);
             var miningDefenseService = new MiningDefenseService(BaseManager, UnitManager);
-            var miningTask = new MiningTask(UnitDataManager, BaseManager, UnitManager, 1, miningDefenseService);
+            var miningTask = new MiningTask(UnitDataManager, BaseManager, UnitManager, 1, miningDefenseService, MacroData);
             var queenInjectTask = new QueenInjectsTask(UnitManager, 1.1f);
             var attackTask = new AttackTask(MicroController, TargetingManager, UnitManager, DefenseService, MacroData, AttackData, 2);
 
