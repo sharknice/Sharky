@@ -191,6 +191,8 @@ namespace Sharky.DefaultBot
 
             var zerglingMicroController = new ZerglingMicroController(MapDataService, UnitDataManager, UnitManager, DebugManager, NoPathFinder, BaseManager, SharkyOptions, MicroPriority.AttackForward, false);
 
+            var workerDefenseMicroController = new IndividualMicroController(MapDataService, UnitDataManager, UnitManager, DebugManager, SharkyPathFinder, BaseManager, SharkyOptions, MicroPriority.LiveAndAttack, false, 3);
+
             IndividualMicroControllers = new Dictionary<UnitTypes, IIndividualMicroController>
             {
                 { UnitTypes.PROTOSS_COLOSSUS, colossusMicroController },
@@ -216,8 +218,9 @@ namespace Sharky.DefaultBot
             MicroController = new MicroController(IndividualMicroControllers, IndividualMicroController);
 
             var defenseSquadTask = new DefenseSquadTask(UnitManager, TargetingManager, DefenseService, MicroController, new List<DesiredUnitsClaim>(), 0, false);
-            var workerScoutTask = new WorkerScoutTask(UnitDataManager, TargetingManager, MapDataService, true, 0.5f, IndividualMicroController);
-            var miningDefenseService = new MiningDefenseService(BaseManager, UnitManager);
+            var workerScoutTask = new WorkerScoutTask(UnitDataManager, TargetingManager, MapDataService, false, 0.5f, workerDefenseMicroController);
+            var proxyScoutTask = new ProxyScoutTask(UnitDataManager, TargetingManager, MapDataService, BaseManager, false, 0.5f, workerDefenseMicroController);
+            var miningDefenseService = new MiningDefenseService(BaseManager, UnitManager, workerDefenseMicroController, DebugManager);
             var miningTask = new MiningTask(UnitDataManager, BaseManager, UnitManager, 1, miningDefenseService, MacroData);
             var queenInjectTask = new QueenInjectsTask(UnitManager, 1.1f);
             var attackTask = new AttackTask(MicroController, TargetingManager, UnitManager, DefenseService, MacroData, AttackData, 2);
@@ -226,6 +229,7 @@ namespace Sharky.DefaultBot
             {
                 [defenseSquadTask.GetType().Name] = defenseSquadTask,
                 [workerScoutTask.GetType().Name] = workerScoutTask,
+                [proxyScoutTask.GetType().Name] = proxyScoutTask,
                 [miningTask.GetType().Name] = miningTask,
                 [queenInjectTask.GetType().Name] = queenInjectTask,
                 [attackTask.GetType().Name] = attackTask
@@ -243,6 +247,7 @@ namespace Sharky.DefaultBot
             {
                 ["Proxy"] = new EnemyStrategies.Proxy(EnemyStrategyHistory, ChatManager, UnitManager, SharkyOptions, TargetingManager),
                 ["WorkerRush"] = new WorkerRush(EnemyStrategyHistory, ChatManager, UnitManager, SharkyOptions, TargetingManager),
+                ["InvisibleAttacks"] = new InvisibleAttacks(EnemyStrategyHistory, ChatManager, UnitManager, SharkyOptions),
                 ["AdeptRush"] = new AdeptRush(EnemyStrategyHistory, ChatManager, UnitManager, SharkyOptions),
                 ["MarineRush"] = new MarineRush(EnemyStrategyHistory, ChatManager, UnitManager, SharkyOptions),
                 ["MassVikings"] = new MassVikings(EnemyStrategyHistory, ChatManager, UnitManager, SharkyOptions),
@@ -288,7 +293,7 @@ namespace Sharky.DefaultBot
 
             var massMarine = new MassMarines(BuildOptions, MacroData, UnitManager, AttackData, ChatManager);
             var battleCruisers = new BattleCruisers(BuildOptions, MacroData, UnitManager, AttackData, ChatManager);
-            var everyTerranUnit = new EveryTerranUnit(BuildOptions, MacroData, UnitManager, AttackData, ChatManager);
+            var everyTerranUnit = new EveryTerranUnit(BuildOptions, MacroData, UnitManager, AttackData, ChatManager, MicroManager);
             var terranBuilds = new Dictionary<string, ISharkyBuild>
             {
                 [massMarine.Name()] = massMarine,

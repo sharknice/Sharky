@@ -1,5 +1,6 @@
 ﻿using SC2APIProtocol;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Sharky.MicroControllers
 {
@@ -17,9 +18,11 @@ namespace Sharky.MicroControllers
         public List<Action> Attack(List<UnitCommander> commanders, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
             var actions = new List<Action>();
+            var stopwatch = new Stopwatch();
 
             foreach (var commander in commanders)
             {
+                stopwatch.Restart();
                 Action action;
 
                 if (IndividualMicroControllers.TryGetValue((UnitTypes)commander.UnitCalculation.Unit.UnitType, out var individualMicroController))
@@ -34,6 +37,11 @@ namespace Sharky.MicroControllers
                 if (action != null)
                 {
                     actions.Add(action);
+                }
+                var timeTaken = stopwatch.ElapsedMilliseconds;
+                if (timeTaken > 25)
+                {
+                    var foo = true;
                 }
             }
             return actions;

@@ -1,6 +1,5 @@
 ﻿using SC2APIProtocol;
 using Sharky.Managers;
-using Sharky.MicroTasks;
 
 namespace Sharky.Builds.Zerg
 {
@@ -27,12 +26,6 @@ namespace Sharky.Builds.Zerg
 
             MacroData.DesiredUnitCounts[UnitTypes.ZERG_DRONE] = 10;
             MacroData.DesiredUnitCounts[UnitTypes.ZERG_OVERLORD] = 1;
-
-            if (MicroManager.MicroTasks.ContainsKey("WorkerScoutTask"))
-            {
-                var workerScoutTask = (WorkerScoutTask)MicroManager.MicroTasks["WorkerScoutTask"];
-                workerScoutTask.Disable();
-            }
         }
 
         public override void OnFrame(ResponseObservation observation)

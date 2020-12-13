@@ -31,7 +31,6 @@ namespace Sharky.MicroTasks.Harass
             UnitCommanders = new List<UnitCommander>();
         }
 
-        // TODO: dark templar harass, split DTs and send to as many bases as possible, if nothing at base or too defended go on to next random base
         public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
         {
             if (UnitCommanders.Count() < DesiredCount)
@@ -77,7 +76,7 @@ namespace Sharky.MicroTasks.Harass
                         }
                         else if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Detector) && Vector2.DistanceSquared(new Vector2(harassInfo.BaseLocation.MineralLineLocation.X, harassInfo.BaseLocation.MineralLineLocation.Y), new Vector2(e.Unit.Pos.X, e.Unit.Pos.Y)) < 100))
                         {
-                            if (commander.UnitCalculation.TargetPriorityCalculation.GroundWinnability < 1)
+                            if (commander.UnitCalculation.TargetPriorityCalculation.GroundWinnability < 1 && commander.UnitCalculation.Unit.Shield < commander.UnitCalculation.Unit.ShieldMax)
                             {
                                 harassInfo.LastDefendedFrame = frame;
                                 harassInfo.Harassers.Remove(commander);

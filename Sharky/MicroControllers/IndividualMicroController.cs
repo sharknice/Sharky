@@ -26,7 +26,7 @@ namespace Sharky.MicroControllers
         protected float AvoidDamageDistance;
         protected float LooseFormationDistance;
 
-        public IndividualMicroController(MapDataService mapDataService, UnitDataManager unitDataManager, IUnitManager unitManager, DebugManager debugManager, IPathFinder sharkyPathFinder, IBaseManager baseManager, SharkyOptions sharkyOptions, MicroPriority microPriority, bool groupUpEnabled)
+        public IndividualMicroController(MapDataService mapDataService, UnitDataManager unitDataManager, IUnitManager unitManager, DebugManager debugManager, IPathFinder sharkyPathFinder, IBaseManager baseManager, SharkyOptions sharkyOptions, MicroPriority microPriority, bool groupUpEnabled, float avoidDamageDistance = 1)
         {
             MapDataService = mapDataService;
             UnitDataManager = unitDataManager;
@@ -41,7 +41,7 @@ namespace Sharky.MicroControllers
             GroupUpDistanceSmall = 5;
             GroupUpDistance = 10;
             GroupUpDistanceMax = 50;
-            AvoidDamageDistance = 1;
+            AvoidDamageDistance = avoidDamageDistance;
             LooseFormationDistance = 1.75f;
         }
 
@@ -80,20 +80,48 @@ namespace Sharky.MicroControllers
             return null;
         }
 
-        public virtual SC2APIProtocol.Action Scout(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame)
+        public virtual SC2APIProtocol.Action Scout(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, bool prioritizeVision = false)
         {
             SC2APIProtocol.Action action = null;
 
-            if (WeaponReady(commander))
+            if (!prioritizeVision || MapDataService.SelfVisible(target))
             {
-                var bestTarget = GetBestTarget(commander, target);
-                if (bestTarget != null && bestTarget.UnitClassifications.Contains(UnitClassification.Worker) && commander.UnitCalculation.EnemiesInRange.Any(e => e.Unit.Tag == bestTarget.Unit.Tag))
+                if (WeaponReady(commander) && (commander.UnitCalculation.Unit.Shield + commander.UnitCalculation.Unit.Health) > (commander.UnitCalculation.Unit.ShieldMax + (commander.UnitCalculation.Unit.HealthMax / 2.0f)))
                 {
-                    if (AttackBestTarget(commander, target, defensivePoint, target, bestTarget, frame, out action)) 
-                    { 
-                        return action; 
+                    var bestTarget = GetBestTarget(commander, target);
+                    if (bestTarget != null && bestTarget.UnitClassifications.Contains(UnitClassification.Worker) && commander.UnitCalculation.EnemiesInRange.Any(e => e.Unit.Tag == bestTarget.Unit.Tag))
+                    {
+                        if (AttackBestTarget(commander, target, defensivePoint, target, bestTarget, frame, out action))
+                        {
+                            return action;
+                        }
                     }
                 }
+            }
+
+            if (prioritizeVision && !MapDataService.SelfVisible(target))
+            {
+                return commander.Order(frame, Abilities.MOVE, target);
+            }
+
+            if (WorkerEscapeSurround(commander, target, defensivePoint, frame, out action))
+            {
+                return action;
+            }
+
+            if (AvoidTargettedOneHitKills(commander, target, defensivePoint, frame, out action))
+            {
+                return action;
+            }
+
+            if (AvoidTargettedDamage(commander, target, defensivePoint, frame, out action))
+            {
+                return action;
+            }
+
+            if (AvoidDamage(commander, target, defensivePoint, frame, out action))
+            {
+                return action;
             }
 
             if (!MapDataService.SelfVisible(target))
@@ -102,30 +130,9 @@ namespace Sharky.MicroControllers
             }
             else
             {
-                if (WorkerEscapeSurround(commander, target, defensivePoint, frame, out action))
-                {
-                    return action;
-                }
-
-                if (AvoidTargettedOneHitKills(commander, target, defensivePoint, frame, out action)) 
-                { 
-                    return action; 
-                }
-
-                if (AvoidTargettedDamage(commander, target, defensivePoint, frame, out action))
-                {
-                    return action;
-                }
-
-                if (AvoidDamage(commander, target, defensivePoint, frame, out action))
-                {
-                    return action;
-                }
-
                 // TODO: circle around base
+                return Bait(commander, target, defensivePoint, null, frame);
             }
-
-            return null;
         }
 
         public virtual SC2APIProtocol.Action Retreat(UnitCommander commander, Point2D defensivePoint, Point2D groupCenter, int frame)
@@ -139,6 +146,36 @@ namespace Sharky.MicroControllers
             {
                 return Idle(commander, defensivePoint, frame);
             }
+        }
+
+        public virtual SC2APIProtocol.Action Bait(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
+        {
+            SC2APIProtocol.Action action = null;
+
+            var formation = GetDesiredFormation(commander);
+            var bestTarget = GetBestTarget(commander, target);
+
+            if (AvoidTargettedOneHitKills(commander, target, defensivePoint, frame, out action))
+            {
+                return action;
+            }
+
+            if (AvoidTargettedDamage(commander, target, defensivePoint, frame, out action))
+            {
+                return action;
+            }
+
+            if (AvoidDamage(commander, target, defensivePoint, frame, out action))
+            {
+                return action;
+            }
+
+            if (NavigateToTarget(commander, target, groupCenter, bestTarget, formation, frame, out action))
+            {
+                return action;
+            }
+
+            return commander.Order(frame, Abilities.ATTACK, target);
         }
 
         protected virtual bool Move(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, Formation formation, int frame, out SC2APIProtocol.Action action)
@@ -331,20 +368,23 @@ namespace Sharky.MicroControllers
                     range = attack.Range;
                 }
 
-                // TODO: real pathing
-                //IEnumerable<Vector2> path;
-                //if (commander.UnitCalculation.Unit.IsFlying)
-                //{
-                //    path = SharkPathFinder.GetSafeAirPath(defensivePoint.X, defensivePoint.Y, commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y);
-                //}
-                //else
-                //{
-                //    path = SharkPathFinder.GetSafeGroundPath(defensivePoint.X, defensivePoint.Y, commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y);
-                //}
-                //if (FollowPath(commander, path))
-                //{
-                //    return true;
-                //}
+                if (commander.RetreatPathFrame + 20 < frame)
+                {
+                    if (commander.UnitCalculation.Unit.IsFlying)
+                    {
+                        commander.RetreatPath = SharkyPathFinder.GetSafeAirPath(defensivePoint.X, defensivePoint.Y, commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y, frame);
+                    }
+                    else
+                    {
+                        commander.RetreatPath = SharkyPathFinder.GetSafeGroundPath(defensivePoint.X, defensivePoint.Y, commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y, frame);
+                    }
+                    commander.RetreatPathFrame = frame;
+                    commander.RetreatPathIndex = 1;
+                }
+                if (FollowPath(commander, frame, out action))
+                {
+                    return true;
+                }
 
                 var avoidPoint = GetGroundAvoidPoint(commander.UnitCalculation.Unit.Pos, attack.Unit.Pos, target, defensivePoint, attack.Range + attack.Unit.Radius + commander.UnitCalculation.Unit.Radius + AvoidDamageDistance);
                 action = commander.Order(frame, Abilities.MOVE, avoidPoint);

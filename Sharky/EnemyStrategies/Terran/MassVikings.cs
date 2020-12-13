@@ -14,7 +14,7 @@ namespace Sharky.EnemyStrategies.Terran
 
         protected override bool Detect(int frame)
         {
-            if (UnitManager.EnemyCount(UnitTypes.TERRAN_VIKINGASSAULT) >= 8 && UnitManager.EnemyCount(UnitTypes.TERRAN_VIKINGFIGHTER) >= 8)
+            if (UnitManager.EnemyCount(UnitTypes.TERRAN_VIKINGASSAULT) + UnitManager.EnemyCount(UnitTypes.TERRAN_VIKINGFIGHTER) >= 8)
             {
                 return true;
             }

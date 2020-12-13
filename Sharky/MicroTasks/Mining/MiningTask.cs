@@ -93,7 +93,23 @@ namespace Sharky.MicroTasks
             var refinereries = UnitManager.SelfUnits.Where(u => UnitDataManager.GasGeyserRefineryTypes.Contains((UnitTypes)u.Value.Unit.UnitType) && u.Value.Unit.BuildProgress >= .95f);
             var unsaturatedRefineries = refinereries.Where(u => u.Value.Unit.AssignedHarvesters < u.Value.Unit.IdealHarvesters);
 
-            if (MacroData.VespeneGas > 600 && MacroData.Minerals < 100)
+            if (MacroData.VespeneGas > 2500 && MacroData.Minerals < 1000)
+            {
+                var usedRefineries = refinereries.Where(u => u.Value.Unit.AssignedHarvesters > 0);
+                foreach (var refinery in usedRefineries)
+                {
+                    var worker = UnitCommanders.Where(u => u.UnitCalculation.Unit.Orders.Any(o => o.TargetUnitTag == refinery.Key)).FirstOrDefault();
+                    if (worker != null)
+                    {
+                        var action = worker.Order(frame, Abilities.STOP);
+                        if (action != null)
+                        {
+                            actions.Add(action);
+                        }
+                    }
+                }
+            }
+            else if (MacroData.VespeneGas > 600 && MacroData.Minerals < 100)
             {
                 var usedRefineries = refinereries.Where(u => u.Value.Unit.AssignedHarvesters > 1);
                 foreach (var refinery in usedRefineries)

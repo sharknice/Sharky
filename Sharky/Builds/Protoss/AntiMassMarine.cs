@@ -30,8 +30,8 @@ namespace Sharky.Builds.Protoss
                 UnitTypes.PROTOSS_STALKER
             };
 
-            AttackData.ArmyFoodAttack = 5;
-            AttackData.ArmyFoodRetreat = 5;
+            AttackData.ArmyFoodAttack = 6;
+            AttackData.ArmyFoodRetreat = 3;
         }
 
         public override void OnFrame(ResponseObservation observation)

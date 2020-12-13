@@ -2,6 +2,7 @@
 {
     public enum UnitRole
     {
+        None,
         Bait
     }
 }

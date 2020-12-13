@@ -1,5 +1,6 @@
 ﻿using SC2APIProtocol;
 using Sharky.Managers;
+using Sharky.MicroControllers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -10,11 +11,15 @@ namespace Sharky.MicroTasks.Mining
     {
         IBaseManager BaseManager;
         IUnitManager UnitManager;
+        IIndividualMicroController WorkerMicroController;
+        DebugManager DebugManager;
 
-        public MiningDefenseService(IBaseManager baseManager, IUnitManager unitManager)
+        public MiningDefenseService(IBaseManager baseManager, IUnitManager unitManager, IIndividualMicroController workerMicroController, DebugManager debugManager)
         {
             BaseManager = baseManager;
             UnitManager = unitManager;
+            WorkerMicroController = workerMicroController;
+            DebugManager = debugManager;
         }
 
         public List<SC2APIProtocol.Action> DealWithEnemies(int frame, List<UnitCommander> unitCommanders)
@@ -36,9 +41,13 @@ namespace Sharky.MicroTasks.Mining
                         if (combatUnits.Count() == 0)
                         {
                             desiredWorkers = workers.Count() + 1;
-                            if (workers.Count() > 8)
+                            if (workers.Count() > 8) // this is a worker rush, set one defending worker as the bait that will stay just out of range and run away
                             {
-                                // TODO: this is a worker rush, set one defending worker as the bait and stay just out of range and run away
+                                var bait = commanders.Where(w => w.UnitRole == UnitRole.Bait).FirstOrDefault();
+                                if (bait == null && commanders.Count() > 0)
+                                {
+                                    commanders.FirstOrDefault().UnitRole = UnitRole.Bait;
+                                }
                             }
                         }
                         else
@@ -56,15 +65,16 @@ namespace Sharky.MicroTasks.Mining
                         if (UnitManager.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Where(u => !u.Unit.IsFlying).Count() > 8)
                         {
                             // if all the workers are stacked, attack the closest enemy
-                            var vectors = commanders.Select(c => new Vector2(c.UnitCalculation.Unit.Pos.X, c.UnitCalculation.Unit.Pos.Y));
+                            var selectedCommanders = commanders.Where(c => c.UnitRole != UnitRole.Bait);
+                            var vectors = selectedCommanders.Select(c => new Vector2(c.UnitCalculation.Unit.Pos.X, c.UnitCalculation.Unit.Pos.Y));
                             var averageVector = new Vector2(vectors.Average(v => v.X), vectors.Average(v => v.Y));
-                            if (commanders.All(c => Vector2.DistanceSquared(averageVector, new Vector2(c.UnitCalculation.Unit.Pos.X, c.UnitCalculation.Unit.Pos.Y)) < 1))
+                            if (selectedCommanders.All(c => Vector2.DistanceSquared(averageVector, new Vector2(c.UnitCalculation.Unit.Pos.X, c.UnitCalculation.Unit.Pos.Y)) < 1))
                             {
                                 var closestEnemy = UnitManager.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Where(u => !u.Unit.IsFlying).OrderBy(u => Vector2.DistanceSquared(new Vector2(u.Unit.Pos.X, u.Unit.Pos.Y), averageVector)).FirstOrDefault();
                                 if (closestEnemy != null)
                                 {
                                     var command = new ActionRawUnitCommand();
-                                    foreach (var commander in commanders)
+                                    foreach (var commander in selectedCommanders)
                                     {
                                         command.UnitTags.Add(commander.UnitCalculation.Unit.Tag);
                                     }
@@ -87,7 +97,7 @@ namespace Sharky.MicroTasks.Mining
                                 var farMineral = selfBase.MineralFields.OrderByDescending(m => Vector2.DistanceSquared(new Vector2(m.Pos.X, m.Pos.Y), new Vector2(selfBase.Location.X, selfBase.Location.Y))).FirstOrDefault();
                                 if (farMineral != null)
                                 {
-                                    foreach (var commander in commanders)
+                                    foreach (var commander in selectedCommanders)
                                     {
                                         var enemyInRange = commander.UnitCalculation.EnemiesInRange.OrderBy(e => e.Unit.Health + e.Unit.Shield).FirstOrDefault();
                                         if (enemyInRange != null && commander.UnitCalculation.Unit.WeaponCooldown == 0)
@@ -110,7 +120,7 @@ namespace Sharky.MicroTasks.Mining
                                 }
                                 else
                                 {
-                                    foreach (var commander in commanders)
+                                    foreach (var commander in selectedCommanders)
                                     {
                                         var action = commander.Order(frame, Abilities.ATTACK, selfBase.Location);
                                         if (action != null)
@@ -118,6 +128,15 @@ namespace Sharky.MicroTasks.Mining
                                             actions.Add(action);
                                         }
                                     }
+                                }
+                            }
+
+                            foreach (var commander in commanders.Where(c => c.UnitRole == UnitRole.Bait))
+                            {
+                                var action = WorkerMicroController.Bait(commander, BaseManager.BaseLocations.Last().Location, BaseManager.BaseLocations.First().Location, null, frame);
+                                if (action != null)
+                                {
+                                    actions.Add(action);
                                 }
                             }
                         }

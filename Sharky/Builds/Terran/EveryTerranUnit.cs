@@ -1,19 +1,64 @@
 ﻿using SC2APIProtocol;
 using Sharky.Managers;
+using Sharky.MicroTasks;
 
 namespace Sharky.Builds.Terran
 {
     public class EveryTerranUnit : TerranSharkyBuild
     {
-        public EveryTerranUnit(BuildOptions buildOptions, MacroData macroData, IUnitManager unitManager, AttackData attackData, IChatManager chatManager) : base(buildOptions, macroData, unitManager, attackData, chatManager)
-        {
+        MicroManager MicroManager;
+        WorkerScoutTask WorkerScoutTask;
+        ProxyScoutTask ProxyScoutTask;
+        bool Scouted;
 
+        public EveryTerranUnit(BuildOptions buildOptions, MacroData macroData, IUnitManager unitManager, AttackData attackData, IChatManager chatManager, MicroManager microManager) : base(buildOptions, macroData, unitManager, attackData, chatManager)
+        {
+            MicroManager = microManager;
+            Scouted = false;
+        }
+
+        public override void StartBuild(int frame)
+        {
+            base.StartBuild(frame);
+
+            BuildOptions.StrictWorkerCount = true;
+            BuildOptions.StrictGasCount = true;
+            BuildOptions.StrictSupplyCount = true;
+            MacroData.DesiredGases = 0;
+
+            AttackData.ArmyFoodAttack = 3;
+            AttackData.ArmyFoodRetreat = 3;
+
+            MacroData.DesiredUnitCounts[UnitTypes.ZERG_DRONE] = 10;
+            MacroData.DesiredUnitCounts[UnitTypes.ZERG_OVERLORD] = 1;
+
+            if (MicroManager.MicroTasks.ContainsKey("WorkerScoutTask"))
+            {
+                WorkerScoutTask = (WorkerScoutTask)MicroManager.MicroTasks["WorkerScoutTask"];
+            }
+            if (MicroManager.MicroTasks.ContainsKey("ProxyScoutTask"))
+            {
+                ProxyScoutTask = (ProxyScoutTask)MicroManager.MicroTasks["ProxyScoutTask"];
+            }
         }
 
         public override void OnFrame(ResponseObservation observation)
         {
             if (MacroData.FoodUsed >= 15)
             {
+                if (!Scouted)
+                {
+                    if (WorkerScoutTask != null)
+                    {
+                        WorkerScoutTask.Enable();
+                    }
+                    if (ProxyScoutTask != null)
+                    {
+                        ProxyScoutTask.Enable();
+                    }
+                    Scouted = true;
+                }
+
                 if (MacroData.DesiredProductionCounts[UnitTypes.TERRAN_BARRACKS] < 2)
                 {
                     MacroData.DesiredProductionCounts[UnitTypes.TERRAN_BARRACKS] = 2;

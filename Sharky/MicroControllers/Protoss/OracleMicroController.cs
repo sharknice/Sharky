@@ -308,6 +308,7 @@ namespace Sharky.MicroControllers.Protoss
                 if (AttackBestTarget(commander, target, defensivePoint, null, bestTarget, frame, out action)) { return action; }
             }
 
+            return NavigateToPoint(commander, target, defensivePoint, null, frame);
             if (Move(commander, target, defensivePoint, null, bestTarget, formation, frame, out action)) { return action; }
 
             return commander.Order(frame, Abilities.MOVE, target);

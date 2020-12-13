@@ -97,7 +97,7 @@ namespace Sharky.MicroTasks
                 var targetVector = new Vector2(Target.X, Target.Y);
 
                 if ((commander.UnitCalculation.Unit.Energy > 50 || commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.ORACLEWEAPON)) && commander.UnitCalculation.EnemiesInRangeOf.Count() == 0 &&
-                    (commander.UnitCalculation.EnemiesInRange.Count(e => e.UnitClassifications.Contains(UnitClassification.Worker)) > 0 || (commander.UnitCalculation.NearbyEnemies.Count(e => e.UnitClassifications.Contains(UnitClassification.Worker)) > 2 && commander.UnitCalculation.NearbyEnemies.Count(e => e.DamageAir && e.Unit.BuildProgress == 1) == 0)))
+                    (commander.UnitCalculation.EnemiesInRange.Count(e => e.UnitClassifications.Contains(UnitClassification.Worker)) > 1 || (commander.UnitCalculation.NearbyEnemies.Count(e => e.UnitClassifications.Contains(UnitClassification.Worker)) > 2 && commander.UnitCalculation.NearbyEnemies.Count(e => e.DamageAir && e.Unit.BuildProgress == 1) == 0)))
                 {
                     var action = OracleMicroController.HarassWorkers(commander, Target, defensivePoint, frame);
                     if (action != null)

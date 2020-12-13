@@ -63,7 +63,7 @@ namespace Sharky.MicroTasks
 
             foreach (var commander in UnitCommanders)
             {
-                var action = IndividualMicroController.Scout(commander, TargetingManager.EnemyMainBasePoint, TargetingManager.ForwardDefensePoint, frame);
+                var action = IndividualMicroController.Scout(commander, TargetingManager.EnemyMainBasePoint, TargetingManager.ForwardDefensePoint, frame, true);
                 if (action != null)
                 {
                     commands.Add(action);
