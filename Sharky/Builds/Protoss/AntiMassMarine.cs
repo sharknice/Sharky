@@ -3,6 +3,7 @@ using Sharky.Builds.BuildChoosing;
 using Sharky.Managers;
 using Sharky.Managers.Protoss;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Sharky.Builds.Protoss
 {
@@ -29,9 +30,6 @@ namespace Sharky.Builds.Protoss
                 UnitTypes.PROTOSS_PROBE,
                 UnitTypes.PROTOSS_STALKER
             };
-
-            AttackData.ArmyFoodAttack = 6;
-            AttackData.ArmyFoodRetreat = 3;
         }
 
         public override void OnFrame(ResponseObservation observation)
@@ -113,7 +111,16 @@ namespace Sharky.Builds.Protoss
 
         public override bool Transition(int frame)
         {
+            if (UnitManager.EnemyUnits.Any(e => e.Value.UnitClassifications.Contains(UnitClassification.ArmyUnit) && e.Value.Unit.UnitType != (uint)UnitTypes.TERRAN_MARINE))
+            {
+                return true;
+            }
             return MacroData.FoodUsed > 50 && UnitManager.Count(UnitTypes.PROTOSS_NEXUS) > 1;
+        }
+
+        public override List<string> CounterTransition(int frame)
+        {
+            return new List<string>();
         }
     }
 }

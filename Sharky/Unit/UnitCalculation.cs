@@ -167,7 +167,7 @@ namespace Sharky
             {
                 UnitClassifications.Add(UnitClassification.Worker);
             }
-            else if (unit.UnitType == (uint)UnitTypes.ZERG_QUEEN || unit.UnitType == (uint)UnitTypes.TERRAN_MULE || unit.UnitType == (uint)UnitTypes.ZERG_OVERLORD)
+            else if (unit.UnitType == (uint)UnitTypes.ZERG_QUEEN || unit.UnitType == (uint)UnitTypes.TERRAN_MULE || unit.UnitType == (uint)UnitTypes.ZERG_OVERLORD || unit.UnitType == (uint)UnitTypes.ZERG_LARVA || unit.UnitType == (uint)UnitTypes.ZERG_EGG)
             {
 
             }

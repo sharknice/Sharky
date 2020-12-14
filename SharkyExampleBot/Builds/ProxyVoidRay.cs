@@ -72,6 +72,7 @@ namespace SharkyExampleBot.Builds
             var proxyLocation = ProxyLocationService.GetCliffProxyLocation();
             MacroData.Proxies[ProxyTask.ProxyName] = new ProxyData(proxyLocation, MacroData);
 
+            AttackData.UseAttackDataManager = false;
             AttackData.CustomAttackFunction = true;
         }
 

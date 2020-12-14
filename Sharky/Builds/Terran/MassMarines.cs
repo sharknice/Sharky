@@ -17,9 +17,6 @@ namespace Sharky.Builds.Terran
             BuildOptions.StrictGasCount = true;
             MacroData.DesiredGases = 0;
 
-            AttackData.ArmyFoodAttack = 5;
-            AttackData.ArmyFoodRetreat = 5;
-
             MacroData.DesiredUnitCounts[UnitTypes.TERRAN_MARINE] = 150;
         }
 

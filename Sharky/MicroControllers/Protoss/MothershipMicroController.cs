@@ -40,6 +40,11 @@ namespace Sharky.MicroControllers.Protoss
         {
             action = null;
 
+            if (commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.EFFECT_TIMEWARP))
+            {
+                return true;
+            }
+
             if (commander.UnitCalculation.Unit.Energy < 100 || !commander.AbilityOffCooldown(Abilities.EFFECT_TIMEWARP, frame, SharkyOptions.FramesPerSecond, UnitDataManager))
             {
                 return false;

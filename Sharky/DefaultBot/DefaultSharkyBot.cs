@@ -46,6 +46,7 @@ namespace Sharky.DefaultBot
         public MicroManager MicroManager { get; set; }
         public EnemyStrategyManager EnemyStrategyManager { get; set; }
         public BuildManager BuildManager { get; set; }
+        public AttackDataManager AttackDataManager { get; set; }
 
         public CollisionCalculator CollisionCalculator { get; set; }
         public UpgradeDataService UpgradeDataService { get; set; }
@@ -105,9 +106,9 @@ namespace Sharky.DefaultBot
 
             SharkyOptions = new SharkyOptions { Debug = debug, FramesPerSecond = framesPerSecond };
             MacroData = new MacroData();
+            AttackData = new AttackData { ArmyFoodAttack = 30, ArmyFoodRetreat = 25, Attacking = false, UseAttackDataManager = true, CustomAttackFunction = true };
 
             Managers = new List<IManager>();
-
 
             DebugManager = new DebugManager(gameConnection, SharkyOptions);
             Managers.Add(DebugManager);
@@ -126,7 +127,7 @@ namespace Sharky.DefaultBot
             TargetPriorityService = new TargetPriorityService(UnitDataManager);
             CollisionCalculator = new CollisionCalculator();
             UnitManager = new UnitManager(UnitDataManager, SharkyOptions, TargetPriorityService, CollisionCalculator, MapDataService, DebugManager);
-            MapManager = new MapManager(MapData, UnitManager, SharkyOptions);
+            MapManager = new MapManager(MapData, UnitManager, SharkyOptions, UnitDataManager);
             Managers.Add(MapManager);
             Managers.Add(UnitManager);
 
@@ -152,7 +153,6 @@ namespace Sharky.DefaultBot
             BuildingPlacement = new BuildingPlacement(ProtossBuildingPlacement, TerranBuildingPlacement, ZergBuildingPlacement, BaseManager, UnitManager, BuildingService, UnitDataManager);
             BuildingBuilder = new BuildingBuilder(UnitManager, TargetingManager, BuildingPlacement, UnitDataManager);
 
-            AttackData = new AttackData { ArmyFoodAttack = 30, ArmyFoodRetreat = 25, Attacking = false, CustomAttackFunction = false };
             WarpInPlacement = new WarpInPlacement(UnitManager, DebugManager, MapData);
             
             Morpher = new Morpher(UnitManager, UnitDataManager, SharkyOptions);
@@ -237,6 +237,9 @@ namespace Sharky.DefaultBot
 
             MicroManager = new MicroManager(UnitManager, MicroTasks);
             Managers.Add(MicroManager);
+
+            AttackDataManager = new AttackDataManager(AttackData, UnitManager, attackTask, TargetPriorityService, TargetingManager, MacroData, DebugManager);
+            Managers.Add(AttackDataManager);
 
             BuildProxyService = new BuildProxyService(MacroData, BuildingBuilder, UnitDataManager, UnitManager, BaseManager, TargetingManager, Morpher, MicroManager);
             MacroManager = new MacroManager(MacroSetup, UnitManager, UnitDataManager, BuildingBuilder, SharkyOptions, BaseManager, TargetingManager, AttackData, WarpInPlacement, MacroData, Morpher, BuildPylonService, BuildDefenseService, BuildProxyService);

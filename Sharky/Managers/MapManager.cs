@@ -1,5 +1,6 @@
 ﻿using SC2APIProtocol;
 using Sharky.Pathing;
+using Sharky.S2ClientTypeEnums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,7 @@ namespace Sharky.Managers
         IUnitManager UnitManager;
         MapData MapData;
         SharkyOptions SharkyOptions;
+        UnitDataManager UnitDataManager;
 
         private int LastBuildingCount;
         private int LastVisibleEnemyUnitCount;
@@ -19,11 +21,12 @@ namespace Sharky.Managers
         private readonly int MillisecondsPerUpdate;
         private double MillisecondsUntilUpdate;
 
-        public MapManager(MapData mapData, IUnitManager unitManager, SharkyOptions sharkyOptions)
+        public MapManager(MapData mapData, IUnitManager unitManager, SharkyOptions sharkyOptions, UnitDataManager unitDataManager)
         {
             MapData = mapData;
             UnitManager = unitManager;
             SharkyOptions = sharkyOptions;
+            UnitDataManager = unitDataManager;
 
             LastBuildingCount = 0;
             LastVisibleEnemyUnitCount = 0;
@@ -121,6 +124,15 @@ namespace Sharky.Managers
             foreach (var enemy in UnitManager.EnemyUnits.Where(e => e.Value.UnitClassifications.Contains(UnitClassification.Detector) && e.Value.Unit.BuildProgress == 1))
             {
                 var nodes = GetNodesInRange(enemy.Value.Unit.Pos, enemy.Value.Unit.DetectRange + 1, MapData.MapWidth, MapData.MapHeight);
+                foreach (var node in nodes)
+                {
+                    MapData.Map[(int)node.X][(int)node.Y].InEnemyDetection = true;
+                }
+            }
+
+            foreach (var scan in UnitDataManager.Effects.Where(e => e.EffectId == (uint)Effects.SCAN))
+            {
+                var nodes = GetNodesInRange(new Point { X = scan.Pos[0].X, Y = scan.Pos[0].Y, Z = 1 }, scan.Radius + 1, MapData.MapWidth, MapData.MapHeight);
                 foreach (var node in nodes)
                 {
                     MapData.Map[(int)node.X][(int)node.Y].InEnemyDetection = true;

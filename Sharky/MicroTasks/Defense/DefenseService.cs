@@ -44,6 +44,11 @@ namespace Sharky.MicroTasks
                 }
             }
 
+            var endWwinnability = CalculateWinability(counterGroup, enemyAttributes, enemyHps, enemyHealth, enemyDps);
+            if (endWwinnability > 1)
+            {
+                return counterGroup;
+            }
             return counterGroup;
         }
 

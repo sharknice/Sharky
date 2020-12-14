@@ -1,6 +1,7 @@
 ﻿using SC2APIProtocol;
 using Sharky.Managers;
 using Sharky.Pathing;
+using Sharky.S2ClientTypeEnums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -54,13 +55,11 @@ namespace Sharky.MicroControllers
 
             SC2APIProtocol.Action action = null;
 
-            // TODO: all the SHarkMicroController.cs stuff
             var formation = GetDesiredFormation(commander);
             var bestTarget = GetBestTarget(commander, target);
 
             if (PreOffenseOrder(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
 
-            // TODO: avoid targetted one hit kills
             if (AvoidTargettedOneHitKills(commander, target, defensivePoint, frame, out action)) { return action; }
 
             if (OffensiveAbility(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
@@ -196,6 +195,8 @@ namespace Sharky.MicroControllers
         protected virtual bool SpecialCaseMove(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, Formation formation, int frame, out SC2APIProtocol.Action action)
         {
             if (AvoidPurificationNovas(commander, target, defensivePoint, frame, out action)) { return true; }
+
+            if (AvoidRavagerShots(commander, target, defensivePoint, frame, out action)) { return true; }
 
             // TODO: special case movement
             //if (ChargeBlindly(commander, target))
@@ -1211,6 +1212,35 @@ namespace Sharky.MicroControllers
             return false;
         }
 
+        protected virtual bool AvoidRavagerShots(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out SC2APIProtocol.Action action)
+        {
+            action = null;
+
+            foreach (var effect in UnitDataManager.Effects)
+            {
+                if (effect.EffectId == (uint)Effects.CORROSIVEBILE)
+                {
+                    if (Vector2.DistanceSquared(new Vector2(effect.Pos[0].X, effect.Pos[0].Y), new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y)) < 4)
+                    {
+                        Point2D avoidPoint;
+                        if (commander.UnitCalculation.Unit.IsFlying)
+                        {
+                            avoidPoint = GetAirAvoidPoint(commander.UnitCalculation.Unit.Pos, new Point { X = effect.Pos[0].X, Y = effect.Pos[0].Y, Z = 1 }, target, defensivePoint, 5);
+                        }
+                        else
+                        {
+                            avoidPoint = GetGroundAvoidPoint(commander.UnitCalculation.Unit.Pos, new Point { X = effect.Pos[0].X, Y = effect.Pos[0].Y, Z = 1 }, target, defensivePoint, 5);
+
+                        }
+                        action = commander.Order(frame, Abilities.MOVE, avoidPoint);
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
         protected virtual Point2D GetPositionFromRange(Point target, Point position, float range)
         {
             var angle = Math.Atan2(target.Y - position.Y, position.X - target.X);
@@ -1293,7 +1323,7 @@ namespace Sharky.MicroControllers
 
         protected virtual bool Detected(UnitCommander commander)
         {
-            foreach (var scan in UnitDataManager.Effects.Where(e => e.EffectId == 6))
+            foreach (var scan in UnitDataManager.Effects.Where(e => e.EffectId == (uint)Effects.SCAN))
             {
                 if (InRange(scan.Pos[0], commander.UnitCalculation.Unit.Pos, scan.Radius + commander.UnitCalculation.Unit.Radius))
                 {

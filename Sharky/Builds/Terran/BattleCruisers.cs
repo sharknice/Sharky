@@ -13,9 +13,6 @@ namespace Sharky.Builds.Terran
         public override void StartBuild(int frame)
         {
             base.StartBuild(frame);
-
-            AttackData.ArmyFoodAttack = 5;
-            AttackData.ArmyFoodRetreat = 5;
         }
 
         public override void OnFrame(ResponseObservation observation)

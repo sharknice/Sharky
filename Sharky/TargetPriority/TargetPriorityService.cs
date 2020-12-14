@@ -15,13 +15,26 @@ namespace Sharky
 
         public TargetPriorityCalculation CalculateTargetPriority(UnitCalculation unitCalculation)
         {
+            var allies = unitCalculation.NearbyAllies.Where(e => e.UnitClassifications.Contains(UnitClassification.DefensiveStructure) || e.UnitClassifications.Contains(UnitClassification.ArmyUnit));
+            var enemies = unitCalculation.NearbyEnemies.Where(e => e.UnitClassifications.Contains(UnitClassification.DefensiveStructure) || e.UnitClassifications.Contains(UnitClassification.ArmyUnit));
+
+            var calculation = CalculateTargetPriority(allies, enemies);
+
+            if (ShouldTargetDetection(unitCalculation))
+            {
+                calculation.TargetPriority = TargetPriority.KillDetection;
+                return calculation;
+            }
+
+            return calculation;
+        }
+
+        public TargetPriorityCalculation CalculateTargetPriority(IEnumerable<UnitCalculation> allies, IEnumerable<UnitCalculation> enemies)
+        {
             var calculation = new TargetPriorityCalculation
             {
                 TargetPriority = TargetPriority.Attack
             };
-
-            var allies = unitCalculation.NearbyAllies.Where(e => e.UnitClassifications.Contains(UnitClassification.DefensiveStructure) || e.UnitClassifications.Contains(UnitClassification.ArmyUnit));
-            var enemies = unitCalculation.NearbyEnemies.Where(e => e.UnitClassifications.Contains(UnitClassification.DefensiveStructure) || e.UnitClassifications.Contains(UnitClassification.ArmyUnit));
 
             var allyHealth = allies.Sum(e => e.SimulatedHitpoints);
             var enemyHealth = enemies.Sum(e => e.SimulatedHitpoints);
@@ -35,23 +48,27 @@ namespace Sharky
             var allyHps = allies.Sum(e => e.SimulatedHealPerSecond);
             var enemyHps = enemies.Sum(e => e.SimulatedHealPerSecond);
 
-            var secondsToKillEnemies = 600f;
+            var secondsToKillEnemies = 1000f;
             if (allyDps - enemyHps > 0)
             {
                 secondsToKillEnemies = enemyHealth / (allyDps - enemyHps);
             }
 
-            var secondsToKillAllies = 600f;
+            var secondsToKillAllies = 1000f;
             if (enemyDps - allyHps > 0)
             {
                 secondsToKillAllies = allyHealth / (enemyDps - allyHps);
             }
 
             calculation.OverallWinnability = secondsToKillAllies / secondsToKillEnemies; // higher the number the better
+            if (secondsToKillEnemies == 0)
+            {
+                calculation.OverallWinnability = 1000f;
+            }
             calculation.Overwhelm = calculation.OverallWinnability > 20;
 
             var airAttackingEnemies = enemies.Where(e => e.DamageAir || e.Unit.UnitType == (uint)UnitTypes.PROTOSS_SHIELDBATTERY);
-            var airKillSeconds = 600f;
+            var airKillSeconds = 1000f;
             if (allies.Count(a => a.Unit.IsFlying && a.DamageAir) > 0)
             {
                 var seconds = GetKillSeconds(airAttackingEnemies, allies);
@@ -59,18 +76,26 @@ namespace Sharky
                 {
                     airKillSeconds = seconds;
                 }
+                else
+                {
+                    airKillSeconds = 0.00001f;
+                }
             }
 
             calculation.AirWinnability = secondsToKillAllies / airKillSeconds;
 
             var groundAttackingEnemies = enemies.Where(e => e.DamageGround || e.Unit.UnitType == (uint)UnitTypes.TERRAN_MEDIVAC || e.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISM || e.Unit.UnitType == (uint)UnitTypes.PROTOSS_SHIELDBATTERY);
-            var groundKillSeconds = 600f;
+            var groundKillSeconds = 1000f;
             if (allies.Count(a => !a.Unit.IsFlying && a.DamageGround) > 0)
             {
                 var seconds = GetKillSeconds(groundAttackingEnemies, allies);
                 if (seconds > 0)
                 {
                     groundKillSeconds = seconds;
+                }
+                else
+                {
+                    groundKillSeconds = 0.00001f;
                 }
             }
 
@@ -89,12 +114,6 @@ namespace Sharky
                 }
 
                 calculation.TargetPriority = TargetPriority.Retreat;
-                return calculation;
-            }
-
-            if (ShouldTargetDetection(unitCalculation))
-            {
-                calculation.TargetPriority = TargetPriority.KillDetection;
                 return calculation;
             }
 

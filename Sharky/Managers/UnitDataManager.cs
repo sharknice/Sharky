@@ -332,6 +332,10 @@ namespace Sharky.Managers
             {
                 return new Weapon { Attacks = 1, Damage = 16, Range = 2.2f, Type = Weapon.Types.TargetType.Ground, Speed = 1f };
             }
+            if (unitType == UnitTypes.TERRAN_BUNKER)
+            {
+                return new Weapon { Attacks = 1, Damage = 6, Range = 6, Type = Weapon.Types.TargetType.Any, Speed = 0.15f };
+            }
 
             return null;
         }
@@ -399,7 +403,7 @@ namespace Sharky.Managers
 
             foreach (Weapon weapon in UnitData[unitType].Weapons)
             {
-                if (weapon.Type == Weapon.Types.TargetType.Any || (weapon.Type == Weapon.Types.TargetType.Air))
+                if (weapon.Type == Weapon.Types.TargetType.Any || (weapon.Type == Weapon.Types.TargetType.Ground))
                 {
                     return true;
                 }

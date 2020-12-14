@@ -9,5 +9,6 @@ namespace Sharky
         public int ArmyFoodAttack { get; set; }
         public int ArmyFoodRetreat { get; set; }
         public bool CustomAttackFunction { get; set; }
+        public bool UseAttackDataManager { get; set; }
     }
 }
