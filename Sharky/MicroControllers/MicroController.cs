@@ -22,6 +22,11 @@ namespace Sharky.MicroControllers
 
             foreach (var commander in commanders)
             {
+                if (commander.SkipFrame)
+                {
+                    commander.SkipFrame = false;
+                    continue;
+                }
                 stopwatch.Restart();
                 Action action;
 
@@ -39,9 +44,9 @@ namespace Sharky.MicroControllers
                     actions.Add(action);
                 }
                 var timeTaken = stopwatch.ElapsedMilliseconds;
-                if (timeTaken > 25)
+                if (timeTaken > 1)
                 {
-                    var foo = true;
+                    commander.SkipFrame = true;
                 }
             }
             return actions;
@@ -50,9 +55,16 @@ namespace Sharky.MicroControllers
         public List<Action> Retreat(List<UnitCommander> commanders, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
             var actions = new List<Action>();
+            var stopwatch = new Stopwatch();
 
             foreach (var commander in commanders)
             {
+                if (commander.SkipFrame)
+                {
+                    commander.SkipFrame = false;
+                    continue;
+                }
+                stopwatch.Restart();
                 Action action;
 
                 if (IndividualMicroControllers.TryGetValue((UnitTypes)commander.UnitCalculation.Unit.UnitType, out var individualMicroController))
@@ -68,6 +80,11 @@ namespace Sharky.MicroControllers
                 {
                     actions.Add(action);
                 }
+                var timeTaken = stopwatch.ElapsedMilliseconds;
+                if (timeTaken > 1)
+                {
+                    commander.SkipFrame = true;
+                }
             }
             return actions;
         }
@@ -75,9 +92,16 @@ namespace Sharky.MicroControllers
         public List<Action> Idle(List<UnitCommander> commanders, Point2D target, Point2D defensivePoint, int frame)
         {
             var actions = new List<Action>();
+            var stopwatch = new Stopwatch();
 
             foreach (var commander in commanders)
             {
+                if (commander.SkipFrame)
+                {
+                    commander.SkipFrame = false;
+                    continue;
+                }
+                stopwatch.Restart();
                 Action action;
 
                 if (IndividualMicroControllers.TryGetValue((UnitTypes)commander.UnitCalculation.Unit.UnitType, out var individualMicroController))
@@ -92,6 +116,11 @@ namespace Sharky.MicroControllers
                 if (action != null)
                 {
                     actions.Add(action);
+                }
+                var timeTaken = stopwatch.ElapsedMilliseconds;
+                if (timeTaken > 1)
+                {
+                    commander.SkipFrame = true;
                 }
             }
             return actions;

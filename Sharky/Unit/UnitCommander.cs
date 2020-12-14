@@ -18,6 +18,8 @@ namespace Sharky
         public int RetreatPathIndex { get; set; }
         public int LastOrderFrame { get; private set; }
 
+        public bool SkipFrame { get; set; }
+
         Abilities LastAbility;
         Point2D LastTargetLocation;
         ulong LastTargetTag;

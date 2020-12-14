@@ -132,7 +132,7 @@ namespace Sharky.Managers
 
             foreach (var scan in UnitDataManager.Effects.Where(e => e.EffectId == (uint)Effects.SCAN))
             {
-                var nodes = GetNodesInRange(new Point { X = scan.Pos[0].X, Y = scan.Pos[0].Y, Z = 1 }, scan.Radius + 1, MapData.MapWidth, MapData.MapHeight);
+                var nodes = GetNodesInRange(new Point { X = scan.Pos[0].X, Y = scan.Pos[0].Y, Z = 1 }, scan.Radius + 2, MapData.MapWidth, MapData.MapHeight);
                 foreach (var node in nodes)
                 {
                     MapData.Map[(int)node.X][(int)node.Y].InEnemyDetection = true;
