@@ -18,7 +18,8 @@ namespace Sharky.MicroControllers
         protected IPathFinder SharkyPathFinder;
         IBaseManager BaseManager;
         protected SharkyOptions SharkyOptions;
-        protected MicroPriority MicroPriority;
+
+        public MicroPriority MicroPriority { get; set; }
 
         public bool GroupUpEnabled;
         protected float GroupUpDistanceSmall;
@@ -1171,6 +1172,7 @@ namespace Sharky.MicroControllers
         protected virtual bool AvoidTargettedDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out SC2APIProtocol.Action action)
         {
             action = null;
+            if (MicroPriority == MicroPriority.AttackForward && commander.UnitCalculation.Unit.Health > commander.UnitCalculation.Unit.HealthMax / 4.0) { return false; }
             var attack = commander.UnitCalculation.Attackers.OrderBy(e => (e.Range * e.Range) - Vector2.DistanceSquared(new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y), new Vector2(e.Unit.Pos.X, e.Unit.Pos.Y))).FirstOrDefault();
             if (attack != null)
             {

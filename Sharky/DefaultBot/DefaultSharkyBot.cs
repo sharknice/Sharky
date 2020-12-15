@@ -91,7 +91,7 @@ namespace Sharky.DefaultBot
         public Dictionary<Race, BuildChoices> BuildChoices { get; set; }
 
         public IIndividualMicroController IndividualMicroController { get; set; }
-        public Dictionary<UnitTypes, IIndividualMicroController> IndividualMicroControllers { get; set; }
+        public MicroData MicroData { get; set; }
         public IMicroController MicroController { get; set; }
         public Dictionary<string, IMicroTask> MicroTasks { get; set; }
 
@@ -172,28 +172,28 @@ namespace Sharky.DefaultBot
 
             ProxyLocationService = new ProxyLocationService(BaseManager, TargetingManager, SharkyPathFinder);
 
-            IndividualMicroController = new IndividualMicroController(MapDataService, UnitDataManager, UnitManager, DebugManager, NoPathFinder, BaseManager, SharkyOptions, MicroPriority.LiveAndAttack, false);
+            var individualMicroController = new IndividualMicroController(MapDataService, UnitDataManager, UnitManager, DebugManager, SharkySimplePathFinder, BaseManager, SharkyOptions, MicroPriority.LiveAndAttack, false);
 
-            var colossusMicroController = new ColossusMicroController(MapDataService, UnitDataManager, UnitManager, DebugManager, NoPathFinder, BaseManager, SharkyOptions, MicroPriority.AttackForward, false, CollisionCalculator);
-            var darkTemplarMicroController = new DarkTemplarMicroController(MapDataService, UnitDataManager, UnitManager, DebugManager, NoPathFinder, BaseManager, SharkyOptions, MicroPriority.AttackForward, false);
-            var disruptorMicroController = new DisruptorMicroController(MapDataService, UnitDataManager, UnitManager, DebugManager, NoPathFinder, BaseManager, SharkyOptions, MicroPriority.AttackForward, false);
-            var disruptorPhasedMicroController = new DisruptorPhasedMicroController(MapDataService, UnitDataManager, UnitManager, DebugManager, NoPathFinder, BaseManager, SharkyOptions, MicroPriority.AttackForward, false);
-            var mothershipMicroController = new MothershipMicroController(MapDataService, UnitDataManager, UnitManager, DebugManager, NoPathFinder, BaseManager, SharkyOptions, MicroPriority.AttackForward, false);
-            var oraclepMicroController = new OracleMicroController(MapDataService, UnitDataManager, UnitManager, DebugManager, NoPathFinder, BaseManager, SharkyOptions, MicroPriority.AttackForward, false);
-            var phoenixMicroController = new PhoenixMicroController(MapDataService, UnitDataManager, UnitManager, DebugManager, NoPathFinder, BaseManager, SharkyOptions, MicroPriority.AttackForward, false);
-            var sentryMicroController = new SentryMicroController(MapDataService, UnitDataManager, UnitManager, DebugManager, NoPathFinder, BaseManager, SharkyOptions, MicroPriority.StayOutOfRange, true);
-            var stalkerMicroController = new StalkerMicroController(MapDataService, UnitDataManager, UnitManager, DebugManager, NoPathFinder, BaseManager, SharkyOptions, MicroPriority.AttackForward, false);
-            var tempestMicroController = new TempestMicroController(MapDataService, UnitDataManager, UnitManager, DebugManager, NoPathFinder, BaseManager, SharkyOptions, MicroPriority.AttackForward, false);
-            var voidrayMicroController = new VoidRayMicroController(MapDataService, UnitDataManager, UnitManager, DebugManager, NoPathFinder, BaseManager, SharkyOptions, MicroPriority.AttackForward, false);
-            var warpPrismpMicroController = new WarpPrismMicroController(MapDataService, UnitDataManager, UnitManager, DebugManager, NoPathFinder, BaseManager, SharkyOptions, MicroPriority.AttackForward, false);
-            var zealotMicroController = new ZealotMicroController(MapDataService, UnitDataManager, UnitManager, DebugManager, NoPathFinder, BaseManager, SharkyOptions, MicroPriority.AttackForward, false);
-            var observerMicroController = new IndividualMicroController(MapDataService, UnitDataManager, UnitManager, DebugManager, NoPathFinder, BaseManager, SharkyOptions, MicroPriority.StayOutOfRange, true);
+            var colossusMicroController = new ColossusMicroController(MapDataService, UnitDataManager, UnitManager, DebugManager, SharkySimplePathFinder, BaseManager, SharkyOptions, MicroPriority.LiveAndAttack, false, CollisionCalculator);
+            var darkTemplarMicroController = new DarkTemplarMicroController(MapDataService, UnitDataManager, UnitManager, DebugManager, SharkySimplePathFinder, BaseManager, SharkyOptions, MicroPriority.LiveAndAttack, false);
+            var disruptorMicroController = new DisruptorMicroController(MapDataService, UnitDataManager, UnitManager, DebugManager, SharkySimplePathFinder, BaseManager, SharkyOptions, MicroPriority.LiveAndAttack, false);
+            var disruptorPhasedMicroController = new DisruptorPhasedMicroController(MapDataService, UnitDataManager, UnitManager, DebugManager, SharkySimplePathFinder, BaseManager, SharkyOptions, MicroPriority.LiveAndAttack, false);
+            var mothershipMicroController = new MothershipMicroController(MapDataService, UnitDataManager, UnitManager, DebugManager, SharkySimplePathFinder, BaseManager, SharkyOptions, MicroPriority.LiveAndAttack, false);
+            var oraclepMicroController = new OracleMicroController(MapDataService, UnitDataManager, UnitManager, DebugManager, SharkySimplePathFinder, BaseManager, SharkyOptions, MicroPriority.LiveAndAttack, false);
+            var phoenixMicroController = new PhoenixMicroController(MapDataService, UnitDataManager, UnitManager, DebugManager, SharkySimplePathFinder, BaseManager, SharkyOptions, MicroPriority.LiveAndAttack, false);
+            var sentryMicroController = new SentryMicroController(MapDataService, UnitDataManager, UnitManager, DebugManager, SharkySimplePathFinder, BaseManager, SharkyOptions, MicroPriority.StayOutOfRange, true);
+            var stalkerMicroController = new StalkerMicroController(MapDataService, UnitDataManager, UnitManager, DebugManager, SharkySimplePathFinder, BaseManager, SharkyOptions, MicroPriority.LiveAndAttack, false);
+            var tempestMicroController = new TempestMicroController(MapDataService, UnitDataManager, UnitManager, DebugManager, SharkySimplePathFinder, BaseManager, SharkyOptions, MicroPriority.LiveAndAttack, false);
+            var voidrayMicroController = new VoidRayMicroController(MapDataService, UnitDataManager, UnitManager, DebugManager, SharkySimplePathFinder, BaseManager, SharkyOptions, MicroPriority.LiveAndAttack, false);
+            var warpPrismpMicroController = new WarpPrismMicroController(MapDataService, UnitDataManager, UnitManager, DebugManager, SharkySimplePathFinder, BaseManager, SharkyOptions, MicroPriority.LiveAndAttack, false);
+            var zealotMicroController = new ZealotMicroController(MapDataService, UnitDataManager, UnitManager, DebugManager, SharkySimplePathFinder, BaseManager, SharkyOptions, MicroPriority.AttackForward, false);
+            var observerMicroController = new IndividualMicroController(MapDataService, UnitDataManager, UnitManager, DebugManager, SharkySimplePathFinder, BaseManager, SharkyOptions, MicroPriority.StayOutOfRange, true);
 
-            var zerglingMicroController = new ZerglingMicroController(MapDataService, UnitDataManager, UnitManager, DebugManager, NoPathFinder, BaseManager, SharkyOptions, MicroPriority.AttackForward, false);
+            var zerglingMicroController = new ZerglingMicroController(MapDataService, UnitDataManager, UnitManager, DebugManager, SharkySimplePathFinder, BaseManager, SharkyOptions, MicroPriority.AttackForward, false);
 
             var workerDefenseMicroController = new IndividualMicroController(MapDataService, UnitDataManager, UnitManager, DebugManager, SharkyPathFinder, BaseManager, SharkyOptions, MicroPriority.LiveAndAttack, false, 3);
 
-            IndividualMicroControllers = new Dictionary<UnitTypes, IIndividualMicroController>
+            var individualMicroControllers = new Dictionary<UnitTypes, IIndividualMicroController>
             {
                 { UnitTypes.PROTOSS_COLOSSUS, colossusMicroController },
                 { UnitTypes.PROTOSS_DARKTEMPLAR, darkTemplarMicroController },
@@ -214,8 +214,10 @@ namespace Sharky.DefaultBot
                 { UnitTypes.ZERG_ZERGLING, zerglingMicroController }
             };
 
+            MicroData = new MicroData { IndividualMicroControllers = individualMicroControllers, IndividualMicroController = individualMicroController };
+
             DefenseService = new DefenseService(UnitManager);
-            MicroController = new MicroController(IndividualMicroControllers, IndividualMicroController);
+            MicroController = new MicroController(MicroData);
 
             var defenseSquadTask = new DefenseSquadTask(UnitManager, TargetingManager, DefenseService, MicroController, new List<DesiredUnitsClaim>(), 0, false);
             var workerScoutTask = new WorkerScoutTask(UnitDataManager, TargetingManager, MapDataService, false, 0.5f, workerDefenseMicroController);

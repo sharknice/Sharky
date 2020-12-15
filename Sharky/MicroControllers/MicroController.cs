@@ -6,13 +6,11 @@ namespace Sharky.MicroControllers
 {
     public class MicroController : IMicroController
     {
-        Dictionary<UnitTypes, IIndividualMicroController> IndividualMicroControllers;
-        IIndividualMicroController IndividualMicroController;
+        MicroData MicroData;
 
-        public MicroController(Dictionary<UnitTypes, IIndividualMicroController> individualMicroControllers, IIndividualMicroController individualMicroController)
+        public MicroController(MicroData microData)
         {
-            IndividualMicroControllers = individualMicroControllers;
-            IndividualMicroController = individualMicroController;
+            MicroData = microData;
         }
 
         public List<Action> Attack(List<UnitCommander> commanders, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
@@ -30,13 +28,13 @@ namespace Sharky.MicroControllers
                 stopwatch.Restart();
                 Action action;
 
-                if (IndividualMicroControllers.TryGetValue((UnitTypes)commander.UnitCalculation.Unit.UnitType, out var individualMicroController))
+                if (MicroData.IndividualMicroControllers.TryGetValue((UnitTypes)commander.UnitCalculation.Unit.UnitType, out var individualMicroController))
                 {
                     action = individualMicroController.Attack(commander, target, defensivePoint, groupCenter, frame);
                 }
                 else
                 {
-                    action = IndividualMicroController.Attack(commander, target, defensivePoint, groupCenter, frame);
+                    action = MicroData.IndividualMicroController.Attack(commander, target, defensivePoint, groupCenter, frame);
                 }
 
                 if (action != null)
@@ -67,13 +65,13 @@ namespace Sharky.MicroControllers
                 stopwatch.Restart();
                 Action action;
 
-                if (IndividualMicroControllers.TryGetValue((UnitTypes)commander.UnitCalculation.Unit.UnitType, out var individualMicroController))
+                if (MicroData.IndividualMicroControllers.TryGetValue((UnitTypes)commander.UnitCalculation.Unit.UnitType, out var individualMicroController))
                 {
                     action = individualMicroController.Retreat(commander, defensivePoint, groupCenter, frame);
                 }
                 else
                 {
-                    action = IndividualMicroController.Retreat(commander, defensivePoint, groupCenter, frame);
+                    action = MicroData.IndividualMicroController.Retreat(commander, defensivePoint, groupCenter, frame);
                 }
 
                 if (action != null)
@@ -104,13 +102,13 @@ namespace Sharky.MicroControllers
                 stopwatch.Restart();
                 Action action;
 
-                if (IndividualMicroControllers.TryGetValue((UnitTypes)commander.UnitCalculation.Unit.UnitType, out var individualMicroController))
+                if (MicroData.IndividualMicroControllers.TryGetValue((UnitTypes)commander.UnitCalculation.Unit.UnitType, out var individualMicroController))
                 {
                     action = individualMicroController.Idle(commander, defensivePoint, frame);
                 }
                 else
                 {
-                    action = IndividualMicroController.Idle(commander, defensivePoint, frame);
+                    action = MicroData.IndividualMicroController.Idle(commander, defensivePoint, frame);
                 }
 
                 if (action != null)

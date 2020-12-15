@@ -75,7 +75,7 @@ namespace Sharky.MicroTasks
                 lastFrameTime = stopwatch.ElapsedMilliseconds;
                 return actions;
             }
-            actions = MicroController.Attack(UnitCommanders, TargetingManager.ForwardDefensePoint, TargetingManager.ForwardDefensePoint, TargetingManager.ForwardDefensePoint, frame);
+            actions = MicroController.Attack(UnitCommanders, TargetingManager.MainDefensePoint, TargetingManager.MainDefensePoint, TargetingManager.MainDefensePoint, frame);
             stopwatch.Stop();
             lastFrameTime = stopwatch.ElapsedMilliseconds;
             return actions;
@@ -99,7 +99,7 @@ namespace Sharky.MicroTasks
                     var groupVectors = selfGroup.Select(u => new Vector2(u.UnitCalculation.Unit.Pos.X, u.UnitCalculation.Unit.Pos.Y));
                     var groupPoint = new Point2D { X = groupVectors.Average(v => v.X), Y = groupVectors.Average(v => v.Y) };
                     var defensePoint = new Point2D { X = enemyGroup.FirstOrDefault().Unit.Pos.X, Y = enemyGroup.FirstOrDefault().Unit.Pos.Y };
-                    actions.AddRange(MicroController.Attack(selfGroup, defensePoint, TargetingManager.ForwardDefensePoint, groupPoint, frame));
+                    actions.AddRange(MicroController.Attack(selfGroup, defensePoint, TargetingManager.MainDefensePoint, groupPoint, frame));
                 }
             }
 
@@ -107,7 +107,7 @@ namespace Sharky.MicroTasks
             {
                 var groupVectors = availableCommanders.Select(u => new Vector2(u.UnitCalculation.Unit.Pos.X, u.UnitCalculation.Unit.Pos.Y));
                 var groupPoint = new Point2D { X = groupVectors.Average(v => v.X), Y = groupVectors.Average(v => v.Y) };
-                actions.AddRange(MicroController.Attack(availableCommanders, new Point2D { X = attackingEnemies.FirstOrDefault().Unit.Pos.X, Y = attackingEnemies.FirstOrDefault().Unit.Pos.Y }, TargetingManager.ForwardDefensePoint, groupPoint, frame));
+                actions.AddRange(MicroController.Attack(availableCommanders, new Point2D { X = attackingEnemies.FirstOrDefault().Unit.Pos.X, Y = attackingEnemies.FirstOrDefault().Unit.Pos.Y }, TargetingManager.MainDefensePoint, groupPoint, frame));
             }
 
             return actions;

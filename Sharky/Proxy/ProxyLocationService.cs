@@ -22,7 +22,7 @@ namespace Sharky.Proxy
         public Point2D GetCliffProxyLocation()
         {
             int proxyBase = 3;
-            // TODO: specific maps are layed out different, need to change proxybase for those, need to use the walking distance, not the air distance
+            // TODO: specific maps are layed out different, need to change proxybase for those
 
             var orderedLocations = BaseManager.BaseLocations.OrderBy(b => PathFinder.GetGroundPath(TargetingManager.EnemyMainBasePoint.X, TargetingManager.EnemyMainBasePoint.Y, b.Location.X, b.Location.Y, 0).Count());
             var baseLocation = orderedLocations.Take(proxyBase).Last().Location;
@@ -30,6 +30,20 @@ namespace Sharky.Proxy
             var angle = Math.Atan2(TargetingManager.EnemyMainBasePoint.Y - baseLocation.Y, baseLocation.X - TargetingManager.EnemyMainBasePoint.X);
             var x = 8 * Math.Cos(angle);
             var y = 8 * Math.Sin(angle);
+            return new Point2D { X = baseLocation.X + (float)x, Y = baseLocation.Y - (float)y };
+        }
+
+        public Point2D GetGroundProxyLocation()
+        {
+            int proxyBase = 2;
+            // TODO: specific maps are layed out different, need to change proxybase for those
+
+            var orderedLocations = BaseManager.BaseLocations.OrderBy(b => PathFinder.GetGroundPath(TargetingManager.EnemyMainBasePoint.X, TargetingManager.EnemyMainBasePoint.Y, b.Location.X, b.Location.Y, 0).Count());
+            var baseLocation = orderedLocations.Take(proxyBase).Last().Location;
+
+            var angle = Math.Atan2(TargetingManager.EnemyMainBasePoint.Y - baseLocation.Y, baseLocation.X - TargetingManager.EnemyMainBasePoint.X);
+            var x = 6 * Math.Cos(angle);
+            var y = 6 * Math.Sin(angle);
             return new Point2D { X = baseLocation.X + (float)x, Y = baseLocation.Y - (float)y };
         }
     }
