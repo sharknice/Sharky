@@ -1,7 +1,7 @@
 # Sharky
 A C# framework for developing StarCraft 2 AI bots
 
-The goal of Sharky is to proide a framework that handles all the complex setup and mundane details of creating a bot so you can focus on the fun stuff like builds and strategies.  
+The goal of Sharky is to proide a framework that handles all the complex setup and mundane details of creating a bot so you can focus on the fun stuff like builds, strategies, and micro.  
 
 You can pull it to use directly in your solution, or install it via the nuget package 'Sharky'
 
