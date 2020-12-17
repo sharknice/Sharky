@@ -2,6 +2,7 @@
 using Sharky.Managers;
 using Sharky.Pathing;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
@@ -31,7 +32,7 @@ namespace Sharky.MicroControllers.Protoss
             return false;
         }
 
-        bool SupportArmy(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame, out SC2APIProtocol.Action action)
+        public bool SupportArmy(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame, out SC2APIProtocol.Action action, IEnumerable<UnitCalculation> supportableUnits = null)
         {
             action = null;
 
@@ -59,7 +60,7 @@ namespace Sharky.MicroControllers.Protoss
             }
 
             // follow behind at the range of pickup
-            var unitToSupport = GetSupportTarget(commander, target, defensivePoint);
+            var unitToSupport = GetSupportTarget(commander, target, defensivePoint, supportableUnits);
 
             if (!commander.UnitCalculation.NearbyAllies.Any(a => a.Unit.Tag == unitToSupport.Unit.Tag))
             {
@@ -277,55 +278,60 @@ namespace Sharky.MicroControllers.Protoss
             return false;
         }
 
-        UnitCalculation GetSupportTarget(UnitCommander commander, Point2D target, Point2D defensivePoint)
+        UnitCalculation GetSupportTarget(UnitCommander commander, Point2D target, Point2D defensivePoint, IEnumerable<UnitCalculation> supportableUnits = null)
         {
-            // no allies that already have a friendly warp prism or warp prism phasing within 8 range
-            var otherWarpPrisms = UnitManager.SelfUnits.Where(u => u.Value.Unit.Tag != commander.UnitCalculation.Unit.Tag && (u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISM || u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISMPHASING));
+            if (supportableUnits == null)
+            {
+                supportableUnits = UnitManager.SelfUnits.Values;
+            }
 
-            var friendlies = UnitManager.SelfUnits.Where(u => u.Value.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !u.Value.Unit.IsFlying
-                && !otherWarpPrisms.Any(o => DistanceSquared(o.Value, u.Value) < 64)
-                    && Vector2.DistanceSquared(new Vector2(u.Value.Unit.Pos.X, u.Value.Unit.Pos.Y), new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y)) < 225
-                    && u.Value.NearbyEnemies.Any(e => DistanceSquared(u.Value, e) < 225)
-                ).OrderBy(u => DistanceSquared(u.Value.NearbyEnemies.OrderBy(e => DistanceSquared(e, u.Value)).First(), u.Value));
+            // no allies that already have a friendly warp prism or warp prism phasing within 8 range
+            var otherWarpPrisms = supportableUnits.Where(u => u.Unit.Tag != commander.UnitCalculation.Unit.Tag && (u.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISM || u.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISMPHASING));
+
+            var friendlies = supportableUnits.Where(u => u.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !u.Unit.IsFlying
+                && !otherWarpPrisms.Any(o => DistanceSquared(o, u) < 64)
+                    && Vector2.DistanceSquared(new Vector2(u.Unit.Pos.X, u.Unit.Pos.Y), new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y)) < 225
+                    && u.NearbyEnemies.Any(e => DistanceSquared(u, e) < 225)
+                ).OrderBy(u => DistanceSquared(u.NearbyEnemies.OrderBy(e => DistanceSquared(e, u)).First(), u));
 
             if (friendlies.Count() > 0)
             {
-                return friendlies.First().Value;
+                return friendlies.First();
             }
 
             // if none
             // get any allies
             // select the friendies with enemies in 15 range
             // order by closest to the enemy
-            friendlies = UnitManager.SelfUnits.Where(u => u.Value.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !u.Value.Unit.IsFlying
-                            && !otherWarpPrisms.Any(o => DistanceSquared(o.Value, u.Value) < 64)
-                                && u.Value.NearbyEnemies.Any(e => DistanceSquared(u.Value, e) < 225)
-                            ).OrderBy(u => DistanceSquared(u.Value.NearbyEnemies.OrderBy(e => DistanceSquared(e, u.Value)).FirstOrDefault(), u.Value));
+            friendlies = supportableUnits.Where(u => u.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !u.Unit.IsFlying
+                            && !otherWarpPrisms.Any(o => DistanceSquared(o, u) < 64)
+                                && u.NearbyEnemies.Any(e => DistanceSquared(u, e) < 225)
+                            ).OrderBy(u => DistanceSquared(u.NearbyEnemies.OrderBy(e => DistanceSquared(e, u)).FirstOrDefault(), u));
 
             if (friendlies.Count() > 0)
             {
-                return friendlies.First().Value;
+                return friendlies.First();
             }
 
             // if still none
             //get ally closest to target
-            friendlies = UnitManager.SelfUnits.Where(u => u.Value.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !u.Value.Unit.IsFlying
-                            && !otherWarpPrisms.Any(o => DistanceSquared(o.Value, u.Value) < 64)
-                            ).OrderBy(u => DistanceSquared(u.Value.NearbyEnemies.OrderBy(e => DistanceSquared(e, u.Value)).FirstOrDefault(), u.Value));
+            friendlies = supportableUnits.Where(u => u.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !u.Unit.IsFlying
+                            && !otherWarpPrisms.Any(o => DistanceSquared(o, u) < 64)
+                            ).OrderBy(u => DistanceSquared(u.NearbyEnemies.OrderBy(e => DistanceSquared(e, u)).FirstOrDefault(), u));
 
             if (friendlies.Count() > 0)
             {
-                return friendlies.First().Value;
+                return friendlies.First();
             }
 
             // if still none
             //get ally closest to target even if there is another warp prism nearby
-            friendlies = UnitManager.SelfUnits.Where(u => u.Value.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !u.Value.Unit.IsFlying
-                            ).OrderBy(u => DistanceSquared(u.Value.NearbyEnemies.OrderBy(e => DistanceSquared(e, u.Value)).FirstOrDefault(), u.Value));
+            friendlies = supportableUnits.Where(u => u.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !u.Unit.IsFlying
+                            ).OrderBy(u => DistanceSquared(u.NearbyEnemies.OrderBy(e => DistanceSquared(e, u)).FirstOrDefault(), u));
 
             if (friendlies.Count() > 0)
             {
-                return friendlies.First().Value;
+                return friendlies.First();
             }
 
             return null;

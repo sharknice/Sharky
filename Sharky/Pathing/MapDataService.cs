@@ -113,6 +113,11 @@ namespace Sharky.Pathing
             return MapData.Map[(int)point.X][(int)point.Y].TerrainHeight;
         }
 
+        public int MapHeight(Point2D point)
+        {
+            return MapData.Map[(int)point.X][(int)point.Y].TerrainHeight;
+        }
+
         public float EnemyAirDpsInRange(Point point)
         {
             return MapData.Map[(int)point.X][(int)point.Y].EnemyAirDpsInRange;

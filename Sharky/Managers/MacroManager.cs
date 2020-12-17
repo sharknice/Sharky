@@ -3,6 +3,7 @@ using Sharky.Builds;
 using Sharky.Builds.BuildingPlacement;
 using Sharky.Builds.MacroServices;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 
@@ -24,6 +25,12 @@ namespace Sharky.Managers
         BuildPylonService BuildPylonService;
         BuildDefenseService BuildDefenseService;
         BuildProxyService BuildProxyService;
+
+        bool SkipFrame;
+        bool SkipSupply;
+        bool SkipProduction;
+        bool SkipTech;
+        bool SkipAddons;
 
         public MacroManager(MacroSetup macroSetup, IUnitManager unitManager, UnitDataManager unitDataManager, IBuildingBuilder buildingBuilder, SharkyOptions sharkyOptions, IBaseManager baseManager, ITargetingManager targetingManager, AttackData attackData, IBuildingPlacement warpInPlacement, MacroData macroData, Morpher morpher, BuildPylonService buildPylonService, BuildDefenseService buildDefenseService, BuildProxyService buildProxyService)
         {
@@ -62,6 +69,13 @@ namespace Sharky.Managers
         public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
         {
             var actions = new List<Action>();
+            if (SkipFrame)
+            {
+                SkipFrame = false;
+                return actions;
+            }
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
 
             MacroData.FoodUsed = (int)observation.Observation.PlayerCommon.FoodUsed;
             MacroData.FoodLeft = (int)observation.Observation.PlayerCommon.FoodCap - MacroData.FoodUsed;
@@ -96,6 +110,11 @@ namespace Sharky.Managers
 
             actions.AddRange(ResearchUpgrades());
             actions.AddRange(ProduceUnits());
+
+            if (stopwatch.ElapsedMilliseconds > 1)
+            {
+                SkipFrame = true;
+            }
 
             return actions;
         }
@@ -263,6 +282,12 @@ namespace Sharky.Managers
         private List<Action> BuildSupply()
         {
             var commands = new List<Action>();
+            if (SkipSupply)
+            {
+                SkipSupply = false;
+                return commands;
+            }
+            var stopwatch = new Stopwatch();
 
             if (MacroData.BuildPylon)
             {
@@ -291,12 +316,23 @@ namespace Sharky.Managers
                 MacroData.BuildUnits[UnitTypes.ZERG_OVERLORD] = true;
             }
 
+            if (stopwatch.ElapsedMilliseconds > 1)
+            {
+                SkipSupply = true;
+            }    
+
             return commands;
         }
 
         private List<Action> BuildProductionBuildings()
         {
             var commands = new List<Action>();
+            if (SkipProduction)
+            {
+                SkipProduction = false;
+                return commands;
+            }
+            var stopwatch = new Stopwatch();
 
             foreach (var unit in MacroData.BuildProduction)
             {
@@ -310,6 +346,11 @@ namespace Sharky.Managers
                         return commands;
                     }
                 }
+            }
+
+            if (stopwatch.ElapsedMilliseconds > 1)
+            {
+                SkipProduction = true;
             }
 
             return commands;
@@ -339,6 +380,12 @@ namespace Sharky.Managers
         private List<Action> BuildTechBuildings()
         {
             var commands = new List<Action>();
+            if (SkipTech)
+            {
+                SkipTech = false;
+                return commands;
+            }
+            var stopwatch = new Stopwatch();
 
             foreach (var unit in MacroData.BuildTech)
             {
@@ -354,12 +401,23 @@ namespace Sharky.Managers
                 }
             }
 
+            if (stopwatch.ElapsedMilliseconds > 1)
+            {
+                SkipTech = true;
+            }
+
             return commands;
         }
 
         private List<Action> BuildAddOns()
         {
             var commands = new List<Action>();
+            if (SkipAddons)
+            {
+                SkipAddons = false;
+                return commands;
+            }
+            var stopwatch = new Stopwatch();
 
             foreach (var unit in MacroData.BuildAddOns)
             {
@@ -373,6 +431,11 @@ namespace Sharky.Managers
                         continue;
                     }
                 }
+            }
+
+            if (stopwatch.ElapsedMilliseconds > 1)
+            {
+                SkipAddons = true;
             }
 
             return commands;

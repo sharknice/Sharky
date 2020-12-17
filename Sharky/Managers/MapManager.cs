@@ -58,13 +58,12 @@ namespace Sharky.Managers
 
         public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
         {
-            UpdateVisibility(observation.Observation.RawData.MapState.Visibility);
-            UpdateCreep(observation.Observation.RawData.MapState.Creep);
-
             MillisecondsUntilUpdate -= (1 / SharkyOptions.FramesPerSecond) * 1000;
             if (MillisecondsUntilUpdate > 0) { return new List<SC2APIProtocol.Action>(); }
             MillisecondsUntilUpdate = MillisecondsPerUpdate;
 
+            UpdateVisibility(observation.Observation.RawData.MapState.Visibility);
+            UpdateCreep(observation.Observation.RawData.MapState.Creep);
             UpdateEnemyAirDpsInRange();
             UpdateInEnemyDetection();
 

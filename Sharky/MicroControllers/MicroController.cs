@@ -13,7 +13,7 @@ namespace Sharky.MicroControllers
             MicroData = microData;
         }
 
-        public List<Action> Attack(List<UnitCommander> commanders, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
+        public List<Action> Attack(IEnumerable<UnitCommander> commanders, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
             var actions = new List<Action>();
             var stopwatch = new Stopwatch();
@@ -50,7 +50,7 @@ namespace Sharky.MicroControllers
             return actions;
         }
 
-        public List<Action> Retreat(List<UnitCommander> commanders, Point2D defensivePoint, Point2D groupCenter, int frame)
+        public List<Action> Retreat(IEnumerable<UnitCommander> commanders, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
             var actions = new List<Action>();
             var stopwatch = new Stopwatch();
@@ -87,7 +87,7 @@ namespace Sharky.MicroControllers
             return actions;
         }
 
-        public List<Action> Idle(List<UnitCommander> commanders, Point2D target, Point2D defensivePoint, int frame)
+        public List<Action> Idle(IEnumerable<UnitCommander> commanders, Point2D target, Point2D defensivePoint, int frame)
         {
             var actions = new List<Action>();
             var stopwatch = new Stopwatch();
