@@ -70,7 +70,7 @@ namespace Sharky.Managers
                 if (closestBase != null)
                 {
                     MainDefensePoint = closestBase.Location;
-                    ForwardDefensePoint = closestBase.Location;
+                    ForwardDefensePoint = closestBase.Location; // TODO: look for tops of ramps, set defensive point there
                 }
                 var farthestBase = ordered.LastOrDefault();
                 if (farthestBase != null)

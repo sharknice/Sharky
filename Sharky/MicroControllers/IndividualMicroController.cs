@@ -59,11 +59,19 @@ namespace Sharky.MicroControllers
             var formation = GetDesiredFormation(commander);
             var bestTarget = GetBestTarget(commander, target);
 
+            if (SpecialCaseMove(commander, target, defensivePoint, groupCenter, bestTarget, formation, frame, out action)) { return action; }
+
             if (PreOffenseOrder(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
 
             if (AvoidTargettedOneHitKills(commander, target, defensivePoint, frame, out action)) { return action; }
 
             if (OffensiveAbility(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
+
+            if (MicroPriority == MicroPriority.StayOutOfRange)
+            {
+                if (SpecialCaseMove(commander, target, defensivePoint, groupCenter, bestTarget, formation, frame, out action)) { return action; }
+                if (MoveAway(commander, target, defensivePoint, frame, out action)) { return action; }
+            }
 
             if (WeaponReady(commander))
             {
@@ -199,6 +207,8 @@ namespace Sharky.MicroControllers
 
             if (AvoidRavagerShots(commander, target, defensivePoint, frame, out action)) { return true; }
 
+            if (DealWithCyclones(commander, target, defensivePoint, frame, out action)) { return true; }
+
             // TODO: special case movement
             //if (ChargeBlindly(commander, target))
             //{
@@ -211,13 +221,6 @@ namespace Sharky.MicroControllers
             //}
 
             //if (DealWithSiegedTanks(commander))
-            //{
-            //    return true;
-            //}
-
-            //// TODO: DealWithCyclones(agent)
-            //// if overwhelming victory charge the cyclone and kill it, otherwise stay out of lockon range
-            //if (DealWithCyclones(commander, defensivePoint))
             //{
             //    return true;
             //}
@@ -1238,6 +1241,33 @@ namespace Sharky.MicroControllers
                         return true;
                     }
                 }
+            }
+
+            return false;
+        }
+
+        protected virtual bool DealWithCyclones(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out SC2APIProtocol.Action action)
+        {
+            action = null;
+
+            var lockOnRange = 7;
+            var enemyCyclones = commander.UnitCalculation.NearbyEnemies.Where(u => u.Unit.UnitType == (uint)UnitTypes.TERRAN_CYCLONE && InRange(commander.UnitCalculation.Unit.Pos, u.Unit.Pos, commander.UnitCalculation.Unit.Radius + lockOnRange));
+            if (enemyCyclones.Count() > 0 && MicroPriority != MicroPriority.StayOutOfRange && (commander.UnitCalculation.TargetPriorityCalculation.AirWinnability > 1 || commander.UnitCalculation.TargetPriorityCalculation.GroundWinnability > 1))
+            {
+                var cycloneDps = enemyCyclones.Sum(e => e.Dps);
+                var otherDps = commander.UnitCalculation.NearbyEnemies.Where(u => u.Unit.UnitType != (uint)UnitTypes.TERRAN_CYCLONE && InRange(commander.UnitCalculation.Unit.Pos, u.Unit.Pos, commander.UnitCalculation.Unit.Radius + lockOnRange)).Sum(e => e.Dps);
+
+                if (cycloneDps > otherDps)
+                {
+                    var closestCyclone = enemyCyclones.OrderBy(e => Vector2.DistanceSquared(new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y), new Vector2(e.Unit.Pos.X, e.Unit.Pos.Y))).FirstOrDefault();
+                    action = commander.Order(frame, Abilities.ATTACK, null, closestCyclone.Unit.Tag);
+                    return true;
+                }
+            }
+
+            if (commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.LOCKON))
+            {
+                if (Retreat(commander, defensivePoint, defensivePoint, frame, out action)) { return true; }
             }
 
             return false;

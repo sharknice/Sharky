@@ -47,6 +47,20 @@ namespace Sharky.Managers
                 return new List<SC2APIProtocol.Action>();
             }
 
+            if (UnitManager.SelfUnits.Count(u => u.Value.UnitClassifications.Contains(UnitClassification.Worker)) == 0)
+            {
+                AttackData.Attacking = true;
+                DebugManager.DrawText("Attacking: no workers");
+                return new List<SC2APIProtocol.Action>();
+            }
+
+            if (UnitManager.SelfUnits.Count(u => u.Value.UnitClassifications.Contains(UnitClassification.ResourceCenter)) == 0)
+            {
+                AttackData.Attacking = true;
+                DebugManager.DrawText("Attacking: no base");
+                return new List<SC2APIProtocol.Action>();
+            }
+
             if (AttackTask.UnitCommanders.Count() < 1)
             {
                 AttackData.Attacking = false;
