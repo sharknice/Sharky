@@ -1,15 +1,14 @@
 ﻿using Sharky.Managers;
-using System;
 using System.Linq;
 using System.Numerics;
 
-namespace Sharky.EnemyStrategies
+namespace Sharky.EnemyStrategies.Protoss
 {
-    public class Proxy : EnemyStrategy
+    public class CannonRush : EnemyStrategy
     {
         ITargetingManager TargetingManager;
 
-        public Proxy(EnemyStrategyHistory enemyStrategyHistory, IChatManager chatManager, IUnitManager unitManager, SharkyOptions sharkyOptions, ITargetingManager targetingManager, DebugManager debugManager)
+        public CannonRush(EnemyStrategyHistory enemyStrategyHistory, IChatManager chatManager, IUnitManager unitManager, SharkyOptions sharkyOptions, ITargetingManager targetingManager, DebugManager debugManager)
         {
             EnemyStrategyHistory = enemyStrategyHistory;
             ChatManager = chatManager;
@@ -23,7 +22,7 @@ namespace Sharky.EnemyStrategies
         {
             if (frame < SharkyOptions.FramesPerSecond * 60 * 3)
             {
-                if (UnitManager.EnemyUnits.Values.Any(u => u.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && Vector2.DistanceSquared(new Vector2(TargetingManager.EnemyMainBasePoint.X, TargetingManager.EnemyMainBasePoint.Y), new Vector2(u.Unit.Pos.X, u.Unit.Pos.Y)) > (100 * 100)))
+                if (UnitManager.EnemyUnits.Values.Any(u => u.Unit.UnitType == (uint)UnitTypes.PROTOSS_PHOTONCANNON && Vector2.DistanceSquared(new Vector2(TargetingManager.ForwardDefensePoint.X, TargetingManager.ForwardDefensePoint.Y), new Vector2(u.Unit.Pos.X, u.Unit.Pos.Y)) < 900))
                 {
                     return true;
                 }

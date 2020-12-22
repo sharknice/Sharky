@@ -170,7 +170,7 @@ namespace Sharky.DefaultBot
             ChatManager = new ChatManager(HttpClient, ChatHistory, SharkyOptions, ChatDataService, EnemyPlayerService, EnemyNameService);
             Managers.Add(ChatManager);
 
-            ProxyLocationService = new ProxyLocationService(BaseManager, TargetingManager, SharkyPathFinder);
+            ProxyLocationService = new ProxyLocationService(BaseManager, TargetingManager, SharkyPathFinder, MapDataService);
 
             var individualMicroController = new IndividualMicroController(MapDataService, UnitDataManager, UnitManager, DebugManager, SharkySimplePathFinder, BaseManager, SharkyOptions, MicroPriority.LiveAndAttack, false);
 
@@ -250,13 +250,14 @@ namespace Sharky.DefaultBot
             EnemyStrategyHistory = new EnemyStrategyHistory();
             EnemyStrategies = new Dictionary<string, IEnemyStrategy>
             {
-                ["Proxy"] = new EnemyStrategies.Proxy(EnemyStrategyHistory, ChatManager, UnitManager, SharkyOptions, TargetingManager),
-                ["WorkerRush"] = new WorkerRush(EnemyStrategyHistory, ChatManager, UnitManager, SharkyOptions, TargetingManager),
-                ["InvisibleAttacks"] = new InvisibleAttacks(EnemyStrategyHistory, ChatManager, UnitManager, SharkyOptions),
-                ["AdeptRush"] = new AdeptRush(EnemyStrategyHistory, ChatManager, UnitManager, SharkyOptions),
-                ["MarineRush"] = new MarineRush(EnemyStrategyHistory, ChatManager, UnitManager, SharkyOptions),
-                ["MassVikings"] = new MassVikings(EnemyStrategyHistory, ChatManager, UnitManager, SharkyOptions),
-                ["ZerglingRush"] = new ZerglingRush(EnemyStrategyHistory, ChatManager, UnitManager, SharkyOptions)
+                ["Proxy"] = new EnemyStrategies.Proxy(EnemyStrategyHistory, ChatManager, UnitManager, SharkyOptions, TargetingManager, DebugManager),
+                ["WorkerRush"] = new WorkerRush(EnemyStrategyHistory, ChatManager, UnitManager, SharkyOptions, TargetingManager, DebugManager),
+                ["InvisibleAttacks"] = new InvisibleAttacks(EnemyStrategyHistory, ChatManager, UnitManager, SharkyOptions, DebugManager),
+                ["AdeptRush"] = new AdeptRush(EnemyStrategyHistory, ChatManager, UnitManager, SharkyOptions, DebugManager),
+                ["CannonRush"] = new CannonRush(EnemyStrategyHistory, ChatManager, UnitManager, SharkyOptions, TargetingManager, DebugManager),
+                ["MarineRush"] = new MarineRush(EnemyStrategyHistory, ChatManager, UnitManager, SharkyOptions, DebugManager),
+                ["MassVikings"] = new MassVikings(EnemyStrategyHistory, ChatManager, UnitManager, SharkyOptions, DebugManager),
+                ["ZerglingRush"] = new ZerglingRush(EnemyStrategyHistory, ChatManager, UnitManager, SharkyOptions, DebugManager)
             };
 
             EnemyStrategyManager = new EnemyStrategyManager(EnemyStrategies);

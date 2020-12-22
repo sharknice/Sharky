@@ -4,12 +4,13 @@ namespace Sharky.EnemyStrategies.Zerg
 {
     public class ZerglingRush : EnemyStrategy
     {
-        public ZerglingRush(EnemyStrategyHistory enemyStrategyHistory, IChatManager chatManager, IUnitManager unitManager, SharkyOptions sharkyOptions)
+        public ZerglingRush(EnemyStrategyHistory enemyStrategyHistory, IChatManager chatManager, IUnitManager unitManager, SharkyOptions sharkyOptions, DebugManager debugManager)
         {
             EnemyStrategyHistory = enemyStrategyHistory;
             ChatManager = chatManager;
             UnitManager = unitManager;
             SharkyOptions = sharkyOptions;
+            DebugManager = debugManager;
         }
 
         protected override bool Detect(int frame)

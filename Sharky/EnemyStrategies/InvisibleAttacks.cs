@@ -5,12 +5,13 @@ namespace Sharky.EnemyStrategies
 {
     class InvisibleAttacks : EnemyStrategy
     {
-        public InvisibleAttacks(EnemyStrategyHistory enemyStrategyHistory, IChatManager chatManager, IUnitManager unitManager, SharkyOptions sharkyOptions)
+        public InvisibleAttacks(EnemyStrategyHistory enemyStrategyHistory, IChatManager chatManager, IUnitManager unitManager, SharkyOptions sharkyOptions, DebugManager debugManager)
         {
             EnemyStrategyHistory = enemyStrategyHistory;
             ChatManager = chatManager;
             UnitManager = unitManager;
             SharkyOptions = sharkyOptions;
+            DebugManager = debugManager;
         }
 
         protected override bool Detect(int frame)

@@ -33,6 +33,10 @@ namespace Sharky.Builds
                 }
                 var placementLocation = BuildingPlacement.FindPlacement(location, unitType, unitData.Size, ignoreMineralProximity, maxDistance);
                 
+                if (placementLocation == null)
+                {
+                    placementLocation = BuildingPlacement.FindPlacement(location, unitType, unitData.Size, true, maxDistance);
+                }
                 if (placementLocation != null)
                 {
                     var worker = GetWorker(placementLocation, workerPool);

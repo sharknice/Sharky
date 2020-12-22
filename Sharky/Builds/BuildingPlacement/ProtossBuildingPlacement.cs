@@ -60,14 +60,19 @@ namespace Sharky.Builds.BuildingPlacement
                     {
                         var mineralFields = UnitManager.NeutralUnits.Where(u => UnitDataManager.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType) || UnitDataManager.GasGeyserTypes.Contains((UnitTypes)u.Value.Unit.UnitType));
                         var squared = (1 + minimumMineralProximinity + .5) * (1 + minimumMineralProximinity + .5);
-                        var clashes = mineralFields.Where(u => Vector2.DistanceSquared(new Vector2(u.Value.Unit.Pos.X, u.Value.Unit.Pos.Y), new Vector2(point.X, point.Y)) < squared);
-
-                        if (clashes.Count() == 0)
+                        var nexusDistanceSquared = 16f;
+                        if (minimumMineralProximinity == 0) { nexusDistanceSquared = 0; }
+                        var nexusClashes = UnitManager.SelfUnits.Where(u => (u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS || u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON) && Vector2.DistanceSquared(new Vector2(u.Value.Unit.Pos.X, u.Value.Unit.Pos.Y), new Vector2(point.X, point.Y)) < squared + nexusDistanceSquared);
+                        if (nexusClashes.Count() == 0)
                         {
-                            if (Vector2.DistanceSquared(new Vector2(reference.X, reference.Y), new Vector2(point.X, point.Y)) <= maxDistance * maxDistance)
+                            var clashes = mineralFields.Where(u => Vector2.DistanceSquared(new Vector2(u.Value.Unit.Pos.X, u.Value.Unit.Pos.Y), new Vector2(point.X, point.Y)) < squared);
+                            if (clashes.Count() == 0)
                             {
-                                DebugManager.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
-                                return point;
+                                if (Vector2.DistanceSquared(new Vector2(reference.X, reference.Y), new Vector2(point.X, point.Y)) <= maxDistance * maxDistance)
+                                {
+                                    DebugManager.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
+                                    return point;
+                                }
                             }
                         }
                     }
@@ -90,14 +95,15 @@ namespace Sharky.Builds.BuildingPlacement
                 var powerRadius = 7 - (size / 2f);
 
                 // start at 12 o'clock then rotate around 12 times, increase radius by 1 until it's more than powerRadius
-                while (radius < powerRadius)
+                while (radius <= powerRadius)
                 {
                     var fullCircle = Math.PI * 2;
-                    var sliceSize = fullCircle / 12.0;
+                    var sliceSize = fullCircle / 24.0;
                     var angle = 0.0;
                     while (angle + (sliceSize / 2) < fullCircle)
                     {
                         var point = new Point2D { X = x + (float)(radius * Math.Cos(angle)), Y = y + (float)(radius * Math.Sin(angle)) };
+                        DebugManager.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
 
                         if (BuildingService.AreaBuildable(point.X, point.Y, size / 2.0f) && !BuildingService.Blocked(point.X, point.Y, size / 2.0f) && !BuildingService.HasCreep(point.X, point.Y, size / 2.0f))
                         {

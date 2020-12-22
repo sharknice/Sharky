@@ -8,13 +8,14 @@ namespace Sharky.EnemyStrategies
     {
         ITargetingManager TargetingManager;
 
-        public WorkerRush(EnemyStrategyHistory enemyStrategyHistory, IChatManager chatManager, IUnitManager unitManager, SharkyOptions sharkyOptions, ITargetingManager targetingManager)
+        public WorkerRush(EnemyStrategyHistory enemyStrategyHistory, IChatManager chatManager, IUnitManager unitManager, SharkyOptions sharkyOptions, ITargetingManager targetingManager, DebugManager debugManager)
         {
             EnemyStrategyHistory = enemyStrategyHistory;
             ChatManager = chatManager;
             UnitManager = unitManager;
             SharkyOptions = sharkyOptions;
             TargetingManager = targetingManager;
+            DebugManager = debugManager;
         }
 
         protected override bool Detect(int frame)

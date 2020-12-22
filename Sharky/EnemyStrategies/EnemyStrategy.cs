@@ -12,6 +12,7 @@ namespace Sharky.EnemyStrategies
         protected EnemyStrategyHistory EnemyStrategyHistory;
         protected IUnitManager UnitManager;
         protected SharkyOptions SharkyOptions;
+        protected DebugManager DebugManager;
 
         public string Name()
         {
@@ -33,6 +34,11 @@ namespace Sharky.EnemyStrategies
                     Detected = true;
                     DetectedChat();
                 }
+                DebugManager.DrawText($"Active: {Name()}");
+            }
+            else
+            {
+                Active = false;
             }
         }
 

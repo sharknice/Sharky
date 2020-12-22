@@ -1,4 +1,5 @@
-﻿using Sharky.Managers;
+﻿using SC2APIProtocol;
+using Sharky.Managers;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,17 +12,19 @@ namespace Sharky.MicroTasks
         UnitDataManager UnitDataManager;
         MacroData MacroData;
         MicroManager MicroManager;
+        DebugManager DebugManager;
         public string ProxyName { get; set; }
 
         bool started { get; set; }
 
-        public ProxyTask(UnitDataManager unitDataManager, bool enabled, float priority, MacroData macroData, string proxyName, MicroManager microManager)
+        public ProxyTask(UnitDataManager unitDataManager, bool enabled, float priority, MacroData macroData, string proxyName, MicroManager microManager, DebugManager debugManager)
         {
             UnitDataManager = unitDataManager;
             Priority = priority;
             MacroData = macroData;
             ProxyName = proxyName;
             MicroManager = microManager;
+            DebugManager = debugManager;
 
             UnitCommanders = new List<UnitCommander>();
             Enabled = enabled;

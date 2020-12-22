@@ -56,7 +56,6 @@ namespace Sharky.MicroTasks
 
         public override IEnumerable<SC2APIProtocol.Action> PerformActions(int frame)
         {
-
             var actions = new List<SC2APIProtocol.Action>();
 
             if (lastFrameTime > 5)
@@ -70,12 +69,22 @@ namespace Sharky.MicroTasks
             var attackingEnemies = UnitManager.SelfUnits.Where(u => u.Value.UnitClassifications.Contains(UnitClassification.ResourceCenter) || u.Value.UnitClassifications.Contains(UnitClassification.ProductionStructure)).SelectMany(u => u.Value.NearbyEnemies).Distinct();
             if (attackingEnemies.Count() > 0)
             {
+                foreach (var commander in UnitCommanders)
+                {
+                    if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.Retreat || commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.FullRetreat)
+                    {
+                        commander.UnitCalculation.TargetPriorityCalculation.TargetPriority = TargetPriority.Attack;
+                    }
+                }
                 actions = SplitDefenders(frame, attackingEnemies);
                 stopwatch.Stop();
                 lastFrameTime = stopwatch.ElapsedMilliseconds;
                 return actions;
             }
-            actions = MicroController.Attack(UnitCommanders, TargetingManager.MainDefensePoint, TargetingManager.MainDefensePoint, TargetingManager.MainDefensePoint, frame);
+            else
+            {
+                actions = MicroController.Attack(UnitCommanders, TargetingManager.MainDefensePoint, TargetingManager.ForwardDefensePoint, TargetingManager.MainDefensePoint, frame);
+            }
             stopwatch.Stop();
             lastFrameTime = stopwatch.ElapsedMilliseconds;
             return actions;
@@ -96,18 +105,19 @@ namespace Sharky.MicroTasks
                 {
                     availableCommanders.RemoveAll(a => selfGroup.Any(s => a.UnitCalculation.Unit.Tag == s.UnitCalculation.Unit.Tag));
 
-                    var groupVectors = selfGroup.Select(u => new Vector2(u.UnitCalculation.Unit.Pos.X, u.UnitCalculation.Unit.Pos.Y));
-                    var groupPoint = new Point2D { X = groupVectors.Average(v => v.X), Y = groupVectors.Average(v => v.Y) };
                     var defensePoint = new Point2D { X = enemyGroup.FirstOrDefault().Unit.Pos.X, Y = enemyGroup.FirstOrDefault().Unit.Pos.Y };
-                    actions.AddRange(MicroController.Attack(selfGroup, defensePoint, TargetingManager.MainDefensePoint, groupPoint, frame));
+                    actions.AddRange(MicroController.Attack(selfGroup, defensePoint, TargetingManager.MainDefensePoint, null, frame));
                 }
             }
 
             if (availableCommanders.Count() > 0)
             {
-                var groupVectors = availableCommanders.Select(u => new Vector2(u.UnitCalculation.Unit.Pos.X, u.UnitCalculation.Unit.Pos.Y));
-                var groupPoint = new Point2D { X = groupVectors.Average(v => v.X), Y = groupVectors.Average(v => v.Y) };
-                actions.AddRange(MicroController.Attack(availableCommanders, new Point2D { X = attackingEnemies.FirstOrDefault().Unit.Pos.X, Y = attackingEnemies.FirstOrDefault().Unit.Pos.Y }, TargetingManager.MainDefensePoint, groupPoint, frame));
+                var enemyGroup = enemyGroups.FirstOrDefault();
+                if (enemyGroup != null)
+                {
+                    var defensePoint = new Point2D { X = enemyGroup.FirstOrDefault().Unit.Pos.X, Y = enemyGroup.FirstOrDefault().Unit.Pos.Y };
+                    actions.AddRange(MicroController.Attack(availableCommanders, defensePoint, TargetingManager.MainDefensePoint, null, frame));
+                }
             }
 
             return actions;
