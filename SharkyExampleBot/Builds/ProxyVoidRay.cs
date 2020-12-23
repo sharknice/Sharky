@@ -25,7 +25,7 @@ namespace SharkyExampleBot.Builds
 
         ProxyTask ProxyTask;
 
-        public ProxyVoidRay(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, IChatManager chatManager, NexusManager nexusManager, SharkyOptions sharkyOptions, MicroManager microManager, ICounterTransitioner counterTransitioner, UnitDataManager unitDataManager, ProxyLocationService proxyLocationService, DebugManager debugManager, UnitCountService unitCountService, IIndividualMicroController probeMicroController) 
+        public ProxyVoidRay(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, IChatManager chatManager, ChronoData nexusManager, SharkyOptions sharkyOptions, MicroManager microManager, ICounterTransitioner counterTransitioner, UnitDataManager unitDataManager, ProxyLocationService proxyLocationService, DebugManager debugManager, UnitCountService unitCountService, IIndividualMicroController probeMicroController) 
             : base(buildOptions, macroData, activeUnitData, attackData, chatManager, nexusManager, counterTransitioner, unitCountService)
         {
             SharkyOptions = sharkyOptions;
@@ -50,7 +50,7 @@ namespace SharkyExampleBot.Builds
 
             MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_PROBE] = 23;
 
-            NexusManager.ChronodUnits = new HashSet<UnitTypes>
+            ChronoData.ChronodUnits = new HashSet<UnitTypes>
             {
                 UnitTypes.PROTOSS_PROBE,
                 UnitTypes.PROTOSS_VOIDRAY,
@@ -126,9 +126,9 @@ namespace SharkyExampleBot.Builds
                 {
                     MacroData.DesiredPylons = 2;
                 }
-                if (NexusManager.ChronodUnits.Contains(UnitTypes.PROTOSS_PROBE))
+                if (ChronoData.ChronodUnits.Contains(UnitTypes.PROTOSS_PROBE))
                 {
-                    NexusManager.ChronodUnits.Remove(UnitTypes.PROTOSS_PROBE);
+                    ChronoData.ChronodUnits.Remove(UnitTypes.PROTOSS_PROBE);
                 }
             }
             if (UnitCountService.Completed(UnitTypes.PROTOSS_GATEWAY) > 0)

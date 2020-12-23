@@ -18,7 +18,7 @@ namespace SharkyExampleBot.Builds
         bool OpeningAttackChatSent;
         bool Scouted;
 
-        public ZealotRush(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, IChatManager chatManager, NexusManager nexusManager, ICounterTransitioner counterTransitioner, MicroManager microManager, UnitCountService unitCountService) 
+        public ZealotRush(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, IChatManager chatManager, ChronoData nexusManager, ICounterTransitioner counterTransitioner, MicroManager microManager, UnitCountService unitCountService) 
             : base(buildOptions, macroData, activeUnitData, attackData, chatManager, nexusManager, counterTransitioner, unitCountService)
         {
             MicroManager = microManager;
@@ -33,7 +33,7 @@ namespace SharkyExampleBot.Builds
 
             MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_ZEALOT] = 100;
 
-            NexusManager.ChronodUnits = new HashSet<UnitTypes>
+            ChronoData.ChronodUnits = new HashSet<UnitTypes>
             {
                 UnitTypes.PROTOSS_ZEALOT
             };
