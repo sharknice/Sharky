@@ -18,7 +18,8 @@ namespace SharkyExampleBot.Builds
         bool OpeningAttackChatSent;
         bool Scouted;
 
-        public ZealotRush(BuildOptions buildOptions, MacroData macroData, IUnitManager unitManager, AttackData attackData, IChatManager chatManager, NexusManager nexusManager, ICounterTransitioner counterTransitioner, MicroManager microManager) : base(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager, counterTransitioner)
+        public ZealotRush(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, IChatManager chatManager, NexusManager nexusManager, ICounterTransitioner counterTransitioner, MicroManager microManager, UnitCountService unitCountService) 
+            : base(buildOptions, macroData, activeUnitData, attackData, chatManager, nexusManager, counterTransitioner, unitCountService)
         {
             MicroManager = microManager;
             OpeningAttackChatSent = false;
@@ -49,7 +50,7 @@ namespace SharkyExampleBot.Builds
 
         public override void OnFrame(ResponseObservation observation)
         {
-            if (UnitManager.Completed(UnitTypes.PROTOSS_PYLON) > 0)
+            if (UnitCountService.Completed(UnitTypes.PROTOSS_PYLON) > 0)
             {
                 if (MacroData.DesiredProductionCounts[UnitTypes.PROTOSS_GATEWAY] < 2)
                 {
@@ -69,7 +70,7 @@ namespace SharkyExampleBot.Builds
                     Scouted = true;
                 }
             }
-            if (UnitManager.Completed(UnitTypes.PROTOSS_PYLON) >= 2)
+            if (UnitCountService.Completed(UnitTypes.PROTOSS_PYLON) >= 2)
             {
                 if (MacroData.DesiredProductionCounts[UnitTypes.PROTOSS_GATEWAY] < 4)
                 {

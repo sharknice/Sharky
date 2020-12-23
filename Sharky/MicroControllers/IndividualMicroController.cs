@@ -13,11 +13,12 @@ namespace Sharky.MicroControllers
     {
         protected MapDataService MapDataService;
         protected UnitDataManager UnitDataManager;
-        protected IUnitManager UnitManager;
+        protected ActiveUnitData ActiveUnitData;
         protected DebugManager DebugManager;
         protected IPathFinder SharkyPathFinder;
         IBaseManager BaseManager;
         protected SharkyOptions SharkyOptions;
+        protected DamageService DamageService;
 
         public MicroPriority MicroPriority { get; set; }
 
@@ -28,17 +29,18 @@ namespace Sharky.MicroControllers
         protected float AvoidDamageDistance;
         protected float LooseFormationDistance;
 
-        public IndividualMicroController(MapDataService mapDataService, UnitDataManager unitDataManager, IUnitManager unitManager, DebugManager debugManager, IPathFinder sharkyPathFinder, IBaseManager baseManager, SharkyOptions sharkyOptions, MicroPriority microPriority, bool groupUpEnabled, float avoidDamageDistance = 1)
+        public IndividualMicroController(MapDataService mapDataService, UnitDataManager unitDataManager, ActiveUnitData activeUnitData, DebugManager debugManager, IPathFinder sharkyPathFinder, IBaseManager baseManager, SharkyOptions sharkyOptions, DamageService damageService, MicroPriority microPriority, bool groupUpEnabled, float avoidDamageDistance = 1)
         {
             MapDataService = mapDataService;
             UnitDataManager = unitDataManager;
-            UnitManager = unitManager;
+            ActiveUnitData = activeUnitData;
             DebugManager = debugManager;
             SharkyPathFinder = sharkyPathFinder;
             BaseManager = baseManager;
             SharkyOptions = sharkyOptions;
             MicroPriority = microPriority;
             GroupUpEnabled = groupUpEnabled;
+            DamageService = damageService;
 
             GroupUpDistanceSmall = 5;
             GroupUpDistance = 10;
@@ -233,7 +235,7 @@ namespace Sharky.MicroControllers
             return false;
         }
 
-        protected virtual bool NavigateToTarget(UnitCommander commander, Point2D target, Point2D groupCenter, UnitCalculation bestTarget, Formation formation, int frame, out SC2APIProtocol.Action action)
+        public virtual bool NavigateToTarget(UnitCommander commander, Point2D target, Point2D groupCenter, UnitCalculation bestTarget, Formation formation, int frame, out SC2APIProtocol.Action action)
         {
             action = null;
 
@@ -358,7 +360,7 @@ namespace Sharky.MicroControllers
 
             foreach (var enemyAttack in commander.UnitCalculation.NearbyEnemies)
             {
-                if (UnitManager.CanDamage(enemyAttack.Weapons, commander.UnitCalculation.Unit) && InRange(commander.UnitCalculation.Unit.Pos, enemyAttack.Unit.Pos, UnitDataManager.GetRange(enemyAttack.Unit) + commander.UnitCalculation.Unit.Radius + enemyAttack.Unit.Radius + AvoidDamageDistance))
+                if (DamageService.CanDamage(enemyAttack.Weapons, commander.UnitCalculation.Unit) && InRange(commander.UnitCalculation.Unit.Pos, enemyAttack.Unit.Pos, UnitDataManager.GetRange(enemyAttack.Unit) + commander.UnitCalculation.Unit.Radius + enemyAttack.Unit.Radius + AvoidDamageDistance))
                 {
                     attacks.Add(enemyAttack);
                 }
@@ -415,7 +417,7 @@ namespace Sharky.MicroControllers
 
             foreach (var enemyAttack in commander.UnitCalculation.NearbyEnemies)
             {
-                if (UnitManager.CanDamage(enemyAttack.Weapons, commander.UnitCalculation.Unit) && InRange(commander.UnitCalculation.Unit.Pos, enemyAttack.Unit.Pos, range + commander.UnitCalculation.Unit.Radius + enemyAttack.Unit.Radius + AvoidDamageDistance))
+                if (DamageService.CanDamage(enemyAttack.Weapons, commander.UnitCalculation.Unit) && InRange(commander.UnitCalculation.Unit.Pos, enemyAttack.Unit.Pos, range + commander.UnitCalculation.Unit.Radius + enemyAttack.Unit.Radius + AvoidDamageDistance))
                 {
                     enemiesInRange.Add(enemyAttack);
                 }
@@ -598,7 +600,7 @@ namespace Sharky.MicroControllers
             attacks = new List<UnitCalculation>(); // nearby units not in range right now
             foreach (var enemyAttack in commander.UnitCalculation.NearbyEnemies)
             {
-                if (enemyAttack.Unit.DisplayType != DisplayType.Hidden && UnitManager.CanDamage(commander.UnitCalculation.Weapons, enemyAttack.Unit) && !InRange(enemyAttack.Unit.Pos, commander.UnitCalculation.Unit.Pos, range + enemyAttack.Unit.Radius + commander.UnitCalculation.Unit.Radius))
+                if (enemyAttack.Unit.DisplayType != DisplayType.Hidden && DamageService.CanDamage(commander.UnitCalculation.Weapons, enemyAttack.Unit) && !InRange(enemyAttack.Unit.Pos, commander.UnitCalculation.Unit.Pos, range + enemyAttack.Unit.Radius + commander.UnitCalculation.Unit.Radius))
                 {
                     attacks.Add(enemyAttack);
                 }
@@ -624,13 +626,13 @@ namespace Sharky.MicroControllers
                 fakeMainBase.Alliance = Alliance.Enemy;
                 return new UnitCalculation(fakeMainBase, fakeMainBase, 0, UnitDataManager, SharkyOptions);
             }
-            var unitsNearEnemyMain = UnitManager.EnemyUnits.Values.Where(e => InRange(target, e.Unit.Pos, 20));
+            var unitsNearEnemyMain = ActiveUnitData.EnemyUnits.Values.Where(e => InRange(target, e.Unit.Pos, 20));
             if (unitsNearEnemyMain.Count() > 0 && InRange(target, commander.UnitCalculation.Unit.Pos, 100))
             {
                 attacks = new List<UnitCalculation>(); // enemies in the main enemy base
                 foreach (var enemyAttack in unitsNearEnemyMain)
                 {
-                    if (enemyAttack.Unit.DisplayType != DisplayType.Hidden && UnitManager.CanDamage(commander.UnitCalculation.Weapons, enemyAttack.Unit))
+                    if (enemyAttack.Unit.DisplayType != DisplayType.Hidden && DamageService.CanDamage(commander.UnitCalculation.Weapons, enemyAttack.Unit))
                     {
                         attacks.Add(enemyAttack);
                     }
@@ -704,7 +706,7 @@ namespace Sharky.MicroControllers
                 return false;
             }
 
-            if (frame > SharkyOptions.FramesPerSecond * 10 * 60 && UnitManager.EnemyUnits.Count() < 10)
+            if (frame > SharkyOptions.FramesPerSecond * 10 * 60 && ActiveUnitData.EnemyUnits.Count() < 10)
             {
                 return false; // stop grouping up when searching for the last enemy units to finish the game
             }
@@ -923,7 +925,7 @@ namespace Sharky.MicroControllers
                 }
             }
 
-            var threats = attacks.Where(enemyAttack => enemyAttack.Damage > 0 && UnitManager.CanDamage(enemyAttack.Weapons, commander.UnitCalculation.Unit) && enemyAttack.Unit.UnitType != (uint)UnitTypes.ZERG_BROODLING && (!enemyAttack.UnitClassifications.Contains(UnitClassification.Worker) || enemyAttack.EnemiesInRange.Any(e => e.Unit.Tag == commander.UnitCalculation.Unit.Tag)) && GroundAttackersFilter(commander, enemyAttack) && AirAttackersFilter(commander, enemyAttack));
+            var threats = attacks.Where(enemyAttack => enemyAttack.Damage > 0 && DamageService.CanDamage(enemyAttack.Weapons, commander.UnitCalculation.Unit) && enemyAttack.Unit.UnitType != (uint)UnitTypes.ZERG_BROODLING && (!enemyAttack.UnitClassifications.Contains(UnitClassification.Worker) || enemyAttack.EnemiesInRange.Any(e => e.Unit.Tag == commander.UnitCalculation.Unit.Tag)) && GroundAttackersFilter(commander, enemyAttack) && AirAttackersFilter(commander, enemyAttack));
             if (threats.Count() > 0)
             {
                 var bestDpsReduction = GetBestDpsReduction(commander, weapon, threats, attacks);

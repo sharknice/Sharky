@@ -13,7 +13,7 @@ namespace Sharky.Builds.Protoss
         MicroManager MicroManager;
         EnemyRaceManager EnemyRaceManager;
 
-        public ProtossRobo(BuildOptions buildOptions, MacroData macroData, IUnitManager unitManager, AttackData attackData, IChatManager chatManager, NexusManager nexusManager, SharkyOptions sharkyOptions, MicroManager microManager, EnemyRaceManager enemyRaceManager, ICounterTransitioner counterTransitioner) : base(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager, counterTransitioner)
+        public ProtossRobo(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, IChatManager chatManager, ChronoData nexusManager, SharkyOptions sharkyOptions, MicroManager microManager, EnemyRaceManager enemyRaceManager, ICounterTransitioner counterTransitioner, UnitCountService unitCountService) : base(buildOptions, macroData, activeUnitData, attackData, chatManager, nexusManager, counterTransitioner, unitCountService)
         {
             SharkyOptions = sharkyOptions;
             MicroManager = microManager;
@@ -24,12 +24,12 @@ namespace Sharky.Builds.Protoss
         {
             base.StartBuild(frame);
 
-            NexusManager.ChronodUpgrades = new HashSet<Upgrades>
+            ChronoData.ChronodUpgrades = new HashSet<Upgrades>
             {
                 Upgrades.WARPGATERESEARCH
             };
 
-            NexusManager.ChronodUnits = new HashSet<UnitTypes>
+            ChronoData.ChronodUnits = new HashSet<UnitTypes>
             {
                 UnitTypes.PROTOSS_IMMORTAL,
             };
@@ -57,7 +57,7 @@ namespace Sharky.Builds.Protoss
 
         public override void OnFrame(ResponseObservation observation)
         {
-            if (UnitManager.Count(UnitTypes.PROTOSS_IMMORTAL) > 0)
+            if (UnitCountService.Count(UnitTypes.PROTOSS_IMMORTAL) > 0)
             {
                 // TODO: MacroData.ShieldsAtEveryExpansion = 2;
                 if (MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_STALKER] < 4)
@@ -74,19 +74,19 @@ namespace Sharky.Builds.Protoss
                 }
             }
 
-            if (UnitManager.Count(UnitTypes.PROTOSS_IMMORTAL) >= 2)
+            if (UnitCountService.Count(UnitTypes.PROTOSS_IMMORTAL) >= 2)
             {
                 if (MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_WARPPRISM] < 1)
                 {
                     MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_WARPPRISM] = 1;
                 }
-                if (UnitManager.Count(UnitTypes.PROTOSS_IMMORTAL) >= 3 && MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_OBSERVER] < 1)
+                if (UnitCountService.Count(UnitTypes.PROTOSS_IMMORTAL) >= 3 && MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_OBSERVER] < 1)
                 {
                     MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_OBSERVER] = 1;
                 }
             }
 
-            if (UnitManager.Completed(UnitTypes.PROTOSS_ROBOTICSFACILITY) > 0)
+            if (UnitCountService.Completed(UnitTypes.PROTOSS_ROBOTICSFACILITY) > 0)
             {
                 MacroData.DesiredGases = 3;
                 MacroData.DesiredUpgrades[Upgrades.WARPGATERESEARCH] = true;
@@ -95,13 +95,13 @@ namespace Sharky.Builds.Protoss
                 {
                     MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_IMMORTAL] = 10;
                 }
-                if (MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_STALKER] < UnitManager.Count(UnitTypes.PROTOSS_IMMORTAL) * 3)
+                if (MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_STALKER] < UnitCountService.Count(UnitTypes.PROTOSS_IMMORTAL) * 3)
                 {
-                    MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_STALKER] = UnitManager.Count(UnitTypes.PROTOSS_IMMORTAL) * 3;
+                    MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_STALKER] = UnitCountService.Count(UnitTypes.PROTOSS_IMMORTAL) * 3;
                 }
-                if (MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_ZEALOT] < UnitManager.Count(UnitTypes.PROTOSS_IMMORTAL))
+                if (MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_ZEALOT] < UnitCountService.Count(UnitTypes.PROTOSS_IMMORTAL))
                 {
-                    MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_ZEALOT] = UnitManager.Count(UnitTypes.PROTOSS_IMMORTAL);
+                    MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_ZEALOT] = UnitCountService.Count(UnitTypes.PROTOSS_IMMORTAL);
                 }
             }
 
@@ -115,17 +115,17 @@ namespace Sharky.Builds.Protoss
                 MacroData.DesiredProductionCounts[UnitTypes.PROTOSS_ROBOTICSFACILITY] = 1;
             }
 
-            if (MacroData.DesiredProductionCounts[UnitTypes.PROTOSS_ROBOTICSFACILITY] < 2 && UnitManager.Count(UnitTypes.PROTOSS_IMMORTAL) > 0)
+            if (MacroData.DesiredProductionCounts[UnitTypes.PROTOSS_ROBOTICSFACILITY] < 2 && UnitCountService.Count(UnitTypes.PROTOSS_IMMORTAL) > 0)
             {
                 MacroData.DesiredProductionCounts[UnitTypes.PROTOSS_ROBOTICSFACILITY] = 2;
             }
 
-            if (UnitManager.Completed(UnitTypes.PROTOSS_ROBOTICSFACILITY) >= 2)
+            if (UnitCountService.Completed(UnitTypes.PROTOSS_ROBOTICSFACILITY) >= 2)
             {
                 BuildOptions.StrictGasCount = false;
             }
 
-            if (UnitManager.Completed(UnitTypes.PROTOSS_ROBOTICSFACILITY) >= 2 && MacroData.DesiredTechCounts[UnitTypes.PROTOSS_FORGE] < 1)
+            if (UnitCountService.Completed(UnitTypes.PROTOSS_ROBOTICSFACILITY) >= 2 && MacroData.DesiredTechCounts[UnitTypes.PROTOSS_FORGE] < 1)
             {
                 MacroData.DesiredTechCounts[UnitTypes.PROTOSS_FORGE] = 1;
             }
@@ -133,13 +133,13 @@ namespace Sharky.Builds.Protoss
             // TODO: EnemyManager get EnemyRace
             //if (EnemyRace == SC2APIProtocol.Race.Terran)
             //{
-            //    if (UnitManager.Completed(UnitTypes.PROTOSS_ROBOTICSFACILITY) > 0 && MacroData.DesiredTechCounts[UnitTypes.PROTOSS_FORGE] < 1)
+            //    if (UnitCountService.Completed(UnitTypes.PROTOSS_ROBOTICSFACILITY) > 0 && MacroData.DesiredTechCounts[UnitTypes.PROTOSS_FORGE] < 1)
             //    {
             //        MacroData.DesiredTechCounts[UnitTypes.PROTOSS_FORGE] = 1;
             //    }
             //}
 
-            if (UnitManager.Completed(UnitTypes.PROTOSS_ROBOTICSFACILITY) >= 2 && UnitManager.Count(UnitTypes.PROTOSS_IMMORTAL) > 3)
+            if (UnitCountService.Completed(UnitTypes.PROTOSS_ROBOTICSFACILITY) >= 2 && UnitCountService.Count(UnitTypes.PROTOSS_IMMORTAL) > 3)
             {
                 if (MacroData.DesiredProductionCounts[UnitTypes.PROTOSS_NEXUS] < 3)
                 {
@@ -147,17 +147,17 @@ namespace Sharky.Builds.Protoss
                 }
             }
 
-            if (UnitManager.Completed(UnitTypes.PROTOSS_NEXUS) > 2 && UnitManager.Completed(UnitTypes.PROTOSS_FORGE) > 0)
+            if (UnitCountService.Completed(UnitTypes.PROTOSS_NEXUS) > 2 && UnitCountService.Completed(UnitTypes.PROTOSS_FORGE) > 0)
             {
                 if (MacroData.DesiredTechCounts[UnitTypes.PROTOSS_TWILIGHTCOUNCIL] < 1)
                 {
                     MacroData.DesiredTechCounts[UnitTypes.PROTOSS_TWILIGHTCOUNCIL] = 1;
                 }
                 MacroData.DesiredUpgrades[Upgrades.BLINKTECH] = true;
-                NexusManager.ChronodUpgrades.Add(Upgrades.BLINKTECH);
+                ChronoData.ChronodUpgrades.Add(Upgrades.BLINKTECH);
             }
 
-            if (UnitManager.Completed(UnitTypes.PROTOSS_NEXUS) > 2 && UnitManager.Completed(UnitTypes.PROTOSS_TWILIGHTCOUNCIL) > 0)
+            if (UnitCountService.Completed(UnitTypes.PROTOSS_NEXUS) > 2 && UnitCountService.Completed(UnitTypes.PROTOSS_TWILIGHTCOUNCIL) > 0)
             {
                 if (MacroData.DesiredTechCounts[UnitTypes.PROTOSS_FORGE] < 2)
                 {
@@ -165,7 +165,7 @@ namespace Sharky.Builds.Protoss
                 }
             }
 
-            if (UnitManager.Completed(UnitTypes.PROTOSS_TWILIGHTCOUNCIL) > 0 && UnitManager.Completed(UnitTypes.PROTOSS_FORGE) >= 2)
+            if (UnitCountService.Completed(UnitTypes.PROTOSS_TWILIGHTCOUNCIL) > 0 && UnitCountService.Completed(UnitTypes.PROTOSS_FORGE) >= 2)
             {
                 if (MacroData.DesiredTechCounts[UnitTypes.PROTOSS_TEMPLARARCHIVE] < 1)
                 {
@@ -173,7 +173,7 @@ namespace Sharky.Builds.Protoss
                 }
             }
 
-            if (UnitManager.Completed(UnitTypes.PROTOSS_TEMPLARARCHIVE) > 0)
+            if (UnitCountService.Completed(UnitTypes.PROTOSS_TEMPLARARCHIVE) > 0)
             {
                 if (MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_HIGHTEMPLAR] < 2)
                 {
@@ -185,15 +185,15 @@ namespace Sharky.Builds.Protoss
                 }
             }
 
-            if (UnitManager.Completed(UnitTypes.PROTOSS_FORGE) > 0)
+            if (UnitCountService.Completed(UnitTypes.PROTOSS_FORGE) > 0)
             {
                 MacroData.DesiredUpgrades[Upgrades.PROTOSSGROUNDWEAPONSLEVEL1] = true;
-                NexusManager.ChronodUpgrades.Add(Upgrades.PROTOSSGROUNDWEAPONSLEVEL1);
+                ChronoData.ChronodUpgrades.Add(Upgrades.PROTOSSGROUNDWEAPONSLEVEL1);
             }
-            if (UnitManager.Completed(UnitTypes.PROTOSS_FORGE) > 1)
+            if (UnitCountService.Completed(UnitTypes.PROTOSS_FORGE) > 1)
             {
                 MacroData.DesiredUpgrades[Upgrades.PROTOSSGROUNDARMORSLEVEL1] = true;
-                NexusManager.ChronodUpgrades.Add(Upgrades.PROTOSSGROUNDARMORSLEVEL1);
+                ChronoData.ChronodUpgrades.Add(Upgrades.PROTOSSGROUNDARMORSLEVEL1);
             }
 
             if (observation.Observation.GameLoop > SharkyOptions.FramesPerSecond * 15 * 60 || MacroData.FoodUsed > 125)
@@ -212,14 +212,14 @@ namespace Sharky.Builds.Protoss
                 }
             }
 
-            if (MacroData.DesiredTechCounts[UnitTypes.PROTOSS_ROBOTICSBAY] < 1 && UnitManager.Completed(UnitTypes.PROTOSS_ROBOTICSFACILITY) > 1 && UnitManager.Completed(UnitTypes.PROTOSS_NEXUS) > 2)
+            if (MacroData.DesiredTechCounts[UnitTypes.PROTOSS_ROBOTICSBAY] < 1 && UnitCountService.Completed(UnitTypes.PROTOSS_ROBOTICSFACILITY) > 1 && UnitCountService.Completed(UnitTypes.PROTOSS_NEXUS) > 2)
             {
                 MacroData.DesiredTechCounts[UnitTypes.PROTOSS_ROBOTICSBAY] = 1;
             }
 
-            if (UnitManager.Completed(UnitTypes.PROTOSS_ROBOTICSBAY) > 0)
+            if (UnitCountService.Completed(UnitTypes.PROTOSS_ROBOTICSBAY) > 0)
             {
-                if (UnitManager.Count(UnitTypes.PROTOSS_IMMORTAL) > 3)
+                if (UnitCountService.Count(UnitTypes.PROTOSS_IMMORTAL) > 3)
                 {
                     if (MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_DISRUPTOR] < 3)
                     {
@@ -228,11 +228,11 @@ namespace Sharky.Builds.Protoss
                 }
 
                 MacroData.DesiredUpgrades[Upgrades.GRAVITICDRIVE] = true;
-                NexusManager.ChronodUpgrades.Add(Upgrades.GRAVITICDRIVE);
+                ChronoData.ChronodUpgrades.Add(Upgrades.GRAVITICDRIVE);
             }
 
             // TODO: ProductionBalancer
-            //if (UnitManager.Completed(UnitTypes.PROTOSS_NEXUS) > 3)
+            //if (UnitCountService.Completed(UnitTypes.PROTOSS_NEXUS) > 3)
             //{
             //    ProductionBalancer.BalanceProductionCapacity();
             //    ProductionBalancer.BalanceUnitCounterProduction();
@@ -241,7 +241,7 @@ namespace Sharky.Builds.Protoss
             //    ProductionBalancer.ExpandForever();
             //}
 
-            //if (UnitManager.Count(UnitTypes.PROTOSS_IMMORTAL) > 4)
+            //if (UnitCountService.Count(UnitTypes.PROTOSS_IMMORTAL) > 4)
             //{
             //    ProductionBalancer.ExpandForever();
             //}

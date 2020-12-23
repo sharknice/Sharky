@@ -14,8 +14,8 @@ namespace Sharky.MicroControllers.Protoss
         int TimeWarpRange = 9;
         float TImeWarpRadius = 3.5f;
 
-        public MothershipMicroController(MapDataService mapDataService, UnitDataManager unitDataManager, IUnitManager unitManager, DebugManager debugManager, IPathFinder sharkyPathFinder, IBaseManager baseManager, SharkyOptions sharkyOptions, MicroPriority microPriority, bool groupUpEnabled)
-            : base(mapDataService, unitDataManager, unitManager, debugManager, sharkyPathFinder, baseManager, sharkyOptions, microPriority, groupUpEnabled)
+        public MothershipMicroController(MapDataService mapDataService, UnitDataManager unitDataManager, ActiveUnitData activeUnitData, DebugManager debugManager, IPathFinder sharkyPathFinder, IBaseManager baseManager, SharkyOptions sharkyOptions, DamageService damageService, MicroPriority microPriority, bool groupUpEnabled)
+            : base(mapDataService, unitDataManager, activeUnitData, debugManager, sharkyPathFinder, baseManager, sharkyOptions, damageService, microPriority, groupUpEnabled)
         {
         }
 
@@ -148,7 +148,7 @@ namespace Sharky.MicroControllers.Protoss
 
         UnitCalculation GetSupportTarget(UnitCommander commander, Point2D target, Point2D defensivePoint)
         {
-            var allyAttacks = UnitManager.SelfUnits.Where(u => u.Value.UnitClassifications.Contains(UnitClassification.ArmyUnit));
+            var allyAttacks = ActiveUnitData.SelfUnits.Where(u => u.Value.UnitClassifications.Contains(UnitClassification.ArmyUnit));
 
             // out of nearby allies within 15 range
             // select the friendlies with enemies in 15 range

@@ -12,7 +12,7 @@ namespace Sharky.Managers
     public class MacroManager : SharkyManager
     {
         MacroSetup MacroSetup;
-        IUnitManager UnitManager;
+        ActiveUnitData ActiveUnitData;
         UnitDataManager UnitDataManager;
         IBuildingBuilder BuildingBuilder;
         SharkyOptions SharkyOptions;
@@ -25,6 +25,7 @@ namespace Sharky.Managers
         BuildPylonService BuildPylonService;
         BuildDefenseService BuildDefenseService;
         BuildProxyService BuildProxyService;
+        UnitCountService UnitCountService;
 
         bool SkipFrame;
         bool SkipSupply;
@@ -32,10 +33,10 @@ namespace Sharky.Managers
         bool SkipTech;
         bool SkipAddons;
 
-        public MacroManager(MacroSetup macroSetup, IUnitManager unitManager, UnitDataManager unitDataManager, IBuildingBuilder buildingBuilder, SharkyOptions sharkyOptions, IBaseManager baseManager, ITargetingManager targetingManager, AttackData attackData, IBuildingPlacement warpInPlacement, MacroData macroData, Morpher morpher, BuildPylonService buildPylonService, BuildDefenseService buildDefenseService, BuildProxyService buildProxyService)
+        public MacroManager(MacroSetup macroSetup, ActiveUnitData activeUnitData, UnitDataManager unitDataManager, IBuildingBuilder buildingBuilder, SharkyOptions sharkyOptions, IBaseManager baseManager, ITargetingManager targetingManager, AttackData attackData, IBuildingPlacement warpInPlacement, MacroData macroData, Morpher morpher, BuildPylonService buildPylonService, BuildDefenseService buildDefenseService, BuildProxyService buildProxyService, UnitCountService unitCountService)
         {
             MacroSetup = macroSetup;
-            UnitManager = unitManager;
+            ActiveUnitData = activeUnitData;
             UnitDataManager = unitDataManager;
             BuildingBuilder = buildingBuilder;
             SharkyOptions = sharkyOptions;
@@ -49,6 +50,7 @@ namespace Sharky.Managers
             BuildPylonService = buildPylonService;
             BuildDefenseService = buildDefenseService;
             BuildProxyService = buildProxyService;
+            UnitCountService = unitCountService;
 
             MacroData.DesiredUpgrades = new Dictionary<Upgrades, bool>();
         }
@@ -129,9 +131,9 @@ namespace Sharky.Managers
                 {
                     var upgradeData = UnitDataManager.UpgradeData[upgrade.Key];
 
-                    if (!UnitManager.Commanders.Any(c => upgradeData.ProducingUnits.Contains((UnitTypes)c.Value.UnitCalculation.Unit.UnitType) && c.Value.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (int)upgradeData.Ability)))
+                    if (!ActiveUnitData.Commanders.Any(c => upgradeData.ProducingUnits.Contains((UnitTypes)c.Value.UnitCalculation.Unit.UnitType) && c.Value.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (int)upgradeData.Ability)))
                     {
-                        var building = UnitManager.Commanders.Where(c => upgradeData.ProducingUnits.Contains((UnitTypes)c.Value.UnitCalculation.Unit.UnitType) && !c.Value.UnitCalculation.Unit.IsActive && c.Value.UnitCalculation.Unit.BuildProgress == 1 && c.Value.LastOrderFrame != MacroData.Frame);
+                        var building = ActiveUnitData.Commanders.Where(c => upgradeData.ProducingUnits.Contains((UnitTypes)c.Value.UnitCalculation.Unit.UnitType) && !c.Value.UnitCalculation.Unit.IsActive && c.Value.UnitCalculation.Unit.BuildProgress == 1 && c.Value.LastOrderFrame != MacroData.Frame);
                         if (building.Count() > 0)
                         {
                             if (upgradeData.Minerals <= MacroData.Minerals && upgradeData.Gas <= MacroData.VespeneGas)
@@ -156,18 +158,18 @@ namespace Sharky.Managers
                     var unitData = UnitDataManager.TrainingData[unit.Key];
                     if ((unitData.Food == 0 || unitData.Food <= MacroData.FoodLeft) && unitData.Minerals <= MacroData.Minerals && unitData.Gas <= MacroData.VespeneGas)
                     {
-                        var building = UnitManager.Commanders.Where(c => unitData.ProducingUnits.Contains((UnitTypes)c.Value.UnitCalculation.Unit.UnitType) && !c.Value.UnitCalculation.Unit.IsActive && c.Value.UnitCalculation.Unit.BuildProgress == 1 && c.Value.WarpInOffCooldown(MacroData.Frame, SharkyOptions.FramesPerSecond, UnitDataManager));
+                        var building = ActiveUnitData.Commanders.Where(c => unitData.ProducingUnits.Contains((UnitTypes)c.Value.UnitCalculation.Unit.UnitType) && !c.Value.UnitCalculation.Unit.IsActive && c.Value.UnitCalculation.Unit.BuildProgress == 1 && c.Value.WarpInOffCooldown(MacroData.Frame, SharkyOptions.FramesPerSecond, UnitDataManager));
                         
                         if (unitData.RequiresTechLab)
                         {
-                            building = building.Where(b => b.Value.UnitCalculation.Unit.HasAddOnTag && UnitDataManager.TechLabTypes.Contains((UnitTypes)UnitManager.SelfUnits[b.Value.UnitCalculation.Unit.AddOnTag].Unit.UnitType));
+                            building = building.Where(b => b.Value.UnitCalculation.Unit.HasAddOnTag && UnitDataManager.TechLabTypes.Contains((UnitTypes)ActiveUnitData.SelfUnits[b.Value.UnitCalculation.Unit.AddOnTag].Unit.UnitType));
                         }
                         else if (building.Count() == 0)
                         {
                             if (unitData.ProducingUnits.Contains(UnitTypes.TERRAN_BARRACKS) || unitData.ProducingUnits.Contains(UnitTypes.TERRAN_FACTORY) || unitData.ProducingUnits.Contains(UnitTypes.TERRAN_STARPORT))
                             {
-                                building = UnitManager.Commanders.Where(c => unitData.ProducingUnits.Contains((UnitTypes)c.Value.UnitCalculation.Unit.UnitType) && c.Value.UnitCalculation.Unit.IsActive && c.Value.UnitCalculation.Unit.BuildProgress == 1 && c.Value.UnitCalculation.Unit.HasAddOnTag && 
-                                    UnitDataManager.ReactorTypes.Contains((UnitTypes)UnitManager.SelfUnits[c.Value.UnitCalculation.Unit.AddOnTag].Unit.UnitType) && c.Value.UnitCalculation.Unit.Orders.Count() == 1);
+                                building = ActiveUnitData.Commanders.Where(c => unitData.ProducingUnits.Contains((UnitTypes)c.Value.UnitCalculation.Unit.UnitType) && c.Value.UnitCalculation.Unit.IsActive && c.Value.UnitCalculation.Unit.BuildProgress == 1 && c.Value.UnitCalculation.Unit.HasAddOnTag && 
+                                    UnitDataManager.ReactorTypes.Contains((UnitTypes)ActiveUnitData.SelfUnits[c.Value.UnitCalculation.Unit.AddOnTag].Unit.UnitType) && c.Value.UnitCalculation.Unit.Orders.Count() == 1);
                             }
                         }
 
@@ -213,9 +215,9 @@ namespace Sharky.Managers
                 }
                 else if (unit.Value && unit.Key == UnitTypes.PROTOSS_ARCHON)
                 {
-                    var templar = UnitManager.Commanders.Where(c => c.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_HIGHTEMPLAR || c.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_DARKTEMPLAR);
+                    var templar = ActiveUnitData.Commanders.Where(c => c.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_HIGHTEMPLAR || c.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_DARKTEMPLAR);
                     var merges = templar.Count(a => a.Value.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.MORPH_ARCHON));
-                    if (merges + UnitManager.Count(UnitTypes.PROTOSS_ARCHON) < MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_ARCHON])
+                    if (merges + UnitCountService.Count(UnitTypes.PROTOSS_ARCHON) < MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_ARCHON])
                     {
                         var mergables = templar.Where(c => !c.Value.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.MORPH_ARCHON || o.AbilityId == (uint)Abilities.MORPH_ARCHON + 1));
                         if (mergables.Count() >= 2)
@@ -241,7 +243,7 @@ namespace Sharky.Managers
             if (MacroData.BuildGas && MacroData.Minerals >= 75)
             {
                 var unitData = GetGasTypeData();
-                var takenGases = UnitManager.SelfUnits.Where(u => UnitDataManager.GasGeyserRefineryTypes.Contains((UnitTypes)u.Value.Unit.UnitType)).Concat(UnitManager.EnemyUnits.Where(u => UnitDataManager.GasGeyserRefineryTypes.Contains((UnitTypes)u.Value.Unit.UnitType)));
+                var takenGases = ActiveUnitData.SelfUnits.Where(u => UnitDataManager.GasGeyserRefineryTypes.Contains((UnitTypes)u.Value.Unit.UnitType)).Concat(ActiveUnitData.EnemyUnits.Where(u => UnitDataManager.GasGeyserRefineryTypes.Contains((UnitTypes)u.Value.Unit.UnitType)));
                 var openGeysers = BaseManager.BaseLocations.SelectMany(b => b.VespeneGeysers).Where(g => g.VespeneContents > 0 && !takenGases.Any(t => t.Value.Unit.Pos.X == g.Pos.X && t.Value.Unit.Pos.Y == g.Pos.Y));
                 if (openGeysers.Count() > 0)
                 {

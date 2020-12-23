@@ -9,17 +9,17 @@ namespace Sharky.Managers
     public class AttackDataManager : SharkyManager
     {
         AttackData AttackData;
-        IUnitManager UnitManager;
+        ActiveUnitData ActiveUnitData;
         AttackTask AttackTask;
         TargetPriorityService TargetPriorityService;
         ITargetingManager TargetingManager;
         MacroData MacroData;
         DebugManager DebugManager;
 
-        public AttackDataManager(AttackData attackData, IUnitManager unitManager, AttackTask attackTask, TargetPriorityService targetPriorityService, ITargetingManager targetingManager, MacroData macroData, DebugManager debugManager)
+        public AttackDataManager(AttackData attackData, ActiveUnitData activeUnitData, AttackTask attackTask, TargetPriorityService targetPriorityService, ITargetingManager targetingManager, MacroData macroData, DebugManager debugManager)
         {
             AttackData = attackData;
-            UnitManager = unitManager;
+            ActiveUnitData = activeUnitData;
             AttackTask = attackTask;
             TargetPriorityService = targetPriorityService;
             TargetingManager = targetingManager;
@@ -47,14 +47,14 @@ namespace Sharky.Managers
                 return new List<SC2APIProtocol.Action>();
             }
 
-            if (UnitManager.SelfUnits.Count(u => u.Value.UnitClassifications.Contains(UnitClassification.Worker)) == 0)
+            if (ActiveUnitData.SelfUnits.Count(u => u.Value.UnitClassifications.Contains(UnitClassification.Worker)) == 0)
             {
                 AttackData.Attacking = true;
                 DebugManager.DrawText("Attacking: no workers");
                 return new List<SC2APIProtocol.Action>();
             }
 
-            if (UnitManager.SelfUnits.Count(u => u.Value.UnitClassifications.Contains(UnitClassification.ResourceCenter)) == 0)
+            if (ActiveUnitData.SelfUnits.Count(u => u.Value.UnitClassifications.Contains(UnitClassification.ResourceCenter)) == 0)
             {
                 AttackData.Attacking = true;
                 DebugManager.DrawText("Attacking: no base");
@@ -69,7 +69,7 @@ namespace Sharky.Managers
             }
 
             var attackVector = new Vector2(TargetingManager.AttackPoint.X, TargetingManager.AttackPoint.Y);
-            var enemyUnits = UnitManager.EnemyUnits.Values.Where(e => (e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && Vector2.DistanceSquared(new Vector2(TargetingManager.MainDefensePoint.X, TargetingManager.MainDefensePoint.Y), new Vector2(e.Unit.Pos.X, e.Unit.Pos.Y)) > 400)
+            var enemyUnits = ActiveUnitData.EnemyUnits.Values.Where(e => (e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && Vector2.DistanceSquared(new Vector2(TargetingManager.MainDefensePoint.X, TargetingManager.MainDefensePoint.Y), new Vector2(e.Unit.Pos.X, e.Unit.Pos.Y)) > 400)
             || (e.UnitClassifications.Contains(UnitClassification.DefensiveStructure) && Vector2.DistanceSquared(attackVector, new Vector2(e.Unit.Pos.X, e.Unit.Pos.Y)) < 625));
 
             if (enemyUnits.Count() < 1)

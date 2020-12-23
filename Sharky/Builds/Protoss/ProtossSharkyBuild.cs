@@ -1,18 +1,17 @@
 ﻿using Sharky.Builds.BuildChoosing;
 using Sharky.Managers;
-using Sharky.Managers.Protoss;
 using System.Collections.Generic;
 
 namespace Sharky.Builds
 {
     public abstract class ProtossSharkyBuild : SharkyBuild
     {
-        protected NexusManager NexusManager;
+        protected ChronoData ChronoData;
         protected ICounterTransitioner CounterTransitioner;
 
-        public ProtossSharkyBuild(BuildOptions buildOptions, MacroData macroData, IUnitManager unitManager, AttackData attackData, IChatManager chatManager, NexusManager nexusManager, ICounterTransitioner counterTransitioner) : base(buildOptions, macroData, unitManager, attackData, chatManager)
+        public ProtossSharkyBuild(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, IChatManager chatManager, ChronoData chronoData, ICounterTransitioner counterTransitioner, UnitCountService unitCountService) : base(buildOptions, macroData, activeUnitData, attackData, chatManager, unitCountService)
         {
-            NexusManager = nexusManager;
+            ChronoData = chronoData;
             CounterTransitioner = counterTransitioner;
         }
 

@@ -13,15 +13,15 @@ namespace Sharky.MicroTasks
     {
         UnitDataManager UnitDataManager;
         IBaseManager BaseManager;
-        IUnitManager UnitManager;
+        ActiveUnitData ActiveUnitData;
         MiningDefenseService MiningDefenseService;
         MacroData MacroData;
 
-        public MiningTask(UnitDataManager unitDataManager, IBaseManager baseManager, IUnitManager unitManager, float priority, MiningDefenseService miningDefenseService, MacroData macroData)
+        public MiningTask(UnitDataManager unitDataManager, IBaseManager baseManager, ActiveUnitData activeUnitData, float priority, MiningDefenseService miningDefenseService, MacroData macroData)
         {
             UnitDataManager = unitDataManager;
             BaseManager = baseManager;
-            UnitManager = unitManager;
+            ActiveUnitData = activeUnitData;
             Priority = priority;
             MiningDefenseService = miningDefenseService;
             MacroData = macroData;
@@ -63,7 +63,7 @@ namespace Sharky.MicroTasks
 
         IEnumerable<UnitCommander> GetIdleWorkers()
         {
-            var incompleteRefineries = UnitManager.SelfUnits.Where(u => UnitDataManager.GasGeyserRefineryTypes.Contains((UnitTypes)u.Value.Unit.UnitType) && u.Value.Unit.BuildProgress < .95f).Select(u => u.Key);
+            var incompleteRefineries = ActiveUnitData.SelfUnits.Where(u => UnitDataManager.GasGeyserRefineryTypes.Contains((UnitTypes)u.Value.Unit.UnitType) && u.Value.Unit.BuildProgress < .95f).Select(u => u.Key);
             return UnitCommanders.Where(c => c.UnitCalculation.Unit.Orders.Count() == 0 || c.UnitCalculation.Unit.Orders.Any(o => incompleteRefineries.Contains(o.TargetUnitTag)));
         }
 
@@ -90,7 +90,7 @@ namespace Sharky.MicroTasks
         {
             var actions = new List<SC2APIProtocol.Action>();
 
-            var refinereries = UnitManager.SelfUnits.Where(u => UnitDataManager.GasGeyserRefineryTypes.Contains((UnitTypes)u.Value.Unit.UnitType) && u.Value.Unit.BuildProgress >= .95f);
+            var refinereries = ActiveUnitData.SelfUnits.Where(u => UnitDataManager.GasGeyserRefineryTypes.Contains((UnitTypes)u.Value.Unit.UnitType) && u.Value.Unit.BuildProgress >= .95f);
             var unsaturatedRefineries = refinereries.Where(u => u.Value.Unit.AssignedHarvesters < u.Value.Unit.IdealHarvesters);
 
             if (MacroData.VespeneGas > 2500 && MacroData.Minerals < 1000)
@@ -181,7 +181,7 @@ namespace Sharky.MicroTasks
                 var undersaturatedBase = BaseManager.SelfBases.Where(b => b.ResourceCenter.BuildProgress > .9 && b.ResourceCenter.AssignedHarvesters < b.ResourceCenter.IdealHarvesters).OrderBy(b => b.ResourceCenter.AssignedHarvesters - b.ResourceCenter.IdealHarvesters).FirstOrDefault();
                 if (undersaturatedBase != null)
                 {
-                    var refinereries = UnitManager.SelfUnits.Where(u => UnitDataManager.GasGeyserRefineryTypes.Contains((UnitTypes)u.Value.Unit.UnitType) && u.Value.Unit.BuildProgress >= .95f);
+                    var refinereries = ActiveUnitData.SelfUnits.Where(u => UnitDataManager.GasGeyserRefineryTypes.Contains((UnitTypes)u.Value.Unit.UnitType) && u.Value.Unit.BuildProgress >= .95f);
                     var worker = UnitCommanders.Where(c => c.UnitCalculation.Unit.Orders.Any(o => UnitDataManager.GatheringAbilities.Contains((Abilities)o.AbilityId) && !refinereries.Select(r => r.Key).Contains(o.TargetUnitTag))).OrderBy(w => Vector2.DistanceSquared(new Vector2(w.UnitCalculation.Unit.Pos.X, w.UnitCalculation.Unit.Pos.Y), new Vector2(oversaturatedBase.Location.X, oversaturatedBase.Location.Y))).FirstOrDefault();
                     var mineralField = undersaturatedBase.MineralFields.OrderBy(m => Vector2.DistanceSquared(new Vector2(m.Pos.X, m.Pos.Y), new Vector2(worker.UnitCalculation.Unit.Pos.X, worker.UnitCalculation.Unit.Pos.Y))).FirstOrDefault();
                     if (mineralField != null)

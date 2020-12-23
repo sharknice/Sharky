@@ -4,18 +4,19 @@ namespace Sharky.EnemyStrategies.Terran
 {
     public class MassVikings : EnemyStrategy
     {
-        public MassVikings(EnemyStrategyHistory enemyStrategyHistory, IChatManager chatManager, IUnitManager unitManager, SharkyOptions sharkyOptions, DebugManager debugManager)
+        public MassVikings(EnemyStrategyHistory enemyStrategyHistory, IChatManager chatManager, ActiveUnitData activeUnitData, SharkyOptions sharkyOptions, DebugManager debugManager, UnitCountService unitCountService)
         {
             EnemyStrategyHistory = enemyStrategyHistory;
             ChatManager = chatManager;
-            UnitManager = unitManager;
+            ActiveUnitData = activeUnitData;
             SharkyOptions = sharkyOptions;
             DebugManager = debugManager;
+            UnitCountService = unitCountService;
         }
 
         protected override bool Detect(int frame)
         {
-            if (UnitManager.EnemyCount(UnitTypes.TERRAN_VIKINGASSAULT) + UnitManager.EnemyCount(UnitTypes.TERRAN_VIKINGFIGHTER) >= 8)
+            if (UnitCountService.EnemyCount(UnitTypes.TERRAN_VIKINGASSAULT) + UnitCountService.EnemyCount(UnitTypes.TERRAN_VIKINGFIGHTER) >= 8)
             {
                 return true;
             }

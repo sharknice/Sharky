@@ -7,7 +7,7 @@ namespace Sharky.Builds.Zerg
     {
         MicroManager MicroManager;
 
-        public BasicZerglingRush(BuildOptions buildOptions, MacroData macroData, IUnitManager unitManager, AttackData attackData, IChatManager chatManager, MicroManager microManager) : base(buildOptions, macroData, unitManager, attackData, chatManager)
+        public BasicZerglingRush(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, IChatManager chatManager, MicroManager microManager, UnitCountService unitCountService) : base(buildOptions, macroData, activeUnitData, attackData, chatManager, unitCountService)
         {
             MicroManager = microManager;
         }
@@ -35,13 +35,13 @@ namespace Sharky.Builds.Zerg
                 }
             }
 
-            if (UnitManager.Count(UnitTypes.ZERG_SPAWNINGPOOL) > 0)
+            if (UnitCountService.Count(UnitTypes.ZERG_SPAWNINGPOOL) > 0)
             {
                 MacroData.DesiredGases = 1;
                 MacroData.DesiredUnitCounts[UnitTypes.ZERG_OVERLORD] = 2;
             }
 
-            if (UnitManager.Completed(UnitTypes.ZERG_SPAWNINGPOOL) > 0)
+            if (UnitCountService.Completed(UnitTypes.ZERG_SPAWNINGPOOL) > 0)
             {
                 MacroData.DesiredUpgrades[Upgrades.ZERGLINGMOVEMENTSPEED] = true;
                 MacroData.DesiredUnitCounts[UnitTypes.ZERG_ZERGLING] = 30;
@@ -65,7 +65,7 @@ namespace Sharky.Builds.Zerg
 
         public override bool Transition(int frame)
         {
-            return MacroData.FoodUsed > 50 && UnitManager.EquivalentTypeCompleted(UnitTypes.ZERG_HATCHERY) > 1;
+            return MacroData.FoodUsed > 50 && UnitCountService.EquivalentTypeCompleted(UnitTypes.ZERG_HATCHERY) > 1;
         }
     }
 }

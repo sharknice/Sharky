@@ -9,17 +9,19 @@ namespace Sharky.Builds
     {
         protected BuildOptions BuildOptions;
         protected MacroData MacroData;
-        protected IUnitManager UnitManager;
+        protected ActiveUnitData ActiveUnitData;
         protected AttackData AttackData;
         protected IChatManager ChatManager;
+        protected UnitCountService UnitCountService;
 
-        public SharkyBuild(BuildOptions buildOptions, MacroData macroData, IUnitManager unitManager, AttackData attackData, IChatManager chatManager)
+        public SharkyBuild(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, IChatManager chatManager, UnitCountService unitCountService)
         {
             BuildOptions = buildOptions;
             MacroData = macroData;
-            UnitManager = unitManager;
+            ActiveUnitData = activeUnitData;
             AttackData = attackData;
             ChatManager = chatManager;
+            UnitCountService = unitCountService;
         }
 
         public string Name()

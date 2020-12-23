@@ -9,15 +9,15 @@ namespace Sharky.Builds.BuildingPlacement
 {
     public class ProtossBuildingPlacement : IBuildingPlacement
     {
-        IUnitManager UnitManager;
+        ActiveUnitData ActiveUnitData;
         UnitDataManager UnitDataManager;
         DebugManager DebugManager;
         MapData MapData;
         BuildingService BuildingService;
 
-        public ProtossBuildingPlacement(IUnitManager unitManager, UnitDataManager unitDataManager, DebugManager debugManager, MapData mapData, BuildingService buildingService)
+        public ProtossBuildingPlacement(ActiveUnitData activeUnitData, UnitDataManager unitDataManager, DebugManager debugManager, MapData mapData, BuildingService buildingService)
         {
-            UnitManager = unitManager;
+            ActiveUnitData = activeUnitData;
             UnitDataManager = unitDataManager;
             DebugManager = debugManager;
             MapData = mapData;
@@ -58,11 +58,11 @@ namespace Sharky.Builds.BuildingPlacement
 
                     if (BuildingService.AreaBuildable(point.X, point.Y, 1.25f) && !BuildingService.Blocked(point.X, point.Y, 1.25f) && !BuildingService.HasCreep(point.X, point.Y, 1.5f))
                     {
-                        var mineralFields = UnitManager.NeutralUnits.Where(u => UnitDataManager.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType) || UnitDataManager.GasGeyserTypes.Contains((UnitTypes)u.Value.Unit.UnitType));
+                        var mineralFields = ActiveUnitData.NeutralUnits.Where(u => UnitDataManager.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType) || UnitDataManager.GasGeyserTypes.Contains((UnitTypes)u.Value.Unit.UnitType));
                         var squared = (1 + minimumMineralProximinity + .5) * (1 + minimumMineralProximinity + .5);
                         var nexusDistanceSquared = 16f;
                         if (minimumMineralProximinity == 0) { nexusDistanceSquared = 0; }
-                        var nexusClashes = UnitManager.SelfUnits.Where(u => (u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS || u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON) && Vector2.DistanceSquared(new Vector2(u.Value.Unit.Pos.X, u.Value.Unit.Pos.Y), new Vector2(point.X, point.Y)) < squared + nexusDistanceSquared);
+                        var nexusClashes = ActiveUnitData.SelfUnits.Where(u => (u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS || u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON) && Vector2.DistanceSquared(new Vector2(u.Value.Unit.Pos.X, u.Value.Unit.Pos.Y), new Vector2(point.X, point.Y)) < squared + nexusDistanceSquared);
                         if (nexusClashes.Count() == 0)
                         {
                             var clashes = mineralFields.Where(u => Vector2.DistanceSquared(new Vector2(u.Value.Unit.Pos.X, u.Value.Unit.Pos.Y), new Vector2(point.X, point.Y)) < squared);
@@ -86,7 +86,7 @@ namespace Sharky.Builds.BuildingPlacement
 
         public Point2D FindProductionPlacement(Point2D target, float size, float maxDistance, float minimumMineralProximinity = 2)
         {
-            var powerSources = UnitManager.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && c.UnitCalculation.Unit.BuildProgress == 1).OrderBy(c => Vector2.DistanceSquared(new Vector2(c.UnitCalculation.Unit.Pos.X, c.UnitCalculation.Unit.Pos.Y), new Vector2(target.X, target.Y)));
+            var powerSources = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && c.UnitCalculation.Unit.BuildProgress == 1).OrderBy(c => Vector2.DistanceSquared(new Vector2(c.UnitCalculation.Unit.Pos.X, c.UnitCalculation.Unit.Pos.Y), new Vector2(target.X, target.Y)));
             foreach (var powerSource in powerSources)
             {
                 var x = powerSource.UnitCalculation.Unit.Pos.X;
@@ -107,7 +107,7 @@ namespace Sharky.Builds.BuildingPlacement
 
                         if (BuildingService.AreaBuildable(point.X, point.Y, size / 2.0f) && !BuildingService.Blocked(point.X, point.Y, size / 2.0f) && !BuildingService.HasCreep(point.X, point.Y, size / 2.0f))
                         {
-                            var mineralFields = UnitManager.NeutralUnits.Where(u => UnitDataManager.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType));
+                            var mineralFields = ActiveUnitData.NeutralUnits.Where(u => UnitDataManager.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType));
                             var squared = (1 + minimumMineralProximinity + (size / 2f)) * (1 + minimumMineralProximinity + (size / 2f));
                             var clashes = mineralFields.Where(u => Vector2.DistanceSquared(new Vector2(u.Value.Unit.Pos.X, u.Value.Unit.Pos.Y), new Vector2(point.X, point.Y)) < squared);
 

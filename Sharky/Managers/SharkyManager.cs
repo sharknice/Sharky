@@ -5,7 +5,7 @@ namespace Sharky.Managers
 {
     public abstract class SharkyManager : IManager
     {
-        public virtual void OnEnd(ResponseObservation observation, Result result)
+        public virtual void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)
         {
 
         }
@@ -15,7 +15,7 @@ namespace Sharky.Managers
             return new List<Action>();
         }
 
-        public virtual void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)
+        public virtual void OnEnd(ResponseObservation observation, Result result)
         {
 
         }

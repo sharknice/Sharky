@@ -1,5 +1,4 @@
-﻿using Sharky.Managers;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -8,11 +7,14 @@ namespace Sharky.MicroTasks
 {
     public class QueenInjectsTask : MicroTask
     {
-        IUnitManager UnitManager;
+        ActiveUnitData ActiveUnitData;
+        UnitCountService UnitCountService;
 
-        public QueenInjectsTask(IUnitManager unitManager, float priority)
+        public QueenInjectsTask(ActiveUnitData activeUnitData, float priority, UnitCountService unitCountService)
         {
-            UnitManager = unitManager;
+            ActiveUnitData = activeUnitData;
+            UnitCountService = unitCountService;
+
             Priority = priority;
 
             UnitCommanders = new List<UnitCommander>();
@@ -22,7 +24,7 @@ namespace Sharky.MicroTasks
 
         public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
         {
-            var hatcheryCount = UnitManager.EquivalentTypeCompleted(UnitTypes.ZERG_HATCHERY);
+            var hatcheryCount = UnitCountService.EquivalentTypeCompleted(UnitTypes.ZERG_HATCHERY);
 
             if (UnitCommanders.Count() >= hatcheryCount)
             {
@@ -59,7 +61,7 @@ namespace Sharky.MicroTasks
         {
             var actions = new List<SC2APIProtocol.Action>();
 
-            var hatcheries = UnitManager.SelfUnits.Where(u => u.Value.UnitClassifications.Contains(UnitClassification.ResourceCenter) && !u.Value.Unit.BuffIds.Contains((uint)Buffs.QUEENSPAWNLARVATIMER));
+            var hatcheries = ActiveUnitData.SelfUnits.Where(u => u.Value.UnitClassifications.Contains(UnitClassification.ResourceCenter) && !u.Value.Unit.BuffIds.Contains((uint)Buffs.QUEENSPAWNLARVATIMER));
 
             foreach (var hatchery in hatcheries)
             {

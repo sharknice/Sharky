@@ -8,14 +8,14 @@ namespace Sharky.Builds.BuildingPlacement
 {
     public class ZergBuildingPlacement : IBuildingPlacement
     {
-        IUnitManager UnitManager;
+        ActiveUnitData ActiveUnitData;
         UnitDataManager UnitDataManager;
         DebugManager DebugManager;
         BuildingService BuildingService;
 
-        public ZergBuildingPlacement(IUnitManager unitManager, UnitDataManager unitDataManager, DebugManager debugManager, BuildingService buildingService)
+        public ZergBuildingPlacement(ActiveUnitData activeUnitData, UnitDataManager unitDataManager, DebugManager debugManager, BuildingService buildingService)
         {
-            UnitManager = unitManager;
+            ActiveUnitData = activeUnitData;
             UnitDataManager = unitDataManager;
             DebugManager = debugManager;
             BuildingService = buildingService;
@@ -46,13 +46,13 @@ namespace Sharky.Builds.BuildingPlacement
                     var point = new Point2D { X = x + (float)(radius * Math.Cos(angle)), Y = y + (float)(radius * Math.Sin(angle)) };
                     if (BuildingService.HasCreep(point.X, point.Y, size / 2.0f) && BuildingService.AreaBuildable(point.X, point.Y, size / 2.0f) && !BuildingService.Blocked(point.X, point.Y, size / 2.0f))
                     {
-                        var mineralFields = UnitManager.NeutralUnits.Where(u => UnitDataManager.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType));
+                        var mineralFields = ActiveUnitData.NeutralUnits.Where(u => UnitDataManager.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType));
                         var squared = (1 + minimumMineralProximinity + (size / 2f)) * (1 + minimumMineralProximinity + (size / 2f));
                         var clashes = mineralFields.Where(u => Vector2.DistanceSquared(new Vector2(u.Value.Unit.Pos.X, u.Value.Unit.Pos.Y), new Vector2(point.X, point.Y)) < squared);
 
                         if (clashes.Count() == 0)
                         {
-                            var productionStructures = UnitManager.SelfUnits.Where(u => u.Value.Unit.UnitType == (uint)UnitTypes.TERRAN_BARRACKS || u.Value.Unit.UnitType == (uint)UnitTypes.TERRAN_FACTORY || u.Value.Unit.UnitType == (uint)UnitTypes.TERRAN_STARPORT);
+                            var productionStructures = ActiveUnitData.SelfUnits.Where(u => u.Value.Unit.UnitType == (uint)UnitTypes.TERRAN_BARRACKS || u.Value.Unit.UnitType == (uint)UnitTypes.TERRAN_FACTORY || u.Value.Unit.UnitType == (uint)UnitTypes.TERRAN_STARPORT);
                             if (!productionStructures.Any(u => Vector2.DistanceSquared(new Vector2(u.Value.Unit.Pos.X, u.Value.Unit.Pos.Y), new Vector2(point.X, point.Y)) < 16))
                             {
                                 if (Vector2.DistanceSquared(new Vector2(reference.X, reference.Y), new Vector2(point.X, point.Y)) <= maxDistance * maxDistance)

@@ -8,12 +8,12 @@ namespace Sharky.Managers
     {
         public Race EnemyRace { get; private set; }
 
-        IUnitManager UnitManager;
+        ActiveUnitData ActiveUnitData;
         UnitDataManager UnitDataManager;
 
-        public EnemyRaceManager(IUnitManager unitManager, UnitDataManager unitDataManager)
+        public EnemyRaceManager(ActiveUnitData activeUnitData, UnitDataManager unitDataManager)
         {
-            UnitManager = unitManager;
+            ActiveUnitData = activeUnitData;
             UnitDataManager = unitDataManager;
         }
 
@@ -32,15 +32,15 @@ namespace Sharky.Managers
         {
             if (EnemyRace == Race.Random)
             {
-                if (UnitManager.EnemyUnits.Any(e => UnitDataManager.ProtossTypes.Contains((UnitTypes)e.Value.Unit.UnitType)))
+                if (ActiveUnitData.EnemyUnits.Any(e => UnitDataManager.ProtossTypes.Contains((UnitTypes)e.Value.Unit.UnitType)))
                 {
                     EnemyRace = Race.Protoss;
                 }
-                else if (UnitManager.EnemyUnits.Any(e => UnitDataManager.TerranTypes.Contains((UnitTypes)e.Value.Unit.UnitType)))
+                else if (ActiveUnitData.EnemyUnits.Any(e => UnitDataManager.TerranTypes.Contains((UnitTypes)e.Value.Unit.UnitType)))
                 {
                     EnemyRace = Race.Terran;
                 }
-                else if (UnitManager.EnemyUnits.Any(e => UnitDataManager.ZergTypes.Contains((UnitTypes)e.Value.Unit.UnitType)))
+                else if (ActiveUnitData.EnemyUnits.Any(e => UnitDataManager.ZergTypes.Contains((UnitTypes)e.Value.Unit.UnitType)))
                 {
                     EnemyRace = Race.Zerg;
                 }

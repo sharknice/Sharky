@@ -8,9 +8,9 @@ namespace Sharky.Builds.BuildChoosing
 {
     public class BuildDecisionService : IBuildDecisionService
     {
-        ChatManager ChatManager;
+        IChatManager ChatManager;
 
-        public BuildDecisionService(ChatManager chatManager)
+        public BuildDecisionService(IChatManager chatManager)
         {
             ChatManager = chatManager;
         }

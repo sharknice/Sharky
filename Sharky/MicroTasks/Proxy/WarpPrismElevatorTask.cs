@@ -22,7 +22,7 @@ namespace Sharky.MicroTasks.Proxy
         MapDataService MapDataService;
         DebugManager DebugManager;
         UnitDataManager UnitDataManager;
-        IUnitManager UnitManager;
+        ActiveUnitData ActiveUnitData;
         IChatManager ChatManager;
 
         float lastFrameTime;
@@ -38,7 +38,7 @@ namespace Sharky.MicroTasks.Proxy
         float InsideBaseDistanceSquared { get; set; }
         int PickupRangeSquared { get; set; }
 
-        public WarpPrismElevatorTask(ITargetingManager targetingManager, IMicroController microController, WarpPrismMicroController warpPrismMicroController, ProxyLocationService proxyLocationService, MapDataService mapDataService, DebugManager debugManager, UnitDataManager unitDataManager, IUnitManager unitManager, IChatManager chatManager, List<DesiredUnitsClaim> desiredUnitsClaims, float priority, bool enabled = true)
+        public WarpPrismElevatorTask(ITargetingManager targetingManager, IMicroController microController, WarpPrismMicroController warpPrismMicroController, ProxyLocationService proxyLocationService, MapDataService mapDataService, DebugManager debugManager, UnitDataManager unitDataManager, ActiveUnitData activeUnitData, IChatManager chatManager, List<DesiredUnitsClaim> desiredUnitsClaims, float priority, bool enabled = true)
         {
             TargetingManager = targetingManager;
             MicroController = microController;
@@ -47,7 +47,7 @@ namespace Sharky.MicroTasks.Proxy
             MapDataService = mapDataService;
             DebugManager = debugManager;
             UnitDataManager = unitDataManager;
-            UnitManager = unitManager;
+            ActiveUnitData = activeUnitData;
 
             DesiredUnitsClaims = desiredUnitsClaims;
             Priority = priority;
@@ -144,7 +144,7 @@ namespace Sharky.MicroTasks.Proxy
 
         private void CheckComplete()
         {
-            if (MapDataService.SelfVisible(TargetLocatoin) && !UnitManager.EnemyUnits.Any(e => Vector2.DistanceSquared(new Vector2(TargetLocatoin.X, TargetLocatoin.Y), new Vector2(e.Value.Unit.Pos.X, e.Value.Unit.Pos.Y)) < 100))
+            if (MapDataService.SelfVisible(TargetLocatoin) && !ActiveUnitData.EnemyUnits.Any(e => Vector2.DistanceSquared(new Vector2(TargetLocatoin.X, TargetLocatoin.Y), new Vector2(e.Value.Unit.Pos.X, e.Value.Unit.Pos.Y)) < 100))
             {
                 Disable();
                 ChatManager.SendChatType("WarpPrismElevatorTask-TaskCompleted");

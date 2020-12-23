@@ -10,14 +10,14 @@ namespace Sharky.MicroTasks.Mining
     public class MiningDefenseService
     {
         IBaseManager BaseManager;
-        IUnitManager UnitManager;
+        ActiveUnitData ActiveUnitData;
         IIndividualMicroController WorkerMicroController;
         DebugManager DebugManager;
 
-        public MiningDefenseService(IBaseManager baseManager, IUnitManager unitManager, IIndividualMicroController workerMicroController, DebugManager debugManager)
+        public MiningDefenseService(IBaseManager baseManager, ActiveUnitData activeUnitData, IIndividualMicroController workerMicroController, DebugManager debugManager)
         {
             BaseManager = baseManager;
-            UnitManager = unitManager;
+            ActiveUnitData = activeUnitData;
             WorkerMicroController = workerMicroController;
             DebugManager = debugManager;
         }
@@ -27,157 +27,171 @@ namespace Sharky.MicroTasks.Mining
             var actions = new List<SC2APIProtocol.Action>();
             foreach (var selfBase in BaseManager.SelfBases)
             {
-                if (UnitManager.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Count() > 0 && !UnitManager.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyAllies.Any(a => a.UnitClassifications.Contains(UnitClassification.ArmyUnit)))
+                if (ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Count() > 0)
                 {
-                    var enemyGroundDamage = UnitManager.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Where(e => e.DamageGround).Sum(e => e.Damage);
-                    var commanders = unitCommanders.Where(u => UnitManager.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyAllies.Any(a => a.Unit.Tag == u.UnitCalculation.Unit.Tag));
-                    if (commanders.Count() < 1) { continue; }
-
-                    if (UnitManager.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyAllies.Where(e => e.DamageGround || e.UnitClassifications.Contains(UnitClassification.Worker)).Sum(e => e.Damage) > enemyGroundDamage)
+                    if (!ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyAllies.Any(a => a.UnitClassifications.Contains(UnitClassification.ArmyUnit)))
                     {
-                        int desiredWorkers = 0;
-                        var combatUnits = UnitManager.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Where(u => u.UnitClassifications.Contains(UnitClassification.ArmyUnit));
-                        var workers = UnitManager.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Where(u => u.UnitClassifications.Contains(UnitClassification.Worker));
-                        if (combatUnits.Count() == 0)
-                        {
-                            desiredWorkers = workers.Count() + 1;
-                            if (workers.Count() > 8) // this is a worker rush, set one defending worker as the bait that will stay just out of range and run away
-                            {
-                                var bait = commanders.Where(w => w.UnitRole == UnitRole.Bait).FirstOrDefault();
-                                if (bait == null && commanders.Count() > 0)
-                                {
-                                    commanders.FirstOrDefault().UnitRole = UnitRole.Bait;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            if (combatUnits.All(u => u.Unit.UnitType == (uint)UnitTypes.ZERG_ZERGLING))
-                            {
-                                desiredWorkers = combatUnits.Count() * 2;
-                            }
-                            else
-                            {
-                                desiredWorkers = combatUnits.Count() * 3;
-                            }
-                        }
+                        var enemyGroundDamage = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Where(e => e.DamageGround).Sum(e => e.Damage);
+                        var commanders = unitCommanders.Where(u => ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyAllies.Any(a => a.Unit.Tag == u.UnitCalculation.Unit.Tag));
+                        if (commanders.Count() < 1) { continue; }
 
-                        if (UnitManager.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Where(u => !u.Unit.IsFlying).Count() > 8)
+                        if (ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyAllies.Where(e => e.DamageGround || e.UnitClassifications.Contains(UnitClassification.Worker)).Sum(e => e.Damage) > enemyGroundDamage)
                         {
-                            // if all the workers are stacked, attack the closest enemy
-                            var selectedCommanders = commanders.Where(c => c.UnitRole != UnitRole.Bait);
-                            var vectors = selectedCommanders.Select(c => new Vector2(c.UnitCalculation.Unit.Pos.X, c.UnitCalculation.Unit.Pos.Y));
-                            var averageVector = new Vector2(vectors.Average(v => v.X), vectors.Average(v => v.Y));
-                            if (selectedCommanders.All(c => Vector2.DistanceSquared(averageVector, new Vector2(c.UnitCalculation.Unit.Pos.X, c.UnitCalculation.Unit.Pos.Y)) < 1))
+                            int desiredWorkers = 0;
+                            var combatUnits = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Where(u => u.UnitClassifications.Contains(UnitClassification.ArmyUnit));
+                            var workers = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Where(u => u.UnitClassifications.Contains(UnitClassification.Worker));
+                            if (combatUnits.Count() == 0)
                             {
-                                var closestEnemy = UnitManager.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Where(u => !u.Unit.IsFlying).OrderBy(u => Vector2.DistanceSquared(new Vector2(u.Unit.Pos.X, u.Unit.Pos.Y), averageVector)).FirstOrDefault();
-                                if (closestEnemy != null)
+                                desiredWorkers = workers.Count() + 1;
+                                if (workers.Count() > 8) // this is a worker rush, set one defending worker as the bait that will stay just out of range and run away
                                 {
-                                    var command = new ActionRawUnitCommand();
-                                    foreach (var commander in selectedCommanders)
+                                    var bait = commanders.Where(w => w.UnitRole == UnitRole.Bait).FirstOrDefault();
+                                    if (bait == null && commanders.Count() > 0)
                                     {
-                                        command.UnitTags.Add(commander.UnitCalculation.Unit.Tag);
+                                        commanders.FirstOrDefault().UnitRole = UnitRole.Bait;
                                     }
-                                    command.AbilityId = (int)Abilities.ATTACK;
-                                    command.TargetUnitTag = closestEnemy.Unit.Tag;
-
-                                    var action = new SC2APIProtocol.Action
-                                    {
-                                        ActionRaw = new ActionRaw
-                                        {
-                                            UnitCommand = command
-                                        }
-                                    };
-                                    actions.Add(action);
                                 }
                             }
                             else
                             {
-                                // spam a far mineral to bunch workers up until enemies get within range and then attack
-                                var farMineral = selfBase.MineralFields.OrderByDescending(m => Vector2.DistanceSquared(new Vector2(m.Pos.X, m.Pos.Y), new Vector2(selfBase.Location.X, selfBase.Location.Y))).FirstOrDefault();
-                                if (farMineral != null)
+                                if (combatUnits.All(u => u.Unit.UnitType == (uint)UnitTypes.ZERG_ZERGLING))
                                 {
-                                    foreach (var commander in selectedCommanders)
+                                    desiredWorkers = combatUnits.Count() * 3;
+                                }
+                                else if (combatUnits.All(u => u.Unit.UnitType == (uint)UnitTypes.ZERG_ZERGLING))
+                                {
+                                    desiredWorkers = combatUnits.Count() * 4;
+                                }
+                                else
+                                {
+                                    desiredWorkers = combatUnits.Count() * 5;
+                                }
+                            }
+
+                            if (ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Where(u => !u.Unit.IsFlying).Count() > 8)
+                            {
+                                // if all the workers are stacked, attack the closest enemy
+                                var selectedCommanders = commanders.Where(c => c.UnitRole != UnitRole.Bait);
+                                var vectors = selectedCommanders.Select(c => new Vector2(c.UnitCalculation.Unit.Pos.X, c.UnitCalculation.Unit.Pos.Y));
+                                var averageVector = new Vector2(vectors.Average(v => v.X), vectors.Average(v => v.Y));
+                                if (selectedCommanders.All(c => Vector2.DistanceSquared(averageVector, new Vector2(c.UnitCalculation.Unit.Pos.X, c.UnitCalculation.Unit.Pos.Y)) < 1))
+                                {
+                                    var closestEnemy = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Where(u => !u.Unit.IsFlying).OrderBy(u => Vector2.DistanceSquared(new Vector2(u.Unit.Pos.X, u.Unit.Pos.Y), averageVector)).FirstOrDefault();
+                                    if (closestEnemy != null)
                                     {
-                                        var enemyInRange = commander.UnitCalculation.EnemiesInRange.OrderBy(e => e.Unit.Health + e.Unit.Shield).FirstOrDefault();
-                                        if (enemyInRange != null && commander.UnitCalculation.Unit.WeaponCooldown == 0)
+                                        var command = new ActionRawUnitCommand();
+                                        foreach (var commander in selectedCommanders)
                                         {
-                                            var action = commander.Order(frame, Abilities.ATTACK, null, enemyInRange.Unit.Tag);
-                                            if (action != null)
-                                            {
-                                                actions.Add(action);
-                                            }
+                                            command.UnitTags.Add(commander.UnitCalculation.Unit.Tag);
                                         }
-                                        else
+                                        command.AbilityId = (int)Abilities.ATTACK;
+                                        command.TargetUnitTag = closestEnemy.Unit.Tag;
+
+                                        var action = new SC2APIProtocol.Action
                                         {
-                                            var action = commander.Order(frame, Abilities.HARVEST_GATHER, null, farMineral.Tag, true);
-                                            if (action != null)
+                                            ActionRaw = new ActionRaw
                                             {
-                                                actions.Add(action);
+                                                UnitCommand = command
                                             }
-                                        }
+                                        };
+                                        actions.Add(action);
                                     }
                                 }
                                 else
                                 {
-                                    foreach (var commander in selectedCommanders)
+                                    // spam a far mineral to bunch workers up until enemies get within range and then attack
+                                    var farMineral = selfBase.MineralFields.OrderByDescending(m => Vector2.DistanceSquared(new Vector2(m.Pos.X, m.Pos.Y), new Vector2(selfBase.Location.X, selfBase.Location.Y))).FirstOrDefault();
+                                    if (farMineral != null)
                                     {
-                                        var action = commander.Order(frame, Abilities.ATTACK, selfBase.Location);
-                                        if (action != null)
+                                        foreach (var commander in selectedCommanders)
                                         {
-                                            actions.Add(action);
+                                            var enemyInRange = commander.UnitCalculation.EnemiesInRange.OrderBy(e => e.Unit.Health + e.Unit.Shield).FirstOrDefault();
+                                            if (enemyInRange != null && commander.UnitCalculation.Unit.WeaponCooldown == 0)
+                                            {
+                                                var action = commander.Order(frame, Abilities.ATTACK, null, enemyInRange.Unit.Tag);
+                                                if (action != null)
+                                                {
+                                                    actions.Add(action);
+                                                }
+                                            }
+                                            else
+                                            {
+                                                var action = commander.Order(frame, Abilities.HARVEST_GATHER, null, farMineral.Tag, true);
+                                                if (action != null)
+                                                {
+                                                    actions.Add(action);
+                                                }
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        foreach (var commander in selectedCommanders)
+                                        {
+                                            var action = commander.Order(frame, Abilities.ATTACK, selfBase.Location);
+                                            if (action != null)
+                                            {
+                                                actions.Add(action);
+                                            }
                                         }
                                     }
                                 }
-                            }
 
-                            foreach (var commander in commanders.Where(c => c.UnitRole == UnitRole.Bait))
-                            {
-                                var action = WorkerMicroController.Bait(commander, BaseManager.BaseLocations.Last().Location, BaseManager.BaseLocations.First().Location, null, frame);
-                                if (action != null)
+                                foreach (var commander in commanders.Where(c => c.UnitRole == UnitRole.Bait))
                                 {
-                                    actions.Add(action);
+                                    var action = WorkerMicroController.Bait(commander, BaseManager.BaseLocations.Last().Location, BaseManager.BaseLocations.First().Location, null, frame);
+                                    if (action != null)
+                                    {
+                                        actions.Add(action);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                var enemy = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Where(u => !u.Unit.IsFlying).OrderBy(u => Vector2.DistanceSquared(new Vector2(u.Unit.Pos.X, u.Unit.Pos.Y), new Vector2(selfBase.Location.X, selfBase.Location.Y))).FirstOrDefault();
+                                // TODO: maybe use a MicroController for this isntead
+                                if (commanders.Count() < desiredWorkers)
+                                {
+                                    actions.AddRange(Run(frame, unitCommanders, selfBase));
+                                }
+                                else if (enemy != null)
+                                {
+                                    int defendingCount = 0;
+                                    var command = new ActionRawUnitCommand();
+                                    foreach (var commander in commanders)
+                                    {
+                                        if (defendingCount < desiredWorkers)
+                                        {
+                                            command.UnitTags.Add(commander.UnitCalculation.Unit.Tag);
+                                            defendingCount++;
+                                        }
+                                    }
+
+                                    if (defendingCount > 0)
+                                    {
+                                        command.AbilityId = (int)Abilities.ATTACK;
+                                        command.TargetWorldSpacePos = new Point2D { X = enemy.Unit.Pos.X, Y = enemy.Unit.Pos.Y };
+
+                                        var action = new SC2APIProtocol.Action
+                                        {
+                                            ActionRaw = new ActionRaw
+                                            {
+                                                UnitCommand = command
+                                            }
+                                        };
+                                        actions.Add(action);
+                                    }
                                 }
                             }
                         }
                         else
                         {
-                            var enemy = UnitManager.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Where(u => !u.Unit.IsFlying).OrderBy(u => Vector2.DistanceSquared(new Vector2(u.Unit.Pos.X, u.Unit.Pos.Y), new Vector2(selfBase.Location.X, selfBase.Location.Y))).FirstOrDefault();
-                            // TODO: maybe use a MicroController for this isntead
-
-                            if (enemy != null)
-                            {
-                                int defendingCount = 0;
-                                var command = new ActionRawUnitCommand();
-                                foreach (var commander in commanders)
-                                {
-                                    if (defendingCount < desiredWorkers)
-                                    {
-                                        command.UnitTags.Add(commander.UnitCalculation.Unit.Tag);
-                                        defendingCount++;
-                                    }
-                                }
-
-                                if (defendingCount > 0)
-                                {
-                                    command.AbilityId = (int)Abilities.ATTACK;
-                                    command.TargetWorldSpacePos = new Point2D { X = enemy.Unit.Pos.X, Y = enemy.Unit.Pos.Y };
-
-                                    var action = new SC2APIProtocol.Action
-                                    {
-                                        ActionRaw = new ActionRaw
-                                        {
-                                            UnitCommand = command
-                                        }
-                                    };
-                                    actions.Add(action);
-                                }
-                            }
+                            actions.AddRange(Run(frame, unitCommanders, selfBase));
                         }
                     }
                     else
                     {
-                        // TODO: run
+                        actions.AddRange(Run(frame, unitCommanders, selfBase));
                     }
                 }
             }
@@ -193,6 +207,30 @@ namespace Sharky.MicroTasks.Mining
                         actions.Add(action);
                     }
                 }
+            }
+
+            return actions;
+        }
+
+        private List<SC2APIProtocol.Action> Run(int frame, List<UnitCommander> unitCommanders, BaseLocation selfBase)
+        {
+            var actions = new List<SC2APIProtocol.Action>();
+
+            var otherBase = BaseManager.BaseLocations.FirstOrDefault(b => b.Location.X != selfBase.Location.X && b.Location.Y != selfBase.Location.Y);
+            if (otherBase != null)
+            {
+                foreach (var commander in unitCommanders)
+                {
+                    if (commander.UnitCalculation.EnemiesInRangeOf.Count() > 0)
+                    {
+                        var action = WorkerMicroController.Retreat(commander, otherBase.MineralLineLocation, null, frame);
+                        if (action != null)
+                        {
+                            actions.Add(action);
+                        }
+                    }
+                }
+
             }
 
             return actions;

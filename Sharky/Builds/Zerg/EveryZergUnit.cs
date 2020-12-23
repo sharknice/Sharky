@@ -5,7 +5,7 @@ namespace Sharky.Builds.Zerg
 {
     public class EveryZergUnit : ZergSharkyBuild
     {
-        public EveryZergUnit(BuildOptions buildOptions, MacroData macroData, IUnitManager unitManager, AttackData attackData, IChatManager chatManager) : base(buildOptions, macroData, unitManager, attackData, chatManager)
+        public EveryZergUnit(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, IChatManager chatManager, UnitCountService unitCountService) : base(buildOptions, macroData, activeUnitData, attackData, chatManager, unitCountService)
         {
         }
 
@@ -29,7 +29,7 @@ namespace Sharky.Builds.Zerg
                 MacroData.DesiredUpgrades[Upgrades.BURROW] = true;
             }
 
-            if (UnitManager.Completed(UnitTypes.ZERG_SPAWNINGPOOL) > 0)
+            if (UnitCountService.Completed(UnitTypes.ZERG_SPAWNINGPOOL) > 0)
             {
                 if (MacroData.DesiredTechCounts[UnitTypes.ZERG_BANELINGNEST] < 1)
                 {
@@ -71,7 +71,7 @@ namespace Sharky.Builds.Zerg
                 MacroData.DesiredUpgrades[Upgrades.OVERLORDSPEED] = true;
             }
 
-            if (UnitManager.Completed(UnitTypes.ZERG_EVOLUTIONCHAMBER) > 0)
+            if (UnitCountService.Completed(UnitTypes.ZERG_EVOLUTIONCHAMBER) > 0)
             {
                 MacroData.DesiredUpgrades[Upgrades.ZERGMELEEWEAPONSLEVEL1] = true;
                 MacroData.DesiredUpgrades[Upgrades.ZERGMELEEWEAPONSLEVEL2] = true;
@@ -84,7 +84,7 @@ namespace Sharky.Builds.Zerg
                 MacroData.DesiredUpgrades[Upgrades.ZERGGROUNDARMORSLEVEL3] = true;
             }
 
-            if (UnitManager.Completed(UnitTypes.ZERG_ROACHWARREN) > 0)
+            if (UnitCountService.Completed(UnitTypes.ZERG_ROACHWARREN) > 0)
             {
                 if (MacroData.DesiredUnitCounts[UnitTypes.ZERG_ROACH] < 1)
                 {
@@ -99,7 +99,7 @@ namespace Sharky.Builds.Zerg
                 MacroData.DesiredUpgrades[Upgrades.TUNNELINGCLAWS] = true;
             }
 
-            if (UnitManager.Completed(UnitTypes.ZERG_BANELINGNEST) > 0)
+            if (UnitCountService.Completed(UnitTypes.ZERG_BANELINGNEST) > 0)
             {
                 if (MacroData.DesiredUnitCounts[UnitTypes.ZERG_BANELING] < 1)
                 {
@@ -109,7 +109,7 @@ namespace Sharky.Builds.Zerg
                 MacroData.DesiredUpgrades[Upgrades.CENTRIFICALHOOKS] = true;
             }
 
-            if (UnitManager.Completed(UnitTypes.ZERG_LAIR) > 0)
+            if (UnitCountService.Completed(UnitTypes.ZERG_LAIR) > 0)
             {
                 if (MacroData.DesiredTechCounts[UnitTypes.ZERG_HYDRALISKDEN] < 1)
                 {
@@ -137,7 +137,7 @@ namespace Sharky.Builds.Zerg
                 }
             }
 
-            if (UnitManager.Completed(UnitTypes.ZERG_INFESTATIONPIT) > 0)
+            if (UnitCountService.Completed(UnitTypes.ZERG_INFESTATIONPIT) > 0)
             {
                 if (MacroData.DesiredUnitCounts[UnitTypes.ZERG_INFESTOR] < 1)
                 {
@@ -157,7 +157,7 @@ namespace Sharky.Builds.Zerg
                 }
             }
 
-            if (UnitManager.EquivalentTypeCompleted(UnitTypes.ZERG_HYDRALISKDEN) > 0)
+            if (UnitCountService.EquivalentTypeCompleted(UnitTypes.ZERG_HYDRALISKDEN) > 0)
             {
                 if (MacroData.DesiredUnitCounts[UnitTypes.ZERG_HYDRALISK] < 1)
                 {
@@ -168,7 +168,7 @@ namespace Sharky.Builds.Zerg
                 MacroData.DesiredUpgrades[Upgrades.EVOLVEMUSCULARAUGMENTS] = true;
             }
 
-            if (UnitManager.Completed(UnitTypes.ZERG_SPIRE) > 0)
+            if (UnitCountService.Completed(UnitTypes.ZERG_SPIRE) > 0)
             {
                 if (MacroData.DesiredUnitCounts[UnitTypes.ZERG_MUTALISK] < 1)
                 {
@@ -192,7 +192,7 @@ namespace Sharky.Builds.Zerg
                 }
             }
 
-            if (UnitManager.Completed(UnitTypes.ZERG_HIVE) > 0)
+            if (UnitCountService.Completed(UnitTypes.ZERG_HIVE) > 0)
             {
                 if (MacroData.DesiredUnitCounts[UnitTypes.ZERG_VIPER] < 1)
                 {
@@ -210,7 +210,7 @@ namespace Sharky.Builds.Zerg
                 }
             }
 
-            if (UnitManager.Completed(UnitTypes.ZERG_LURKERDENMP) > 0)
+            if (UnitCountService.Completed(UnitTypes.ZERG_LURKERDENMP) > 0)
             {
                 if (MacroData.DesiredUnitCounts[UnitTypes.ZERG_LURKERMP] < 1)
                 {
@@ -221,7 +221,7 @@ namespace Sharky.Builds.Zerg
                 MacroData.DesiredUpgrades[Upgrades.LURKERSPEED] = true;
             }
 
-            if (UnitManager.Completed(UnitTypes.ZERG_ULTRALISKCAVERN) > 0)
+            if (UnitCountService.Completed(UnitTypes.ZERG_ULTRALISKCAVERN) > 0)
             {
                 if (MacroData.DesiredUnitCounts[UnitTypes.ZERG_ULTRALISK] < 1)
                 {
@@ -232,7 +232,7 @@ namespace Sharky.Builds.Zerg
                 MacroData.DesiredUpgrades[Upgrades.CHITINOUSPLATING] = true;
             }
 
-            if (UnitManager.Completed(UnitTypes.ZERG_GREATERSPIRE) > 0)
+            if (UnitCountService.Completed(UnitTypes.ZERG_GREATERSPIRE) > 0)
             {
                 if (MacroData.DesiredUnitCounts[UnitTypes.ZERG_BROODLORD] < 1)
                 {
@@ -242,7 +242,7 @@ namespace Sharky.Builds.Zerg
 
             if (MacroData.Minerals > 500)
             {
-                if (MacroData.DesiredProductionCounts[UnitTypes.ZERG_HATCHERY] <= UnitManager.EquivalentTypeCount(UnitTypes.ZERG_HATCHERY))
+                if (MacroData.DesiredProductionCounts[UnitTypes.ZERG_HATCHERY] <= UnitCountService.EquivalentTypeCount(UnitTypes.ZERG_HATCHERY))
                 {
                     MacroData.DesiredProductionCounts[UnitTypes.ZERG_HATCHERY]++;
                 }

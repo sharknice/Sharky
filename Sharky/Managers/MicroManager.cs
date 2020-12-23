@@ -7,13 +7,13 @@ namespace Sharky.Managers
 {
     public class MicroManager : SharkyManager
     {      
-        IUnitManager UnitManager;
+        ActiveUnitData ActiveUnitData;
 
         public Dictionary<string, IMicroTask> MicroTasks;
 
-        public MicroManager(IUnitManager unitManager, Dictionary<string, IMicroTask> microTasks)
+        public MicroManager(ActiveUnitData activeUnitData, Dictionary<string, IMicroTask> microTasks)
         {
-            UnitManager = unitManager;
+            ActiveUnitData = activeUnitData;
             MicroTasks = microTasks;
         }
 
@@ -24,12 +24,12 @@ namespace Sharky.Managers
             var actions = new List<Action>();
             foreach (var microTask in MicroTasks.Values.Where(m => m.Enabled).OrderBy(m => m.Priority))
             {
-                foreach (var tag in UnitManager.DeadUnits)
+                foreach (var tag in ActiveUnitData.DeadUnits)
                 {
                     microTask.UnitCommanders.RemoveAll(c => c.UnitCalculation.Unit.Tag == tag);
                 }
 
-                microTask.ClaimUnits(UnitManager.Commanders);
+                microTask.ClaimUnits(ActiveUnitData.Commanders);
                 actions.AddRange(microTask.PerformActions(frame));
             }
             return actions;

@@ -5,7 +5,7 @@ namespace Sharky.Builds.Terran
 {
     public class MassMarines : TerranSharkyBuild
     {
-        public MassMarines(BuildOptions buildOptions, MacroData macroData, IUnitManager unitManager, AttackData attackData, IChatManager chatManager) : base(buildOptions, macroData, unitManager, attackData, chatManager)
+        public MassMarines(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, IChatManager chatManager, UnitCountService unitCountService) : base(buildOptions, macroData, activeUnitData, attackData, chatManager, unitCountService)
         {
 
         }
@@ -41,7 +41,7 @@ namespace Sharky.Builds.Terran
 
         public override bool Transition(int frame)
         {
-            return MacroData.FoodUsed > 50 && UnitManager.EquivalentTypeCompleted(UnitTypes.TERRAN_COMMANDCENTER) > 1;
+            return MacroData.FoodUsed > 50 && UnitCountService.EquivalentTypeCompleted(UnitTypes.TERRAN_COMMANDCENTER) > 1;
         }
     }
 }

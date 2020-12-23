@@ -8,11 +8,11 @@ namespace Sharky.MicroTasks
 {
     public class DefenseService
     {
-        IUnitManager UnitManager;
+        ActiveUnitData ActiveUnitData;
 
-        public DefenseService(IUnitManager unitManager)
+        public DefenseService(ActiveUnitData activeUnitData)
         {
-            UnitManager = unitManager;
+            ActiveUnitData = activeUnitData;
         }
 
         public List<UnitCommander> GetDefenseGroup(List<UnitCalculation> enemyGroup, List<UnitCommander> unitCommanders)
@@ -82,7 +82,7 @@ namespace Sharky.MicroTasks
                 {
                     var group = new List<UnitCalculation>();
                     group.Add(enemy);
-                    foreach (var nearbyEnemy in UnitManager.EnemyUnits[enemy.Unit.Tag].NearbyAllies)
+                    foreach (var nearbyEnemy in ActiveUnitData.EnemyUnits[enemy.Unit.Tag].NearbyAllies)
                     {
                         if (!enemyGroups.Any(g => g.Any(e => e.Unit.Tag == nearbyEnemy.Unit.Tag)))
                         {

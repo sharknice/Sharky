@@ -1,5 +1,6 @@
 ﻿using SC2APIProtocol;
 using Sharky.Managers;
+using Sharky.MicroControllers;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,11 +14,13 @@ namespace Sharky.MicroTasks
         MacroData MacroData;
         MicroManager MicroManager;
         DebugManager DebugManager;
+        IIndividualMicroController IndividualMicroController;
+
         public string ProxyName { get; set; }
 
         bool started { get; set; }
 
-        public ProxyTask(UnitDataManager unitDataManager, bool enabled, float priority, MacroData macroData, string proxyName, MicroManager microManager, DebugManager debugManager)
+        public ProxyTask(UnitDataManager unitDataManager, bool enabled, float priority, MacroData macroData, string proxyName, MicroManager microManager, DebugManager debugManager, IIndividualMicroController individualMicroController)
         {
             UnitDataManager = unitDataManager;
             Priority = priority;
@@ -25,6 +28,7 @@ namespace Sharky.MicroTasks
             ProxyName = proxyName;
             MicroManager = microManager;
             DebugManager = debugManager;
+            IndividualMicroController = individualMicroController;
 
             UnitCommanders = new List<UnitCommander>();
             Enabled = enabled;
@@ -101,10 +105,13 @@ namespace Sharky.MicroTasks
             {
                 if (Vector2.DistanceSquared(new Vector2(MacroData.Proxies[ProxyName].Location.X, MacroData.Proxies[ProxyName].Location.Y), new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y)) > MacroData.Proxies[ProxyName].MaximumBuildingDistance)
                 {
-                    var action = commander.Order(frame, Abilities.MOVE, MacroData.Proxies[ProxyName].Location);
-                    if (action != null)
+                    SC2APIProtocol.Action action;
+                    if (IndividualMicroController.NavigateToTarget(commander, MacroData.Proxies[ProxyName].Location, null, null, Formation.Normal, frame, out action))
                     {
-                        commands.Add(action);
+                        if (action != null)
+                        {
+                            commands.Add(action);
+                        }
                     }
                 }
             }

@@ -8,7 +8,7 @@ namespace Sharky.Builds.Protoss
     public class Twilight : ProtossSharkyBuild
     {
 
-        public Twilight(BuildOptions buildOptions, MacroData macroData, IUnitManager unitManager, AttackData attackData, IChatManager chatManager, NexusManager nexusManager, ICounterTransitioner counterTransitioner) : base(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager, counterTransitioner)
+        public Twilight(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, IChatManager chatManager, ChronoData nexusManager, ICounterTransitioner counterTransitioner, UnitCountService unitCountService) : base(buildOptions, macroData, activeUnitData, attackData, chatManager, nexusManager, counterTransitioner, unitCountService)
         {
         }
 
@@ -23,7 +23,7 @@ namespace Sharky.Builds.Protoss
             {
                 MacroData.DesiredProductionCounts[UnitTypes.PROTOSS_GATEWAY] = 1;
             }
-            if (UnitManager.Completed(UnitTypes.PROTOSS_GATEWAY) > 0)
+            if (UnitCountService.Completed(UnitTypes.PROTOSS_GATEWAY) > 0)
             {
                 if (MacroData.DesiredTechCounts[UnitTypes.PROTOSS_CYBERNETICSCORE] < 1)
                 {
@@ -31,7 +31,7 @@ namespace Sharky.Builds.Protoss
                 }
             }
 
-            if (UnitManager.Completed(UnitTypes.PROTOSS_CYBERNETICSCORE) > 0)
+            if (UnitCountService.Completed(UnitTypes.PROTOSS_CYBERNETICSCORE) > 0)
             {
                 if (MacroData.DesiredProductionCounts[UnitTypes.PROTOSS_TWILIGHTCOUNCIL] < 1)
                 {
@@ -42,7 +42,7 @@ namespace Sharky.Builds.Protoss
 
         public override bool Transition(int frame)
         {
-            return UnitManager.Completed(UnitTypes.PROTOSS_TWILIGHTCOUNCIL) > 0;
+            return UnitCountService.Completed(UnitTypes.PROTOSS_TWILIGHTCOUNCIL) > 0;
         }
     }
 }

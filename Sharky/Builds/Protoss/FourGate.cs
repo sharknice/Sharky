@@ -12,7 +12,7 @@ namespace Sharky.Builds.Protoss
 
         bool OpeningAttackChatSent;
 
-        public FourGate(BuildOptions buildOptions, MacroData macroData, IUnitManager unitManager, AttackData attackData, IChatManager chatManager, NexusManager nexusManager, UnitDataManager unitDataManager, ICounterTransitioner counterTransitioner) : base(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager, counterTransitioner)
+        public FourGate(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, IChatManager chatManager, ChronoData nexusManager, UnitDataManager unitDataManager, ICounterTransitioner counterTransitioner, UnitCountService unitCountService) : base(buildOptions, macroData, activeUnitData, attackData, chatManager, nexusManager, counterTransitioner, unitCountService)
         {
             UnitDataManager = unitDataManager;
 
@@ -26,12 +26,12 @@ namespace Sharky.Builds.Protoss
             BuildOptions.StrictGasCount = true;
             BuildOptions.StrictWorkerCount = true;
 
-            NexusManager.ChronodUpgrades = new HashSet<Upgrades>
+            ChronoData.ChronodUpgrades = new HashSet<Upgrades>
             {
                 Upgrades.WARPGATERESEARCH
             };
 
-            NexusManager.ChronodUnits = new HashSet<UnitTypes>
+            ChronoData.ChronodUnits = new HashSet<UnitTypes>
             {
                 UnitTypes.PROTOSS_PROBE,
             };
@@ -49,42 +49,42 @@ namespace Sharky.Builds.Protoss
                     MacroData.DesiredProductionCounts[UnitTypes.PROTOSS_GATEWAY] = 1;
                 }
             }
-            if (MacroData.FoodUsed >= 17 && UnitManager.Count(UnitTypes.PROTOSS_GATEWAY) > 0)
+            if (MacroData.FoodUsed >= 17 && UnitCountService.Count(UnitTypes.PROTOSS_GATEWAY) > 0)
             {
                 if (MacroData.DesiredGases < 1)
                 {
                     MacroData.DesiredGases = 1;
                 }
             }
-            if (MacroData.FoodUsed >= 20 && UnitManager.Count(UnitTypes.PROTOSS_GATEWAY) > 0)
+            if (MacroData.FoodUsed >= 20 && UnitCountService.Count(UnitTypes.PROTOSS_GATEWAY) > 0)
             {
                 if (MacroData.DesiredGases < 2)
                 {
                     MacroData.DesiredGases = 2;
                 }
             }
-            if (UnitManager.Completed(UnitTypes.PROTOSS_GATEWAY) > 0)
+            if (UnitCountService.Completed(UnitTypes.PROTOSS_GATEWAY) > 0)
             {
                 if (MacroData.DesiredTechCounts[UnitTypes.PROTOSS_CYBERNETICSCORE] < 1)
                 {
                     MacroData.DesiredTechCounts[UnitTypes.PROTOSS_CYBERNETICSCORE] = 1;
                 }
             }
-            if (UnitManager.Count(UnitTypes.PROTOSS_CYBERNETICSCORE) > 0)
+            if (UnitCountService.Count(UnitTypes.PROTOSS_CYBERNETICSCORE) > 0)
             {
                 if (MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_ZEALOT] < 1)
                 {
                     MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_ZEALOT] = 1;
                 }
             }
-            if (UnitManager.Count(UnitTypes.PROTOSS_CYBERNETICSCORE) > 0 && UnitManager.Count(UnitTypes.PROTOSS_ZEALOT) > 0)
+            if (UnitCountService.Count(UnitTypes.PROTOSS_CYBERNETICSCORE) > 0 && UnitCountService.Count(UnitTypes.PROTOSS_ZEALOT) > 0)
             {
                 if (MacroData.DesiredProductionCounts[UnitTypes.PROTOSS_GATEWAY] < 4)
                 {
                     MacroData.DesiredProductionCounts[UnitTypes.PROTOSS_GATEWAY] = 4;
                 }
             }
-            if (UnitManager.Completed(UnitTypes.PROTOSS_CYBERNETICSCORE) > 0)
+            if (UnitCountService.Completed(UnitTypes.PROTOSS_CYBERNETICSCORE) > 0)
             {
                 MacroData.DesiredUpgrades[Upgrades.WARPGATERESEARCH] = true;
                 if (MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_STALKER] < 1)
@@ -93,7 +93,7 @@ namespace Sharky.Builds.Protoss
                 }
             }
 
-            if (UnitManager.Count(UnitTypes.PROTOSS_GATEWAY) >= 4)
+            if (UnitCountService.Count(UnitTypes.PROTOSS_GATEWAY) >= 4)
             {
                 if (MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_STALKER] < 4)
                 {
@@ -151,7 +151,7 @@ namespace Sharky.Builds.Protoss
 
         public override bool Transition(int frame)
         {
-            return UnitManager.Count(UnitTypes.PROTOSS_NEXUS) > 1 && UnitManager.EquivalentTypeCount(UnitTypes.PROTOSS_GATEWAY) >= 4;
+            return UnitCountService.Count(UnitTypes.PROTOSS_NEXUS) > 1 && UnitCountService.EquivalentTypeCount(UnitTypes.PROTOSS_GATEWAY) >= 4;
         }
     }
 }

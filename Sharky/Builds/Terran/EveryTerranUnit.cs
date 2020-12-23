@@ -11,7 +11,7 @@ namespace Sharky.Builds.Terran
         ProxyScoutTask ProxyScoutTask;
         bool Scouted;
 
-        public EveryTerranUnit(BuildOptions buildOptions, MacroData macroData, IUnitManager unitManager, AttackData attackData, IChatManager chatManager, MicroManager microManager) : base(buildOptions, macroData, unitManager, attackData, chatManager)
+        public EveryTerranUnit(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, IChatManager chatManager, MicroManager microManager, UnitCountService unitCountService) : base(buildOptions, macroData, activeUnitData, attackData, chatManager, unitCountService)
         {
             MicroManager = microManager;
             Scouted = false;
@@ -66,7 +66,7 @@ namespace Sharky.Builds.Terran
                 }
             }
 
-            if (UnitManager.Completed(UnitTypes.TERRAN_BARRACKS) > 0)
+            if (UnitCountService.Completed(UnitTypes.TERRAN_BARRACKS) > 0)
             {
                 if (MacroData.DesiredProductionCounts[UnitTypes.TERRAN_FACTORY] < 2)
                 {
@@ -107,7 +107,7 @@ namespace Sharky.Builds.Terran
                 }
             }
 
-            if (UnitManager.Completed(UnitTypes.TERRAN_ENGINEERINGBAY) > 0)
+            if (UnitCountService.Completed(UnitTypes.TERRAN_ENGINEERINGBAY) > 0)
             {
                 if (MacroData.DesiredDefensiveBuildingsCounts[UnitTypes.TERRAN_MISSILETURRET] < 1)
                 {
@@ -133,7 +133,7 @@ namespace Sharky.Builds.Terran
                 MacroData.DesiredUpgrades[Upgrades.TERRANBUILDINGARMOR] = true;
             }
 
-            if (UnitManager.Completed(UnitTypes.TERRAN_BARRACKSTECHLAB) > 0)
+            if (UnitCountService.Completed(UnitTypes.TERRAN_BARRACKSTECHLAB) > 0)
             {
                 if (MacroData.DesiredUnitCounts[UnitTypes.TERRAN_MARAUDER] < 1)
                 {
@@ -145,7 +145,7 @@ namespace Sharky.Builds.Terran
                 MacroData.DesiredUpgrades[Upgrades.PUNISHERGRENADES] = true;
             }
 
-            if (UnitManager.Completed(UnitTypes.TERRAN_GHOSTACADEMY) > 0)
+            if (UnitCountService.Completed(UnitTypes.TERRAN_GHOSTACADEMY) > 0)
             {
                 if (MacroData.DesiredUnitCounts[UnitTypes.TERRAN_GHOST] < 1)
                 {
@@ -156,7 +156,7 @@ namespace Sharky.Builds.Terran
                 MacroData.DesiredUpgrades[Upgrades.ENHANCEDSHOCKWAVES] = true;
             }
 
-            if (UnitManager.EquivalentTypeCompleted(UnitTypes.TERRAN_COMMANDCENTER) > 1)
+            if (UnitCountService.EquivalentTypeCompleted(UnitTypes.TERRAN_COMMANDCENTER) > 1)
             {
                 if (MacroData.DesiredMorphCounts[UnitTypes.TERRAN_PLANETARYFORTRESS] < 1)
                 {
@@ -164,7 +164,7 @@ namespace Sharky.Builds.Terran
                 }
             }
 
-            if (UnitManager.Completed(UnitTypes.TERRAN_FACTORY) > 0)
+            if (UnitCountService.Completed(UnitTypes.TERRAN_FACTORY) > 0)
             {
                 if (MacroData.DesiredProductionCounts[UnitTypes.TERRAN_STARPORT] < 2)
                 {
@@ -195,7 +195,7 @@ namespace Sharky.Builds.Terran
                 }
             }
 
-            if (UnitManager.Completed(UnitTypes.TERRAN_FACTORYTECHLAB) > 0)
+            if (UnitCountService.Completed(UnitTypes.TERRAN_FACTORYTECHLAB) > 0)
             {
                 if (MacroData.DesiredUnitCounts[UnitTypes.TERRAN_SIEGETANK] < 1)
                 {
@@ -212,7 +212,7 @@ namespace Sharky.Builds.Terran
                 MacroData.DesiredUpgrades[Upgrades.HIGHCAPACITYBARRELS] = true;
             }
 
-            if (UnitManager.Completed(UnitTypes.TERRAN_ARMORY) > 0)
+            if (UnitCountService.Completed(UnitTypes.TERRAN_ARMORY) > 0)
             {
                 if (MacroData.DesiredUnitCounts[UnitTypes.TERRAN_THOR] < 1)
                 {
@@ -235,7 +235,7 @@ namespace Sharky.Builds.Terran
                 MacroData.DesiredUpgrades[Upgrades.TERRANVEHICLEWEAPONSLEVEL3] = true;
             }
 
-            if (UnitManager.Completed(UnitTypes.TERRAN_STARPORT) > 0)
+            if (UnitCountService.Completed(UnitTypes.TERRAN_STARPORT) > 0)
             {
                 if (MacroData.DesiredUnitCounts[UnitTypes.TERRAN_VIKINGFIGHTER] < 1)
                 {
@@ -265,7 +265,7 @@ namespace Sharky.Builds.Terran
                 }
             }
 
-            if (UnitManager.Completed(UnitTypes.TERRAN_STARPORTTECHLAB) > 0)
+            if (UnitCountService.Completed(UnitTypes.TERRAN_STARPORTTECHLAB) > 0)
             {
                 if (MacroData.DesiredUnitCounts[UnitTypes.TERRAN_BANSHEE] < 1)
                 {
@@ -281,7 +281,7 @@ namespace Sharky.Builds.Terran
                 MacroData.DesiredUpgrades[Upgrades.BANSHEESPEED] = true;
             }
 
-            if (UnitManager.Completed(UnitTypes.TERRAN_FUSIONCORE) > 0)
+            if (UnitCountService.Completed(UnitTypes.TERRAN_FUSIONCORE) > 0)
             {
                 if (MacroData.DesiredUnitCounts[UnitTypes.TERRAN_BATTLECRUISER] < 1)
                 {
@@ -295,7 +295,7 @@ namespace Sharky.Builds.Terran
 
             if (MacroData.Minerals > 500)
             {
-                if (MacroData.DesiredProductionCounts[UnitTypes.TERRAN_COMMANDCENTER] <= UnitManager.EquivalentTypeCount(UnitTypes.TERRAN_COMMANDCENTER))
+                if (MacroData.DesiredProductionCounts[UnitTypes.TERRAN_COMMANDCENTER] <= UnitCountService.EquivalentTypeCount(UnitTypes.TERRAN_COMMANDCENTER))
                 {
                     MacroData.DesiredProductionCounts[UnitTypes.TERRAN_COMMANDCENTER]++;
                 }

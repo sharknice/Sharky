@@ -12,7 +12,7 @@ namespace Sharky.Builds.Protoss
         EnemyRaceManager EnemyRaceManager;
         MicroManager MicroManager;
 
-        public Robo(BuildOptions buildOptions, MacroData macroData, IUnitManager unitManager, AttackData attackData, IChatManager chatManager, NexusManager nexusManager, EnemyRaceManager enemyRaceManager, MicroManager microManager, ICounterTransitioner counterTransitioner) : base(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager, counterTransitioner)
+        public Robo(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, IChatManager chatManager, ChronoData nexusManager, EnemyRaceManager enemyRaceManager, MicroManager microManager, ICounterTransitioner counterTransitioner, UnitCountService unitCountService) : base(buildOptions, macroData, activeUnitData, attackData, chatManager, nexusManager, counterTransitioner, unitCountService)
         {
             EnemyRaceManager = enemyRaceManager;
             MicroManager = microManager;
@@ -25,12 +25,12 @@ namespace Sharky.Builds.Protoss
             BuildOptions.StrictGasCount = true;
             MacroData.DesiredGases = 2;
 
-            NexusManager.ChronodUpgrades = new HashSet<Upgrades>
+            ChronoData.ChronodUpgrades = new HashSet<Upgrades>
             {
                 Upgrades.WARPGATERESEARCH
             };
 
-            NexusManager.ChronodUnits = new HashSet<UnitTypes>
+            ChronoData.ChronodUnits = new HashSet<UnitTypes>
             {
                 UnitTypes.PROTOSS_PROBE,
             };
@@ -77,7 +77,7 @@ namespace Sharky.Builds.Protoss
             {
                 MacroData.DesiredProductionCounts[UnitTypes.PROTOSS_GATEWAY] = 1;
             }
-            if (UnitManager.Completed(UnitTypes.PROTOSS_GATEWAY) > 0)
+            if (UnitCountService.Completed(UnitTypes.PROTOSS_GATEWAY) > 0)
             {
                 if (MacroData.DesiredTechCounts[UnitTypes.PROTOSS_CYBERNETICSCORE] < 1)
                 {
@@ -85,7 +85,7 @@ namespace Sharky.Builds.Protoss
                 }
             }
 
-            if (UnitManager.Count(UnitTypes.PROTOSS_ROBOTICSFACILITY) > 0 && UnitManager.Count(UnitTypes.PROTOSS_NEXUS) >= 2)
+            if (UnitCountService.Count(UnitTypes.PROTOSS_ROBOTICSFACILITY) > 0 && UnitCountService.Count(UnitTypes.PROTOSS_NEXUS) >= 2)
             {
                 // TODO: MacroData.PylonsAtEveryExpansion = true; 
                 if (MacroData.DesiredProductionCounts[UnitTypes.PROTOSS_GATEWAY] < 2)
@@ -93,7 +93,7 @@ namespace Sharky.Builds.Protoss
                     MacroData.DesiredProductionCounts[UnitTypes.PROTOSS_GATEWAY] = 2;
                 }
 
-                if (UnitManager.Count(UnitTypes.PROTOSS_STALKER) + UnitManager.Count(UnitTypes.PROTOSS_ADEPT) > 0)
+                if (UnitCountService.Count(UnitTypes.PROTOSS_STALKER) + UnitCountService.Count(UnitTypes.PROTOSS_ADEPT) > 0)
                 {
                     MacroData.DesiredUpgrades[Upgrades.WARPGATERESEARCH] = true;
                     if (MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_STALKER] < 3)
@@ -103,7 +103,7 @@ namespace Sharky.Builds.Protoss
                 }
             }
 
-            if (UnitManager.Count(UnitTypes.PROTOSS_ROBOTICSFACILITY) < 1 && UnitManager.Count(UnitTypes.PROTOSS_STALKER) + UnitManager.Count(UnitTypes.PROTOSS_ADEPT) > 0)
+            if (UnitCountService.Count(UnitTypes.PROTOSS_ROBOTICSFACILITY) < 1 && UnitCountService.Count(UnitTypes.PROTOSS_STALKER) + UnitCountService.Count(UnitTypes.PROTOSS_ADEPT) > 0)
             {
                 MacroData.DesiredProductionCounts[UnitTypes.PROTOSS_ROBOTICSFACILITY] = 1;
             }
@@ -131,7 +131,7 @@ namespace Sharky.Builds.Protoss
 
         public override bool Transition(int frame)
         {
-            return UnitManager.Completed(UnitTypes.PROTOSS_ROBOTICSFACILITY) > 0 && UnitManager.Completed(UnitTypes.PROTOSS_NEXUS) > 0;
+            return UnitCountService.Completed(UnitTypes.PROTOSS_ROBOTICSFACILITY) > 0 && UnitCountService.Completed(UnitTypes.PROTOSS_NEXUS) > 0;
         }
     }
 }

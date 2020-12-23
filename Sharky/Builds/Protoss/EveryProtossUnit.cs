@@ -8,7 +8,7 @@ namespace Sharky.Builds.Protoss
 {
     public class EveryProtossUnit : ProtossSharkyBuild
     {
-        public EveryProtossUnit(BuildOptions buildOptions, MacroData macroData, IUnitManager unitManager, AttackData attackData, IChatManager chatManager, NexusManager nexusManager, ICounterTransitioner counterTransitioner) : base(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager, counterTransitioner)
+        public EveryProtossUnit(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, IChatManager chatManager, ChronoData nexusManager, ICounterTransitioner counterTransitioner, UnitCountService unitCountService) : base(buildOptions, macroData, activeUnitData, attackData, chatManager, nexusManager, counterTransitioner, unitCountService)
         {
         }
 
@@ -16,12 +16,12 @@ namespace Sharky.Builds.Protoss
         {
             base.StartBuild(frame);
 
-            NexusManager.ChronodUpgrades = new HashSet<Upgrades>
+            ChronoData.ChronodUpgrades = new HashSet<Upgrades>
             {
                 Upgrades.WARPGATERESEARCH
             };
 
-            NexusManager.ChronodUnits = new HashSet<UnitTypes>
+            ChronoData.ChronodUnits = new HashSet<UnitTypes>
             {
                 UnitTypes.PROTOSS_PROBE,
             };
@@ -37,7 +37,7 @@ namespace Sharky.Builds.Protoss
                 }
             }
 
-            if (UnitManager.Completed(UnitTypes.PROTOSS_GATEWAY) > 0)
+            if (UnitCountService.Completed(UnitTypes.PROTOSS_GATEWAY) > 0)
             {
                 if (MacroData.DesiredTechCounts[UnitTypes.PROTOSS_CYBERNETICSCORE] < 1)
                 {
@@ -55,7 +55,7 @@ namespace Sharky.Builds.Protoss
                 }
             }
 
-            if (UnitManager.Completed(UnitTypes.PROTOSS_FORGE) > 0)
+            if (UnitCountService.Completed(UnitTypes.PROTOSS_FORGE) > 0)
             {
                 if (MacroData.DesiredDefensiveBuildingsCounts[UnitTypes.PROTOSS_PHOTONCANNON] < 1)
                 {
@@ -87,7 +87,7 @@ namespace Sharky.Builds.Protoss
                 MacroData.DesiredUpgrades[Upgrades.PROTOSSSHIELDSLEVEL3] = true;
             }
 
-            if (UnitManager.Completed(UnitTypes.PROTOSS_CYBERNETICSCORE) > 0)
+            if (UnitCountService.Completed(UnitTypes.PROTOSS_CYBERNETICSCORE) > 0)
             {
                 if (MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_STALKER] < 1)
                 {
@@ -125,7 +125,7 @@ namespace Sharky.Builds.Protoss
                 MacroData.DesiredUpgrades[Upgrades.PROTOSSAIRWEAPONSLEVEL3] = true;
             }
 
-            if (UnitManager.Completed(UnitTypes.PROTOSS_ROBOTICSFACILITY) > 0)
+            if (UnitCountService.Completed(UnitTypes.PROTOSS_ROBOTICSFACILITY) > 0)
             {
                 if (MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_OBSERVER] < 1)
                 {
@@ -146,7 +146,7 @@ namespace Sharky.Builds.Protoss
                 }
             }
 
-            if (UnitManager.Completed(UnitTypes.PROTOSS_ROBOTICSBAY) > 0)
+            if (UnitCountService.Completed(UnitTypes.PROTOSS_ROBOTICSBAY) > 0)
             {
                 if (MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_COLOSSUS] < 1)
                 {
@@ -162,7 +162,7 @@ namespace Sharky.Builds.Protoss
                 MacroData.DesiredUpgrades[Upgrades.EXTENDEDTHERMALLANCE] = true;
             }
 
-            if (UnitManager.Completed(UnitTypes.PROTOSS_STARGATE) > 0)
+            if (UnitCountService.Completed(UnitTypes.PROTOSS_STARGATE) > 0)
             {
                 if (MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_PHOENIX] < 1)
                 {
@@ -183,7 +183,7 @@ namespace Sharky.Builds.Protoss
                 }
             }
 
-            if (UnitManager.Completed(UnitTypes.PROTOSS_FLEETBEACON) > 0)
+            if (UnitCountService.Completed(UnitTypes.PROTOSS_FLEETBEACON) > 0)
             {
                 if (MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_CARRIER] < 1)
                 {
@@ -203,7 +203,7 @@ namespace Sharky.Builds.Protoss
                 MacroData.DesiredUpgrades[Upgrades.TECTONICDESTABILIZERS] = true;
             }
 
-            if (UnitManager.Completed(UnitTypes.PROTOSS_TWILIGHTCOUNCIL) > 0)
+            if (UnitCountService.Completed(UnitTypes.PROTOSS_TWILIGHTCOUNCIL) > 0)
             {
                 if (MacroData.DesiredTechCounts[UnitTypes.PROTOSS_TEMPLARARCHIVE] < 1)
                 {
@@ -219,7 +219,7 @@ namespace Sharky.Builds.Protoss
                 MacroData.DesiredUpgrades[Upgrades.ADEPTPIERCINGATTACK] = true;
             }
 
-            if (UnitManager.Completed(UnitTypes.PROTOSS_TEMPLARARCHIVE) > 0)
+            if (UnitCountService.Completed(UnitTypes.PROTOSS_TEMPLARARCHIVE) > 0)
             {
                 if (MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_HIGHTEMPLAR] < 2)
                 {
@@ -233,7 +233,7 @@ namespace Sharky.Builds.Protoss
                 MacroData.DesiredUpgrades[Upgrades.PSISTORMTECH] = true;
             }
 
-            if (UnitManager.Completed(UnitTypes.PROTOSS_DARKSHRINE) > 0)
+            if (UnitCountService.Completed(UnitTypes.PROTOSS_DARKSHRINE) > 0)
             {
                 if (MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_DARKTEMPLAR] < 1)
                 {
@@ -245,7 +245,7 @@ namespace Sharky.Builds.Protoss
 
             if (MacroData.Minerals > 500)
             {
-                if (MacroData.DesiredProductionCounts[UnitTypes.PROTOSS_NEXUS] <= UnitManager.Count(UnitTypes.PROTOSS_NEXUS))
+                if (MacroData.DesiredProductionCounts[UnitTypes.PROTOSS_NEXUS] <= UnitCountService.Count(UnitTypes.PROTOSS_NEXUS))
                 {
                     MacroData.DesiredProductionCounts[UnitTypes.PROTOSS_NEXUS]++;
                 }

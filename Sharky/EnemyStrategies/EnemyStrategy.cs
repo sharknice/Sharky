@@ -10,9 +10,10 @@ namespace Sharky.EnemyStrategies
 
         protected IChatManager ChatManager;
         protected EnemyStrategyHistory EnemyStrategyHistory;
-        protected IUnitManager UnitManager;
+        protected ActiveUnitData ActiveUnitData;
         protected SharkyOptions SharkyOptions;
         protected DebugManager DebugManager;
+        protected UnitCountService UnitCountService;
 
         public string Name()
         {

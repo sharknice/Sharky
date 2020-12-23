@@ -15,7 +15,7 @@ namespace Sharky.Managers
         public Point2D SelfMainBasePoint { get; private set; }
         public Point2D EnemyMainBasePoint { get; private set; }
 
-        IUnitManager UnitManager;
+        ActiveUnitData ActiveUnitData;
         UnitDataManager UnitDataManager;
         MapDataService MapDataService;
         IBaseManager BaseManager;
@@ -23,9 +23,9 @@ namespace Sharky.Managers
 
         int baseCount;
 
-        public TargetingManager(IUnitManager unitManager, UnitDataManager unitDataManager, MapDataService mapDataService, IBaseManager baseManager, MacroData macroData)
+        public TargetingManager(ActiveUnitData activeUnitData, UnitDataManager unitDataManager, MapDataService mapDataService, IBaseManager baseManager, MacroData macroData)
         {
-            UnitManager = unitManager;
+            ActiveUnitData = activeUnitData;
             UnitDataManager = unitDataManager;
             MapDataService = mapDataService;
             BaseManager = baseManager;
@@ -90,7 +90,7 @@ namespace Sharky.Managers
 
         public Point2D GetAttackPoint(Point2D armyPoint)
         {
-            var enemyBuilding = UnitManager.EnemyUnits.Where(e => e.Value.UnitTypeData.Attributes.Contains(SC2APIProtocol.Attribute.Structure)).OrderBy(e => Vector2.DistanceSquared(new Vector2(e.Value.Unit.Pos.X, e.Value.Unit.Pos.Y), new Vector2(armyPoint.X, armyPoint.Y))).FirstOrDefault().Value;
+            var enemyBuilding = ActiveUnitData.EnemyUnits.Where(e => e.Value.UnitTypeData.Attributes.Contains(SC2APIProtocol.Attribute.Structure)).OrderBy(e => Vector2.DistanceSquared(new Vector2(e.Value.Unit.Pos.X, e.Value.Unit.Pos.Y), new Vector2(armyPoint.X, armyPoint.Y))).FirstOrDefault().Value;
             if (enemyBuilding != null)
             {
                 return new Point2D { X = enemyBuilding.Unit.Pos.X, Y = enemyBuilding.Unit.Pos.Y };

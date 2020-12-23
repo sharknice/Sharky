@@ -11,17 +11,17 @@ namespace Sharky.Builds.BuildingPlacement
         IBuildingPlacement TerranBuildingPlacement;
         IBuildingPlacement ZergBuildingPlacement;
         IBaseManager BaseManager;
-        IUnitManager UnitManager;
+        ActiveUnitData ActiveUnitData;
         BuildingService BuildingService;
         UnitDataManager UnitDataManager;
 
-        public BuildingPlacement(IBuildingPlacement protossBuildingPlacement, IBuildingPlacement terranBuildingPlacement, IBuildingPlacement zergBuildingPlacement, IBaseManager baseManager, IUnitManager unitManager, BuildingService buildingService, UnitDataManager unitDataManager)
+        public BuildingPlacement(IBuildingPlacement protossBuildingPlacement, IBuildingPlacement terranBuildingPlacement, IBuildingPlacement zergBuildingPlacement, IBaseManager baseManager, ActiveUnitData activeUnitData, BuildingService buildingService, UnitDataManager unitDataManager)
         {
             ProtossBuildingPlacement = protossBuildingPlacement;
             TerranBuildingPlacement = terranBuildingPlacement;
             ZergBuildingPlacement = zergBuildingPlacement;
             BaseManager = baseManager;
-            UnitManager = unitManager;
+            ActiveUnitData = activeUnitData;
             BuildingService = buildingService;
             UnitDataManager = unitDataManager;
         }
@@ -49,7 +49,7 @@ namespace Sharky.Builds.BuildingPlacement
 
         private Point2D GetResourceCenterLocation()
         {
-            var resourceCenters = UnitManager.SelfUnits.Values.Where(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter));
+            var resourceCenters = ActiveUnitData.SelfUnits.Values.Where(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter));
             var openBases = BaseManager.BaseLocations.Where(b => !resourceCenters.Any(r => Vector2.DistanceSquared(new Vector2(r.Unit.Pos.X, r.Unit.Pos.Y), new Vector2(b.Location.X, b.Location.Y)) < 25));
 
             foreach (var openBase in openBases)

@@ -7,8 +7,8 @@ namespace Sharky.MicroControllers.Protoss
 {
     public class VoidRayMicroController : IndividualMicroController
     {
-        public VoidRayMicroController(MapDataService mapDataService, UnitDataManager unitDataManager, IUnitManager unitManager, DebugManager debugManager, IPathFinder sharkyPathFinder, IBaseManager baseManager, SharkyOptions sharkyOptions, MicroPriority microPriority, bool groupUpEnabled)
-            : base(mapDataService, unitDataManager, unitManager, debugManager, sharkyPathFinder, baseManager, sharkyOptions, microPriority, groupUpEnabled)
+        public VoidRayMicroController(MapDataService mapDataService, UnitDataManager unitDataManager, ActiveUnitData activeUnitData, DebugManager debugManager, IPathFinder sharkyPathFinder, IBaseManager baseManager, SharkyOptions sharkyOptions, DamageService damageService, MicroPriority microPriority, bool groupUpEnabled)
+            : base(mapDataService, unitDataManager, activeUnitData, debugManager, sharkyPathFinder, baseManager, sharkyOptions, damageService, microPriority, groupUpEnabled)
         {
         }
 
@@ -47,7 +47,7 @@ namespace Sharky.MicroControllers.Protoss
                     foreach (var tag in commander.UnitCalculation.Unit.Orders.Select(o => o.TargetUnitTag))
                     {
                         UnitCalculation unit;
-                        if (UnitManager.EnemyUnits.TryGetValue(tag, out unit))
+                        if (ActiveUnitData.EnemyUnits.TryGetValue(tag, out unit))
                         {
                             if (unit.Attributes.Contains(Attribute.Armored))
                             {

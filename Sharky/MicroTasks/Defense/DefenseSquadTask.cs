@@ -11,7 +11,7 @@ namespace Sharky.MicroTasks
 {
     public class DefenseSquadTask : MicroTask
     {
-        IUnitManager UnitManager;
+        ActiveUnitData ActiveUnitData;
         ITargetingManager TargetingManager;
         DefenseService DefenseService;
         IMicroController MicroController;
@@ -20,9 +20,9 @@ namespace Sharky.MicroTasks
 
         public List<DesiredUnitsClaim> DesiredUnitsClaims { get; set; }
 
-        public DefenseSquadTask(IUnitManager unitManager, ITargetingManager targetingManager, DefenseService defenseService, IMicroController microController, List<DesiredUnitsClaim> desiredUnitsClaims, float priority, bool enabled = true)
+        public DefenseSquadTask(ActiveUnitData activeUnitData, ITargetingManager targetingManager, DefenseService defenseService, IMicroController microController, List<DesiredUnitsClaim> desiredUnitsClaims, float priority, bool enabled = true)
         {
-            UnitManager = unitManager;
+            ActiveUnitData = activeUnitData;
             TargetingManager = targetingManager;
             DefenseService = defenseService;
             MicroController = microController;
@@ -66,7 +66,7 @@ namespace Sharky.MicroTasks
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            var attackingEnemies = UnitManager.SelfUnits.Where(u => u.Value.UnitClassifications.Contains(UnitClassification.ResourceCenter) || u.Value.UnitClassifications.Contains(UnitClassification.ProductionStructure)).SelectMany(u => u.Value.NearbyEnemies).Distinct();
+            var attackingEnemies = ActiveUnitData.SelfUnits.Where(u => u.Value.UnitClassifications.Contains(UnitClassification.ResourceCenter) || u.Value.UnitClassifications.Contains(UnitClassification.ProductionStructure)).SelectMany(u => u.Value.NearbyEnemies).Distinct();
             if (attackingEnemies.Count() > 0)
             {
                 foreach (var commander in UnitCommanders)

@@ -5,7 +5,7 @@ namespace Sharky.Builds
 {
     public class ProxyData
     {
-        public ProxyData(Point2D location, MacroData macroData)
+        public ProxyData(Point2D location, MacroData macroData, bool enabled = false)
         {
             Location = location;
             Enabled = true;
@@ -41,6 +41,8 @@ namespace Sharky.Builds
             {
                 DesiredDefensiveBuildingsCounts[defensiveBuildingsType] = 0;
             }
+
+            Enabled = enabled;
         }
 
         public bool Enabled { get; set; }

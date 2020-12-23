@@ -6,7 +6,6 @@ using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
 using SC2APIProtocol;
-using Sharky;
 
 namespace Sharky
 {
@@ -65,6 +64,7 @@ namespace Sharky
             player2.Race = opponentRace;
             player2.Type = PlayerType.Computer;
             player2.Difficulty = opponentDifficulty;
+            player2.AiBuild = AIBuild.Rush;
 
             Request request = new Request();
             request.CreateGame = createGame;

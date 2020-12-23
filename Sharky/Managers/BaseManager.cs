@@ -16,14 +16,16 @@ namespace Sharky.Managers
         ImageData PlacementGrid;
 
         UnitDataManager UnitDataManager;
-        IUnitManager UnitManager;
+        ActiveUnitData ActiveUnitData;
         IPathFinder PathFinder;
+        UnitCountService UnitCountService;
 
-        public BaseManager(UnitDataManager unitDataManager, IUnitManager unitManager, IPathFinder pathFinder)
+        public BaseManager(UnitDataManager unitDataManager, ActiveUnitData activeUnitData, IPathFinder pathFinder, UnitCountService unitCountService)
         {
             UnitDataManager = unitDataManager;
-            UnitManager = unitManager;
+            ActiveUnitData = activeUnitData;
             PathFinder = pathFinder;
+            UnitCountService = unitCountService;
             BaseLocations = new List<BaseLocation>();
         }
 
@@ -100,7 +102,7 @@ namespace Sharky.Managers
 
         public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
         {
-            foreach (var tag in UnitManager.DeadUnits)
+            foreach (var tag in ActiveUnitData.DeadUnits)
             {
                 foreach (var baseLocation in BaseLocations)
                 {
@@ -115,9 +117,9 @@ namespace Sharky.Managers
 
         void UpdateSelfBases()
         {
-            if (SelfBases.Count() != UnitManager.EquivalentTypeCount(UnitTypes.PROTOSS_NEXUS) + UnitManager.EquivalentTypeCount(UnitTypes.TERRAN_COMMANDCENTER) + UnitManager.EquivalentTypeCount(UnitTypes.ZERG_HATCHERY))
+            if (SelfBases.Count() != UnitCountService.EquivalentTypeCount(UnitTypes.PROTOSS_NEXUS) + UnitCountService.EquivalentTypeCount(UnitTypes.TERRAN_COMMANDCENTER) + UnitCountService.EquivalentTypeCount(UnitTypes.ZERG_HATCHERY))
             {
-                var resourceCenters = UnitManager.SelfUnits.Values.Where(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter));
+                var resourceCenters = ActiveUnitData.SelfUnits.Values.Where(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter));
                 SelfBases = BaseLocations.Where(b => resourceCenters.Any(r => Vector2.DistanceSquared(new Vector2(r.Unit.Pos.X, r.Unit.Pos.Y), new Vector2(b.Location.X, b.Location.Y)) < 25)).ToList();
                 foreach (var selfBase in SelfBases)
                 {
@@ -126,7 +128,7 @@ namespace Sharky.Managers
             }
             foreach (var selfBase in SelfBases)
             {
-                if (UnitManager.SelfUnits.TryGetValue(selfBase.ResourceCenter.Tag, out UnitCalculation updatedUnit))
+                if (ActiveUnitData.SelfUnits.TryGetValue(selfBase.ResourceCenter.Tag, out UnitCalculation updatedUnit))
                 {
                     if (updatedUnit != null)
                     {
@@ -138,7 +140,7 @@ namespace Sharky.Managers
                 {
                     if (selfBase.MineralFields[index].DisplayType == DisplayType.Snapshot)
                     {
-                        var visibleMineral = UnitManager.NeutralUnits.FirstOrDefault(m => m.Value.Unit.DisplayType == DisplayType.Visible && m.Value.Unit.Pos.X == selfBase.MineralFields[index].Pos.X && m.Value.Unit.Pos.Y == selfBase.MineralFields[index].Pos.Y).Value;
+                        var visibleMineral = ActiveUnitData.NeutralUnits.FirstOrDefault(m => m.Value.Unit.DisplayType == DisplayType.Visible && m.Value.Unit.Pos.X == selfBase.MineralFields[index].Pos.X && m.Value.Unit.Pos.Y == selfBase.MineralFields[index].Pos.Y).Value;
                         if (visibleMineral != null)
                         {
                             selfBase.MineralFields[index] = visibleMineral.Unit;
@@ -150,7 +152,7 @@ namespace Sharky.Managers
                 {
                     if (selfBase.VespeneGeysers[index].DisplayType == DisplayType.Snapshot)
                     {
-                        var visibleGeyser = UnitManager.NeutralUnits.FirstOrDefault(m => m.Value.Unit.DisplayType == DisplayType.Visible && m.Value.Unit.Pos.X == selfBase.VespeneGeysers[index].Pos.X && m.Value.Unit.Pos.Y == selfBase.VespeneGeysers[index].Pos.Y).Value;
+                        var visibleGeyser = ActiveUnitData.NeutralUnits.FirstOrDefault(m => m.Value.Unit.DisplayType == DisplayType.Visible && m.Value.Unit.Pos.X == selfBase.VespeneGeysers[index].Pos.X && m.Value.Unit.Pos.Y == selfBase.VespeneGeysers[index].Pos.Y).Value;
                         if (visibleGeyser != null)
                         {
                             selfBase.VespeneGeysers[index] = visibleGeyser.Unit;

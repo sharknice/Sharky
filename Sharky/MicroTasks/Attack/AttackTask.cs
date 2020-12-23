@@ -13,18 +13,18 @@ namespace Sharky.MicroTasks
     {
         IMicroController MicroController;
         ITargetingManager TargetingManager;
-        IUnitManager UnitManager;
+        ActiveUnitData ActiveUnitData;
         DefenseService DefenseService;
         MacroData MacroData;
         AttackData AttackData;
 
         float lastFrameTime;
 
-        public AttackTask(IMicroController microController, ITargetingManager targetingManager, IUnitManager unitManager, DefenseService defenseService, MacroData macroData, AttackData attackData, float priority)
+        public AttackTask(IMicroController microController, ITargetingManager targetingManager, ActiveUnitData activeUnitData, DefenseService defenseService, MacroData macroData, AttackData attackData, float priority)
         {
             MicroController = microController;
             TargetingManager = targetingManager;
-            UnitManager = unitManager;
+            ActiveUnitData = activeUnitData;
             DefenseService = defenseService;
             MacroData = macroData;
             AttackData = attackData;
@@ -97,7 +97,7 @@ namespace Sharky.MicroTasks
                 }
             }
 
-            var attackingEnemies = UnitManager.SelfUnits.Where(u => u.Value.UnitClassifications.Contains(UnitClassification.ResourceCenter) || u.Value.UnitClassifications.Contains(UnitClassification.ProductionStructure)).SelectMany(u => u.Value.NearbyEnemies).Distinct();
+            var attackingEnemies = ActiveUnitData.SelfUnits.Where(u => u.Value.UnitClassifications.Contains(UnitClassification.ResourceCenter) || u.Value.UnitClassifications.Contains(UnitClassification.ProductionStructure)).SelectMany(u => u.Value.NearbyEnemies).Distinct();
             if (attackingEnemies.Count() > 0)
             {
                 var armyPoint = new Vector2(AttackData.ArmyPoint.X, AttackData.ArmyPoint.Y);

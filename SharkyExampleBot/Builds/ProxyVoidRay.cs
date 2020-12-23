@@ -4,6 +4,7 @@ using Sharky.Builds;
 using Sharky.Builds.BuildChoosing;
 using Sharky.Managers;
 using Sharky.Managers.Protoss;
+using Sharky.MicroControllers;
 using Sharky.MicroTasks;
 using Sharky.Proxy;
 using System.Collections.Generic;
@@ -24,7 +25,8 @@ namespace SharkyExampleBot.Builds
 
         ProxyTask ProxyTask;
 
-        public ProxyVoidRay(BuildOptions buildOptions, MacroData macroData, IUnitManager unitManager, AttackData attackData, IChatManager chatManager, NexusManager nexusManager, SharkyOptions sharkyOptions, MicroManager microManager, ICounterTransitioner counterTransitioner, UnitDataManager unitDataManager, ProxyLocationService proxyLocationService) : base(buildOptions, macroData, unitManager, attackData, chatManager, nexusManager, counterTransitioner)
+        public ProxyVoidRay(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, IChatManager chatManager, NexusManager nexusManager, SharkyOptions sharkyOptions, MicroManager microManager, ICounterTransitioner counterTransitioner, UnitDataManager unitDataManager, ProxyLocationService proxyLocationService, DebugManager debugManager, UnitCountService unitCountService, IIndividualMicroController probeMicroController) 
+            : base(buildOptions, macroData, activeUnitData, attackData, chatManager, nexusManager, counterTransitioner, unitCountService)
         {
             SharkyOptions = sharkyOptions;
             MicroManager = microManager;
@@ -34,7 +36,7 @@ namespace SharkyExampleBot.Builds
             OpeningAttackChatSent = false;
             CancelledProxyChatSent = false;
 
-            ProxyTask = new ProxyTask(UnitDataManager, false, 0.9f, MacroData, string.Empty, MicroManager);
+            ProxyTask = new ProxyTask(UnitDataManager, false, 0.9f, MacroData, string.Empty, MicroManager, debugManager, probeMicroController);
             ProxyTask.ProxyName = GetType().Name;
         }
 
@@ -78,7 +80,7 @@ namespace SharkyExampleBot.Builds
 
         void SetAttack()
         {
-            if (UnitManager.Completed(UnitTypes.PROTOSS_VOIDRAY) > 1)
+            if (UnitCountService.Completed(UnitTypes.PROTOSS_VOIDRAY) > 1)
             {
                 AttackData.Attacking = true;
                 if (!OpeningAttackChatSent)
@@ -87,7 +89,7 @@ namespace SharkyExampleBot.Builds
                     OpeningAttackChatSent = true;
                 }
             }
-            else if (UnitManager.Completed(UnitTypes.PROTOSS_VOIDRAY) == 0)
+            else if (UnitCountService.Completed(UnitTypes.PROTOSS_VOIDRAY) == 0)
             {
                 AttackData.Attacking = false;
             }
@@ -111,7 +113,7 @@ namespace SharkyExampleBot.Builds
                     MacroData.DesiredProductionCounts[UnitTypes.PROTOSS_GATEWAY] = 1;
                 }
             }
-            if (UnitManager.Count(UnitTypes.PROTOSS_GATEWAY) > 0)
+            if (UnitCountService.Count(UnitTypes.PROTOSS_GATEWAY) > 0)
             {
                 if (MacroData.DesiredGases < 2)
                 {
@@ -129,7 +131,7 @@ namespace SharkyExampleBot.Builds
                     NexusManager.ChronodUnits.Remove(UnitTypes.PROTOSS_PROBE);
                 }
             }
-            if (UnitManager.Completed(UnitTypes.PROTOSS_GATEWAY) > 0)
+            if (UnitCountService.Completed(UnitTypes.PROTOSS_GATEWAY) > 0)
             {
                 if (MacroData.DesiredTechCounts[UnitTypes.PROTOSS_CYBERNETICSCORE] < 1)
                 {
@@ -138,7 +140,7 @@ namespace SharkyExampleBot.Builds
                 ProxyTask.Enable();
                 MacroData.Proxies[ProxyTask.ProxyName].DesiredPylons = 1;
             }
-            if (UnitManager.Completed(UnitTypes.PROTOSS_CYBERNETICSCORE) > 0)
+            if (UnitCountService.Completed(UnitTypes.PROTOSS_CYBERNETICSCORE) > 0)
             {
                 if (MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_STALKER] < 1)
                 {
@@ -151,7 +153,7 @@ namespace SharkyExampleBot.Builds
                 }
             }
 
-            if (UnitManager.Count(UnitTypes.PROTOSS_STARGATE) > 0)
+            if (UnitCountService.Count(UnitTypes.PROTOSS_STARGATE) > 0)
             {
                 BuildOptions.StrictSupplyCount = false;
                 MacroData.DesiredUpgrades[Upgrades.WARPGATERESEARCH] = true;
@@ -174,13 +176,13 @@ namespace SharkyExampleBot.Builds
                         MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_STALKER] = 3;
                     }
 
-                    if (MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_ZEALOT] < 10 && MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_ZEALOT] <= UnitManager.Count(UnitTypes.PROTOSS_ZEALOT) && MacroData.Minerals > 350)
+                    if (MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_ZEALOT] < 10 && MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_ZEALOT] <= UnitCountService.Count(UnitTypes.PROTOSS_ZEALOT) && MacroData.Minerals > 350)
                     {
                         MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_ZEALOT]++;
                     }
                 }
             }
-            if (UnitManager.Completed(UnitTypes.PROTOSS_STARGATE) > 0)
+            if (UnitCountService.Completed(UnitTypes.PROTOSS_STARGATE) > 0)
             {
                 if (MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_VOIDRAY] < 10)
                 {
@@ -198,9 +200,9 @@ namespace SharkyExampleBot.Builds
         {
             bool transition = false;
 
-            if (UnitManager.Count(UnitTypes.PROTOSS_STARGATE) < 1)
+            if (UnitCountService.Count(UnitTypes.PROTOSS_STARGATE) < 1)
             {
-                if (UnitManager.EnemyUnits.Any(e => Vector2.DistanceSquared(new Vector2(e.Value.Unit.Pos.X, e.Value.Unit.Pos.Y), new Vector2(MacroData.Proxies[ProxyTask.ProxyName].Location.X, MacroData.Proxies[ProxyTask.ProxyName].Location.Y)) < 100))
+                if (ActiveUnitData.EnemyUnits.Any(e => Vector2.DistanceSquared(new Vector2(e.Value.Unit.Pos.X, e.Value.Unit.Pos.Y), new Vector2(MacroData.Proxies[ProxyTask.ProxyName].Location.X, MacroData.Proxies[ProxyTask.ProxyName].Location.Y)) < 100))
                 {
                     if (!CancelledProxyChatSent)
                     {

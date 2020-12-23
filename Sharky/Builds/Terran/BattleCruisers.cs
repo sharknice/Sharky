@@ -5,7 +5,7 @@ namespace Sharky.Builds.Terran
 {
     public class BattleCruisers : TerranSharkyBuild
     {
-        public BattleCruisers(BuildOptions buildOptions, MacroData macroData, IUnitManager unitManager, AttackData attackData, IChatManager chatManager) : base(buildOptions, macroData, unitManager, attackData, chatManager)
+        public BattleCruisers(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, IChatManager chatManager, UnitCountService unitCountService) : base(buildOptions, macroData, activeUnitData, attackData, chatManager, unitCountService)
         {
 
         }
@@ -25,7 +25,7 @@ namespace Sharky.Builds.Terran
                 }
             }
 
-            if (UnitManager.Completed(UnitTypes.TERRAN_BARRACKS) > 0)
+            if (UnitCountService.Completed(UnitTypes.TERRAN_BARRACKS) > 0)
             {
                 if (MacroData.DesiredProductionCounts[UnitTypes.TERRAN_FACTORY] < 1)
                 {
@@ -43,7 +43,7 @@ namespace Sharky.Builds.Terran
                 }
             }
 
-            if (UnitManager.Completed(UnitTypes.TERRAN_FACTORY) > 0)
+            if (UnitCountService.Completed(UnitTypes.TERRAN_FACTORY) > 0)
             {
                 if (MacroData.DesiredProductionCounts[UnitTypes.TERRAN_STARPORT] < 2)
                 {
@@ -56,7 +56,7 @@ namespace Sharky.Builds.Terran
                 }
             }
 
-            if (UnitManager.Completed(UnitTypes.TERRAN_STARPORT) > 0)
+            if (UnitCountService.Completed(UnitTypes.TERRAN_STARPORT) > 0)
             {
                 AttackData.ArmyFoodAttack = 50;
                 AttackData.ArmyFoodRetreat = 30;
@@ -74,7 +74,7 @@ namespace Sharky.Builds.Terran
                 MacroData.DesiredUnitCounts[UnitTypes.TERRAN_HELLION] = 0;
             }
 
-            if (UnitManager.Completed(UnitTypes.TERRAN_FUSIONCORE) > 0)
+            if (UnitCountService.Completed(UnitTypes.TERRAN_FUSIONCORE) > 0)
             {
                 if (MacroData.DesiredUnitCounts[UnitTypes.TERRAN_BATTLECRUISER] < 10)
                 {
@@ -105,13 +105,13 @@ namespace Sharky.Builds.Terran
                 }
             }
 
-            if (UnitManager.Completed(UnitTypes.TERRAN_ARMORY) > 0)
+            if (UnitCountService.Completed(UnitTypes.TERRAN_ARMORY) > 0)
             {
                 MacroData.DesiredUpgrades[Upgrades.TERRANSHIPWEAPONSLEVEL1] = true;
                 MacroData.DesiredUpgrades[Upgrades.TERRANSHIPWEAPONSLEVEL2] = true;
                 MacroData.DesiredUpgrades[Upgrades.TERRANSHIPWEAPONSLEVEL3] = true;
             }
-            if (UnitManager.Completed(UnitTypes.TERRAN_ARMORY) > 1)
+            if (UnitCountService.Completed(UnitTypes.TERRAN_ARMORY) > 1)
             {
                 MacroData.DesiredUpgrades[Upgrades.TERRANVEHICLEANDSHIPARMORSLEVEL1] = true;
                 MacroData.DesiredUpgrades[Upgrades.TERRANVEHICLEANDSHIPARMORSLEVEL2] = true;

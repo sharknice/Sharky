@@ -6,26 +6,22 @@ namespace Sharky.Managers.Protoss
 {
     public class NexusManager : SharkyManager
     {
-        IUnitManager UnitManager;
+        ActiveUnitData ActiveUnitData;
         UnitDataManager UnitDataManager;
+        ChronoData ChronoData;
 
-        public HashSet<UnitTypes> ChronodUnits { get; set; }
-        public HashSet<Upgrades> ChronodUpgrades { get; set; }
-
-        public NexusManager(IUnitManager unitManager, UnitDataManager unitDataManager)
+        public NexusManager(ActiveUnitData activeUnitData, UnitDataManager unitDataManager, ChronoData chronoData)
         {
-            UnitManager = unitManager;
+            ActiveUnitData = activeUnitData;
             UnitDataManager = unitDataManager;
-
-            ChronodUnits = new HashSet<UnitTypes>();
-            ChronodUpgrades = new HashSet<Upgrades>();
+            ChronoData = chronoData;
         }
 
         public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
         {
             var actions = new List<SC2APIProtocol.Action>();
 
-            var nexus = UnitManager.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS).OrderByDescending(c => c.UnitCalculation.Unit.Energy).FirstOrDefault();
+            var nexus = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS).OrderByDescending(c => c.UnitCalculation.Unit.Energy).FirstOrDefault();
             if (nexus != null)
             {
                 var action = ChronoBoost(nexus, (int)observation.Observation.GameLoop);
@@ -42,20 +38,20 @@ namespace Sharky.Managers.Protoss
         {
             if (nexus.UnitCalculation.Unit.Energy >= 50)
             {
-                foreach (var upgrade in ChronodUpgrades)
+                foreach (var upgrade in ChronoData.ChronodUpgrades)
                 {
                     var upgradeData = UnitDataManager.UpgradeData[upgrade];
-                    var building = UnitManager.SelfUnits.Where(u => !u.Value.Unit.BuffIds.Contains((uint)Buffs.CHRONOBOOST) && upgradeData.ProducingUnits.Contains((UnitTypes)u.Value.Unit.UnitType) && u.Value.Unit.Orders.Any(o => o.AbilityId == (uint)upgradeData.Ability)).FirstOrDefault().Value;
+                    var building = ActiveUnitData.SelfUnits.Where(u => !u.Value.Unit.BuffIds.Contains((uint)Buffs.CHRONOBOOST) && upgradeData.ProducingUnits.Contains((UnitTypes)u.Value.Unit.UnitType) && u.Value.Unit.Orders.Any(o => o.AbilityId == (uint)upgradeData.Ability)).FirstOrDefault().Value;
                     if (building != null)
                     {
                         return nexus.Order(frame, Abilities.CHRONOBOOST, null, building.Unit.Tag);
                     }
                 }
 
-                foreach (var unit in ChronodUnits)
+                foreach (var unit in ChronoData.ChronodUnits)
                 {
                     var trainingData = UnitDataManager.TrainingData[unit];
-                    var building = UnitManager.SelfUnits.Where(u => !u.Value.Unit.BuffIds.Contains((uint)Buffs.CHRONOBOOST) && trainingData.ProducingUnits.Contains((UnitTypes)u.Value.Unit.UnitType) && u.Value.Unit.Orders.Any(o => o.AbilityId == (uint)trainingData.Ability)).FirstOrDefault().Value;
+                    var building = ActiveUnitData.SelfUnits.Where(u => !u.Value.Unit.BuffIds.Contains((uint)Buffs.CHRONOBOOST) && trainingData.ProducingUnits.Contains((UnitTypes)u.Value.Unit.UnitType) && u.Value.Unit.Orders.Any(o => o.AbilityId == (uint)trainingData.Ability)).FirstOrDefault().Value;
                     if (building != null)
                     {
                         return nexus.Order(frame, Abilities.CHRONOBOOST, null, building.Unit.Tag);

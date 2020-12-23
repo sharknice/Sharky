@@ -10,7 +10,7 @@ namespace Sharky.Managers
 {
     public class MapManager : SharkyManager
     {
-        IUnitManager UnitManager;
+        ActiveUnitData ActiveUnitData;
         MapData MapData;
         SharkyOptions SharkyOptions;
         UnitDataManager UnitDataManager;
@@ -21,10 +21,10 @@ namespace Sharky.Managers
         private readonly int MillisecondsPerUpdate;
         private double MillisecondsUntilUpdate;
 
-        public MapManager(MapData mapData, IUnitManager unitManager, SharkyOptions sharkyOptions, UnitDataManager unitDataManager)
+        public MapManager(MapData mapData, ActiveUnitData activeUnitData, SharkyOptions sharkyOptions, UnitDataManager unitDataManager)
         {
             MapData = mapData;
-            UnitManager = unitManager;
+            ActiveUnitData = activeUnitData;
             SharkyOptions = sharkyOptions;
             UnitDataManager = unitDataManager;
 
@@ -100,7 +100,7 @@ namespace Sharky.Managers
                 }
             }
 
-            foreach (var enemy in UnitManager.EnemyUnits.Where(e => e.Value.DamageAir && e.Value.Unit.BuildProgress == 1))
+            foreach (var enemy in ActiveUnitData.EnemyUnits.Where(e => e.Value.DamageAir && e.Value.Unit.BuildProgress == 1))
             {
                 var nodes = GetNodesInRange(enemy.Value.Unit.Pos, enemy.Value.Range + 2, MapData.MapWidth, MapData.MapHeight);
                 foreach (var node in nodes)
@@ -120,7 +120,7 @@ namespace Sharky.Managers
                 }
             }
 
-            foreach (var enemy in UnitManager.EnemyUnits.Where(e => e.Value.UnitClassifications.Contains(UnitClassification.Detector) && e.Value.Unit.BuildProgress == 1))
+            foreach (var enemy in ActiveUnitData.EnemyUnits.Where(e => e.Value.UnitClassifications.Contains(UnitClassification.Detector) && e.Value.Unit.BuildProgress == 1))
             {
                 var nodes = GetNodesInRange(enemy.Value.Unit.Pos, enemy.Value.Unit.DetectRange + 1, MapData.MapWidth, MapData.MapHeight);
                 foreach (var node in nodes)

@@ -25,7 +25,6 @@ namespace Sharky.Proxy
         public Point2D GetCliffProxyLocation()
         {
             var numberOfCloseLocations = NumberOfCloseBaseLocations();
-            // TODO: specific maps are layed out different, need to change proxybase for those
             var closeAirLocations = BaseManager.BaseLocations.OrderBy(b => Vector2.DistanceSquared(new Vector2(TargetingManager.EnemyMainBasePoint.X, TargetingManager.EnemyMainBasePoint.Y), new Vector2(b.Location.X, b.Location.Y))).Take(numberOfCloseLocations);
 
             var baseLocation = closeAirLocations.OrderBy(b => PathFinder.GetGroundPath(TargetingManager.EnemyMainBasePoint.X, TargetingManager.EnemyMainBasePoint.Y, b.Location.X, b.Location.Y, 0).Count()).Last().Location;
@@ -44,9 +43,8 @@ namespace Sharky.Proxy
         public Point2D GetGroundProxyLocation()
         {
             int proxyBase = NumberOfCloseBaseLocations() + 1;
-            // TODO: specific maps are layed out different, need to change proxybase for those
-
             var orderedLocations = BaseManager.BaseLocations.OrderBy(b => PathFinder.GetGroundPath(TargetingManager.EnemyMainBasePoint.X, TargetingManager.EnemyMainBasePoint.Y, b.Location.X, b.Location.Y, 0).Count());
+
             var baseLocation = orderedLocations.Take(proxyBase).Last().Location;
 
             var angle = Math.Atan2(TargetingManager.EnemyMainBasePoint.Y - baseLocation.Y, baseLocation.X - TargetingManager.EnemyMainBasePoint.X);
@@ -62,9 +60,7 @@ namespace Sharky.Proxy
 
         private int NumberOfCloseBaseLocations()
         {
-            return BaseManager.BaseLocations.Count(b => Vector2.DistanceSquared(new Vector2(TargetingManager.EnemyMainBasePoint.X, TargetingManager.EnemyMainBasePoint.Y), new Vector2(b.Location.X, b.Location.Y)) < 900);
-
-            return 4;
+            return BaseManager.BaseLocations.Count(b => Vector2.DistanceSquared(new Vector2(TargetingManager.EnemyMainBasePoint.X, TargetingManager.EnemyMainBasePoint.Y), new Vector2(b.Location.X, b.Location.Y)) < 1000);
         }
     }
 }
