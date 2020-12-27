@@ -1,7 +1,6 @@
 ﻿using SC2APIProtocol;
 using Sharky.Builds.BuildChoosing;
 using Sharky.Managers;
-using Sharky.Managers.Protoss;
 using System.Collections.Generic;
 
 namespace Sharky.Builds.Protoss
@@ -10,7 +9,8 @@ namespace Sharky.Builds.Protoss
     {
        ICounterTransitioner ProtossCounterTransitioner;
 
-        public NexusFirst(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, IChatManager chatManager, ChronoData nexusManager, ICounterTransitioner protossCounterTransitioner, UnitCountService unitCountService) : base(buildOptions, macroData, activeUnitData, attackData, chatManager, nexusManager, protossCounterTransitioner, unitCountService)
+        public NexusFirst(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, IChatManager chatManager, ChronoData chronoData, ICounterTransitioner protossCounterTransitioner, UnitCountService unitCountService) 
+            : base(buildOptions, macroData, activeUnitData, attackData, chatManager, chronoData, protossCounterTransitioner, unitCountService)
         {
             ProtossCounterTransitioner = protossCounterTransitioner;
         }

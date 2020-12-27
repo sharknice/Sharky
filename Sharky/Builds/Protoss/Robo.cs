@@ -12,7 +12,7 @@ namespace Sharky.Builds.Protoss
         EnemyRaceManager EnemyRaceManager;
         MicroManager MicroManager;
 
-        public Robo(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, IChatManager chatManager, ChronoData nexusManager, EnemyRaceManager enemyRaceManager, MicroManager microManager, ICounterTransitioner counterTransitioner, UnitCountService unitCountService) : base(buildOptions, macroData, activeUnitData, attackData, chatManager, nexusManager, counterTransitioner, unitCountService)
+        public Robo(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, IChatManager chatManager, ChronoData chronoData, EnemyRaceManager enemyRaceManager, MicroManager microManager, ICounterTransitioner counterTransitioner, UnitCountService unitCountService) : base(buildOptions, macroData, activeUnitData, attackData, chatManager, chronoData, counterTransitioner, unitCountService)
         {
             EnemyRaceManager = enemyRaceManager;
             MicroManager = microManager;
