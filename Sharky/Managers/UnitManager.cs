@@ -15,14 +15,14 @@ namespace Sharky.Managers
         TargetPriorityService TargetPriorityService;
         CollisionCalculator CollisionCalculator;
         MapDataService MapDataService;
-        DebugManager DebugManager;
+        DebugService DebugService;
         DamageService DamageService;
 
         float NearbyDistance = 25;
 
         ActiveUnitData ActiveUnitData;
 
-        public UnitManager(ActiveUnitData activeUnitData, UnitDataManager unitDataManager, SharkyOptions sharkyOptions, TargetPriorityService targetPriorityService, CollisionCalculator collisionCalculator, MapDataService mapDataService, DebugManager debugManager, DamageService damageService)
+        public UnitManager(ActiveUnitData activeUnitData, UnitDataManager unitDataManager, SharkyOptions sharkyOptions, TargetPriorityService targetPriorityService, CollisionCalculator collisionCalculator, MapDataService mapDataService, DebugService debugService, DamageService damageService)
         {
             ActiveUnitData = activeUnitData;
 
@@ -31,7 +31,7 @@ namespace Sharky.Managers
             TargetPriorityService = targetPriorityService;
             CollisionCalculator = collisionCalculator;
             MapDataService = mapDataService;
-            DebugManager = debugManager;
+            DebugService = debugService;
             DamageService = damageService;
 
             ActiveUnitData.EnemyUnits = new ConcurrentDictionary<ulong, UnitCalculation>();
@@ -175,11 +175,11 @@ namespace Sharky.Managers
             {
                 foreach (var selfUnit in ActiveUnitData.SelfUnits)
                 {
-                    DebugManager.DrawLine(selfUnit.Value.Unit.Pos, new Point { X = selfUnit.Value.End.X, Y = selfUnit.Value.End.Y, Z = selfUnit.Value.Unit.Pos.Z + 1f }, new SC2APIProtocol.Color { R = 0, B = 0, G = 255 });
+                    DebugService.DrawLine(selfUnit.Value.Unit.Pos, new Point { X = selfUnit.Value.End.X, Y = selfUnit.Value.End.Y, Z = selfUnit.Value.Unit.Pos.Z + 1f }, new SC2APIProtocol.Color { R = 0, B = 0, G = 255 });
                 }
                 foreach (var enemyUnit in ActiveUnitData.EnemyUnits)
                 {
-                    DebugManager.DrawLine(enemyUnit.Value.Unit.Pos, new Point { X = enemyUnit.Value.End.X, Y = enemyUnit.Value.End.Y, Z = enemyUnit.Value.Unit.Pos.Z + 1f }, new SC2APIProtocol.Color { R = 255, B = 0, G = 0 });
+                    DebugService.DrawLine(enemyUnit.Value.Unit.Pos, new Point { X = enemyUnit.Value.End.X, Y = enemyUnit.Value.End.Y, Z = enemyUnit.Value.Unit.Pos.Z + 1f }, new SC2APIProtocol.Color { R = 255, B = 0, G = 0 });
                 }
             }
 

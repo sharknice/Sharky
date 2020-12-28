@@ -1,17 +1,16 @@
 ﻿using Sharky.Chat;
-using Sharky.Managers;
 
 namespace Sharky.EnemyStrategies.Protoss
 {
     public class AdeptRush : EnemyStrategy
     {
-        public AdeptRush(EnemyStrategyHistory enemyStrategyHistory, ChatService chatService, ActiveUnitData activeUnitData, SharkyOptions sharkyOptions, DebugManager debugManager, UnitCountService unitCountService)
+        public AdeptRush(EnemyStrategyHistory enemyStrategyHistory, ChatService chatService, ActiveUnitData activeUnitData, SharkyOptions sharkyOptions, DebugService debugService, UnitCountService unitCountService)
         {
             EnemyStrategyHistory = enemyStrategyHistory;
             ChatService = chatService;
             ActiveUnitData = activeUnitData;
             SharkyOptions = sharkyOptions;
-            DebugManager = debugManager;
+            DebugService = debugService;
             UnitCountService = unitCountService;
         }
 

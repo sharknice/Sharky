@@ -14,7 +14,7 @@ namespace Sharky.MicroControllers
         protected MapDataService MapDataService;
         protected UnitDataManager UnitDataManager;
         protected ActiveUnitData ActiveUnitData;
-        protected DebugManager DebugManager;
+        protected DebugService DebugService;
         protected IPathFinder SharkyPathFinder;
         BaseData BaseData;
         protected SharkyOptions SharkyOptions;
@@ -29,12 +29,12 @@ namespace Sharky.MicroControllers
         protected float AvoidDamageDistance;
         protected float LooseFormationDistance;
 
-        public IndividualMicroController(MapDataService mapDataService, UnitDataManager unitDataManager, ActiveUnitData activeUnitData, DebugManager debugManager, IPathFinder sharkyPathFinder, BaseData baseData, SharkyOptions sharkyOptions, DamageService damageService, MicroPriority microPriority, bool groupUpEnabled, float avoidDamageDistance = 1)
+        public IndividualMicroController(MapDataService mapDataService, UnitDataManager unitDataManager, ActiveUnitData activeUnitData, DebugService debugService, IPathFinder sharkyPathFinder, BaseData baseData, SharkyOptions sharkyOptions, DamageService damageService, MicroPriority microPriority, bool groupUpEnabled, float avoidDamageDistance = 1)
         {
             MapDataService = mapDataService;
             UnitDataManager = unitDataManager;
             ActiveUnitData = activeUnitData;
-            DebugManager = debugManager;
+            DebugService = debugService;
             SharkyPathFinder = sharkyPathFinder;
             BaseData = baseData;
             SharkyOptions = sharkyOptions;
@@ -496,7 +496,7 @@ namespace Sharky.MicroControllers
                     var thing = commander.RetreatPath.ToList();
                     for (int index = 0; index < thing.Count - 1; index++)
                     {
-                        DebugManager.DrawLine(new Point { X = thing[index].X, Y = thing[index].Y, Z = commander.UnitCalculation.Unit.Pos.Z + 1 }, new Point { X = thing[index + 1].X, Y = thing[index + 1].Y, Z = commander.UnitCalculation.Unit.Pos.Z + 1 }, new Color { R = 0, G = 0, B = 255 });
+                        DebugService.DrawLine(new Point { X = thing[index].X, Y = thing[index].Y, Z = commander.UnitCalculation.Unit.Pos.Z + 1 }, new Point { X = thing[index + 1].X, Y = thing[index + 1].Y, Z = commander.UnitCalculation.Unit.Pos.Z + 1 }, new Color { R = 0, G = 0, B = 255 });
                     }
                 }
 
@@ -505,7 +505,7 @@ namespace Sharky.MicroControllers
                     var point = commander.RetreatPath[commander.RetreatPathIndex];
 
                     action = commander.Order(frame, Abilities.MOVE, new Point2D { X = point.X, Y = point.Y });
-                    DebugManager.DrawSphere(new Point { X = point.X, Y = point.Y, Z = commander.UnitCalculation.Unit.Pos.Z }, 1, new Color { R = 0, G = 0, B = 255 });
+                    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = commander.UnitCalculation.Unit.Pos.Z }, 1, new Color { R = 0, G = 0, B = 255 });
 
                     if (Vector2.DistanceSquared(new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y), point) < 2)
                     {
@@ -522,7 +522,7 @@ namespace Sharky.MicroControllers
             //    if (SharkyOptions.Debug)
             //    {
             //        var thing = path.ToList();
-            //        DebugManager.DrawSphere(new Point { X = point.X, Y = point.Y, Z = commander.UnitCalculation.Unit.Pos.Z }, 1, new Color { R = 0, G = 0, B = 255 });
+            //        DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = commander.UnitCalculation.Unit.Pos.Z }, 1, new Color { R = 0, G = 0, B = 255 });
 
             //        for (int index = 0; index < thing.Count - 1; index++)
             //        {
@@ -727,7 +727,7 @@ namespace Sharky.MicroControllers
 
                 if (attack)
                 {
-                    //DebugManager.DrawSphere(new Point { X = groupCenter.X, Y = groupCenter.Y, Z = 10 });
+                    //DebugService.DrawSphere(new Point { X = groupCenter.X, Y = groupCenter.Y, Z = 10 });
                     action = commander.Order(frame, Abilities.ATTACK, groupCenter);
                 }
                 else

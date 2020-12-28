@@ -10,13 +10,13 @@ namespace Sharky
     public class SharkyBot : ISharkyBot
     {
         List<IManager> Managers;
-        DebugManager DebugManager;
+        DebugService DebugService;
         List<SC2APIProtocol.Action> Actions;
 
-        public SharkyBot(List<IManager> managers, DebugManager debugManager)
+        public SharkyBot(List<IManager> managers, DebugService debugService)
         {
             Managers = managers;
-            DebugManager = debugManager;
+            DebugService = debugService;
         }
 
         public void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)
@@ -56,7 +56,7 @@ namespace Sharky
                 {
                     managerStopwatch.Restart();
                     Actions.AddRange(manager.OnFrame(observation));
-                    DebugManager.DrawText($"{manager.GetType().Name}: {managerStopwatch.ElapsedMilliseconds}");
+                    DebugService.DrawText($"{manager.GetType().Name}: {managerStopwatch.ElapsedMilliseconds}");
                 }
             }
             catch (Exception exception)
@@ -65,7 +65,7 @@ namespace Sharky
             }
 
             stopwatch.Stop();
-            DebugManager.DrawText($"OnFrame: {stopwatch.ElapsedMilliseconds}");
+            DebugService.DrawText($"OnFrame: {stopwatch.ElapsedMilliseconds}");
 
             if (Actions.Any(a => a == null))
             {

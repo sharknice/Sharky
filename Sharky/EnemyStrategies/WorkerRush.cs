@@ -9,14 +9,14 @@ namespace Sharky.EnemyStrategies
     {
         TargetingData TargetingData;
 
-        public WorkerRush(EnemyStrategyHistory enemyStrategyHistory, ChatService chatService, ActiveUnitData activeUnitData, SharkyOptions sharkyOptions, TargetingData targetingData, DebugManager debugManager, UnitCountService unitCountService)
+        public WorkerRush(EnemyStrategyHistory enemyStrategyHistory, ChatService chatService, ActiveUnitData activeUnitData, SharkyOptions sharkyOptions, TargetingData targetingData, DebugService debugService, UnitCountService unitCountService)
         {
             EnemyStrategyHistory = enemyStrategyHistory;
             ChatService = chatService;
             ActiveUnitData = activeUnitData;
             SharkyOptions = sharkyOptions;
             TargetingData = targetingData;
-            DebugManager = debugManager;
+            DebugService = debugService;
             UnitCountService = unitCountService;
         }
 

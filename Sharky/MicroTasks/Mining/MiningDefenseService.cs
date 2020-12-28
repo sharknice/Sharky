@@ -12,14 +12,14 @@ namespace Sharky.MicroTasks.Mining
         BaseData BaseData;
         ActiveUnitData ActiveUnitData;
         IIndividualMicroController WorkerMicroController;
-        DebugManager DebugManager;
+        DebugService DebugService;
 
-        public MiningDefenseService(BaseData baseData, ActiveUnitData activeUnitData, IIndividualMicroController workerMicroController, DebugManager debugManager)
+        public MiningDefenseService(BaseData baseData, ActiveUnitData activeUnitData, IIndividualMicroController workerMicroController, DebugService debugService)
         {
             BaseData = baseData;
             ActiveUnitData = activeUnitData;
             WorkerMicroController = workerMicroController;
-            DebugManager = debugManager;
+            DebugService = debugService;
         }
 
         public List<SC2APIProtocol.Action> DealWithEnemies(int frame, List<UnitCommander> unitCommanders)

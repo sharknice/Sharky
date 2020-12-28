@@ -9,14 +9,14 @@ namespace Sharky.EnemyStrategies.Protoss
     {
         TargetingData TargetingData;
 
-        public CannonRush(EnemyStrategyHistory enemyStrategyHistory, ChatService chatService, ActiveUnitData activeUnitData, SharkyOptions sharkyOptions, TargetingData targetingData, DebugManager debugManager, UnitCountService unitCountService)
+        public CannonRush(EnemyStrategyHistory enemyStrategyHistory, ChatService chatService, ActiveUnitData activeUnitData, SharkyOptions sharkyOptions, TargetingData targetingData, DebugService debugService, UnitCountService unitCountService)
         {
             EnemyStrategyHistory = enemyStrategyHistory;
             ChatService = chatService;
             ActiveUnitData = activeUnitData;
             SharkyOptions = sharkyOptions;
             TargetingData = targetingData;
-            DebugManager = debugManager;
+            DebugService = debugService;
             UnitCountService = unitCountService;
         }
 

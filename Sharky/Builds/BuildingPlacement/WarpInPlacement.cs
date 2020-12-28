@@ -10,13 +10,13 @@ namespace Sharky.Builds.BuildingPlacement
     public class WarpInPlacement : IBuildingPlacement
     {
         ActiveUnitData ActiveUnitData;
-        DebugManager DebugManager;
+        DebugService DebugService;
         MapData MapData;
 
-        public WarpInPlacement(ActiveUnitData activeUnitData, DebugManager debugManager, MapData mapData)
+        public WarpInPlacement(ActiveUnitData activeUnitData, DebugService debugService, MapData mapData)
         {
             ActiveUnitData = activeUnitData;
-            DebugManager = debugManager;
+            DebugService = debugService;
             MapData = mapData;
         }
 
@@ -47,7 +47,7 @@ namespace Sharky.Builds.BuildingPlacement
                         var point = new Point2D { X = x + (float)(radius * Math.Cos(angle)), Y = y + (float)(radius * Math.Sin(angle)) };
                         if (AreaPlaceable(point.X, point.Y, size / 2.0f) && !Blocked(point.X, point.Y, size / 2.0f))
                         {
-                            DebugManager.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
+                            DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
                             return point;
                         }
 

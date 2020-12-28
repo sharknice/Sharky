@@ -12,7 +12,7 @@ namespace Sharky.Managers
 {
     public class BuildManager : SharkyManager
     {
-        DebugManager DebugManager;
+        DebugService DebugService;
         Dictionary<Race, BuildChoices> BuildChoices;
         IBuildDecisionService BuildDecisionService;
         IEnemyPlayerService EnemyPlayerService;
@@ -30,10 +30,10 @@ namespace Sharky.Managers
         ChatHistory ChatHistory;
         EnemyStrategyHistory EnemyStrategyHistory;
 
-        public BuildManager(Dictionary<Race, BuildChoices> buildChoices, DebugManager debugManager, IMacroBalancer macroBalancer, IBuildDecisionService buildDecisionService, IEnemyPlayerService enemyPlayerService, ChatHistory chatHistory, EnemyStrategyHistory enemyStrategyHistory)
+        public BuildManager(Dictionary<Race, BuildChoices> buildChoices, DebugService debugService, IMacroBalancer macroBalancer, IBuildDecisionService buildDecisionService, IEnemyPlayerService enemyPlayerService, ChatHistory chatHistory, EnemyStrategyHistory enemyStrategyHistory)
         {
             BuildChoices = buildChoices;
-            DebugManager = debugManager;
+            DebugService = debugService;
             MacroBalancer = macroBalancer;
             BuildDecisionService = buildDecisionService;
             EnemyPlayerService = enemyPlayerService;
@@ -81,8 +81,8 @@ namespace Sharky.Managers
 
         public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
         {
-            DebugManager.DrawText("Build: " + CurrentBuild.Name());
-            DebugManager.DrawText("Sequence: " + string.Join(", ", BuildSequence));
+            DebugService.DrawText("Build: " + CurrentBuild.Name());
+            DebugService.DrawText("Sequence: " + string.Join(", ", BuildSequence));
 
             var frame = (int)observation.Observation.GameLoop;
 

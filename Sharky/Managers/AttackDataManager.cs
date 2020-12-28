@@ -14,9 +14,9 @@ namespace Sharky.Managers
         TargetPriorityService TargetPriorityService;
         TargetingData TargetingData;
         MacroData MacroData;
-        DebugManager DebugManager;
+        DebugService DebugService;
 
-        public AttackDataManager(AttackData attackData, ActiveUnitData activeUnitData, AttackTask attackTask, TargetPriorityService targetPriorityService, TargetingData targetingData, MacroData macroData, DebugManager debugManager)
+        public AttackDataManager(AttackData attackData, ActiveUnitData activeUnitData, AttackTask attackTask, TargetPriorityService targetPriorityService, TargetingData targetingData, MacroData macroData, DebugService debugService)
         {
             AttackData = attackData;
             ActiveUnitData = activeUnitData;
@@ -24,7 +24,7 @@ namespace Sharky.Managers
             TargetPriorityService = targetPriorityService;
             TargetingData = targetingData;
             MacroData = macroData;
-            DebugManager = debugManager;
+            DebugService = debugService;
         }
 
         public override void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)
@@ -43,28 +43,28 @@ namespace Sharky.Managers
             if (MacroData.FoodUsed > 185)
             {
                 AttackData.Attacking = true;
-                DebugManager.DrawText("Attacking: > 185 supply");
+                DebugService.DrawText("Attacking: > 185 supply");
                 return new List<SC2APIProtocol.Action>();
             }
 
             if (ActiveUnitData.SelfUnits.Count(u => u.Value.UnitClassifications.Contains(UnitClassification.Worker)) == 0)
             {
                 AttackData.Attacking = true;
-                DebugManager.DrawText("Attacking: no workers");
+                DebugService.DrawText("Attacking: no workers");
                 return new List<SC2APIProtocol.Action>();
             }
 
             if (ActiveUnitData.SelfUnits.Count(u => u.Value.UnitClassifications.Contains(UnitClassification.ResourceCenter)) == 0)
             {
                 AttackData.Attacking = true;
-                DebugManager.DrawText("Attacking: no base");
+                DebugService.DrawText("Attacking: no base");
                 return new List<SC2APIProtocol.Action>();
             }
 
             if (AttackTask.UnitCommanders.Count() < 1)
             {
                 AttackData.Attacking = false;
-                DebugManager.DrawText("Not Attacking: no attacking army");
+                DebugService.DrawText("Not Attacking: no attacking army");
                 return new List<SC2APIProtocol.Action>();
             }
 
@@ -75,7 +75,7 @@ namespace Sharky.Managers
             if (enemyUnits.Count() < 1)
             {
                 AttackData.Attacking = true;
-                DebugManager.DrawText("Attacking: no enemy army");
+                DebugService.DrawText("Attacking: no enemy army");
                 return new List<SC2APIProtocol.Action>();
             }
 
@@ -84,12 +84,12 @@ namespace Sharky.Managers
             if (targetPriority.OverallWinnability >= 1 || targetPriority.GroundWinnability > 2 || targetPriority.AirWinnability > 2)
             {
                 AttackData.Attacking = true;
-                DebugManager.DrawText($"Attacking: O:{targetPriority.OverallWinnability:0.00}, G:{targetPriority.GroundWinnability:0.00}, A:{targetPriority.AirWinnability:0.00}");
+                DebugService.DrawText($"Attacking: O:{targetPriority.OverallWinnability:0.00}, G:{targetPriority.GroundWinnability:0.00}, A:{targetPriority.AirWinnability:0.00}");
             }
             else
             {
                 AttackData.Attacking = false;
-                DebugManager.DrawText($"Not Attacking: O:{targetPriority.OverallWinnability:0.00}, G:{targetPriority.GroundWinnability:0.00}, A:{targetPriority.AirWinnability:0.00}");
+                DebugService.DrawText($"Not Attacking: O:{targetPriority.OverallWinnability:0.00}, G:{targetPriority.GroundWinnability:0.00}, A:{targetPriority.AirWinnability:0.00}");
             }
 
             return new List<SC2APIProtocol.Action>();

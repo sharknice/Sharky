@@ -13,21 +13,21 @@ namespace Sharky.MicroTasks
         UnitDataManager UnitDataManager;
         MacroData MacroData;
         MicroManager MicroManager;
-        DebugManager DebugManager;
+        DebugService DebugService;
         IIndividualMicroController IndividualMicroController;
 
         public string ProxyName { get; set; }
 
         bool started { get; set; }
 
-        public ProxyTask(UnitDataManager unitDataManager, bool enabled, float priority, MacroData macroData, string proxyName, MicroManager microManager, DebugManager debugManager, IIndividualMicroController individualMicroController)
+        public ProxyTask(UnitDataManager unitDataManager, bool enabled, float priority, MacroData macroData, string proxyName, MicroManager microManager, DebugService debugService, IIndividualMicroController individualMicroController)
         {
             UnitDataManager = unitDataManager;
             Priority = priority;
             MacroData = macroData;
             ProxyName = proxyName;
             MicroManager = microManager;
-            DebugManager = debugManager;
+            DebugService = debugService;
             IndividualMicroController = individualMicroController;
 
             UnitCommanders = new List<UnitCommander>();

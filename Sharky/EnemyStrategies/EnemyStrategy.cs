@@ -13,7 +13,7 @@ namespace Sharky.EnemyStrategies
         protected EnemyStrategyHistory EnemyStrategyHistory;
         protected ActiveUnitData ActiveUnitData;
         protected SharkyOptions SharkyOptions;
-        protected DebugManager DebugManager;
+        protected DebugService DebugService;
         protected UnitCountService UnitCountService;
 
         public string Name()
@@ -36,7 +36,7 @@ namespace Sharky.EnemyStrategies
                     Detected = true;
                     DetectedChat();
                 }
-                DebugManager.DrawText($"Active: {Name()}");
+                DebugService.DrawText($"Active: {Name()}");
             }
             else
             {

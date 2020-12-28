@@ -11,15 +11,15 @@ namespace Sharky.Builds.BuildingPlacement
     {
         ActiveUnitData ActiveUnitData;
         UnitDataManager UnitDataManager;
-        DebugManager DebugManager;
+        DebugService DebugService;
         MapData MapData;
         BuildingService BuildingService;
 
-        public ProtossBuildingPlacement(ActiveUnitData activeUnitData, UnitDataManager unitDataManager, DebugManager debugManager, MapData mapData, BuildingService buildingService)
+        public ProtossBuildingPlacement(ActiveUnitData activeUnitData, UnitDataManager unitDataManager, DebugService debugService, MapData mapData, BuildingService buildingService)
         {
             ActiveUnitData = activeUnitData;
             UnitDataManager = unitDataManager;
-            DebugManager = debugManager;
+            DebugService = debugService;
             MapData = mapData;
             BuildingService = buildingService;
         }
@@ -54,7 +54,7 @@ namespace Sharky.Builds.BuildingPlacement
                 while (angle + (sliceSize / 2) < fullCircle)
                 {
                     var point = new Point2D { X = x + (float)(radius * Math.Cos(angle)), Y = y + (float)(radius * Math.Sin(angle)) };
-                    //DebugManager.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
+                    //DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
 
                     if (BuildingService.AreaBuildable(point.X, point.Y, 1.25f) && !BuildingService.Blocked(point.X, point.Y, 1.25f) && !BuildingService.HasCreep(point.X, point.Y, 1.5f))
                     {
@@ -70,7 +70,7 @@ namespace Sharky.Builds.BuildingPlacement
                             {
                                 if (Vector2.DistanceSquared(new Vector2(reference.X, reference.Y), new Vector2(point.X, point.Y)) <= maxDistance * maxDistance)
                                 {
-                                    DebugManager.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
+                                    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
                                     return point;
                                 }
                             }
@@ -103,7 +103,7 @@ namespace Sharky.Builds.BuildingPlacement
                     while (angle + (sliceSize / 2) < fullCircle)
                     {
                         var point = new Point2D { X = x + (float)(radius * Math.Cos(angle)), Y = y + (float)(radius * Math.Sin(angle)) };
-                        DebugManager.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
+                        DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
 
                         if (BuildingService.AreaBuildable(point.X, point.Y, size / 2.0f) && !BuildingService.Blocked(point.X, point.Y, size / 2.0f) && !BuildingService.HasCreep(point.X, point.Y, size / 2.0f))
                         {
@@ -115,7 +115,7 @@ namespace Sharky.Builds.BuildingPlacement
                             {
                                 if (Vector2.DistanceSquared(new Vector2(target.X, target.Y), new Vector2(point.X, point.Y)) <= maxDistance * maxDistance)
                                 {
-                                    DebugManager.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
+                                    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
                                     return point;
                                 }
                             }

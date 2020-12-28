@@ -71,6 +71,7 @@ namespace Sharky.DefaultBot
         public DamageService DamageService { get; set; }
         public TargetingService TargetingService { get; set; }
         public ChatService ChatService { get; set; }
+        public DebugService DebugService { get; set; }
 
         public ActiveUnitData ActiveUnitData { get; set; }
         public MapData MapData { get; set; }
@@ -123,7 +124,8 @@ namespace Sharky.DefaultBot
 
             Managers = new List<IManager>();
 
-            DebugManager = new DebugManager(gameConnection, SharkyOptions);
+            DebugService = new DebugService(SharkyOptions);
+            DebugManager = new DebugManager(gameConnection, SharkyOptions, DebugService);
             Managers.Add(DebugManager);
 
             UpgradeDataService = new UpgradeDataService();
@@ -142,7 +144,7 @@ namespace Sharky.DefaultBot
             ActiveUnitData = new ActiveUnitData();
             UnitCountService = new UnitCountService(ActiveUnitData, UnitDataManager);
             DamageService = new DamageService();
-            UnitManager = new UnitManager(ActiveUnitData, UnitDataManager, SharkyOptions, TargetPriorityService, CollisionCalculator, MapDataService, DebugManager, DamageService);
+            UnitManager = new UnitManager(ActiveUnitData, UnitDataManager, SharkyOptions, TargetPriorityService, CollisionCalculator, MapDataService, DebugService, DamageService);
             MapManager = new MapManager(MapData, ActiveUnitData, SharkyOptions, UnitDataManager);
             Managers.Add(MapManager);
             Managers.Add(UnitManager);
@@ -150,7 +152,7 @@ namespace Sharky.DefaultBot
             EnemyRaceManager = new EnemyRaceManager(ActiveUnitData, UnitDataManager);
             Managers.Add(EnemyRaceManager);
 
-            SharkyPathFinder = new SharkyPathFinder(new Roy_T.AStar.Paths.PathFinder(), MapData, MapDataService, DebugManager);
+            SharkyPathFinder = new SharkyPathFinder(new Roy_T.AStar.Paths.PathFinder(), MapData, MapDataService, DebugService);
             SharkySimplePathFinder = new SharkySimplePathFinder(MapDataService);
             NoPathFinder = new SharkyNoPathFinder();
 
@@ -163,13 +165,13 @@ namespace Sharky.DefaultBot
             BuildOptions = new BuildOptions { StrictGasCount = false, StrictSupplyCount = false, StrictWorkerCount = false };
             MacroSetup = new MacroSetup();
             BuildingService = new BuildingService(MapData, ActiveUnitData);
-            ProtossBuildingPlacement = new ProtossBuildingPlacement(ActiveUnitData, UnitDataManager, DebugManager, MapData, BuildingService);
-            TerranBuildingPlacement = new TerranBuildingPlacement(ActiveUnitData, UnitDataManager, DebugManager, BuildingService);
-            ZergBuildingPlacement = new ZergBuildingPlacement(ActiveUnitData, UnitDataManager, DebugManager, BuildingService);
+            ProtossBuildingPlacement = new ProtossBuildingPlacement(ActiveUnitData, UnitDataManager, DebugService, MapData, BuildingService);
+            TerranBuildingPlacement = new TerranBuildingPlacement(ActiveUnitData, UnitDataManager, DebugService, BuildingService);
+            ZergBuildingPlacement = new ZergBuildingPlacement(ActiveUnitData, UnitDataManager, DebugService, BuildingService);
             BuildingPlacement = new BuildingPlacement(ProtossBuildingPlacement, TerranBuildingPlacement, ZergBuildingPlacement, BaseData, ActiveUnitData, BuildingService, UnitDataManager);
             BuildingBuilder = new BuildingBuilder(ActiveUnitData, TargetingData, BuildingPlacement, UnitDataManager);
 
-            WarpInPlacement = new WarpInPlacement(ActiveUnitData, DebugManager, MapData);
+            WarpInPlacement = new WarpInPlacement(ActiveUnitData, DebugService, MapData);
             
             Morpher = new Morpher(ActiveUnitData, UnitDataManager, SharkyOptions);
             BuildPylonService = new BuildPylonService(MacroData, BuildingBuilder, UnitDataManager, ActiveUnitData, BaseData, TargetingData);
@@ -190,26 +192,26 @@ namespace Sharky.DefaultBot
 
             ProxyLocationService = new ProxyLocationService(BaseData, TargetingData, SharkyPathFinder, MapDataService);
 
-            var individualMicroController = new IndividualMicroController(MapDataService, UnitDataManager, ActiveUnitData, DebugManager, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, MicroPriority.LiveAndAttack, false);
+            var individualMicroController = new IndividualMicroController(MapDataService, UnitDataManager, ActiveUnitData, DebugService, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, MicroPriority.LiveAndAttack, false);
 
-            var colossusMicroController = new ColossusMicroController(MapDataService, UnitDataManager, ActiveUnitData, DebugManager, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, MicroPriority.LiveAndAttack, false, CollisionCalculator);
-            var darkTemplarMicroController = new DarkTemplarMicroController(MapDataService, UnitDataManager, ActiveUnitData, DebugManager, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, MicroPriority.LiveAndAttack, false);
-            var disruptorMicroController = new DisruptorMicroController(MapDataService, UnitDataManager, ActiveUnitData, DebugManager, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, MicroPriority.LiveAndAttack, false);
-            var disruptorPhasedMicroController = new DisruptorPhasedMicroController(MapDataService, UnitDataManager, ActiveUnitData, DebugManager, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, MicroPriority.LiveAndAttack, false);
-            var mothershipMicroController = new MothershipMicroController(MapDataService, UnitDataManager, ActiveUnitData, DebugManager, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, MicroPriority.LiveAndAttack, false);
-            var oraclepMicroController = new OracleMicroController(MapDataService, UnitDataManager, ActiveUnitData, DebugManager, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, MicroPriority.LiveAndAttack, false);
-            var phoenixMicroController = new PhoenixMicroController(MapDataService, UnitDataManager, ActiveUnitData, DebugManager, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, MicroPriority.LiveAndAttack, false);
-            var sentryMicroController = new SentryMicroController(MapDataService, UnitDataManager, ActiveUnitData, DebugManager, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, MicroPriority.StayOutOfRange, true);
-            var stalkerMicroController = new StalkerMicroController(MapDataService, UnitDataManager, ActiveUnitData, DebugManager, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, MicroPriority.LiveAndAttack, false);
-            var tempestMicroController = new TempestMicroController(MapDataService, UnitDataManager, ActiveUnitData, DebugManager, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, MicroPriority.LiveAndAttack, false);
-            var voidrayMicroController = new VoidRayMicroController(MapDataService, UnitDataManager, ActiveUnitData, DebugManager, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, MicroPriority.LiveAndAttack, false);
-            var warpPrismpMicroController = new WarpPrismMicroController(MapDataService, UnitDataManager, ActiveUnitData, DebugManager, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, MicroPriority.LiveAndAttack, false);
-            var zealotMicroController = new ZealotMicroController(MapDataService, UnitDataManager, ActiveUnitData, DebugManager, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, MicroPriority.AttackForward, false);
-            var observerMicroController = new IndividualMicroController(MapDataService, UnitDataManager, ActiveUnitData, DebugManager, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, MicroPriority.StayOutOfRange, true);
+            var colossusMicroController = new ColossusMicroController(MapDataService, UnitDataManager, ActiveUnitData, DebugService, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, MicroPriority.LiveAndAttack, false, CollisionCalculator);
+            var darkTemplarMicroController = new DarkTemplarMicroController(MapDataService, UnitDataManager, ActiveUnitData, DebugService, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, MicroPriority.LiveAndAttack, false);
+            var disruptorMicroController = new DisruptorMicroController(MapDataService, UnitDataManager, ActiveUnitData, DebugService, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, MicroPriority.LiveAndAttack, false);
+            var disruptorPhasedMicroController = new DisruptorPhasedMicroController(MapDataService, UnitDataManager, ActiveUnitData, DebugService, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, MicroPriority.LiveAndAttack, false);
+            var mothershipMicroController = new MothershipMicroController(MapDataService, UnitDataManager, ActiveUnitData, DebugService, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, MicroPriority.LiveAndAttack, false);
+            var oraclepMicroController = new OracleMicroController(MapDataService, UnitDataManager, ActiveUnitData, DebugService, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, MicroPriority.LiveAndAttack, false);
+            var phoenixMicroController = new PhoenixMicroController(MapDataService, UnitDataManager, ActiveUnitData, DebugService, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, MicroPriority.LiveAndAttack, false);
+            var sentryMicroController = new SentryMicroController(MapDataService, UnitDataManager, ActiveUnitData, DebugService, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, MicroPriority.StayOutOfRange, true);
+            var stalkerMicroController = new StalkerMicroController(MapDataService, UnitDataManager, ActiveUnitData, DebugService, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, MicroPriority.LiveAndAttack, false);
+            var tempestMicroController = new TempestMicroController(MapDataService, UnitDataManager, ActiveUnitData, DebugService, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, MicroPriority.LiveAndAttack, false);
+            var voidrayMicroController = new VoidRayMicroController(MapDataService, UnitDataManager, ActiveUnitData, DebugService, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, MicroPriority.LiveAndAttack, false);
+            var warpPrismpMicroController = new WarpPrismMicroController(MapDataService, UnitDataManager, ActiveUnitData, DebugService, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, MicroPriority.LiveAndAttack, false);
+            var zealotMicroController = new ZealotMicroController(MapDataService, UnitDataManager, ActiveUnitData, DebugService, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, MicroPriority.AttackForward, false);
+            var observerMicroController = new IndividualMicroController(MapDataService, UnitDataManager, ActiveUnitData, DebugService, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, MicroPriority.StayOutOfRange, true);
 
-            var zerglingMicroController = new ZerglingMicroController(MapDataService, UnitDataManager, ActiveUnitData, DebugManager, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, MicroPriority.AttackForward, false);
+            var zerglingMicroController = new ZerglingMicroController(MapDataService, UnitDataManager, ActiveUnitData, DebugService, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, MicroPriority.AttackForward, false);
 
-            var workerDefenseMicroController = new IndividualMicroController(MapDataService, UnitDataManager, ActiveUnitData, DebugManager, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, MicroPriority.LiveAndAttack, false, 3);
+            var workerDefenseMicroController = new IndividualMicroController(MapDataService, UnitDataManager, ActiveUnitData, DebugService, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, MicroPriority.LiveAndAttack, false, 3);
 
             var individualMicroControllers = new Dictionary<UnitTypes, IIndividualMicroController>
             {
@@ -241,7 +243,7 @@ namespace Sharky.DefaultBot
             var defenseSquadTask = new DefenseSquadTask(ActiveUnitData, TargetingData, DefenseService, MicroController, new List<DesiredUnitsClaim>(), 0, false);
             var workerScoutTask = new WorkerScoutTask(UnitDataManager, TargetingData, MapDataService, false, 0.5f, workerDefenseMicroController);
             var proxyScoutTask = new ProxyScoutTask(UnitDataManager, TargetingData, MapDataService, BaseData, false, 0.5f, workerDefenseMicroController);
-            var miningDefenseService = new MiningDefenseService(BaseData, ActiveUnitData, workerDefenseMicroController, DebugManager);
+            var miningDefenseService = new MiningDefenseService(BaseData, ActiveUnitData, workerDefenseMicroController, DebugService);
             var miningTask = new MiningTask(UnitDataManager, BaseData, ActiveUnitData, 1, miningDefenseService, MacroData);
             var queenInjectTask = new QueenInjectsTask(ActiveUnitData, 1.1f, UnitCountService);
             var attackTask = new AttackTask(MicroController, TargetingData, ActiveUnitData, DefenseService, MacroData, AttackData, TargetingService, 2);
@@ -259,7 +261,7 @@ namespace Sharky.DefaultBot
             MicroManager = new MicroManager(ActiveUnitData, MicroTasks);
             Managers.Add(MicroManager);
 
-            AttackDataManager = new AttackDataManager(AttackData, ActiveUnitData, attackTask, TargetPriorityService, TargetingData, MacroData, DebugManager);
+            AttackDataManager = new AttackDataManager(AttackData, ActiveUnitData, attackTask, TargetPriorityService, TargetingData, MacroData, DebugService);
             Managers.Add(AttackDataManager);
 
             BuildProxyService = new BuildProxyService(MacroData, BuildingBuilder, UnitDataManager, ActiveUnitData, BaseData, TargetingData, Morpher, MicroManager);
@@ -269,14 +271,14 @@ namespace Sharky.DefaultBot
             EnemyStrategyHistory = new EnemyStrategyHistory();
             EnemyStrategies = new Dictionary<string, IEnemyStrategy>
             {
-                ["Proxy"] = new EnemyStrategies.Proxy(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, TargetingData, DebugManager, UnitCountService),
-                ["WorkerRush"] = new WorkerRush(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, TargetingData, DebugManager, UnitCountService),
-                ["InvisibleAttacks"] = new InvisibleAttacks(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, DebugManager, UnitCountService),
-                ["AdeptRush"] = new AdeptRush(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, DebugManager, UnitCountService),
-                ["CannonRush"] = new CannonRush(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, TargetingData, DebugManager, UnitCountService),
-                ["MarineRush"] = new MarineRush(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, DebugManager, UnitCountService),
-                ["MassVikings"] = new MassVikings(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, DebugManager, UnitCountService),
-                ["ZerglingRush"] = new ZerglingRush(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, DebugManager, UnitCountService)
+                ["Proxy"] = new EnemyStrategies.Proxy(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, TargetingData, DebugService, UnitCountService),
+                ["WorkerRush"] = new WorkerRush(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, TargetingData, DebugService, UnitCountService),
+                ["InvisibleAttacks"] = new InvisibleAttacks(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, DebugService, UnitCountService),
+                ["AdeptRush"] = new AdeptRush(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, DebugService, UnitCountService),
+                ["CannonRush"] = new CannonRush(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, TargetingData, DebugService, UnitCountService),
+                ["MarineRush"] = new MarineRush(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, DebugService, UnitCountService),
+                ["MassVikings"] = new MassVikings(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, DebugService, UnitCountService),
+                ["ZerglingRush"] = new ZerglingRush(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, DebugService, UnitCountService)
             };
 
             EnemyStrategyManager = new EnemyStrategyManager(EnemyStrategies);
@@ -369,12 +371,12 @@ namespace Sharky.DefaultBot
                 { Race.Zerg, new BuildChoices { Builds = zergBuilds, BuildSequences = zergBuildSequences } }
             };
             BuildDecisionService = new BuildDecisionService(ChatService);
-            BuildManager = new BuildManager(BuildChoices, DebugManager, MacroBalancer, BuildDecisionService, EnemyPlayerService, ChatHistory, EnemyStrategyHistory);
+            BuildManager = new BuildManager(BuildChoices, DebugService, MacroBalancer, BuildDecisionService, EnemyPlayerService, ChatHistory, EnemyStrategyHistory);
             Managers.Add(BuildManager);
         }
-        public SharkyBot CreateBot(List<IManager> managers, DebugManager debugManager)
+        public SharkyBot CreateBot(List<IManager> managers, DebugService debugService)
         {
-            return new SharkyBot(managers, debugManager);
+            return new SharkyBot(managers, DebugService);
         }
     }
 }

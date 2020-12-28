@@ -30,14 +30,14 @@ namespace Sharky.Pathing
         PathFinder PathFinder;
         MapData MapData;
         MapDataService MapDataService;
-        DebugManager DebugManager;
+        DebugService DebugService;
 
-        public SharkyPathFinder(PathFinder pathFinder, MapData mapData, MapDataService mapDataService, DebugManager debugManager)
+        public SharkyPathFinder(PathFinder pathFinder, MapData mapData, MapDataService mapDataService, DebugService debugService)
         {
             PathFinder = pathFinder;
             MapData = mapData;
             MapDataService = mapDataService;
-            DebugManager = debugManager;
+            DebugService = debugService;
 
             GroundDamageLastUpdate = -1;
             GroundDetectionLastUpdate = -1;
@@ -186,11 +186,11 @@ namespace Sharky.Pathing
                         if (!MapData.Map[x][y].Walkable)
                         {
                             WalkGrid.DisconnectNode(new GridPosition(x, y));
-                            //DebugManager.DrawSphere(new Point { X = x, Y = y, Z = MapData.Map[x][y].TerrainHeight + 1 }, 2, new Color { R = 0, G = 255, B = 0 });
+                            //DebugService.DrawSphere(new Point { X = x, Y = y, Z = MapData.Map[x][y].TerrainHeight + 1 }, 2, new Color { R = 0, G = 255, B = 0 });
                         }
                         else
                         {
-                            //DebugManager.DrawSphere(new Point { X = x, Y = y, Z = MapData.Map[x][y].TerrainHeight + 1 }, 2, new Color { R = 255, G = 0, B = 0 });
+                            //DebugService.DrawSphere(new Point { X = x, Y = y, Z = MapData.Map[x][y].TerrainHeight + 1 }, 2, new Color { R = 255, G = 0, B = 0 });
                         }
                     }
                 }

@@ -5,13 +5,13 @@ namespace Sharky.EnemyStrategies.Terran
 {
     public class MarineRush : EnemyStrategy
     {
-        public MarineRush(EnemyStrategyHistory enemyStrategyHistory, ChatService chatService, ActiveUnitData activeUnitData, SharkyOptions sharkyOptions, DebugManager debugManager, UnitCountService unitCountService)
+        public MarineRush(EnemyStrategyHistory enemyStrategyHistory, ChatService chatService, ActiveUnitData activeUnitData, SharkyOptions sharkyOptions, DebugService debugService, UnitCountService unitCountService)
         {
             EnemyStrategyHistory = enemyStrategyHistory;
             ChatService = chatService;
             ActiveUnitData = activeUnitData;
             SharkyOptions = sharkyOptions;
-            DebugManager = debugManager;
+            DebugService = debugService;
             UnitCountService = unitCountService;
         }
 

@@ -25,7 +25,7 @@ namespace SharkyExampleBot.Builds
 
         ProxyTask ProxyTask;
 
-        public ProxyVoidRay(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, ChronoData chronoData, SharkyOptions sharkyOptions, MicroManager microManager, ICounterTransitioner counterTransitioner, UnitDataManager unitDataManager, ProxyLocationService proxyLocationService, DebugManager debugManager, UnitCountService unitCountService, IIndividualMicroController probeMicroController) 
+        public ProxyVoidRay(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, ChronoData chronoData, SharkyOptions sharkyOptions, MicroManager microManager, ICounterTransitioner counterTransitioner, UnitDataManager unitDataManager, ProxyLocationService proxyLocationService, DebugService debugService, UnitCountService unitCountService, IIndividualMicroController probeMicroController) 
             : base(buildOptions, macroData, activeUnitData, attackData, chatService, chronoData, counterTransitioner, unitCountService)
         {
             SharkyOptions = sharkyOptions;
@@ -36,7 +36,7 @@ namespace SharkyExampleBot.Builds
             OpeningAttackChatSent = false;
             CancelledProxyChatSent = false;
 
-            ProxyTask = new ProxyTask(UnitDataManager, false, 0.9f, MacroData, string.Empty, MicroManager, debugManager, probeMicroController);
+            ProxyTask = new ProxyTask(UnitDataManager, false, 0.9f, MacroData, string.Empty, MicroManager, debugService, probeMicroController);
             ProxyTask.ProxyName = GetType().Name;
         }
 

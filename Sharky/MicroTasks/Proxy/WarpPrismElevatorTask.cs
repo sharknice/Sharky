@@ -21,7 +21,7 @@ namespace Sharky.MicroTasks.Proxy
         WarpPrismMicroController WarpPrismMicroController;
         ProxyLocationService ProxyLocationService;
         MapDataService MapDataService;
-        DebugManager DebugManager;
+        DebugService DebugService;
         UnitDataManager UnitDataManager;
         ActiveUnitData ActiveUnitData;
         ChatService ChatService;
@@ -39,14 +39,14 @@ namespace Sharky.MicroTasks.Proxy
         float InsideBaseDistanceSquared { get; set; }
         int PickupRangeSquared { get; set; }
 
-        public WarpPrismElevatorTask(TargetingData targetingData, IMicroController microController, WarpPrismMicroController warpPrismMicroController, ProxyLocationService proxyLocationService, MapDataService mapDataService, DebugManager debugManager, UnitDataManager unitDataManager, ActiveUnitData activeUnitData, ChatService chatService, List<DesiredUnitsClaim> desiredUnitsClaims, float priority, bool enabled = true)
+        public WarpPrismElevatorTask(TargetingData targetingData, IMicroController microController, WarpPrismMicroController warpPrismMicroController, ProxyLocationService proxyLocationService, MapDataService mapDataService, DebugService debugService, UnitDataManager unitDataManager, ActiveUnitData activeUnitData, ChatService chatService, List<DesiredUnitsClaim> desiredUnitsClaims, float priority, bool enabled = true)
         {
             TargetingData = targetingData;
             MicroController = microController;
             WarpPrismMicroController = warpPrismMicroController;
             ProxyLocationService = proxyLocationService;
             MapDataService = mapDataService;
-            DebugManager = debugManager;
+            DebugService = debugService;
             UnitDataManager = unitDataManager;
             ActiveUnitData = activeUnitData;
 
@@ -226,8 +226,8 @@ namespace Sharky.MicroTasks.Proxy
 
                 InsideBaseDistanceSquared = Vector2.DistanceSquared(new Vector2(DropLocation.X, DropLocation.Y), new Vector2(TargetLocatoin.X, TargetLocatoin.Y)) + 9f;
             }
-            DebugManager.DrawSphere(new Point { X = LoadingLocation.X, Y = LoadingLocation.Y, Z = 12 }, 3, new Color { R = 0, G = 0, B = 255 });
-            DebugManager.DrawSphere(new Point { X = DropLocation.X, Y = DropLocation.Y, Z = 12 }, 3, new Color { R = 0, G = 255, B = 0 });
+            DebugService.DrawSphere(new Point { X = LoadingLocation.X, Y = LoadingLocation.Y, Z = 12 }, 3, new Color { R = 0, G = 0, B = 255 });
+            DebugService.DrawSphere(new Point { X = DropLocation.X, Y = DropLocation.Y, Z = 12 }, 3, new Color { R = 0, G = 255, B = 0 });
         }
     }
 }

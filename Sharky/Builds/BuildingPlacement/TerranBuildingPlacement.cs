@@ -10,14 +10,14 @@ namespace Sharky.Builds.BuildingPlacement
     {
         ActiveUnitData ActiveUnitData;
         UnitDataManager UnitDataManager;
-        DebugManager DebugManager;
+        DebugService DebugService;
         BuildingService BuildingService;
 
-        public TerranBuildingPlacement(ActiveUnitData activeUnitData, UnitDataManager unitDataManager, DebugManager debugManager, BuildingService buildingService)
+        public TerranBuildingPlacement(ActiveUnitData activeUnitData, UnitDataManager unitDataManager, DebugService debugService, BuildingService buildingService)
         {
             ActiveUnitData = activeUnitData;
             UnitDataManager = unitDataManager;
-            DebugManager = debugManager;
+            DebugService = debugService;
             BuildingService = buildingService;
         }
 
@@ -61,7 +61,7 @@ namespace Sharky.Builds.BuildingPlacement
                             {
                                 if (Vector2.DistanceSquared(new Vector2(reference.X, reference.Y), new Vector2(point.X, point.Y)) <= maxDistance * maxDistance)
                                 {
-                                    DebugManager.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
+                                    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
                                     return point;
                                 }
                             }
