@@ -6,15 +6,15 @@ namespace Sharky.Managers
 {
     public class EnemyRaceManager : SharkyManager
     {
-        public Race EnemyRace { get; private set; }
-
         ActiveUnitData ActiveUnitData;
         UnitDataManager UnitDataManager;
+        EnemyData EnemyData;
 
-        public EnemyRaceManager(ActiveUnitData activeUnitData, UnitDataManager unitDataManager)
+        public EnemyRaceManager(ActiveUnitData activeUnitData, UnitDataManager unitDataManager, EnemyData enemyData)
         {
             ActiveUnitData = activeUnitData;
             UnitDataManager = unitDataManager;
+            EnemyData = enemyData;
         }
 
         public override void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)
@@ -23,26 +23,26 @@ namespace Sharky.Managers
             {
                 if (playerInfo.PlayerId != playerId)
                 {
-                    EnemyRace = playerInfo.RaceRequested;
+                    EnemyData.EnemyRace = playerInfo.RaceRequested;
                 }
             }
         }
 
         public override IEnumerable<Action> OnFrame(ResponseObservation observation)
         {
-            if (EnemyRace == Race.Random)
+            if (EnemyData.EnemyRace == Race.Random)
             {
                 if (ActiveUnitData.EnemyUnits.Any(e => UnitDataManager.ProtossTypes.Contains((UnitTypes)e.Value.Unit.UnitType)))
                 {
-                    EnemyRace = Race.Protoss;
+                    EnemyData.EnemyRace = Race.Protoss;
                 }
                 else if (ActiveUnitData.EnemyUnits.Any(e => UnitDataManager.TerranTypes.Contains((UnitTypes)e.Value.Unit.UnitType)))
                 {
-                    EnemyRace = Race.Terran;
+                    EnemyData.EnemyRace = Race.Terran;
                 }
                 else if (ActiveUnitData.EnemyUnits.Any(e => UnitDataManager.ZergTypes.Contains((UnitTypes)e.Value.Unit.UnitType)))
                 {
-                    EnemyRace = Race.Zerg;
+                    EnemyData.EnemyRace = Race.Zerg;
                 }
             }
 

@@ -11,14 +11,14 @@ namespace Sharky.Builds.Protoss
     {
         SharkyOptions SharkyOptions;
         MicroManager MicroManager;
-        EnemyRaceManager EnemyRaceManager;
+        EnemyData EnemyData;
 
-        public ProtossRobo(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, ChronoData chronoData, SharkyOptions sharkyOptions, MicroManager microManager, EnemyRaceManager enemyRaceManager, ICounterTransitioner counterTransitioner, UnitCountService unitCountService) 
+        public ProtossRobo(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, ChronoData chronoData, SharkyOptions sharkyOptions, MicroManager microManager, EnemyData enemyData, ICounterTransitioner counterTransitioner, UnitCountService unitCountService) 
             : base(buildOptions, macroData, activeUnitData, attackData, chatService, chronoData, counterTransitioner, unitCountService)
         {
             SharkyOptions = sharkyOptions;
             MicroManager = microManager;
-            EnemyRaceManager = enemyRaceManager;
+            EnemyData = enemyData;
         }
 
         public override void StartBuild(int frame)
@@ -38,7 +38,7 @@ namespace Sharky.Builds.Protoss
             MacroData.DesiredProductionCounts[UnitTypes.PROTOSS_NEXUS] = 1;
 
             var desiredUnitsClaim = new DesiredUnitsClaim(UnitTypes.PROTOSS_ADEPT, 1);
-            if (EnemyRaceManager.EnemyRace == Race.Protoss)
+            if (EnemyData.EnemyRace == Race.Protoss)
             {
                 desiredUnitsClaim = new DesiredUnitsClaim(UnitTypes.PROTOSS_STALKER, 1);
             }

@@ -105,6 +105,7 @@ namespace Sharky.DefaultBot
         public TargetingData TargetingData { get; set; }
         public BaseData BaseData { get; set; }
         public ActiveChatData ActiveChatData { get; set; }
+        public EnemyData EnemyData { get; set; }
 
         public DefaultSharkyBot(GameConnection gameConnection)
         {
@@ -121,6 +122,7 @@ namespace Sharky.DefaultBot
             TargetingData = new TargetingData();
             BaseData = new BaseData();
             ActiveChatData = new ActiveChatData();
+            EnemyData = new EnemyData();
 
             Managers = new List<IManager>();
 
@@ -149,7 +151,7 @@ namespace Sharky.DefaultBot
             Managers.Add(MapManager);
             Managers.Add(UnitManager);
 
-            EnemyRaceManager = new EnemyRaceManager(ActiveUnitData, UnitDataManager);
+            EnemyRaceManager = new EnemyRaceManager(ActiveUnitData, UnitDataManager, EnemyData);
             Managers.Add(EnemyRaceManager);
 
             SharkyPathFinder = new SharkyPathFinder(new Roy_T.AStar.Paths.PathFinder(), MapData, MapDataService, DebugService);
@@ -289,8 +291,8 @@ namespace Sharky.DefaultBot
             var antiMassMarine = new AntiMassMarine(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, EmptyCounterTransitioner, UnitCountService);
             var fourGate = new FourGate(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, UnitDataManager, EmptyCounterTransitioner, UnitCountService);
             var nexusFirst = new NexusFirst(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, EmptyCounterTransitioner, UnitCountService);
-            var robo = new Robo(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, EnemyRaceManager, MicroManager, EmptyCounterTransitioner, UnitCountService);
-            var protossRobo = new ProtossRobo(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, SharkyOptions, MicroManager, EnemyRaceManager, EmptyCounterTransitioner, UnitCountService);
+            var robo = new Robo(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, EnemyData, MicroManager, EmptyCounterTransitioner, UnitCountService);
+            var protossRobo = new ProtossRobo(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, SharkyOptions, MicroManager, EnemyData, EmptyCounterTransitioner, UnitCountService);
             var everyProtossUnit = new EveryProtossUnit(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, EmptyCounterTransitioner, UnitCountService);
 
             var protossBuilds = new Dictionary<string, ISharkyBuild>

@@ -9,13 +9,13 @@ namespace Sharky.Builds.Protoss
 {
     public class Robo : ProtossSharkyBuild
     {
-        EnemyRaceManager EnemyRaceManager;
+        EnemyData EnemyData;
         MicroManager MicroManager;
 
-        public Robo(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, ChronoData chronoData, EnemyRaceManager enemyRaceManager, MicroManager microManager, ICounterTransitioner counterTransitioner, UnitCountService unitCountService) 
+        public Robo(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, ChronoData chronoData, EnemyData enemyData, MicroManager microManager, ICounterTransitioner counterTransitioner, UnitCountService unitCountService) 
             : base(buildOptions, macroData, activeUnitData, attackData, chatService, chronoData, counterTransitioner, unitCountService)
         {
-            EnemyRaceManager = enemyRaceManager;
+            EnemyData = enemyData;
             MicroManager = microManager;
         }
 
@@ -39,7 +39,7 @@ namespace Sharky.Builds.Protoss
             MacroData.DesiredProductionCounts[UnitTypes.PROTOSS_NEXUS] = 1;
 
             var desiredUnitsClaim = new DesiredUnitsClaim(UnitTypes.PROTOSS_ADEPT, 1);
-            if (EnemyRaceManager.EnemyRace == Race.Protoss)
+            if (EnemyData.EnemyRace == Race.Protoss)
             {
                 desiredUnitsClaim = new DesiredUnitsClaim(UnitTypes.PROTOSS_STALKER, 1);
             }
@@ -59,7 +59,7 @@ namespace Sharky.Builds.Protoss
 
         public override void OnFrame(ResponseObservation observation)
         {
-            if (EnemyRaceManager.EnemyRace == SC2APIProtocol.Race.Protoss)
+            if (EnemyData.EnemyRace == SC2APIProtocol.Race.Protoss)
             {
                 if (MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_STALKER] < 1)
                 {
@@ -109,7 +109,7 @@ namespace Sharky.Builds.Protoss
                 MacroData.DesiredProductionCounts[UnitTypes.PROTOSS_ROBOTICSFACILITY] = 1;
             }
 
-            if (EnemyRaceManager.EnemyRace == SC2APIProtocol.Race.Terran)
+            if (EnemyData.EnemyRace == SC2APIProtocol.Race.Terran)
             {
                 if (MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_OBSERVER] < 1)
                 {
