@@ -6,15 +6,15 @@ namespace Sharky.EnemyStrategies
 {
     public class WorkerRush : EnemyStrategy
     {
-        ITargetingManager TargetingManager;
+        TargetingData TargetingData;
 
-        public WorkerRush(EnemyStrategyHistory enemyStrategyHistory, IChatManager chatManager, ActiveUnitData activeUnitData, SharkyOptions sharkyOptions, ITargetingManager targetingManager, DebugManager debugManager, UnitCountService unitCountService)
+        public WorkerRush(EnemyStrategyHistory enemyStrategyHistory, IChatManager chatManager, ActiveUnitData activeUnitData, SharkyOptions sharkyOptions, TargetingData targetingData, DebugManager debugManager, UnitCountService unitCountService)
         {
             EnemyStrategyHistory = enemyStrategyHistory;
             ChatManager = chatManager;
             ActiveUnitData = activeUnitData;
             SharkyOptions = sharkyOptions;
-            TargetingManager = targetingManager;
+            TargetingData = targetingData;
             DebugManager = debugManager;
             UnitCountService = unitCountService;
         }
@@ -23,7 +23,7 @@ namespace Sharky.EnemyStrategies
         {
             if (frame < SharkyOptions.FramesPerSecond * 60)
             {
-                if (ActiveUnitData.EnemyUnits.Values.Count(u => u.UnitClassifications.Contains(UnitClassification.Worker) && Vector2.DistanceSquared(new Vector2(TargetingManager.EnemyMainBasePoint.X, TargetingManager.EnemyMainBasePoint.Y), new Vector2(u.Unit.Pos.X, u.Unit.Pos.Y)) > (40 * 40)) >= 5)
+                if (ActiveUnitData.EnemyUnits.Values.Count(u => u.UnitClassifications.Contains(UnitClassification.Worker) && Vector2.DistanceSquared(new Vector2(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y), new Vector2(u.Unit.Pos.X, u.Unit.Pos.Y)) > (40 * 40)) >= 5)
                 {
                     return true;
                 }

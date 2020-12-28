@@ -12,17 +12,17 @@ namespace Sharky.MicroTasks.Harass
     public class DarkTemplarHarassTask : MicroTask
     {
         IBaseManager BaseManager;
-        ITargetingManager TargetingManager;
+        TargetingData TargetingData;
         MapDataService MapDataService;
         DarkTemplarMicroController DarkTemplarMicroController;
 
         int DesiredCount { get; set; }
         List<HarassInfo> HarassInfos { get; set; }
 
-        public DarkTemplarHarassTask(IBaseManager baseManager, ITargetingManager targetingManager, MapDataService mapDataService, DarkTemplarMicroController darkTemplarMicroController, int desiredCount = 5, bool enabled = true, float priority = -1f)
+        public DarkTemplarHarassTask(IBaseManager baseManager, TargetingData targetingData, MapDataService mapDataService, DarkTemplarMicroController darkTemplarMicroController, int desiredCount = 5, bool enabled = true, float priority = -1f)
         {
             BaseManager = baseManager;
-            TargetingManager = targetingManager;
+            TargetingData = targetingData;
             MapDataService = mapDataService;
             DarkTemplarMicroController = darkTemplarMicroController;
             DesiredCount = desiredCount;
@@ -62,7 +62,7 @@ namespace Sharky.MicroTasks.Harass
                 {           
                     if (Vector2.DistanceSquared(new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y), new Vector2(harassInfo.BaseLocation.MineralLineLocation.X, harassInfo.BaseLocation.MineralLineLocation.Y)) < 100)
                     {
-                        var action = DarkTemplarMicroController.HarassWorkers(commander, harassInfo.BaseLocation.MineralLineLocation, TargetingManager.ForwardDefensePoint, frame);
+                        var action = DarkTemplarMicroController.HarassWorkers(commander, harassInfo.BaseLocation.MineralLineLocation, TargetingData.ForwardDefensePoint, frame);
                         if (action != null)
                         {
                             commands.Add(action);
@@ -86,7 +86,7 @@ namespace Sharky.MicroTasks.Harass
                     }
                     else if (!MapDataService.InEnemyDetection(commander.UnitCalculation.Unit.Pos) && commander.UnitCalculation.NearbyEnemies.Any(e => !e.Unit.IsFlying && (e.Unit.Health + e.Unit.Shield < commander.UnitCalculation.Damage)))  // if undetected and near one hit kills just kill them
                     {
-                        var action = DarkTemplarMicroController.HarassWorkers(commander, harassInfo.BaseLocation.MineralLineLocation, TargetingManager.ForwardDefensePoint, frame);
+                        var action = DarkTemplarMicroController.HarassWorkers(commander, harassInfo.BaseLocation.MineralLineLocation, TargetingData.ForwardDefensePoint, frame);
                         if (action != null)
                         {
                             commands.Add(action);
@@ -94,7 +94,7 @@ namespace Sharky.MicroTasks.Harass
                     }
                     else
                     {
-                        var action = DarkTemplarMicroController.NavigateToPoint(commander, harassInfo.BaseLocation.MineralLineLocation, TargetingManager.ForwardDefensePoint, null, frame);
+                        var action = DarkTemplarMicroController.NavigateToPoint(commander, harassInfo.BaseLocation.MineralLineLocation, TargetingData.ForwardDefensePoint, null, frame);
                         if (action != null)
                         {
                             commands.Add(action);

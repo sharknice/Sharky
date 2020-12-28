@@ -15,7 +15,7 @@ namespace Sharky.MicroTasks.Proxy
 {
     public class WarpPrismElevatorTask : MicroTask
     {
-        ITargetingManager TargetingManager;
+        TargetingData TargetingData;
         IMicroController MicroController;
         WarpPrismMicroController WarpPrismMicroController;
         ProxyLocationService ProxyLocationService;
@@ -38,9 +38,9 @@ namespace Sharky.MicroTasks.Proxy
         float InsideBaseDistanceSquared { get; set; }
         int PickupRangeSquared { get; set; }
 
-        public WarpPrismElevatorTask(ITargetingManager targetingManager, IMicroController microController, WarpPrismMicroController warpPrismMicroController, ProxyLocationService proxyLocationService, MapDataService mapDataService, DebugManager debugManager, UnitDataManager unitDataManager, ActiveUnitData activeUnitData, IChatManager chatManager, List<DesiredUnitsClaim> desiredUnitsClaims, float priority, bool enabled = true)
+        public WarpPrismElevatorTask(TargetingData targetingData, IMicroController microController, WarpPrismMicroController warpPrismMicroController, ProxyLocationService proxyLocationService, MapDataService mapDataService, DebugManager debugManager, UnitDataManager unitDataManager, ActiveUnitData activeUnitData, IChatManager chatManager, List<DesiredUnitsClaim> desiredUnitsClaims, float priority, bool enabled = true)
         {
-            TargetingManager = targetingManager;
+            TargetingData = targetingData;
             MicroController = microController;
             WarpPrismMicroController = warpPrismMicroController;
             ProxyLocationService = proxyLocationService;
@@ -210,7 +210,7 @@ namespace Sharky.MicroTasks.Proxy
             if (DefensiveLocation == null)
             {
                 DefensiveLocation = ProxyLocationService.GetCliffProxyLocation();
-                TargetLocatoin = TargetingManager.EnemyMainBasePoint;
+                TargetLocatoin = TargetingData.EnemyMainBasePoint;
 
                 var angle = Math.Atan2(TargetLocatoin.Y - DefensiveLocation.Y, DefensiveLocation.X - TargetLocatoin.X);
                 var x = -6 * Math.Cos(angle);

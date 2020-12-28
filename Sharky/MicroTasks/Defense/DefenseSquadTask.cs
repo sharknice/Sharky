@@ -12,7 +12,7 @@ namespace Sharky.MicroTasks
     public class DefenseSquadTask : MicroTask
     {
         ActiveUnitData ActiveUnitData;
-        ITargetingManager TargetingManager;
+        TargetingData TargetingData;
         DefenseService DefenseService;
         IMicroController MicroController;
 
@@ -20,10 +20,10 @@ namespace Sharky.MicroTasks
 
         public List<DesiredUnitsClaim> DesiredUnitsClaims { get; set; }
 
-        public DefenseSquadTask(ActiveUnitData activeUnitData, ITargetingManager targetingManager, DefenseService defenseService, IMicroController microController, List<DesiredUnitsClaim> desiredUnitsClaims, float priority, bool enabled = true)
+        public DefenseSquadTask(ActiveUnitData activeUnitData, TargetingData targetingData, DefenseService defenseService, IMicroController microController, List<DesiredUnitsClaim> desiredUnitsClaims, float priority, bool enabled = true)
         {
             ActiveUnitData = activeUnitData;
-            TargetingManager = targetingManager;
+            TargetingData = targetingData;
             DefenseService = defenseService;
             MicroController = microController;
 
@@ -83,7 +83,7 @@ namespace Sharky.MicroTasks
             }
             else
             {
-                actions = MicroController.Attack(UnitCommanders, TargetingManager.MainDefensePoint, TargetingManager.ForwardDefensePoint, TargetingManager.MainDefensePoint, frame);
+                actions = MicroController.Attack(UnitCommanders, TargetingData.MainDefensePoint, TargetingData.ForwardDefensePoint, TargetingData.MainDefensePoint, frame);
             }
             stopwatch.Stop();
             lastFrameTime = stopwatch.ElapsedMilliseconds;
@@ -106,7 +106,7 @@ namespace Sharky.MicroTasks
                     availableCommanders.RemoveAll(a => selfGroup.Any(s => a.UnitCalculation.Unit.Tag == s.UnitCalculation.Unit.Tag));
 
                     var defensePoint = new Point2D { X = enemyGroup.FirstOrDefault().Unit.Pos.X, Y = enemyGroup.FirstOrDefault().Unit.Pos.Y };
-                    actions.AddRange(MicroController.Attack(selfGroup, defensePoint, TargetingManager.MainDefensePoint, null, frame));
+                    actions.AddRange(MicroController.Attack(selfGroup, defensePoint, TargetingData.MainDefensePoint, null, frame));
                 }
             }
 
@@ -116,7 +116,7 @@ namespace Sharky.MicroTasks
                 if (enemyGroup != null)
                 {
                     var defensePoint = new Point2D { X = enemyGroup.FirstOrDefault().Unit.Pos.X, Y = enemyGroup.FirstOrDefault().Unit.Pos.Y };
-                    actions.AddRange(MicroController.Attack(availableCommanders, defensePoint, TargetingManager.MainDefensePoint, null, frame));
+                    actions.AddRange(MicroController.Attack(availableCommanders, defensePoint, TargetingData.MainDefensePoint, null, frame));
                 }
             }
 

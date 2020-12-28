@@ -11,7 +11,7 @@ namespace Sharky.MicroTasks
 {
     public class OracleWorkerHarassTask : MicroTask
     {
-        ITargetingManager TargetingManager;
+        TargetingData TargetingData;
         IBaseManager BaseManager;
         IChatManager ChatManager;
         MapDataService MapDataService;
@@ -32,9 +32,9 @@ namespace Sharky.MicroTasks
         bool CheeseChatSent;
         int TargetIndex;
 
-        public OracleWorkerHarassTask(ITargetingManager targetingManager, IBaseManager baseManager, IChatManager chatManager, MapDataService mapDataService, MapData mapData, OracleMicroController oracleMicroController, int desiredCount = 1, bool enabled = true, float priority = -1f)
+        public OracleWorkerHarassTask(TargetingData targetingData, IBaseManager baseManager, IChatManager chatManager, MapDataService mapDataService, MapData mapData, OracleMicroController oracleMicroController, int desiredCount = 1, bool enabled = true, float priority = -1f)
         {
-            TargetingManager = targetingManager;
+            TargetingData = targetingData;
             BaseManager = baseManager;
             ChatManager = chatManager;
             MapDataService = mapDataService;
@@ -86,13 +86,13 @@ namespace Sharky.MicroTasks
 
             if (Target == null)
             {
-                Target = TargetingManager.EnemyMainBasePoint;
+                Target = TargetingData.EnemyMainBasePoint;
                 GetTargetPath(Target);
             }
 
             foreach (var commander in UnitCommanders)
             {
-                var defensivePoint = TargetingManager.ForwardDefensePoint;
+                var defensivePoint = TargetingData.ForwardDefensePoint;
                 var commanderVector = new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y);
                 var targetVector = new Vector2(Target.X, Target.Y);
 
@@ -139,7 +139,7 @@ namespace Sharky.MicroTasks
                     continue;
                 }
 
-                if (Vector2.DistanceSquared(commanderVector, targetVector) > Vector2.DistanceSquared(commanderVector, new Vector2(TargetingManager.ForwardDefensePoint.X, TargetingManager.ForwardDefensePoint.Y)))
+                if (Vector2.DistanceSquared(commanderVector, targetVector) > Vector2.DistanceSquared(commanderVector, new Vector2(TargetingData.ForwardDefensePoint.X, TargetingData.ForwardDefensePoint.Y)))
                 {
                     var action = OracleMicroController.NavigateToPoint(commander, MidPoint, defensivePoint, MidPoint, frame);
                     if (action != null)
@@ -210,7 +210,7 @@ namespace Sharky.MicroTasks
 
         void GetNextTarget()
         {
-            Target = BaseManager.BaseLocations.OrderBy(b => Vector2.DistanceSquared(new Vector2(b.Location.X, b.Location.Y), new Vector2(TargetingManager.EnemyMainBasePoint.X, TargetingManager.EnemyMainBasePoint.Y))).Skip(TargetIndex + 1).First().MineralLineLocation;
+            Target = BaseManager.BaseLocations.OrderBy(b => Vector2.DistanceSquared(new Vector2(b.Location.X, b.Location.Y), new Vector2(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y))).Skip(TargetIndex + 1).First().MineralLineLocation;
             TargetIndex++;
             if (TargetIndex > 3)
             {
@@ -223,7 +223,7 @@ namespace Sharky.MicroTasks
         {
             var closeestDistance = target.X - 0;
             Left = true;
-            MidPoint = new Point2D { X = 0, Y = (target.Y + TargetingManager.ForwardDefensePoint.Y) / 2f };
+            MidPoint = new Point2D { X = 0, Y = (target.Y + TargetingData.ForwardDefensePoint.Y) / 2f };
             StagingPoint = new Point2D { X = 0, Y = target.Y };
 
             var right = MapData.MapWidth - target.X;
@@ -232,7 +232,7 @@ namespace Sharky.MicroTasks
                 closeestDistance = right;
                 Left = false;
                 Right = true;
-                MidPoint = new Point2D { X = MapData.MapWidth, Y = (target.Y + TargetingManager.ForwardDefensePoint.Y) / 2f };
+                MidPoint = new Point2D { X = MapData.MapWidth, Y = (target.Y + TargetingData.ForwardDefensePoint.Y) / 2f };
                 StagingPoint = new Point2D { X = MapData.MapWidth - 0, Y = target.Y };
             }
 
@@ -243,7 +243,7 @@ namespace Sharky.MicroTasks
                 Left = false;
                 Right = false;
                 Top = true;
-                MidPoint = new Point2D { X = (target.X + TargetingManager.ForwardDefensePoint.X) / 2f, Y = 0 };
+                MidPoint = new Point2D { X = (target.X + TargetingData.ForwardDefensePoint.X) / 2f, Y = 0 };
                 StagingPoint = new Point2D { X = target.X, Y = 0 };
             }
 
@@ -255,7 +255,7 @@ namespace Sharky.MicroTasks
                 Right = false;
                 Top = false;
                 Bottom = true;
-                MidPoint = new Point2D { X = (target.X + TargetingManager.ForwardDefensePoint.X) / 2f, Y = MapData.MapHeight };
+                MidPoint = new Point2D { X = (target.X + TargetingData.ForwardDefensePoint.X) / 2f, Y = MapData.MapHeight };
                 StagingPoint = new Point2D { X = target.X, Y = MapData.MapHeight - 0 };
             }
 

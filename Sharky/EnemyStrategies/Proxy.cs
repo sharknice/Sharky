@@ -7,15 +7,15 @@ namespace Sharky.EnemyStrategies
 {
     public class Proxy : EnemyStrategy
     {
-        ITargetingManager TargetingManager;
+        TargetingData TargetingData;
 
-        public Proxy(EnemyStrategyHistory enemyStrategyHistory, IChatManager chatManager, ActiveUnitData activeUnitData, SharkyOptions sharkyOptions, ITargetingManager targetingManager, DebugManager debugManager, UnitCountService unitCountService)
+        public Proxy(EnemyStrategyHistory enemyStrategyHistory, IChatManager chatManager, ActiveUnitData activeUnitData, SharkyOptions sharkyOptions, TargetingData targetingData, DebugManager debugManager, UnitCountService unitCountService)
         {
             EnemyStrategyHistory = enemyStrategyHistory;
             ChatManager = chatManager;
             ActiveUnitData = activeUnitData;
             SharkyOptions = sharkyOptions;
-            TargetingManager = targetingManager;
+            TargetingData = targetingData;
             DebugManager = debugManager;
             UnitCountService = unitCountService;
         }
@@ -24,7 +24,7 @@ namespace Sharky.EnemyStrategies
         {
             if (frame < SharkyOptions.FramesPerSecond * 60 * 3)
             {
-                if (ActiveUnitData.EnemyUnits.Values.Any(u => u.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && Vector2.DistanceSquared(new Vector2(TargetingManager.EnemyMainBasePoint.X, TargetingManager.EnemyMainBasePoint.Y), new Vector2(u.Unit.Pos.X, u.Unit.Pos.Y)) > (100 * 100)))
+                if (ActiveUnitData.EnemyUnits.Values.Any(u => u.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && Vector2.DistanceSquared(new Vector2(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y), new Vector2(u.Unit.Pos.X, u.Unit.Pos.Y)) > (100 * 100)))
                 {
                     return true;
                 }

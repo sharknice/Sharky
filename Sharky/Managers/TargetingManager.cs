@@ -1,35 +1,30 @@
 ﻿using SC2APIProtocol;
 using Sharky.Pathing;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
 namespace Sharky.Managers
 {
-    public class TargetingManager : ITargetingManager
+    public class TargetingManager : IManager
     {
-        public Point2D AttackPoint { get; private set; }
-        public Point2D MainDefensePoint { get; private set; }
-        public Point2D ForwardDefensePoint { get; private set; }
-        public Point2D SelfMainBasePoint { get; private set; }
-        public Point2D EnemyMainBasePoint { get; private set; }
-
         ActiveUnitData ActiveUnitData;
         UnitDataManager UnitDataManager;
         MapDataService MapDataService;
         IBaseManager BaseManager;
         MacroData MacroData;
+        TargetingData TargetingData;
 
         int baseCount;
 
-        public TargetingManager(ActiveUnitData activeUnitData, UnitDataManager unitDataManager, MapDataService mapDataService, IBaseManager baseManager, MacroData macroData)
+        public TargetingManager(ActiveUnitData activeUnitData, UnitDataManager unitDataManager, MapDataService mapDataService, IBaseManager baseManager, MacroData macroData, TargetingData targetingData)
         {
             ActiveUnitData = activeUnitData;
             UnitDataManager = unitDataManager;
             MapDataService = mapDataService;
             BaseManager = baseManager;
             MacroData = macroData;
+            TargetingData = targetingData;
 
             baseCount = 0;
         }
@@ -38,14 +33,14 @@ namespace Sharky.Managers
         {
             foreach (var location in gameInfo.StartRaw.StartLocations)
             {
-                AttackPoint = location;
-                EnemyMainBasePoint = location;
+                TargetingData.AttackPoint = location;
+                TargetingData.EnemyMainBasePoint = location;
             }
             foreach (var unit in observation.Observation.RawData.Units.Where(u => u.Alliance == Alliance.Self && UnitDataManager.UnitData[(UnitTypes)u.UnitType].Attributes.Contains(SC2APIProtocol.Attribute.Structure)))
             {
-                MainDefensePoint = new Point2D { X = unit.Pos.X, Y = unit.Pos.Y };
-                ForwardDefensePoint = new Point2D { X = unit.Pos.X, Y = unit.Pos.Y };
-                SelfMainBasePoint = new Point2D { X = unit.Pos.X, Y = unit.Pos.Y };
+                TargetingData.MainDefensePoint = new Point2D { X = unit.Pos.X, Y = unit.Pos.Y };
+                TargetingData.ForwardDefensePoint = new Point2D { X = unit.Pos.X, Y = unit.Pos.Y };
+                TargetingData.SelfMainBasePoint = new Point2D { X = unit.Pos.X, Y = unit.Pos.Y };
                 return;
             }
         }
@@ -65,17 +60,17 @@ namespace Sharky.Managers
         {
             if (baseCount != BaseManager.SelfBases.Count())
             {
-                var ordered = BaseManager.SelfBases.OrderBy(b => Vector2.DistanceSquared(new Vector2(b.Location.X, b.Location.Y), new Vector2(AttackPoint.X, AttackPoint.Y)));
+                var ordered = BaseManager.SelfBases.OrderBy(b => Vector2.DistanceSquared(new Vector2(b.Location.X, b.Location.Y), new Vector2(TargetingData.AttackPoint.X, TargetingData.AttackPoint.Y)));
                 var closestBase = ordered.FirstOrDefault();
                 if (closestBase != null)
                 {
-                    MainDefensePoint = closestBase.MineralLineLocation;
-                    ForwardDefensePoint = closestBase.Location; // TODO: look for tops of ramps, set defensive point there
+                    TargetingData.MainDefensePoint = closestBase.MineralLineLocation;
+                    TargetingData.ForwardDefensePoint = closestBase.Location; // TODO: look for tops of ramps, set defensive point there
                 }
                 var farthestBase = ordered.LastOrDefault();
                 if (farthestBase != null)
                 {
-                    SelfMainBasePoint = farthestBase.Location;
+                    TargetingData.SelfMainBasePoint = farthestBase.Location;
                 }
                 baseCount = BaseManager.SelfBases.Count();
             }
@@ -83,34 +78,9 @@ namespace Sharky.Managers
             {
                 if (task.Value.Enabled)
                 {
-                    ForwardDefensePoint = task.Value.Location;
+                    TargetingData.ForwardDefensePoint = task.Value.Location;
                 }
             }
-        }
-
-        public Point2D GetAttackPoint(Point2D armyPoint)
-        {
-            var enemyBuilding = ActiveUnitData.EnemyUnits.Where(e => e.Value.UnitTypeData.Attributes.Contains(SC2APIProtocol.Attribute.Structure)).OrderBy(e => Vector2.DistanceSquared(new Vector2(e.Value.Unit.Pos.X, e.Value.Unit.Pos.Y), new Vector2(armyPoint.X, armyPoint.Y))).FirstOrDefault().Value;
-            if (enemyBuilding != null)
-            {
-                return new Point2D { X = enemyBuilding.Unit.Pos.X, Y = enemyBuilding.Unit.Pos.Y };
-            }
-
-            // TODO: if we have vision of AttackPoint find a new AttackPoint, choose a random base location
-            if (MapDataService.SelfVisible(AttackPoint))
-            {
-                var bases = BaseManager.BaseLocations.Where(b => !MapDataService.SelfVisible(b.Location));
-                if (bases.Count() == 0)
-                {
-                    // TODO: find a random spot on the map and check there
-                    AttackPoint = new Point2D { X = new Random().Next(0, MapDataService.MapData.MapWidth), Y = new Random().Next(0, MapDataService.MapData.MapHeight) };
-                }
-                else
-                {
-                    AttackPoint = bases.ToList()[new Random().Next(0, bases.Count() - 1)].Location;
-                }
-            }
-            return AttackPoint;
         }
     }
 }

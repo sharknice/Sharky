@@ -12,7 +12,7 @@ namespace Sharky.MicroTasks
     public class ProxyScoutTask : MicroTask
     {
         UnitDataManager UnitDataManager;
-        ITargetingManager TargetingManager;
+        TargetingData TargetingData;
         MapDataService MapDataService;
         IBaseManager BaseManager;
         IIndividualMicroController IndividualMicroController;
@@ -22,10 +22,10 @@ namespace Sharky.MicroTasks
         List<Point2D> ScoutLocations { get; set; }
         int ScoutLocationIndex { get; set; }
 
-        public ProxyScoutTask(UnitDataManager unitDataManager, ITargetingManager targetingManager, MapDataService mapDataService, IBaseManager baseManager, bool enabled, float priority, IIndividualMicroController individualMicroController)
+        public ProxyScoutTask(UnitDataManager unitDataManager, TargetingData targetingData, MapDataService mapDataService, IBaseManager baseManager, bool enabled, float priority, IIndividualMicroController individualMicroController)
         {
             UnitDataManager = unitDataManager;
-            TargetingManager = targetingManager;
+            TargetingData = targetingData;
             MapDataService = mapDataService;
             BaseManager = baseManager;
             Priority = priority;
@@ -79,7 +79,7 @@ namespace Sharky.MicroTasks
                 {
                     // TODO: attack scv that is building something, then any worker, then buildlng
                     var enemy = commander.UnitCalculation.NearbyEnemies.FirstOrDefault();
-                    var action = IndividualMicroController.Attack(commander, new Point2D { X = enemy.Unit.Pos.X, Y = enemy.Unit.Pos.Y }, TargetingManager.ForwardDefensePoint, null, frame);
+                    var action = IndividualMicroController.Attack(commander, new Point2D { X = enemy.Unit.Pos.X, Y = enemy.Unit.Pos.Y }, TargetingData.ForwardDefensePoint, null, frame);
                     if (action != null)
                     {
                         commands.Add(action);
@@ -95,7 +95,7 @@ namespace Sharky.MicroTasks
                 }
                 else
                 {
-                    var action = IndividualMicroController.Scout(commander, ScoutLocations[ScoutLocationIndex], TargetingManager.ForwardDefensePoint, frame);
+                    var action = IndividualMicroController.Scout(commander, ScoutLocations[ScoutLocationIndex], TargetingData.ForwardDefensePoint, frame);
                     if (action != null)
                     {
                         commands.Add(action);

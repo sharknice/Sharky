@@ -13,18 +13,18 @@ namespace Sharky.Builds.MacroServices
         UnitDataManager UnitDataManager;
         ActiveUnitData ActiveUnitData;
         IBaseManager BaseManager;
-        ITargetingManager TargetingManager;
+        TargetingData TargetingData;
 
         int defensivePointLastFailFrame;
 
-        public BuildDefenseService(MacroData macroData, IBuildingBuilder buildingBuilder, UnitDataManager unitDataManager, ActiveUnitData activeUnitData, IBaseManager baseManager, ITargetingManager targetingManager)
+        public BuildDefenseService(MacroData macroData, IBuildingBuilder buildingBuilder, UnitDataManager unitDataManager, ActiveUnitData activeUnitData, IBaseManager baseManager, TargetingData targetingData)
         {
             MacroData = macroData;
             BuildingBuilder = buildingBuilder;
             UnitDataManager = unitDataManager;
             ActiveUnitData = activeUnitData;
             BaseManager = baseManager;
-            TargetingManager = targetingManager;
+            TargetingData = targetingData;
 
             defensivePointLastFailFrame = 0;
         }
@@ -38,7 +38,7 @@ namespace Sharky.Builds.MacroServices
                 if (unit.Value)
                 {
                     var unitData = UnitDataManager.BuildingData[unit.Key];
-                    var command = BuildingBuilder.BuildBuilding(MacroData, unit.Key, unitData, TargetingManager.MainDefensePoint);
+                    var command = BuildingBuilder.BuildBuilding(MacroData, unit.Key, unitData, TargetingData.MainDefensePoint);
                     if (command != null)
                     {
                         commands.Add(command);
@@ -61,9 +61,9 @@ namespace Sharky.Builds.MacroServices
                     if (unit.Value > 0)
                     {
                         var unitData = UnitDataManager.BuildingData[unit.Key];
-                        if (ActiveUnitData.SelfUnits.Count(u => u.Value.Unit.UnitType == (uint)unit.Key && Vector2.DistanceSquared(new Vector2(u.Value.Unit.Pos.X, u.Value.Unit.Pos.Y), new Vector2(TargetingManager.MainDefensePoint.X, TargetingManager.MainDefensePoint.Y)) < MacroData.DefensiveBuildingMaximumDistance * MacroData.DefensiveBuildingMaximumDistance) + ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability)) < unit.Value)
+                        if (ActiveUnitData.SelfUnits.Count(u => u.Value.Unit.UnitType == (uint)unit.Key && Vector2.DistanceSquared(new Vector2(u.Value.Unit.Pos.X, u.Value.Unit.Pos.Y), new Vector2(TargetingData.MainDefensePoint.X, TargetingData.MainDefensePoint.Y)) < MacroData.DefensiveBuildingMaximumDistance * MacroData.DefensiveBuildingMaximumDistance) + ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability)) < unit.Value)
                         {
-                            var command = BuildingBuilder.BuildBuilding(MacroData, unit.Key, unitData, TargetingManager.MainDefensePoint, false, MacroData.DefensiveBuildingMaximumDistance);
+                            var command = BuildingBuilder.BuildBuilding(MacroData, unit.Key, unitData, TargetingData.MainDefensePoint, false, MacroData.DefensiveBuildingMaximumDistance);
                             if (command != null)
                             {
                                 commands.Add(command);

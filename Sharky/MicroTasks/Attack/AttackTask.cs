@@ -1,6 +1,6 @@
 ﻿using SC2APIProtocol;
-using Sharky.Managers;
 using Sharky.MicroControllers;
+using Sharky.MicroTasks.Attack;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -12,22 +12,24 @@ namespace Sharky.MicroTasks
     public class AttackTask : MicroTask
     {
         IMicroController MicroController;
-        ITargetingManager TargetingManager;
+        TargetingData TargetingData;
         ActiveUnitData ActiveUnitData;
         DefenseService DefenseService;
         MacroData MacroData;
         AttackData AttackData;
+        TargetingService TargetingService;
 
         float lastFrameTime;
 
-        public AttackTask(IMicroController microController, ITargetingManager targetingManager, ActiveUnitData activeUnitData, DefenseService defenseService, MacroData macroData, AttackData attackData, float priority)
+        public AttackTask(IMicroController microController, TargetingData targetingData, ActiveUnitData activeUnitData, DefenseService defenseService, MacroData macroData, AttackData attackData, TargetingService targetingService, float priority)
         {
             MicroController = microController;
-            TargetingManager = targetingManager;
+            TargetingData = targetingData;
             ActiveUnitData = activeUnitData;
             DefenseService = defenseService;
             MacroData = macroData;
             AttackData = attackData;
+            TargetingService = targetingService;
             Priority = priority;
 
             UnitCommanders = new List<UnitCommander>();
@@ -77,10 +79,10 @@ namespace Sharky.MicroTasks
             }
             else
             {
-                AttackData.ArmyPoint = TargetingManager.AttackPoint;
+                AttackData.ArmyPoint = TargetingData.AttackPoint;
             }
 
-            var attackPoint = TargetingManager.GetAttackPoint(AttackData.ArmyPoint);
+            TargetingData.AttackPoint = TargetingService.UpdateAttackPoint(AttackData.ArmyPoint, TargetingData.AttackPoint); 
 
             if (!AttackData.CustomAttackFunction)
             {
@@ -101,11 +103,11 @@ namespace Sharky.MicroTasks
             if (attackingEnemies.Count() > 0)
             {
                 var armyPoint = new Vector2(AttackData.ArmyPoint.X, AttackData.ArmyPoint.Y);
-                var distanceToAttackPoint = Vector2.DistanceSquared(armyPoint, new Vector2(attackPoint.X, attackPoint.Y));
+                var distanceToAttackPoint = Vector2.DistanceSquared(armyPoint, new Vector2(TargetingData.AttackPoint.X, TargetingData.AttackPoint.Y));
                 var closerEnemies = attackingEnemies.Where(e => Vector2.DistanceSquared(new Vector2(e.Unit.Pos.X, e.Unit.Pos.Y), armyPoint) < distanceToAttackPoint);
                 if (closerEnemies.Count() > 0)
                 {
-                    actions = SplitArmy(frame, closerEnemies, attackPoint);
+                    actions = SplitArmy(frame, closerEnemies, TargetingData.AttackPoint);
                     stopwatch.Stop();
                     lastFrameTime = stopwatch.ElapsedMilliseconds;
                     return actions;
@@ -114,14 +116,14 @@ namespace Sharky.MicroTasks
 
             if (AttackData.Attacking)
             {
-                actions = MicroController.Attack(UnitCommanders, attackPoint, TargetingManager.ForwardDefensePoint, AttackData.ArmyPoint, frame);
+                actions = MicroController.Attack(UnitCommanders, TargetingData.AttackPoint, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame);
                 stopwatch.Stop();
                 lastFrameTime = stopwatch.ElapsedMilliseconds;
                 return actions;
             }
             else
             {
-                actions = MicroController.Retreat(UnitCommanders, TargetingManager.ForwardDefensePoint, AttackData.ArmyPoint, frame);
+                actions = MicroController.Retreat(UnitCommanders, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame);
                 stopwatch.Stop();
                 lastFrameTime = stopwatch.ElapsedMilliseconds;
                 return actions;
@@ -144,7 +146,7 @@ namespace Sharky.MicroTasks
                     var groupVectors = selfGroup.Select(u => new Vector2(u.UnitCalculation.Unit.Pos.X, u.UnitCalculation.Unit.Pos.Y));
                     var groupPoint = new Point2D { X = groupVectors.Average(v => v.X), Y = groupVectors.Average(v => v.Y) };
                     var defensePoint = new Point2D { X = enemyGroup.FirstOrDefault().Unit.Pos.X, Y = enemyGroup.FirstOrDefault().Unit.Pos.Y };
-                    actions.AddRange(MicroController.Attack(selfGroup, defensePoint, TargetingManager.ForwardDefensePoint, groupPoint, frame));
+                    actions.AddRange(MicroController.Attack(selfGroup, defensePoint, TargetingData.ForwardDefensePoint, groupPoint, frame));
                 }
             }
 
@@ -154,11 +156,11 @@ namespace Sharky.MicroTasks
                 var groupPoint = new Point2D { X = groupVectors.Average(v => v.X), Y = groupVectors.Average(v => v.Y) };
                 if (AttackData.Attacking)
                 {
-                    actions.AddRange(MicroController.Attack(availableCommanders, attackPoint, TargetingManager.ForwardDefensePoint, groupPoint, frame));
+                    actions.AddRange(MicroController.Attack(availableCommanders, attackPoint, TargetingData.ForwardDefensePoint, groupPoint, frame));
                 }
                 else
                 {
-                    actions.AddRange(MicroController.Attack(availableCommanders, new Point2D { X = closerEnemies.FirstOrDefault().Unit.Pos.X, Y = closerEnemies.FirstOrDefault().Unit.Pos.Y }, TargetingManager.ForwardDefensePoint, groupPoint, frame));
+                    actions.AddRange(MicroController.Attack(availableCommanders, new Point2D { X = closerEnemies.FirstOrDefault().Unit.Pos.X, Y = closerEnemies.FirstOrDefault().Unit.Pos.Y }, TargetingData.ForwardDefensePoint, groupPoint, frame));
                 }
             }
 

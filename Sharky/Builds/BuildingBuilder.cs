@@ -10,14 +10,14 @@ namespace Sharky.Builds
     public class BuildingBuilder : IBuildingBuilder
     {
         ActiveUnitData ActiveUnitData;
-        ITargetingManager TargetingManager;
+        TargetingData TargetingData;
         IBuildingPlacement BuildingPlacement;
         UnitDataManager UnitDataManager;
 
-        public BuildingBuilder(ActiveUnitData activeUnitData, ITargetingManager targetingManager, IBuildingPlacement buildingPlacement, UnitDataManager unitDataManager)
+        public BuildingBuilder(ActiveUnitData activeUnitData, TargetingData targetingData, IBuildingPlacement buildingPlacement, UnitDataManager unitDataManager)
         {
             ActiveUnitData = activeUnitData;
-            TargetingManager = targetingManager;
+            TargetingData = targetingData;
             BuildingPlacement = buildingPlacement;
             UnitDataManager = unitDataManager;
         }
@@ -29,7 +29,7 @@ namespace Sharky.Builds
                 var location = generalLocation;
                 if (location == null)
                 {
-                    location = GetReferenceLocation(TargetingManager.SelfMainBasePoint);
+                    location = GetReferenceLocation(TargetingData.SelfMainBasePoint);
                 }
                 var placementLocation = BuildingPlacement.FindPlacement(location, unitType, unitData.Size, ignoreMineralProximity, maxDistance);
                 

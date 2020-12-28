@@ -10,16 +10,16 @@ namespace Sharky.MicroTasks
     public class WorkerScoutTask : MicroTask
     {
         UnitDataManager UnitDataManager;
-        ITargetingManager TargetingManager;
+        TargetingData TargetingData;
         MapDataService MapDataService;
         IIndividualMicroController IndividualMicroController;
 
         bool started { get; set; }
 
-        public WorkerScoutTask(UnitDataManager unitDataManager, ITargetingManager targetingManager, MapDataService mapDataService, bool enabled, float priority, IIndividualMicroController individualMicroController)
+        public WorkerScoutTask(UnitDataManager unitDataManager, TargetingData targetingData, MapDataService mapDataService, bool enabled, float priority, IIndividualMicroController individualMicroController)
         {
             UnitDataManager = unitDataManager;
-            TargetingManager = targetingManager;
+            TargetingData = targetingData;
             MapDataService = mapDataService;
             Priority = priority;
             IndividualMicroController = individualMicroController;
@@ -63,7 +63,7 @@ namespace Sharky.MicroTasks
 
             foreach (var commander in UnitCommanders)
             {
-                var action = IndividualMicroController.Scout(commander, TargetingManager.EnemyMainBasePoint, TargetingManager.ForwardDefensePoint, frame, true);
+                var action = IndividualMicroController.Scout(commander, TargetingData.EnemyMainBasePoint, TargetingData.ForwardDefensePoint, frame, true);
                 if (action != null)
                 {
                     commands.Add(action);

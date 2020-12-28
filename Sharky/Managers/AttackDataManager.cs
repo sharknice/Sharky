@@ -12,17 +12,17 @@ namespace Sharky.Managers
         ActiveUnitData ActiveUnitData;
         AttackTask AttackTask;
         TargetPriorityService TargetPriorityService;
-        ITargetingManager TargetingManager;
+        TargetingData TargetingData;
         MacroData MacroData;
         DebugManager DebugManager;
 
-        public AttackDataManager(AttackData attackData, ActiveUnitData activeUnitData, AttackTask attackTask, TargetPriorityService targetPriorityService, ITargetingManager targetingManager, MacroData macroData, DebugManager debugManager)
+        public AttackDataManager(AttackData attackData, ActiveUnitData activeUnitData, AttackTask attackTask, TargetPriorityService targetPriorityService, TargetingData targetingData, MacroData macroData, DebugManager debugManager)
         {
             AttackData = attackData;
             ActiveUnitData = activeUnitData;
             AttackTask = attackTask;
             TargetPriorityService = targetPriorityService;
-            TargetingManager = targetingManager;
+            TargetingData = targetingData;
             MacroData = macroData;
             DebugManager = debugManager;
         }
@@ -68,8 +68,8 @@ namespace Sharky.Managers
                 return new List<SC2APIProtocol.Action>();
             }
 
-            var attackVector = new Vector2(TargetingManager.AttackPoint.X, TargetingManager.AttackPoint.Y);
-            var enemyUnits = ActiveUnitData.EnemyUnits.Values.Where(e => (e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && Vector2.DistanceSquared(new Vector2(TargetingManager.MainDefensePoint.X, TargetingManager.MainDefensePoint.Y), new Vector2(e.Unit.Pos.X, e.Unit.Pos.Y)) > 400)
+            var attackVector = new Vector2(TargetingData.AttackPoint.X, TargetingData.AttackPoint.Y);
+            var enemyUnits = ActiveUnitData.EnemyUnits.Values.Where(e => (e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && Vector2.DistanceSquared(new Vector2(TargetingData.MainDefensePoint.X, TargetingData.MainDefensePoint.Y), new Vector2(e.Unit.Pos.X, e.Unit.Pos.Y)) > 400)
             || (e.UnitClassifications.Contains(UnitClassification.DefensiveStructure) && Vector2.DistanceSquared(attackVector, new Vector2(e.Unit.Pos.X, e.Unit.Pos.Y)) < 625));
 
             if (enemyUnits.Count() < 1)

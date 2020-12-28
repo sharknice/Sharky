@@ -13,17 +13,17 @@ namespace Sharky.MicroTasks.Harass
     public class LateGameOracleHarassTask : MicroTask
     {
         IBaseManager BaseManager;
-        ITargetingManager TargetingManager;
+        TargetingData TargetingData;
         MapDataService MapDataService;
         OracleMicroController OracleMicroController;
 
         public int DesiredCount { get; set; }
         List<HarassInfo> HarassInfos { get; set; }
 
-        public LateGameOracleHarassTask(IBaseManager baseManager, ITargetingManager targetingManager, MapDataService mapDataService, OracleMicroController oracleMicroController, int desiredCount = 2, bool enabled = true, float priority = -1f)
+        public LateGameOracleHarassTask(IBaseManager baseManager, TargetingData targetingData, MapDataService mapDataService, OracleMicroController oracleMicroController, int desiredCount = 2, bool enabled = true, float priority = -1f)
         {
             BaseManager = baseManager;
-            TargetingManager = targetingManager;
+            TargetingData = targetingData;
             MapDataService = mapDataService;
             OracleMicroController = oracleMicroController;
             DesiredCount = desiredCount;
@@ -65,7 +65,7 @@ namespace Sharky.MicroTasks.Harass
                     {
                         if (Vector2.DistanceSquared(new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y), new Vector2(harassInfo.BaseLocation.MineralLineLocation.X, harassInfo.BaseLocation.MineralLineLocation.Y)) < 100)
                         {
-                            var action = OracleMicroController.HarassWorkers(commander, harassInfo.BaseLocation.MineralLineLocation, TargetingManager.ForwardDefensePoint, frame);
+                            var action = OracleMicroController.HarassWorkers(commander, harassInfo.BaseLocation.MineralLineLocation, TargetingData.ForwardDefensePoint, frame);
                             if (action != null)
                             {
                                 commands.Add(action);
@@ -89,7 +89,7 @@ namespace Sharky.MicroTasks.Harass
                         }
                         else if (!commander.UnitCalculation.NearbyEnemies.Any(e => e.DamageAir) && commander.UnitCalculation.NearbyEnemies.Count(e => e.UnitClassifications.Contains(UnitClassification.Worker)) > 2)  // if near woerkers and nothing can attack it just kill workers
                         {
-                            var action = OracleMicroController.HarassWorkers(commander, harassInfo.BaseLocation.MineralLineLocation, TargetingManager.ForwardDefensePoint, frame);
+                            var action = OracleMicroController.HarassWorkers(commander, harassInfo.BaseLocation.MineralLineLocation, TargetingData.ForwardDefensePoint, frame);
                             if (action != null)
                             {
                                 commands.Add(action);
@@ -97,7 +97,7 @@ namespace Sharky.MicroTasks.Harass
                         }
                         else
                         {
-                            var action = OracleMicroController.NavigateToPoint(commander, harassInfo.BaseLocation.MineralLineLocation, TargetingManager.ForwardDefensePoint, null, frame);
+                            var action = OracleMicroController.NavigateToPoint(commander, harassInfo.BaseLocation.MineralLineLocation, TargetingData.ForwardDefensePoint, null, frame);
                             if (action != null)
                             {
                                 commands.Add(action);
@@ -113,7 +113,7 @@ namespace Sharky.MicroTasks.Harass
                     }
                     else
                     {
-                        var action = OracleMicroController.NavigateToPoint(commander, TargetingManager.ForwardDefensePoint, TargetingManager.MainDefensePoint, null, frame);
+                        var action = OracleMicroController.NavigateToPoint(commander, TargetingData.ForwardDefensePoint, TargetingData.MainDefensePoint, null, frame);
                         if (action != null)
                         {
                             commands.Add(action);

@@ -17,7 +17,7 @@ namespace Sharky.Managers
         IBuildingBuilder BuildingBuilder;
         SharkyOptions SharkyOptions;
         IBaseManager BaseManager;
-        ITargetingManager TargetingManager;
+        TargetingData TargetingData;
         AttackData AttackData;
         IBuildingPlacement WarpInPlacement;
         MacroData MacroData;
@@ -33,7 +33,7 @@ namespace Sharky.Managers
         bool SkipTech;
         bool SkipAddons;
 
-        public MacroManager(MacroSetup macroSetup, ActiveUnitData activeUnitData, UnitDataManager unitDataManager, IBuildingBuilder buildingBuilder, SharkyOptions sharkyOptions, IBaseManager baseManager, ITargetingManager targetingManager, AttackData attackData, IBuildingPlacement warpInPlacement, MacroData macroData, Morpher morpher, BuildPylonService buildPylonService, BuildDefenseService buildDefenseService, BuildProxyService buildProxyService, UnitCountService unitCountService)
+        public MacroManager(MacroSetup macroSetup, ActiveUnitData activeUnitData, UnitDataManager unitDataManager, IBuildingBuilder buildingBuilder, SharkyOptions sharkyOptions, IBaseManager baseManager, TargetingData targetingData, AttackData attackData, IBuildingPlacement warpInPlacement, MacroData macroData, Morpher morpher, BuildPylonService buildPylonService, BuildDefenseService buildDefenseService, BuildProxyService buildProxyService, UnitCountService unitCountService)
         {
             MacroSetup = macroSetup;
             ActiveUnitData = activeUnitData;
@@ -41,7 +41,7 @@ namespace Sharky.Managers
             BuildingBuilder = buildingBuilder;
             SharkyOptions = sharkyOptions;
             BaseManager = baseManager;
-            TargetingManager = targetingManager;
+            TargetingData = targetingData;
             AttackData = attackData;
             WarpInPlacement = warpInPlacement;
 
@@ -187,7 +187,7 @@ namespace Sharky.Managers
                             }
                             else if (building.First().Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPGATE)
                             {
-                                var targetLocation = TargetingManager.ForwardDefensePoint;
+                                var targetLocation = TargetingData.ForwardDefensePoint;
                                 if (AttackData.Attacking)
                                 {
                                     targetLocation = AttackData.ArmyPoint;
@@ -247,7 +247,7 @@ namespace Sharky.Managers
                 var openGeysers = BaseManager.BaseLocations.SelectMany(b => b.VespeneGeysers).Where(g => g.VespeneContents > 0 && !takenGases.Any(t => t.Value.Unit.Pos.X == g.Pos.X && t.Value.Unit.Pos.Y == g.Pos.Y));
                 if (openGeysers.Count() > 0)
                 {
-                    var baseLocation = BuildingBuilder.GetReferenceLocation(TargetingManager.SelfMainBasePoint);
+                    var baseLocation = BuildingBuilder.GetReferenceLocation(TargetingData.SelfMainBasePoint);
                     var closestGyeser = openGeysers.OrderBy(o => Vector2.DistanceSquared(new Vector2(baseLocation.X, baseLocation.Y), new Vector2(o.Pos.X, o.Pos.Y))).FirstOrDefault();
                     if (closestGyeser != null)
                     {
