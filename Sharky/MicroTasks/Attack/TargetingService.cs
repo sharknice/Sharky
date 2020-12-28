@@ -13,13 +13,13 @@ namespace Sharky.MicroTasks.Attack
 
         MapDataService MapDataService;
 
-        IBaseManager BaseManager;
+        BaseData BaseData;
 
-        public TargetingService(ActiveUnitData activeUnitData, MapDataService mapDataService, IBaseManager baseManager)
+        public TargetingService(ActiveUnitData activeUnitData, MapDataService mapDataService, BaseData baseData)
         {
             ActiveUnitData = activeUnitData;
             MapDataService = mapDataService;
-            BaseManager = baseManager;
+            BaseData = baseData;
         }
 
         public Point2D UpdateAttackPoint(Point2D armyPoint, Point2D attackPoint)
@@ -33,7 +33,7 @@ namespace Sharky.MicroTasks.Attack
             // if we have vision of AttackPoint find a new AttackPoint, choose a random base location
             if (MapDataService.SelfVisible(attackPoint))
             {
-                var bases = BaseManager.BaseLocations.Where(b => !MapDataService.SelfVisible(b.Location));
+                var bases = BaseData.BaseLocations.Where(b => !MapDataService.SelfVisible(b.Location));
                 if (bases.Count() == 0)
                 {
                     // find a random spot on the map and check there

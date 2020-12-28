@@ -16,7 +16,7 @@ namespace Sharky.MicroControllers
         protected ActiveUnitData ActiveUnitData;
         protected DebugManager DebugManager;
         protected IPathFinder SharkyPathFinder;
-        IBaseManager BaseManager;
+        BaseData BaseData;
         protected SharkyOptions SharkyOptions;
         protected DamageService DamageService;
 
@@ -29,14 +29,14 @@ namespace Sharky.MicroControllers
         protected float AvoidDamageDistance;
         protected float LooseFormationDistance;
 
-        public IndividualMicroController(MapDataService mapDataService, UnitDataManager unitDataManager, ActiveUnitData activeUnitData, DebugManager debugManager, IPathFinder sharkyPathFinder, IBaseManager baseManager, SharkyOptions sharkyOptions, DamageService damageService, MicroPriority microPriority, bool groupUpEnabled, float avoidDamageDistance = 1)
+        public IndividualMicroController(MapDataService mapDataService, UnitDataManager unitDataManager, ActiveUnitData activeUnitData, DebugManager debugManager, IPathFinder sharkyPathFinder, BaseData baseData, SharkyOptions sharkyOptions, DamageService damageService, MicroPriority microPriority, bool groupUpEnabled, float avoidDamageDistance = 1)
         {
             MapDataService = mapDataService;
             UnitDataManager = unitDataManager;
             ActiveUnitData = activeUnitData;
             DebugManager = debugManager;
             SharkyPathFinder = sharkyPathFinder;
-            BaseManager = baseManager;
+            BaseData = baseData;
             SharkyOptions = sharkyOptions;
             MicroPriority = microPriority;
             GroupUpEnabled = groupUpEnabled;
@@ -1135,7 +1135,7 @@ namespace Sharky.MicroControllers
             {
                 if (commander.UnitCalculation.EnemiesInRangeOf.Count() > 0)
                 {
-                    var selfBase = BaseManager.SelfBases.FirstOrDefault();
+                    var selfBase = BaseData.SelfBases.FirstOrDefault();
                     if (selfBase != null)
                     {
                         var mineralField = selfBase.MineralFields.FirstOrDefault();

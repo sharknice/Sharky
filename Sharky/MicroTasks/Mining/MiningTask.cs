@@ -12,15 +12,15 @@ namespace Sharky.MicroTasks
     public class MiningTask : MicroTask
     {
         UnitDataManager UnitDataManager;
-        IBaseManager BaseManager;
+        BaseData BaseData;
         ActiveUnitData ActiveUnitData;
         MiningDefenseService MiningDefenseService;
         MacroData MacroData;
 
-        public MiningTask(UnitDataManager unitDataManager, IBaseManager baseManager, ActiveUnitData activeUnitData, float priority, MiningDefenseService miningDefenseService, MacroData macroData)
+        public MiningTask(UnitDataManager unitDataManager, BaseData baseData, ActiveUnitData activeUnitData, float priority, MiningDefenseService miningDefenseService, MacroData macroData)
         {
             UnitDataManager = unitDataManager;
-            BaseManager = baseManager;
+            BaseData = baseData;
             ActiveUnitData = activeUnitData;
             Priority = priority;
             MiningDefenseService = miningDefenseService;
@@ -153,7 +153,7 @@ namespace Sharky.MicroTasks
 
             foreach (var worker in GetIdleWorkers())
             {
-                var baseLocation = BaseManager.SelfBases.Where(b => b.ResourceCenter.BuildProgress > .9).OrderBy(b => b.ResourceCenter.AssignedHarvesters - b.ResourceCenter.IdealHarvesters).FirstOrDefault();
+                var baseLocation = BaseData.SelfBases.Where(b => b.ResourceCenter.BuildProgress > .9).OrderBy(b => b.ResourceCenter.AssignedHarvesters - b.ResourceCenter.IdealHarvesters).FirstOrDefault();
                 if (baseLocation != null)
                 {
                     var mineralField = baseLocation.MineralFields.OrderBy(m => worker.UnitCalculation.NearbyAllies.Count(a => Vector2.DistanceSquared(new Vector2(m.Pos.X, m.Pos.Y), new Vector2(a.Unit.Pos.X, a.Unit.Pos.Y)) < 3)).ThenBy(m => Vector2.DistanceSquared(new Vector2(m.Pos.X, m.Pos.Y), new Vector2(worker.UnitCalculation.Unit.Pos.X, worker.UnitCalculation.Unit.Pos.Y))).FirstOrDefault();
@@ -175,10 +175,10 @@ namespace Sharky.MicroTasks
         {
             var actions = new List<SC2APIProtocol.Action>();
 
-            var oversaturatedBase = BaseManager.SelfBases.Where(b => b.ResourceCenter.BuildProgress == 1 && b.ResourceCenter.AssignedHarvesters > b.ResourceCenter.IdealHarvesters).OrderByDescending(b => b.ResourceCenter.AssignedHarvesters - b.ResourceCenter.IdealHarvesters).FirstOrDefault();
+            var oversaturatedBase = BaseData.SelfBases.Where(b => b.ResourceCenter.BuildProgress == 1 && b.ResourceCenter.AssignedHarvesters > b.ResourceCenter.IdealHarvesters).OrderByDescending(b => b.ResourceCenter.AssignedHarvesters - b.ResourceCenter.IdealHarvesters).FirstOrDefault();
             if (oversaturatedBase != null)
             {
-                var undersaturatedBase = BaseManager.SelfBases.Where(b => b.ResourceCenter.BuildProgress > .9 && b.ResourceCenter.AssignedHarvesters < b.ResourceCenter.IdealHarvesters).OrderBy(b => b.ResourceCenter.AssignedHarvesters - b.ResourceCenter.IdealHarvesters).FirstOrDefault();
+                var undersaturatedBase = BaseData.SelfBases.Where(b => b.ResourceCenter.BuildProgress > .9 && b.ResourceCenter.AssignedHarvesters < b.ResourceCenter.IdealHarvesters).OrderBy(b => b.ResourceCenter.AssignedHarvesters - b.ResourceCenter.IdealHarvesters).FirstOrDefault();
                 if (undersaturatedBase != null)
                 {
                     var refinereries = ActiveUnitData.SelfUnits.Where(u => UnitDataManager.GasGeyserRefineryTypes.Contains((UnitTypes)u.Value.Unit.UnitType) && u.Value.Unit.BuildProgress >= .95f);
@@ -219,7 +219,7 @@ namespace Sharky.MicroTasks
         List<MiningInfo> GetSplitAssignments()
         {
             var miningAssignments = new List<MiningInfo>();
-            foreach (var mineralField in BaseManager.MainBase.MineralFields)
+            foreach (var mineralField in BaseData.MainBase.MineralFields)
             {
                 miningAssignments.Add(new MiningInfo(mineralField));
             }

@@ -12,7 +12,7 @@ namespace Sharky.MicroTasks.Harass
 {
     public class LateGameOracleHarassTask : MicroTask
     {
-        IBaseManager BaseManager;
+        BaseData BaseData;
         TargetingData TargetingData;
         MapDataService MapDataService;
         OracleMicroController OracleMicroController;
@@ -20,9 +20,9 @@ namespace Sharky.MicroTasks.Harass
         public int DesiredCount { get; set; }
         List<HarassInfo> HarassInfos { get; set; }
 
-        public LateGameOracleHarassTask(IBaseManager baseManager, TargetingData targetingData, MapDataService mapDataService, OracleMicroController oracleMicroController, int desiredCount = 2, bool enabled = true, float priority = -1f)
+        public LateGameOracleHarassTask(BaseData baseData, TargetingData targetingData, MapDataService mapDataService, OracleMicroController oracleMicroController, int desiredCount = 2, bool enabled = true, float priority = -1f)
         {
-            BaseManager = baseManager;
+            BaseData = baseData;
             TargetingData = targetingData;
             MapDataService = mapDataService;
             OracleMicroController = oracleMicroController;
@@ -147,14 +147,14 @@ namespace Sharky.MicroTasks.Harass
             if (HarassInfos == null)
             {
                 HarassInfos = new List<HarassInfo>();
-                foreach (var baseLocation in BaseManager.BaseLocations.Where(b => b.ResourceCenter == null || b.ResourceCenter.Alliance != SC2APIProtocol.Alliance.Self).Reverse())
+                foreach (var baseLocation in BaseData.BaseLocations.Where(b => b.ResourceCenter == null || b.ResourceCenter.Alliance != SC2APIProtocol.Alliance.Self).Reverse())
                 {
                     HarassInfos.Add(new HarassInfo { BaseLocation = baseLocation, Harassers = new List<UnitCommander>(), LastClearedFrame = -1, LastDefendedFrame = -1, LastPathFailedFrame = -1 });
                 }
             }
             else
             {
-                foreach (var baseLocation in BaseManager.SelfBases)
+                foreach (var baseLocation in BaseData.SelfBases)
                 {
                     HarassInfos.RemoveAll(h => h.BaseLocation.Location.X == baseLocation.Location.X && h.BaseLocation.Location.Y == baseLocation.Location.Y);
                 }

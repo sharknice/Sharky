@@ -47,7 +47,7 @@ namespace SharkyExampleBot
             var protossCounterTransitioner = new ProtossCounterTransitioner(defaultSharkyBot.EnemyStrategyManager, defaultSharkyBot.SharkyOptions);
 
             // a probe microcontroller for our proxy builds
-            var probeMicroController = new IndividualMicroController(defaultSharkyBot.MapDataService, defaultSharkyBot.UnitDataManager, defaultSharkyBot.ActiveUnitData, defaultSharkyBot.DebugManager, defaultSharkyBot.SharkyPathFinder, defaultSharkyBot.BaseManager, defaultSharkyBot.SharkyOptions, defaultSharkyBot.DamageService, MicroPriority.JustLive, false);
+            var probeMicroController = new IndividualMicroController(defaultSharkyBot.MapDataService, defaultSharkyBot.UnitDataManager, defaultSharkyBot.ActiveUnitData, defaultSharkyBot.DebugManager, defaultSharkyBot.SharkyPathFinder, defaultSharkyBot.BaseData, defaultSharkyBot.SharkyOptions, defaultSharkyBot.DamageService, MicroPriority.JustLive, false);
 
             // We create all of our builds
             var proxyVoidRay = new ProxyVoidRay(defaultSharkyBot.BuildOptions, defaultSharkyBot.MacroData, defaultSharkyBot.ActiveUnitData, defaultSharkyBot.AttackData, defaultSharkyBot.ChatManager, defaultSharkyBot.ChronoData, defaultSharkyBot.SharkyOptions, defaultSharkyBot.MicroManager, protossCounterTransitioner, defaultSharkyBot.UnitDataManager, defaultSharkyBot.ProxyLocationService, defaultSharkyBot.DebugManager, defaultSharkyBot.UnitCountService, probeMicroController);

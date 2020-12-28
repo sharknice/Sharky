@@ -10,17 +10,17 @@ namespace Sharky.Builds.BuildingPlacement
         IBuildingPlacement ProtossBuildingPlacement;
         IBuildingPlacement TerranBuildingPlacement;
         IBuildingPlacement ZergBuildingPlacement;
-        IBaseManager BaseManager;
+        BaseData BaseData;
         ActiveUnitData ActiveUnitData;
         BuildingService BuildingService;
         UnitDataManager UnitDataManager;
 
-        public BuildingPlacement(IBuildingPlacement protossBuildingPlacement, IBuildingPlacement terranBuildingPlacement, IBuildingPlacement zergBuildingPlacement, IBaseManager baseManager, ActiveUnitData activeUnitData, BuildingService buildingService, UnitDataManager unitDataManager)
+        public BuildingPlacement(IBuildingPlacement protossBuildingPlacement, IBuildingPlacement terranBuildingPlacement, IBuildingPlacement zergBuildingPlacement, BaseData baseData, ActiveUnitData activeUnitData, BuildingService buildingService, UnitDataManager unitDataManager)
         {
             ProtossBuildingPlacement = protossBuildingPlacement;
             TerranBuildingPlacement = terranBuildingPlacement;
             ZergBuildingPlacement = zergBuildingPlacement;
-            BaseManager = baseManager;
+            BaseData = baseData;
             ActiveUnitData = activeUnitData;
             BuildingService = buildingService;
             UnitDataManager = unitDataManager;
@@ -50,7 +50,7 @@ namespace Sharky.Builds.BuildingPlacement
         private Point2D GetResourceCenterLocation()
         {
             var resourceCenters = ActiveUnitData.SelfUnits.Values.Where(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter));
-            var openBases = BaseManager.BaseLocations.Where(b => !resourceCenters.Any(r => Vector2.DistanceSquared(new Vector2(r.Unit.Pos.X, r.Unit.Pos.Y), new Vector2(b.Location.X, b.Location.Y)) < 25));
+            var openBases = BaseData.BaseLocations.Where(b => !resourceCenters.Any(r => Vector2.DistanceSquared(new Vector2(r.Unit.Pos.X, r.Unit.Pos.Y), new Vector2(b.Location.X, b.Location.Y)) < 25));
 
             foreach (var openBase in openBases)
             {

@@ -11,18 +11,18 @@ namespace Sharky.Managers
         ActiveUnitData ActiveUnitData;
         UnitDataManager UnitDataManager;
         MapDataService MapDataService;
-        IBaseManager BaseManager;
+        BaseData BaseData;
         MacroData MacroData;
         TargetingData TargetingData;
 
         int baseCount;
 
-        public TargetingManager(ActiveUnitData activeUnitData, UnitDataManager unitDataManager, MapDataService mapDataService, IBaseManager baseManager, MacroData macroData, TargetingData targetingData)
+        public TargetingManager(ActiveUnitData activeUnitData, UnitDataManager unitDataManager, MapDataService mapDataService, BaseData baseData, MacroData macroData, TargetingData targetingData)
         {
             ActiveUnitData = activeUnitData;
             UnitDataManager = unitDataManager;
             MapDataService = mapDataService;
-            BaseManager = baseManager;
+            BaseData = baseData;
             MacroData = macroData;
             TargetingData = targetingData;
 
@@ -58,9 +58,9 @@ namespace Sharky.Managers
 
         void UpdateDefensePoint()
         {
-            if (baseCount != BaseManager.SelfBases.Count())
+            if (baseCount != BaseData.SelfBases.Count())
             {
-                var ordered = BaseManager.SelfBases.OrderBy(b => Vector2.DistanceSquared(new Vector2(b.Location.X, b.Location.Y), new Vector2(TargetingData.AttackPoint.X, TargetingData.AttackPoint.Y)));
+                var ordered = BaseData.SelfBases.OrderBy(b => Vector2.DistanceSquared(new Vector2(b.Location.X, b.Location.Y), new Vector2(TargetingData.AttackPoint.X, TargetingData.AttackPoint.Y)));
                 var closestBase = ordered.FirstOrDefault();
                 if (closestBase != null)
                 {
@@ -72,7 +72,7 @@ namespace Sharky.Managers
                 {
                     TargetingData.SelfMainBasePoint = farthestBase.Location;
                 }
-                baseCount = BaseManager.SelfBases.Count();
+                baseCount = BaseData.SelfBases.Count();
             }
             foreach (var task in MacroData.Proxies)
             {

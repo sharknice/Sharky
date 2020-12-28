@@ -12,18 +12,18 @@ namespace Sharky.Builds.MacroServices
         IBuildingBuilder BuildingBuilder;
         UnitDataManager UnitDataManager;
         ActiveUnitData ActiveUnitData;
-        IBaseManager BaseManager;
+        BaseData BaseData;
         TargetingData TargetingData;
 
         int defensivePointLastFailFrame;
 
-        public BuildPylonService(MacroData macroData, IBuildingBuilder buildingBuilder, UnitDataManager unitDataManager, ActiveUnitData activeUnitData, IBaseManager baseManager, TargetingData targetingData)
+        public BuildPylonService(MacroData macroData, IBuildingBuilder buildingBuilder, UnitDataManager unitDataManager, ActiveUnitData activeUnitData, BaseData baseData, TargetingData targetingData)
         {
             MacroData = macroData;
             BuildingBuilder = buildingBuilder;
             UnitDataManager = unitDataManager;
             ActiveUnitData = activeUnitData;
-            BaseManager = baseManager;
+            BaseData = baseData;
             TargetingData = targetingData;
 
             defensivePointLastFailFrame = 0;
@@ -42,7 +42,7 @@ namespace Sharky.Builds.MacroServices
             var unitData = UnitDataManager.BuildingData[UnitTypes.PROTOSS_PYLON];
 
             var orderedBuildings = ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
-            foreach (var baseLocation in BaseManager.SelfBases)
+            foreach (var baseLocation in BaseData.SelfBases)
             {
                 if (baseLocation.MineralLineDefenseUnbuildableFrame < MacroData.Frame - 100)
                 {
@@ -72,7 +72,7 @@ namespace Sharky.Builds.MacroServices
             var unitData = UnitDataManager.BuildingData[UnitTypes.PROTOSS_PYLON];
 
             var orderedBuildings = ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
-            foreach (var baseLocation in BaseManager.SelfBases)
+            foreach (var baseLocation in BaseData.SelfBases)
             {
                 if (ActiveUnitData.SelfUnits.Count(u => u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && Vector2.DistanceSquared(new Vector2(u.Value.Unit.Pos.X, u.Value.Unit.Pos.Y), new Vector2(baseLocation.MineralLineLocation.X, baseLocation.MineralLineLocation.Y)) < MacroData.DefensiveBuildingMineralLineMaximumDistance * MacroData.DefensiveBuildingMineralLineMaximumDistance) + orderedBuildings < MacroData.DesiredPylonsAtEveryMineralLine)
                 {

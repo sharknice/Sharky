@@ -12,7 +12,7 @@ namespace Sharky.MicroTasks
     public class OracleWorkerHarassTask : MicroTask
     {
         TargetingData TargetingData;
-        IBaseManager BaseManager;
+        BaseData BaseData;
         IChatManager ChatManager;
         MapDataService MapDataService;
         MapData MapData;
@@ -32,10 +32,10 @@ namespace Sharky.MicroTasks
         bool CheeseChatSent;
         int TargetIndex;
 
-        public OracleWorkerHarassTask(TargetingData targetingData, IBaseManager baseManager, IChatManager chatManager, MapDataService mapDataService, MapData mapData, OracleMicroController oracleMicroController, int desiredCount = 1, bool enabled = true, float priority = -1f)
+        public OracleWorkerHarassTask(TargetingData targetingData, BaseData baseData, IChatManager chatManager, MapDataService mapDataService, MapData mapData, OracleMicroController oracleMicroController, int desiredCount = 1, bool enabled = true, float priority = -1f)
         {
             TargetingData = targetingData;
-            BaseManager = baseManager;
+            BaseData = baseData;
             ChatManager = chatManager;
             MapDataService = mapDataService;
             MapData = mapData;
@@ -210,7 +210,7 @@ namespace Sharky.MicroTasks
 
         void GetNextTarget()
         {
-            Target = BaseManager.BaseLocations.OrderBy(b => Vector2.DistanceSquared(new Vector2(b.Location.X, b.Location.Y), new Vector2(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y))).Skip(TargetIndex + 1).First().MineralLineLocation;
+            Target = BaseData.BaseLocations.OrderBy(b => Vector2.DistanceSquared(new Vector2(b.Location.X, b.Location.Y), new Vector2(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y))).Skip(TargetIndex + 1).First().MineralLineLocation;
             TargetIndex++;
             if (TargetIndex > 3)
             {

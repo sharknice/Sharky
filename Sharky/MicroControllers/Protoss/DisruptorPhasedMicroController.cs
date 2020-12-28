@@ -11,8 +11,8 @@ namespace Sharky.MicroControllers.Protoss
     {
         private int PurificationNovaRange = 13;
 
-        public DisruptorPhasedMicroController(MapDataService mapDataService, UnitDataManager unitDataManager, ActiveUnitData activeUnitData, DebugManager debugManager, IPathFinder sharkyPathFinder, IBaseManager baseManager, SharkyOptions sharkyOptions, DamageService damageService, MicroPriority microPriority, bool groupUpEnabled)
-            : base(mapDataService, unitDataManager, activeUnitData, debugManager, sharkyPathFinder, baseManager, sharkyOptions, damageService, microPriority, groupUpEnabled)
+        public DisruptorPhasedMicroController(MapDataService mapDataService, UnitDataManager unitDataManager, ActiveUnitData activeUnitData, DebugManager debugManager, IPathFinder sharkyPathFinder, BaseData baseData, SharkyOptions sharkyOptions, DamageService damageService, MicroPriority microPriority, bool groupUpEnabled)
+            : base(mapDataService, unitDataManager, activeUnitData, debugManager, sharkyPathFinder, baseData, sharkyOptions, damageService, microPriority, groupUpEnabled)
         {
         }
 

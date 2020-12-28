@@ -12,12 +12,12 @@ namespace Sharky.MicroControllers.Protoss
     {
         int PickupRange = 5;
 
-        IBaseManager BaseManager;
+        BaseData BaseData;
 
-        public WarpPrismMicroController(MapDataService mapDataService, UnitDataManager unitDataManager, ActiveUnitData activeUnitData, DebugManager debugManager, IPathFinder sharkyPathFinder, IBaseManager baseManager, SharkyOptions sharkyOptions, DamageService damageService, MicroPriority microPriority, bool groupUpEnabled)
-            : base(mapDataService, unitDataManager, activeUnitData, debugManager, sharkyPathFinder, baseManager, sharkyOptions, damageService, microPriority, groupUpEnabled)
+        public WarpPrismMicroController(MapDataService mapDataService, UnitDataManager unitDataManager, ActiveUnitData activeUnitData, DebugManager debugManager, IPathFinder sharkyPathFinder, BaseData baseData, SharkyOptions sharkyOptions, DamageService damageService, MicroPriority microPriority, bool groupUpEnabled)
+            : base(mapDataService, unitDataManager, activeUnitData, debugManager, sharkyPathFinder, baseData, sharkyOptions, damageService, microPriority, groupUpEnabled)
         {
-            BaseManager = baseManager;
+            BaseData = baseData;
         }
 
         protected override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out SC2APIProtocol.Action action)
@@ -423,7 +423,7 @@ namespace Sharky.MicroControllers.Protoss
 
             var nexuses = ActiveUnitData.SelfUnits.Where(u => u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS && u.Value.Unit.BuildProgress == 1 && u.Value.Unit.AssignedHarvesters > 0 && u.Value.Unit.IdealHarvesters > 0).OrderBy(u => u.Value.Unit.AssignedHarvesters / (float)u.Value.Unit.IdealHarvesters).ThenBy(u => DistanceSquared(commander.UnitCalculation, u.Value));
 
-            //foreach (var nexusBase in BaseManager.Bases)
+            //foreach (var nexusBase in BaseData.Bases)
             //{
             //    DrawSphere(SC2Util.Point(nexusBase.MineralLinePos.X, nexusBase.MineralLinePos.Y, 11));
             //}
@@ -470,7 +470,7 @@ namespace Sharky.MicroControllers.Protoss
         Point2D GetMiningSpot(UnitCalculation nexus)
         {
             var nexusPoint = new Point2D { X = nexus.Unit.Pos.X, Y = nexus.Unit.Pos.Y };
-            var nexusBase = BaseManager.BaseLocations.Where(b => b.Location.X == nexusPoint.X && b.Location.Y == nexusPoint.Y).FirstOrDefault();
+            var nexusBase = BaseData.BaseLocations.Where(b => b.Location.X == nexusPoint.X && b.Location.Y == nexusPoint.Y).FirstOrDefault();
             if (nexusBase == null)
             {
                 return nexusPoint;

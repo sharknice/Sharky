@@ -12,18 +12,18 @@ namespace Sharky.Builds.MacroServices
         IBuildingBuilder BuildingBuilder;
         UnitDataManager UnitDataManager;
         ActiveUnitData ActiveUnitData;
-        IBaseManager BaseManager;
+        BaseData BaseData;
         TargetingData TargetingData;
 
         int defensivePointLastFailFrame;
 
-        public BuildDefenseService(MacroData macroData, IBuildingBuilder buildingBuilder, UnitDataManager unitDataManager, ActiveUnitData activeUnitData, IBaseManager baseManager, TargetingData targetingData)
+        public BuildDefenseService(MacroData macroData, IBuildingBuilder buildingBuilder, UnitDataManager unitDataManager, ActiveUnitData activeUnitData, BaseData baseData, TargetingData targetingData)
         {
             MacroData = macroData;
             BuildingBuilder = buildingBuilder;
             UnitDataManager = unitDataManager;
             ActiveUnitData = activeUnitData;
-            BaseManager = baseManager;
+            BaseData = baseData;
             TargetingData = targetingData;
 
             defensivePointLastFailFrame = 0;
@@ -92,7 +92,7 @@ namespace Sharky.Builds.MacroServices
                     var unitData = UnitDataManager.BuildingData[unit.Key];
 
                     var orderedBuildings = ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
-                    foreach (var baseLocation in BaseManager.SelfBases)
+                    foreach (var baseLocation in BaseData.SelfBases)
                     {
                         if (baseLocation.MineralLineDefenseUnbuildableFrame < MacroData.Frame - 100)
                         {
@@ -129,7 +129,7 @@ namespace Sharky.Builds.MacroServices
                     var unitData = UnitDataManager.BuildingData[unit.Key];
 
                     var orderedBuildings = ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
-                    foreach (var baseLocation in BaseManager.SelfBases)
+                    foreach (var baseLocation in BaseData.SelfBases)
                     {
                         if (baseLocation.MineralLineDefenseUnbuildableFrame < MacroData.Frame - 100)
                         {

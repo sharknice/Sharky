@@ -14,7 +14,7 @@ namespace Sharky.MicroTasks
         UnitDataManager UnitDataManager;
         TargetingData TargetingData;
         MapDataService MapDataService;
-        IBaseManager BaseManager;
+        BaseData BaseData;
         IIndividualMicroController IndividualMicroController;
 
         bool started { get; set; }
@@ -22,12 +22,12 @@ namespace Sharky.MicroTasks
         List<Point2D> ScoutLocations { get; set; }
         int ScoutLocationIndex { get; set; }
 
-        public ProxyScoutTask(UnitDataManager unitDataManager, TargetingData targetingData, MapDataService mapDataService, IBaseManager baseManager, bool enabled, float priority, IIndividualMicroController individualMicroController)
+        public ProxyScoutTask(UnitDataManager unitDataManager, TargetingData targetingData, MapDataService mapDataService, BaseData baseData, bool enabled, float priority, IIndividualMicroController individualMicroController)
         {
             UnitDataManager = unitDataManager;
             TargetingData = targetingData;
             MapDataService = mapDataService;
-            BaseManager = baseManager;
+            BaseData = baseData;
             Priority = priority;
             IndividualMicroController = individualMicroController;
 
@@ -109,7 +109,7 @@ namespace Sharky.MicroTasks
         private void GetScoutLocations()
         {
             ScoutLocations = new List<Point2D>();
-            foreach (var baseLocation in BaseManager.BaseLocations.Skip(1).Take(4))
+            foreach (var baseLocation in BaseData.BaseLocations.Skip(1).Take(4))
             {
                 ScoutLocations.Add(baseLocation.MineralLineLocation);
             }

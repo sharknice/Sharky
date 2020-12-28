@@ -7,26 +7,24 @@ using System.Numerics;
 
 namespace Sharky.Managers
 {
-    public class BaseManager : SharkyManager, IBaseManager
+    public class BaseManager : SharkyManager
     {
-        public List<BaseLocation> BaseLocations { get; private set; }
-        public List<BaseLocation> SelfBases { get; private set; }
-        public BaseLocation MainBase { get; private set; }
-
         ImageData PlacementGrid;
 
         UnitDataManager UnitDataManager;
         ActiveUnitData ActiveUnitData;
         IPathFinder PathFinder;
         UnitCountService UnitCountService;
+        BaseData BaseData;
 
-        public BaseManager(UnitDataManager unitDataManager, ActiveUnitData activeUnitData, IPathFinder pathFinder, UnitCountService unitCountService)
+        public BaseManager(UnitDataManager unitDataManager, ActiveUnitData activeUnitData, IPathFinder pathFinder, UnitCountService unitCountService, BaseData baseData)
         {
             UnitDataManager = unitDataManager;
             ActiveUnitData = activeUnitData;
             PathFinder = pathFinder;
             UnitCountService = unitCountService;
-            BaseLocations = new List<BaseLocation>();
+            BaseData = baseData;
+            BaseData.BaseLocations = new List<BaseLocation>();
         }
 
         public override void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)
@@ -50,7 +48,7 @@ namespace Sharky.Managers
                 if (!mineralGroups.ContainsKey(mineralField.Tag))
                 {
                     var baseLocation = new BaseLocation();
-                    BaseLocations.Add(baseLocation);
+                    BaseData.BaseLocations.Add(baseLocation);
                     mineralGroups.Add(mineralField.Tag, currentSet);
                     baseLocation.MineralFields.Add(mineralField);
 
@@ -85,7 +83,7 @@ namespace Sharky.Managers
             }
             gasses = gasses.OrderBy(g => g.Pos.X).ThenBy(g => g.Pos.Y).ToList();
 
-            foreach (var location in BaseLocations)
+            foreach (var location in BaseData.BaseLocations)
             {
                 DetermineFinalLocation(location, gasses);
                 SetMineralLineLocation(location);
@@ -93,18 +91,17 @@ namespace Sharky.Managers
 
             var startingUnit = observation.Observation.RawData.Units.FirstOrDefault(u => u.Alliance == Alliance.Self && UnitDataManager.ResourceCenterTypes.Contains((UnitTypes)u.UnitType));
 
-            //BaseLocations = BaseLocations.OrderBy(b => Vector2.DistanceSquared(new Vector2(startingUnit.Pos.X, startingUnit.Pos.Y), new Vector2(b.Location.X, b.Location.Y))).ToList();
-            BaseLocations = BaseLocations.OrderBy(b => PathFinder.GetGroundPath(startingUnit.Pos.X + 4, startingUnit.Pos.Y + 4, b.Location.X, b.Location.Y, 0).Count()).ToList();
-            MainBase = BaseLocations.FirstOrDefault();
-            MainBase.ResourceCenter = startingUnit;
-            SelfBases = new List<BaseLocation> { MainBase };
+            BaseData.BaseLocations = BaseData.BaseLocations.OrderBy(b => PathFinder.GetGroundPath(startingUnit.Pos.X + 4, startingUnit.Pos.Y + 4, b.Location.X, b.Location.Y, 0).Count()).ToList();
+            BaseData.MainBase = BaseData.BaseLocations.FirstOrDefault();
+            BaseData.MainBase.ResourceCenter = startingUnit;
+            BaseData.SelfBases = new List<BaseLocation> { BaseData.MainBase };
         }
 
         public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
         {
             foreach (var tag in ActiveUnitData.DeadUnits)
             {
-                foreach (var baseLocation in BaseLocations)
+                foreach (var baseLocation in BaseData.BaseLocations)
                 {
                     baseLocation.MineralFields.RemoveAll(m => m.Tag == tag);
                 }
@@ -117,16 +114,16 @@ namespace Sharky.Managers
 
         void UpdateSelfBases()
         {
-            if (SelfBases.Count() != UnitCountService.EquivalentTypeCount(UnitTypes.PROTOSS_NEXUS) + UnitCountService.EquivalentTypeCount(UnitTypes.TERRAN_COMMANDCENTER) + UnitCountService.EquivalentTypeCount(UnitTypes.ZERG_HATCHERY))
+            if (BaseData.SelfBases.Count() != UnitCountService.EquivalentTypeCount(UnitTypes.PROTOSS_NEXUS) + UnitCountService.EquivalentTypeCount(UnitTypes.TERRAN_COMMANDCENTER) + UnitCountService.EquivalentTypeCount(UnitTypes.ZERG_HATCHERY))
             {
                 var resourceCenters = ActiveUnitData.SelfUnits.Values.Where(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter));
-                SelfBases = BaseLocations.Where(b => resourceCenters.Any(r => Vector2.DistanceSquared(new Vector2(r.Unit.Pos.X, r.Unit.Pos.Y), new Vector2(b.Location.X, b.Location.Y)) < 25)).ToList();
-                foreach (var selfBase in SelfBases)
+                BaseData.SelfBases = BaseData.BaseLocations.Where(b => resourceCenters.Any(r => Vector2.DistanceSquared(new Vector2(r.Unit.Pos.X, r.Unit.Pos.Y), new Vector2(b.Location.X, b.Location.Y)) < 25)).ToList();
+                foreach (var selfBase in BaseData.SelfBases)
                 {
                     selfBase.ResourceCenter = resourceCenters.FirstOrDefault(r => Vector2.DistanceSquared(new Vector2(r.Unit.Pos.X, r.Unit.Pos.Y), new Vector2(selfBase.Location.X, selfBase.Location.Y)) < 25).Unit;
                 }
             }
-            foreach (var selfBase in SelfBases)
+            foreach (var selfBase in BaseData.SelfBases)
             {
                 if (ActiveUnitData.SelfUnits.TryGetValue(selfBase.ResourceCenter.Tag, out UnitCalculation updatedUnit))
                 {

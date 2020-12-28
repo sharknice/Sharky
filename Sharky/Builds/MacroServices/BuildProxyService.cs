@@ -12,20 +12,20 @@ namespace Sharky.Builds.MacroServices
         IBuildingBuilder BuildingBuilder;
         UnitDataManager UnitDataManager;
         ActiveUnitData ActiveUnitData;
-        IBaseManager BaseManager;
+        BaseData BaseData;
         TargetingData TargetingData;
         Morpher Morpher;
         MicroManager MicroManager;
 
         int lastFailFrame;
 
-        public BuildProxyService(MacroData macroData, IBuildingBuilder buildingBuilder, UnitDataManager unitDataManager, ActiveUnitData activeUnitData, IBaseManager baseManager, TargetingData targetingData, Morpher morpher, MicroManager microManager)
+        public BuildProxyService(MacroData macroData, IBuildingBuilder buildingBuilder, UnitDataManager unitDataManager, ActiveUnitData activeUnitData, BaseData baseData, TargetingData targetingData, Morpher morpher, MicroManager microManager)
         {
             MacroData = macroData;
             BuildingBuilder = buildingBuilder;
             UnitDataManager = unitDataManager;
             ActiveUnitData = activeUnitData;
-            BaseManager = baseManager;
+            BaseData = baseData;
             TargetingData = targetingData;
             Morpher = morpher;
             MicroManager = microManager;

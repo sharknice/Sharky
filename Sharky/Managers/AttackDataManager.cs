@@ -94,7 +94,5 @@ namespace Sharky.Managers
 
             return new List<SC2APIProtocol.Action>();
         }
-
-
     }
 }

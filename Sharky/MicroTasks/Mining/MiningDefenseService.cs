@@ -9,14 +9,14 @@ namespace Sharky.MicroTasks.Mining
 {
     public class MiningDefenseService
     {
-        IBaseManager BaseManager;
+        BaseData BaseData;
         ActiveUnitData ActiveUnitData;
         IIndividualMicroController WorkerMicroController;
         DebugManager DebugManager;
 
-        public MiningDefenseService(IBaseManager baseManager, ActiveUnitData activeUnitData, IIndividualMicroController workerMicroController, DebugManager debugManager)
+        public MiningDefenseService(BaseData baseData, ActiveUnitData activeUnitData, IIndividualMicroController workerMicroController, DebugManager debugManager)
         {
-            BaseManager = baseManager;
+            BaseData = baseData;
             ActiveUnitData = activeUnitData;
             WorkerMicroController = workerMicroController;
             DebugManager = debugManager;
@@ -25,7 +25,7 @@ namespace Sharky.MicroTasks.Mining
         public List<SC2APIProtocol.Action> DealWithEnemies(int frame, List<UnitCommander> unitCommanders)
         {
             var actions = new List<SC2APIProtocol.Action>();
-            foreach (var selfBase in BaseManager.SelfBases)
+            foreach (var selfBase in BaseData.SelfBases)
             {
                 if (ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Count() > 0)
                 {
@@ -139,7 +139,7 @@ namespace Sharky.MicroTasks.Mining
 
                                 foreach (var commander in commanders.Where(c => c.UnitRole == UnitRole.Bait))
                                 {
-                                    var action = WorkerMicroController.Bait(commander, BaseManager.BaseLocations.Last().Location, BaseManager.BaseLocations.First().Location, null, frame);
+                                    var action = WorkerMicroController.Bait(commander, BaseData.BaseLocations.Last().Location, BaseData.BaseLocations.First().Location, null, frame);
                                     if (action != null)
                                     {
                                         actions.Add(action);
@@ -201,7 +201,7 @@ namespace Sharky.MicroTasks.Mining
             {
                 if (commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.ATTACK_ATTACK) && (!commander.UnitCalculation.NearbyAllies.Any(a => a.UnitClassifications.Contains(UnitClassification.ResourceCenter)) || commander.UnitCalculation.NearbyAllies.Any(a => a.UnitClassifications.Contains(UnitClassification.ArmyUnit))))
                 {
-                    var action = commander.Order(frame, Abilities.MOVE, BaseManager.MainBase.Location);
+                    var action = commander.Order(frame, Abilities.MOVE, BaseData.MainBase.Location);
                     if (action != null)
                     {
                         actions.Add(action);
@@ -216,7 +216,7 @@ namespace Sharky.MicroTasks.Mining
         {
             var actions = new List<SC2APIProtocol.Action>();
 
-            var otherBase = BaseManager.BaseLocations.FirstOrDefault(b => b.Location.X != selfBase.Location.X && b.Location.Y != selfBase.Location.Y);
+            var otherBase = BaseData.BaseLocations.FirstOrDefault(b => b.Location.X != selfBase.Location.X && b.Location.Y != selfBase.Location.Y);
             if (otherBase != null)
             {
                 foreach (var commander in unitCommanders)

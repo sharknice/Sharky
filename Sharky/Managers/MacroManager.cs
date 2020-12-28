@@ -16,7 +16,7 @@ namespace Sharky.Managers
         UnitDataManager UnitDataManager;
         IBuildingBuilder BuildingBuilder;
         SharkyOptions SharkyOptions;
-        IBaseManager BaseManager;
+        BaseData BaseData;
         TargetingData TargetingData;
         AttackData AttackData;
         IBuildingPlacement WarpInPlacement;
@@ -33,14 +33,14 @@ namespace Sharky.Managers
         bool SkipTech;
         bool SkipAddons;
 
-        public MacroManager(MacroSetup macroSetup, ActiveUnitData activeUnitData, UnitDataManager unitDataManager, IBuildingBuilder buildingBuilder, SharkyOptions sharkyOptions, IBaseManager baseManager, TargetingData targetingData, AttackData attackData, IBuildingPlacement warpInPlacement, MacroData macroData, Morpher morpher, BuildPylonService buildPylonService, BuildDefenseService buildDefenseService, BuildProxyService buildProxyService, UnitCountService unitCountService)
+        public MacroManager(MacroSetup macroSetup, ActiveUnitData activeUnitData, UnitDataManager unitDataManager, IBuildingBuilder buildingBuilder, SharkyOptions sharkyOptions, BaseData baseData, TargetingData targetingData, AttackData attackData, IBuildingPlacement warpInPlacement, MacroData macroData, Morpher morpher, BuildPylonService buildPylonService, BuildDefenseService buildDefenseService, BuildProxyService buildProxyService, UnitCountService unitCountService)
         {
             MacroSetup = macroSetup;
             ActiveUnitData = activeUnitData;
             UnitDataManager = unitDataManager;
             BuildingBuilder = buildingBuilder;
             SharkyOptions = sharkyOptions;
-            BaseManager = baseManager;
+            BaseData = baseData;
             TargetingData = targetingData;
             AttackData = attackData;
             WarpInPlacement = warpInPlacement;
@@ -244,7 +244,7 @@ namespace Sharky.Managers
             {
                 var unitData = GetGasTypeData();
                 var takenGases = ActiveUnitData.SelfUnits.Where(u => UnitDataManager.GasGeyserRefineryTypes.Contains((UnitTypes)u.Value.Unit.UnitType)).Concat(ActiveUnitData.EnemyUnits.Where(u => UnitDataManager.GasGeyserRefineryTypes.Contains((UnitTypes)u.Value.Unit.UnitType)));
-                var openGeysers = BaseManager.BaseLocations.SelectMany(b => b.VespeneGeysers).Where(g => g.VespeneContents > 0 && !takenGases.Any(t => t.Value.Unit.Pos.X == g.Pos.X && t.Value.Unit.Pos.Y == g.Pos.Y));
+                var openGeysers = BaseData.BaseLocations.SelectMany(b => b.VespeneGeysers).Where(g => g.VespeneContents > 0 && !takenGases.Any(t => t.Value.Unit.Pos.X == g.Pos.X && t.Value.Unit.Pos.Y == g.Pos.Y));
                 if (openGeysers.Count() > 0)
                 {
                     var baseLocation = BuildingBuilder.GetReferenceLocation(TargetingData.SelfMainBasePoint);
