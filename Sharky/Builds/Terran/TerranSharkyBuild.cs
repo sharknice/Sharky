@@ -1,10 +1,10 @@
-﻿using Sharky.Managers;
+﻿using Sharky.Chat;
 
 namespace Sharky.Builds.Terran
 {
     public class TerranSharkyBuild : SharkyBuild
     {
-        public TerranSharkyBuild(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, IChatManager chatManager, UnitCountService unitCountService) : base(buildOptions, macroData, activeUnitData, attackData, chatManager, unitCountService)
+        public TerranSharkyBuild(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, UnitCountService unitCountService) : base(buildOptions, macroData, activeUnitData, attackData, chatService, unitCountService)
         {
         }
     }

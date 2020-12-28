@@ -1,5 +1,5 @@
 ﻿using SC2APIProtocol;
-using Sharky.Managers;
+using Sharky.Chat;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,11 +8,11 @@ namespace Sharky.Builds.BuildChoosing
 {
     public class BuildDecisionService : IBuildDecisionService
     {
-        IChatManager ChatManager;
+       ChatService ChatService;
 
-        public BuildDecisionService(IChatManager chatManager)
+        public BuildDecisionService(ChatService chatService)
         {
-            ChatManager = chatManager;
+            ChatService = chatService;
         }
 
         private bool BetterBuild(Record original, Record current)

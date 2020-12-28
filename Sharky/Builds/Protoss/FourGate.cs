@@ -1,5 +1,6 @@
 ﻿using SC2APIProtocol;
 using Sharky.Builds.BuildChoosing;
+using Sharky.Chat;
 using Sharky.Managers;
 using System.Collections.Generic;
 
@@ -11,8 +12,8 @@ namespace Sharky.Builds.Protoss
 
         bool OpeningAttackChatSent;
 
-        public FourGate(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, IChatManager chatManager, ChronoData chronoData, UnitDataManager unitDataManager, ICounterTransitioner counterTransitioner, UnitCountService unitCountService) 
-            : base(buildOptions, macroData, activeUnitData, attackData, chatManager, chronoData, counterTransitioner, unitCountService)
+        public FourGate(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, ChronoData chronoData, UnitDataManager unitDataManager, ICounterTransitioner counterTransitioner, UnitCountService unitCountService) 
+            : base(buildOptions, macroData, activeUnitData, attackData, chatService, chronoData, counterTransitioner, unitCountService)
         {
             UnitDataManager = unitDataManager;
 
@@ -144,7 +145,7 @@ namespace Sharky.Builds.Protoss
 
             if (!OpeningAttackChatSent && MacroData.FoodArmy > 10)
             {
-                ChatManager.SendChatType("FourGate-FirstAttack");
+                ChatService.SendChatType("FourGate-FirstAttack");
                 OpeningAttackChatSent = true;
             }
         }

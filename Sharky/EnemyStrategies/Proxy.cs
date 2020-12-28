@@ -1,4 +1,5 @@
-﻿using Sharky.Managers;
+﻿using Sharky.Chat;
+using Sharky.Managers;
 using System;
 using System.Linq;
 using System.Numerics;
@@ -9,10 +10,10 @@ namespace Sharky.EnemyStrategies
     {
         TargetingData TargetingData;
 
-        public Proxy(EnemyStrategyHistory enemyStrategyHistory, IChatManager chatManager, ActiveUnitData activeUnitData, SharkyOptions sharkyOptions, TargetingData targetingData, DebugManager debugManager, UnitCountService unitCountService)
+        public Proxy(EnemyStrategyHistory enemyStrategyHistory, ChatService chatService, ActiveUnitData activeUnitData, SharkyOptions sharkyOptions, TargetingData targetingData, DebugManager debugManager, UnitCountService unitCountService)
         {
             EnemyStrategyHistory = enemyStrategyHistory;
-            ChatManager = chatManager;
+            ChatService = chatService;
             ActiveUnitData = activeUnitData;
             SharkyOptions = sharkyOptions;
             TargetingData = targetingData;

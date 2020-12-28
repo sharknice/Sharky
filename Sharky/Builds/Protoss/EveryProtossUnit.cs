@@ -1,14 +1,13 @@
 ﻿using SC2APIProtocol;
 using Sharky.Builds.BuildChoosing;
-using Sharky.Managers;
-using Sharky.Managers.Protoss;
+using Sharky.Chat;
 using System.Collections.Generic;
 
 namespace Sharky.Builds.Protoss
 {
     public class EveryProtossUnit : ProtossSharkyBuild
     {
-        public EveryProtossUnit(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, IChatManager chatManager, ChronoData chronoData, ICounterTransitioner counterTransitioner, UnitCountService unitCountService) : base(buildOptions, macroData, activeUnitData, attackData, chatManager, chronoData, counterTransitioner, unitCountService)
+        public EveryProtossUnit(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, ChronoData chronoData, ICounterTransitioner counterTransitioner, UnitCountService unitCountService) : base(buildOptions, macroData, activeUnitData, attackData, chatService, chronoData, counterTransitioner, unitCountService)
         {
         }
 

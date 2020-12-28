@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using Sharky.Chat;
 using Sharky.Managers;
 using Sharky.MicroControllers;
 using Sharky.MicroControllers.Protoss;
@@ -23,7 +24,7 @@ namespace Sharky.MicroTasks.Proxy
         DebugManager DebugManager;
         UnitDataManager UnitDataManager;
         ActiveUnitData ActiveUnitData;
-        IChatManager ChatManager;
+        ChatService ChatService;
 
         float lastFrameTime;
 
@@ -38,7 +39,7 @@ namespace Sharky.MicroTasks.Proxy
         float InsideBaseDistanceSquared { get; set; }
         int PickupRangeSquared { get; set; }
 
-        public WarpPrismElevatorTask(TargetingData targetingData, IMicroController microController, WarpPrismMicroController warpPrismMicroController, ProxyLocationService proxyLocationService, MapDataService mapDataService, DebugManager debugManager, UnitDataManager unitDataManager, ActiveUnitData activeUnitData, IChatManager chatManager, List<DesiredUnitsClaim> desiredUnitsClaims, float priority, bool enabled = true)
+        public WarpPrismElevatorTask(TargetingData targetingData, IMicroController microController, WarpPrismMicroController warpPrismMicroController, ProxyLocationService proxyLocationService, MapDataService mapDataService, DebugManager debugManager, UnitDataManager unitDataManager, ActiveUnitData activeUnitData, ChatService chatService, List<DesiredUnitsClaim> desiredUnitsClaims, float priority, bool enabled = true)
         {
             TargetingData = targetingData;
             MicroController = microController;
@@ -147,7 +148,7 @@ namespace Sharky.MicroTasks.Proxy
             if (MapDataService.SelfVisible(TargetLocatoin) && !ActiveUnitData.EnemyUnits.Any(e => Vector2.DistanceSquared(new Vector2(TargetLocatoin.X, TargetLocatoin.Y), new Vector2(e.Value.Unit.Pos.X, e.Value.Unit.Pos.Y)) < 100))
             {
                 Disable();
-                ChatManager.SendChatType("WarpPrismElevatorTask-TaskCompleted");
+                ChatService.SendChatType("WarpPrismElevatorTask-TaskCompleted");
             }
         }
 

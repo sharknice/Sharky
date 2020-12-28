@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using Sharky.Chat;
 using Sharky.Managers;
 using Sharky.MicroTasks;
 
@@ -11,7 +12,8 @@ namespace Sharky.Builds.Terran
         ProxyScoutTask ProxyScoutTask;
         bool Scouted;
 
-        public EveryTerranUnit(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, IChatManager chatManager, MicroManager microManager, UnitCountService unitCountService) : base(buildOptions, macroData, activeUnitData, attackData, chatManager, unitCountService)
+        public EveryTerranUnit(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, MicroManager microManager, UnitCountService unitCountService) 
+            : base(buildOptions, macroData, activeUnitData, attackData, chatService, unitCountService)
         {
             MicroManager = microManager;
             Scouted = false;

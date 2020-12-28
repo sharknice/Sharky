@@ -9,12 +9,11 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using Action = SC2APIProtocol.Action;
 
 namespace Sharky.Managers
 {
-    public class ChatManager : SharkyManager, IChatManager
+    public class ChatManager : SharkyManager
     {
         HttpClient HttpClient;
         ChatHistory ChatHistory;
@@ -22,8 +21,8 @@ namespace Sharky.Managers
         IChatDataService ChatDataService;
         IEnemyPlayerService EnemyPlayerManager;
         IEnemyNameService EnemyNameService;
-
-        List<Action> ChatActions;
+        ChatService ChatService;
+        ActiveChatData ActiveChatData;
 
         Dictionary<TypeEnum, int> LastResponseTimes;
         Dictionary<TypeEnum, int> ChatTypeFrequencies;
@@ -31,16 +30,14 @@ namespace Sharky.Managers
         string ConversationName;
         private PlayerInfo Self;
         private PlayerInfo Enemy;
-        string EnemyName;
         bool GreetingSent;
 
-        double TimeModulation;
         long LastFrameTime;
         double RuntimeFrameRate;
 
         bool ApiEnabled;
 
-        public ChatManager(HttpClient httpClient, ChatHistory chatHistory, SharkyOptions sharkyOptions, IChatDataService chatDataService, IEnemyPlayerService enemyPlayerManager, IEnemyNameService enemyNameService)
+        public ChatManager(HttpClient httpClient, ChatHistory chatHistory, SharkyOptions sharkyOptions, IChatDataService chatDataService, IEnemyPlayerService enemyPlayerManager, IEnemyNameService enemyNameService, ChatService chatService, ActiveChatData activeChatData)
         {
             HttpClient = httpClient;
             ChatHistory = chatHistory;
@@ -48,6 +45,8 @@ namespace Sharky.Managers
             ChatDataService = chatDataService;
             EnemyPlayerManager = enemyPlayerManager;
             EnemyNameService = enemyNameService;
+            ChatService = chatService;
+            ActiveChatData = activeChatData;
 
             ApiEnabled = false;
             
@@ -61,20 +60,20 @@ namespace Sharky.Managers
 
         public override void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)
         {
-            TimeModulation = 1;
+            ActiveChatData.TimeModulation = 1;
             LastFrameTime = 0;
             RuntimeFrameRate = SharkyOptions.FramesPerSecond;
 
             GreetingSent = false;
 
-            ChatActions = new List<Action>();
+            ActiveChatData.ChatActions = new List<Action>();
 
             Self = gameInfo.PlayerInfo[(int)observation.Observation.PlayerCommon.PlayerId - 1];
             Enemy = gameInfo.PlayerInfo[2 - (int)observation.Observation.PlayerCommon.PlayerId];
 
             ConversationName = $"starcraft-{Enemy.PlayerId}-{DateTimeOffset.Now.ToUnixTimeMilliseconds()}";
 
-            EnemyName = EnemyNameService.GetEnemyNameFromId(opponentId, EnemyPlayerManager.Enemies);
+            ActiveChatData.EnemyName = EnemyNameService.GetEnemyNameFromId(opponentId, EnemyPlayerManager.Enemies);
 
             ChatHistory.EnemyChatHistory = new Dictionary<int, string>();
             ChatHistory.MyChatHistory = new Dictionary<int, string>();
@@ -87,7 +86,7 @@ namespace Sharky.Managers
 
             if (!GreetingSent && observation.Observation.GameLoop > 20)
             {
-                SendChatType($"{EnemyName}-Greeting");
+                ChatService.SendChatType($"{ActiveChatData.EnemyName}-Greeting");
                 GreetingSent = true;
             }
 
@@ -99,72 +98,9 @@ namespace Sharky.Managers
             if (LastFrameTime != 0)
             {
                 RuntimeFrameRate = 1000.0 / (DateTimeOffset.Now.ToUnixTimeMilliseconds() - LastFrameTime);
-                TimeModulation = RuntimeFrameRate / SharkyOptions.FramesPerSecond;
+                ActiveChatData.TimeModulation = RuntimeFrameRate / SharkyOptions.FramesPerSecond;
             }
             LastFrameTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-        }
-
-        public async void SendChatType(string chatType, bool instant = false)
-        {
-            var data = ChatDataService.GetChatTypeData(chatType);
-
-            if (data != null)
-            {
-                var messages = ChatDataService.GetChatTypeMessage(data, EnemyName);
-                SendChatMessages(messages);
-            }
-        }
-
-        public async void SendChatMessage(string message, bool instant = false)
-        {
-            if (instant)
-            {
-                SendInstantChatMessage(message);
-            }
-            else
-            {
-                SendChatMessages(new List<string> { message });
-            }
-        }
-
-        public async void SendChatMessages(IEnumerable<string> messages)
-        {
-            var typeTime = 0;
-            foreach (var message in messages)
-            {
-                var chatAction = new Action { ActionChat = new ActionChat { Message = message } };
-
-                typeTime += message.Length * 80; // simulate typing at 80 ms per keystroke
-                // translate framerate to real
-                await Task.Delay((int)(typeTime / TimeModulation)).ContinueWith((task) => { ChatActions.Add(chatAction); });
-            }
-        }
-
-        public async void SendDebugChatMessage(string message)
-        {
-            SendDebugChatMessages(new List<string> { message });
-        }
-
-        public async void SendDebugChatMessages(IEnumerable<string> messages)
-        {
-            if (SharkyOptions.Debug)
-            {
-                var typeTime = 0;
-                foreach (var message in messages)
-                {
-                    var chatAction = new Action { ActionChat = new ActionChat { Message = message, Channel = ActionChat.Types.Channel.Team } };
-
-                    typeTime += message.Length * 80; // simulate typing at 80 ms per keystroke
-                                                     // translate framerate to real
-                    await Task.Delay((int)(typeTime / TimeModulation)).ContinueWith((task) => { ChatActions.Add(chatAction); });
-                }
-            }
-        }
-
-        void SendInstantChatMessage(string message)
-        {
-            var chatAction = new Action { ActionChat = new ActionChat { Message = message } };
-            ChatActions.Add(chatAction);
         }
 
         private async void ObserveChatAsync(RepeatedField<ChatReceived> chatsReceived, int frame)
@@ -185,9 +121,9 @@ namespace Sharky.Managers
                 {
                     Console.WriteLine($"{frame} enemy chat: {chatReceived.Message}");
                     ChatHistory.EnemyChatHistory[frame] = chatReceived.Message;
-                    if (string.IsNullOrEmpty(EnemyName))
+                    if (string.IsNullOrEmpty(ActiveChatData.EnemyName))
                     {
-                        EnemyName = EnemyNameService.GetNameFromChat(chat.message, EnemyPlayerManager.Enemies);
+                        ActiveChatData.EnemyName = EnemyNameService.GetNameFromChat(chat.message, EnemyPlayerManager.Enemies);
                     }
                     GetChatResponseAsync(chat, frame);
                 }
@@ -197,8 +133,8 @@ namespace Sharky.Managers
 
         private List<Action> PopChatActions()
         {
-            var poppedActions = new List<Action>(ChatActions);
-            ChatActions = new List<Action>();
+            var poppedActions = new List<Action>(ActiveChatData.ChatActions);
+            ActiveChatData.ChatActions = new List<Action>();
             return poppedActions;
         }
 
@@ -241,8 +177,8 @@ namespace Sharky.Managers
                     {
                         chatData.LastResponseFrame = frame;
                         LastResponseTimes[chatData.Type] = frame;
-                        var message = ChatDataService.GetChatMessage(chatData, matchData, EnemyName);
-                        SendChatMessages(message);
+                        var message = ChatDataService.GetChatMessage(chatData, matchData, ActiveChatData.EnemyName);
+                        ChatService.SendChatMessages(message);
                         return true;
                     }
                 }
@@ -276,7 +212,7 @@ namespace Sharky.Managers
 
                     if (chatResponse.confidence > .5)
                     {
-                        SendChatMessages(chatResponse.response);
+                        ChatService.SendChatMessages(chatResponse.response);
                     }
                 }
                 catch (Exception)

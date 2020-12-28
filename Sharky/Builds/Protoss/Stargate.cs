@@ -1,14 +1,14 @@
 ﻿using SC2APIProtocol;
 using Sharky.Builds.BuildChoosing;
-using Sharky.Managers;
-using Sharky.Managers.Protoss;
+using Sharky.Chat;
 
 namespace Sharky.Builds.Protoss
 {
     public class Stargate : ProtossSharkyBuild
     {
 
-        public Stargate(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, IChatManager chatManager, ChronoData chronoData, ICounterTransitioner counterTransitioner, UnitCountService unitCountService) : base(buildOptions, macroData, activeUnitData, attackData, chatManager, chronoData, counterTransitioner, unitCountService)
+        public Stargate(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, ChronoData chronoData, ICounterTransitioner counterTransitioner, UnitCountService unitCountService) 
+            : base(buildOptions, macroData, activeUnitData, attackData, chatService, chronoData, counterTransitioner, unitCountService)
         {
         }
 

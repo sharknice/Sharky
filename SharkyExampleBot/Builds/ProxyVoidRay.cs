@@ -2,8 +2,8 @@
 using Sharky;
 using Sharky.Builds;
 using Sharky.Builds.BuildChoosing;
+using Sharky.Chat;
 using Sharky.Managers;
-using Sharky.Managers.Protoss;
 using Sharky.MicroControllers;
 using Sharky.MicroTasks;
 using Sharky.Proxy;
@@ -25,8 +25,8 @@ namespace SharkyExampleBot.Builds
 
         ProxyTask ProxyTask;
 
-        public ProxyVoidRay(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, IChatManager chatManager, ChronoData chronoData, SharkyOptions sharkyOptions, MicroManager microManager, ICounterTransitioner counterTransitioner, UnitDataManager unitDataManager, ProxyLocationService proxyLocationService, DebugManager debugManager, UnitCountService unitCountService, IIndividualMicroController probeMicroController) 
-            : base(buildOptions, macroData, activeUnitData, attackData, chatManager, chronoData, counterTransitioner, unitCountService)
+        public ProxyVoidRay(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, ChronoData chronoData, SharkyOptions sharkyOptions, MicroManager microManager, ICounterTransitioner counterTransitioner, UnitDataManager unitDataManager, ProxyLocationService proxyLocationService, DebugManager debugManager, UnitCountService unitCountService, IIndividualMicroController probeMicroController) 
+            : base(buildOptions, macroData, activeUnitData, attackData, chatService, chronoData, counterTransitioner, unitCountService)
         {
             SharkyOptions = sharkyOptions;
             MicroManager = microManager;
@@ -85,7 +85,7 @@ namespace SharkyExampleBot.Builds
                 AttackData.Attacking = true;
                 if (!OpeningAttackChatSent)
                 {
-                    ChatManager.SendChatType("ProxyVoidRay-FirstAttack");
+                    ChatService.SendChatType("ProxyVoidRay-FirstAttack");
                     OpeningAttackChatSent = true;
                 }
             }
@@ -206,7 +206,7 @@ namespace SharkyExampleBot.Builds
                 {
                     if (!CancelledProxyChatSent)
                     {
-                        ChatManager.SendChatType("ProxyVoidRay-CancelledAttack");
+                        ChatService.SendChatType("ProxyVoidRay-CancelledAttack");
                         CancelledProxyChatSent = true;
                     }
                     transition = true;

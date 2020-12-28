@@ -1,13 +1,14 @@
-﻿using Sharky.Managers;
+﻿using Sharky.Chat;
+using Sharky.Managers;
 
 namespace Sharky.EnemyStrategies.Terran
 {
     public class MassVikings : EnemyStrategy
     {
-        public MassVikings(EnemyStrategyHistory enemyStrategyHistory, IChatManager chatManager, ActiveUnitData activeUnitData, SharkyOptions sharkyOptions, DebugManager debugManager, UnitCountService unitCountService)
+        public MassVikings(EnemyStrategyHistory enemyStrategyHistory, ChatService chatService, ActiveUnitData activeUnitData, SharkyOptions sharkyOptions, DebugManager debugManager, UnitCountService unitCountService)
         {
             EnemyStrategyHistory = enemyStrategyHistory;
-            ChatManager = chatManager;
+            ChatService = chatService;
             ActiveUnitData = activeUnitData;
             SharkyOptions = sharkyOptions;
             DebugManager = debugManager;

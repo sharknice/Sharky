@@ -1,5 +1,5 @@
 ﻿using SC2APIProtocol;
-using Sharky.Managers;
+using Sharky.Chat;
 using System;
 using System.Collections.Generic;
 
@@ -11,16 +11,16 @@ namespace Sharky.Builds
         protected MacroData MacroData;
         protected ActiveUnitData ActiveUnitData;
         protected AttackData AttackData;
-        protected IChatManager ChatManager;
+        protected ChatService ChatService;
         protected UnitCountService UnitCountService;
 
-        public SharkyBuild(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, IChatManager chatManager, UnitCountService unitCountService)
+        public SharkyBuild(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, UnitCountService unitCountService)
         {
             BuildOptions = buildOptions;
             MacroData = macroData;
             ActiveUnitData = activeUnitData;
             AttackData = attackData;
-            ChatManager = chatManager;
+            ChatService = chatService;
             UnitCountService = unitCountService;
         }
 

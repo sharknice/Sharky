@@ -43,7 +43,7 @@ namespace Sharky.DefaultBot
         public TargetingManager TargetingManager { get; set; }
         public MacroManager MacroManager { get; set; }
         public NexusManager NexusManager { get; set; }
-        public IChatManager ChatManager { get; set; }
+        public ChatManager ChatManager { get; set; }
         public MicroManager MicroManager { get; set; }
         public EnemyStrategyManager EnemyStrategyManager { get; set; }
         public BuildManager BuildManager { get; set; }
@@ -70,6 +70,7 @@ namespace Sharky.DefaultBot
         public UnitCountService UnitCountService { get; set; }
         public DamageService DamageService { get; set; }
         public TargetingService TargetingService { get; set; }
+        public ChatService ChatService { get; set; }
 
         public ActiveUnitData ActiveUnitData { get; set; }
         public MapData MapData { get; set; }
@@ -102,6 +103,7 @@ namespace Sharky.DefaultBot
         public ChronoData ChronoData { get; set; }
         public TargetingData TargetingData { get; set; }
         public BaseData BaseData { get; set; }
+        public ActiveChatData ActiveChatData { get; set; }
 
         public DefaultSharkyBot(GameConnection gameConnection)
         {
@@ -117,6 +119,7 @@ namespace Sharky.DefaultBot
             AttackData = new AttackData { ArmyFoodAttack = 30, ArmyFoodRetreat = 25, Attacking = false, UseAttackDataManager = true, CustomAttackFunction = true };
             TargetingData = new TargetingData();
             BaseData = new BaseData();
+            ActiveChatData = new ActiveChatData();
 
             Managers = new List<IManager>();
 
@@ -181,7 +184,8 @@ namespace Sharky.DefaultBot
             ChatDataService = new ChatDataService();
             EnemyNameService = new EnemyNameService();
             EnemyPlayerService = new EnemyPlayerService(EnemyNameService);
-            ChatManager = new ChatManager(HttpClient, ChatHistory, SharkyOptions, ChatDataService, EnemyPlayerService, EnemyNameService);
+            ChatService = new ChatService(ChatDataService, SharkyOptions, ActiveChatData);
+            ChatManager = new ChatManager(HttpClient, ChatHistory, SharkyOptions, ChatDataService, EnemyPlayerService, EnemyNameService, ChatService, ActiveChatData);
             Managers.Add((IManager)ChatManager);
 
             ProxyLocationService = new ProxyLocationService(BaseData, TargetingData, SharkyPathFinder, MapDataService);
@@ -265,14 +269,14 @@ namespace Sharky.DefaultBot
             EnemyStrategyHistory = new EnemyStrategyHistory();
             EnemyStrategies = new Dictionary<string, IEnemyStrategy>
             {
-                ["Proxy"] = new EnemyStrategies.Proxy(EnemyStrategyHistory, ChatManager, ActiveUnitData, SharkyOptions, TargetingData, DebugManager, UnitCountService),
-                ["WorkerRush"] = new WorkerRush(EnemyStrategyHistory, ChatManager, ActiveUnitData, SharkyOptions, TargetingData, DebugManager, UnitCountService),
-                ["InvisibleAttacks"] = new InvisibleAttacks(EnemyStrategyHistory, ChatManager, ActiveUnitData, SharkyOptions, DebugManager, UnitCountService),
-                ["AdeptRush"] = new AdeptRush(EnemyStrategyHistory, ChatManager, ActiveUnitData, SharkyOptions, DebugManager, UnitCountService),
-                ["CannonRush"] = new CannonRush(EnemyStrategyHistory, ChatManager, ActiveUnitData, SharkyOptions, TargetingData, DebugManager, UnitCountService),
-                ["MarineRush"] = new MarineRush(EnemyStrategyHistory, ChatManager, ActiveUnitData, SharkyOptions, DebugManager, UnitCountService),
-                ["MassVikings"] = new MassVikings(EnemyStrategyHistory, ChatManager, ActiveUnitData, SharkyOptions, DebugManager, UnitCountService),
-                ["ZerglingRush"] = new ZerglingRush(EnemyStrategyHistory, ChatManager, ActiveUnitData, SharkyOptions, DebugManager, UnitCountService)
+                ["Proxy"] = new EnemyStrategies.Proxy(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, TargetingData, DebugManager, UnitCountService),
+                ["WorkerRush"] = new WorkerRush(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, TargetingData, DebugManager, UnitCountService),
+                ["InvisibleAttacks"] = new InvisibleAttacks(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, DebugManager, UnitCountService),
+                ["AdeptRush"] = new AdeptRush(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, DebugManager, UnitCountService),
+                ["CannonRush"] = new CannonRush(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, TargetingData, DebugManager, UnitCountService),
+                ["MarineRush"] = new MarineRush(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, DebugManager, UnitCountService),
+                ["MassVikings"] = new MassVikings(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, DebugManager, UnitCountService),
+                ["ZerglingRush"] = new ZerglingRush(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, DebugManager, UnitCountService)
             };
 
             EnemyStrategyManager = new EnemyStrategyManager(EnemyStrategies);
@@ -280,12 +284,12 @@ namespace Sharky.DefaultBot
 
             EmptyCounterTransitioner = new EmptyCounterTransitioner(EnemyStrategies, SharkyOptions);
 
-            var antiMassMarine = new AntiMassMarine(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatManager, ChronoData, EmptyCounterTransitioner, UnitCountService);
-            var fourGate = new FourGate(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatManager, ChronoData, UnitDataManager, EmptyCounterTransitioner, UnitCountService);
-            var nexusFirst = new NexusFirst(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatManager, ChronoData, EmptyCounterTransitioner, UnitCountService);
-            var robo = new Robo(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatManager, ChronoData, EnemyRaceManager, MicroManager, EmptyCounterTransitioner, UnitCountService);
-            var protossRobo = new ProtossRobo(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatManager, ChronoData, SharkyOptions, MicroManager, EnemyRaceManager, EmptyCounterTransitioner, UnitCountService);
-            var everyProtossUnit = new EveryProtossUnit(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatManager, ChronoData, EmptyCounterTransitioner, UnitCountService);
+            var antiMassMarine = new AntiMassMarine(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, EmptyCounterTransitioner, UnitCountService);
+            var fourGate = new FourGate(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, UnitDataManager, EmptyCounterTransitioner, UnitCountService);
+            var nexusFirst = new NexusFirst(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, EmptyCounterTransitioner, UnitCountService);
+            var robo = new Robo(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, EnemyRaceManager, MicroManager, EmptyCounterTransitioner, UnitCountService);
+            var protossRobo = new ProtossRobo(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, SharkyOptions, MicroManager, EnemyRaceManager, EmptyCounterTransitioner, UnitCountService);
+            var everyProtossUnit = new EveryProtossUnit(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, EmptyCounterTransitioner, UnitCountService);
 
             var protossBuilds = new Dictionary<string, ISharkyBuild>
             {
@@ -312,9 +316,9 @@ namespace Sharky.DefaultBot
                 ["Transition"] = protossSequences
             };
 
-            var massMarine = new MassMarines(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatManager, UnitCountService);
-            var battleCruisers = new BattleCruisers(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatManager, UnitCountService);
-            var everyTerranUnit = new EveryTerranUnit(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatManager, MicroManager, UnitCountService);
+            var massMarine = new MassMarines(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, UnitCountService);
+            var battleCruisers = new BattleCruisers(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, UnitCountService);
+            var everyTerranUnit = new EveryTerranUnit(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, MicroManager, UnitCountService);
             var terranBuilds = new Dictionary<string, ISharkyBuild>
             {
                 [massMarine.Name()] = massMarine,
@@ -336,8 +340,8 @@ namespace Sharky.DefaultBot
                 ["Transition"] = terranSequences
             };
 
-            var basicZerglingRush = new BasicZerglingRush(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatManager, MicroManager, UnitCountService);
-            var everyZergUnit = new EveryZergUnit(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatManager, UnitCountService);
+            var basicZerglingRush = new BasicZerglingRush(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, MicroManager, UnitCountService);
+            var everyZergUnit = new EveryZergUnit(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, UnitCountService);
             var zergBuilds = new Dictionary<string, ISharkyBuild>
             {
                 [everyZergUnit.Name()] = everyZergUnit,
@@ -364,7 +368,7 @@ namespace Sharky.DefaultBot
                 { Race.Terran, new BuildChoices { Builds = terranBuilds, BuildSequences = terranBuildSequences } },
                 { Race.Zerg, new BuildChoices { Builds = zergBuilds, BuildSequences = zergBuildSequences } }
             };
-            BuildDecisionService = new BuildDecisionService(ChatManager);
+            BuildDecisionService = new BuildDecisionService(ChatService);
             BuildManager = new BuildManager(BuildChoices, DebugManager, MacroBalancer, BuildDecisionService, EnemyPlayerService, ChatHistory, EnemyStrategyHistory);
             Managers.Add(BuildManager);
         }

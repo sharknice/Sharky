@@ -1,4 +1,5 @@
-﻿using Sharky.Managers;
+﻿using Sharky.Chat;
+using Sharky.Managers;
 using System;
 
 namespace Sharky.EnemyStrategies
@@ -8,7 +9,7 @@ namespace Sharky.EnemyStrategies
         public bool Active { get; private set; }
         public bool Detected { get; private set; }
 
-        protected IChatManager ChatManager;
+        protected ChatService ChatService;
         protected EnemyStrategyHistory EnemyStrategyHistory;
         protected ActiveUnitData ActiveUnitData;
         protected SharkyOptions SharkyOptions;
@@ -45,7 +46,7 @@ namespace Sharky.EnemyStrategies
 
         protected void DetectedChat()
         {
-            ChatManager.SendChatType($"{Name()}-EnemyStrategy");
+            ChatService.SendChatType($"{Name()}-EnemyStrategy");
         }
 
         protected abstract bool Detect(int frame);

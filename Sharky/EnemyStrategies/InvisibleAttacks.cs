@@ -1,14 +1,15 @@
-﻿using Sharky.Managers;
+﻿using Sharky.Chat;
+using Sharky.Managers;
 using System.Linq;
 
 namespace Sharky.EnemyStrategies
 {
     class InvisibleAttacks : EnemyStrategy
     {
-        public InvisibleAttacks(EnemyStrategyHistory enemyStrategyHistory, IChatManager chatManager, ActiveUnitData activeUnitData, SharkyOptions sharkyOptions, DebugManager debugManager, UnitCountService unitCountService)
+        public InvisibleAttacks(EnemyStrategyHistory enemyStrategyHistory, ChatService chatService, ActiveUnitData activeUnitData, SharkyOptions sharkyOptions, DebugManager debugManager, UnitCountService unitCountService)
         {
             EnemyStrategyHistory = enemyStrategyHistory;
-            ChatManager = chatManager;
+            ChatService = chatService;
             ActiveUnitData = activeUnitData;
             SharkyOptions = sharkyOptions;
             DebugManager = debugManager;

@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using Sharky.Chat;
 using Sharky.Managers;
 
 namespace Sharky.Builds.Zerg
@@ -7,7 +8,8 @@ namespace Sharky.Builds.Zerg
     {
         MicroManager MicroManager;
 
-        public BasicZerglingRush(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, IChatManager chatManager, MicroManager microManager, UnitCountService unitCountService) : base(buildOptions, macroData, activeUnitData, attackData, chatManager, unitCountService)
+        public BasicZerglingRush(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, MicroManager microManager, UnitCountService unitCountService) 
+            : base(buildOptions, macroData, activeUnitData, attackData, chatService, unitCountService)
         {
             MicroManager = microManager;
         }

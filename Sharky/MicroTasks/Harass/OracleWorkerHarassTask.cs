@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using Sharky.Chat;
 using Sharky.Managers;
 using Sharky.MicroControllers.Protoss;
 using Sharky.Pathing;
@@ -13,7 +14,7 @@ namespace Sharky.MicroTasks
     {
         TargetingData TargetingData;
         BaseData BaseData;
-        IChatManager ChatManager;
+        ChatService ChatService;
         MapDataService MapDataService;
         MapData MapData;
         OracleMicroController OracleMicroController;
@@ -32,11 +33,11 @@ namespace Sharky.MicroTasks
         bool CheeseChatSent;
         int TargetIndex;
 
-        public OracleWorkerHarassTask(TargetingData targetingData, BaseData baseData, IChatManager chatManager, MapDataService mapDataService, MapData mapData, OracleMicroController oracleMicroController, int desiredCount = 1, bool enabled = true, float priority = -1f)
+        public OracleWorkerHarassTask(TargetingData targetingData, BaseData baseData, ChatService chatService, MapDataService mapDataService, MapData mapData, OracleMicroController oracleMicroController, int desiredCount = 1, bool enabled = true, float priority = -1f)
         {
             TargetingData = targetingData;
             BaseData = baseData;
-            ChatManager = chatManager;
+            ChatService = chatService;
             MapDataService = mapDataService;
             MapData = mapData;
             OracleMicroController = oracleMicroController;
@@ -111,7 +112,7 @@ namespace Sharky.MicroTasks
                 {
                     if (!CheeseChatSent)
                     {
-                        ChatManager.SendChatType("OracleHarass-FirstAttack");
+                        ChatService.SendChatType("OracleHarass-FirstAttack");
                         CheeseChatSent = true;
                     }
                     if (!commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.ORACLEWEAPON) && (commander.UnitCalculation.Unit.Energy < 50 || commander.UnitCalculation.Unit.Shield < commander.UnitCalculation.Unit.ShieldMax / 2))
