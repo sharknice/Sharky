@@ -44,7 +44,7 @@ namespace SharkyExampleBot
         static BuildChoices GetProtossBuildChoices(DefaultSharkyBot defaultSharkyBot)
         {
             // we can use this to switch builds mid-game if we detect certain strategies
-            var protossCounterTransitioner = new ProtossCounterTransitioner(defaultSharkyBot.EnemyStrategyManager, defaultSharkyBot.SharkyOptions);
+            var protossCounterTransitioner = new ProtossCounterTransitioner(defaultSharkyBot.EnemyData, defaultSharkyBot.SharkyOptions);
 
             // a probe microcontroller for our proxy builds
             var probeMicroController = new IndividualMicroController(defaultSharkyBot.MapDataService, defaultSharkyBot.UnitDataManager, defaultSharkyBot.ActiveUnitData, defaultSharkyBot.DebugService, defaultSharkyBot.SharkyPathFinder, defaultSharkyBot.BaseData, defaultSharkyBot.SharkyOptions, defaultSharkyBot.DamageService, MicroPriority.JustLive, false);

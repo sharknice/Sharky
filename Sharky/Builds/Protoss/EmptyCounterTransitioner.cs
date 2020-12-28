@@ -1,17 +1,16 @@
 ﻿using Sharky.Builds.BuildChoosing;
-using Sharky.EnemyStrategies;
 using System.Collections.Generic;
 
 namespace Sharky.Builds.Protoss
 {
     public class EmptyCounterTransitioner : ICounterTransitioner
     {
-        Dictionary<string, IEnemyStrategy> EnemyStrategies;
+        EnemyData EnemyData;
         SharkyOptions SharkyOptions;
 
-        public EmptyCounterTransitioner(Dictionary<string, IEnemyStrategy> enemyStrategies, SharkyOptions sharkyOptions)
+        public EmptyCounterTransitioner(EnemyData enemyData, SharkyOptions sharkyOptions)
         {
-            EnemyStrategies = enemyStrategies;
+            EnemyData = enemyData;
             SharkyOptions = sharkyOptions;
         }
 

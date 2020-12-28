@@ -1,24 +1,23 @@
 ﻿using Sharky;
 using Sharky.Builds.BuildChoosing;
-using Sharky.Managers;
 using System.Collections.Generic;
 
 namespace SharkyExampleBot
 {
     public class ProtossCounterTransitioner : ICounterTransitioner
     {
-        EnemyStrategyManager EnemyStrategyManager;
+        EnemyData EnemyData;
         SharkyOptions SharkyOptions;
 
-        public ProtossCounterTransitioner(EnemyStrategyManager enemyStrategyManager, SharkyOptions sharkyOptions)
+        public ProtossCounterTransitioner(EnemyData enemyData, SharkyOptions sharkyOptions)
         {
-            EnemyStrategyManager = enemyStrategyManager;
+            EnemyData = enemyData;
             SharkyOptions = sharkyOptions;
         }
 
         public List<string> DefaultCounterTransition(int frame)
         {
-            if (EnemyStrategyManager.EnemyStrategies["ZerglingRush"].Active && (frame < SharkyOptions.FramesPerSecond * 5 * 60))
+            if (EnemyData.EnemyStrategies["ZerglingRush"].Active && (frame < SharkyOptions.FramesPerSecond * 5 * 60))
             {
                 return new List<string> { "ZealotRush" };
             }

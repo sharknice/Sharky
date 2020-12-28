@@ -92,7 +92,6 @@ namespace Sharky.DefaultBot
         public IPathFinder SharkySimplePathFinder { get; set; }
         public IPathFinder NoPathFinder { get; set; }
         public EnemyStrategyHistory EnemyStrategyHistory { get; set; }
-        public Dictionary<string, IEnemyStrategy> EnemyStrategies { get; set; }
         public ICounterTransitioner EmptyCounterTransitioner { get; set; }
         public MacroBalancer MacroBalancer { get; set; }
         public Dictionary<Race, BuildChoices> BuildChoices { get; set; }
@@ -271,7 +270,7 @@ namespace Sharky.DefaultBot
             Managers.Add(MacroManager);
 
             EnemyStrategyHistory = new EnemyStrategyHistory();
-            EnemyStrategies = new Dictionary<string, IEnemyStrategy>
+            EnemyData.EnemyStrategies = new Dictionary<string, IEnemyStrategy>
             {
                 ["Proxy"] = new EnemyStrategies.Proxy(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, TargetingData, DebugService, UnitCountService),
                 ["WorkerRush"] = new WorkerRush(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, TargetingData, DebugService, UnitCountService),
@@ -283,10 +282,10 @@ namespace Sharky.DefaultBot
                 ["ZerglingRush"] = new ZerglingRush(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, DebugService, UnitCountService)
             };
 
-            EnemyStrategyManager = new EnemyStrategyManager(EnemyStrategies);
+            EnemyStrategyManager = new EnemyStrategyManager(EnemyData);
             Managers.Add(EnemyStrategyManager);
 
-            EmptyCounterTransitioner = new EmptyCounterTransitioner(EnemyStrategies, SharkyOptions);
+            EmptyCounterTransitioner = new EmptyCounterTransitioner(EnemyData, SharkyOptions);
 
             var antiMassMarine = new AntiMassMarine(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, EmptyCounterTransitioner, UnitCountService);
             var fourGate = new FourGate(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, UnitDataManager, EmptyCounterTransitioner, UnitCountService);
