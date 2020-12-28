@@ -44,7 +44,7 @@ namespace Sharky
             throw new Exception("Unable to make a connection.");
         }
 
-        public async Task CreateGame(String mapName, Race opponentRace, Difficulty opponentDifficulty)
+        public async Task CreateGame(String mapName, Race opponentRace, Difficulty opponentDifficulty, AIBuild aIBuild)
         {
             RequestCreateGame createGame = new RequestCreateGame();
             createGame.Realtime = false;
@@ -64,7 +64,7 @@ namespace Sharky
             player2.Race = opponentRace;
             player2.Type = PlayerType.Computer;
             player2.Difficulty = opponentDifficulty;
-            player2.AiBuild = AIBuild.Rush;
+            player2.AiBuild = aIBuild;
 
             Request request = new Request();
             request.CreateGame = createGame;
@@ -230,12 +230,12 @@ namespace Sharky
             }
         }
         
-        public async Task RunSinglePlayer(ISharkyBot bot, string map, Race myRace, Race opponentRace, Difficulty opponentDifficulty)
+        public async Task RunSinglePlayer(ISharkyBot bot, string map, Race myRace, Race opponentRace, Difficulty opponentDifficulty, AIBuild aIBuild)
         {
             readSettings();
             StartSC2Instance(5678);
             await Connect(5678);
-            await CreateGame(map, opponentRace, opponentDifficulty);
+            await CreateGame(map, opponentRace, opponentDifficulty, aIBuild);
             uint playerId = await JoinGame(myRace);
             await Run(bot, playerId, "test");
         }

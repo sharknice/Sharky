@@ -32,7 +32,7 @@ namespace SharkyExampleBot
             if (args.Length == 0)
             {
                 // if there are no arguments passed we play against a comptuer opponent
-                gameConnection.RunSinglePlayer(sharkyExampleBot, @"AutomatonLE.SC2Map", myRace, Race.Random, Difficulty.VeryHard).Wait();
+                gameConnection.RunSinglePlayer(sharkyExampleBot, @"AutomatonLE.SC2Map", myRace, Race.Random, Difficulty.VeryHard, AIBuild.RandomBuild).Wait();
             }
             else
             {
