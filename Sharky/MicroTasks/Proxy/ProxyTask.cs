@@ -12,7 +12,7 @@ namespace Sharky.MicroTasks
     {
         UnitDataManager UnitDataManager;
         MacroData MacroData;
-        MicroManager MicroManager;
+        MicroTaskData MicroTaskData;
         DebugService DebugService;
         IIndividualMicroController IndividualMicroController;
 
@@ -20,13 +20,13 @@ namespace Sharky.MicroTasks
 
         bool started { get; set; }
 
-        public ProxyTask(UnitDataManager unitDataManager, bool enabled, float priority, MacroData macroData, string proxyName, MicroManager microManager, DebugService debugService, IIndividualMicroController individualMicroController)
+        public ProxyTask(UnitDataManager unitDataManager, bool enabled, float priority, MacroData macroData, string proxyName, MicroTaskData microTaskData, DebugService debugService, IIndividualMicroController individualMicroController)
         {
             UnitDataManager = unitDataManager;
             Priority = priority;
             MacroData = macroData;
             ProxyName = proxyName;
-            MicroManager = microManager;
+           MicroTaskData = microTaskData;
             DebugService = debugService;
             IndividualMicroController = individualMicroController;
 
@@ -36,9 +36,9 @@ namespace Sharky.MicroTasks
 
         public override void Enable()
         {
-            if (MicroManager.MicroTasks.ContainsKey("MiningTask"))
+            if (MicroTaskData.MicroTasks.ContainsKey("MiningTask"))
             {
-                MicroManager.MicroTasks["MiningTask"].ResetClaimedUnits();
+                MicroTaskData.MicroTasks["MiningTask"].ResetClaimedUnits();
             }
             Enabled = true;
             started = false;

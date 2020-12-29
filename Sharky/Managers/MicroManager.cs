@@ -1,5 +1,4 @@
 ﻿using SC2APIProtocol;
-using Sharky.MicroTasks;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -8,13 +7,12 @@ namespace Sharky.Managers
     public class MicroManager : SharkyManager
     {      
         ActiveUnitData ActiveUnitData;
+        MicroTaskData MicroTaskData;
 
-        public Dictionary<string, IMicroTask> MicroTasks;
-
-        public MicroManager(ActiveUnitData activeUnitData, Dictionary<string, IMicroTask> microTasks)
+        public MicroManager(ActiveUnitData activeUnitData, MicroTaskData microTaskData)
         {
             ActiveUnitData = activeUnitData;
-            MicroTasks = microTasks;
+            MicroTaskData = microTaskData;
         }
 
         public override IEnumerable<Action> OnFrame(ResponseObservation observation)
@@ -22,7 +20,7 @@ namespace Sharky.Managers
             var frame = (int)observation.Observation.GameLoop;
 
             var actions = new List<Action>();
-            foreach (var microTask in MicroTasks.Values.Where(m => m.Enabled).OrderBy(m => m.Priority))
+            foreach (var microTask in MicroTaskData.MicroTasks.Values.Where(m => m.Enabled).OrderBy(m => m.Priority))
             {
                 foreach (var tag in ActiveUnitData.DeadUnits)
                 {

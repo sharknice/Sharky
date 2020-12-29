@@ -99,7 +99,7 @@ namespace Sharky.DefaultBot
         public IIndividualMicroController IndividualMicroController { get; set; }
         public MicroData MicroData { get; set; }
         public IMicroController MicroController { get; set; }
-        public Dictionary<string, IMicroTask> MicroTasks { get; set; }
+        public MicroTaskData MicroTaskData { get; set; }
         public ChronoData ChronoData { get; set; }
         public TargetingData TargetingData { get; set; }
         public BaseData BaseData { get; set; }
@@ -249,23 +249,26 @@ namespace Sharky.DefaultBot
             var queenInjectTask = new QueenInjectsTask(ActiveUnitData, 1.1f, UnitCountService);
             var attackTask = new AttackTask(MicroController, TargetingData, ActiveUnitData, DefenseService, MacroData, AttackData, TargetingService, 2);
 
-            MicroTasks = new Dictionary<string, IMicroTask>
+            MicroTaskData = new MicroTaskData
             {
-                [defenseSquadTask.GetType().Name] = defenseSquadTask,
-                [workerScoutTask.GetType().Name] = workerScoutTask,
-                [proxyScoutTask.GetType().Name] = proxyScoutTask,
-                [miningTask.GetType().Name] = miningTask,
-                [queenInjectTask.GetType().Name] = queenInjectTask,
-                [attackTask.GetType().Name] = attackTask
+                MicroTasks = new Dictionary<string, IMicroTask>
+                {
+                    [defenseSquadTask.GetType().Name] = defenseSquadTask,
+                    [workerScoutTask.GetType().Name] = workerScoutTask,
+                    [proxyScoutTask.GetType().Name] = proxyScoutTask,
+                    [miningTask.GetType().Name] = miningTask,
+                    [queenInjectTask.GetType().Name] = queenInjectTask,
+                    [attackTask.GetType().Name] = attackTask
+                }
             };
 
-            MicroManager = new MicroManager(ActiveUnitData, MicroTasks);
+            MicroManager = new MicroManager(ActiveUnitData, MicroTaskData);
             Managers.Add(MicroManager);
 
             AttackDataManager = new AttackDataManager(AttackData, ActiveUnitData, attackTask, TargetPriorityService, TargetingData, MacroData, DebugService);
             Managers.Add(AttackDataManager);
 
-            BuildProxyService = new BuildProxyService(MacroData, BuildingBuilder, UnitDataManager, ActiveUnitData, BaseData, TargetingData, Morpher, MicroManager);
+            BuildProxyService = new BuildProxyService(MacroData, BuildingBuilder, UnitDataManager, ActiveUnitData, BaseData, TargetingData, Morpher, MicroTaskData);
             MacroManager = new MacroManager(MacroSetup, ActiveUnitData, UnitDataManager, BuildingBuilder, SharkyOptions, BaseData, TargetingData, AttackData, WarpInPlacement, MacroData, Morpher, BuildPylonService, BuildDefenseService, BuildProxyService, UnitCountService);
             Managers.Add(MacroManager);
 
@@ -290,8 +293,8 @@ namespace Sharky.DefaultBot
             var antiMassMarine = new AntiMassMarine(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, EmptyCounterTransitioner, UnitCountService);
             var fourGate = new FourGate(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, UnitDataManager, EmptyCounterTransitioner, UnitCountService);
             var nexusFirst = new NexusFirst(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, EmptyCounterTransitioner, UnitCountService);
-            var robo = new Robo(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, EnemyData, MicroManager, EmptyCounterTransitioner, UnitCountService);
-            var protossRobo = new ProtossRobo(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, SharkyOptions, MicroManager, EnemyData, EmptyCounterTransitioner, UnitCountService);
+            var robo = new Robo(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, EnemyData, MicroTaskData, EmptyCounterTransitioner, UnitCountService);
+            var protossRobo = new ProtossRobo(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, SharkyOptions, MicroTaskData, EnemyData, EmptyCounterTransitioner, UnitCountService);
             var everyProtossUnit = new EveryProtossUnit(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, EmptyCounterTransitioner, UnitCountService);
 
             var protossBuilds = new Dictionary<string, ISharkyBuild>
@@ -321,7 +324,7 @@ namespace Sharky.DefaultBot
 
             var massMarine = new MassMarines(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, UnitCountService);
             var battleCruisers = new BattleCruisers(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, UnitCountService);
-            var everyTerranUnit = new EveryTerranUnit(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, MicroManager, UnitCountService);
+            var everyTerranUnit = new EveryTerranUnit(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, MicroTaskData, UnitCountService);
             var terranBuilds = new Dictionary<string, ISharkyBuild>
             {
                 [massMarine.Name()] = massMarine,
@@ -343,7 +346,7 @@ namespace Sharky.DefaultBot
                 ["Transition"] = terranSequences
             };
 
-            var basicZerglingRush = new BasicZerglingRush(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, MicroManager, UnitCountService);
+            var basicZerglingRush = new BasicZerglingRush(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, MicroTaskData, UnitCountService);
             var everyZergUnit = new EveryZergUnit(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, UnitCountService);
             var zergBuilds = new Dictionary<string, ISharkyBuild>
             {

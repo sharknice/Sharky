@@ -1,17 +1,16 @@
 ﻿using SC2APIProtocol;
 using Sharky.Chat;
-using Sharky.Managers;
 
 namespace Sharky.Builds.Zerg
 {
     public class BasicZerglingRush : ZergSharkyBuild
     {
-        MicroManager MicroManager;
+        MicroTaskData MicroTaskData;
 
-        public BasicZerglingRush(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, MicroManager microManager, UnitCountService unitCountService) 
+        public BasicZerglingRush(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, MicroTaskData microTaskData, UnitCountService unitCountService) 
             : base(buildOptions, macroData, activeUnitData, attackData, chatService, unitCountService)
         {
-            MicroManager = microManager;
+           MicroTaskData = microTaskData;
         }
 
         public override void StartBuild(int frame)

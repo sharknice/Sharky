@@ -10,13 +10,13 @@ namespace Sharky.Builds.Protoss
     public class Robo : ProtossSharkyBuild
     {
         EnemyData EnemyData;
-        MicroManager MicroManager;
+        MicroTaskData MicroTaskData;
 
-        public Robo(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, ChronoData chronoData, EnemyData enemyData, MicroManager microManager, ICounterTransitioner counterTransitioner, UnitCountService unitCountService) 
+        public Robo(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, ChronoData chronoData, EnemyData enemyData, MicroTaskData microTaskData, ICounterTransitioner counterTransitioner, UnitCountService unitCountService) 
             : base(buildOptions, macroData, activeUnitData, attackData, chatService, chronoData, counterTransitioner, unitCountService)
         {
             EnemyData = enemyData;
-            MicroManager = microManager;
+           MicroTaskData = microTaskData;
         }
 
         public override void StartBuild(int frame)
@@ -44,15 +44,15 @@ namespace Sharky.Builds.Protoss
                 desiredUnitsClaim = new DesiredUnitsClaim(UnitTypes.PROTOSS_STALKER, 1);
             }
 
-            if (MicroManager.MicroTasks.ContainsKey("DefenseSquadTask"))
+            if (MicroTaskData.MicroTasks.ContainsKey("DefenseSquadTask"))
             {
-                var defenseSquadTask = (DefenseSquadTask)MicroManager.MicroTasks["DefenseSquadTask"];
+                var defenseSquadTask = (DefenseSquadTask)MicroTaskData.MicroTasks["DefenseSquadTask"];
                 defenseSquadTask.DesiredUnitsClaims = new List<DesiredUnitsClaim> { desiredUnitsClaim };
                 defenseSquadTask.Enable();
 
-                if (MicroManager.MicroTasks.ContainsKey("AttackTask"))
+                if (MicroTaskData.MicroTasks.ContainsKey("AttackTask"))
                 {
-                    MicroManager.MicroTasks["AttackTask"].ResetClaimedUnits();
+                    MicroTaskData.MicroTasks["AttackTask"].ResetClaimedUnits();
                 }
             }
         }

@@ -7,15 +7,15 @@ namespace Sharky.Builds.Terran
 {
     public class EveryTerranUnit : TerranSharkyBuild
     {
-        MicroManager MicroManager;
+        MicroTaskData MicroTaskData;
         WorkerScoutTask WorkerScoutTask;
         ProxyScoutTask ProxyScoutTask;
         bool Scouted;
 
-        public EveryTerranUnit(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, MicroManager microManager, UnitCountService unitCountService) 
+        public EveryTerranUnit(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, MicroTaskData microTaskData, UnitCountService unitCountService) 
             : base(buildOptions, macroData, activeUnitData, attackData, chatService, unitCountService)
         {
-            MicroManager = microManager;
+           MicroTaskData = microTaskData;
             Scouted = false;
         }
 
@@ -31,13 +31,13 @@ namespace Sharky.Builds.Terran
             MacroData.DesiredUnitCounts[UnitTypes.ZERG_DRONE] = 10;
             MacroData.DesiredUnitCounts[UnitTypes.ZERG_OVERLORD] = 1;
 
-            if (MicroManager.MicroTasks.ContainsKey("WorkerScoutTask"))
+            if (MicroTaskData.MicroTasks.ContainsKey("WorkerScoutTask"))
             {
-                WorkerScoutTask = (WorkerScoutTask)MicroManager.MicroTasks["WorkerScoutTask"];
+                WorkerScoutTask = (WorkerScoutTask)MicroTaskData.MicroTasks["WorkerScoutTask"];
             }
-            if (MicroManager.MicroTasks.ContainsKey("ProxyScoutTask"))
+            if (MicroTaskData.MicroTasks.ContainsKey("ProxyScoutTask"))
             {
-                ProxyScoutTask = (ProxyScoutTask)MicroManager.MicroTasks["ProxyScoutTask"];
+                ProxyScoutTask = (ProxyScoutTask)MicroTaskData.MicroTasks["ProxyScoutTask"];
             }
         }
 
