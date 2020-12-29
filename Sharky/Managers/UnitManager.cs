@@ -10,29 +10,31 @@ namespace Sharky.Managers
 {
     public class UnitManager : SharkyManager
     {
-        UnitDataManager UnitDataManager;
+        SharkyUnitData SharkyUnitData;
         SharkyOptions SharkyOptions;
         TargetPriorityService TargetPriorityService;
         CollisionCalculator CollisionCalculator;
         MapDataService MapDataService;
         DebugService DebugService;
         DamageService DamageService;
+        UnitDataService UnitDataService;
 
         float NearbyDistance = 25;
 
         ActiveUnitData ActiveUnitData;
 
-        public UnitManager(ActiveUnitData activeUnitData, UnitDataManager unitDataManager, SharkyOptions sharkyOptions, TargetPriorityService targetPriorityService, CollisionCalculator collisionCalculator, MapDataService mapDataService, DebugService debugService, DamageService damageService)
+        public UnitManager(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, SharkyOptions sharkyOptions, TargetPriorityService targetPriorityService, CollisionCalculator collisionCalculator, MapDataService mapDataService, DebugService debugService, DamageService damageService, UnitDataService unitDataService)
         {
             ActiveUnitData = activeUnitData;
 
-            UnitDataManager = unitDataManager;
+            SharkyUnitData = sharkyUnitData;
             SharkyOptions = sharkyOptions;
             TargetPriorityService = targetPriorityService;
             CollisionCalculator = collisionCalculator;
             MapDataService = mapDataService;
             DebugService = debugService;
             DamageService = damageService;
+            UnitDataService = unitDataService;
 
             ActiveUnitData.EnemyUnits = new ConcurrentDictionary<ulong, UnitCalculation>();
             ActiveUnitData.SelfUnits = new ConcurrentDictionary<ulong, UnitCalculation>();
@@ -96,7 +98,7 @@ namespace Sharky.Managers
                 if (unit.Alliance == Alliance.Enemy)
                 {
                     var repairingUnitCount = repairers.Where(u => u.Alliance == Alliance.Enemy && Vector2.DistanceSquared(new Vector2(u.Pos.X, u.Pos.Y), new Vector2(unit.Pos.X, unit.Pos.Y)) < (1.0 + u.Radius + unit.Radius) * (0.1 + u.Radius + unit.Radius)).Count();
-                    var attack = new UnitCalculation(unit, unit, repairingUnitCount, UnitDataManager, SharkyOptions);
+                    var attack = new UnitCalculation(unit, unit, repairingUnitCount, SharkyUnitData, SharkyOptions, UnitDataService);
                     if (ActiveUnitData.EnemyUnits.TryGetValue(unit.Tag, out UnitCalculation existing))
                     {
                         attack.PreviousUnit = existing.Unit;
@@ -105,7 +107,7 @@ namespace Sharky.Managers
                 }
                 else if (unit.Alliance == Alliance.Self)
                 {
-                    var attack = new UnitCalculation(unit, unit, 0, UnitDataManager, SharkyOptions);
+                    var attack = new UnitCalculation(unit, unit, 0, SharkyUnitData, SharkyOptions, UnitDataService);
                     if (ActiveUnitData.SelfUnits.TryGetValue(unit.Tag, out UnitCalculation existing))
                     {
                         attack.PreviousUnit = existing.Unit;
@@ -114,7 +116,7 @@ namespace Sharky.Managers
                 }
                 else if (unit.Alliance == Alliance.Neutral)
                 {
-                    var attack = new UnitCalculation(unit, unit, 0, UnitDataManager, SharkyOptions);
+                    var attack = new UnitCalculation(unit, unit, 0, SharkyUnitData, SharkyOptions, UnitDataService);
                     if (ActiveUnitData.NeutralUnits.TryGetValue(unit.Tag, out UnitCalculation existing))
                     {
                         attack.PreviousUnit = existing.Unit;

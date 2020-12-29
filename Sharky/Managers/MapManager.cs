@@ -13,7 +13,7 @@ namespace Sharky.Managers
         ActiveUnitData ActiveUnitData;
         MapData MapData;
         SharkyOptions SharkyOptions;
-        UnitDataManager UnitDataManager;
+        SharkyUnitData SharkyUnitData;
 
         private int LastBuildingCount;
         private int LastVisibleEnemyUnitCount;
@@ -21,12 +21,12 @@ namespace Sharky.Managers
         private readonly int MillisecondsPerUpdate;
         private double MillisecondsUntilUpdate;
 
-        public MapManager(MapData mapData, ActiveUnitData activeUnitData, SharkyOptions sharkyOptions, UnitDataManager unitDataManager)
+        public MapManager(MapData mapData, ActiveUnitData activeUnitData, SharkyOptions sharkyOptions, SharkyUnitData sharkyUnitData)
         {
             MapData = mapData;
             ActiveUnitData = activeUnitData;
             SharkyOptions = sharkyOptions;
-            UnitDataManager = unitDataManager;
+            SharkyUnitData = sharkyUnitData;
 
             LastBuildingCount = 0;
             LastVisibleEnemyUnitCount = 0;
@@ -129,7 +129,7 @@ namespace Sharky.Managers
                 }
             }
 
-            foreach (var scan in UnitDataManager.Effects.Where(e => e.EffectId == (uint)Effects.SCAN))
+            foreach (var scan in SharkyUnitData.Effects.Where(e => e.EffectId == (uint)Effects.SCAN))
             {
                 var nodes = GetNodesInRange(new Point { X = scan.Pos[0].X, Y = scan.Pos[0].Y, Z = 1 }, scan.Radius + 2, MapData.MapWidth, MapData.MapHeight);
                 foreach (var node in nodes)

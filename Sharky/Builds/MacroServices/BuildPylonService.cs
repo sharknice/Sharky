@@ -1,5 +1,4 @@
 ﻿using SC2APIProtocol;
-using Sharky.Managers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -10,18 +9,18 @@ namespace Sharky.Builds.MacroServices
     {
         MacroData MacroData;
         IBuildingBuilder BuildingBuilder;
-        UnitDataManager UnitDataManager;
+        SharkyUnitData SharkyUnitData;
         ActiveUnitData ActiveUnitData;
         BaseData BaseData;
         TargetingData TargetingData;
 
         int defensivePointLastFailFrame;
 
-        public BuildPylonService(MacroData macroData, IBuildingBuilder buildingBuilder, UnitDataManager unitDataManager, ActiveUnitData activeUnitData, BaseData baseData, TargetingData targetingData)
+        public BuildPylonService(MacroData macroData, IBuildingBuilder buildingBuilder, SharkyUnitData sharkyUnitData, ActiveUnitData activeUnitData, BaseData baseData, TargetingData targetingData)
         {
             MacroData = macroData;
             BuildingBuilder = buildingBuilder;
-            UnitDataManager = unitDataManager;
+            SharkyUnitData = sharkyUnitData;
             ActiveUnitData = activeUnitData;
             BaseData = baseData;
             TargetingData = targetingData;
@@ -31,7 +30,7 @@ namespace Sharky.Builds.MacroServices
 
         public SC2APIProtocol.Action BuildPylon(Point2D location, bool ignoreMineralProximity = false, float maxDistance = 50)
         {
-            var unitData = UnitDataManager.BuildingData[UnitTypes.PROTOSS_PYLON];
+            var unitData = SharkyUnitData.BuildingData[UnitTypes.PROTOSS_PYLON];
             return BuildingBuilder.BuildBuilding(MacroData, UnitTypes.PROTOSS_PYLON, unitData, location, ignoreMineralProximity, maxDistance);
         }
 
@@ -39,7 +38,7 @@ namespace Sharky.Builds.MacroServices
         {
             var commands = new List<SC2APIProtocol.Action>();
 
-            var unitData = UnitDataManager.BuildingData[UnitTypes.PROTOSS_PYLON];
+            var unitData = SharkyUnitData.BuildingData[UnitTypes.PROTOSS_PYLON];
 
             var orderedBuildings = ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
             foreach (var baseLocation in BaseData.SelfBases)
@@ -69,7 +68,7 @@ namespace Sharky.Builds.MacroServices
         {
             var commands = new List<SC2APIProtocol.Action>();
 
-            var unitData = UnitDataManager.BuildingData[UnitTypes.PROTOSS_PYLON];
+            var unitData = SharkyUnitData.BuildingData[UnitTypes.PROTOSS_PYLON];
 
             var orderedBuildings = ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
             foreach (var baseLocation in BaseData.SelfBases)
@@ -98,7 +97,7 @@ namespace Sharky.Builds.MacroServices
 
             if (defensivePointLastFailFrame < MacroData.Frame - 100)
             {
-                var unitData = UnitDataManager.BuildingData[UnitTypes.PROTOSS_PYLON];
+                var unitData = SharkyUnitData.BuildingData[UnitTypes.PROTOSS_PYLON];
 
                 var orderedBuildings = ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
 

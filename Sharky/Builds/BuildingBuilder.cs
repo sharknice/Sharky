@@ -1,6 +1,5 @@
 ﻿using SC2APIProtocol;
 using Sharky.Builds.BuildingPlacement;
-using Sharky.Managers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -12,14 +11,14 @@ namespace Sharky.Builds
         ActiveUnitData ActiveUnitData;
         TargetingData TargetingData;
         IBuildingPlacement BuildingPlacement;
-        UnitDataManager UnitDataManager;
+        SharkyUnitData SharkyUnitData;
 
-        public BuildingBuilder(ActiveUnitData activeUnitData, TargetingData targetingData, IBuildingPlacement buildingPlacement, UnitDataManager unitDataManager)
+        public BuildingBuilder(ActiveUnitData activeUnitData, TargetingData targetingData, IBuildingPlacement buildingPlacement, SharkyUnitData sharkyUnitData)
         {
             ActiveUnitData = activeUnitData;
             TargetingData = targetingData;
             BuildingPlacement = buildingPlacement;
-            UnitDataManager = unitDataManager;
+            SharkyUnitData = sharkyUnitData;
         }
 
         public Action BuildBuilding(MacroData macroData, UnitTypes unitType, BuildingTypeData unitData, Point2D generalLocation = null, bool ignoreMineralProximity = false, float maxDistance = 50, List<UnitCommander> workerPool = null)
@@ -112,9 +111,9 @@ namespace Sharky.Builds
         {
             if (workers == null)
             {
-                workers = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && !c.UnitCalculation.Unit.BuffIds.Any(b => UnitDataManager.CarryingResourceBuffs.Contains((Buffs)b)));
+                workers = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && !c.UnitCalculation.Unit.BuffIds.Any(b => SharkyUnitData.CarryingResourceBuffs.Contains((Buffs)b)));
             }
-            var availableWorkers = workers.Where(c => !c.UnitCalculation.Unit.Orders.Any(o => UnitDataManager.BuildingData.Values.Any(b => (uint)b.Ability == o.AbilityId)));
+            var availableWorkers = workers.Where(c => !c.UnitCalculation.Unit.Orders.Any(o => SharkyUnitData.BuildingData.Values.Any(b => (uint)b.Ability == o.AbilityId)));
 
             var closestWorkers = availableWorkers.OrderBy(p => Vector2.DistanceSquared(new Vector2(p.UnitCalculation.Unit.Pos.X, p.UnitCalculation.Unit.Pos.Y), new Vector2(location.X, location.Y)));
             if (closestWorkers.Count() == 0)

@@ -1,17 +1,16 @@
-﻿using Sharky.Managers;
-using System.Linq;
+﻿using System.Linq;
 
 namespace Sharky
 {
     public class UnitCountService
     {
         ActiveUnitData ActiveUnitData;
-        UnitDataManager UnitDataManager;
+        SharkyUnitData SharkyUnitData;
 
-        public UnitCountService(ActiveUnitData activeUnitData, UnitDataManager unitDataManager)
+        public UnitCountService(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData)
         {
             ActiveUnitData = activeUnitData;
-            UnitDataManager = unitDataManager;
+            SharkyUnitData = sharkyUnitData;
         }
 
         public int Count(UnitTypes unitType)
@@ -26,7 +25,7 @@ namespace Sharky
 
         public int UnitsInProgressCount(UnitTypes unitType)
         {
-            var unitData = UnitDataManager.TrainingData[unitType];
+            var unitData = SharkyUnitData.TrainingData[unitType];
             return ActiveUnitData.SelfUnits.Count(u => (unitData.ProducingUnits.Contains((UnitTypes)u.Value.Unit.UnitType) || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_EGG || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_OVERLORDCOCOON || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_TRANSPORTOVERLORDCOCOON) && u.Value.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
         }
 

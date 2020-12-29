@@ -1,5 +1,4 @@
 ﻿using SC2APIProtocol;
-using Sharky.Managers;
 using Sharky.MicroControllers;
 using Sharky.Pathing;
 using System.Collections.Concurrent;
@@ -11,7 +10,7 @@ namespace Sharky.MicroTasks
 {
     public class ProxyScoutTask : MicroTask
     {
-        UnitDataManager UnitDataManager;
+        SharkyUnitData SharkyUnitData;
         TargetingData TargetingData;
         MapDataService MapDataService;
         BaseData BaseData;
@@ -22,9 +21,9 @@ namespace Sharky.MicroTasks
         List<Point2D> ScoutLocations { get; set; }
         int ScoutLocationIndex { get; set; }
 
-        public ProxyScoutTask(UnitDataManager unitDataManager, TargetingData targetingData, MapDataService mapDataService, BaseData baseData, bool enabled, float priority, IIndividualMicroController individualMicroController)
+        public ProxyScoutTask(SharkyUnitData sharkyUnitData, TargetingData targetingData, MapDataService mapDataService, BaseData baseData, bool enabled, float priority, IIndividualMicroController individualMicroController)
         {
-            UnitDataManager = unitDataManager;
+            SharkyUnitData = sharkyUnitData;
             TargetingData = targetingData;
             MapDataService = mapDataService;
             BaseData = baseData;
@@ -49,7 +48,7 @@ namespace Sharky.MicroTasks
                 {
                     if (!commander.Value.Claimed && commander.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker))
                     {
-                        if (commander.Value.UnitCalculation.Unit.Orders.Any(o => !UnitDataManager.MiningAbilities.Contains((Abilities)o.AbilityId)))
+                        if (commander.Value.UnitCalculation.Unit.Orders.Any(o => !SharkyUnitData.MiningAbilities.Contains((Abilities)o.AbilityId)))
                         {
                         }
                         else

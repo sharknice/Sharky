@@ -103,22 +103,22 @@ namespace Sharky
             return action;
         }
 
-        public bool AbilityOffCooldown(Abilities ability, int frame, float framesPerSecond, UnitDataManager unitDataManager)
+        public bool AbilityOffCooldown(Abilities ability, int frame, float framesPerSecond, SharkyUnitData sharkyUnitData)
         {
             if (AbilityOrderTimes.ContainsKey(ability))
             {
-                return (frame - AbilityOrderTimes[ability]) / framesPerSecond > unitDataManager.AbilityCooldownTimes[ability];
+                return (frame - AbilityOrderTimes[ability]) / framesPerSecond > sharkyUnitData.AbilityCooldownTimes[ability];
             }
             return true;
         }
 
-        public bool WarpInOffCooldown(int frame, float framesPerSecond, UnitDataManager unitDataManager)
+        public bool WarpInOffCooldown(int frame, float framesPerSecond, SharkyUnitData sharkyUnitData)
         {
-            foreach (var warpIn in unitDataManager.WarpInCooldownTimes)
+            foreach (var warpIn in sharkyUnitData.WarpInCooldownTimes)
             {
                 if (AbilityOrderTimes.ContainsKey(warpIn.Key))
                 {
-                    if ((frame - AbilityOrderTimes[warpIn.Key]) / framesPerSecond < unitDataManager.WarpInCooldownTimes[warpIn.Key])
+                    if ((frame - AbilityOrderTimes[warpIn.Key]) / framesPerSecond < sharkyUnitData.WarpInCooldownTimes[warpIn.Key])
                     {
                         return false;
                     }
@@ -127,13 +127,13 @@ namespace Sharky
             return true;
         }
 
-        public bool WarpInAlmostOffCooldown(int frame, float framesPerSecond, UnitDataManager unitDataManager)
+        public bool WarpInAlmostOffCooldown(int frame, float framesPerSecond, SharkyUnitData sharkyUnitData)
         {
-            foreach (var warpIn in unitDataManager.WarpInCooldownTimes)
+            foreach (var warpIn in sharkyUnitData.WarpInCooldownTimes)
             {
                 if (AbilityOrderTimes.ContainsKey(warpIn.Key))
                 {
-                    if ((frame - AbilityOrderTimes[warpIn.Key] - 10) / framesPerSecond < unitDataManager.WarpInCooldownTimes[warpIn.Key])
+                    if ((frame - AbilityOrderTimes[warpIn.Key] - 10) / framesPerSecond < sharkyUnitData.WarpInCooldownTimes[warpIn.Key])
                     {
                         return false;
                     }

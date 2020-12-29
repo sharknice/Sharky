@@ -1,5 +1,4 @@
 ﻿using SC2APIProtocol;
-using Sharky.Managers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -10,18 +9,18 @@ namespace Sharky.Builds.MacroServices
     {
         MacroData MacroData;
         IBuildingBuilder BuildingBuilder;
-        UnitDataManager UnitDataManager;
+        SharkyUnitData SharkyUnitData;
         ActiveUnitData ActiveUnitData;
         BaseData BaseData;
         TargetingData TargetingData;
 
         int defensivePointLastFailFrame;
 
-        public BuildDefenseService(MacroData macroData, IBuildingBuilder buildingBuilder, UnitDataManager unitDataManager, ActiveUnitData activeUnitData, BaseData baseData, TargetingData targetingData)
+        public BuildDefenseService(MacroData macroData, IBuildingBuilder buildingBuilder, SharkyUnitData sharkyUnitData, ActiveUnitData activeUnitData, BaseData baseData, TargetingData targetingData)
         {
             MacroData = macroData;
             BuildingBuilder = buildingBuilder;
-            UnitDataManager = unitDataManager;
+            SharkyUnitData = sharkyUnitData;
             ActiveUnitData = activeUnitData;
             BaseData = baseData;
             TargetingData = targetingData;
@@ -37,7 +36,7 @@ namespace Sharky.Builds.MacroServices
             {
                 if (unit.Value)
                 {
-                    var unitData = UnitDataManager.BuildingData[unit.Key];
+                    var unitData = SharkyUnitData.BuildingData[unit.Key];
                     var command = BuildingBuilder.BuildBuilding(MacroData, unit.Key, unitData, TargetingData.MainDefensePoint);
                     if (command != null)
                     {
@@ -60,7 +59,7 @@ namespace Sharky.Builds.MacroServices
                 {
                     if (unit.Value > 0)
                     {
-                        var unitData = UnitDataManager.BuildingData[unit.Key];
+                        var unitData = SharkyUnitData.BuildingData[unit.Key];
                         if (ActiveUnitData.SelfUnits.Count(u => u.Value.Unit.UnitType == (uint)unit.Key && Vector2.DistanceSquared(new Vector2(u.Value.Unit.Pos.X, u.Value.Unit.Pos.Y), new Vector2(TargetingData.MainDefensePoint.X, TargetingData.MainDefensePoint.Y)) < MacroData.DefensiveBuildingMaximumDistance * MacroData.DefensiveBuildingMaximumDistance) + ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability)) < unit.Value)
                         {
                             var command = BuildingBuilder.BuildBuilding(MacroData, unit.Key, unitData, TargetingData.MainDefensePoint, false, MacroData.DefensiveBuildingMaximumDistance);
@@ -89,7 +88,7 @@ namespace Sharky.Builds.MacroServices
             {
                 if (unit.Value > 0)
                 {
-                    var unitData = UnitDataManager.BuildingData[unit.Key];
+                    var unitData = SharkyUnitData.BuildingData[unit.Key];
 
                     var orderedBuildings = ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
                     foreach (var baseLocation in BaseData.SelfBases)
@@ -126,7 +125,7 @@ namespace Sharky.Builds.MacroServices
             {
                 if (unit.Value > 0)
                 {
-                    var unitData = UnitDataManager.BuildingData[unit.Key];
+                    var unitData = SharkyUnitData.BuildingData[unit.Key];
 
                     var orderedBuildings = ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
                     foreach (var baseLocation in BaseData.SelfBases)

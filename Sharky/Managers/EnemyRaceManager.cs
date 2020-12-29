@@ -7,13 +7,13 @@ namespace Sharky.Managers
     public class EnemyRaceManager : SharkyManager
     {
         ActiveUnitData ActiveUnitData;
-        UnitDataManager UnitDataManager;
+        SharkyUnitData SharkyUnitData;
         EnemyData EnemyData;
 
-        public EnemyRaceManager(ActiveUnitData activeUnitData, UnitDataManager unitDataManager, EnemyData enemyData)
+        public EnemyRaceManager(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, EnemyData enemyData)
         {
             ActiveUnitData = activeUnitData;
-            UnitDataManager = unitDataManager;
+            SharkyUnitData = sharkyUnitData;
             EnemyData = enemyData;
         }
 
@@ -32,15 +32,15 @@ namespace Sharky.Managers
         {
             if (EnemyData.EnemyRace == Race.Random)
             {
-                if (ActiveUnitData.EnemyUnits.Any(e => UnitDataManager.ProtossTypes.Contains((UnitTypes)e.Value.Unit.UnitType)))
+                if (ActiveUnitData.EnemyUnits.Any(e => SharkyUnitData.ProtossTypes.Contains((UnitTypes)e.Value.Unit.UnitType)))
                 {
                     EnemyData.EnemyRace = Race.Protoss;
                 }
-                else if (ActiveUnitData.EnemyUnits.Any(e => UnitDataManager.TerranTypes.Contains((UnitTypes)e.Value.Unit.UnitType)))
+                else if (ActiveUnitData.EnemyUnits.Any(e => SharkyUnitData.TerranTypes.Contains((UnitTypes)e.Value.Unit.UnitType)))
                 {
                     EnemyData.EnemyRace = Race.Terran;
                 }
-                else if (ActiveUnitData.EnemyUnits.Any(e => UnitDataManager.ZergTypes.Contains((UnitTypes)e.Value.Unit.UnitType)))
+                else if (ActiveUnitData.EnemyUnits.Any(e => SharkyUnitData.ZergTypes.Contains((UnitTypes)e.Value.Unit.UnitType)))
                 {
                     EnemyData.EnemyRace = Race.Zerg;
                 }

@@ -1,6 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.Managers;
-using Sharky.MicroControllers;
+﻿using Sharky.MicroControllers;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +8,7 @@ namespace Sharky.MicroTasks
 {
     public class ProxyTask : MicroTask
     {
-        UnitDataManager UnitDataManager;
+        SharkyUnitData SharkyUnitData;
         MacroData MacroData;
         MicroTaskData MicroTaskData;
         DebugService DebugService;
@@ -20,9 +18,9 @@ namespace Sharky.MicroTasks
 
         bool started { get; set; }
 
-        public ProxyTask(UnitDataManager unitDataManager, bool enabled, float priority, MacroData macroData, string proxyName, MicroTaskData microTaskData, DebugService debugService, IIndividualMicroController individualMicroController)
+        public ProxyTask(SharkyUnitData sharkyUnitData, bool enabled, float priority, MacroData macroData, string proxyName, MicroTaskData microTaskData, DebugService debugService, IIndividualMicroController individualMicroController)
         {
-            UnitDataManager = unitDataManager;
+            SharkyUnitData = sharkyUnitData;
             Priority = priority;
             MacroData = macroData;
             ProxyName = proxyName;
@@ -70,7 +68,7 @@ namespace Sharky.MicroTasks
                 {
                     if (!commander.Value.Claimed && commander.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker))
                     {
-                        if (commander.Value.UnitCalculation.Unit.Orders.Any(o => !UnitDataManager.MiningAbilities.Contains((Abilities)o.AbilityId)))
+                        if (commander.Value.UnitCalculation.Unit.Orders.Any(o => !SharkyUnitData.MiningAbilities.Contains((Abilities)o.AbilityId)))
                         {
                         }
                         else
@@ -101,7 +99,7 @@ namespace Sharky.MicroTasks
         {
             var commands = new List<SC2APIProtocol.Action>();
 
-            foreach (var commander in UnitCommanders.Where(c => !c.UnitCalculation.Unit.Orders.Any(o => UnitDataManager.BuildingData.Values.Any(b => (uint)b.Ability == o.AbilityId))))
+            foreach (var commander in UnitCommanders.Where(c => !c.UnitCalculation.Unit.Orders.Any(o => SharkyUnitData.BuildingData.Values.Any(b => (uint)b.Ability == o.AbilityId))))
             {
                 if (Vector2.DistanceSquared(new Vector2(MacroData.Proxies[ProxyName].Location.X, MacroData.Proxies[ProxyName].Location.Y), new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y)) > MacroData.Proxies[ProxyName].MaximumBuildingDistance)
                 {

@@ -51,13 +51,13 @@ namespace Sharky
         public TargetPriorityCalculation TargetPriorityCalculation { get; set; }
         public UnitTypeData UnitTypeData { get; set; }
 
-        public UnitCalculation(Unit previousUnit, Unit unit, int repairers, UnitDataManager unitDataManager, SharkyOptions sharkyOptions)
+        public UnitCalculation(Unit previousUnit, Unit unit, int repairers, SharkyUnitData sharkyUnitData, SharkyOptions sharkyOptions, UnitDataService unitDataService)
         {
             PreviousUnit = previousUnit;
             Unit = unit;
-            UnitTypeData = unitDataManager.UnitData[(UnitTypes)unit.UnitType];
+            UnitTypeData = sharkyUnitData.UnitData[(UnitTypes)unit.UnitType];
 
-            var unitRange = unitDataManager.GetRange(unit);
+            var unitRange = unitDataService.GetRange(unit);
             if (unitRange == 0)
             {
                 Range = 0;
@@ -86,18 +86,18 @@ namespace Sharky
             EstimatedCooldown = 0; // TODO: get estimated cooldown
 
             DamageAir = false;
-            if (unitDataManager.CanAttackAir((UnitTypes)unit.UnitType))
+            if (unitDataService.CanAttackAir((UnitTypes)unit.UnitType))
             {
                 DamageAir = true;
             }
             DamageGround = false;
-            if (unitDataManager.CanAttackGround((UnitTypes)unit.UnitType))
+            if (unitDataService.CanAttackGround((UnitTypes)unit.UnitType))
             {
                 DamageGround = true;
             }
-            Damage = unitDataManager.GetDamage(unit);
-            Dps = unitDataManager.GetDps(unit);
-            Weapon = unitDataManager.GetWeapon(unit);
+            Damage = unitDataService.GetDamage(unit);
+            Dps = unitDataService.GetDps(unit);
+            Weapon = unitDataService.GetWeapon(unit);
             Weapons = UnitTypeData.Weapons.ToList();
             if (Weapons == null || Weapons.Count() == 0)
             {
@@ -118,7 +118,7 @@ namespace Sharky
                 SimulatedHitpoints += 500;
             }
 
-            if (unitDataManager.ZergTypes.Contains((UnitTypes)Unit.UnitType))
+            if (sharkyUnitData.ZergTypes.Contains((UnitTypes)Unit.UnitType))
             {
                 SimulatedHealPerSecond = 0.38f;
             }
@@ -153,12 +153,12 @@ namespace Sharky
             UnitClassifications = new List<UnitClassification>();
             if (UnitTypeData.Attributes.Contains(SC2APIProtocol.Attribute.Structure))
             {
-                if (unitDataManager.ResourceCenterTypes.Contains((UnitTypes)unit.UnitType))
+                if (sharkyUnitData.ResourceCenterTypes.Contains((UnitTypes)unit.UnitType))
                 {
                     UnitClassifications.Add(UnitClassification.ResourceCenter);
                     UnitClassifications.Add(UnitClassification.ProductionStructure);
                 }
-                if (unitDataManager.DefensiveStructureTypes.Contains((UnitTypes)unit.UnitType))
+                if (sharkyUnitData.DefensiveStructureTypes.Contains((UnitTypes)unit.UnitType))
                 {
                     UnitClassifications.Add(UnitClassification.DefensiveStructure);
                 }
@@ -176,15 +176,15 @@ namespace Sharky
                 UnitClassifications.Add(UnitClassification.ArmyUnit);
             }
 
-            if (unitDataManager.DetectionTypes.Contains((UnitTypes)unit.UnitType))
+            if (sharkyUnitData.DetectionTypes.Contains((UnitTypes)unit.UnitType))
             {
                 UnitClassifications.Add(UnitClassification.Detector);
             }
-            if (unitDataManager.AbilityDetectionTypes.Contains((UnitTypes)unit.UnitType))
+            if (sharkyUnitData.AbilityDetectionTypes.Contains((UnitTypes)unit.UnitType))
             {
                 UnitClassifications.Add(UnitClassification.DetectionCaster);
             }
-            if (unitDataManager.CloakableAttackers.Contains((UnitTypes)unit.UnitType))
+            if (sharkyUnitData.CloakableAttackers.Contains((UnitTypes)unit.UnitType))
             {
                 UnitClassifications.Add(UnitClassification.Cloakable);
             }

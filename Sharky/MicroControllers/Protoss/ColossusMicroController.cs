@@ -1,5 +1,4 @@
 ﻿using SC2APIProtocol;
-using Sharky.Managers;
 using Sharky.Pathing;
 using System;
 using System.Collections.Generic;
@@ -12,8 +11,8 @@ namespace Sharky.MicroControllers.Protoss
     {
         CollisionCalculator CollisionCalculator;
 
-        public ColossusMicroController(MapDataService mapDataService, UnitDataManager unitDataManager, ActiveUnitData activeUnitData, DebugService debugService, IPathFinder sharkyPathFinder, BaseData baseData, SharkyOptions sharkyOptions, DamageService damageService, MicroPriority microPriority, bool groupUpEnabled, CollisionCalculator collisionCalculator)
-            : base(mapDataService, unitDataManager, activeUnitData, debugService, sharkyPathFinder, baseData, sharkyOptions, damageService, microPriority, groupUpEnabled)
+        public ColossusMicroController(MapDataService mapDataService, SharkyUnitData unitDataManager, ActiveUnitData activeUnitData, DebugService debugService, IPathFinder sharkyPathFinder, BaseData baseData, SharkyOptions sharkyOptions, DamageService damageService, UnitDataService unitDataService, MicroPriority microPriority, bool groupUpEnabled, CollisionCalculator collisionCalculator)
+            : base(mapDataService, unitDataManager, activeUnitData, debugService, sharkyPathFinder, baseData, sharkyOptions, damageService, unitDataService, microPriority, groupUpEnabled)
         {
             CollisionCalculator = collisionCalculator;
         }
@@ -30,7 +29,7 @@ namespace Sharky.MicroControllers.Protoss
                 {
                     if (CollisionCalculator.Collides(new Vector2(splashedEnemy.Unit.Pos.X, splashedEnemy.Unit.Pos.Y), splashedEnemy.Unit.Radius + splashRadius, attackLine.Start, attackLine.End))
                     {
-                        dpsReduction += splashedEnemy.Dps / TimeToKill(weapon, splashedEnemy.Unit, UnitDataManager.UnitData[(UnitTypes)splashedEnemy.Unit.UnitType]);
+                        dpsReduction += splashedEnemy.Dps / TimeToKill(weapon, splashedEnemy.Unit, SharkyUnitData.UnitData[(UnitTypes)splashedEnemy.Unit.UnitType]);
                     }
                 }
                 dpsReductions[enemyAttack.Unit.Tag] = dpsReduction;

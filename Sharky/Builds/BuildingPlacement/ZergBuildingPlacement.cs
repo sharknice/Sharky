@@ -1,5 +1,4 @@
 ﻿using SC2APIProtocol;
-using Sharky.Managers;
 using System;
 using System.Linq;
 using System.Numerics;
@@ -9,14 +8,14 @@ namespace Sharky.Builds.BuildingPlacement
     public class ZergBuildingPlacement : IBuildingPlacement
     {
         ActiveUnitData ActiveUnitData;
-        UnitDataManager UnitDataManager;
+        SharkyUnitData SharkyUnitData;
         DebugService DebugService;
         BuildingService BuildingService;
 
-        public ZergBuildingPlacement(ActiveUnitData activeUnitData, UnitDataManager unitDataManager, DebugService debugService, BuildingService buildingService)
+        public ZergBuildingPlacement(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, DebugService debugService, BuildingService buildingService)
         {
             ActiveUnitData = activeUnitData;
-            UnitDataManager = unitDataManager;
+            SharkyUnitData = sharkyUnitData;
             DebugService = debugService;
             BuildingService = buildingService;
         }
@@ -46,7 +45,7 @@ namespace Sharky.Builds.BuildingPlacement
                     var point = new Point2D { X = x + (float)(radius * Math.Cos(angle)), Y = y + (float)(radius * Math.Sin(angle)) };
                     if (BuildingService.HasCreep(point.X, point.Y, size / 2.0f) && BuildingService.AreaBuildable(point.X, point.Y, size / 2.0f) && !BuildingService.Blocked(point.X, point.Y, size / 2.0f))
                     {
-                        var mineralFields = ActiveUnitData.NeutralUnits.Where(u => UnitDataManager.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType));
+                        var mineralFields = ActiveUnitData.NeutralUnits.Where(u => SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType));
                         var squared = (1 + minimumMineralProximinity + (size / 2f)) * (1 + minimumMineralProximinity + (size / 2f));
                         var clashes = mineralFields.Where(u => Vector2.DistanceSquared(new Vector2(u.Value.Unit.Pos.X, u.Value.Unit.Pos.Y), new Vector2(point.X, point.Y)) < squared);
 

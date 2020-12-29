@@ -11,15 +11,15 @@ namespace Sharky.Managers
     {
         ImageData PlacementGrid;
 
-        UnitDataManager UnitDataManager;
+        SharkyUnitData SharkyUnitData;
         ActiveUnitData ActiveUnitData;
         IPathFinder PathFinder;
         UnitCountService UnitCountService;
         BaseData BaseData;
 
-        public BaseManager(UnitDataManager unitDataManager, ActiveUnitData activeUnitData, IPathFinder pathFinder, UnitCountService unitCountService, BaseData baseData)
+        public BaseManager(SharkyUnitData sharkyUnitData, ActiveUnitData activeUnitData, IPathFinder pathFinder, UnitCountService unitCountService, BaseData baseData)
         {
-            UnitDataManager = unitDataManager;
+            SharkyUnitData = sharkyUnitData;
             ActiveUnitData = activeUnitData;
             PathFinder = pathFinder;
             UnitCountService = unitCountService;
@@ -34,7 +34,7 @@ namespace Sharky.Managers
             var mineralFields = new List<Unit>();
             foreach (var unit in observation.Observation.RawData.Units)
             {
-                if (UnitDataManager.MineralFieldTypes.Contains((UnitTypes)unit.UnitType))
+                if (SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)unit.UnitType))
                 {
                     mineralFields.Add(unit);
                 }
@@ -76,7 +76,7 @@ namespace Sharky.Managers
             var gasses = new List<Unit>();
             foreach (var unit in observation.Observation.RawData.Units)
             {
-                if (UnitDataManager.GasGeyserTypes.Contains((UnitTypes)unit.UnitType))
+                if (SharkyUnitData.GasGeyserTypes.Contains((UnitTypes)unit.UnitType))
                 {
                     gasses.Add(unit);
                 }
@@ -89,7 +89,7 @@ namespace Sharky.Managers
                 SetMineralLineLocation(location);
             }
 
-            var startingUnit = observation.Observation.RawData.Units.FirstOrDefault(u => u.Alliance == Alliance.Self && UnitDataManager.ResourceCenterTypes.Contains((UnitTypes)u.UnitType));
+            var startingUnit = observation.Observation.RawData.Units.FirstOrDefault(u => u.Alliance == Alliance.Self && SharkyUnitData.ResourceCenterTypes.Contains((UnitTypes)u.UnitType));
 
             BaseData.BaseLocations = BaseData.BaseLocations.OrderBy(b => PathFinder.GetGroundPath(startingUnit.Pos.X + 4, startingUnit.Pos.Y + 4, b.Location.X, b.Location.Y, 0).Count()).ToList();
             BaseData.MainBase = BaseData.BaseLocations.FirstOrDefault();

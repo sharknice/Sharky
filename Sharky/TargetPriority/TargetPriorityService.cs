@@ -1,16 +1,15 @@
-﻿using Sharky.Managers;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace Sharky
 {
     public class TargetPriorityService
     {
-        UnitDataManager UnitDataManager;
+        SharkyUnitData SharkyUnitData;
 
-        public TargetPriorityService(UnitDataManager unitDataManager)
+        public TargetPriorityService(SharkyUnitData sharkyUnitData)
         {
-            UnitDataManager = unitDataManager;
+            SharkyUnitData = sharkyUnitData;
         }
 
         public TargetPriorityCalculation CalculateTargetPriority(UnitCalculation unitCalculation)
@@ -143,7 +142,7 @@ namespace Sharky
 
         bool ShouldTargetDetection(UnitCalculation unitCalculation)
         {
-            if (unitCalculation.NearbyAllies.Any(e => UnitDataManager.CloakableAttackers.Contains((UnitTypes)e.Unit.UnitType) || e.Unit.UnitType == (uint)UnitTypes.PROTOSS_MOTHERSHIP))
+            if (unitCalculation.NearbyAllies.Any(e => SharkyUnitData.CloakableAttackers.Contains((UnitTypes)e.Unit.UnitType) || e.Unit.UnitType == (uint)UnitTypes.PROTOSS_MOTHERSHIP))
             {
                 if (unitCalculation.NearbyEnemies.Any(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_OBSERVER || e.Unit.UnitType == (uint)UnitTypes.TERRAN_RAVEN || e.Unit.UnitType == (uint)UnitTypes.ZERG_OVERSEER || e.Unit.UnitType == (uint)UnitTypes.PROTOSS_ORACLE))
                 {

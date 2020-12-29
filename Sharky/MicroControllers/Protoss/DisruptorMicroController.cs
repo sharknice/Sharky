@@ -1,5 +1,4 @@
 ﻿using SC2APIProtocol;
-using Sharky.Managers;
 using Sharky.Pathing;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,8 +10,8 @@ namespace Sharky.MicroControllers.Protoss
     {
         int PurificationNovaRange = 13;
 
-        public DisruptorMicroController(MapDataService mapDataService, UnitDataManager unitDataManager, ActiveUnitData activeUnitData, DebugService debugService, IPathFinder sharkyPathFinder, BaseData baseData, SharkyOptions sharkyOptions, DamageService damageService, MicroPriority microPriority, bool groupUpEnabled)
-            : base(mapDataService, unitDataManager, activeUnitData, debugService, sharkyPathFinder, baseData, sharkyOptions, damageService, microPriority, groupUpEnabled)
+        public DisruptorMicroController(MapDataService mapDataService, SharkyUnitData sharkyUnitData, ActiveUnitData activeUnitData, DebugService debugService, IPathFinder sharkyPathFinder, BaseData baseData, SharkyOptions sharkyOptions, DamageService damageService, UnitDataService unitDataService, MicroPriority microPriority, bool groupUpEnabled)
+            : base(mapDataService, sharkyUnitData, activeUnitData, debugService, sharkyPathFinder, baseData, sharkyOptions, damageService, unitDataService, microPriority, groupUpEnabled)
         {
         }
 
@@ -20,7 +19,7 @@ namespace Sharky.MicroControllers.Protoss
         {
             action = null;
 
-            if (!commander.AbilityOffCooldown(Abilities.EFFECT_PURIFICATIONNOVA, frame, SharkyOptions.FramesPerSecond, UnitDataManager))
+            if (!commander.AbilityOffCooldown(Abilities.EFFECT_PURIFICATIONNOVA, frame, SharkyOptions.FramesPerSecond, SharkyUnitData))
             {
                 return false;
             }
@@ -43,7 +42,7 @@ namespace Sharky.MicroControllers.Protoss
 
             if (attacks.Count > 0)
             {
-                var oneShotKills = attacks.Where(a => a.Unit.Health + a.Unit.Shield < GetPurificationNovaDamage(a.Unit, UnitDataManager.UnitData[(UnitTypes)a.Unit.UnitType]) && !a.Unit.BuffIds.Contains((uint)Buffs.IMMORTALOVERLOAD)).OrderByDescending(u => u.Dps);
+                var oneShotKills = attacks.Where(a => a.Unit.Health + a.Unit.Shield < GetPurificationNovaDamage(a.Unit, SharkyUnitData.UnitData[(UnitTypes)a.Unit.UnitType]) && !a.Unit.BuffIds.Contains((uint)Buffs.IMMORTALOVERLOAD)).OrderByDescending(u => u.Dps);
                 if (oneShotKills.Count() > 0)
                 {
                     var bestAttack = GetBestAttack(commander.UnitCalculation, oneShotKills, attacks);
@@ -110,7 +109,7 @@ namespace Sharky.MicroControllers.Protoss
                 {
                     if (Vector2.DistanceSquared(new Vector2(splashedEnemy.Unit.Pos.X, splashedEnemy.Unit.Pos.Y), new Vector2(enemyAttack.Unit.Pos.X, enemyAttack.Unit.Pos.Y)) < (splashedEnemy.Unit.Radius + splashRadius) * (splashedEnemy.Unit.Radius + splashRadius))
                     {
-                        if (splashedEnemy.Unit.Health + splashedEnemy.Unit.Shield < GetPurificationNovaDamage(splashedEnemy.Unit, UnitDataManager.UnitData[(UnitTypes)splashedEnemy.Unit.UnitType]))
+                        if (splashedEnemy.Unit.Health + splashedEnemy.Unit.Shield < GetPurificationNovaDamage(splashedEnemy.Unit, SharkyUnitData.UnitData[(UnitTypes)splashedEnemy.Unit.UnitType]))
                         {
                             killCount++;
                         }
@@ -120,7 +119,7 @@ namespace Sharky.MicroControllers.Protoss
                 {
                     if (Vector2.DistanceSquared(new Vector2(splashedAlly.Unit.Pos.X, splashedAlly.Unit.Pos.Y), new Vector2(enemyAttack.Unit.Pos.X, enemyAttack.Unit.Pos.Y)) < (splashedAlly.Unit.Radius + splashRadius) * (splashedAlly.Unit.Radius + splashRadius))
                     {
-                        if (splashedAlly.Unit.Health + splashedAlly.Unit.Shield < GetPurificationNovaDamage(splashedAlly.Unit, UnitDataManager.UnitData[(UnitTypes)splashedAlly.Unit.UnitType]))
+                        if (splashedAlly.Unit.Health + splashedAlly.Unit.Shield < GetPurificationNovaDamage(splashedAlly.Unit, SharkyUnitData.UnitData[(UnitTypes)splashedAlly.Unit.UnitType]))
                         {
                             killCount--;
                         }

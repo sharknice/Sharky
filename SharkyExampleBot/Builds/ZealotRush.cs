@@ -3,7 +3,6 @@ using Sharky;
 using Sharky.Builds;
 using Sharky.Builds.BuildChoosing;
 using Sharky.Chat;
-using Sharky.Managers;
 using Sharky.MicroTasks;
 using System.Collections.Generic;
 
@@ -11,17 +10,17 @@ namespace SharkyExampleBot.Builds
 {
     public class ZealotRush : ProtossSharkyBuild
     {
-        MicroManager MicroManager;
+        MicroTaskData MicroTaskData;
         WorkerScoutTask WorkerScoutTask;
         ProxyScoutTask ProxyScoutTask;
 
         bool OpeningAttackChatSent;
         bool Scouted;
 
-        public ZealotRush(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, ChronoData chronoData, ICounterTransitioner counterTransitioner, MicroManager microManager, UnitCountService unitCountService) 
+        public ZealotRush(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, ChronoData chronoData, ICounterTransitioner counterTransitioner, MicroTaskData microTaskData, UnitCountService unitCountService) 
             : base(buildOptions, macroData, activeUnitData, attackData, chatService, chronoData, counterTransitioner, unitCountService)
         {
-            MicroManager = microManager;
+            MicroTaskData = microTaskData;
             OpeningAttackChatSent = false;
         }
 
@@ -38,13 +37,13 @@ namespace SharkyExampleBot.Builds
                 UnitTypes.PROTOSS_ZEALOT
             };
 
-            if (MicroManager.MicroTasks.ContainsKey("WorkerScoutTask"))
+            if (MicroTaskData.MicroTasks.ContainsKey("WorkerScoutTask"))
             {
-                WorkerScoutTask = (WorkerScoutTask)MicroManager.MicroTasks["WorkerScoutTask"];
+                WorkerScoutTask = (WorkerScoutTask)MicroTaskData.MicroTasks["WorkerScoutTask"];
             }
-            if (MicroManager.MicroTasks.ContainsKey("ProxyScoutTask"))
+            if (MicroTaskData.MicroTasks.ContainsKey("ProxyScoutTask"))
             {
-                ProxyScoutTask = (ProxyScoutTask)MicroManager.MicroTasks["ProxyScoutTask"];
+                ProxyScoutTask = (ProxyScoutTask)MicroTaskData.MicroTasks["ProxyScoutTask"];
             }
         }
 

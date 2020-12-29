@@ -1,6 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.Managers;
-using Sharky.MicroTasks.Mining;
+﻿using Sharky.MicroTasks.Mining;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -11,15 +9,15 @@ namespace Sharky.MicroTasks
 {
     public class MiningTask : MicroTask
     {
-        UnitDataManager UnitDataManager;
+        SharkyUnitData SharkyUnitData;
         BaseData BaseData;
         ActiveUnitData ActiveUnitData;
         MiningDefenseService MiningDefenseService;
         MacroData MacroData;
 
-        public MiningTask(UnitDataManager unitDataManager, BaseData baseData, ActiveUnitData activeUnitData, float priority, MiningDefenseService miningDefenseService, MacroData macroData)
+        public MiningTask(SharkyUnitData sharkyUnitData, BaseData baseData, ActiveUnitData activeUnitData, float priority, MiningDefenseService miningDefenseService, MacroData macroData)
         {
-            UnitDataManager = unitDataManager;
+            SharkyUnitData = sharkyUnitData;
             BaseData = baseData;
             ActiveUnitData = activeUnitData;
             Priority = priority;
@@ -63,7 +61,7 @@ namespace Sharky.MicroTasks
 
         IEnumerable<UnitCommander> GetIdleWorkers()
         {
-            var incompleteRefineries = ActiveUnitData.SelfUnits.Where(u => UnitDataManager.GasGeyserRefineryTypes.Contains((UnitTypes)u.Value.Unit.UnitType) && u.Value.Unit.BuildProgress < .95f).Select(u => u.Key);
+            var incompleteRefineries = ActiveUnitData.SelfUnits.Where(u => SharkyUnitData.GasGeyserRefineryTypes.Contains((UnitTypes)u.Value.Unit.UnitType) && u.Value.Unit.BuildProgress < .95f).Select(u => u.Key);
             return UnitCommanders.Where(c => c.UnitCalculation.Unit.Orders.Count() == 0 || c.UnitCalculation.Unit.Orders.Any(o => incompleteRefineries.Contains(o.TargetUnitTag)));
         }
 
@@ -71,7 +69,7 @@ namespace Sharky.MicroTasks
         {
             var actions = new List<SC2APIProtocol.Action>();
 
-            foreach (var worker in UnitCommanders.Where(u => u.UnitCalculation.NearbyAllies.Any(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISM) && u.UnitCalculation.Unit.BuffIds.Any(b => UnitDataManager.CarryingMineralBuffs.Contains((Buffs)b))))
+            foreach (var worker in UnitCommanders.Where(u => u.UnitCalculation.NearbyAllies.Any(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISM) && u.UnitCalculation.Unit.BuffIds.Any(b => SharkyUnitData.CarryingMineralBuffs.Contains((Buffs)b))))
             {
                 if (worker.UnitCalculation.NearbyAllies.Any(a => (a.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISM) && Vector2.DistanceSquared(new Vector2(a.Unit.Pos.X, a.Unit.Pos.Y), new Vector2(worker.UnitCalculation.Unit.Pos.X, worker.UnitCalculation.Unit.Pos.Y)) < .1))
                 {
@@ -90,7 +88,7 @@ namespace Sharky.MicroTasks
         {
             var actions = new List<SC2APIProtocol.Action>();
 
-            var refinereries = ActiveUnitData.SelfUnits.Where(u => UnitDataManager.GasGeyserRefineryTypes.Contains((UnitTypes)u.Value.Unit.UnitType) && u.Value.Unit.BuildProgress >= .95f);
+            var refinereries = ActiveUnitData.SelfUnits.Where(u => SharkyUnitData.GasGeyserRefineryTypes.Contains((UnitTypes)u.Value.Unit.UnitType) && u.Value.Unit.BuildProgress >= .95f);
             var unsaturatedRefineries = refinereries.Where(u => u.Value.Unit.AssignedHarvesters < u.Value.Unit.IdealHarvesters);
 
             if (MacroData.VespeneGas > 2500 && MacroData.Minerals < 1000)
@@ -131,7 +129,7 @@ namespace Sharky.MicroTasks
                 var idealGasWorkers = GetIdleWorkers();
                 if (idealGasWorkers.Count() == 0)
                 {
-                    idealGasWorkers = UnitCommanders.Where(c => c.UnitCalculation.Unit.Orders.Any(o => UnitDataManager.GatheringAbilities.Contains((Abilities)o.AbilityId) && !refinereries.Select(r => r.Key).Contains(o.TargetUnitTag))).OrderBy(w => Vector2.DistanceSquared(new Vector2(w.UnitCalculation.Unit.Pos.X, w.UnitCalculation.Unit.Pos.Y), new Vector2(refinery.Value.Unit.Pos.X, refinery.Value.Unit.Pos.Y)));
+                    idealGasWorkers = UnitCommanders.Where(c => c.UnitCalculation.Unit.Orders.Any(o => SharkyUnitData.GatheringAbilities.Contains((Abilities)o.AbilityId) && !refinereries.Select(r => r.Key).Contains(o.TargetUnitTag))).OrderBy(w => Vector2.DistanceSquared(new Vector2(w.UnitCalculation.Unit.Pos.X, w.UnitCalculation.Unit.Pos.Y), new Vector2(refinery.Value.Unit.Pos.X, refinery.Value.Unit.Pos.Y)));
                 }
 
                 if (idealGasWorkers.Count() > 0)
@@ -181,8 +179,8 @@ namespace Sharky.MicroTasks
                 var undersaturatedBase = BaseData.SelfBases.Where(b => b.ResourceCenter.BuildProgress > .9 && b.ResourceCenter.AssignedHarvesters < b.ResourceCenter.IdealHarvesters).OrderBy(b => b.ResourceCenter.AssignedHarvesters - b.ResourceCenter.IdealHarvesters).FirstOrDefault();
                 if (undersaturatedBase != null)
                 {
-                    var refinereries = ActiveUnitData.SelfUnits.Where(u => UnitDataManager.GasGeyserRefineryTypes.Contains((UnitTypes)u.Value.Unit.UnitType) && u.Value.Unit.BuildProgress >= .95f);
-                    var worker = UnitCommanders.Where(c => c.UnitCalculation.Unit.Orders.Any(o => UnitDataManager.GatheringAbilities.Contains((Abilities)o.AbilityId) && !refinereries.Select(r => r.Key).Contains(o.TargetUnitTag))).OrderBy(w => Vector2.DistanceSquared(new Vector2(w.UnitCalculation.Unit.Pos.X, w.UnitCalculation.Unit.Pos.Y), new Vector2(oversaturatedBase.Location.X, oversaturatedBase.Location.Y))).FirstOrDefault();
+                    var refinereries = ActiveUnitData.SelfUnits.Where(u => SharkyUnitData.GasGeyserRefineryTypes.Contains((UnitTypes)u.Value.Unit.UnitType) && u.Value.Unit.BuildProgress >= .95f);
+                    var worker = UnitCommanders.Where(c => c.UnitCalculation.Unit.Orders.Any(o => SharkyUnitData.GatheringAbilities.Contains((Abilities)o.AbilityId) && !refinereries.Select(r => r.Key).Contains(o.TargetUnitTag))).OrderBy(w => Vector2.DistanceSquared(new Vector2(w.UnitCalculation.Unit.Pos.X, w.UnitCalculation.Unit.Pos.Y), new Vector2(oversaturatedBase.Location.X, oversaturatedBase.Location.Y))).FirstOrDefault();
                     var mineralField = undersaturatedBase.MineralFields.OrderBy(m => Vector2.DistanceSquared(new Vector2(m.Pos.X, m.Pos.Y), new Vector2(worker.UnitCalculation.Unit.Pos.X, worker.UnitCalculation.Unit.Pos.Y))).FirstOrDefault();
                     if (mineralField != null)
                     {

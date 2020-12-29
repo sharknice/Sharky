@@ -1,6 +1,5 @@
 ﻿using SC2APIProtocol;
 using Sharky.Chat;
-using Sharky.Managers;
 using Sharky.MicroControllers;
 using Sharky.MicroControllers.Protoss;
 using Sharky.Pathing;
@@ -22,7 +21,7 @@ namespace Sharky.MicroTasks.Proxy
         ProxyLocationService ProxyLocationService;
         MapDataService MapDataService;
         DebugService DebugService;
-        UnitDataManager UnitDataManager;
+        UnitDataService UnitDataService;
         ActiveUnitData ActiveUnitData;
         ChatService ChatService;
 
@@ -39,7 +38,7 @@ namespace Sharky.MicroTasks.Proxy
         float InsideBaseDistanceSquared { get; set; }
         int PickupRangeSquared { get; set; }
 
-        public WarpPrismElevatorTask(TargetingData targetingData, IMicroController microController, WarpPrismMicroController warpPrismMicroController, ProxyLocationService proxyLocationService, MapDataService mapDataService, DebugService debugService, UnitDataManager unitDataManager, ActiveUnitData activeUnitData, ChatService chatService, List<DesiredUnitsClaim> desiredUnitsClaims, float priority, bool enabled = true)
+        public WarpPrismElevatorTask(TargetingData targetingData, IMicroController microController, WarpPrismMicroController warpPrismMicroController, ProxyLocationService proxyLocationService, MapDataService mapDataService, DebugService debugService, UnitDataService unitDataService, ActiveUnitData activeUnitData, ChatService chatService, List<DesiredUnitsClaim> desiredUnitsClaims, float priority, bool enabled = true)
         {
             TargetingData = targetingData;
             MicroController = microController;
@@ -47,7 +46,7 @@ namespace Sharky.MicroTasks.Proxy
             ProxyLocationService = proxyLocationService;
             MapDataService = mapDataService;
             DebugService = debugService;
-            UnitDataManager = unitDataManager;
+            UnitDataService = unitDataService;
             ActiveUnitData = activeUnitData;
 
             DesiredUnitsClaims = desiredUnitsClaims;
@@ -162,7 +161,7 @@ namespace Sharky.MicroTasks.Proxy
                     return warpPrism.Order(frame, Abilities.MORPH_WARPPRISMTRANSPORTMODE);
                 }
 
-                if (warpPrism.UnitCalculation.Unit.CargoSpaceMax - warpPrism.UnitCalculation.Unit.CargoSpaceTaken >= UnitDataManager.CargoSize((UnitTypes)pickup.UnitCalculation.Unit.UnitType) && !warpPrism.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.UNLOADALLAT_WARPPRISM))
+                if (warpPrism.UnitCalculation.Unit.CargoSpaceMax - warpPrism.UnitCalculation.Unit.CargoSpaceTaken >= UnitDataService.CargoSize((UnitTypes)pickup.UnitCalculation.Unit.UnitType) && !warpPrism.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.UNLOADALLAT_WARPPRISM))
                 {
                     if (Vector2.DistanceSquared(new Vector2(warpPrism.UnitCalculation.Unit.Pos.X, warpPrism.UnitCalculation.Unit.Pos.Y), new Vector2(LoadingLocation.X, LoadingLocation.Y)) < PickupRangeSquared)
                     {

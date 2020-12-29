@@ -6,14 +6,10 @@ namespace Sharky.Builds
     public class Morpher
     {
         ActiveUnitData ActiveUnitData;
-        UnitDataManager UnitDataManager;
-        SharkyOptions SharkyOptions;
 
-        public Morpher(ActiveUnitData activeUnitData, UnitDataManager unitDataManager, SharkyOptions sharkyOptions)
+        public Morpher(ActiveUnitData activeUnitData)
         {
             ActiveUnitData = activeUnitData;
-            UnitDataManager = unitDataManager;
-            SharkyOptions = sharkyOptions;
         }
 
         public SC2APIProtocol.Action MorphBuilding(MacroData macroData, TrainingTypeData unitData)

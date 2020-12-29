@@ -3,7 +3,6 @@ using Sharky;
 using Sharky.Builds;
 using Sharky.Builds.BuildChoosing;
 using Sharky.Chat;
-using Sharky.Managers;
 using Sharky.MicroControllers;
 using Sharky.MicroTasks;
 using Sharky.Proxy;
@@ -16,8 +15,8 @@ namespace SharkyExampleBot.Builds
     public class ProxyVoidRay : ProtossSharkyBuild
     {
         SharkyOptions SharkyOptions;
-        MicroManager MicroManager;
-        UnitDataManager UnitDataManager;
+        MicroTaskData MicroTaskData;
+        SharkyUnitData SharkyUnitData;
         ProxyLocationService ProxyLocationService;
 
         bool OpeningAttackChatSent;
@@ -25,18 +24,18 @@ namespace SharkyExampleBot.Builds
 
         ProxyTask ProxyTask;
 
-        public ProxyVoidRay(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, ChronoData chronoData, SharkyOptions sharkyOptions, MicroManager microManager, ICounterTransitioner counterTransitioner, UnitDataManager unitDataManager, ProxyLocationService proxyLocationService, DebugService debugService, UnitCountService unitCountService, IIndividualMicroController probeMicroController) 
+        public ProxyVoidRay(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, ChronoData chronoData, SharkyOptions sharkyOptions, MicroTaskData microTaskData, ICounterTransitioner counterTransitioner, SharkyUnitData sharkyUnitData, ProxyLocationService proxyLocationService, DebugService debugService, UnitCountService unitCountService, IIndividualMicroController probeMicroController) 
             : base(buildOptions, macroData, activeUnitData, attackData, chatService, chronoData, counterTransitioner, unitCountService)
         {
             SharkyOptions = sharkyOptions;
-            MicroManager = microManager;
-            UnitDataManager = unitDataManager;
+            MicroTaskData = microTaskData;
+            SharkyUnitData = sharkyUnitData;
             ProxyLocationService = proxyLocationService;
 
             OpeningAttackChatSent = false;
             CancelledProxyChatSent = false;
 
-            ProxyTask = new ProxyTask(UnitDataManager, false, 0.9f, MacroData, string.Empty, MicroManager, debugService, probeMicroController);
+            ProxyTask = new ProxyTask(SharkyUnitData, false, 0.9f, MacroData, string.Empty, MicroTaskData, debugService, probeMicroController);
             ProxyTask.ProxyName = GetType().Name;
         }
 
@@ -58,19 +57,19 @@ namespace SharkyExampleBot.Builds
 
             var desiredUnitsClaim = new DesiredUnitsClaim(UnitTypes.PROTOSS_STALKER, 1);
 
-            if (MicroManager.MicroTasks.ContainsKey("DefenseSquadTask"))
+            if (MicroTaskData.MicroTasks.ContainsKey("DefenseSquadTask"))
             {
-                var defenseSquadTask = (DefenseSquadTask)MicroManager.MicroTasks["DefenseSquadTask"];
+                var defenseSquadTask = (DefenseSquadTask)MicroTaskData.MicroTasks["DefenseSquadTask"];
                 defenseSquadTask.DesiredUnitsClaims = new List<DesiredUnitsClaim> { desiredUnitsClaim };
                 defenseSquadTask.Enable();
 
-                if (MicroManager.MicroTasks.ContainsKey("AttackTask"))
+                if (MicroTaskData.MicroTasks.ContainsKey("AttackTask"))
                 {
-                    MicroManager.MicroTasks["AttackTask"].ResetClaimedUnits();
+                    MicroTaskData.MicroTasks["AttackTask"].ResetClaimedUnits();
                 }
             }
 
-            MicroManager.MicroTasks["ProxyVoidRay"] = ProxyTask;   
+            MicroTaskData.MicroTasks["ProxyVoidRay"] = ProxyTask;   
             var proxyLocation = ProxyLocationService.GetCliffProxyLocation();
             MacroData.Proxies[ProxyTask.ProxyName] = new ProxyData(proxyLocation, MacroData);
 
@@ -169,7 +168,7 @@ namespace SharkyExampleBot.Builds
                     MacroData.DesiredProductionCounts[UnitTypes.PROTOSS_GATEWAY] = 2;
                 }
 
-                if (UnitDataManager.ResearchedUpgrades.Contains((uint)Upgrades.WARPGATERESEARCH))
+                if (SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.WARPGATERESEARCH))
                 {
                     if (MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_ZEALOT] < 3)
                     {

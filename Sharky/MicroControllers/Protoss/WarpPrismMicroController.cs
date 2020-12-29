@@ -1,5 +1,4 @@
 ﻿using SC2APIProtocol;
-using Sharky.Managers;
 using Sharky.Pathing;
 using System;
 using System.Collections.Generic;
@@ -14,8 +13,8 @@ namespace Sharky.MicroControllers.Protoss
 
         BaseData BaseData;
 
-        public WarpPrismMicroController(MapDataService mapDataService, UnitDataManager unitDataManager, ActiveUnitData activeUnitData, DebugService debugService, IPathFinder sharkyPathFinder, BaseData baseData, SharkyOptions sharkyOptions, DamageService damageService, MicroPriority microPriority, bool groupUpEnabled)
-            : base(mapDataService, unitDataManager, activeUnitData, debugService, sharkyPathFinder, baseData, sharkyOptions, damageService, microPriority, groupUpEnabled)
+        public WarpPrismMicroController(MapDataService mapDataService, SharkyUnitData sharkyUnitData, ActiveUnitData activeUnitData, DebugService debugService, IPathFinder sharkyPathFinder, BaseData baseData, SharkyOptions sharkyOptions, DamageService damageService, UnitDataService unitDataService, MicroPriority microPriority, bool groupUpEnabled)
+            : base(mapDataService, sharkyUnitData, activeUnitData, debugService, sharkyPathFinder, baseData, sharkyOptions, damageService, unitDataService, microPriority, groupUpEnabled)
         {
             BaseData = baseData;
         }
@@ -96,7 +95,7 @@ namespace Sharky.MicroControllers.Protoss
                 var backAverageHealth = backHalf.Sum(u => u.Unit.Health + u.Unit.Shield) / backHalf.Count();
                 foreach (var friendly in frontHalf)
                 {
-                    if (commander.UnitCalculation.Unit.CargoSpaceMax - commander.UnitCalculation.Unit.CargoSpaceTaken >= UnitDataManager.CargoSize((UnitTypes)friendly.Unit.UnitType))
+                    if (commander.UnitCalculation.Unit.CargoSpaceMax - commander.UnitCalculation.Unit.CargoSpaceTaken >= UnitDataService.CargoSize((UnitTypes)friendly.Unit.UnitType))
                     {
                         if (ShouldLoadUnit(friendly, backAverageHealth, frame))
                         {
@@ -110,7 +109,7 @@ namespace Sharky.MicroControllers.Protoss
                 {
                     foreach (var friendly in friendliesInRange)
                     {
-                        if (commander.UnitCalculation.Unit.CargoSpaceMax - commander.UnitCalculation.Unit.CargoSpaceTaken >= UnitDataManager.CargoSize((UnitTypes)friendly.Unit.UnitType))
+                        if (commander.UnitCalculation.Unit.CargoSpaceMax - commander.UnitCalculation.Unit.CargoSpaceTaken >= UnitDataService.CargoSize((UnitTypes)friendly.Unit.UnitType))
                         {
                             if (ShouldLoadUnit(friendly, friendly.Unit.Health + (friendly.Unit.ShieldMax / 2), frame))
                             {
@@ -148,7 +147,7 @@ namespace Sharky.MicroControllers.Protoss
             {
                 return false;
             }
-            if (ActiveUnitData.Commanders.Values.Where(v => v.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPGATE && !v.UnitCalculation.Unit.IsActive && v.WarpInAlmostOffCooldown(frame, SharkyOptions.FramesPerSecond, UnitDataManager)).Count() == 0)
+            if (ActiveUnitData.Commanders.Values.Where(v => v.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPGATE && !v.UnitCalculation.Unit.IsActive && v.WarpInAlmostOffCooldown(frame, SharkyOptions.FramesPerSecond, SharkyUnitData)).Count() == 0)
             {
                 return false;
             }
@@ -192,7 +191,7 @@ namespace Sharky.MicroControllers.Protoss
             {
                 if (friendly.Unit.Shield != friendly.Unit.ShieldMax)
                 {
-                    return ActiveUnitData.Commanders[friendly.Unit.Tag].AbilityOffCooldown(Abilities.EFFECT_PURIFICATIONNOVA, frame, SharkyOptions.FramesPerSecond, UnitDataManager);
+                    return ActiveUnitData.Commanders[friendly.Unit.Tag].AbilityOffCooldown(Abilities.EFFECT_PURIFICATIONNOVA, frame, SharkyOptions.FramesPerSecond, SharkyUnitData);
                 }
             }
             if (friendly.Unit.WeaponCooldown > 0 && (friendly.Unit.Health + friendly.Unit.Shield) < healthLimit && friendly.Unit.Shield != friendly.Unit.ShieldMax) // TODO: or could die in one hit
@@ -377,7 +376,7 @@ namespace Sharky.MicroControllers.Protoss
 
             if (commander.UnitCalculation.Unit.CargoSpaceMax > commander.UnitCalculation.Unit.CargoSpaceTaken && commander.UnitCalculation.Unit.Shield + commander.UnitCalculation.Unit.Health > 50) // find more units to load
             {
-                var friendly = commander.UnitCalculation.NearbyAllies.Where(u => !u.Unit.IsFlying && u.Unit.BuildProgress == 1 && u.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !commander.UnitCalculation.Unit.Passengers.Any(p => p.Tag == u.Unit.Tag) && commander.UnitCalculation.Unit.CargoSpaceMax - commander.UnitCalculation.Unit.CargoSpaceTaken >= UnitDataManager.CargoSize((UnitTypes)u.Unit.UnitType) && u.EnemiesInRange.Count == 0 && u.EnemiesInRangeOf.Count == 0).OrderBy(u => Vector2.DistanceSquared(new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y), new Vector2(u.Unit.Pos.X, u.Unit.Pos.Y))).FirstOrDefault();
+                var friendly = commander.UnitCalculation.NearbyAllies.Where(u => !u.Unit.IsFlying && u.Unit.BuildProgress == 1 && u.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !commander.UnitCalculation.Unit.Passengers.Any(p => p.Tag == u.Unit.Tag) && commander.UnitCalculation.Unit.CargoSpaceMax - commander.UnitCalculation.Unit.CargoSpaceTaken >= UnitDataService.CargoSize((UnitTypes)u.Unit.UnitType) && u.EnemiesInRange.Count == 0 && u.EnemiesInRangeOf.Count == 0).OrderBy(u => Vector2.DistanceSquared(new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y), new Vector2(u.Unit.Pos.X, u.Unit.Pos.Y))).FirstOrDefault();
 
                 if (friendly != null)
                 {
@@ -451,7 +450,7 @@ namespace Sharky.MicroControllers.Protoss
 
                         if (Vector2.DistanceSquared(new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y), new Vector2(miningLocation.X, miningLocation.Y)) < .5)
                         {
-                            var probe = commander.UnitCalculation.NearbyAllies.Where(a => a.Unit.BuffIds.Any(b => UnitDataManager.CarryingMineralBuffs.Contains((Buffs)b)) && InRange(a.Unit.Pos, commander.UnitCalculation.Unit.Pos, PickupRange) && !InRange(a.Unit.Pos, nexus.Value.Unit.Pos, nexus.Value.Unit.Radius + 1)).OrderByDescending(u => DistanceSquared(nexus.Value, u)).FirstOrDefault();
+                            var probe = commander.UnitCalculation.NearbyAllies.Where(a => a.Unit.BuffIds.Any(b => SharkyUnitData.CarryingMineralBuffs.Contains((Buffs)b)) && InRange(a.Unit.Pos, commander.UnitCalculation.Unit.Pos, PickupRange) && !InRange(a.Unit.Pos, nexus.Value.Unit.Pos, nexus.Value.Unit.Radius + 1)).OrderByDescending(u => DistanceSquared(nexus.Value, u)).FirstOrDefault();
                             if (probe != null)
                             {
                                 action = commander.Order(frame, Abilities.LOAD, null, probe.Unit.Tag);

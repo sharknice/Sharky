@@ -7,13 +7,13 @@ namespace Sharky.Managers.Protoss
     public class NexusManager : SharkyManager
     {
         ActiveUnitData ActiveUnitData;
-        UnitDataManager UnitDataManager;
+        SharkyUnitData SharkyUnitData;
         ChronoData ChronoData;
 
-        public NexusManager(ActiveUnitData activeUnitData, UnitDataManager unitDataManager, ChronoData chronoData)
+        public NexusManager(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, ChronoData chronoData)
         {
             ActiveUnitData = activeUnitData;
-            UnitDataManager = unitDataManager;
+            SharkyUnitData = sharkyUnitData;
             ChronoData = chronoData;
         }
 
@@ -40,7 +40,7 @@ namespace Sharky.Managers.Protoss
             {
                 foreach (var upgrade in ChronoData.ChronodUpgrades)
                 {
-                    var upgradeData = UnitDataManager.UpgradeData[upgrade];
+                    var upgradeData = SharkyUnitData.UpgradeData[upgrade];
                     var building = ActiveUnitData.SelfUnits.Where(u => !u.Value.Unit.BuffIds.Contains((uint)Buffs.CHRONOBOOST) && upgradeData.ProducingUnits.Contains((UnitTypes)u.Value.Unit.UnitType) && u.Value.Unit.Orders.Any(o => o.AbilityId == (uint)upgradeData.Ability)).FirstOrDefault().Value;
                     if (building != null)
                     {
@@ -50,7 +50,7 @@ namespace Sharky.Managers.Protoss
 
                 foreach (var unit in ChronoData.ChronodUnits)
                 {
-                    var trainingData = UnitDataManager.TrainingData[unit];
+                    var trainingData = SharkyUnitData.TrainingData[unit];
                     var building = ActiveUnitData.SelfUnits.Where(u => !u.Value.Unit.BuffIds.Contains((uint)Buffs.CHRONOBOOST) && trainingData.ProducingUnits.Contains((UnitTypes)u.Value.Unit.UnitType) && u.Value.Unit.Orders.Any(o => o.AbilityId == (uint)trainingData.Ability)).FirstOrDefault().Value;
                     if (building != null)
                     {

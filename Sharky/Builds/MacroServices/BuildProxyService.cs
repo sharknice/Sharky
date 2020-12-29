@@ -1,5 +1,4 @@
 ﻿using SC2APIProtocol;
-using Sharky.Managers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -10,23 +9,19 @@ namespace Sharky.Builds.MacroServices
     {
         MacroData MacroData;
         IBuildingBuilder BuildingBuilder;
-        UnitDataManager UnitDataManager;
+        SharkyUnitData SharkyUnitData;
         ActiveUnitData ActiveUnitData;
-        BaseData BaseData;
-        TargetingData TargetingData;
         Morpher Morpher;
         MicroTaskData MicroTaskData;
 
         int lastFailFrame;
 
-        public BuildProxyService(MacroData macroData, IBuildingBuilder buildingBuilder, UnitDataManager unitDataManager, ActiveUnitData activeUnitData, BaseData baseData, TargetingData targetingData, Morpher morpher, MicroTaskData microTaskData)
+        public BuildProxyService(MacroData macroData, IBuildingBuilder buildingBuilder, SharkyUnitData sharkyUnitData, ActiveUnitData activeUnitData, Morpher morpher, MicroTaskData microTaskData)
         {
             MacroData = macroData;
             BuildingBuilder = buildingBuilder;
-            UnitDataManager = unitDataManager;
+            SharkyUnitData = sharkyUnitData;
             ActiveUnitData = activeUnitData;
-            BaseData = baseData;
-            TargetingData = targetingData;
             Morpher = morpher;
             MicroTaskData = microTaskData;
 
@@ -39,7 +34,7 @@ namespace Sharky.Builds.MacroServices
 
             if (lastFailFrame < MacroData.Frame - 100)
             {
-                var unitData = UnitDataManager.BuildingData[UnitTypes.PROTOSS_PYLON];
+                var unitData = SharkyUnitData.BuildingData[UnitTypes.PROTOSS_PYLON];
                 var orderedBuildings = ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
                 foreach (var proxy in MacroData.Proxies)
                 {
@@ -74,7 +69,7 @@ namespace Sharky.Builds.MacroServices
                     {
                         if (unit.Value > 0)
                         {
-                            var unitData = UnitDataManager.BuildingData[unit.Key];
+                            var unitData = SharkyUnitData.BuildingData[unit.Key];
 
                             var orderedBuildings = ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
 
@@ -111,7 +106,7 @@ namespace Sharky.Builds.MacroServices
                     {
                         if (unit.Value > 0)
                         {
-                            var unitData = UnitDataManager.BuildingData[unit.Key];
+                            var unitData = SharkyUnitData.BuildingData[unit.Key];
 
                             var orderedBuildings = ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
                             if (unit.Key == UnitTypes.PROTOSS_GATEWAY)
@@ -148,7 +143,7 @@ namespace Sharky.Builds.MacroServices
             {
                 if (unit.Value)
                 {
-                    var unitData = UnitDataManager.MorphData[unit.Key];
+                    var unitData = SharkyUnitData.MorphData[unit.Key];
                     var command = Morpher.MorphBuilding(MacroData, unitData);
                     if (command != null)
                     {
@@ -173,7 +168,7 @@ namespace Sharky.Builds.MacroServices
                     {
                         if (unit.Value > 0)
                         {
-                            var unitData = UnitDataManager.BuildingData[unit.Key];
+                            var unitData = SharkyUnitData.BuildingData[unit.Key];
 
                             var orderedBuildings = ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
 
@@ -210,7 +205,7 @@ namespace Sharky.Builds.MacroServices
                     {
                         if (ActiveUnitData.SelfUnits.Count(u => u.Value.Unit.UnitType == (uint)unit.Key && Vector2.DistanceSquared(new Vector2(u.Value.Unit.Pos.X, u.Value.Unit.Pos.Y), new Vector2(proxy.Value.Location.X, proxy.Value.Location.Y)) < proxy.Value.MaximumBuildingDistance * proxy.Value.MaximumBuildingDistance) < unit.Value)
                         {
-                            var unitData = UnitDataManager.AddOnData[unit.Key];
+                            var unitData = SharkyUnitData.AddOnData[unit.Key];
                             var command = BuildingBuilder.BuildAddOn(MacroData, unitData, proxy.Value.Location);
                             if (command != null)
                             {

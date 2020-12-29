@@ -1,5 +1,4 @@
 ﻿using SC2APIProtocol;
-using Sharky.Managers;
 using Sharky.Pathing;
 using System;
 using System.Linq;
@@ -10,15 +9,15 @@ namespace Sharky.Builds.BuildingPlacement
     public class ProtossBuildingPlacement : IBuildingPlacement
     {
         ActiveUnitData ActiveUnitData;
-        UnitDataManager UnitDataManager;
+        SharkyUnitData SharkyUnitData;
         DebugService DebugService;
         MapData MapData;
         BuildingService BuildingService;
 
-        public ProtossBuildingPlacement(ActiveUnitData activeUnitData, UnitDataManager unitDataManager, DebugService debugService, MapData mapData, BuildingService buildingService)
+        public ProtossBuildingPlacement(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, DebugService debugService, MapData mapData, BuildingService buildingService)
         {
             ActiveUnitData = activeUnitData;
-            UnitDataManager = unitDataManager;
+            SharkyUnitData = sharkyUnitData;
             DebugService = debugService;
             MapData = mapData;
             BuildingService = buildingService;
@@ -58,7 +57,7 @@ namespace Sharky.Builds.BuildingPlacement
 
                     if (BuildingService.AreaBuildable(point.X, point.Y, 1.25f) && !BuildingService.Blocked(point.X, point.Y, 1.25f) && !BuildingService.HasCreep(point.X, point.Y, 1.5f))
                     {
-                        var mineralFields = ActiveUnitData.NeutralUnits.Where(u => UnitDataManager.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType) || UnitDataManager.GasGeyserTypes.Contains((UnitTypes)u.Value.Unit.UnitType));
+                        var mineralFields = ActiveUnitData.NeutralUnits.Where(u => SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType) || SharkyUnitData.GasGeyserTypes.Contains((UnitTypes)u.Value.Unit.UnitType));
                         var squared = (1 + minimumMineralProximinity + .5) * (1 + minimumMineralProximinity + .5);
                         var nexusDistanceSquared = 16f;
                         if (minimumMineralProximinity == 0) { nexusDistanceSquared = 0; }
@@ -107,7 +106,7 @@ namespace Sharky.Builds.BuildingPlacement
 
                         if (BuildingService.AreaBuildable(point.X, point.Y, size / 2.0f) && !BuildingService.Blocked(point.X, point.Y, size / 2.0f) && !BuildingService.HasCreep(point.X, point.Y, size / 2.0f))
                         {
-                            var mineralFields = ActiveUnitData.NeutralUnits.Where(u => UnitDataManager.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType));
+                            var mineralFields = ActiveUnitData.NeutralUnits.Where(u => SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType));
                             var squared = (1 + minimumMineralProximinity + (size / 2f)) * (1 + minimumMineralProximinity + (size / 2f));
                             var clashes = mineralFields.Where(u => Vector2.DistanceSquared(new Vector2(u.Value.Unit.Pos.X, u.Value.Unit.Pos.Y), new Vector2(point.X, point.Y)) < squared);
 

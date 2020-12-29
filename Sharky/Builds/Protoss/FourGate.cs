@@ -1,21 +1,20 @@
 ﻿using SC2APIProtocol;
 using Sharky.Builds.BuildChoosing;
 using Sharky.Chat;
-using Sharky.Managers;
 using System.Collections.Generic;
 
 namespace Sharky.Builds.Protoss
 {
     public class FourGate : ProtossSharkyBuild
     {
-        UnitDataManager UnitDataManager;
+        SharkyUnitData SharkyUnitData;
 
         bool OpeningAttackChatSent;
 
-        public FourGate(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, ChronoData chronoData, UnitDataManager unitDataManager, ICounterTransitioner counterTransitioner, UnitCountService unitCountService) 
+        public FourGate(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, ChronoData chronoData, SharkyUnitData sharkyUnitData, ICounterTransitioner counterTransitioner, UnitCountService unitCountService) 
             : base(buildOptions, macroData, activeUnitData, attackData, chatService, chronoData, counterTransitioner, unitCountService)
         {
-            UnitDataManager = unitDataManager;
+            SharkyUnitData = sharkyUnitData;
 
             OpeningAttackChatSent = false;
         }
@@ -105,7 +104,7 @@ namespace Sharky.Builds.Protoss
                     MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_SENTRY] = 1;
                 }
             }
-            if (UnitDataManager.ResearchedUpgrades.Contains((uint)Upgrades.WARPGATERESEARCH))
+            if (SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.WARPGATERESEARCH))
             {
                 if (MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_ZEALOT] < 3)
                 {

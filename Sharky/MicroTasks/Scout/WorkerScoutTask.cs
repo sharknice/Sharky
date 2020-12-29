@@ -1,5 +1,4 @@
-﻿using Sharky.Managers;
-using Sharky.MicroControllers;
+﻿using Sharky.MicroControllers;
 using Sharky.Pathing;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -9,16 +8,16 @@ namespace Sharky.MicroTasks
 {
     public class WorkerScoutTask : MicroTask
     {
-        UnitDataManager UnitDataManager;
+        SharkyUnitData SharkyUnitData;
         TargetingData TargetingData;
         MapDataService MapDataService;
         IIndividualMicroController IndividualMicroController;
 
         bool started { get; set; }
 
-        public WorkerScoutTask(UnitDataManager unitDataManager, TargetingData targetingData, MapDataService mapDataService, bool enabled, float priority, IIndividualMicroController individualMicroController)
+        public WorkerScoutTask(SharkyUnitData sharkyUnitData, TargetingData targetingData, MapDataService mapDataService, bool enabled, float priority, IIndividualMicroController individualMicroController)
         {
-            UnitDataManager = unitDataManager;
+            SharkyUnitData = sharkyUnitData;
             TargetingData = targetingData;
             MapDataService = mapDataService;
             Priority = priority;
@@ -42,7 +41,7 @@ namespace Sharky.MicroTasks
                 {
                     if (!commander.Value.Claimed && commander.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker))
                     {
-                        if (commander.Value.UnitCalculation.Unit.Orders.Any(o => !UnitDataManager.MiningAbilities.Contains((Abilities)o.AbilityId)))
+                        if (commander.Value.UnitCalculation.Unit.Orders.Any(o => !SharkyUnitData.MiningAbilities.Contains((Abilities)o.AbilityId)))
                         {
                         }
                         else

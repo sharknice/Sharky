@@ -1,5 +1,4 @@
 ﻿using SC2APIProtocol;
-using Sharky.Managers;
 using System.Linq;
 using System.Numerics;
 
@@ -13,9 +12,9 @@ namespace Sharky.Builds.BuildingPlacement
         BaseData BaseData;
         ActiveUnitData ActiveUnitData;
         BuildingService BuildingService;
-        UnitDataManager UnitDataManager;
+        SharkyUnitData SharkyUnitData;
 
-        public BuildingPlacement(IBuildingPlacement protossBuildingPlacement, IBuildingPlacement terranBuildingPlacement, IBuildingPlacement zergBuildingPlacement, BaseData baseData, ActiveUnitData activeUnitData, BuildingService buildingService, UnitDataManager unitDataManager)
+        public BuildingPlacement(IBuildingPlacement protossBuildingPlacement, IBuildingPlacement terranBuildingPlacement, IBuildingPlacement zergBuildingPlacement, BaseData baseData, ActiveUnitData activeUnitData, BuildingService buildingService, SharkyUnitData sharkyUnitData)
         {
             ProtossBuildingPlacement = protossBuildingPlacement;
             TerranBuildingPlacement = terranBuildingPlacement;
@@ -23,7 +22,7 @@ namespace Sharky.Builds.BuildingPlacement
             BaseData = baseData;
             ActiveUnitData = activeUnitData;
             BuildingService = buildingService;
-            UnitDataManager = unitDataManager;
+            SharkyUnitData = sharkyUnitData;
         }
 
         public Point2D FindPlacement(Point2D target, UnitTypes unitType, int size, bool ignoreResourceProximity = false, float maxDistance = 50)
@@ -33,11 +32,11 @@ namespace Sharky.Builds.BuildingPlacement
                 return GetResourceCenterLocation();
             }
 
-            if (UnitDataManager.TerranTypes.Contains(unitType))
+            if (SharkyUnitData.TerranTypes.Contains(unitType))
             {
                 return TerranBuildingPlacement.FindPlacement(target, unitType, size, ignoreResourceProximity, maxDistance);
             }
-            else if (UnitDataManager.ProtossTypes.Contains(unitType))
+            else if (SharkyUnitData.ProtossTypes.Contains(unitType))
             {
                 return ProtossBuildingPlacement.FindPlacement(target, unitType, size, ignoreResourceProximity, maxDistance);
             }

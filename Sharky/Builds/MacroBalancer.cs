@@ -1,5 +1,4 @@
 ﻿using SC2APIProtocol;
-using Sharky.Managers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,15 +10,15 @@ namespace Sharky.Builds
         BuildOptions BuildOptions;
         ActiveUnitData ActiveUnitData;
         MacroData MacroData;
-        UnitDataManager UnitDataManager;
+        SharkyUnitData SharkyUnitData;
         UnitCountService UnitCountService;
 
-        public MacroBalancer(BuildOptions buildOptions, ActiveUnitData activeUnitData, MacroData macroData, UnitDataManager unitDataManager, UnitCountService unitCountService)
+        public MacroBalancer(BuildOptions buildOptions, ActiveUnitData activeUnitData, MacroData macroData, SharkyUnitData sharkyUnitData, UnitCountService unitCountService)
         {
             BuildOptions = buildOptions;
             ActiveUnitData = activeUnitData;
             MacroData = macroData;
-            UnitDataManager = unitDataManager;
+            SharkyUnitData = sharkyUnitData;
             UnitCountService = unitCountService;
         }
 
@@ -97,7 +96,7 @@ namespace Sharky.Builds
         {
             foreach (var u in MacroData.Tech)
             {
-                var unitData = UnitDataManager.BuildingData[u];
+                var unitData = SharkyUnitData.BuildingData[u];
                 MacroData.BuildTech[u] = UnitCountService.EquivalentTypeCount(u) + ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability)) < MacroData.DesiredTechCounts[u];
             }
         }
@@ -114,7 +113,7 @@ namespace Sharky.Builds
         {
             foreach (var u in MacroData.DefensiveBuildings)
             {
-                var unitData = UnitDataManager.BuildingData[u];
+                var unitData = SharkyUnitData.BuildingData[u];
                 MacroData.BuildDefensiveBuildings[u] = UnitCountService.Count(u) + ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability)) < MacroData.DesiredDefensiveBuildingsCounts[u];
             }
         }
@@ -123,7 +122,7 @@ namespace Sharky.Builds
         {
             foreach (var u in MacroData.Production)
             {
-                var unitData = UnitDataManager.BuildingData[u];
+                var unitData = SharkyUnitData.BuildingData[u];
                 MacroData.BuildProduction[u] = UnitCountService.EquivalentTypeCount(u) + ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability)) < MacroData.DesiredProductionCounts[u];
             }
         }
@@ -132,7 +131,7 @@ namespace Sharky.Builds
         {
             foreach (var u in MacroData.Morphs)
             {
-                var unitData = UnitDataManager.MorphData[u];
+                var unitData = SharkyUnitData.MorphData[u];
                 MacroData.Morph[u] = UnitCountService.EquivalentTypeCount(u) + ActiveUnitData.Commanders.Values.Count(c => unitData.ProducingUnits.Contains((UnitTypes)c.UnitCalculation.Unit.UnitType) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability)) < MacroData.DesiredMorphCounts[u];
             }
         }
@@ -303,7 +302,7 @@ namespace Sharky.Builds
                     continue;
                 }
 
-                var trainingData = UnitDataManager.TrainingData[u];
+                var trainingData = SharkyUnitData.TrainingData[u];
                 if (u == UnitTypes.PROTOSS_WARPPRISM) { count += UnitCountService.Count(UnitTypes.PROTOSS_WARPPRISMPHASING); }
 
                 var actualRatio = count / (double)currentTotal;
@@ -314,7 +313,7 @@ namespace Sharky.Builds
                 }
                 else if (actualRatio > desiredRatio || count >= MacroData.DesiredUnitCounts[u])
                 {
-                    if (MacroData.DesiredUnitCounts[u] < MacroData.DesiredUnitCounts[u] && MacroData.Minerals > 350 && UnitDataManager.UnitData[u].VespeneCost == 0) // TODO: this has got to be wrong
+                    if (MacroData.DesiredUnitCounts[u] < MacroData.DesiredUnitCounts[u] && MacroData.Minerals > 350 && SharkyUnitData.UnitData[u].VespeneCost == 0) // TODO: this has got to be wrong
                     {
                         MacroData.BuildUnits[u] = true;
                     }

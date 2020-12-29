@@ -1,5 +1,4 @@
 ﻿using SC2APIProtocol;
-using Sharky.Pathing;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -8,20 +7,16 @@ namespace Sharky.Managers
 {
     public class TargetingManager : IManager
     {
-        ActiveUnitData ActiveUnitData;
-        UnitDataManager UnitDataManager;
-        MapDataService MapDataService;
+        SharkyUnitData SharkyUnitData;
         BaseData BaseData;
         MacroData MacroData;
         TargetingData TargetingData;
 
         int baseCount;
 
-        public TargetingManager(ActiveUnitData activeUnitData, UnitDataManager unitDataManager, MapDataService mapDataService, BaseData baseData, MacroData macroData, TargetingData targetingData)
+        public TargetingManager(SharkyUnitData sharkyUnitData, BaseData baseData, MacroData macroData, TargetingData targetingData)
         {
-            ActiveUnitData = activeUnitData;
-            UnitDataManager = unitDataManager;
-            MapDataService = mapDataService;
+            SharkyUnitData = sharkyUnitData;
             BaseData = baseData;
             MacroData = macroData;
             TargetingData = targetingData;
@@ -36,7 +31,7 @@ namespace Sharky.Managers
                 TargetingData.AttackPoint = location;
                 TargetingData.EnemyMainBasePoint = location;
             }
-            foreach (var unit in observation.Observation.RawData.Units.Where(u => u.Alliance == Alliance.Self && UnitDataManager.UnitData[(UnitTypes)u.UnitType].Attributes.Contains(SC2APIProtocol.Attribute.Structure)))
+            foreach (var unit in observation.Observation.RawData.Units.Where(u => u.Alliance == Alliance.Self && SharkyUnitData.UnitData[(UnitTypes)u.UnitType].Attributes.Contains(SC2APIProtocol.Attribute.Structure)))
             {
                 TargetingData.MainDefensePoint = new Point2D { X = unit.Pos.X, Y = unit.Pos.Y };
                 TargetingData.ForwardDefensePoint = new Point2D { X = unit.Pos.X, Y = unit.Pos.Y };
