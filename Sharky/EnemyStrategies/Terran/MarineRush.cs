@@ -1,5 +1,4 @@
 ﻿using Sharky.Chat;
-using Sharky.Managers;
 
 namespace Sharky.EnemyStrategies.Terran
 {

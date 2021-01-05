@@ -40,6 +40,10 @@ namespace Sharky.MicroTasks
             }
             Enabled = true;
             started = false;
+            if (MacroData.Proxies.ContainsKey(ProxyName))
+            {
+                MacroData.Proxies[ProxyName].Enabled = true;
+            }
         }
 
         public override void Disable()
@@ -51,7 +55,10 @@ namespace Sharky.MicroTasks
             UnitCommanders = new List<UnitCommander>();
 
             Enabled = false;
-            MacroData.Proxies[ProxyName].Enabled = false;
+            if (MacroData.Proxies.ContainsKey(ProxyName))
+            {
+                MacroData.Proxies[ProxyName].Enabled = false;
+            }
         }
 
         public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)

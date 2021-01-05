@@ -80,8 +80,14 @@ namespace Sharky.Managers
             }
 
             var targetPriority = TargetPriorityService.CalculateTargetPriority(AttackTask.UnitCommanders.Select(c => c.UnitCalculation), enemyUnits);
-            
-            if (targetPriority.OverallWinnability >= 1 || targetPriority.GroundWinnability > 2 || targetPriority.AirWinnability > 2)
+
+            var overallTrigger = 1f;
+            if (!AttackData.Attacking)
+            {
+                overallTrigger = 1.5f;
+            }
+
+            if (targetPriority.OverallWinnability >= overallTrigger || targetPriority.GroundWinnability > 2 || targetPriority.AirWinnability > 2)
             {
                 AttackData.Attacking = true;
                 DebugService.DrawText($"Attacking: O:{targetPriority.OverallWinnability:0.00}, G:{targetPriority.GroundWinnability:0.00}, A:{targetPriority.AirWinnability:0.00}");

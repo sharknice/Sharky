@@ -73,6 +73,7 @@ namespace Sharky.DefaultBot
         public ChatService ChatService { get; set; }
         public DebugService DebugService { get; set; }
         public UnitDataService UnitDataService { get; set; }
+        public BuildingCancelService BuildingCancelService { get; set; }
 
         public ActiveUnitData ActiveUnitData { get; set; }
         public MapData MapData { get; set; }
@@ -275,7 +276,8 @@ namespace Sharky.DefaultBot
             Managers.Add(AttackDataManager);
 
             BuildProxyService = new BuildProxyService(MacroData, BuildingBuilder, SharkyUnitData, ActiveUnitData, Morpher, MicroTaskData);
-            MacroManager = new MacroManager(MacroSetup, ActiveUnitData, SharkyUnitData, BuildingBuilder, SharkyOptions, BaseData, TargetingData, AttackData, WarpInPlacement, MacroData, Morpher, BuildPylonService, BuildDefenseService, BuildProxyService, UnitCountService);
+            BuildingCancelService = new BuildingCancelService(ActiveUnitData, MacroData);
+            MacroManager = new MacroManager(MacroSetup, ActiveUnitData, SharkyUnitData, BuildingBuilder, SharkyOptions, BaseData, TargetingData, AttackData, WarpInPlacement, MacroData, Morpher, BuildPylonService, BuildDefenseService, BuildProxyService, UnitCountService, BuildingCancelService);
             Managers.Add(MacroManager);
 
             EnemyStrategyHistory = new EnemyStrategyHistory();

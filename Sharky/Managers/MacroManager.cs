@@ -26,6 +26,7 @@ namespace Sharky.Managers
         BuildDefenseService BuildDefenseService;
         BuildProxyService BuildProxyService;
         UnitCountService UnitCountService;
+        BuildingCancelService BuildingCancelService;
 
         bool SkipFrame;
         bool SkipSupply;
@@ -33,7 +34,8 @@ namespace Sharky.Managers
         bool SkipTech;
         bool SkipAddons;
 
-        public MacroManager(MacroSetup macroSetup, ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, IBuildingBuilder buildingBuilder, SharkyOptions sharkyOptions, BaseData baseData, TargetingData targetingData, AttackData attackData, IBuildingPlacement warpInPlacement, MacroData macroData, Morpher morpher, BuildPylonService buildPylonService, BuildDefenseService buildDefenseService, BuildProxyService buildProxyService, UnitCountService unitCountService)
+        public MacroManager(MacroSetup macroSetup, ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, IBuildingBuilder buildingBuilder, SharkyOptions sharkyOptions, BaseData baseData, TargetingData targetingData, AttackData attackData, IBuildingPlacement warpInPlacement, MacroData macroData, Morpher morpher, 
+            BuildPylonService buildPylonService, BuildDefenseService buildDefenseService, BuildProxyService buildProxyService, UnitCountService unitCountService, BuildingCancelService buildingCancelService)
         {
             MacroSetup = macroSetup;
             ActiveUnitData = activeUnitData;
@@ -51,6 +53,7 @@ namespace Sharky.Managers
             BuildDefenseService = buildDefenseService;
             BuildProxyService = buildProxyService;
             UnitCountService = unitCountService;
+            BuildingCancelService = buildingCancelService;
 
             MacroData.DesiredUpgrades = new Dictionary<Upgrades, bool>();
         }
@@ -112,6 +115,8 @@ namespace Sharky.Managers
 
             actions.AddRange(ResearchUpgrades());
             actions.AddRange(ProduceUnits());
+
+            actions.AddRange(BuildingCancelService.CancelBuildings());
 
             if (stopwatch.ElapsedMilliseconds > 1)
             {

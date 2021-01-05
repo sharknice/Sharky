@@ -1,5 +1,5 @@
 ﻿using Sharky.Chat;
-using Sharky.Managers;
+using System.Linq;
 
 namespace Sharky.EnemyStrategies.Zerg
 {
@@ -17,12 +17,12 @@ namespace Sharky.EnemyStrategies.Zerg
 
         protected override bool Detect(int frame)
         {
-            if (UnitCountService.EnemyCount(UnitTypes.ZERG_ZERGLING) >= 4 && frame < SharkyOptions.FramesPerSecond * 4 * 60)
+            if (UnitCountService.EnemyCount(UnitTypes.ZERG_ZERGLING) >= 4 && frame < SharkyOptions.FramesPerSecond * 4 * 60 && !ActiveUnitData.EnemyUnits.Any(e => e.Value.UnitClassifications.Contains(UnitClassification.ArmyUnit) && e.Value.Unit.UnitType != (uint)UnitTypes.ZERG_ZERGLING))
             {
                 return true;
             }
 
-            if (frame < SharkyOptions.FramesPerSecond * 5 * 60 && UnitCountService.EnemyCount(UnitTypes.ZERG_ZERGLING) >= 6 && UnitCountService.EnemyCount(UnitTypes.ZERG_ROACH) == 0 && UnitCountService.EnemyCount(UnitTypes.TERRAN_REFINERY) <= 1 && UnitCountService.EnemyCount(UnitTypes.ZERG_ROACHWARREN) == 0)
+            if (frame < SharkyOptions.FramesPerSecond * 5 * 60 && UnitCountService.EnemyCount(UnitTypes.ZERG_ZERGLING) >= 6 && !ActiveUnitData.EnemyUnits.Any(e => e.Value.UnitClassifications.Contains(UnitClassification.ArmyUnit) && e.Value.Unit.UnitType != (uint)UnitTypes.ZERG_ZERGLING) && UnitCountService.EnemyCount(UnitTypes.ZERG_EXTRACTOR) <= 1 && UnitCountService.EnemyCount(UnitTypes.ZERG_ROACHWARREN) == 0)
             {
                 return true;
             }

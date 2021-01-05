@@ -1,5 +1,4 @@
 ﻿using SC2APIProtocol;
-using Sharky.Managers;
 using Sharky.Pathing;
 using System;
 using System.Linq;

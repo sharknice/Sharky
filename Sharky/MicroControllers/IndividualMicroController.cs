@@ -551,7 +551,7 @@ namespace Sharky.MicroControllers
 
             var range = commander.UnitCalculation.Range;
 
-            var attacks = new List<UnitCalculation>(commander.UnitCalculation.EnemiesInRange.Where(u => u.Unit.DisplayType != DisplayType.Hidden)); // units that are in range right now
+            var attacks = new List<UnitCalculation>(commander.UnitCalculation.EnemiesInRange.Where(u => u.Unit.DisplayType == DisplayType.Visible)); // units that are in range right now
 
             UnitCalculation bestAttack = null;
             if (attacks.Count > 0)
@@ -601,7 +601,7 @@ namespace Sharky.MicroControllers
             attacks = new List<UnitCalculation>(); // nearby units not in range right now
             foreach (var enemyAttack in commander.UnitCalculation.NearbyEnemies)
             {
-                if (enemyAttack.Unit.DisplayType != DisplayType.Hidden && DamageService.CanDamage(commander.UnitCalculation.Weapons, enemyAttack.Unit) && !InRange(enemyAttack.Unit.Pos, commander.UnitCalculation.Unit.Pos, range + enemyAttack.Unit.Radius + commander.UnitCalculation.Unit.Radius))
+                if (enemyAttack.Unit.DisplayType == DisplayType.Visible && DamageService.CanDamage(commander.UnitCalculation.Weapons, enemyAttack.Unit) && !InRange(enemyAttack.Unit.Pos, commander.UnitCalculation.Unit.Pos, range + enemyAttack.Unit.Radius + commander.UnitCalculation.Unit.Radius))
                 {
                     attacks.Add(enemyAttack);
                 }
@@ -633,7 +633,7 @@ namespace Sharky.MicroControllers
                 attacks = new List<UnitCalculation>(); // enemies in the main enemy base
                 foreach (var enemyAttack in unitsNearEnemyMain)
                 {
-                    if (enemyAttack.Unit.DisplayType != DisplayType.Hidden && DamageService.CanDamage(commander.UnitCalculation.Weapons, enemyAttack.Unit))
+                    if (enemyAttack.Unit.DisplayType == DisplayType.Visible && DamageService.CanDamage(commander.UnitCalculation.Weapons, enemyAttack.Unit))
                     {
                         attacks.Add(enemyAttack);
                     }

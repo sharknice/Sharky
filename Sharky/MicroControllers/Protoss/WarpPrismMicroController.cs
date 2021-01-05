@@ -79,7 +79,7 @@ namespace Sharky.MicroControllers.Protoss
             }
 
             var moveTo = GetPickupSpot(new Point2D { X = unitToSupport.Unit.Pos.X, Y = unitToSupport.Unit.Pos.Y }, defensivePoint);
-            if (commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.UNLOADALLAT_WARPPRISM) && MapDataService.PathWalkable(moveTo)) // TODO: does this groundpathable thing work right?
+            if (commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.UNLOADALLAT_WARPPRISM) || !MapDataService.PathWalkable(moveTo)) // TODO: does this groundpathable thing work right?
             {
                 moveTo = new Point2D { X = unitToSupport.Unit.Pos.X, Y = unitToSupport.Unit.Pos.Y };
             }
