@@ -55,6 +55,23 @@ namespace Sharky.Builds.BuildingPlacement
                     var point = new Point2D { X = x + (float)(radius * Math.Cos(angle)), Y = y + (float)(radius * Math.Sin(angle)) };
                     //DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
 
+                    //if (!BuildingService.AreaBuildable(point.X, point.Y, 1.25f))
+                    //{
+                    //    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 }, 1, new Color { R = 255, G = 0, B = 0 });
+                    //}
+                    //else if (BuildingService.Blocked(point.X, point.Y, 1.25f))
+                    //{
+                    //    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 }, 1, new Color { R = 255, G = 255, B = 0 });
+                    //}
+                    //else if (BuildingService.HasCreep(point.X, point.Y, 1.5f))
+                    //{
+                    //    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 }, 1, new Color { R = 255, G = 255, B = 255 });
+                    //}
+                    //else
+                    //{
+                    //    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 }, 1, new Color { R = 0, G = 255, B = 0 });
+                    //}
+
                     if (BuildingService.AreaBuildable(point.X, point.Y, 1.25f) && !BuildingService.Blocked(point.X, point.Y, 1.25f) && !BuildingService.HasCreep(point.X, point.Y, 1.5f))
                     {
                         var mineralFields = ActiveUnitData.NeutralUnits.Where(u => SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType) || SharkyUnitData.GasGeyserTypes.Contains((UnitTypes)u.Value.Unit.UnitType));

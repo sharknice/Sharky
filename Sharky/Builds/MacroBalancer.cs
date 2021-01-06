@@ -158,7 +158,7 @@ namespace Sharky.Builds
                 var resourceCenters = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.ResourceCenter));
                 var completedResourceCenters = resourceCenters.Where(n => n.UnitCalculation.Unit.BuildProgress == 1);
                 var buildingResourceCentersCount = resourceCenters.Count(n => n.UnitCalculation.Unit.BuildProgress < 1);
-                var desiredWorkers = completedResourceCenters.Sum(n => n.UnitCalculation.Unit.IdealHarvesters + 4) + (buildingResourceCentersCount * 22) + 1; // +4 because 2 are inside the gases and you can't see them
+                var desiredWorkers = completedResourceCenters.Sum(n => n.UnitCalculation.Unit.IdealHarvesters + 6) + (buildingResourceCentersCount * 22) + 1; // +6 because gas, +1 to build
                 if (desiredWorkers > 70)
                 {
                     desiredWorkers = 70;

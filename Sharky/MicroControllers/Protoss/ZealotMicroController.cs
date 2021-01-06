@@ -1,4 +1,5 @@
-﻿using Sharky.Pathing;
+﻿using SC2APIProtocol;
+using Sharky.Pathing;
 
 namespace Sharky.MicroControllers.Protoss
 {
@@ -7,7 +8,18 @@ namespace Sharky.MicroControllers.Protoss
         public ZealotMicroController(MapDataService mapDataService, SharkyUnitData sharkyUnitData, ActiveUnitData activeUnitData, DebugService debugService, IPathFinder sharkyPathFinder, BaseData baseData, SharkyOptions sharkyOptions, DamageService damageService, UnitDataService unitDataService, MicroPriority microPriority, bool groupUpEnabled) 
             : base(mapDataService, sharkyUnitData, activeUnitData, debugService, sharkyPathFinder, baseData, sharkyOptions, damageService, unitDataService, microPriority, groupUpEnabled)
         {
+        }
 
+        protected override bool AvoidTargettedDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out SC2APIProtocol.Action action)
+        {
+            action = null;
+
+            if (commander.UnitCalculation.Unit.Shield > 0)
+            {
+                return false;
+            }
+
+            return base.AvoidTargettedDamage(commander, target, defensivePoint, frame, out action);
         }
     }
 }

@@ -212,6 +212,8 @@ namespace Sharky.MicroControllers
 
             if (DealWithCyclones(commander, target, defensivePoint, frame, out action)) { return true; }
 
+            if (DealWithSiegedTanks(commander, target, defensivePoint, frame, out action)) { return true; }
+
             // TODO: special case movement
             //if (ChargeBlindly(commander, target))
             //{
@@ -219,11 +221,6 @@ namespace Sharky.MicroControllers
             //}
 
             //if (ChargeUpRamp(commander, target, bestTarget))
-            //{
-            //    return true;
-            //}
-
-            //if (DealWithSiegedTanks(commander))
             //{
             //    return true;
             //}
@@ -278,9 +275,63 @@ namespace Sharky.MicroControllers
             }
             else
             {
-                action = commander.Order(frame, Abilities.MOVE, new Point2D { X = bestTarget.Unit.Pos.X, Y = bestTarget.Unit.Pos.Y });
+                var position = GetSurroundPoint(commander, bestTarget);
+                action = commander.Order(frame, Abilities.MOVE, position);
                 return true;
             }
+        }
+
+        protected virtual Point2D GetSurroundPoint(UnitCommander commander, UnitCalculation bestTarget)
+        {
+            if (commander.UnitCalculation.Unit.IsFlying || bestTarget.Attributes.Contains(SC2APIProtocol.Attribute.Structure) || bestTarget.Unit.IsFlying || bestTarget.Unit.UnitType == (uint)UnitTypes.ZERG_LARVA || bestTarget.Unit.UnitType == (uint)UnitTypes.ZERG_BROODLING)
+            {
+                return new Point2D { X = bestTarget.Unit.Pos.X, Y = bestTarget.Unit.Pos.Y };
+            }
+
+            // block enemy unit, if already blocked then surround enemy unit, by forming circle around it, cover one of 4 sides, if the sides are all taken by allies just move directly on
+            var front = GetPoint(bestTarget.Unit.Pos, bestTarget.Unit.Facing, bestTarget.Unit.Radius);
+            if (!PointBlocked(bestTarget, front, commander.UnitCalculation.Unit.Tag))
+            {
+                return front;
+            }
+            var behind = GetPoint(bestTarget.Unit.Pos, bestTarget.Unit.Facing + (float)Math.PI, bestTarget.Unit.Radius);
+            if (!PointBlocked(bestTarget, behind, commander.UnitCalculation.Unit.Tag))
+            {
+                return behind;
+            }
+            var right = GetPoint(bestTarget.Unit.Pos, bestTarget.Unit.Facing + ((float)Math.PI * .5f), bestTarget.Unit.Radius);
+            if (!PointBlocked(bestTarget, right, commander.UnitCalculation.Unit.Tag))
+            {
+                return right;
+            }
+            var left = GetPoint(bestTarget.Unit.Pos, bestTarget.Unit.Facing + ((float)Math.PI * 1.5f), bestTarget.Unit.Radius);
+            if (!PointBlocked(bestTarget, left, commander.UnitCalculation.Unit.Tag))
+            {
+                return left;
+            }
+
+            return new Point2D { X = bestTarget.Unit.Pos.X, Y = bestTarget.Unit.Pos.Y };
+        }
+
+        protected bool PointBlocked(UnitCalculation unitCalculation, Point2D point, ulong excludedUnit)
+        {
+            var vector = new Vector2(point.X, point.Y);
+            if (unitCalculation.NearbyEnemies.Any(u => u.Unit.Tag != excludedUnit && Vector2.DistanceSquared(vector, new Vector2(u.Unit.Pos.X, u.Unit.Pos.Y)) < .1))
+            {
+                return true;
+            }
+            if (unitCalculation.NearbyAllies.Any(u => u.Unit.Tag != excludedUnit && Vector2.DistanceSquared(vector, new Vector2(u.Unit.Pos.X, u.Unit.Pos.Y)) < .1))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        protected Point2D GetPoint(Point start, float angle, float distance)
+        {
+            var x = (float)(distance * Math.Sin(angle + (Math.PI / 2)));
+            var y = (float)(distance * Math.Cos(angle + (Math.PI / 2)));
+            return new Point2D { X = start.X + x, Y = start.Y + y };
         }
 
         protected virtual bool GetInFormation(UnitCommander commander, Formation formation, int frame, out SC2APIProtocol.Action action)
@@ -336,8 +387,7 @@ namespace Sharky.MicroControllers
                     return true;
                 }
             }
-
-            if (MicroPriority == MicroPriority.LiveAndAttack)
+            else if (MicroPriority == MicroPriority.LiveAndAttack)
             {
                 if (AvoidTargettedDamage(commander, target, defensivePoint, frame, out action))
                 {
@@ -620,14 +670,14 @@ namespace Sharky.MicroControllers
                 }
             }
 
-            if (MapDataService.SelfVisible(target)) // if enemy main is unexplored, march to enemy main
+            if (!MapDataService.SelfVisible(target)) // if enemy main is unexplored, march to enemy main
             {
                 var fakeMainBase = new Unit(commander.UnitCalculation.Unit);
                 fakeMainBase.Pos = new Point { X = target.X, Y = target.Y, Z = 1 };
                 fakeMainBase.Alliance = Alliance.Enemy;
                 return new UnitCalculation(fakeMainBase, fakeMainBase, 0, SharkyUnitData, SharkyOptions, UnitDataService);
             }
-            var unitsNearEnemyMain = ActiveUnitData.EnemyUnits.Values.Where(e => InRange(target, e.Unit.Pos, 20));
+            var unitsNearEnemyMain = ActiveUnitData.EnemyUnits.Values.Where(e => e.Unit.UnitType != (uint)UnitTypes.ZERG_LARVA && InRange(target, e.Unit.Pos, 20));
             if (unitsNearEnemyMain.Count() > 0 && InRange(target, commander.UnitCalculation.Unit.Pos, 100))
             {
                 attacks = new List<UnitCalculation>(); // enemies in the main enemy base
@@ -702,7 +752,7 @@ namespace Sharky.MicroControllers
         protected virtual bool GroupUp(UnitCommander commander, Point2D target, Point2D groupCenter, bool attack, int frame, out SC2APIProtocol.Action action)
         {
             action = null;
-            if (commander.UnitCalculation.NearbyEnemies.Any())
+            if (commander.UnitCalculation.NearbyEnemies.Any() || groupCenter == null)
             {
                 return false;
             }
@@ -1271,6 +1321,38 @@ namespace Sharky.MicroControllers
             if (commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.LOCKON))
             {
                 if (Retreat(commander, defensivePoint, defensivePoint, frame, out action)) { return true; }
+            }
+
+            return false;
+        }
+
+        protected virtual bool DealWithSiegedTanks(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out SC2APIProtocol.Action action)
+        {
+            action = null;
+            if (commander.UnitCalculation.Unit.IsFlying || commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.FullRetreat || commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.Retreat)
+            {
+                return false;
+            }
+
+            var siegeRange = 13; // 13 siege mode range, can't shoot within 2 range
+            var enemySiegedTanks = commander.UnitCalculation.EnemiesInRangeOf.Where(u => u.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED);
+
+            var siegedCount = enemySiegedTanks.Count();
+            if (siegedCount == 0)
+            {
+                return false;
+            }
+
+            var estimatedSiegeDps = siegedCount * 75;
+
+            var otherEnemyAttacks = commander.UnitCalculation.EnemiesInRangeOf.Where(u => u.Unit.UnitType != (uint)UnitTypes.TERRAN_SIEGETANKSIEGED);
+            var otherDps = otherEnemyAttacks.Sum(e => e.Dps);
+
+            if (estimatedSiegeDps > otherDps)
+            {
+                var closestSiegePosition = enemySiegedTanks.OrderBy(u => Vector2.DistanceSquared(new Vector2(u.Unit.Pos.X, u.Unit.Pos.Y), new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y))).FirstOrDefault();
+                action = commander.Order(frame, Abilities.MOVE, new Point2D { X = closestSiegePosition.Unit.Pos.X, Y = closestSiegePosition.Unit.Pos.Y });
+                return true;
             }
 
             return false;
