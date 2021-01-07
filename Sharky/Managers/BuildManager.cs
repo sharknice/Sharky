@@ -43,6 +43,8 @@ namespace Sharky.Managers
 
         public override void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)
         {
+            string enemyName = string.Empty;
+
             foreach (var playerInfo in gameInfo.PlayerInfo)
             {
                 if (playerInfo.PlayerId == playerId)
@@ -51,6 +53,10 @@ namespace Sharky.Managers
                 }
                 else
                 {
+                    if (playerInfo.PlayerName != null)
+                    {
+                        enemyName = playerInfo.PlayerName;
+                    }
                     EnemyRace = playerInfo.RaceRequested;
                 }
             }
@@ -62,9 +68,8 @@ namespace Sharky.Managers
             }
             if (EnemyPlayer == null)
             {
-                EnemyPlayer = new EnemyPlayer.EnemyPlayer { ChatMatches = new List<string>(), Games = new List<Game>(), Id = opponentId, Name = string.Empty };
+                EnemyPlayer = new EnemyPlayer.EnemyPlayer { ChatMatches = new List<string>(), Games = new List<Game>(), Id = opponentId, Name = enemyName };
             }
-
 
             var buildSequences = BuildChoices[ActualRace].BuildSequences[EnemyRace.ToString()];
             if (!string.IsNullOrWhiteSpace(EnemyPlayer.Name) && BuildChoices[ActualRace].BuildSequences.ContainsKey(EnemyPlayer.Name))
