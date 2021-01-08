@@ -1,4 +1,5 @@
 ﻿using Sharky.Chat;
+using System.Linq;
 
 namespace Sharky.EnemyStrategies.Terran
 {
@@ -16,6 +17,11 @@ namespace Sharky.EnemyStrategies.Terran
 
         protected override bool Detect(int frame)
         {
+            if (ActiveUnitData.EnemyUnits.Values.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && e.Unit.UnitType != (uint)UnitTypes.TERRAN_MARINE))
+            {
+                return false;
+            }
+
             if (UnitCountService.EnemyCount(UnitTypes.TERRAN_MARINE) >= 8 && frame < SharkyOptions.FramesPerSecond * 4 * 60)
             {
                 return true;

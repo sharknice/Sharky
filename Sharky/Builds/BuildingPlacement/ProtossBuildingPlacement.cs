@@ -59,7 +59,7 @@ namespace Sharky.Builds.BuildingPlacement
                     //{
                     //    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 }, 1, new Color { R = 255, G = 0, B = 0 });
                     //}
-                    //else if (BuildingService.Blocked(point.X, point.Y, 1.25f))
+                    //else if (BuildingService.Blocked(point.X, point.Y, 1.25f, .1f))
                     //{
                     //    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 }, 1, new Color { R = 255, G = 255, B = 0 });
                     //}
@@ -72,7 +72,7 @@ namespace Sharky.Builds.BuildingPlacement
                     //    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 }, 1, new Color { R = 0, G = 255, B = 0 });
                     //}
 
-                    if (BuildingService.AreaBuildable(point.X, point.Y, 1.25f) && !BuildingService.Blocked(point.X, point.Y, 1.25f) && !BuildingService.HasCreep(point.X, point.Y, 1.5f))
+                    if (BuildingService.AreaBuildable(point.X, point.Y, 1.25f) && !BuildingService.Blocked(point.X, point.Y, 1.25f, .1f) && !BuildingService.HasCreep(point.X, point.Y, 1.5f))
                     {
                         var mineralFields = ActiveUnitData.NeutralUnits.Where(u => SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType) || SharkyUnitData.GasGeyserTypes.Contains((UnitTypes)u.Value.Unit.UnitType));
                         var squared = (1 + minimumMineralProximinity + .5) * (1 + minimumMineralProximinity + .5);
@@ -119,9 +119,88 @@ namespace Sharky.Builds.BuildingPlacement
                     while (angle + (sliceSize / 2) < fullCircle)
                     {
                         var point = new Point2D { X = x + (float)(radius * Math.Cos(angle)), Y = y + (float)(radius * Math.Sin(angle)) };
-                        DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
+                        //DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
+
+                        //if (!BuildingService.AreaBuildable(point.X, point.Y, 1.25f))
+                        //{
+                        //    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 10 }, 1, new Color { R = 255, G = 0, B = 0 });
+                        //}
+                        //else if (BuildingService.Blocked(point.X, point.Y, 1.25f))
+                        //{
+                        //    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 10 }, 1, new Color { R = 255, G = 255, B = 0 });
+                        //}
+                        //else if (BuildingService.HasCreep(point.X, point.Y, 1.5f))
+                        //{
+                        //    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 10 }, 1, new Color { R = 255, G = 255, B = 255 });
+                        //}
+                        //else
+                        //{
+                        //    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 10 }, 1, new Color { R = 0, G = 255, B = 0 });
+                        //}
 
                         if (BuildingService.AreaBuildable(point.X, point.Y, size / 2.0f) && !BuildingService.Blocked(point.X, point.Y, size / 2.0f) && !BuildingService.HasCreep(point.X, point.Y, size / 2.0f))
+                        {
+                            var mineralFields = ActiveUnitData.NeutralUnits.Where(u => SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType));
+                            var squared = (1 + minimumMineralProximinity + (size / 2f)) * (1 + minimumMineralProximinity + (size / 2f));
+                            var clashes = mineralFields.Where(u => Vector2.DistanceSquared(new Vector2(u.Value.Unit.Pos.X, u.Value.Unit.Pos.Y), new Vector2(point.X, point.Y)) < squared);
+
+                            if (clashes.Count() == 0)
+                            {
+                                if (Vector2.DistanceSquared(new Vector2(target.X, target.Y), new Vector2(point.X, point.Y)) <= maxDistance * maxDistance)
+                                {
+                                    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
+                                    return point;
+                                }
+                            }
+                        }
+
+                        angle += sliceSize;
+                    }
+                    radius += 1;
+                }
+            }
+            return FindProductionPlacementTryHarder(target, size, maxDistance, minimumMineralProximinity);
+        }
+
+        Point2D FindProductionPlacementTryHarder(Point2D target, float size, float maxDistance, float minimumMineralProximinity)
+        {
+            var powerSources = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && c.UnitCalculation.Unit.BuildProgress == 1).OrderBy(c => Vector2.DistanceSquared(new Vector2(c.UnitCalculation.Unit.Pos.X, c.UnitCalculation.Unit.Pos.Y), new Vector2(target.X, target.Y)));
+            foreach (var powerSource in powerSources)
+            {
+                var x = powerSource.UnitCalculation.Unit.Pos.X;
+                var y = powerSource.UnitCalculation.Unit.Pos.Y;
+                var radius = size / 2f;
+                var powerRadius = 7 - (size / 2f);
+
+                // start at 12 o'clock then rotate around 12 times, increase radius by 1 until it's more than powerRadius
+                while (radius <= powerRadius)
+                {
+                    var fullCircle = Math.PI * 2;
+                    var sliceSize = fullCircle / 48.0;
+                    var angle = 0.0;
+                    while (angle + (sliceSize / 2) < fullCircle)
+                    {
+                        var point = new Point2D { X = x + (float)(radius * Math.Cos(angle)), Y = y + (float)(radius * Math.Sin(angle)) };
+                        //DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
+
+                        if (!BuildingService.AreaBuildable(point.X, point.Y, size / 2.0f))
+                        {
+                            DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 10 }, 1, new Color { R = 255, G = 0, B = 0 });
+                        }
+                        else if (BuildingService.Blocked(point.X, point.Y, size / 2.0f, 0))
+                        {
+                            DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 10 }, 1, new Color { R = 255, G = 255, B = 0 });
+                        }
+                        else if (BuildingService.HasCreep(point.X, point.Y, size / 2.0f))
+                        {
+                            DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 10 }, 1, new Color { R = 255, G = 255, B = 255 });
+                        }
+                        else
+                        {
+                            DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 10 }, 1, new Color { R = 0, G = 255, B = 0 });
+                        }
+
+                        if (BuildingService.AreaBuildable(point.X, point.Y, size / 2.0f) && !BuildingService.Blocked(point.X, point.Y, size / 2.0f, 0) && !BuildingService.HasCreep(point.X, point.Y, size / 2.0f))
                         {
                             var mineralFields = ActiveUnitData.NeutralUnits.Where(u => SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType));
                             var squared = (1 + minimumMineralProximinity + (size / 2f)) * (1 + minimumMineralProximinity + (size / 2f));

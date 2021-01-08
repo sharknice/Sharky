@@ -27,14 +27,8 @@ namespace Sharky.Builds.BuildingPlacement
                 && MapData.Map[(int)x - (int)radius][(int)y].CurrentlyBuildable && MapData.Map[(int)x - (int)radius][(int)y + (int)radius].CurrentlyBuildable && MapData.Map[(int)x - (int)radius][(int)y - (int)radius].CurrentlyBuildable;
         }
 
-        public bool Blocked(float x, float y, float radius)
+        public bool Blocked(float x, float y, float radius, float padding = .5f)
         {
-            var padding = .1f;
-            if (radius > 1.25)
-            {
-                padding = .5f;
-            }
-
             if (ActiveUnitData.NeutralUnits.Any(u => Vector2.DistanceSquared(new Vector2(x, y), new Vector2(u.Value.Unit.Pos.X, u.Value.Unit.Pos.Y)) < (u.Value.Unit.Radius + padding + radius) * (u.Value.Unit.Radius + padding + radius)))
             {
                 return true;
