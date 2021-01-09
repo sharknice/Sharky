@@ -20,6 +20,7 @@ using Sharky.MicroControllers.Zerg;
 using Sharky.MicroTasks;
 using Sharky.MicroTasks.Attack;
 using Sharky.MicroTasks.Mining;
+using Sharky.MicroTasks.Scout;
 using Sharky.Pathing;
 using Sharky.Proxy;
 using Sharky.TypeData;
@@ -250,26 +251,24 @@ namespace Sharky.DefaultBot
             TargetingService = new TargetingService(ActiveUnitData, MapDataService, BaseData, TargetingData);
             MicroController = new MicroController(MicroData);
 
+            MicroTaskData = new MicroTaskData { MicroTasks = new Dictionary<string, IMicroTask>() };
+
             var defenseSquadTask = new DefenseSquadTask(ActiveUnitData, TargetingData, DefenseService, MicroController, new List<DesiredUnitsClaim>(), 0, false);
             var workerScoutTask = new WorkerScoutTask(SharkyUnitData, TargetingData, MapDataService, false, 0.5f, workerDefenseMicroController);
+            var findHiddenBaseTask = new FindHiddenBaseTask(BaseData, TargetingData, MapDataService, individualMicroController, 15, false, 0.5f);
             var proxyScoutTask = new ProxyScoutTask(SharkyUnitData, TargetingData, MapDataService, BaseData, false, 0.5f, workerDefenseMicroController);
             var miningDefenseService = new MiningDefenseService(BaseData, ActiveUnitData, workerDefenseMicroController, DebugService);
             var miningTask = new MiningTask(SharkyUnitData, BaseData, ActiveUnitData, 1, miningDefenseService, MacroData);
             var queenInjectTask = new QueenInjectsTask(ActiveUnitData, 1.1f, UnitCountService);
-            var attackTask = new AttackTask(MicroController, TargetingData, ActiveUnitData, DefenseService, MacroData, AttackData, TargetingService, 2);
+            var attackTask = new AttackTask(MicroController, TargetingData, ActiveUnitData, DefenseService, MacroData, AttackData, TargetingService, MicroTaskData, 2);
 
-            MicroTaskData = new MicroTaskData
-            {
-                MicroTasks = new Dictionary<string, IMicroTask>
-                {
-                    [defenseSquadTask.GetType().Name] = defenseSquadTask,
-                    [workerScoutTask.GetType().Name] = workerScoutTask,
-                    [proxyScoutTask.GetType().Name] = proxyScoutTask,
-                    [miningTask.GetType().Name] = miningTask,
-                    [queenInjectTask.GetType().Name] = queenInjectTask,
-                    [attackTask.GetType().Name] = attackTask
-                }
-            };
+            MicroTaskData.MicroTasks[defenseSquadTask.GetType().Name] = defenseSquadTask;
+            MicroTaskData.MicroTasks[workerScoutTask.GetType().Name] = workerScoutTask;
+            MicroTaskData.MicroTasks[findHiddenBaseTask.GetType().Name] = findHiddenBaseTask;
+            MicroTaskData.MicroTasks[proxyScoutTask.GetType().Name] = proxyScoutTask;
+            MicroTaskData.MicroTasks[miningTask.GetType().Name] = miningTask;
+            MicroTaskData.MicroTasks[queenInjectTask.GetType().Name] = queenInjectTask;
+            MicroTaskData.MicroTasks[attackTask.GetType().Name] = attackTask;
 
             MicroManager = new MicroManager(ActiveUnitData, MicroTaskData);
             Managers.Add(MicroManager);

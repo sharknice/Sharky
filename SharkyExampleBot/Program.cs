@@ -28,7 +28,7 @@ namespace SharkyExampleBot
             // we create a bot with the modified default bot we made
             var sharkyExampleBot = defaultSharkyBot.CreateBot(defaultSharkyBot.Managers, defaultSharkyBot.DebugService);
 
-            var myRace = Race.Terran;
+            var myRace = Race.Random;
             if (args.Length == 0)
             {
                 // if there are no arguments passed we play against a comptuer opponent

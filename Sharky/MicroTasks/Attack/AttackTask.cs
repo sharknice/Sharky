@@ -18,10 +18,11 @@ namespace Sharky.MicroTasks
         MacroData MacroData;
         AttackData AttackData;
         TargetingService TargetingService;
+        MicroTaskData MicroTaskData;
 
         float lastFrameTime;
 
-        public AttackTask(IMicroController microController, TargetingData targetingData, ActiveUnitData activeUnitData, DefenseService defenseService, MacroData macroData, AttackData attackData, TargetingService targetingService, float priority)
+        public AttackTask(IMicroController microController, TargetingData targetingData, ActiveUnitData activeUnitData, DefenseService defenseService, MacroData macroData, AttackData attackData, TargetingService targetingService, MicroTaskData microTaskData, float priority)
         {
             MicroController = microController;
             TargetingData = targetingData;
@@ -30,6 +31,7 @@ namespace Sharky.MicroTasks
             MacroData = macroData;
             AttackData = attackData;
             TargetingService = targetingService;
+            MicroTaskData = microTaskData;
             Priority = priority;
 
             UnitCommanders = new List<UnitCommander>();
@@ -82,6 +84,8 @@ namespace Sharky.MicroTasks
                 AttackData.ArmyPoint = TargetingData.AttackPoint;
             }
 
+            var hiddenBase = TargetingData.HiddenEnemyBase;
+
             TargetingData.AttackPoint = TargetingService.UpdateAttackPoint(AttackData.ArmyPoint, TargetingData.AttackPoint); 
 
             if (!AttackData.CustomAttackFunction)
@@ -111,6 +115,22 @@ namespace Sharky.MicroTasks
                     stopwatch.Stop();
                     lastFrameTime = stopwatch.ElapsedMilliseconds;
                     return actions;
+                }
+            }
+
+            if (!hiddenBase && TargetingData.HiddenEnemyBase)
+            {
+                ResetClaimedUnits();
+                if (MicroTaskData.MicroTasks.ContainsKey("FindHiddenBaseTask"))
+                {
+                    MicroTaskData.MicroTasks["FindHiddenBaseTask"].Enable();
+                }
+            }
+            else if (hiddenBase && !TargetingData.HiddenEnemyBase)
+            {
+                if (MicroTaskData.MicroTasks.ContainsKey("FindHiddenBaseTask"))
+                {
+                    MicroTaskData.MicroTasks["FindHiddenBaseTask"].Disable();
                 }
             }
 
