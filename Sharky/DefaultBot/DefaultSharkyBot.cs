@@ -122,7 +122,7 @@ namespace Sharky.DefaultBot
             SharkyOptions = new SharkyOptions { Debug = debug, FramesPerSecond = framesPerSecond };
             MacroData = new MacroData();
             AttackData = new AttackData { ArmyFoodAttack = 30, ArmyFoodRetreat = 25, Attacking = false, UseAttackDataManager = true, CustomAttackFunction = true };
-            TargetingData = new TargetingData();
+            TargetingData = new TargetingData { HiddenEnemyBase = false };
             BaseData = new BaseData();
             ActiveChatData = new ActiveChatData();
             EnemyData = new EnemyData();
@@ -247,7 +247,7 @@ namespace Sharky.DefaultBot
             MicroData = new MicroData { IndividualMicroControllers = individualMicroControllers, IndividualMicroController = individualMicroController };
 
             DefenseService = new DefenseService(ActiveUnitData);
-            TargetingService = new TargetingService(ActiveUnitData, MapDataService, BaseData);
+            TargetingService = new TargetingService(ActiveUnitData, MapDataService, BaseData, TargetingData);
             MicroController = new MicroController(MicroData);
 
             var defenseSquadTask = new DefenseSquadTask(ActiveUnitData, TargetingData, DefenseService, MicroController, new List<DesiredUnitsClaim>(), 0, false);

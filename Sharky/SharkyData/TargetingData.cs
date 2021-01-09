@@ -9,5 +9,6 @@ namespace Sharky
         public Point2D MainDefensePoint { get; set; }
         public Point2D SelfMainBasePoint { get; set; }
         public Point2D EnemyMainBasePoint { get; set; }
+        public bool HiddenEnemyBase { get; set; }
     }
 }
