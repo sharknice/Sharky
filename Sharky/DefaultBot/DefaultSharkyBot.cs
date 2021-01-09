@@ -56,6 +56,7 @@ namespace Sharky.DefaultBot
         public AddOnDataService AddOnDataService { get; set; }
         public MorphDataService MorphDataService { get; set; }
         public MapDataService MapDataService { get; set; }
+        public ChokePointService ChokePointService { get; set; }
         public TargetPriorityService TargetPriorityService { get; set; }
         public BuildingService BuildingService { get; set; }
         public BuildPylonService BuildPylonService { get; set; }
@@ -163,11 +164,12 @@ namespace Sharky.DefaultBot
             SharkyPathFinder = new SharkyPathFinder(new Roy_T.AStar.Paths.PathFinder(), MapData, MapDataService, DebugService);
             SharkySimplePathFinder = new SharkySimplePathFinder(MapDataService);
             NoPathFinder = new SharkyNoPathFinder();
+            ChokePointService = new ChokePointService(SharkyPathFinder, MapDataService);
 
             BaseManager = new BaseManager(SharkyUnitData, ActiveUnitData, SharkyPathFinder, UnitCountService, BaseData);
             Managers.Add(BaseManager);
 
-            TargetingManager = new TargetingManager(SharkyUnitData, BaseData, MacroData, TargetingData);
+            TargetingManager = new TargetingManager(SharkyUnitData, BaseData, MacroData, TargetingData, ChokePointService, DebugService);
             Managers.Add(TargetingManager);
 
             BuildOptions = new BuildOptions { StrictGasCount = false, StrictSupplyCount = false, StrictWorkerCount = false };

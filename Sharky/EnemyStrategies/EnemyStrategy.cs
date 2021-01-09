@@ -1,5 +1,4 @@
 ﻿using Sharky.Chat;
-using Sharky.Managers;
 using System;
 
 namespace Sharky.EnemyStrategies
@@ -32,7 +31,7 @@ namespace Sharky.EnemyStrategies
                 if (!Detected)
                 {
                     EnemyStrategyHistory.History[frame] = Name();
-                    Console.WriteLine($"Detected: {Name()}");
+                    Console.WriteLine($"{frame} Detected: {Name()}");
                     Detected = true;
                     DetectedChat();
                 }

@@ -271,7 +271,7 @@ namespace Sharky.MicroControllers.Protoss
             {
                 if (commander.RetreatPathFrame + 20 < frame)
                 {
-                    commander.RetreatPath = SharkyPathFinder.GetSafeAirPath(target.X, target.Y, commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y, frame);
+                    commander.RetreatPath = SharkyPathFinder.GetSafeAirPath(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y, target.X, target.Y, frame);
                     commander.RetreatPathFrame = frame;
                 }
 

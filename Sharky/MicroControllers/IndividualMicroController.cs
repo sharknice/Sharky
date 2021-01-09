@@ -430,11 +430,11 @@ namespace Sharky.MicroControllers
                 {
                     if (commander.UnitCalculation.Unit.IsFlying)
                     {
-                        commander.RetreatPath = SharkyPathFinder.GetSafeAirPath(defensivePoint.X, defensivePoint.Y, commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y, frame);
+                        commander.RetreatPath = SharkyPathFinder.GetSafeAirPath(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y, defensivePoint.X, defensivePoint.Y, frame);
                     }
                     else
                     {
-                        commander.RetreatPath = SharkyPathFinder.GetSafeGroundPath(defensivePoint.X, defensivePoint.Y, commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y, frame);
+                        commander.RetreatPath = SharkyPathFinder.GetSafeGroundPath(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y, defensivePoint.X, defensivePoint.Y, frame);
                     }
                     commander.RetreatPathFrame = frame;
                     commander.RetreatPathIndex = 1;
@@ -518,11 +518,11 @@ namespace Sharky.MicroControllers
             {
                 if (commander.UnitCalculation.Unit.IsFlying)
                 {
-                    commander.RetreatPath = SharkyPathFinder.GetSafeAirPath(defensivePoint.X, defensivePoint.Y, commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y, frame);
+                    commander.RetreatPath = SharkyPathFinder.GetSafeAirPath(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y, defensivePoint.X, defensivePoint.Y, frame);
                 }
                 else
                 {
-                    commander.RetreatPath = SharkyPathFinder.GetSafeGroundPath(defensivePoint.X, defensivePoint.Y, commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y, frame);
+                    commander.RetreatPath = SharkyPathFinder.GetSafeGroundPath(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y, defensivePoint.X, defensivePoint.Y, frame);
                 }
                 commander.RetreatPathFrame = frame;
                 commander.RetreatPathIndex = 1;

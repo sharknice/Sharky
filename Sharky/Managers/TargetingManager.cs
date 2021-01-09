@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using Sharky.Pathing;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -11,15 +12,19 @@ namespace Sharky.Managers
         BaseData BaseData;
         MacroData MacroData;
         TargetingData TargetingData;
+        ChokePointService ChokePointService;
+        DebugService DebugService;
 
         int baseCount;
 
-        public TargetingManager(SharkyUnitData sharkyUnitData, BaseData baseData, MacroData macroData, TargetingData targetingData)
+        public TargetingManager(SharkyUnitData sharkyUnitData, BaseData baseData, MacroData macroData, TargetingData targetingData, ChokePointService chokePointService, DebugService debugService)
         {
             SharkyUnitData = sharkyUnitData;
             BaseData = baseData;
             MacroData = macroData;
             TargetingData = targetingData;
+            ChokePointService = chokePointService;
+            DebugService = debugService;
 
             baseCount = 0;
         }
@@ -34,7 +39,18 @@ namespace Sharky.Managers
             foreach (var unit in observation.Observation.RawData.Units.Where(u => u.Alliance == Alliance.Self && SharkyUnitData.UnitData[(UnitTypes)u.UnitType].Attributes.Contains(SC2APIProtocol.Attribute.Structure)))
             {
                 TargetingData.MainDefensePoint = new Point2D { X = unit.Pos.X, Y = unit.Pos.Y };
+
+                var chokePoint = ChokePointService.FindDefensiveChokePoint(new Point2D { X = unit.Pos.X + 4, Y = unit.Pos.Y + 4 }, TargetingData.AttackPoint, 0);
+                if (chokePoint != null)
+                {
+                    TargetingData.ForwardDefensePoint = chokePoint;
+                }
+                else
+                {
+                    TargetingData.ForwardDefensePoint = new Point2D { X = unit.Pos.X, Y = unit.Pos.Y };
+                }
                 TargetingData.ForwardDefensePoint = new Point2D { X = unit.Pos.X, Y = unit.Pos.Y };
+
                 TargetingData.SelfMainBasePoint = new Point2D { X = unit.Pos.X, Y = unit.Pos.Y };
                 return;
             }
@@ -42,16 +58,21 @@ namespace Sharky.Managers
 
         public void OnEnd(ResponseObservation observation, Result result)
         {
+
         }
 
         public IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
         {
-            UpdateDefensePoint();
+            UpdateDefensePoint((int)observation.Observation.GameLoop);
+
+            DebugService.DrawSphere(new Point { X = TargetingData.MainDefensePoint.X, Y = TargetingData.MainDefensePoint.Y, Z = 12 }, 2, new Color { R = 0, G = 255, B = 0 });
+            DebugService.DrawSphere(new Point { X = TargetingData.ForwardDefensePoint.X, Y = TargetingData.ForwardDefensePoint.Y, Z = 12 }, 2, new Color { R = 0, G = 0, B = 255 });
+            DebugService.DrawSphere(new Point { X = TargetingData.AttackPoint.X, Y = TargetingData.AttackPoint.Y, Z = 12 }, 2, new Color { R = 255, G = 0, B = 0 });
 
             return new List<SC2APIProtocol.Action>();
         }
 
-        void UpdateDefensePoint()
+        void UpdateDefensePoint(int frame)
         {
             if (baseCount != BaseData.SelfBases.Count())
             {
@@ -60,7 +81,15 @@ namespace Sharky.Managers
                 if (closestBase != null)
                 {
                     TargetingData.MainDefensePoint = closestBase.MineralLineLocation;
-                    TargetingData.ForwardDefensePoint = closestBase.Location; // TODO: look for tops of ramps, set defensive point there
+                    var chokePoint = ChokePointService.FindDefensiveChokePoint(new Point2D { X = closestBase.Location.X + 4, Y = closestBase.Location.Y + 4 }, TargetingData.AttackPoint, frame);
+                    if (chokePoint != null) // TODO: also check distance from the base, shouldn't be too far away
+                    {
+                        TargetingData.ForwardDefensePoint = chokePoint;
+                    }
+                    else
+                    {
+                        TargetingData.ForwardDefensePoint = closestBase.Location;
+                    }
                 }
                 var farthestBase = ordered.LastOrDefault();
                 if (farthestBase != null)
