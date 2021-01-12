@@ -61,15 +61,15 @@ namespace Sharky.Pathing
 
         public Point2D FindFlatChokePoint(List<Vector2> path, float maxDistance = 15)
         {
-            return null;
-            // TODO: check points around if they are walkable, if you can fit a circle near, not sur ehow to do it exactly
+            return null; // TODO: check points around if they are walkable, if you can fit a circle near, not sure how to do it exactly
+
             if (path.Count > 0)
             {
                 var previousPoint = path[0];
 
                 foreach (var point in path)
                 {
-                    //if (IsFlatChoke(new Point2D { X = point.X, Y = point.Y }))
+                    if (IsFlatChoke(new Point2D { X = point.X, Y = point.Y }))
                     {
                         if (Vector2.DistanceSquared(path[0], point) > maxDistance * maxDistance)
                         {
@@ -82,6 +82,11 @@ namespace Sharky.Pathing
             }
 
             return null;
+        }
+
+        private bool IsFlatChoke(Point2D point2D)
+        {
+            return false; // check area of map with radius of 10 around this, if percentage that is walkable and the same height is below certain amount it's a choke point
         }
     }
 }

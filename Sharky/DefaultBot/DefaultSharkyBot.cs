@@ -16,6 +16,7 @@ using Sharky.Managers;
 using Sharky.Managers.Protoss;
 using Sharky.MicroControllers;
 using Sharky.MicroControllers.Protoss;
+using Sharky.MicroControllers.Terran;
 using Sharky.MicroControllers.Zerg;
 using Sharky.MicroTasks;
 using Sharky.MicroTasks.Attack;
@@ -222,6 +223,10 @@ namespace Sharky.DefaultBot
 
             var zerglingMicroController = new ZerglingMicroController(MapDataService, SharkyUnitData, ActiveUnitData, DebugService, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, UnitDataService, MicroPriority.AttackForward, false);
 
+            var marineMicroController = new MarineMicroController(MapDataService, SharkyUnitData, ActiveUnitData, DebugService, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, UnitDataService, MicroPriority.LiveAndAttack, false);
+            var reaperMicroController = new ReaperMicroController(MapDataService, SharkyUnitData, ActiveUnitData, DebugService, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, UnitDataService, MicroPriority.LiveAndAttack, false);
+            var bansheeMicroController = new BansheeMicroController(MapDataService, SharkyUnitData, ActiveUnitData, DebugService, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, UnitDataService, MicroPriority.LiveAndAttack, false);
+
             var workerDefenseMicroController = new IndividualMicroController(MapDataService, SharkyUnitData, ActiveUnitData, DebugService, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, UnitDataService, MicroPriority.LiveAndAttack, false, 3);
 
             var individualMicroControllers = new Dictionary<UnitTypes, IIndividualMicroController>
@@ -242,7 +247,12 @@ namespace Sharky.DefaultBot
                 { UnitTypes.PROTOSS_ZEALOT, zealotMicroController },
                 { UnitTypes.PROTOSS_OBSERVER, observerMicroController },
 
-                { UnitTypes.ZERG_ZERGLING, zerglingMicroController }
+                { UnitTypes.ZERG_ZERGLING, zerglingMicroController },
+
+                { UnitTypes.TERRAN_MARINE, marineMicroController },
+                { UnitTypes.TERRAN_MARAUDER, marineMicroController },
+                { UnitTypes.TERRAN_REAPER, reaperMicroController },
+                { UnitTypes.TERRAN_BANSHEE, bansheeMicroController }
             };
 
             MicroData = new MicroData { IndividualMicroControllers = individualMicroControllers, IndividualMicroController = individualMicroController };

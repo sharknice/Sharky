@@ -1056,6 +1056,11 @@ namespace Sharky.MicroControllers
         protected UnitCalculation GetBestBuildingTarget(IEnumerable<UnitCalculation> attacks, UnitCommander commander)
         {
             var orderedAttacks = attacks.Where(enemy => enemy.Unit.UnitType != (uint)UnitTypes.ZERG_LARVA && enemy.Unit.UnitType != (uint)UnitTypes.ZERG_BROODLING && enemy.Unit.UnitType != (uint)UnitTypes.ZERG_EGG && GroundAttackersFilter(commander, enemy)).OrderBy(enemy => (UnitTypes)enemy.Unit.UnitType, new UnitTypeTargetPriority()).ThenBy(enemy => enemy.Unit.Health + enemy.Unit.Shield).ThenBy(enemy => Vector2.DistanceSquared(new Vector2(enemy.Unit.Pos.X, enemy.Unit.Pos.Y), new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y)));
+            var pylon = orderedAttacks.FirstOrDefault(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON);
+            if (pylon != null)
+            {
+                return pylon;
+            }
             var activeBuilding = orderedAttacks.Where(a => a.Unit.IsActive).FirstOrDefault();
             if (activeBuilding != null && !activeBuilding.UnitClassifications.Contains(UnitClassification.ResourceCenter))
             {

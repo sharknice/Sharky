@@ -98,6 +98,11 @@ namespace Sharky.Pathing
             return MapData.Map[(int)point.X][(int)point.Y].InSelfVision;
         }
 
+        public int Visibility(Point2D point)
+        {
+            return MapData.Map[(int)point.X][(int)point.Y].Visibility;
+        }
+
         public bool InEnemyDetection(Point point)
         {
             return MapData.Map[(int)point.X][(int)point.Y].InEnemyDetection;

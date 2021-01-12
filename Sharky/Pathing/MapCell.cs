@@ -22,5 +22,6 @@
         public bool InEnemyVision { get; set; }
         public bool InSelfVision { get; set; }
         public bool InEnemyDetection { get; set; }
+        public int Visibility { get; set; }
     }
 }

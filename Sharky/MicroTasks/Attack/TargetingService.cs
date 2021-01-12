@@ -45,7 +45,7 @@ namespace Sharky.MicroTasks.Attack
                 }
             }
 
-            if (currentEnemyBuildingCount == 0 && MapDataService.SelfVisible(attackPoint))
+            if (currentEnemyBuildingCount == 0 && MapDataService.SelfVisible(attackPoint) && MapDataService.Visibility(TargetingData.EnemyMainBasePoint) > 0)
             {
                 // can't find enemy base, choose a random base location
                 TargetingData.HiddenEnemyBase = true;
