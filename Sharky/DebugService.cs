@@ -10,12 +10,14 @@ namespace Sharky
         Color DefaultColor;
 
         public Request DrawRequest { get; set; }
+        public Request SpawnRequest { get; set; }
 
         public DebugService(SharkyOptions sharkyOptions)
         {
             SharkyOptions = sharkyOptions;
             DefaultColor = new Color() { R = 255, G = 0, B = 0 };
             ResetDrawRequest();
+            ResetSpawnRequest();
         }
 
         public void DrawLine(Point start, Point end, Color color)
@@ -63,6 +65,29 @@ namespace Sharky
             DebugCommand debugCommand = new DebugCommand();
             debugCommand.Draw = new DebugDraw();
             DrawRequest.Debug.Debug.Add(debugCommand);
+        }
+
+        public void ResetSpawnRequest()
+        {
+            TextLine = 0;
+            SpawnRequest = new Request();
+            SpawnRequest.Debug = new RequestDebug();
+            DebugCommand debugCommand = new DebugCommand();
+            DrawRequest.Debug.Debug.Add(debugCommand);
+        }
+
+        public void SpawnUnit(UnitTypes unitType, Point2D location, int playerId)
+        {
+            SpawnRequest.Debug.Debug.Add(new DebugCommand()
+            {
+                CreateUnit = new DebugCreateUnit()
+                {
+                    Owner = playerId,
+                    Pos = location,
+                    Quantity = 1,
+                    UnitType = (uint)unitType
+                }
+            });
         }
     }
 }

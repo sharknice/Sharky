@@ -40,31 +40,18 @@ namespace Sharky.MicroTasks.Mining
                             int desiredWorkers = 0;
                             var combatUnits = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Where(u => u.UnitClassifications.Contains(UnitClassification.ArmyUnit));
                             var workers = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Where(u => u.UnitClassifications.Contains(UnitClassification.Worker));
-                            if (combatUnits.Count() == 0)
+
+                            desiredWorkers = 1;
+                            if (workers.Count() > 1)
                             {
-                                desiredWorkers = workers.Count() + 1;
-                                if (workers.Count() > 8) // this is a worker rush, set one defending worker as the bait that will stay just out of range and run away
-                                {
-                                    var bait = commanders.Where(w => w.UnitRole == UnitRole.Bait).FirstOrDefault();
-                                    if (bait == null && commanders.Count() > 0)
-                                    {
-                                        commanders.FirstOrDefault().UnitRole = UnitRole.Bait;
-                                    }
-                                }
+                                desiredWorkers = workers.Count() + 1; ;
                             }
-                            else
+                            if (workers.Count() > 8) // this is a worker rush, set one defending worker as the bait that will stay just out of range and run away
                             {
-                                if (combatUnits.All(u => u.Unit.UnitType == (uint)UnitTypes.ZERG_ZERGLING))
+                                var bait = commanders.Where(w => w.UnitRole == UnitRole.Bait).FirstOrDefault();
+                                if (bait == null && commanders.Count() > 0)
                                 {
-                                    desiredWorkers = combatUnits.Count() * 3;
-                                }
-                                else if (combatUnits.All(u => u.Unit.UnitType == (uint)UnitTypes.ZERG_ZERGLING))
-                                {
-                                    desiredWorkers = combatUnits.Count() * 4;
-                                }
-                                else
-                                {
-                                    desiredWorkers = combatUnits.Count() * 5;
+                                    commanders.FirstOrDefault().UnitRole = UnitRole.Bait;
                                 }
                             }
 
@@ -99,7 +86,7 @@ namespace Sharky.MicroTasks.Mining
                                 }
                                 else
                                 {
-                                    // spam a far mineral to bunch workers up until enemies get within range and then attack
+                                    // spam a far mineral to bunch workers up until enemies get within range and then attack, TODO: check if mineral has 2 close minerals touching it so it can be used to spam group probes
                                     var farMineral = selfBase.MineralFields.OrderByDescending(m => Vector2.DistanceSquared(new Vector2(m.Pos.X, m.Pos.Y), new Vector2(selfBase.Location.X, selfBase.Location.Y))).FirstOrDefault();
                                     if (farMineral != null)
                                     {
@@ -156,31 +143,7 @@ namespace Sharky.MicroTasks.Mining
                                 }
                                 else if (enemy != null)
                                 {
-                                    int defendingCount = 0;
-                                    var command = new ActionRawUnitCommand();
-                                    foreach (var commander in commanders)
-                                    {
-                                        if (defendingCount < desiredWorkers)
-                                        {
-                                            command.UnitTags.Add(commander.UnitCalculation.Unit.Tag);
-                                            defendingCount++;
-                                        }
-                                    }
-
-                                    if (defendingCount > 0)
-                                    {
-                                        command.AbilityId = (int)Abilities.ATTACK;
-                                        command.TargetWorldSpacePos = new Point2D { X = enemy.Unit.Pos.X, Y = enemy.Unit.Pos.Y };
-
-                                        var action = new SC2APIProtocol.Action
-                                        {
-                                            ActionRaw = new ActionRaw
-                                            {
-                                                UnitCommand = command
-                                            }
-                                        };
-                                        actions.Add(action);
-                                    }
+                                    actions.AddRange(Run(frame, unitCommanders, selfBase));
                                 }
                             }
                         }
@@ -201,7 +164,7 @@ namespace Sharky.MicroTasks.Mining
             {
                 if (commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.ATTACK_ATTACK) && (!commander.UnitCalculation.NearbyAllies.Any(a => a.UnitClassifications.Contains(UnitClassification.ResourceCenter)) || commander.UnitCalculation.NearbyAllies.Any(a => a.UnitClassifications.Contains(UnitClassification.ArmyUnit))))
                 {
-                    var action = commander.Order(frame, Abilities.MOVE, BaseData.MainBase.Location);
+                    var action = commander.Order(frame, Abilities.STOP);
                     if (action != null)
                     {
                         actions.Add(action);
@@ -223,10 +186,21 @@ namespace Sharky.MicroTasks.Mining
                 {
                     if (commander.UnitCalculation.EnemiesInRangeOf.Count() > 0)
                     {
-                        var action = WorkerMicroController.Retreat(commander, otherBase.MineralLineLocation, null, frame);
-                        if (action != null)
+                        if (commander.UnitCalculation.Unit.Health + commander.UnitCalculation.Unit.Shield < commander.UnitCalculation.EnemiesInRangeOf.First().Damage)
                         {
-                            actions.Add(action);
+                            var action = WorkerMicroController.Retreat(commander, otherBase.MineralLineLocation, null, frame);
+                            if (action != null)
+                            {
+                                actions.Add(action);
+                            }
+                        }
+                        else
+                        {
+                            var action = WorkerMicroController.Bait(commander, BaseData.BaseLocations.Last().Location, BaseData.BaseLocations.First().Location, null, frame);
+                            if (action != null)
+                            {
+                                actions.Add(action);
+                            }
                         }
                     }
                 }

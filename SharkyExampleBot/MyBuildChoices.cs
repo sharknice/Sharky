@@ -41,13 +41,15 @@ namespace SharkyExampleBot
             // we create build sequences to be used by each matchup
             var defaultSequences = new List<List<string>>
             {
+                new List<string> { proxyVoidRay.Name() },
                 new List<string> { nexusFirst.Name(), robo.Name(), protossRobo.Name() },
-                new List<string> { proxyVoidRay.Name() }
+                new List<string> { zealotRush.Name() }
             };
             var zergSequences = new List<List<string>>
             {
                 new List<string> { zealotRush.Name() },
-                new List<string> { proxyVoidRay.Name() }
+                new List<string> { proxyVoidRay.Name() },
+                new List<string> { nexusFirst.Name(), robo.Name(), protossRobo.Name() }
             };
             var transitionSequences = new List<List<string>>
             {
