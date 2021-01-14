@@ -7,9 +7,9 @@
     <Description>The Sharky Framework.  A StarCraft 2 API framework for creating StarCraft 2 bots</Description>
     <PackageProjectUrl>https://github.com/sharknice/Sharky</PackageProjectUrl>
     <PackageTags>StarCraft, SC2, SC2AI, bot</PackageTags>
-    <Version>1.0.6</Version>
+    <Version>1.0.7</Version>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <AssemblyVersion>1.0.5.0</AssemblyVersion>
+    <AssemblyVersion>1.0.7.0</AssemblyVersion>
     <FileVersion>1.0.6.0</FileVersion>
     <PackageReleaseNotes>improved targeting, use choke points, improved enemy strategy recognition and building placement</PackageReleaseNotes>
   </PropertyGroup>

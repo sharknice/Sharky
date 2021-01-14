@@ -74,6 +74,11 @@ namespace Sharky.Pathing
             return PathWalkable(point.X, point.Y, point.X, point.Y);
         }
 
+        public bool PathWalkable(int x, int y)
+        {
+            return PathWalkable(x, y, x, y);
+        }
+
         public bool PathFlyable(float startX, float startY, float endX, float endY)
         {
             if (endX < 0 || endY < 0 || endX >= MapData.MapWidth || endY >= MapData.MapHeight)
@@ -121,6 +126,11 @@ namespace Sharky.Pathing
         public int MapHeight(Point2D point)
         {
             return MapData.Map[(int)point.X][(int)point.Y].TerrainHeight;
+        }
+
+        public int MapHeight(int x, int y)
+        {
+            return MapData.Map[x][y].TerrainHeight;
         }
 
         public float EnemyAirDpsInRange(Point point)

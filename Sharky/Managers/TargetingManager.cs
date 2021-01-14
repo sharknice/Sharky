@@ -44,6 +44,11 @@ namespace Sharky.Managers
                 if (chokePoint != null)
                 {
                     TargetingData.ForwardDefensePoint = chokePoint;
+                    var wallPoints = ChokePointService.GetEntireChokePoint(chokePoint);
+                    if (wallPoints != null)
+                    {
+                        TargetingData.ForwardDefenseWallOffPoints = wallPoints;
+                    }
                 }
                 else
                 {
@@ -69,6 +74,14 @@ namespace Sharky.Managers
             DebugService.DrawSphere(new Point { X = TargetingData.ForwardDefensePoint.X, Y = TargetingData.ForwardDefensePoint.Y, Z = 12 }, 2, new Color { R = 0, G = 0, B = 255 });
             DebugService.DrawSphere(new Point { X = TargetingData.AttackPoint.X, Y = TargetingData.AttackPoint.Y, Z = 12 }, 2, new Color { R = 255, G = 0, B = 0 });
 
+            if (TargetingData.ForwardDefenseWallOffPoints != null)
+            {
+                foreach (var point in TargetingData.ForwardDefenseWallOffPoints)
+                {
+                    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 }, 1, new Color { R = 100, G = 100, B = 255 });
+                }
+            }
+
             return new List<SC2APIProtocol.Action>();
         }
 
@@ -82,9 +95,14 @@ namespace Sharky.Managers
                 {
                     TargetingData.MainDefensePoint = closestBase.MineralLineLocation;
                     var chokePoint = ChokePointService.FindDefensiveChokePoint(new Point2D { X = closestBase.Location.X + 4, Y = closestBase.Location.Y + 4 }, TargetingData.AttackPoint, frame);
-                    if (chokePoint != null) // TODO: also check distance from the base, shouldn't be too far away
+                    if (chokePoint != null)
                     {
                         TargetingData.ForwardDefensePoint = chokePoint;
+                        var wallPoints = ChokePointService.GetEntireChokePoint(chokePoint);
+                        if (wallPoints != null)
+                        {
+                            TargetingData.ForwardDefenseWallOffPoints = wallPoints;
+                        }
                     }
                     else
                     {
