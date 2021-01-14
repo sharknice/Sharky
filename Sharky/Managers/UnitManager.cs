@@ -95,7 +95,11 @@ namespace Sharky.Managers
 
             Parallel.ForEach(observation.Observation.RawData.Units, (unit) =>
             {
-                if (unit.Alliance == Alliance.Enemy)
+                if (unit.UnitType == (uint)UnitTypes.TERRAN_KD8CHARGE)
+                {
+
+                }
+                else if (unit.Alliance == Alliance.Enemy)
                 {
                     var repairingUnitCount = repairers.Where(u => u.Alliance == Alliance.Enemy && Vector2.DistanceSquared(new Vector2(u.Pos.X, u.Pos.Y), new Vector2(unit.Pos.X, unit.Pos.Y)) < (1.0 + u.Radius + unit.Radius) * (0.1 + u.Radius + unit.Radius)).Count();
                     var attack = new UnitCalculation(unit, unit, repairingUnitCount, SharkyUnitData, SharkyOptions, UnitDataService);

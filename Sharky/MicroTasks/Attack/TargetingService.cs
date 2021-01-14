@@ -28,7 +28,7 @@ namespace Sharky.MicroTasks.Attack
             var enemyBuildings = ActiveUnitData.EnemyUnits.Where(e => e.Value.UnitTypeData.Attributes.Contains(SC2APIProtocol.Attribute.Structure));
             var currentEnemyBuildingCount = enemyBuildings.Count();
 
-            if (EnemyBuildingCount != currentEnemyBuildingCount)
+            if (MapDataService.SelfVisible(attackPoint) || EnemyBuildingCount != currentEnemyBuildingCount)
             {
                 TargetingData.HiddenEnemyBase = false;
                 EnemyBuildingCount = currentEnemyBuildingCount;
