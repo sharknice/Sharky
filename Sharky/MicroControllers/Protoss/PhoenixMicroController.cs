@@ -3,6 +3,7 @@ using Sharky.Pathing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace Sharky.MicroControllers.Protoss
 {
@@ -43,7 +44,18 @@ namespace Sharky.MicroControllers.Protoss
                 return true;
             }
 
-            action = commander.Order(frame, Abilities.ATTACK, target); // no damaging targets in range, attack towards the main target
+            var vectors = commander.UnitCalculation.NearbyAllies.Where(a => (!a.Unit.IsFlying && !commander.UnitCalculation.Unit.IsFlying) || (a.Unit.IsFlying && commander.UnitCalculation.Unit.IsFlying)).Select(u => new Vector2(u.Unit.Pos.X, u.Unit.Pos.Y));
+            if (vectors.Count() > 0)
+            {
+                var center = new Point2D { X = vectors.Average(v => v.X), Y = vectors.Average(v => v.Y) };
+                if (Vector2.DistanceSquared(new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y), new Vector2(center.X, center.Y)) + commander.UnitCalculation.Unit.Radius > 1)
+                {
+                    action = commander.Order(frame, Abilities.MOVE, center);
+                    return true;
+                }
+            }
+
+            action = commander.Order(frame, Abilities.ATTACK, target);
             return true;
         }
 

@@ -60,6 +60,10 @@ namespace Sharky.MicroControllers.Protoss
 
             // follow behind at the range of pickup
             var unitToSupport = GetSupportTarget(commander, target, defensivePoint, supportableUnits);
+            if (unitToSupport == null)
+            {
+                return false;
+            }
 
             if (!commander.UnitCalculation.NearbyAllies.Any(a => a.Unit.Tag == unitToSupport.Unit.Tag))
             {

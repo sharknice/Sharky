@@ -70,7 +70,7 @@ namespace Sharky.Pathing
 
         public Point2D FindFlatChokePoint(List<Vector2> path, float maxDistance = 15)
         {
-            //return null; // TODO: check points around if they are walkable, if you can fit a circle near, not sure how to do it exactly
+            return null; // TODO: check points around if they are walkable, if you can fit a circle near, not sure how to do it exactly
 
             if (path.Count > 0)
             {
@@ -105,8 +105,7 @@ namespace Sharky.Pathing
                 {
                     if (MapDataService.MapHeight(x + (int)chokePoint.X, y + (int)chokePoint.Y) == startHeight && MapDataService.PathWalkable(x + (int)chokePoint.X, y + (int)chokePoint.Y))
                     {
-                        // find if there is a touching point that is lower
-                        if (TouchingLowerPoint(x + (int)chokePoint.X, y + (int)chokePoint.Y, startHeight))
+                        if (!TouchingLowerPoint(x + (int)chokePoint.X, y + (int)chokePoint.Y, startHeight) || !TouchingUnwalkablePoint(x + (int)chokePoint.X, y + (int)chokePoint.Y, startHeight))
                         {
                             notChokeCount++;
                             if (notChokeCount > 50)
@@ -159,6 +158,27 @@ namespace Sharky.Pathing
                 return true;
             }
             if (MapDataService.MapHeight(x - 1, y) < startHeight && MapDataService.PathWalkable(x - 1, y))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        private bool TouchingUnwalkablePoint(int x, int y, int startHeight)
+        {
+            if (!MapDataService.PathWalkable(x, y + 1))
+            {
+                return true;
+            }
+            if (!MapDataService.PathWalkable(x, y - 1))
+            {
+                return true;
+            }
+            if (!MapDataService.PathWalkable(x + 1, y))
+            {
+                return true;
+            }
+            if (!MapDataService.PathWalkable(x - 1, y))
             {
                 return true;
             }

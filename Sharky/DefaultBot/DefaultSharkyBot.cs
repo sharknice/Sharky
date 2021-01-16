@@ -212,7 +212,7 @@ namespace Sharky.DefaultBot
             var disruptorPhasedMicroController = new DisruptorPhasedMicroController(MapDataService, SharkyUnitData, ActiveUnitData, DebugService, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, UnitDataService, MicroPriority.LiveAndAttack, false);
             var mothershipMicroController = new MothershipMicroController(MapDataService, SharkyUnitData, ActiveUnitData, DebugService, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, UnitDataService, MicroPriority.LiveAndAttack, false);
             var oraclepMicroController = new OracleMicroController(MapDataService, SharkyUnitData, ActiveUnitData, DebugService, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, UnitDataService, MicroPriority.LiveAndAttack, false);
-            var phoenixMicroController = new PhoenixMicroController(MapDataService, SharkyUnitData, ActiveUnitData, DebugService, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, UnitDataService, MicroPriority.LiveAndAttack, false);
+            var phoenixMicroController = new PhoenixMicroController(MapDataService, SharkyUnitData, ActiveUnitData, DebugService, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, UnitDataService, MicroPriority.StayOutOfRange, true);
             var sentryMicroController = new SentryMicroController(MapDataService, SharkyUnitData, ActiveUnitData, DebugService, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, UnitDataService, MicroPriority.StayOutOfRange, true);
             var stalkerMicroController = new StalkerMicroController(MapDataService, SharkyUnitData, ActiveUnitData, DebugService, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, UnitDataService, MicroPriority.LiveAndAttack, false);
             var tempestMicroController = new TempestMicroController(MapDataService, SharkyUnitData, ActiveUnitData, DebugService, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, UnitDataService, MicroPriority.LiveAndAttack, false);
@@ -228,6 +228,7 @@ namespace Sharky.DefaultBot
             var bansheeMicroController = new BansheeMicroController(MapDataService, SharkyUnitData, ActiveUnitData, DebugService, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, UnitDataService, MicroPriority.LiveAndAttack, false);
 
             var workerDefenseMicroController = new IndividualMicroController(MapDataService, SharkyUnitData, ActiveUnitData, DebugService, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, UnitDataService, MicroPriority.LiveAndAttack, false, 3);
+            var workerProxyScoutMicroController = new WorkerScoutMicroController(MapDataService, SharkyUnitData, ActiveUnitData, DebugService, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, UnitDataService, MicroPriority.AttackForward, false);
 
             var individualMicroControllers = new Dictionary<UnitTypes, IIndividualMicroController>
             {
@@ -266,7 +267,7 @@ namespace Sharky.DefaultBot
             var defenseSquadTask = new DefenseSquadTask(ActiveUnitData, TargetingData, DefenseService, MicroController, new List<DesiredUnitsClaim>(), 0, false);
             var workerScoutTask = new WorkerScoutTask(SharkyUnitData, TargetingData, MapDataService, false, 0.5f, workerDefenseMicroController);
             var findHiddenBaseTask = new FindHiddenBaseTask(BaseData, TargetingData, MapDataService, individualMicroController, 15, false, 0.5f);
-            var proxyScoutTask = new ProxyScoutTask(SharkyUnitData, TargetingData, MapDataService, BaseData, false, 0.5f, workerDefenseMicroController);
+            var proxyScoutTask = new ProxyScoutTask(SharkyUnitData, TargetingData, MapDataService, BaseData, false, 0.5f, workerProxyScoutMicroController);
             var miningDefenseService = new MiningDefenseService(BaseData, ActiveUnitData, workerDefenseMicroController, DebugService);
             var miningTask = new MiningTask(SharkyUnitData, BaseData, ActiveUnitData, 1, miningDefenseService, MacroData);
             var queenInjectTask = new QueenInjectsTask(ActiveUnitData, 1.1f, UnitCountService);
