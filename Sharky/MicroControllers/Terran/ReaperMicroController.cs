@@ -1,6 +1,7 @@
 ﻿using SC2APIProtocol;
 using Sharky.Pathing;
 using System;
+using System.Collections.Generic;
 using System.Numerics;
 
 namespace Sharky.MicroControllers.Terran
@@ -16,7 +17,7 @@ namespace Sharky.MicroControllers.Terran
             Kd8Charge = 5;
         }
 
-        protected override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out SC2APIProtocol.Action action)
+        protected override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -36,7 +37,7 @@ namespace Sharky.MicroControllers.Terran
             return false;
         }
 
-        protected override bool OffensiveAbility(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out SC2APIProtocol.Action action)
+        protected override bool OffensiveAbility(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 

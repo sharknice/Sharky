@@ -106,7 +106,7 @@ namespace Sharky.MicroTasks.Proxy
                     var action = OrderWarpPrism(commander, droppedAttackers, unDroppedAttackers, frame);
                     if (action != null)
                     {
-                        actions.Add(action);
+                        actions.AddRange(action);
                     }
                 }
 
@@ -116,7 +116,7 @@ namespace Sharky.MicroTasks.Proxy
                     var action = commander.Order(frame, Abilities.ATTACK, LoadingLocation);
                     if (action != null)
                     {
-                        actions.Add(action);
+                        actions.AddRange(action);
                     }
                 }
                 //actions.AddRange(MicroController.Retreat(unDroppedAttackers, LoadingLocation, null, frame));
@@ -151,7 +151,7 @@ namespace Sharky.MicroTasks.Proxy
             }
         }
 
-        private SC2APIProtocol.Action OrderWarpPrism(UnitCommander warpPrism, IEnumerable<UnitCommander> droppedAttackers, IEnumerable<UnitCommander> unDroppedAttackers, int frame)
+        private List<SC2APIProtocol.Action> OrderWarpPrism(UnitCommander warpPrism, IEnumerable<UnitCommander> droppedAttackers, IEnumerable<UnitCommander> unDroppedAttackers, int frame)
         {
             var readyForPickup = unDroppedAttackers.Where(c => !warpPrism.UnitCalculation.Unit.Passengers.Any(p => p.Tag == c.UnitCalculation.Unit.Tag) && Vector2.DistanceSquared(new Vector2(c.UnitCalculation.Unit.Pos.X, c.UnitCalculation.Unit.Pos.Y), new Vector2(LoadingLocation.X, LoadingLocation.Y)) < 10);
             foreach (var pickup in readyForPickup)
@@ -190,14 +190,14 @@ namespace Sharky.MicroTasks.Proxy
 
             if (droppedAttackers.Count() > 0)
             {
-                SC2APIProtocol.Action action = null;
+                List<SC2APIProtocol.Action> action = null;
                 WarpPrismMicroController.SupportArmy(warpPrism, TargetLocatoin, DropLocation, null, frame, out action, droppedAttackers.Select(c => c.UnitCalculation));
                 return action;
             }
 
             if (unDroppedAttackers.Count() > 0)
             {
-                SC2APIProtocol.Action action = null;
+                List<SC2APIProtocol.Action> action = null;
                 WarpPrismMicroController.SupportArmy(warpPrism, TargetLocatoin, DefensiveLocation, null, frame, out action, unDroppedAttackers.Select(c => c.UnitCalculation));
                 return action;
             }

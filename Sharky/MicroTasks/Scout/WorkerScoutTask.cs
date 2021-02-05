@@ -47,6 +47,7 @@ namespace Sharky.MicroTasks
                         else
                         {
                             commander.Value.Claimed = true;
+                            commander.Value.UnitRole = UnitRole.Scout;
                             UnitCommanders.Add(commander.Value);
                             started = true;
                             return;
@@ -65,7 +66,7 @@ namespace Sharky.MicroTasks
                 var action = IndividualMicroController.Scout(commander, TargetingData.EnemyMainBasePoint, TargetingData.ForwardDefensePoint, frame, true);
                 if (action != null)
                 {
-                    commands.Add(action);
+                    commands.AddRange(action);
                 }
             }
 

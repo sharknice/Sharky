@@ -1,6 +1,6 @@
 ﻿using SC2APIProtocol;
-using Sharky.Managers;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 
 namespace Sharky
@@ -48,11 +48,11 @@ namespace Sharky
             LastOrderFrame = 0;
         }
 
-        public Action Order(int frame, Abilities ability, Point2D targetLocation = null, ulong targetTag = 0, bool allowSpam = false)
+        public List<Action> Order(int frame, Abilities ability, Point2D targetLocation = null, ulong targetTag = 0, bool allowSpam = false)
         {
             if (!allowSpam && ability == LastAbility && targetTag == LastTargetTag && ((targetLocation == null && LastTargetLocation == null) || (targetLocation.X == LastTargetLocation.X && targetLocation.Y == LastTargetLocation.Y)) && AbilityOrderTimes[ability] > frame - SpamFrames)
             {
-                return null; // if new action is exactly the same, don't do anything to prevent apm spam
+                return new List<Action>(); // if new action is exactly the same, don't do anything to prevent apm spam
             }
 
             var command = new ActionRawUnitCommand();
@@ -82,7 +82,7 @@ namespace Sharky
 
             LastOrderFrame = frame;
 
-            return action;
+            return new List<Action> { action };
         }
 
         public Action Merge(ulong targetTag)
@@ -140,6 +140,47 @@ namespace Sharky
                 }
             }
             return true;
+        }
+
+        public List<Action> UnloadSpecificUnit(int frame, Abilities ability, ulong targetTag, bool allowSpam = false)
+        {
+            if (!allowSpam && ability == LastAbility && targetTag == LastTargetTag && AbilityOrderTimes[ability] > frame - SpamFrames)
+            {
+                return null; // if new action is exactly the same, don't do anything to prevent apm spam
+            }
+
+            var passenger = UnitCalculation.Unit.Passengers.Where(p => p.Tag == targetTag).FirstOrDefault();
+            if (passenger == null)
+            {
+                return null;
+            }
+
+            var selectionCommand = new ActionRawUnitCommand();
+            selectionCommand.UnitTags.Add(UnitCalculation.Unit.Tag);
+            selectionCommand.AbilityId = 0;
+            var selectAction = new Action
+            {
+                ActionRaw = new ActionRaw
+                {
+                    UnitCommand = selectionCommand
+                },
+            };
+
+            var unloadAction = new Action
+            {
+                ActionUi = new ActionUI
+                {
+                    CargoPanel = new ActionCargoPanelUnload { UnitIndex = UnitCalculation.Unit.Passengers.IndexOf(passenger) }
+                },
+            };
+
+            LastAbility = ability;
+            LastTargetLocation = null;
+            LastTargetTag = targetTag;
+            AbilityOrderTimes[ability] = frame;
+            LastOrderFrame = frame;
+
+            return new List<Action> { selectAction, unloadAction };
         }
     }
 }

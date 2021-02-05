@@ -26,7 +26,7 @@ namespace Sharky.MicroControllers
                     continue;
                 }
                 stopwatch.Restart();
-                Action action;
+                List<Action> action;
 
                 if (MicroData.IndividualMicroControllers.TryGetValue((UnitTypes)commander.UnitCalculation.Unit.UnitType, out var individualMicroController))
                 {
@@ -39,7 +39,7 @@ namespace Sharky.MicroControllers
 
                 if (action != null)
                 {
-                    actions.Add(action);
+                    actions.AddRange(action);
                 }
                 var timeTaken = stopwatch.ElapsedMilliseconds;
                 if (timeTaken > 1)
@@ -63,7 +63,7 @@ namespace Sharky.MicroControllers
                     continue;
                 }
                 stopwatch.Restart();
-                Action action;
+                List<Action> action;
 
                 if (MicroData.IndividualMicroControllers.TryGetValue((UnitTypes)commander.UnitCalculation.Unit.UnitType, out var individualMicroController))
                 {
@@ -76,7 +76,7 @@ namespace Sharky.MicroControllers
 
                 if (action != null)
                 {
-                    actions.Add(action);
+                    actions.AddRange(action);
                 }
                 var timeTaken = stopwatch.ElapsedMilliseconds;
                 if (timeTaken > 1)
@@ -100,7 +100,7 @@ namespace Sharky.MicroControllers
                     continue;
                 }
                 stopwatch.Restart();
-                Action action;
+                List<Action> action;
 
                 if (MicroData.IndividualMicroControllers.TryGetValue((UnitTypes)commander.UnitCalculation.Unit.UnitType, out var individualMicroController))
                 {
@@ -113,7 +113,7 @@ namespace Sharky.MicroControllers
 
                 if (action != null)
                 {
-                    actions.Add(action);
+                    actions.AddRange(action);
                 }
                 var timeTaken = stopwatch.ElapsedMilliseconds;
                 if (timeTaken > 1)

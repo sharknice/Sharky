@@ -19,7 +19,7 @@ namespace Sharky.MicroControllers.Protoss
             BaseData = baseData;
         }
 
-        protected override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out SC2APIProtocol.Action action)
+        protected override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -31,7 +31,7 @@ namespace Sharky.MicroControllers.Protoss
             return false;
         }
 
-        public bool SupportArmy(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame, out SC2APIProtocol.Action action, IEnumerable<UnitCalculation> supportableUnits = null)
+        public bool SupportArmy(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame, out List<SC2APIProtocol.Action> action, IEnumerable<UnitCalculation> supportableUnits = null)
         {
             action = null;
 
@@ -83,7 +83,7 @@ namespace Sharky.MicroControllers.Protoss
             }
 
             var moveTo = GetPickupSpot(new Point2D { X = unitToSupport.Unit.Pos.X, Y = unitToSupport.Unit.Pos.Y }, defensivePoint);
-            if (commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.UNLOADALLAT_WARPPRISM) || !MapDataService.PathWalkable(moveTo)) // TODO: does this groundpathable thing work right?
+            if (commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.UNLOADALLAT_WARPPRISM || o.AbilityId == (uint)Abilities.UNLOADUNIT_WARPPRISM) || !MapDataService.PathWalkable(moveTo)) // TODO: does this groundpathable thing work right?
             {
                 moveTo = new Point2D { X = unitToSupport.Unit.Pos.X, Y = unitToSupport.Unit.Pos.Y };
             }
@@ -143,7 +143,7 @@ namespace Sharky.MicroControllers.Protoss
             }
         }
 
-        bool StartWarping(UnitCommander commander, int frame, out SC2APIProtocol.Action action)
+        bool StartWarping(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -166,7 +166,7 @@ namespace Sharky.MicroControllers.Protoss
             return false;
         }
 
-        bool StopWarping(UnitCommander commander, int frame, out SC2APIProtocol.Action action)
+        bool StopWarping(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -234,13 +234,13 @@ namespace Sharky.MicroControllers.Protoss
             return new Point2D { X = target.X + (float)x, Y = target.Y - (float)y };
         }
 
-        bool UnloadUnits(UnitCommander commander, Point2D defensivePoint, int frame, out SC2APIProtocol.Action action)
+        bool UnloadUnits(UnitCommander commander, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
             // TODO: if already unloading all return false and it will unload as it moves?
 
-            if (commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.UNLOADALLAT_WARPPRISM)) {
+            if (commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.UNLOADALLAT_WARPPRISM || o.AbilityId == (uint)Abilities.UNLOADUNIT_WARPPRISM)) {
                 // if a unit has been in there for more than a second, warp prism must be on unloadable ground, move to a new area then try again
                 if (commander.LoadTimes.Any(l => l.Value > 100))
                 {
@@ -265,7 +265,8 @@ namespace Sharky.MicroControllers.Protoss
                 // use LoadTimes to calculate weapon cooldown
                 if (commander.UnitCalculation.Unit.Shield + commander.UnitCalculation.Unit.Health < 50 || passenger.Shield > 25) // unload any units that regained shields, or if warp prism dying
                 {
-                    action = commander.Order(frame, Abilities.UNLOADALLAT_WARPPRISM, null, commander.UnitCalculation.Unit.Tag); // TODO: dropping a specific unit not working due to api bug, can only drop all, change it if they ever fix the api
+                    //action = commander.Order(frame, Abilities.UNLOADALLAT_WARPPRISM, null, commander.UnitCalculation.Unit.Tag); // TODO: dropping a specific unit not working due to api bug, can only drop all, change it if they ever fix the api
+                    action = commander.UnloadSpecificUnit(frame, Abilities.UNLOADUNIT_WARPPRISM, passenger.Tag);
                     return true;
                 }
                 else
@@ -273,7 +274,8 @@ namespace Sharky.MicroControllers.Protoss
                     var weapon = ActiveUnitData.SelfUnits[passenger.Tag].Weapon;
                     if (weapon == null || (frame - commander.LoadTimes[passenger.Tag]) / SharkyOptions.FramesPerSecond > weapon.Speed) // unload any units ready to fire
                     {
-                        action = commander.Order(frame, Abilities.UNLOADALLAT_WARPPRISM, null, commander.UnitCalculation.Unit.Tag); // TODO: dropping a specific unit not working, can only drop all, change it if they ever fix the api
+                        //action = commander.Order(frame, Abilities.UNLOADALLAT_WARPPRISM, null, commander.UnitCalculation.Unit.Tag); // TODO: dropping a specific unit not working, can only drop all, change it if they ever fix the api
+                        action = commander.UnloadSpecificUnit(frame, Abilities.UNLOADUNIT_WARPPRISM, passenger.Tag);
                         return true;
                     }
                 }
@@ -340,7 +342,7 @@ namespace Sharky.MicroControllers.Protoss
             return null;
         }
 
-        bool NavigateToSupportUnit(UnitCommander commander, Point2D target, int frame, out SC2APIProtocol.Action action)
+        bool NavigateToSupportUnit(UnitCommander commander, Point2D target, int frame, out List<SC2APIProtocol.Action> action)
         {
             if (MapDataService.PathWalkable(commander.UnitCalculation.Unit.Pos)) // if it is in unplaceable terrain, can't unload
             {
@@ -364,7 +366,8 @@ namespace Sharky.MicroControllers.Protoss
                                 continue;
                             }
                             // if an enemy is in range drop the unit
-                            action = commander.Order(frame, Abilities.UNLOADALLAT_WARPPRISM, null, commander.UnitCalculation.Unit.Tag); // TODO: dropping a specific unit not working, can only drop all, change it if they ever fix the api
+                            //action = commander.Order(frame, Abilities.UNLOADALLAT_WARPPRISM, null, commander.UnitCalculation.Unit.Tag); // TODO: dropping a specific unit not working, can only drop all, change it if they ever fix the api
+                            action = commander.UnloadSpecificUnit(frame, Abilities.UNLOADUNIT_WARPPRISM, passenger.Tag);
                             return true;
                         }
                     }
@@ -393,14 +396,14 @@ namespace Sharky.MicroControllers.Protoss
             return true;
         }
 
-        public override SC2APIProtocol.Action Idle(UnitCommander commander, Point2D defensivePoint, int frame)
+        public override List<SC2APIProtocol.Action> Idle(UnitCommander commander, Point2D defensivePoint, int frame)
         {
-            SC2APIProtocol.Action action = null;
+            List<SC2APIProtocol.Action> action = null;
             DetermineMiningAction(commander, frame, out action);
             return action;
         }
 
-        public override SC2APIProtocol.Action Retreat(UnitCommander commander, Point2D defensivePoint, Point2D groupCenter, int frame)
+        public override List<SC2APIProtocol.Action> Retreat(UnitCommander commander, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
             // TODO: pick up nearby units that are retreating to help them retreat faster
             return Idle(commander, defensivePoint, frame);
@@ -415,9 +418,9 @@ namespace Sharky.MicroControllers.Protoss
             return Vector2.DistanceSquared(new Vector2(unit1.Unit.Pos.X, unit1.Unit.Pos.Y), new Vector2(unit2.Unit.Pos.X, unit2.Unit.Pos.Y));
         }
 
-        bool DetermineMiningAction(UnitCommander commander, int frame, out SC2APIProtocol.Action action)
+        bool DetermineMiningAction(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
         {
-            action = null;
+            action = new List<SC2APIProtocol.Action>();
 
             if (commander.UnitCalculation.NearbyEnemies.Count > 0)
             {
@@ -433,7 +436,15 @@ namespace Sharky.MicroControllers.Protoss
 
             if (commander.UnitCalculation.Unit.Passengers.Count > 0)
             {
-                action = commander.Order(frame, Abilities.UNLOADALLAT_WARPPRISM, null, commander.UnitCalculation.Unit.Tag);
+                //action = commander.Order(frame, Abilities.UNLOADALLAT_WARPPRISM, null, commander.UnitCalculation.Unit.Tag);
+                foreach (var passenger in commander.UnitCalculation.Unit.Passengers)
+                {
+                    var passengerAction = commander.UnloadSpecificUnit(frame, Abilities.UNLOADUNIT_WARPPRISM, passenger.Tag);
+                    if (passengerAction != null)
+                    {
+                        action.AddRange(passengerAction);
+                    }
+                }
                 return true;
             }
 

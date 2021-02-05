@@ -143,7 +143,7 @@ namespace Sharky.Managers
                         {
                             if (upgradeData.Minerals <= MacroData.Minerals && upgradeData.Gas <= MacroData.VespeneGas)
                             {
-                                commands.Add(building.First().Value.Order(MacroData.Frame, upgradeData.Ability));
+                                commands.AddRange(building.First().Value.Order(MacroData.Frame, upgradeData.Ability));
                             }
                         }
                     }
@@ -186,7 +186,7 @@ namespace Sharky.Managers
                                 var action = building.First().Value.Order(MacroData.Frame, Abilities.RESEARCH_WARPGATE);
                                 if (action != null)
                                 {
-                                    commands.Add(action);
+                                    commands.AddRange(action);
                                     return commands;
                                 }
                             }
@@ -202,7 +202,7 @@ namespace Sharky.Managers
                                 var action = building.First().Value.Order(MacroData.Frame, unitData.WarpInAbility, location);
                                 if (action != null)
                                 {
-                                    commands.Add(action);
+                                    commands.AddRange(action);
                                     return commands;
                                 }
                             }
@@ -211,7 +211,7 @@ namespace Sharky.Managers
                                 var action = building.First().Value.Order(MacroData.Frame, unitData.Ability);
                                 if (action != null)
                                 {
-                                    commands.Add(action);
+                                    commands.AddRange(action);
                                     return commands;
                                 }
                             }
@@ -259,7 +259,7 @@ namespace Sharky.Managers
                         var command = BuildingBuilder.BuildGas(MacroData, unitData, closestGyeser);
                         if (command != null)
                         {
-                            commands.Add(command);
+                            commands.AddRange(command);
                             return commands;
                         }
                     }
@@ -302,7 +302,7 @@ namespace Sharky.Managers
                 var command = BuildingBuilder.BuildBuilding(MacroData, UnitTypes.PROTOSS_PYLON, unitData);
                 if (command != null)
                 {
-                    commands.Add(command);
+                    commands.AddRange(command);
                     return commands;
                 }
             }
@@ -313,7 +313,7 @@ namespace Sharky.Managers
                 var command = BuildingBuilder.BuildBuilding(MacroData, UnitTypes.TERRAN_SUPPLYDEPOT, unitData);
                 if (command != null)
                 {
-                    commands.Add(command);
+                    commands.AddRange(command);
                     return commands;
                 }
             }
@@ -349,7 +349,7 @@ namespace Sharky.Managers
                     var command = BuildingBuilder.BuildBuilding(MacroData, unit.Key, unitData);
                     if (command != null)
                     {
-                        commands.Add(command);
+                        commands.AddRange(command);
                         return commands;
                     }
                 }
@@ -375,7 +375,7 @@ namespace Sharky.Managers
                     var command = Morpher.MorphBuilding(MacroData, unitData);
                     if (command != null)
                     {
-                        commands.Add(command);
+                        commands.AddRange(command);
                         return commands;
                     }
                 }
@@ -402,7 +402,7 @@ namespace Sharky.Managers
                     var command = BuildingBuilder.BuildBuilding(MacroData, unit.Key, unitData);
                     if (command != null)
                     {
-                        commands.Add(command);
+                        commands.AddRange(command);
                         return commands;
                     }
                 }
@@ -434,7 +434,7 @@ namespace Sharky.Managers
                     var command = BuildingBuilder.BuildAddOn(MacroData, unitData);
                     if (command != null)
                     {
-                        commands.Add(command);
+                        commands.AddRange(command);
                         continue;
                     }
                 }

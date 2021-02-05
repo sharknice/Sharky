@@ -1,5 +1,6 @@
 ﻿using SC2APIProtocol;
 using Sharky.Pathing;
+using System.Collections.Generic;
 
 namespace Sharky.MicroControllers.Protoss
 {
@@ -10,7 +11,7 @@ namespace Sharky.MicroControllers.Protoss
         {
         }
 
-        protected override bool AvoidTargettedDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out SC2APIProtocol.Action action)
+        protected override bool AvoidTargettedDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 

@@ -18,7 +18,7 @@ namespace Sharky.MicroControllers.Protoss
         {
         }
 
-        protected override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out SC2APIProtocol.Action action)
+        protected override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -35,7 +35,7 @@ namespace Sharky.MicroControllers.Protoss
             return false;
         }
 
-        bool TimeWarp(UnitCommander commander, int frame, out SC2APIProtocol.Action action)
+        bool TimeWarp(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -105,7 +105,7 @@ namespace Sharky.MicroControllers.Protoss
             return null;
         }
 
-        bool SupportArmy(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame, out SC2APIProtocol.Action action)
+        bool SupportArmy(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 

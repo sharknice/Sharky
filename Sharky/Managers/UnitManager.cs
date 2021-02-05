@@ -82,12 +82,21 @@ namespace Sharky.Managers
                 ActiveUnitData.Commanders.TryRemove(tag, out UnitCommander removedCommander);
             }
 
+            var enemyList = ActiveUnitData.EnemyUnits.Select(e => e.Value).ToList();
+            var snapshots = enemyList.Where(e => e.Unit.DisplayType == DisplayType.Snapshot);
 
-            foreach (var enemy in ActiveUnitData.EnemyUnits.Select(e => e.Value).ToList()) // if we can see this area of the map and the unit isn't there anymore remove it (we just remove it because visible units will get re-added below)
+            foreach (var enemy in enemyList) // if we can see this area of the map and the unit isn't there anymore remove it (we just remove it because visible units will get re-added below)
             {
                 if (MapDataService.SelfVisible(enemy.Unit.Pos))
                 {
                     ActiveUnitData.EnemyUnits.TryRemove(enemy.Unit.Tag, out UnitCalculation removed);
+                }
+                else if (enemy.Unit.DisplayType == DisplayType.Visible && enemy.Attributes.Contains(Attribute.Structure)) // remove units that are replaced by snapshots
+                {
+                    if (snapshots.Any(e => e.Unit.UnitType == enemy.Unit.UnitType && e.Unit.Pos.X == enemy.Unit.Pos.X && e.Unit.Pos.Y == enemy.Unit.Pos.Y))
+                    {
+                        ActiveUnitData.EnemyUnits.TryRemove(enemy.Unit.Tag, out UnitCalculation removed);
+                    }
                 }
             }
 

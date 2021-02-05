@@ -31,7 +31,7 @@ namespace Sharky.Builds.MacroServices
                             var action = commander.Value.Order(MacroData.Frame, Abilities.CANCEL);
                             if (action != null)
                             {
-                                commands.Add(action);
+                                commands.AddRange(action);
                             }
                         }
                     }
@@ -42,7 +42,7 @@ namespace Sharky.Builds.MacroServices
                             var action = commander.Value.Order(MacroData.Frame, Abilities.CANCEL);
                             if (action != null)
                             {
-                                commands.Add(action);
+                                commands.AddRange(action);
                             }
                         }
                     }

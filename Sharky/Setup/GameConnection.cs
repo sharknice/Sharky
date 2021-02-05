@@ -100,11 +100,13 @@ namespace Sharky
             joinGame.Race = race;
 
             joinGame.Options = new InterfaceOptions();
+            joinGame.Options.FeatureLayer = new SpatialCameraSetup { CropToPlayableArea = true, AllowCheatingLayers = false, MinimapResolution = new Size2DI { X = 16, Y = 16 }, Resolution = new Size2DI { X = 128, Y = 128 }, Width = 10 };
             joinGame.Options.Raw = true;
             joinGame.Options.Score = true;
             joinGame.Options.ShowCloaked = true;
             joinGame.Options.ShowBurrowedShadows = true;
             joinGame.Options.RawCropToPlayableArea = true;
+            joinGame.Options.RawAffectsSelection = true;
 
             Request request = new Request();
             request.JoinGame = joinGame;
@@ -127,10 +129,12 @@ namespace Sharky
             joinGame.ClientPorts[0].BasePort = startPort + 5;
 
             joinGame.Options = new InterfaceOptions();
+            joinGame.Options.FeatureLayer = new SpatialCameraSetup { CropToPlayableArea = true, AllowCheatingLayers = false, MinimapResolution = new Size2DI { X = 16, Y = 16 }, Resolution = new Size2DI { X = 128, Y = 128 }, Width = 10 };
             joinGame.Options.Raw = true;
             joinGame.Options.Score = true;
             joinGame.Options.ShowCloaked = true;
             joinGame.Options.RawCropToPlayableArea = true;
+            joinGame.Options.RawAffectsSelection = true;
 
             Request request = new Request();
             request.JoinGame = joinGame;
@@ -216,6 +220,7 @@ namespace Sharky
                 IEnumerable<SC2APIProtocol.Action> actions = bot.OnFrame(observation);
 
                 Request actionRequest = new Request();
+
                 actionRequest.Action = new RequestAction();
                 actionRequest.Action.Actions.AddRange(actions);
                 if (actionRequest.Action.Actions.Count > 0)

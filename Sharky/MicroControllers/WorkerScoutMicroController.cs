@@ -1,5 +1,6 @@
 ﻿using SC2APIProtocol;
 using Sharky.Pathing;
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
@@ -12,7 +13,7 @@ namespace Sharky.MicroControllers
         {
         }
 
-        public override SC2APIProtocol.Action Attack(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
+        public override List<SC2APIProtocol.Action> Attack(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
             var enemyWorkers = commander.UnitCalculation.NearbyEnemies.Where(u => u.UnitClassifications.Contains(UnitClassification.Worker));
             if (enemyWorkers.Count() > 0)

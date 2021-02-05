@@ -110,12 +110,12 @@ namespace Sharky.MicroTasks
             {
                 if (Vector2.DistanceSquared(new Vector2(MacroData.Proxies[ProxyName].Location.X, MacroData.Proxies[ProxyName].Location.Y), new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y)) > MacroData.Proxies[ProxyName].MaximumBuildingDistance)
                 {
-                    SC2APIProtocol.Action action;
+                    List<SC2APIProtocol.Action> action;
                     if (IndividualMicroController.NavigateToTarget(commander, MacroData.Proxies[ProxyName].Location, null, null, Formation.Normal, frame, out action))
                     {
                         if (action != null)
                         {
-                            commands.Add(action);
+                            commands.AddRange(action);
                         }
                     }
                 }

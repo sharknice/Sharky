@@ -54,6 +54,7 @@ namespace Sharky.MicroTasks
                         else
                         {
                             commander.Value.Claimed = true;
+                            commander.Value.UnitRole = UnitRole.Scout;
                             UnitCommanders.Add(commander.Value);
                             started = true;
                             return;
@@ -81,7 +82,7 @@ namespace Sharky.MicroTasks
                     var action = IndividualMicroController.Attack(commander, new Point2D { X = enemy.Unit.Pos.X, Y = enemy.Unit.Pos.Y }, TargetingData.ForwardDefensePoint, null, frame);
                     if (action != null)
                     {
-                        commands.Add(action);
+                        commands.AddRange(action);
                     }
                 }
                 else if (Vector2.DistanceSquared(new Vector2(ScoutLocations[ScoutLocationIndex].X, ScoutLocations[ScoutLocationIndex].Y), new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y)) < 2)
@@ -97,7 +98,7 @@ namespace Sharky.MicroTasks
                     var action = IndividualMicroController.Scout(commander, ScoutLocations[ScoutLocationIndex], TargetingData.ForwardDefensePoint, frame);
                     if (action != null)
                     {
-                        commands.Add(action);
+                        commands.AddRange(action);
                     }
                 }
             }

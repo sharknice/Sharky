@@ -1,4 +1,4 @@
-﻿using Sharky.Managers;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace Sharky.Builds
@@ -12,7 +12,7 @@ namespace Sharky.Builds
             ActiveUnitData = activeUnitData;
         }
 
-        public SC2APIProtocol.Action MorphBuilding(MacroData macroData, TrainingTypeData unitData)
+        public List<SC2APIProtocol.Action> MorphBuilding(MacroData macroData, TrainingTypeData unitData)
         {
             if ((unitData.Food == 0 || unitData.Food <= macroData.FoodLeft) && unitData.Minerals <= macroData.Minerals && unitData.Gas <= macroData.VespeneGas)
             {

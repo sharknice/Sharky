@@ -98,7 +98,7 @@ namespace Sharky.MicroTasks.Mining
                                                 var action = commander.Order(frame, Abilities.ATTACK, null, enemyInRange.Unit.Tag);
                                                 if (action != null)
                                                 {
-                                                    actions.Add(action);
+                                                    actions.AddRange(action);
                                                 }
                                             }
                                             else
@@ -106,7 +106,7 @@ namespace Sharky.MicroTasks.Mining
                                                 var action = commander.Order(frame, Abilities.HARVEST_GATHER, null, farMineral.Tag, true);
                                                 if (action != null)
                                                 {
-                                                    actions.Add(action);
+                                                    actions.AddRange(action);
                                                 }
                                             }
                                         }
@@ -118,7 +118,7 @@ namespace Sharky.MicroTasks.Mining
                                             var action = commander.Order(frame, Abilities.ATTACK, selfBase.Location);
                                             if (action != null)
                                             {
-                                                actions.Add(action);
+                                                actions.AddRange(action);
                                             }
                                         }
                                     }
@@ -129,7 +129,7 @@ namespace Sharky.MicroTasks.Mining
                                     var action = WorkerMicroController.Bait(commander, BaseData.BaseLocations.Last().Location, BaseData.BaseLocations.First().Location, null, frame);
                                     if (action != null)
                                     {
-                                        actions.Add(action);
+                                        actions.AddRange(action);
                                     }
                                 }
                             }
@@ -167,7 +167,7 @@ namespace Sharky.MicroTasks.Mining
                     var action = commander.Order(frame, Abilities.STOP);
                     if (action != null)
                     {
-                        actions.Add(action);
+                        actions.AddRange(action);
                     }
                 }
             }
@@ -191,7 +191,7 @@ namespace Sharky.MicroTasks.Mining
                             var action = WorkerMicroController.Retreat(commander, otherBase.MineralLineLocation, null, frame);
                             if (action != null)
                             {
-                                actions.Add(action);
+                                actions.AddRange(action);
                             }
                         }
                         else
@@ -199,7 +199,7 @@ namespace Sharky.MicroTasks.Mining
                             var action = WorkerMicroController.Bait(commander, BaseData.BaseLocations.Last().Location, BaseData.BaseLocations.First().Location, null, frame);
                             if (action != null)
                             {
-                                actions.Add(action);
+                                actions.AddRange(action);
                             }
                         }
                     }

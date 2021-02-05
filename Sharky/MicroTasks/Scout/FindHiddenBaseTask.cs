@@ -66,7 +66,7 @@ namespace Sharky.MicroTasks.Scout
                         var action = IndividualMicroController.Attack(commander, scoutInfo.Location, TargetingData.ForwardDefensePoint, null, frame);
                         if (action != null)
                         {
-                            commands.Add(action);
+                            commands.AddRange(action);
                         }
 
                         if (!commander.UnitCalculation.NearbyEnemies.Any(e => Vector2.DistanceSquared(new Vector2(scoutInfo.Location.X, scoutInfo.Location.Y), new Vector2(e.Unit.Pos.X, e.Unit.Pos.Y)) < 100))
@@ -81,7 +81,7 @@ namespace Sharky.MicroTasks.Scout
                         var action = IndividualMicroController.Attack(commander, scoutInfo.Location, TargetingData.ForwardDefensePoint, null, frame);
                         if (action != null)
                         {
-                            commands.Add(action);
+                            commands.AddRange(action);
                         }
                     }
                 }
@@ -95,7 +95,7 @@ namespace Sharky.MicroTasks.Scout
                         var action = IndividualMicroController.Attack(commander, harassInfo.BaseLocation.MineralLineLocation, TargetingData.ForwardDefensePoint, null, frame);
                         if (action != null)
                         {
-                            commands.Add(action);
+                            commands.AddRange(action);
                         }
 
                         if (!commander.UnitCalculation.NearbyEnemies.Any(e => Vector2.DistanceSquared(new Vector2(harassInfo.BaseLocation.MineralLineLocation.X, harassInfo.BaseLocation.MineralLineLocation.Y), new Vector2(e.Unit.Pos.X, e.Unit.Pos.Y)) < 100))
@@ -110,7 +110,7 @@ namespace Sharky.MicroTasks.Scout
                         var action = IndividualMicroController.Attack(commander, harassInfo.BaseLocation.MineralLineLocation, TargetingData.ForwardDefensePoint, null, frame);
                         if (action != null)
                         {
-                            commands.Add(action);
+                            commands.AddRange(action);
                         }
                     }
                 }

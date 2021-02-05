@@ -71,7 +71,7 @@ namespace Sharky.MicroTasks
                     var action = closestQueen.Order(frame, Abilities.EFFECT_INJECTLARVA, null, hatchery.Key);
                     if (action != null)
                     {
-                        actions.Add(action);
+                        actions.AddRange(action);
                         return actions;
                     }
                 }

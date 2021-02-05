@@ -3,6 +3,7 @@
     public enum UnitRole
     {
         None,
-        Bait
+        Bait,
+        Scout
     }
 }

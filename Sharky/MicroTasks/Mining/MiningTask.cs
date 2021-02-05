@@ -76,7 +76,7 @@ namespace Sharky.MicroTasks
                     var action = worker.Order(frame, Abilities.HARVEST_RETURN);
                     if (action != null)
                     {
-                        actions.Add(action);
+                        actions.AddRange(action);
                     }
                 }
             }
@@ -102,7 +102,7 @@ namespace Sharky.MicroTasks
                         var action = worker.Order(frame, Abilities.STOP);
                         if (action != null)
                         {
-                            actions.Add(action);
+                            actions.AddRange(action);
                         }
                     }
                 }
@@ -118,7 +118,7 @@ namespace Sharky.MicroTasks
                         var action = worker.Order(frame, Abilities.STOP);
                         if (action != null)
                         {
-                            actions.Add(action);
+                            actions.AddRange(action);
                         }
                     }
                 }
@@ -137,7 +137,7 @@ namespace Sharky.MicroTasks
                     var action = idealGasWorkers.FirstOrDefault().Order(frame, Abilities.HARVEST_GATHER, null, refinery.Key);
                     if (action != null)
                     {
-                        actions.Add(action);
+                        actions.AddRange(action);
                     }
                 }
             }
@@ -160,7 +160,7 @@ namespace Sharky.MicroTasks
                         var action = worker.Order(frame, Abilities.HARVEST_GATHER, null, mineralField.Tag);
                         if (action != null)
                         {
-                            actions.Add(action);
+                            actions.AddRange(action);
                         }
                     }
                 }
@@ -187,7 +187,7 @@ namespace Sharky.MicroTasks
                         var action = worker.Order(frame, Abilities.HARVEST_GATHER, null, mineralField.Tag);
                         if (action != null)
                         {
-                            actions.Add(action);
+                            actions.AddRange(action);
                             return actions;
                         }
                     }
@@ -207,7 +207,7 @@ namespace Sharky.MicroTasks
                     var action = worker.Order(frame, Abilities.HARVEST_GATHER, null, miningAssignment.ResourceUnit.Tag);
                     if (action != null)
                     {
-                        actions.Add(action);
+                        actions.AddRange(action);
                     }
                 }
             }

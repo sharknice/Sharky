@@ -13,7 +13,7 @@ namespace Sharky.MicroControllers.Protoss
         {
         }
 
-        protected override bool AttackBestTargetInRange(UnitCommander commander, Point2D target, UnitCalculation bestTarget, int frame, out SC2APIProtocol.Action action)
+        protected override bool AttackBestTargetInRange(UnitCommander commander, Point2D target, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
             if (bestTarget != null)
@@ -35,7 +35,7 @@ namespace Sharky.MicroControllers.Protoss
             return false;
         }
 
-        protected override bool AvoidTargettedDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out SC2APIProtocol.Action action)
+        protected override bool AvoidTargettedDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -55,7 +55,7 @@ namespace Sharky.MicroControllers.Protoss
             return base.AvoidTargettedDamage(commander, target, defensivePoint, frame, out action);
         }
 
-        protected override bool AvoidDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out SC2APIProtocol.Action action) // TODO: use unit speed to dynamically adjust AvoidDamageDistance
+        protected override bool AvoidDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action) // TODO: use unit speed to dynamically adjust AvoidDamageDistance
         {
             action = null;
 

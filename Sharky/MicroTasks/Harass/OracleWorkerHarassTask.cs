@@ -103,7 +103,7 @@ namespace Sharky.MicroTasks
                     var action = OracleMicroController.HarassWorkers(commander, Target, defensivePoint, frame);
                     if (action != null)
                     {
-                        commands.Add(action);
+                        commands.AddRange(action);
                     }
                     continue;
                 }
@@ -120,7 +120,7 @@ namespace Sharky.MicroTasks
                         var action = OracleMicroController.NavigateToPoint(commander, StagingPoint, defensivePoint, StagingPoint, frame);
                         if (action != null)
                         {
-                            commands.Add(action);
+                            commands.AddRange(action);
                         }
                     }
                     var canHarass = CanHarass(commander, Target);
@@ -129,7 +129,7 @@ namespace Sharky.MicroTasks
                         var action = OracleMicroController.HarassWorkers(commander, Target, defensivePoint, frame); // need to make it attack drones and not a pylon lol
                         if (action != null)
                         {
-                            commands.Add(action);
+                            commands.AddRange(action);
                         }     
                     }
                     else
@@ -145,7 +145,7 @@ namespace Sharky.MicroTasks
                     var action = OracleMicroController.NavigateToPoint(commander, MidPoint, defensivePoint, MidPoint, frame);
                     if (action != null)
                     {
-                        commands.Add(action);
+                        commands.AddRange(action);
                     }
                     continue;
                 }
@@ -161,7 +161,7 @@ namespace Sharky.MicroTasks
                             var action = OracleMicroController.NavigateToPoint(commander, side, defensivePoint, side, frame);
                             if (action != null)
                             {
-                                commands.Add(action);
+                                commands.AddRange(action);
                             }
                             continue;
                         }
@@ -174,7 +174,7 @@ namespace Sharky.MicroTasks
                             var action = OracleMicroController.NavigateToPoint(commander, side, defensivePoint, side, frame);
                             if (action != null)
                             {
-                                commands.Add(action);
+                                commands.AddRange(action);
                             }
                             continue;
                         }
@@ -184,7 +184,7 @@ namespace Sharky.MicroTasks
                 var navigateAction = OracleMicroController.NavigateToPoint(commander, StagingPoint, defensivePoint, StagingPoint, frame);
                 if (navigateAction != null)
                 {
-                    commands.Add(navigateAction);
+                    commands.AddRange(navigateAction);
                 }
             }
 

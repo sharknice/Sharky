@@ -17,7 +17,7 @@ namespace Sharky.MicroControllers.Protoss
         {
         }
 
-        protected override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out SC2APIProtocol.Action action)
+        protected override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -75,7 +75,7 @@ namespace Sharky.MicroControllers.Protoss
             return null;
         }
 
-        bool Revelation(UnitCommander commander, int frame, out SC2APIProtocol.Action action)
+        bool Revelation(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -143,7 +143,7 @@ namespace Sharky.MicroControllers.Protoss
             return commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.ORACLEWEAPON);
         }
 
-        protected override bool MaintainRange(UnitCommander commander, int frame, out SC2APIProtocol.Action action)
+        protected override bool MaintainRange(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -169,7 +169,7 @@ namespace Sharky.MicroControllers.Protoss
             return true;
         }
 
-        protected override bool OffensiveAbility(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out SC2APIProtocol.Action action)
+        protected override bool OffensiveAbility(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -191,7 +191,7 @@ namespace Sharky.MicroControllers.Protoss
             return false;
         }
 
-        bool PulsarBeam(UnitCommander commander, int frame, UnitCalculation bestTarget, out SC2APIProtocol.Action action)
+        bool PulsarBeam(UnitCommander commander, int frame, UnitCalculation bestTarget, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -214,7 +214,7 @@ namespace Sharky.MicroControllers.Protoss
             return false;
         }
 
-        bool DeactivatePulsarBeam(UnitCommander commander, int frame, UnitCalculation bestTarget, out SC2APIProtocol.Action action)
+        bool DeactivatePulsarBeam(UnitCommander commander, int frame, UnitCalculation bestTarget, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -232,13 +232,13 @@ namespace Sharky.MicroControllers.Protoss
             return false;
         }
 
-        bool StasisWard(UnitCommander commander, int frame, UnitCalculation bestTarget, out SC2APIProtocol.Action action)
+        bool StasisWard(UnitCommander commander, int frame, UnitCalculation bestTarget, out List<SC2APIProtocol.Action> action)
         {
             action = null;
             return false; // TODO:  stasis ward, put stasis wards on the tops of ramps
         }
 
-        protected override bool AttackBestTarget(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out SC2APIProtocol.Action action)
+        protected override bool AttackBestTarget(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker)))
             {
@@ -248,7 +248,7 @@ namespace Sharky.MicroControllers.Protoss
             return base.AttackBestTarget(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action);
         }
 
-        protected override bool AttackBestTargetInRange(UnitCommander commander, Point2D target, UnitCalculation bestTarget, int frame, out SC2APIProtocol.Action action)
+        protected override bool AttackBestTargetInRange(UnitCommander commander, Point2D target, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
             if (bestTarget != null && (bestTarget.UnitClassifications.Contains(UnitClassification.Worker) || !commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker))))
@@ -263,9 +263,9 @@ namespace Sharky.MicroControllers.Protoss
             return false;
         }
 
-        public SC2APIProtocol.Action NavigateToPoint(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
+        public List<SC2APIProtocol.Action> NavigateToPoint(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
-            SC2APIProtocol.Action action = null;
+            List<SC2APIProtocol.Action> action = null;
 
             if (commander.UnitCalculation.NearbyEnemies.Count(e => e.DamageAir) > 0)
             {
@@ -293,9 +293,9 @@ namespace Sharky.MicroControllers.Protoss
             return action;
         }
 
-        public SC2APIProtocol.Action HarassWorkers(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame)
+        public List<SC2APIProtocol.Action> HarassWorkers(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame)
         {
-            SC2APIProtocol.Action action = null;
+            List<SC2APIProtocol.Action> action = null;
 
             var formation = GetDesiredFormation(commander);
             var bestTarget = GetBestHarassTarget(commander, target);

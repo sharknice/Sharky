@@ -10,5 +10,7 @@ namespace Sharky
         public int ArmyFoodRetreat { get; set; }
         public bool CustomAttackFunction { get; set; }
         public bool UseAttackDataManager { get; set; }
+        public float RetreatTrigger { get; set; }
+        public float AttackTrigger { get; set; }
     }
 }

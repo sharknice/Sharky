@@ -16,7 +16,7 @@ namespace Sharky.MicroControllers.Protoss
         {
         }
 
-        protected override bool OffensiveAbility(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out SC2APIProtocol.Action action)
+        protected override bool OffensiveAbility(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -38,7 +38,7 @@ namespace Sharky.MicroControllers.Protoss
             return false;
         }
 
-        protected override bool AvoidTargettedDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out SC2APIProtocol.Action action)
+        protected override bool AvoidTargettedDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -49,7 +49,7 @@ namespace Sharky.MicroControllers.Protoss
             return false;
         }
 
-        protected override bool AvoidDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out SC2APIProtocol.Action action) // TODO: use unit speed to dynamically adjust AvoidDamageDistance
+        protected override bool AvoidDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action) // TODO: use unit speed to dynamically adjust AvoidDamageDistance
         {
             action = null;
 
@@ -61,9 +61,9 @@ namespace Sharky.MicroControllers.Protoss
             return false;
         }
 
-        public SC2APIProtocol.Action NavigateToPoint(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
+        public List<SC2APIProtocol.Action> NavigateToPoint(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
-            SC2APIProtocol.Action action = null;
+            List<SC2APIProtocol.Action> action = null;
 
             if (commander.UnitCalculation.NearbyEnemies.Count(e => e.UnitClassifications.Contains(UnitClassification.Detector)) > 0)
             {
@@ -91,9 +91,9 @@ namespace Sharky.MicroControllers.Protoss
             return action;
         }
 
-        public SC2APIProtocol.Action HarassWorkers(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame)
+        public List<SC2APIProtocol.Action> HarassWorkers(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame)
         {
-            SC2APIProtocol.Action action = null;
+            List<SC2APIProtocol.Action> action = null;
 
             var bestTarget = GetBestHarassTarget(commander, target);
 

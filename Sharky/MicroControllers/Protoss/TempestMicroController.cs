@@ -14,7 +14,7 @@ namespace Sharky.MicroControllers.Protoss
         {
         }
 
-        protected override bool MaintainRange(UnitCommander commander, int frame, out SC2APIProtocol.Action action)
+        protected override bool MaintainRange(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 

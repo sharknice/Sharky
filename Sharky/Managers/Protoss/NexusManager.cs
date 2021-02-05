@@ -27,14 +27,14 @@ namespace Sharky.Managers.Protoss
                 var action = ChronoBoost(nexus, (int)observation.Observation.GameLoop);
                 if (action != null)
                 {
-                    actions.Add(action);
+                    actions.AddRange(action);
                 }
             }
 
             return actions;
         }
 
-        SC2APIProtocol.Action ChronoBoost(UnitCommander nexus, int frame)
+        List<SC2APIProtocol.Action> ChronoBoost(UnitCommander nexus, int frame)
         {
             if (nexus.UnitCalculation.Unit.Energy >= 50)
             {

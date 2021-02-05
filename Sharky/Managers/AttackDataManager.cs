@@ -81,10 +81,10 @@ namespace Sharky.Managers
 
             var targetPriority = TargetPriorityService.CalculateTargetPriority(AttackTask.UnitCommanders.Select(c => c.UnitCalculation), enemyUnits);
 
-            var overallTrigger = 1f;
+            var overallTrigger = AttackData.RetreatTrigger;
             if (!AttackData.Attacking)
             {
-                overallTrigger = 1.5f;
+                overallTrigger = AttackData.AttackTrigger;
             }
 
             if (targetPriority.OverallWinnability >= overallTrigger || targetPriority.GroundWinnability > 2 || targetPriority.AirWinnability > 2)

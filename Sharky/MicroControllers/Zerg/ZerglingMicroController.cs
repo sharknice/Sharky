@@ -1,5 +1,6 @@
 ﻿using SC2APIProtocol;
 using Sharky.Pathing;
+using System.Collections.Generic;
 
 namespace Sharky.MicroControllers.Zerg
 {
@@ -11,7 +12,7 @@ namespace Sharky.MicroControllers.Zerg
             AvoidDamageDistance = 5;
         }
 
-        protected override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out SC2APIProtocol.Action action)
+        protected override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 

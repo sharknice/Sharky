@@ -50,14 +50,14 @@ namespace Sharky.MicroControllers
             LooseFormationDistance = 1.75f;
         }
 
-        public virtual SC2APIProtocol.Action Attack(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
+        public virtual List<SC2APIProtocol.Action> Attack(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
             if (commander.UnitCalculation.Unit.IsSelected)
             {
                 var breakpoint = true;
             }
 
-            SC2APIProtocol.Action action = null;
+            List<SC2APIProtocol.Action> action = null;
 
             var formation = GetDesiredFormation(commander);
             var bestTarget = GetBestTarget(commander, target);
@@ -86,14 +86,14 @@ namespace Sharky.MicroControllers
             return commander.Order(frame, Abilities.ATTACK, target);
         }
 
-        public virtual SC2APIProtocol.Action Idle(UnitCommander commander, Point2D defensivePoint, int frame)
+        public virtual List<SC2APIProtocol.Action> Idle(UnitCommander commander, Point2D defensivePoint, int frame)
         {
             return null;
         }
 
-        public virtual SC2APIProtocol.Action Scout(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, bool prioritizeVision = false)
+        public virtual List<SC2APIProtocol.Action> Scout(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, bool prioritizeVision = false)
         {
-            SC2APIProtocol.Action action = null;
+            List<SC2APIProtocol.Action> action = null;
 
             if (!prioritizeVision || MapDataService.SelfVisible(target))
             {
@@ -146,11 +146,11 @@ namespace Sharky.MicroControllers
             }
         }
 
-        public virtual SC2APIProtocol.Action Retreat(UnitCommander commander, Point2D defensivePoint, Point2D groupCenter, int frame)
+        public virtual List<SC2APIProtocol.Action> Retreat(UnitCommander commander, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
             if (Vector2.DistanceSquared(new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y), new Vector2(defensivePoint.X, defensivePoint.Y)) > 100)
             {
-                if (Retreat(commander, defensivePoint, defensivePoint, frame, out SC2APIProtocol.Action action)) { return action; }
+                if (Retreat(commander, defensivePoint, defensivePoint, frame, out List<SC2APIProtocol.Action> action)) { return action; }
                 return commander.Order(frame, Abilities.MOVE, defensivePoint);
             }
             else
@@ -159,9 +159,9 @@ namespace Sharky.MicroControllers
             }
         }
 
-        public virtual SC2APIProtocol.Action Bait(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
+        public virtual List<SC2APIProtocol.Action> Bait(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
-            SC2APIProtocol.Action action = null;
+            List<SC2APIProtocol.Action> action = null;
 
             var formation = GetDesiredFormation(commander);
             var bestTarget = GetBestTarget(commander, target);
@@ -189,7 +189,7 @@ namespace Sharky.MicroControllers
             return commander.Order(frame, Abilities.ATTACK, target);
         }
 
-        protected virtual bool Move(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, Formation formation, int frame, out SC2APIProtocol.Action action)
+        protected virtual bool Move(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, Formation formation, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
             if (!commander.UnitCalculation.TargetPriorityCalculation.Overwhelm && MicroPriority != MicroPriority.AttackForward && (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.Retreat || commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.FullRetreat))
@@ -204,7 +204,7 @@ namespace Sharky.MicroControllers
             return NavigateToTarget(commander, target, groupCenter, bestTarget, formation, frame, out action);
         }
 
-        protected virtual bool SpecialCaseMove(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, Formation formation, int frame, out SC2APIProtocol.Action action)
+        protected virtual bool SpecialCaseMove(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, Formation formation, int frame, out List<SC2APIProtocol.Action> action)
         {
             if (AvoidPurificationNovas(commander, target, defensivePoint, frame, out action)) { return true; }
 
@@ -233,7 +233,7 @@ namespace Sharky.MicroControllers
             return false;
         }
 
-        public virtual bool NavigateToTarget(UnitCommander commander, Point2D target, Point2D groupCenter, UnitCalculation bestTarget, Formation formation, int frame, out SC2APIProtocol.Action action)
+        public virtual bool NavigateToTarget(UnitCommander commander, Point2D target, Point2D groupCenter, UnitCalculation bestTarget, Formation formation, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -265,7 +265,7 @@ namespace Sharky.MicroControllers
             return true;
         }
 
-        protected virtual bool MoveToAttackTarget(UnitCommander commander, UnitCalculation bestTarget, int frame, out SC2APIProtocol.Action action)
+        protected virtual bool MoveToAttackTarget(UnitCommander commander, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             if (!commander.UnitCalculation.TargetPriorityCalculation.Overwhelm && MicroPriority != MicroPriority.AttackForward && MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos) == MapDataService.MapHeight(bestTarget.Unit.Pos))
             {
@@ -334,7 +334,7 @@ namespace Sharky.MicroControllers
             return new Point2D { X = start.X + x, Y = start.Y + y };
         }
 
-        protected virtual bool GetInFormation(UnitCommander commander, Formation formation, int frame, out SC2APIProtocol.Action action)
+        protected virtual bool GetInFormation(UnitCommander commander, Formation formation, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -374,7 +374,7 @@ namespace Sharky.MicroControllers
             return false;
         }
 
-        protected virtual bool MoveAway(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out SC2APIProtocol.Action action)
+        protected virtual bool MoveAway(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -403,7 +403,7 @@ namespace Sharky.MicroControllers
             return false;
         }
 
-        protected virtual bool AvoidDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out SC2APIProtocol.Action action) // TODO: use unit speed to dynamically adjust AvoidDamageDistance
+        protected virtual bool AvoidDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action) // TODO: use unit speed to dynamically adjust AvoidDamageDistance
         {
             action = null;
 
@@ -454,7 +454,7 @@ namespace Sharky.MicroControllers
             return false;
         }
 
-        protected virtual bool MaintainRange(UnitCommander commander, int frame, out SC2APIProtocol.Action action)
+        protected virtual bool MaintainRange(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -485,7 +485,7 @@ namespace Sharky.MicroControllers
             return true;
         }
 
-        protected bool Retreat(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out SC2APIProtocol.Action action)
+        protected bool Retreat(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
           
@@ -534,7 +534,7 @@ namespace Sharky.MicroControllers
             return true;
         }
 
-        protected bool FollowPath(UnitCommander commander, int frame, out SC2APIProtocol.Action action)
+        protected bool FollowPath(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
         {
             // TODO: this doesn't work well, it flies zig sag which goes very slow, need to smooth out the points somehow or something
 
@@ -707,7 +707,7 @@ namespace Sharky.MicroControllers
             return bestAttack;
         }
 
-        protected virtual bool AttackBestTarget(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out SC2APIProtocol.Action action)
+        protected virtual bool AttackBestTarget(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             if (AttackBestTargetInRange(commander, target, bestTarget, frame, out action))
             {
@@ -749,7 +749,7 @@ namespace Sharky.MicroControllers
             return true;
         }
 
-        protected virtual bool GroupUp(UnitCommander commander, Point2D target, Point2D groupCenter, bool attack, int frame, out SC2APIProtocol.Action action)
+        protected virtual bool GroupUp(UnitCommander commander, Point2D target, Point2D groupCenter, bool attack, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
             if (commander.UnitCalculation.NearbyEnemies.Any() || groupCenter == null)
@@ -792,7 +792,7 @@ namespace Sharky.MicroControllers
             return false;
         }
 
-        protected virtual bool AttackBestTargetInRange(UnitCommander commander, Point2D target, UnitCalculation bestTarget, int frame, out SC2APIProtocol.Action action)
+        protected virtual bool AttackBestTargetInRange(UnitCommander commander, Point2D target, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
             if (bestTarget != null)
@@ -1142,13 +1142,13 @@ namespace Sharky.MicroControllers
             return commander.UnitCalculation.Unit.WeaponCooldown < 2;
         }
 
-        protected virtual bool OffensiveAbility(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out SC2APIProtocol.Action action)
+        protected virtual bool OffensiveAbility(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
             return false;
         }
 
-        protected virtual bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out SC2APIProtocol.Action action)
+        protected virtual bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
             return false;
@@ -1183,7 +1183,7 @@ namespace Sharky.MicroControllers
             return Formation.Normal;
         }
 
-        protected virtual bool WorkerEscapeSurround(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out SC2APIProtocol.Action action)
+        protected virtual bool WorkerEscapeSurround(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -1207,7 +1207,7 @@ namespace Sharky.MicroControllers
             return false;
         }
 
-        protected virtual bool AvoidTargettedOneHitKills(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out SC2APIProtocol.Action action)
+        protected virtual bool AvoidTargettedOneHitKills(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
             var attack = commander.UnitCalculation.Attackers.Where(a => a.Damage > commander.UnitCalculation.Unit.Health + commander.UnitCalculation.Unit.Shield).OrderBy(e => (e.Range * e.Range) - Vector2.DistanceSquared(new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y), new Vector2(e.Unit.Pos.X, e.Unit.Pos.Y))).FirstOrDefault();
@@ -1230,7 +1230,7 @@ namespace Sharky.MicroControllers
             return false;
         }
 
-        protected virtual bool AvoidTargettedDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out SC2APIProtocol.Action action)
+        protected virtual bool AvoidTargettedDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
             if (MicroPriority == MicroPriority.AttackForward && commander.UnitCalculation.Unit.Health > commander.UnitCalculation.Unit.HealthMax / 4.0) { return false; }
@@ -1254,7 +1254,7 @@ namespace Sharky.MicroControllers
             return false;
         }
 
-        protected virtual bool AvoidPurificationNovas(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out SC2APIProtocol.Action action)
+        protected virtual bool AvoidPurificationNovas(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
             if (commander.UnitCalculation.Unit.IsFlying) { return false; }
@@ -1275,7 +1275,7 @@ namespace Sharky.MicroControllers
             return false;
         }
 
-        protected virtual bool AvoidRavagerShots(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out SC2APIProtocol.Action action)
+        protected virtual bool AvoidRavagerShots(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -1304,7 +1304,7 @@ namespace Sharky.MicroControllers
             return false;
         }
 
-        protected virtual bool DealWithCyclones(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out SC2APIProtocol.Action action)
+        protected virtual bool DealWithCyclones(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -1331,7 +1331,7 @@ namespace Sharky.MicroControllers
             return false;
         }
 
-        protected virtual bool DealWithSiegedTanks(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out SC2APIProtocol.Action action)
+        protected virtual bool DealWithSiegedTanks(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
             if (commander.UnitCalculation.Unit.IsFlying || commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.FullRetreat || commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.Retreat)

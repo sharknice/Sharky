@@ -68,7 +68,7 @@ namespace Sharky.MicroTasks.Harass
                             var action = OracleMicroController.HarassWorkers(commander, harassInfo.BaseLocation.MineralLineLocation, TargetingData.ForwardDefensePoint, frame);
                             if (action != null)
                             {
-                                commands.Add(action);
+                                commands.AddRange(action);
                             }
 
                             if (commander.UnitCalculation.NearbyEnemies.Count(e => e.UnitClassifications.Contains(UnitClassification.Worker) && (Vector2.DistanceSquared(new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y), new Vector2(e.Unit.Pos.X, e.Unit.Pos.Y)) <= 100)) < 1 && MapDataService.SelfVisible(harassInfo.BaseLocation.MineralLineLocation))
@@ -92,7 +92,7 @@ namespace Sharky.MicroTasks.Harass
                             var action = OracleMicroController.HarassWorkers(commander, harassInfo.BaseLocation.MineralLineLocation, TargetingData.ForwardDefensePoint, frame);
                             if (action != null)
                             {
-                                commands.Add(action);
+                                commands.AddRange(action);
                             }
                         }
                         else
@@ -100,7 +100,7 @@ namespace Sharky.MicroTasks.Harass
                             var action = OracleMicroController.NavigateToPoint(commander, harassInfo.BaseLocation.MineralLineLocation, TargetingData.ForwardDefensePoint, null, frame);
                             if (action != null)
                             {
-                                commands.Add(action);
+                                commands.AddRange(action);
                             }
 
                             if (commander.UnitCalculation.Unit.Shield <= 10)
@@ -116,7 +116,7 @@ namespace Sharky.MicroTasks.Harass
                         var action = OracleMicroController.NavigateToPoint(commander, TargetingData.ForwardDefensePoint, TargetingData.MainDefensePoint, null, frame);
                         if (action != null)
                         {
-                            commands.Add(action);
+                            commands.AddRange(action);
                         }
                     }
                 }

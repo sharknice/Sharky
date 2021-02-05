@@ -37,10 +37,10 @@ namespace Sharky.Builds.MacroServices
                 if (unit.Value)
                 {
                     var unitData = SharkyUnitData.BuildingData[unit.Key];
-                    var command = BuildingBuilder.BuildBuilding(MacroData, unit.Key, unitData, TargetingData.MainDefensePoint);
+                    var command = BuildingBuilder.BuildBuilding(MacroData, unit.Key, unitData, TargetingData.ForwardDefensePoint);
                     if (command != null)
                     {
-                        commands.Add(command);
+                        commands.AddRange(command);
                         return commands;
                     }
                 }
@@ -60,12 +60,12 @@ namespace Sharky.Builds.MacroServices
                     if (unit.Value > 0)
                     {
                         var unitData = SharkyUnitData.BuildingData[unit.Key];
-                        if (ActiveUnitData.SelfUnits.Count(u => u.Value.Unit.UnitType == (uint)unit.Key && Vector2.DistanceSquared(new Vector2(u.Value.Unit.Pos.X, u.Value.Unit.Pos.Y), new Vector2(TargetingData.MainDefensePoint.X, TargetingData.MainDefensePoint.Y)) < MacroData.DefensiveBuildingMaximumDistance * MacroData.DefensiveBuildingMaximumDistance) + ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability)) < unit.Value)
+                        if (ActiveUnitData.SelfUnits.Count(u => u.Value.Unit.UnitType == (uint)unit.Key && Vector2.DistanceSquared(new Vector2(u.Value.Unit.Pos.X, u.Value.Unit.Pos.Y), new Vector2(TargetingData.ForwardDefensePoint.X, TargetingData.ForwardDefensePoint.Y)) < MacroData.DefensiveBuildingMaximumDistance * MacroData.DefensiveBuildingMaximumDistance) + ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability)) < unit.Value)
                         {
-                            var command = BuildingBuilder.BuildBuilding(MacroData, unit.Key, unitData, TargetingData.MainDefensePoint, false, MacroData.DefensiveBuildingMaximumDistance);
+                            var command = BuildingBuilder.BuildBuilding(MacroData, unit.Key, unitData, TargetingData.ForwardDefensePoint, false, MacroData.DefensiveBuildingMaximumDistance);
                             if (command != null)
                             {
-                                commands.Add(command);
+                                commands.AddRange(command);
                                 return commands;
                             }
                             else
@@ -100,7 +100,7 @@ namespace Sharky.Builds.MacroServices
                                 var command = BuildingBuilder.BuildBuilding(MacroData, unit.Key, unitData, baseLocation.Location, false, MacroData.DefensiveBuildingMaximumDistance);
                                 if (command != null)
                                 {
-                                    commands.Add(command);
+                                    commands.AddRange(command);
                                     return commands;
                                 }
                                 else
@@ -137,7 +137,7 @@ namespace Sharky.Builds.MacroServices
                                 var command = BuildingBuilder.BuildBuilding(MacroData, unit.Key, unitData, baseLocation.MineralLineLocation, true, MacroData.DefensiveBuildingMineralLineMaximumDistance);
                                 if (command != null)
                                 {
-                                    commands.Add(command);
+                                    commands.AddRange(command);
                                     return commands;
                                 }
                                 else

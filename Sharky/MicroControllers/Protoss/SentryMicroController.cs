@@ -1,5 +1,6 @@
 ﻿using SC2APIProtocol;
 using Sharky.Pathing;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Sharky.MicroControllers.Protoss
@@ -12,7 +13,7 @@ namespace Sharky.MicroControllers.Protoss
 
         }
 
-        protected override bool OffensiveAbility(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out SC2APIProtocol.Action action)
+        protected override bool OffensiveAbility(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             if (GuardianShield(commander, frame, out action))
             {
@@ -27,7 +28,7 @@ namespace Sharky.MicroControllers.Protoss
             return false;
         }
 
-        bool GuardianShield(UnitCommander commander, int frame, out SC2APIProtocol.Action action)
+        bool GuardianShield(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
             if (commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.GUARDIANSHIELD) || commander.UnitCalculation.Unit.Energy < 75)
@@ -43,7 +44,7 @@ namespace Sharky.MicroControllers.Protoss
             return false;
         }
 
-        bool Hallucinate(UnitCommander commander, int frame, out SC2APIProtocol.Action action)
+        bool Hallucinate(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
             if (commander.UnitCalculation.Unit.Energy < 75)

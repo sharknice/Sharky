@@ -43,7 +43,7 @@ namespace Sharky.Builds.MacroServices
                         var command = BuildingBuilder.BuildBuilding(MacroData, UnitTypes.PROTOSS_PYLON, unitData, proxy.Value.Location, true, proxy.Value.MaximumBuildingDistance, MicroTaskData.MicroTasks[proxy.Key].UnitCommanders);
                         if (command != null)
                         {
-                            commands.Add(command);
+                            commands.AddRange(command);
                             return commands;
                         }
                         else
@@ -78,7 +78,7 @@ namespace Sharky.Builds.MacroServices
                                 var command = BuildingBuilder.BuildBuilding(MacroData, unit.Key, unitData, proxy.Value.Location, true, proxy.Value.MaximumBuildingDistance, MicroTaskData.MicroTasks[proxy.Key].UnitCommanders);
                                 if (command != null)
                                 {
-                                    commands.Add(command);
+                                    commands.AddRange(command);
                                     return commands;
                                 }
                                 else
@@ -119,7 +119,7 @@ namespace Sharky.Builds.MacroServices
                                 var command = BuildingBuilder.BuildBuilding(MacroData, unit.Key, unitData, proxy.Value.Location, true, proxy.Value.MaximumBuildingDistance, MicroTaskData.MicroTasks[proxy.Key].UnitCommanders);
                                 if (command != null)
                                 {
-                                    commands.Add(command);
+                                    commands.AddRange(command);
                                     return commands;
                                 }
                                 else
@@ -147,7 +147,7 @@ namespace Sharky.Builds.MacroServices
                     var command = Morpher.MorphBuilding(MacroData, unitData);
                     if (command != null)
                     {
-                        commands.Add(command);
+                        commands.AddRange(command);
                         return commands;
                     }
                 }
@@ -177,7 +177,7 @@ namespace Sharky.Builds.MacroServices
                                 var command = BuildingBuilder.BuildBuilding(MacroData, unit.Key, unitData, proxy.Value.Location, true, proxy.Value.MaximumBuildingDistance, MicroTaskData.MicroTasks[proxy.Key].UnitCommanders);
                                 if (command != null)
                                 {
-                                    commands.Add(command);
+                                    commands.AddRange(command);
                                     return commands;
                                 }
                                 else
@@ -209,7 +209,7 @@ namespace Sharky.Builds.MacroServices
                             var command = BuildingBuilder.BuildAddOn(MacroData, unitData, proxy.Value.Location);
                             if (command != null)
                             {
-                                commands.Add(command);
+                                commands.AddRange(command);
                                 continue;
                             }
                         }

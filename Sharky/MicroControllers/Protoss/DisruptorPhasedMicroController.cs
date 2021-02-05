@@ -15,16 +15,16 @@ namespace Sharky.MicroControllers.Protoss
         {
         }
 
-        public override SC2APIProtocol.Action Attack(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
+        public override List<SC2APIProtocol.Action> Attack(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
-            SC2APIProtocol.Action action = null;
+            List<SC2APIProtocol.Action> action = null;
 
             if (PurificationNova(commander, frame, out action)) { return action; }
 
             return null;
         }
 
-        private bool PurificationNova(UnitCommander commander, int frame, out SC2APIProtocol.Action action)
+        private bool PurificationNova(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
             var attacks = new List<UnitCalculation>();
