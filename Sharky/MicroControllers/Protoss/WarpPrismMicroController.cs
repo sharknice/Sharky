@@ -127,6 +127,18 @@ namespace Sharky.MicroControllers.Protoss
                     }
                 }
 
+                foreach (var friendly in friendliesInRange.Where(f => f.EnemiesInRangeOf.Count() > 0 && f.Range > 2).OrderBy(f => f.Unit.Shield).ThenBy(f => f.Unit.Health))
+                {
+                    if (commander.UnitCalculation.Unit.CargoSpaceMax - commander.UnitCalculation.Unit.CargoSpaceTaken >= UnitDataService.CargoSize((UnitTypes)friendly.Unit.UnitType))
+                    {
+                        if (friendly.Unit.WeaponCooldown > 0)
+                        {
+                            action = commander.Order(frame, Abilities.LOAD, null, friendly.Unit.Tag);
+                            return true;
+                        }
+                    }
+                }
+
                 StartWarping(commander, frame, out action);
                 return true;
             }
