@@ -109,7 +109,7 @@ namespace Sharky.MicroTasks
                         }
                         else
                         {
-                            var action = IndividualMicroController.Scout(commander, ScoutLocations[ScoutLocationIndex], TargetingData.ForwardDefensePoint, frame);
+                            var action = commander.Order(frame, Abilities.MOVE, ScoutLocations[ScoutLocationIndex]);
                             if (action != null)
                             {
                                 commands.AddRange(action);
@@ -126,11 +126,17 @@ namespace Sharky.MicroTasks
         {
             ScoutLocations = new List<Point2D>();
 
-            foreach (var baseLocation in BaseData.BaseLocations.OrderBy(b => Vector2.DistanceSquared(new Vector2(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y), new Vector2(b.Location.X, b.Location.Y))).Take(4))
+            foreach (var baseLocation in BaseData.BaseLocations.OrderBy(b => Vector2.DistanceSquared(new Vector2(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y), new Vector2(b.Location.X, b.Location.Y))).Take(4).Reverse())
             {
                 ScoutLocations.Add(baseLocation.MineralLineLocation);
             }
             ScoutLocationIndex = 0;
+        }
+
+        public override void Enable()
+        {
+            started = false;
+            Enabled = true;
         }
     }
 }

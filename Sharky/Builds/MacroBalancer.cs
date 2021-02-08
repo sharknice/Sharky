@@ -166,6 +166,10 @@ namespace Sharky.Builds
                 var completedResourceCenters = resourceCenters.Where(n => n.UnitCalculation.Unit.BuildProgress == 1);
                 var buildingResourceCentersCount = resourceCenters.Count(n => n.UnitCalculation.Unit.BuildProgress < 1);
                 var desiredWorkers = completedResourceCenters.Sum(n => n.UnitCalculation.Unit.IdealHarvesters + 6) + (buildingResourceCentersCount * 22) + 1; // +6 because gas, +1 to build
+                if (desiredWorkers < 40)
+                {
+                    desiredWorkers = 40;
+                }
                 if (desiredWorkers > 70)
                 {
                     desiredWorkers = 70;

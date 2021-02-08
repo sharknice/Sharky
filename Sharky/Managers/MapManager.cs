@@ -50,7 +50,7 @@ namespace Sharky.Managers
                     var walkable = GetDataValueBit(pathingGrid, x, y);
                     var height = GetDataValueByte(heightGrid, x, y);
                     var placeable = GetDataValueBit(placementGrid, x, y);
-                    row[y] = new MapCell { X = x, Y = y, Walkable = walkable, TerrainHeight = height, Buildable = placeable, HasCreep = false, CurrentlyBuildable = placeable, EnemyAirDpsInRange = 0, EnemyGroundDpsInRange = 0, InEnemyVision = false, InSelfVision = false, InEnemyDetection = false, Visibility = 0, NumberOfAllies = 0, NumberOfEnemies = 0, PoweredBySelfPylon = false, SelfAirDpsInRange = 0, SelfGroundDpsInRange = 0 };
+                    row[y] = new MapCell { X = x, Y = y, Walkable = walkable, TerrainHeight = height, Buildable = placeable, HasCreep = false, CurrentlyBuildable = placeable, EnemyAirDpsInRange = 0, EnemyGroundDpsInRange = 0, InEnemyVision = false, InSelfVision = false, InEnemyDetection = false, Visibility = 0, LastFrameVisibility = 0, NumberOfAllies = 0, NumberOfEnemies = 0, PoweredBySelfPylon = false, SelfAirDpsInRange = 0, SelfGroundDpsInRange = 0 };
                 }
                 MapData.Map[x] = row;
             }
@@ -62,7 +62,7 @@ namespace Sharky.Managers
             if (MillisecondsUntilUpdate > 0) { return new List<SC2APIProtocol.Action>(); }
             MillisecondsUntilUpdate = MillisecondsPerUpdate;
 
-            UpdateVisibility(observation.Observation.RawData.MapState.Visibility);
+            UpdateVisibility(observation.Observation.RawData.MapState.Visibility, (int)observation.Observation.GameLoop);
             UpdateCreep(observation.Observation.RawData.MapState.Creep);
             UpdateEnemyAirDpsInRange();
             UpdateInEnemyDetection();
@@ -186,14 +186,18 @@ namespace Sharky.Managers
             }
         }
 
-        void UpdateVisibility(ImageData visiblilityMap)
+        void UpdateVisibility(ImageData visiblilityMap, int frame)
         {
             for (var x = 0; x < visiblilityMap.Size.X; x++)
             {
                 for (var y = 0; y < visiblilityMap.Size.Y; y++)
                 {
                     MapData.Map[x][y].InSelfVision = GetDataValueByte(visiblilityMap, x, y) == 2; // 2 is fully visible
-                    MapData.Map[x][y].Visibility = GetDataValueByte(visiblilityMap, x, y); 
+                    MapData.Map[x][y].Visibility = GetDataValueByte(visiblilityMap, x, y);
+                    if (GetDataValueByte(visiblilityMap, x, y) == 2)
+                    {
+                        MapData.Map[x][y].LastFrameVisibility = frame;
+                    }
                 }
             }
         }

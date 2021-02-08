@@ -83,7 +83,6 @@ namespace Sharky.Managers
             }
 
             var enemyList = ActiveUnitData.EnemyUnits.Select(e => e.Value).ToList();
-            var snapshots = enemyList.Where(e => e.Unit.DisplayType == DisplayType.Snapshot);
 
             foreach (var enemy in enemyList) // if we can see this area of the map and the unit isn't there anymore remove it (we just remove it because visible units will get re-added below)
             {
@@ -91,12 +90,9 @@ namespace Sharky.Managers
                 {
                     ActiveUnitData.EnemyUnits.TryRemove(enemy.Unit.Tag, out UnitCalculation removed);
                 }
-                else if (enemy.Unit.DisplayType == DisplayType.Visible && enemy.Attributes.Contains(Attribute.Structure)) // remove units that are replaced by snapshots
+                else if (enemy.Attributes.Contains(Attribute.Structure)) // structures get replaced by snapshots if we can't see them, so just remove them and let them get readded
                 {
-                    if (snapshots.Any(e => e.Unit.UnitType == enemy.Unit.UnitType && e.Unit.Pos.X == enemy.Unit.Pos.X && e.Unit.Pos.Y == enemy.Unit.Pos.Y))
-                    {
-                        ActiveUnitData.EnemyUnits.TryRemove(enemy.Unit.Tag, out UnitCalculation removed);
-                    }
+                    ActiveUnitData.EnemyUnits.TryRemove(enemy.Unit.Tag, out UnitCalculation removed);
                 }
             }
 
