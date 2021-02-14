@@ -16,6 +16,8 @@ namespace Sharky.MicroControllers.Protoss
         {
             action = null;
 
+            if (OffensiveAbility(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action)) { return true; }
+
             if (commander.UnitCalculation.Unit.Shield < 20)
             {
                 if (AvoidDamage(commander, target, defensivePoint, frame, out action))

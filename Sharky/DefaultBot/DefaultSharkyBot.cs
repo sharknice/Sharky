@@ -83,6 +83,7 @@ namespace Sharky.DefaultBot
         public BuildOptions BuildOptions { get; set; }
         public MacroSetup MacroSetup { get; set; }
         public IBuildingPlacement ProtossBuildingPlacement { get; set; }
+        public IBuildingPlacement WallOffPlacement { get; set; }
         public IBuildingPlacement TerranBuildingPlacement { get; set; }
         public IBuildingPlacement ZergBuildingPlacement { get; set; }
         public IBuildingPlacement BuildingPlacement { get; set; }
@@ -180,6 +181,7 @@ namespace Sharky.DefaultBot
             ProtossBuildingPlacement = new ProtossBuildingPlacement(ActiveUnitData, SharkyUnitData, DebugService, MapData, BuildingService);
             TerranBuildingPlacement = new TerranBuildingPlacement(ActiveUnitData, SharkyUnitData, DebugService, BuildingService);
             ZergBuildingPlacement = new ZergBuildingPlacement(ActiveUnitData, SharkyUnitData, DebugService, BuildingService);
+            WallOffPlacement = new WallOffPlacement(ActiveUnitData, SharkyUnitData, DebugService, MapData, BuildingService);
             BuildingPlacement = new BuildingPlacement(ProtossBuildingPlacement, TerranBuildingPlacement, ZergBuildingPlacement, BaseData, ActiveUnitData, BuildingService, SharkyUnitData);
             BuildingBuilder = new BuildingBuilder(ActiveUnitData, TargetingData, BuildingPlacement, SharkyUnitData);
 
