@@ -29,7 +29,7 @@ namespace Sharky.MicroControllers
         protected float AvoidDamageDistance;
         protected float LooseFormationDistance;
 
-        public IndividualMicroController(MapDataService mapDataService, SharkyUnitData unitDataManager, ActiveUnitData activeUnitData, DebugService debugService, IPathFinder sharkyPathFinder, BaseData baseData, SharkyOptions sharkyOptions, DamageService damageService, UnitDataService unitDataService, MicroPriority microPriority, bool groupUpEnabled, float avoidDamageDistance = 1)
+        public IndividualMicroController(MapDataService mapDataService, SharkyUnitData unitDataManager, ActiveUnitData activeUnitData, DebugService debugService, IPathFinder sharkyPathFinder, BaseData baseData, SharkyOptions sharkyOptions, DamageService damageService, UnitDataService unitDataService, MicroPriority microPriority, bool groupUpEnabled, float avoidDamageDistance = .5f)
         {
             MapDataService = mapDataService;
             SharkyUnitData = unitDataManager;
@@ -490,26 +490,40 @@ namespace Sharky.MicroControllers
             action = null;
           
             // if you can outrun and outrange the enemy do that isntead of a full on retreat
+
+            if (commander.UnitCalculation.EnemiesInRange.Any() && WeaponReady(commander) && !SharkyUnitData.NoWeaponCooldownTypes.Contains((UnitTypes)commander.UnitCalculation.Unit.UnitType)) // keep shooting as you retreat
+            {
+                var bestTarget = GetBestTarget(commander, target);
+                if (bestTarget != null)
+                {
+                    action = commander.Order(frame, Abilities.ATTACK, null, bestTarget.Unit.Tag);
+                    return true;
+                }               
+            }
+
             var closestEnemy = commander.UnitCalculation.NearbyEnemies.OrderBy(u => Vector2.DistanceSquared(new Vector2(u.Unit.Pos.X, u.Unit.Pos.Y), new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y))).FirstOrDefault();
 
-            if (closestEnemy != null && MapDataService.SelfVisible(closestEnemy.Unit.Pos))
+            if (commander.UnitCalculation.NearbyEnemies.All(e => e.Range < commander.UnitCalculation.Range && e.UnitTypeData.MovementSpeed < commander.UnitCalculation.UnitTypeData.MovementSpeed))
             {
-                if (commander.UnitCalculation.Range > closestEnemy.Range)
+                if (closestEnemy != null && MapDataService.SelfVisible(closestEnemy.Unit.Pos))
                 {
-                    var speed = commander.UnitCalculation.UnitTypeData.MovementSpeed;
-                    var enemySpeed = closestEnemy.UnitTypeData.MovementSpeed;
-                    if (closestEnemy.Unit.BuffIds.Contains((uint)Buffs.MEDIVACSPEEDBOOST))
+                    if (commander.UnitCalculation.Range > closestEnemy.Range)
                     {
-                        enemySpeed = 5.94f;
-                    }
-                    if (closestEnemy.Unit.BuffIds.Contains((uint)Buffs.STIMPACK) || closestEnemy.Unit.BuffIds.Contains((uint)Buffs.STIMPACKMARAUDER))
-                    {
-                        enemySpeed += 1.57f;
-                    }
+                        var speed = commander.UnitCalculation.UnitTypeData.MovementSpeed;
+                        var enemySpeed = closestEnemy.UnitTypeData.MovementSpeed;
+                        if (closestEnemy.Unit.BuffIds.Contains((uint)Buffs.MEDIVACSPEEDBOOST))
+                        {
+                            enemySpeed = 5.94f;
+                        }
+                        if (closestEnemy.Unit.BuffIds.Contains((uint)Buffs.STIMPACK) || closestEnemy.Unit.BuffIds.Contains((uint)Buffs.STIMPACKMARAUDER))
+                        {
+                            enemySpeed += 1.57f;
+                        }
 
-                    if (speed > enemySpeed || closestEnemy.Range + 3 < commander.UnitCalculation.Range)
-                    {
-                        if (MaintainRange(commander, frame, out action)) { return true; }
+                        if (speed > enemySpeed || closestEnemy.Range + 3 < commander.UnitCalculation.Range)
+                        {
+                            if (MaintainRange(commander, frame, out action)) { return true; }
+                        }
                     }
                 }
             }

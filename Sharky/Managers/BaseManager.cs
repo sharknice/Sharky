@@ -90,11 +90,14 @@ namespace Sharky.Managers
             }
 
             var startingUnit = observation.Observation.RawData.Units.FirstOrDefault(u => u.Alliance == Alliance.Self && SharkyUnitData.ResourceCenterTypes.Contains((UnitTypes)u.UnitType));
-
             BaseData.BaseLocations = BaseData.BaseLocations.OrderBy(b => PathFinder.GetGroundPath(startingUnit.Pos.X + 4, startingUnit.Pos.Y + 4, b.Location.X, b.Location.Y, 0).Count()).ToList();
             BaseData.MainBase = BaseData.BaseLocations.FirstOrDefault();
             BaseData.MainBase.ResourceCenter = startingUnit;
             BaseData.SelfBases = new List<BaseLocation> { BaseData.MainBase };
+
+            var enemystartingLocation = gameInfo.StartRaw.StartLocations.Last();
+            BaseData.EnemyBaseLocations = BaseData.BaseLocations.OrderBy(b => PathFinder.GetGroundPath(enemystartingLocation.X + 4, enemystartingLocation.Y + 4, b.Location.X, b.Location.Y, 0).Count()).ToList();
+            BaseData.EnemyBases = new List<BaseLocation> { BaseData.EnemyBaseLocations.FirstOrDefault() };
         }
 
         public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
@@ -108,6 +111,7 @@ namespace Sharky.Managers
             }
 
             UpdateSelfBases();
+            UpdateEnemyBases();
 
             return new List<SC2APIProtocol.Action>();
         }
@@ -155,6 +159,19 @@ namespace Sharky.Managers
                             selfBase.VespeneGeysers[index] = visibleGeyser.Unit;
                         }
                     }
+                }
+            }
+        }
+
+        void UpdateEnemyBases()
+        {
+            if (BaseData.EnemyBases.Count() != UnitCountService.EquivalentTypeCount(UnitTypes.PROTOSS_NEXUS) + UnitCountService.EquivalentTypeCount(UnitTypes.TERRAN_COMMANDCENTER) + UnitCountService.EquivalentTypeCount(UnitTypes.ZERG_HATCHERY))
+            {
+                var resourceCenters = ActiveUnitData.EnemyUnits.Values.Where(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter));
+                BaseData.EnemyBases = BaseData.BaseLocations.Where(b => resourceCenters.Any(r => Vector2.DistanceSquared(new Vector2(r.Unit.Pos.X, r.Unit.Pos.Y), new Vector2(b.Location.X, b.Location.Y)) < 25)).ToList();
+                foreach (var enemyBase in BaseData.EnemyBases)
+                {
+                    enemyBase.ResourceCenter = resourceCenters.FirstOrDefault(r => Vector2.DistanceSquared(new Vector2(r.Unit.Pos.X, r.Unit.Pos.Y), new Vector2(enemyBase.Location.X, enemyBase.Location.Y)) < 25).Unit;
                 }
             }
         }

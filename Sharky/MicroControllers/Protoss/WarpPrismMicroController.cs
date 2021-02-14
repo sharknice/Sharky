@@ -171,7 +171,7 @@ namespace Sharky.MicroControllers.Protoss
             {
                 if (commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISM)
                 {
-                    action = commander.Order(frame, Abilities.MORPH_WARPPRISMPHASINGMODE);
+                    action = commander.Order(frame, Abilities.MORPH_WARPPRISMPHASINGMODE, allowSpam: true);
                     return true;
                 }
             }

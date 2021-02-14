@@ -76,6 +76,10 @@ namespace Sharky.Builds
             if (!BuildOptions.StrictGasCount)
             {
                 MacroData.DesiredGases = ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.ResourceCenter) && c.UnitCalculation.Unit.BuildProgress > .7) * 2;
+                if (MacroData.DesiredGases > 2 && MacroData.VespeneGas > 300 && MacroData.Minerals < 150) // if we have an abundance of gas don't build more
+                {
+                    MacroData.DesiredGases = 2;
+                }
             }
 
             if (MacroData.Race == Race.Protoss)
@@ -310,6 +314,7 @@ namespace Sharky.Builds
                 var count = UnitCountService.Count(u) + UnitCountService.UnitsInProgressCount(u);
                 if (u == UnitTypes.PROTOSS_ARCHON)
                 {
+                    MacroData.BuildUnits[u] = count < MacroData.DesiredUnitCounts[u];
                     continue;
                 }
 

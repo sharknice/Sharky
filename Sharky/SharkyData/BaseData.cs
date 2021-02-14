@@ -1,5 +1,4 @@
-﻿using Sharky;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Sharky
 {
@@ -7,6 +6,8 @@ namespace Sharky
     {
         public List<BaseLocation> BaseLocations { get; set; }
         public List<BaseLocation> SelfBases { get; set; }
+        public List<BaseLocation> EnemyBaseLocations { get; set; }
+        public List<BaseLocation> EnemyBases { get; set; }
         public BaseLocation MainBase { get; set; }
     }
 }

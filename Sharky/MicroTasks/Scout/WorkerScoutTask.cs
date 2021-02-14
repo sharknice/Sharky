@@ -15,12 +15,13 @@ namespace Sharky.MicroTasks
         MapDataService MapDataService;
         IIndividualMicroController IndividualMicroController;
         DebugService DebugService;
+        BaseData BaseData;
 
         List<Point2D> ScoutPoints;
 
         bool started { get; set; }
 
-        public WorkerScoutTask(SharkyUnitData sharkyUnitData, TargetingData targetingData, MapDataService mapDataService, bool enabled, float priority, IIndividualMicroController individualMicroController, DebugService debugService)
+        public WorkerScoutTask(SharkyUnitData sharkyUnitData, TargetingData targetingData, MapDataService mapDataService, bool enabled, float priority, IIndividualMicroController individualMicroController, DebugService debugService, BaseData baseData)
         {
             SharkyUnitData = sharkyUnitData;
             TargetingData = targetingData;
@@ -28,6 +29,7 @@ namespace Sharky.MicroTasks
             Priority = priority;
             IndividualMicroController = individualMicroController;
             DebugService = debugService;
+            BaseData = baseData;
 
             UnitCommanders = new List<UnitCommander>();
             Enabled = enabled;
@@ -70,6 +72,7 @@ namespace Sharky.MicroTasks
             if (ScoutPoints == null)
             {
                 ScoutPoints = GetScoutArea(TargetingData.EnemyMainBasePoint);
+                ScoutPoints.Add(BaseData.EnemyBaseLocations.Skip(1).First().Location);
             }
 
             var mainVector = new Vector2(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y);

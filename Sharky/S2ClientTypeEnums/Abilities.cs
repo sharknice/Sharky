@@ -476,6 +476,7 @@
         UNLOADUNIT_OVERLORD = 1409,  // Target: None.
         UNLOADUNIT_WARPPRISM = 914,   // Target: None.
 
+        // taken from Documents\StarCraft II\stableid.json
         CHRONOBOOST = 3755,
         CHRONOBOOSTED = 281,
         RESEARCH_TECTONICDESTABILIZERS = 49,
@@ -487,6 +488,7 @@
         RESEARCH_ADAPTIVETALONS = 3709,
         RESEARCH_LURKERRANGE = 3710,
         RESEARCH_ANABOLICSYNTHESIS = 263,
-        BUILD_LURKERDEN = 1163
+        BUILD_LURKERDEN = 1163,
+        BATTERYOVERCHARGE = 4107
     }
 }

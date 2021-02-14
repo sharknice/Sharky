@@ -1,5 +1,6 @@
 ﻿using SC2APIProtocol;
 using Sharky.Pathing;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -106,7 +107,8 @@ namespace Sharky.Managers
                     }
                     else
                     {
-                        TargetingData.ForwardDefensePoint = closestBase.Location;
+                        var angle = Math.Atan2(closestBase.Location.Y - TargetingData.EnemyMainBasePoint.Y, TargetingData.EnemyMainBasePoint.X - closestBase.Location.X);
+                        TargetingData.ForwardDefensePoint = new Point2D { X = closestBase.Location.X + (float)(6 * Math.Cos(angle)), Y = closestBase.Location.Y - (float)(6 * Math.Sin(angle)) };
                     }
                 }
                 var farthestBase = ordered.LastOrDefault();

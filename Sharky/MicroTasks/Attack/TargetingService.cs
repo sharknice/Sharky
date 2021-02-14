@@ -32,11 +32,7 @@ namespace Sharky.MicroTasks.Attack
             {
                 TargetingData.HiddenEnemyBase = false;
                 EnemyBuildingCount = currentEnemyBuildingCount;
-                var closestEnemyBase = BaseData.BaseLocations.FirstOrDefault(b => enemyBuildings.Any(e => e.Value.Unit.Pos.X == b.Location.X && e.Value.Unit.Pos.Y == b.Location.Y));
-                if (closestEnemyBase != null)
-                {
-                    return closestEnemyBase.Location;
-                }
+
 
                 var enemyBuilding = ActiveUnitData.EnemyUnits.Where(e => e.Value.UnitTypeData.Attributes.Contains(SC2APIProtocol.Attribute.Structure)).OrderBy(e => Vector2.DistanceSquared(new Vector2(e.Value.Unit.Pos.X, e.Value.Unit.Pos.Y), new Vector2(armyPoint.X, armyPoint.Y))).FirstOrDefault().Value;
                 if (enemyBuilding != null)

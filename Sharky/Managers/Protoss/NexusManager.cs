@@ -1,6 +1,7 @@
 ﻿using SC2APIProtocol;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace Sharky.Managers.Protoss
 {
@@ -9,6 +10,8 @@ namespace Sharky.Managers.Protoss
         ActiveUnitData ActiveUnitData;
         SharkyUnitData SharkyUnitData;
         ChronoData ChronoData;
+        float OverchargeRangeSquared = 100;
+        float RestoreRangeSquared = 36;
 
         public NexusManager(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, ChronoData chronoData)
         {
@@ -21,17 +24,43 @@ namespace Sharky.Managers.Protoss
         {
             var actions = new List<SC2APIProtocol.Action>();
 
-            var nexus = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS).OrderByDescending(c => c.UnitCalculation.Unit.Energy).FirstOrDefault();
+            var nexus = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS && c.UnitCalculation.Unit.BuildProgress == 1).OrderByDescending(c => c.UnitCalculation.Unit.Energy).FirstOrDefault();
             if (nexus != null)
             {
-                var action = ChronoBoost(nexus, (int)observation.Observation.GameLoop);
+                var action = Overcharge(nexus, (int)observation.Observation.GameLoop);
                 if (action != null)
                 {
                     actions.AddRange(action);
                 }
+                else
+                {
+                    action = ChronoBoost(nexus, (int)observation.Observation.GameLoop);
+                    if (action != null)
+                    {
+                        actions.AddRange(action);
+                    }
+                }
             }
 
             return actions;
+        }
+
+        List<SC2APIProtocol.Action> Overcharge(UnitCommander nexus, int frame)
+        {
+            if (nexus.UnitCalculation.Unit.Energy >= 50)
+            {
+                var nexusVector = new Vector2(nexus.UnitCalculation.Unit.Pos.X, nexus.UnitCalculation.Unit.Pos.Y);
+                foreach (var shieldBattery in nexus.UnitCalculation.NearbyAllies.Where(u => u.Unit.UnitType == (uint)UnitTypes.PROTOSS_SHIELDBATTERY && u.Unit.BuildProgress == 1 && Vector2.DistanceSquared(nexusVector, new Vector2(u.Unit.Pos.X, u.Unit.Pos.Y)) < OverchargeRangeSquared).OrderBy(u => u.Unit.Energy))
+                {
+                    var shieldBatteryVector = new Vector2(shieldBattery.Unit.Pos.X, shieldBattery.Unit.Pos.Y);
+                    if (shieldBattery.NearbyAllies.Any(a => a.EnemiesInRangeOf.Count() > 0 && a.Unit.Shield < 5 && Vector2.DistanceSquared(shieldBatteryVector, new Vector2(a.Unit.Pos.X, a.Unit.Pos.Y)) < RestoreRangeSquared))
+                    {
+                        return nexus.Order(frame, Abilities.BATTERYOVERCHARGE, null, shieldBattery.Unit.Tag);
+                    }
+                }
+            }
+
+            return null;
         }
 
         List<SC2APIProtocol.Action> ChronoBoost(UnitCommander nexus, int frame)
