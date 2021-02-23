@@ -50,6 +50,8 @@ namespace Sharky.MicroControllers
             LooseFormationDistance = 1.75f;
         }
 
+        // TODO: if missing shields and there is a shieldbattery nearby, retreat to the shield battery
+
         public virtual List<SC2APIProtocol.Action> Attack(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
             if (commander.UnitCalculation.Unit.IsSelected)

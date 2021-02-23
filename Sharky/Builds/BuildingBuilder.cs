@@ -12,13 +12,15 @@ namespace Sharky.Builds
         TargetingData TargetingData;
         IBuildingPlacement BuildingPlacement;
         SharkyUnitData SharkyUnitData;
+        BaseData BaseData;
 
-        public BuildingBuilder(ActiveUnitData activeUnitData, TargetingData targetingData, IBuildingPlacement buildingPlacement, SharkyUnitData sharkyUnitData)
+        public BuildingBuilder(ActiveUnitData activeUnitData, TargetingData targetingData, IBuildingPlacement buildingPlacement, SharkyUnitData sharkyUnitData, BaseData baseData)
         {
             ActiveUnitData = activeUnitData;
             TargetingData = targetingData;
             BuildingPlacement = buildingPlacement;
             SharkyUnitData = sharkyUnitData;
+            BaseData = baseData;
         }
 
         public List<Action> BuildBuilding(MacroData macroData, UnitTypes unitType, BuildingTypeData unitData, Point2D generalLocation = null, bool ignoreMineralProximity = false, float maxDistance = 50, List<UnitCommander> workerPool = null)
@@ -41,6 +43,11 @@ namespace Sharky.Builds
                     var worker = GetWorker(placementLocation, workerPool);
                     if (worker != null)
                     {
+                        if (workerPool == null)
+                        {
+                            worker.UnitRole = UnitRole.Build;
+                        }
+                        
                         return worker.Order(macroData.Frame, unitData.Ability, placementLocation);
                     }
                 }
@@ -81,6 +88,7 @@ namespace Sharky.Builds
                 var worker = GetWorker(new Point2D { X = geyser.Pos.X, Y = geyser.Pos.Y });
                 if (worker != null)
                 {
+                    worker.UnitRole = UnitRole.Build;
                     return worker.Order(macroData.Frame, unitData.Ability, null, geyser.Tag);
                 }
             }
@@ -109,11 +117,16 @@ namespace Sharky.Builds
 
         private UnitCommander GetWorker(Point2D location, IEnumerable<UnitCommander> workers = null)
         {
+            IEnumerable<UnitCommander> availableWorkers;
             if (workers == null)
             {
                 workers = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && !c.UnitCalculation.Unit.BuffIds.Any(b => SharkyUnitData.CarryingResourceBuffs.Contains((Buffs)b)));
+                availableWorkers = workers.Where(c => (c.UnitRole == UnitRole.None || c.UnitRole == UnitRole.Minerals || c.UnitRole == UnitRole.Gas) && !c.UnitCalculation.Unit.Orders.Any(o => SharkyUnitData.BuildingData.Values.Any(b => (uint)b.Ability == o.AbilityId)));
             }
-            var availableWorkers = workers.Where(c => c.UnitRole == UnitRole.None && !c.UnitCalculation.Unit.Orders.Any(o => SharkyUnitData.BuildingData.Values.Any(b => (uint)b.Ability == o.AbilityId)));
+            else
+            {
+                availableWorkers = workers.Where(c => !c.UnitCalculation.Unit.Orders.Any(o => SharkyUnitData.BuildingData.Values.Any(b => (uint)b.Ability == o.AbilityId)));
+            }
 
             var closestWorkers = availableWorkers.OrderBy(p => Vector2.DistanceSquared(new Vector2(p.UnitCalculation.Unit.Pos.X, p.UnitCalculation.Unit.Pos.Y), new Vector2(location.X, location.Y)));
             if (closestWorkers.Count() == 0)

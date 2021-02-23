@@ -8,5 +8,14 @@ namespace Sharky.Builds
         {
 
         }
+
+        public override void StartBuild(int frame)
+        {
+            base.StartBuild(frame);
+
+            BuildOptions.StrictGasCount = false;
+            BuildOptions.StrictSupplyCount = true;
+            BuildOptions.StrictWorkerCount = false;
+        }
     }
 }

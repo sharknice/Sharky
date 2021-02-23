@@ -94,6 +94,7 @@ namespace Sharky.Managers
             BaseData.MainBase = BaseData.BaseLocations.FirstOrDefault();
             BaseData.MainBase.ResourceCenter = startingUnit;
             BaseData.SelfBases = new List<BaseLocation> { BaseData.MainBase };
+            SetupMiningInfo();
 
             var enemystartingLocation = gameInfo.StartRaw.StartLocations.Last();
             BaseData.EnemyBaseLocations = BaseData.BaseLocations.OrderBy(b => PathFinder.GetGroundPath(enemystartingLocation.X + 4, enemystartingLocation.Y + 4, b.Location.X, b.Location.Y, 0).Count()).ToList();
@@ -157,6 +158,81 @@ namespace Sharky.Managers
                         if (visibleGeyser != null)
                         {
                             selfBase.VespeneGeysers[index] = visibleGeyser.Unit;
+                        }
+                    }
+                }
+
+                if (selfBase.MineralMiningInfo == null)
+                {
+                    selfBase.MineralMiningInfo = new List<MiningInfo>();
+                    foreach (var mineral in selfBase.MineralFields)
+                    {
+                        selfBase.MineralMiningInfo.Add(new MiningInfo(mineral));
+                    }
+                }
+                else
+                {
+                    for (var index = 0; index < selfBase.MineralMiningInfo.Count; index++)
+                    {
+                        var updatedMineral = selfBase.MineralFields.FirstOrDefault(m => selfBase.MineralMiningInfo[index].ResourceUnit.Tag == m.Tag);
+                        if (updatedMineral != null)
+                        {
+                            selfBase.MineralMiningInfo[index].ResourceUnit = updatedMineral;
+                        }
+                        else
+                        {
+                            selfBase.MineralMiningInfo.RemoveAt(index);
+                        }
+                    }
+
+                    if (selfBase.MineralMiningInfo.Count != selfBase.MineralFields.Count)
+                    {
+                        var missing = selfBase.MineralFields.Where(m => !selfBase.MineralMiningInfo.Any(i => i.ResourceUnit.Tag == m.Tag));
+                        foreach (var mineral in missing)
+                        {
+                            selfBase.MineralMiningInfo.Add(new MiningInfo(mineral));
+                        }
+                    }
+                }
+
+                var takenGases = ActiveUnitData.SelfUnits.Where(u => SharkyUnitData.GasGeyserRefineryTypes.Contains((UnitTypes)u.Value.Unit.UnitType)).Concat(ActiveUnitData.EnemyUnits.Where(u => SharkyUnitData.GasGeyserRefineryTypes.Contains((UnitTypes)u.Value.Unit.UnitType)));
+                if (selfBase.GasMiningInfo == null)
+                {
+                    selfBase.GasMiningInfo = new List<MiningInfo>();
+                    foreach (var geyser in selfBase.VespeneGeysers)
+                    {
+                        var built = takenGases.FirstOrDefault(t => t.Value.Unit.Pos.X == geyser.Pos.X && t.Value.Unit.Pos.Y == geyser.Pos.Y).Value;
+                        if (built != null)
+                        {
+                            selfBase.GasMiningInfo.Add(new MiningInfo(built.Unit));
+                        }
+                    }
+                }
+                else
+                {
+                    for (var index = 0; index < selfBase.GasMiningInfo.Count; index++)
+                    {
+                        var updatedGas = takenGases.FirstOrDefault(m => selfBase.GasMiningInfo[index].ResourceUnit.Tag == m.Value.Unit.Tag).Value;
+                        if (updatedGas != null)
+                        {
+                            selfBase.GasMiningInfo[index].ResourceUnit = updatedGas.Unit;
+                        }
+                        else
+                        {
+                            selfBase.GasMiningInfo.RemoveAt(index);
+                        }
+                    }
+
+                    foreach (var geyser in selfBase.VespeneGeysers)
+                    {
+                        var match = selfBase.GasMiningInfo.FirstOrDefault(t => t.ResourceUnit.Pos.X == geyser.Pos.X && t.ResourceUnit.Pos.Y == geyser.Pos.Y);
+                        if (match == null)
+                        {
+                            var built = takenGases.FirstOrDefault(t => t.Value.Unit.Pos.X == geyser.Pos.X && t.Value.Unit.Pos.Y == geyser.Pos.Y).Value;
+                            if (built != null)
+                            {
+                                selfBase.GasMiningInfo.Add(new MiningInfo(built.Unit));
+                            }
                         }
                     }
                 }
@@ -350,6 +426,18 @@ namespace Sharky.Managers
                 maxDist += Vector2.DistanceSquared(new Vector2(gas.Pos.X, gas.Pos.Y), new Vector2(position.X, position.Y));
             }
             return maxDist;
+        }
+
+        void SetupMiningInfo()
+        {
+            foreach (var selfBase in BaseData.SelfBases)
+            {
+                selfBase.MineralMiningInfo = new List<MiningInfo>();
+                foreach (var mineral in selfBase.MineralFields)
+                {
+                    selfBase.MineralMiningInfo.Add(new MiningInfo(mineral));
+                }
+            }
         }
 
         bool GetTilePlacable(int x, int y)

@@ -183,7 +183,7 @@ namespace Sharky.DefaultBot
             ZergBuildingPlacement = new ZergBuildingPlacement(ActiveUnitData, SharkyUnitData, DebugService, BuildingService);
             WallOffPlacement = new WallOffPlacement(ActiveUnitData, SharkyUnitData, DebugService, MapData, BuildingService);
             BuildingPlacement = new BuildingPlacement(ProtossBuildingPlacement, TerranBuildingPlacement, ZergBuildingPlacement, BaseData, ActiveUnitData, BuildingService, SharkyUnitData);
-            BuildingBuilder = new BuildingBuilder(ActiveUnitData, TargetingData, BuildingPlacement, SharkyUnitData);
+            BuildingBuilder = new BuildingBuilder(ActiveUnitData, TargetingData, BuildingPlacement, SharkyUnitData, BaseData);
 
             WarpInPlacement = new WarpInPlacement(ActiveUnitData, DebugService, MapData);
             

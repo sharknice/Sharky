@@ -4,6 +4,10 @@
     {
         None,
         Bait,
-        Scout
+        Scout,
+        Build,
+        Proxy,
+        Minerals,
+        Gas
     }
 }

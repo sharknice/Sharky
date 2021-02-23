@@ -73,13 +73,14 @@ namespace Sharky.MicroTasks
 
                 foreach (var commander in commanders.OrderBy(c => c.Value.UnitCalculation.Unit.BuffIds.Count()))
                 {
-                    if (!commander.Value.Claimed && commander.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker))
+                    if ((!commander.Value.Claimed || commander.Value.UnitRole == UnitRole.Minerals) && commander.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker))
                     {
                         if (commander.Value.UnitCalculation.Unit.Orders.Any(o => !SharkyUnitData.MiningAbilities.Contains((Abilities)o.AbilityId)))
                         {
                         }
                         else
                         {
+                            commander.Value.UnitRole = UnitRole.Proxy;
                             commander.Value.Claimed = true;
                             UnitCommanders.Add(commander.Value);
                             started = true;

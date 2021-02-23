@@ -12,6 +12,8 @@ namespace Sharky
         }
 
         public List<Unit> MineralFields { get; set; }
+        public List<MiningInfo> MineralMiningInfo { get; set; }
+        public List<MiningInfo> GasMiningInfo { get; set; }
         public Point2D MineralLineLocation { get; set; }
         public List<Unit> VespeneGeysers { get; set; }
         public Point2D Location { get; set; }
