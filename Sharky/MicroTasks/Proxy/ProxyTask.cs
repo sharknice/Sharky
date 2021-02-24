@@ -34,10 +34,6 @@ namespace Sharky.MicroTasks
 
         public override void Enable()
         {
-            if (MicroTaskData.MicroTasks.ContainsKey("MiningTask"))
-            {
-                MicroTaskData.MicroTasks["MiningTask"].ResetClaimedUnits();
-            }
             Enabled = true;
             started = false;
             if (MacroData.Proxies.ContainsKey(ProxyName))
@@ -109,6 +105,10 @@ namespace Sharky.MicroTasks
 
             foreach (var commander in UnitCommanders.Where(c => !c.UnitCalculation.Unit.Orders.Any(o => SharkyUnitData.BuildingData.Values.Any(b => (uint)b.Ability == o.AbilityId))))
             {
+                if (commander.UnitRole != UnitRole.Proxy && commander.UnitRole != UnitRole.Build)
+                {
+                    commander.UnitRole = UnitRole.Proxy;
+                }
                 if (Vector2.DistanceSquared(new Vector2(MacroData.Proxies[ProxyName].Location.X, MacroData.Proxies[ProxyName].Location.Y), new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y)) > MacroData.Proxies[ProxyName].MaximumBuildingDistance)
                 {
                     List<SC2APIProtocol.Action> action;

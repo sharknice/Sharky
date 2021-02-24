@@ -167,7 +167,7 @@ namespace Sharky.Managers
                     selfBase.MineralMiningInfo = new List<MiningInfo>();
                     foreach (var mineral in selfBase.MineralFields)
                     {
-                        selfBase.MineralMiningInfo.Add(new MiningInfo(mineral));
+                        selfBase.MineralMiningInfo.Add(new MiningInfo(mineral, selfBase.ResourceCenter.Pos));
                     }
                 }
                 else
@@ -190,7 +190,7 @@ namespace Sharky.Managers
                         var missing = selfBase.MineralFields.Where(m => !selfBase.MineralMiningInfo.Any(i => i.ResourceUnit.Tag == m.Tag));
                         foreach (var mineral in missing)
                         {
-                            selfBase.MineralMiningInfo.Add(new MiningInfo(mineral));
+                            selfBase.MineralMiningInfo.Add(new MiningInfo(mineral, selfBase.ResourceCenter.Pos));
                         }
                     }
                 }
@@ -204,7 +204,7 @@ namespace Sharky.Managers
                         var built = takenGases.FirstOrDefault(t => t.Value.Unit.Pos.X == geyser.Pos.X && t.Value.Unit.Pos.Y == geyser.Pos.Y).Value;
                         if (built != null)
                         {
-                            selfBase.GasMiningInfo.Add(new MiningInfo(built.Unit));
+                            selfBase.GasMiningInfo.Add(new MiningInfo(built.Unit, selfBase.ResourceCenter.Pos));
                         }
                     }
                 }
@@ -231,7 +231,7 @@ namespace Sharky.Managers
                             var built = takenGases.FirstOrDefault(t => t.Value.Unit.Pos.X == geyser.Pos.X && t.Value.Unit.Pos.Y == geyser.Pos.Y).Value;
                             if (built != null)
                             {
-                                selfBase.GasMiningInfo.Add(new MiningInfo(built.Unit));
+                                selfBase.GasMiningInfo.Add(new MiningInfo(built.Unit, selfBase.ResourceCenter.Pos));
                             }
                         }
                     }
@@ -435,7 +435,7 @@ namespace Sharky.Managers
                 selfBase.MineralMiningInfo = new List<MiningInfo>();
                 foreach (var mineral in selfBase.MineralFields)
                 {
-                    selfBase.MineralMiningInfo.Add(new MiningInfo(mineral));
+                    selfBase.MineralMiningInfo.Add(new MiningInfo(mineral, selfBase.ResourceCenter.Pos));
                 }
             }
         }

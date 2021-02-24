@@ -146,9 +146,9 @@ namespace SharkyExampleBot.Builds
                     MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_STALKER] = 1;
                 }
 
-                if (MacroData.Proxies[ProxyTask.ProxyName].DesiredProductionCounts[UnitTypes.PROTOSS_STARGATE] < 1)
+                if (MacroData.Proxies[ProxyTask.ProxyName].DesiredProductionCounts[UnitTypes.PROTOSS_STARGATE] < 2)
                 {
-                    MacroData.Proxies[ProxyTask.ProxyName].DesiredProductionCounts[UnitTypes.PROTOSS_STARGATE] = 1;
+                    MacroData.Proxies[ProxyTask.ProxyName].DesiredProductionCounts[UnitTypes.PROTOSS_STARGATE] = 2;
                 }
             }
 

@@ -124,10 +124,6 @@ namespace Sharky.MicroTasks
         List<SC2APIProtocol.Action> MineMinerals(int frame)
         {
             var actions = new List<SC2APIProtocol.Action>();
-            if (frame > 1500)
-            {
-                var foo = true; //no build workers 870t, 860b : // 15 workers 835t, 830b, 3 gas 485/148b, 470/152t
-            }
 
             foreach (var selfBase in BaseData.SelfBases)
             {
@@ -151,9 +147,7 @@ namespace Sharky.MicroTasks
                             }
                             else
                             {
-                                var angle = Math.Atan2(mineralVector.Y - baseVector.Y, baseVector.X - mineralVector.X);
-                                var returnPoint = new Point2D { X = baseVector.X + (float)(-2 * Math.Cos(angle)), Y = baseVector.Y - (float)(-2 * Math.Sin(angle)) };
-                                var action = worker.Order(frame, Abilities.MOVE, returnPoint, 0, false);
+                                var action = worker.Order(frame, Abilities.MOVE, miningInfo.DropOffPoint, 0, false);
                                 if (action != null)
                                 {
                                     actions.AddRange(action);
@@ -173,9 +167,7 @@ namespace Sharky.MicroTasks
                             }
                             else
                             {
-                                var angle = Math.Atan2(baseVector.Y - mineralVector.Y, mineralVector.X - baseVector.X);
-                                var minePoint = new Point2D { X = mineralVector.X + (float)(-.5 * Math.Cos(angle)), Y = mineralVector.Y - (float)(-.5 * Math.Sin(angle)) };
-                                var action = worker.Order(frame, Abilities.MOVE, minePoint, 0, false);
+                                var action = worker.Order(frame, Abilities.MOVE, miningInfo.HarvestPoint, 0, false);
                                 if (action != null)
                                 {
                                     actions.AddRange(action);
@@ -215,9 +207,7 @@ namespace Sharky.MicroTasks
                             }
                             else
                             {
-                                var angle = Math.Atan2(mineralVector.Y - baseVector.Y, baseVector.X - mineralVector.X);
-                                var returnPoint = new Point2D { X = baseVector.X + (float)(-2 * Math.Cos(angle)), Y = baseVector.Y - (float)(-2 * Math.Sin(angle)) };
-                                var action = worker.Order(frame, Abilities.MOVE, returnPoint, 0, false);
+                                var action = worker.Order(frame, Abilities.MOVE, miningInfo.DropOffPoint, 0, false);
                                 if (action != null)
                                 {
                                     actions.AddRange(action);
@@ -237,9 +227,7 @@ namespace Sharky.MicroTasks
                             }
                             else
                             {
-                                var angle = Math.Atan2(baseVector.Y - mineralVector.Y, mineralVector.X - baseVector.X);
-                                var minePoint = new Point2D { X = mineralVector.X + (float)(-.5 * Math.Cos(angle)), Y = mineralVector.Y - (float)(-.5 * Math.Sin(angle)) };
-                                var action = worker.Order(frame, Abilities.MOVE, minePoint, 0, false);
+                                var action = worker.Order(frame, Abilities.MOVE, miningInfo.HarvestPoint, 0, false);
                                 if (action != null)
                                 {
                                     actions.AddRange(action);
@@ -412,7 +400,7 @@ namespace Sharky.MicroTasks
             var miningAssignments = new List<MiningInfo>();
             foreach (var mineralField in BaseData.MainBase.MineralFields)
             {
-                miningAssignments.Add(new MiningInfo(mineralField));
+                miningAssignments.Add(new MiningInfo(mineralField, BaseData.MainBase.ResourceCenter.Pos));
             }
 
             var workersPerField = UnitCommanders.Count() / (float)miningAssignments.Count();
