@@ -65,6 +65,8 @@ namespace Sharky.MicroTasks
                     Disable();
                 }
 
+                var attacked = false;
+
                 foreach (var building in buildings)
                 {
                     if (building != null)
@@ -79,22 +81,26 @@ namespace Sharky.MicroTasks
                         }
                         else
                         {
-                            var command = new ActionRawUnitCommand();
-                            foreach (var commander in UnitCommanders)
+                            if (!attacked)
                             {
-                                command.UnitTags.Add(commander.UnitCalculation.Unit.Tag);
-                            }
-                            command.AbilityId = (int)Abilities.ATTACK;
-                            command.TargetUnitTag = building.UnitCalculation.Unit.Tag;
-
-                            var action = new SC2APIProtocol.Action
-                            {
-                                ActionRaw = new ActionRaw
+                                var command = new ActionRawUnitCommand();
+                                foreach (var commander in UnitCommanders)
                                 {
-                                    UnitCommand = command
+                                    command.UnitTags.Add(commander.UnitCalculation.Unit.Tag);
                                 }
-                            };
-                            actions.Add(action);
+                                command.AbilityId = (int)Abilities.ATTACK;
+                                command.TargetUnitTag = building.UnitCalculation.Unit.Tag;
+
+                                var action = new SC2APIProtocol.Action
+                                {
+                                    ActionRaw = new ActionRaw
+                                    {
+                                        UnitCommand = command
+                                    }
+                                };
+                                actions.Add(action);
+                                attacked = true;
+                            }
                         }
                     }
                 }

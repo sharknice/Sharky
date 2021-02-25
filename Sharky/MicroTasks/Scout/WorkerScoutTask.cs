@@ -16,12 +16,13 @@ namespace Sharky.MicroTasks
         IIndividualMicroController IndividualMicroController;
         DebugService DebugService;
         BaseData BaseData;
+        AreaService AreaService;
 
         List<Point2D> ScoutPoints;
 
         bool started { get; set; }
 
-        public WorkerScoutTask(SharkyUnitData sharkyUnitData, TargetingData targetingData, MapDataService mapDataService, bool enabled, float priority, IIndividualMicroController individualMicroController, DebugService debugService, BaseData baseData)
+        public WorkerScoutTask(SharkyUnitData sharkyUnitData, TargetingData targetingData, MapDataService mapDataService, bool enabled, float priority, IIndividualMicroController individualMicroController, DebugService debugService, BaseData baseData, AreaService areaService)
         {
             SharkyUnitData = sharkyUnitData;
             TargetingData = targetingData;
@@ -30,6 +31,7 @@ namespace Sharky.MicroTasks
             IndividualMicroController = individualMicroController;
             DebugService = debugService;
             BaseData = baseData;
+            AreaService = areaService;
 
             UnitCommanders = new List<UnitCommander>();
             Enabled = enabled;
@@ -71,7 +73,7 @@ namespace Sharky.MicroTasks
 
             if (ScoutPoints == null)
             {
-                ScoutPoints = GetScoutArea(TargetingData.EnemyMainBasePoint);
+                ScoutPoints = AreaService.GetTargetArea(TargetingData.EnemyMainBasePoint);
                 ScoutPoints.Add(BaseData.EnemyBaseLocations.Skip(1).First().Location);
             }
 
@@ -93,28 +95,6 @@ namespace Sharky.MicroTasks
             }
 
             return commands;
-        }
-
-        List<Point2D> GetScoutArea(Point2D point)
-        {
-            var points = new List<Point2D>();
-
-            var startHeight = MapDataService.MapHeight(point);
-            for (var x = -25; x < 25; x++)
-            {
-                for (var y = -25; y < 25; y++)
-                {
-                    if (x + point.X > 0 && x + point.X < MapDataService.MapData.MapWidth && y + point.Y > 0 && y + point.Y < MapDataService.MapData.MapHeight)
-                    {
-                        if (MapDataService.MapHeight(x + (int)point.X, y + (int)point.Y) == startHeight && MapDataService.PathWalkable(x + (int)point.X, y + (int)point.Y))
-                        {
-                            points.Add(new Point2D { X = x + (int)point.X, Y = y + (int)point.Y });
-                        }
-                    }
-                }
-            }
-
-            return points;
         }
     }
 }

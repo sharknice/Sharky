@@ -24,6 +24,7 @@ namespace Sharky.MicroTasks.Proxy
         UnitDataService UnitDataService;
         ActiveUnitData ActiveUnitData;
         ChatService ChatService;
+        AreaService AreaService;
 
         float lastFrameTime;
 
@@ -33,12 +34,13 @@ namespace Sharky.MicroTasks.Proxy
         Point2D LoadingLocation { get; set; }
         int LoadingLocationHeight { get; set; }
         Point2D DropLocation { get; set; }
-        Point2D TargetLocatoin { get; set; }
+        Point2D TargetLocation { get; set; }
         int DropLocationHeight { get; set; }
         float InsideBaseDistanceSquared { get; set; }
         int PickupRangeSquared { get; set; }
+        List<Point2D> DropArea { get; set; }
 
-        public WarpPrismElevatorTask(TargetingData targetingData, IMicroController microController, WarpPrismMicroController warpPrismMicroController, ProxyLocationService proxyLocationService, MapDataService mapDataService, DebugService debugService, UnitDataService unitDataService, ActiveUnitData activeUnitData, ChatService chatService, List<DesiredUnitsClaim> desiredUnitsClaims, float priority, bool enabled = true)
+        public WarpPrismElevatorTask(TargetingData targetingData, IMicroController microController, WarpPrismMicroController warpPrismMicroController, ProxyLocationService proxyLocationService, MapDataService mapDataService, DebugService debugService, UnitDataService unitDataService, ActiveUnitData activeUnitData, ChatService chatService, AreaService areaService, List<DesiredUnitsClaim> desiredUnitsClaims, float priority, bool enabled = true)
         {
             TargetingData = targetingData;
             MicroController = microController;
@@ -48,6 +50,8 @@ namespace Sharky.MicroTasks.Proxy
             DebugService = debugService;
             UnitDataService = unitDataService;
             ActiveUnitData = activeUnitData;
+            AreaService = areaService;
+            ChatService = chatService;
 
             DesiredUnitsClaims = desiredUnitsClaims;
             Priority = priority;
@@ -96,8 +100,8 @@ namespace Sharky.MicroTasks.Proxy
 
             var warpPrisms = UnitCommanders.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISM || c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISMPHASING);
             var attackers = UnitCommanders.Where(c => c.UnitCalculation.Unit.UnitType != (uint)UnitTypes.PROTOSS_WARPPRISM && c.UnitCalculation.Unit.UnitType != (uint)UnitTypes.PROTOSS_WARPPRISMPHASING);
-            var droppedAttackers = attackers.Where(c => MapDataService.MapHeight(c.UnitCalculation.Unit.Pos) == DropLocationHeight && Vector2.DistanceSquared(new Vector2(c.UnitCalculation.Unit.Pos.X, c.UnitCalculation.Unit.Pos.Y), new Vector2(TargetLocatoin.X, TargetLocatoin.Y)) >= InsideBaseDistanceSquared);
-            var unDroppedAttackers = attackers.Where(c => MapDataService.MapHeight(c.UnitCalculation.Unit.Pos) != DropLocationHeight || Vector2.DistanceSquared(new Vector2(c.UnitCalculation.Unit.Pos.X, c.UnitCalculation.Unit.Pos.Y), new Vector2(TargetLocatoin.X, TargetLocatoin.Y)) < InsideBaseDistanceSquared);
+            var droppedAttackers = attackers.Where(c => AreaService.InArea(c.UnitCalculation.Unit.Pos, DropArea));
+            var unDroppedAttackers = attackers.Where(c => !AreaService.InArea(c.UnitCalculation.Unit.Pos, DropArea));
 
             if (warpPrisms.Count() > 0)
             {
@@ -126,7 +130,7 @@ namespace Sharky.MicroTasks.Proxy
                 if (droppedAttackers.Count() > 0)
                 {
                     // don't wait for another warp prism, just attack
-                    actions.AddRange(MicroController.Attack(unDroppedAttackers, TargetLocatoin, DefensiveLocation, null, frame));
+                    actions.AddRange(MicroController.Attack(unDroppedAttackers, TargetLocation, DefensiveLocation, null, frame));
                 }
                 else
                 {
@@ -135,7 +139,7 @@ namespace Sharky.MicroTasks.Proxy
                 }
             }
 
-            actions.AddRange(MicroController.Attack(droppedAttackers, TargetLocatoin, DefensiveLocation, null, frame));
+            actions.AddRange(MicroController.Attack(droppedAttackers, TargetLocation, DefensiveLocation, null, frame));
 
             stopwatch.Stop();
             lastFrameTime = stopwatch.ElapsedMilliseconds;
@@ -144,7 +148,7 @@ namespace Sharky.MicroTasks.Proxy
 
         private void CheckComplete()
         {
-            if (MapDataService.SelfVisible(TargetLocatoin) && !ActiveUnitData.EnemyUnits.Any(e => Vector2.DistanceSquared(new Vector2(TargetLocatoin.X, TargetLocatoin.Y), new Vector2(e.Value.Unit.Pos.X, e.Value.Unit.Pos.Y)) < 100))
+            if (MapDataService.SelfVisible(TargetLocation) && !ActiveUnitData.EnemyUnits.Any(e => Vector2.DistanceSquared(new Vector2(TargetLocation.X, TargetLocation.Y), new Vector2(e.Value.Unit.Pos.X, e.Value.Unit.Pos.Y)) < 100))
             {
                 Disable();
                 ChatService.SendChatType("WarpPrismElevatorTask-TaskCompleted");
@@ -176,13 +180,11 @@ namespace Sharky.MicroTasks.Proxy
 
             if (warpPrism.UnitCalculation.Unit.Passengers.Count() > 0)
             {
-                var dropLoactionDistanceSquared = Vector2.DistanceSquared(new Vector2(warpPrism.UnitCalculation.Unit.Pos.X, warpPrism.UnitCalculation.Unit.Pos.Y), new Vector2(DropLocation.X, DropLocation.Y));
-                if (dropLoactionDistanceSquared <= 5)
+                if (AreaService.InArea(warpPrism.UnitCalculation.Unit.Pos, DropArea))
                 {
                     return warpPrism.Order(frame, Abilities.UNLOADALLAT_WARPPRISM, null, warpPrism.UnitCalculation.Unit.Tag);
                 }
-                var targetLoactionDistanceSquared = Vector2.DistanceSquared(new Vector2(warpPrism.UnitCalculation.Unit.Pos.X, warpPrism.UnitCalculation.Unit.Pos.Y), new Vector2(TargetLocatoin.X, TargetLocatoin.Y));
-                if (dropLoactionDistanceSquared > 5 && targetLoactionDistanceSquared > InsideBaseDistanceSquared)
+                else
                 {
                     return warpPrism.Order(frame, Abilities.UNLOADALLAT_WARPPRISM, DropLocation);
                 }
@@ -191,14 +193,14 @@ namespace Sharky.MicroTasks.Proxy
             if (droppedAttackers.Count() > 0)
             {
                 List<SC2APIProtocol.Action> action = null;
-                WarpPrismMicroController.SupportArmy(warpPrism, TargetLocatoin, DropLocation, null, frame, out action, droppedAttackers.Select(c => c.UnitCalculation));
+                WarpPrismMicroController.SupportArmy(warpPrism, TargetLocation, DropLocation, null, frame, out action, droppedAttackers.Select(c => c.UnitCalculation));
                 return action;
             }
 
             if (unDroppedAttackers.Count() > 0)
             {
                 List<SC2APIProtocol.Action> action = null;
-                WarpPrismMicroController.SupportArmy(warpPrism, TargetLocatoin, DefensiveLocation, null, frame, out action, unDroppedAttackers.Select(c => c.UnitCalculation));
+                WarpPrismMicroController.SupportArmy(warpPrism, TargetLocation, DefensiveLocation, null, frame, out action, unDroppedAttackers.Select(c => c.UnitCalculation));
                 return action;
             }
 
@@ -210,20 +212,23 @@ namespace Sharky.MicroTasks.Proxy
             if (DefensiveLocation == null)
             {
                 DefensiveLocation = ProxyLocationService.GetCliffProxyLocation();
-                TargetLocatoin = TargetingData.EnemyMainBasePoint;
+                TargetLocation = TargetingData.EnemyMainBasePoint;
 
-                var angle = Math.Atan2(TargetLocatoin.Y - DefensiveLocation.Y, DefensiveLocation.X - TargetLocatoin.X);
+                var angle = Math.Atan2(TargetLocation.Y - DefensiveLocation.Y, DefensiveLocation.X - TargetLocation.X);
                 var x = -6 * Math.Cos(angle);
                 var y = -6 * Math.Sin(angle);
                 LoadingLocation = new Point2D { X = DefensiveLocation.X + (float)x, Y = DefensiveLocation.Y - (float)y };
                 LoadingLocationHeight = MapDataService.MapHeight(LoadingLocation);
 
-                x = -25 * Math.Cos(angle);
-                y = -25 * Math.Sin(angle);
-                DropLocation = new Point2D { X = DefensiveLocation.X + (float)x, Y = DefensiveLocation.Y - (float)y };
+                var loadingVector = new Vector2(LoadingLocation.X, LoadingLocation.Y);
+                DropArea = AreaService.GetTargetArea(TargetLocation);
+                var dropVector = DropArea.OrderBy(p => Vector2.DistanceSquared(new Vector2(p.X, p.Y), loadingVector)).First();
+                x = -2 * Math.Cos(angle);
+                y = -2 * Math.Sin(angle);
+                DropLocation = new Point2D { X = dropVector.X + (float)x, Y = dropVector.Y - (float)y };
                 DropLocationHeight = MapDataService.MapHeight(DropLocation);
 
-                InsideBaseDistanceSquared = Vector2.DistanceSquared(new Vector2(DropLocation.X, DropLocation.Y), new Vector2(TargetLocatoin.X, TargetLocatoin.Y)) + 9f;
+                InsideBaseDistanceSquared = Vector2.DistanceSquared(new Vector2(LoadingLocation.X, LoadingLocation.Y), new Vector2(TargetLocation.X, TargetLocation.Y));
             }
             DebugService.DrawSphere(new Point { X = LoadingLocation.X, Y = LoadingLocation.Y, Z = 12 }, 3, new Color { R = 0, G = 0, B = 255 });
             DebugService.DrawSphere(new Point { X = DropLocation.X, Y = DropLocation.Y, Z = 12 }, 3, new Color { R = 0, G = 255, B = 0 });
