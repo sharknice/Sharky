@@ -8,6 +8,7 @@
         Build,
         Proxy,
         Minerals,
-        Gas
+        Gas,
+        Defend
     }
 }

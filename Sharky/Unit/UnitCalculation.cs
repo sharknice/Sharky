@@ -51,9 +51,12 @@ namespace Sharky
         public List<UnitClassification> UnitClassifications { get; set; }
         public TargetPriorityCalculation TargetPriorityCalculation { get; set; }
         public UnitTypeData UnitTypeData { get; set; }
+        public int FrameLastSeen { get; set; }
 
-        public UnitCalculation(Unit previousUnit, Unit unit, int repairers, SharkyUnitData sharkyUnitData, SharkyOptions sharkyOptions, UnitDataService unitDataService)
+        public UnitCalculation(Unit previousUnit, Unit unit, int repairers, SharkyUnitData sharkyUnitData, SharkyOptions sharkyOptions, UnitDataService unitDataService, int frame)
         {
+            FrameLastSeen = frame;
+
             PreviousUnit = previousUnit;
             Unit = unit;
             UnitTypeData = sharkyUnitData.UnitData[(UnitTypes)unit.UnitType];

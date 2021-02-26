@@ -62,7 +62,7 @@ namespace Sharky.MicroControllers
             List<SC2APIProtocol.Action> action = null;
 
             var formation = GetDesiredFormation(commander);
-            var bestTarget = GetBestTarget(commander, target);
+            var bestTarget = GetBestTarget(commander, target, frame);
 
             if (SpecialCaseMove(commander, target, defensivePoint, groupCenter, bestTarget, formation, frame, out action)) { return action; }
 
@@ -101,7 +101,7 @@ namespace Sharky.MicroControllers
             {
                 if (WeaponReady(commander) && (commander.UnitCalculation.Unit.Shield + commander.UnitCalculation.Unit.Health) > (commander.UnitCalculation.Unit.ShieldMax + (commander.UnitCalculation.Unit.HealthMax / 2.0f)))
                 {
-                    var bestTarget = GetBestTarget(commander, target);
+                    var bestTarget = GetBestTarget(commander, target, frame);
                     if (bestTarget != null && bestTarget.UnitClassifications.Contains(UnitClassification.Worker) && commander.UnitCalculation.EnemiesInRange.Any(e => e.Unit.Tag == bestTarget.Unit.Tag))
                     {
                         if (AttackBestTarget(commander, target, defensivePoint, target, bestTarget, frame, out action))
@@ -166,7 +166,7 @@ namespace Sharky.MicroControllers
             List<SC2APIProtocol.Action> action = null;
 
             var formation = GetDesiredFormation(commander);
-            var bestTarget = GetBestTarget(commander, target);
+            var bestTarget = GetBestTarget(commander, target, frame);
 
             if (AvoidTargettedOneHitKills(commander, target, defensivePoint, frame, out action))
             {
@@ -495,7 +495,7 @@ namespace Sharky.MicroControllers
 
             if (commander.UnitCalculation.EnemiesInRange.Any() && WeaponReady(commander) && !SharkyUnitData.NoWeaponCooldownTypes.Contains((UnitTypes)commander.UnitCalculation.Unit.UnitType)) // keep shooting as you retreat
             {
-                var bestTarget = GetBestTarget(commander, target);
+                var bestTarget = GetBestTarget(commander, target, frame);
                 if (bestTarget != null)
                 {
                     action = commander.Order(frame, Abilities.ATTACK, null, bestTarget.Unit.Tag);
@@ -611,7 +611,7 @@ namespace Sharky.MicroControllers
             return false;
         }
 
-        protected virtual UnitCalculation GetBestTarget(UnitCommander commander, Point2D target)
+        protected virtual UnitCalculation GetBestTarget(UnitCommander commander, Point2D target, int frame)
         {
             var existingAttackOrder = commander.UnitCalculation.Unit.Orders.Where(o => o.AbilityId == (uint)Abilities.ATTACK || o.AbilityId == (uint)Abilities.ATTACK_ATTACK).FirstOrDefault();
 
@@ -691,7 +691,7 @@ namespace Sharky.MicroControllers
                 var fakeMainBase = new Unit(commander.UnitCalculation.Unit);
                 fakeMainBase.Pos = new Point { X = target.X, Y = target.Y, Z = 1 };
                 fakeMainBase.Alliance = Alliance.Enemy;
-                return new UnitCalculation(fakeMainBase, fakeMainBase, 0, SharkyUnitData, SharkyOptions, UnitDataService);
+                return new UnitCalculation(fakeMainBase, fakeMainBase, 0, SharkyUnitData, SharkyOptions, UnitDataService, frame);
             }
             var unitsNearEnemyMain = ActiveUnitData.EnemyUnits.Values.Where(e => e.Unit.UnitType != (uint)UnitTypes.ZERG_LARVA && InRange(target, e.Unit.Pos, 20));
             if (unitsNearEnemyMain.Count() > 0 && InRange(target, commander.UnitCalculation.Unit.Pos, 100))

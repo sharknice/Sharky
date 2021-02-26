@@ -42,6 +42,8 @@ namespace Sharky.Builds
             BuildOptions.StrictSupplyCount = false;
             BuildOptions.StrictWorkerCount = false;
 
+            AttackData.UseAttackDataManager = true;
+
             foreach (var u in MacroData.Units)
             {
                 MacroData.DesiredUnitCounts[u] = 0;

@@ -99,19 +99,11 @@ namespace Sharky.MicroTasks
             {
                 foreach (var info in selfBase.MineralMiningInfo)
                 {
-                    foreach (var worker in info.Workers.Where(w => w.UnitRole != UnitRole.Minerals))
-                    {
-                        //worker.UnitRole = UnitRole.None;
-                    }
-                    info.Workers.RemoveAll(w => w.UnitRole != UnitRole.Minerals);
+                    info.Workers.RemoveAll(w => w.UnitRole != UnitRole.Minerals || !UnitCommanders.Any(c => c.UnitCalculation.Unit.Tag == w.UnitCalculation.Unit.Tag));
                 }
                 foreach (var info in selfBase.GasMiningInfo)
                 {
-                    foreach (var worker in info.Workers.Where(w => w.UnitRole != UnitRole.Gas))
-                    {
-                        //worker.UnitRole = UnitRole.None;
-                    }
-                    info.Workers.RemoveAll(w => w.UnitRole != UnitRole.Gas);
+                    info.Workers.RemoveAll(w => w.UnitRole != UnitRole.Gas || !UnitCommanders.Any(c => c.UnitCalculation.Unit.Tag == w.UnitCalculation.Unit.Tag));
                 }
             }
         }

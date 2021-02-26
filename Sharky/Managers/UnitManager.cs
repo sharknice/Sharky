@@ -47,6 +47,8 @@ namespace Sharky.Managers
 
         public override IEnumerable<Action> OnFrame(ResponseObservation observation)
         {
+            var frame = (int)observation.Observation.GameLoop;
+
             if (observation.Observation.RawData.Event != null && observation.Observation.RawData.Event.DeadUnits != null)
             {
                 ActiveUnitData.DeadUnits = observation.Observation.RawData.Event.DeadUnits.ToList();
@@ -107,7 +109,7 @@ namespace Sharky.Managers
                 else if (unit.Alliance == Alliance.Enemy)
                 {
                     var repairingUnitCount = repairers.Where(u => u.Alliance == Alliance.Enemy && Vector2.DistanceSquared(new Vector2(u.Pos.X, u.Pos.Y), new Vector2(unit.Pos.X, unit.Pos.Y)) < (1.0 + u.Radius + unit.Radius) * (0.1 + u.Radius + unit.Radius)).Count();
-                    var attack = new UnitCalculation(unit, unit, repairingUnitCount, SharkyUnitData, SharkyOptions, UnitDataService);
+                    var attack = new UnitCalculation(unit, unit, repairingUnitCount, SharkyUnitData, SharkyOptions, UnitDataService, frame);
                     if (ActiveUnitData.EnemyUnits.TryGetValue(unit.Tag, out UnitCalculation existing))
                     {
                         attack.PreviousUnit = existing.Unit;
@@ -116,7 +118,7 @@ namespace Sharky.Managers
                 }
                 else if (unit.Alliance == Alliance.Self)
                 {
-                    var attack = new UnitCalculation(unit, unit, 0, SharkyUnitData, SharkyOptions, UnitDataService);
+                    var attack = new UnitCalculation(unit, unit, 0, SharkyUnitData, SharkyOptions, UnitDataService, frame);
                     if (ActiveUnitData.SelfUnits.TryGetValue(unit.Tag, out UnitCalculation existing))
                     {
                         attack.PreviousUnit = existing.Unit;
@@ -125,7 +127,7 @@ namespace Sharky.Managers
                 }
                 else if (unit.Alliance == Alliance.Neutral)
                 {
-                    var attack = new UnitCalculation(unit, unit, 0, SharkyUnitData, SharkyOptions, UnitDataService);
+                    var attack = new UnitCalculation(unit, unit, 0, SharkyUnitData, SharkyOptions, UnitDataService, frame);
                     if (ActiveUnitData.NeutralUnits.TryGetValue(unit.Tag, out UnitCalculation existing))
                     {
                         attack.PreviousUnit = existing.Unit;
