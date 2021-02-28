@@ -12,5 +12,6 @@ namespace Sharky
         public bool UseAttackDataManager { get; set; }
         public float RetreatTrigger { get; set; }
         public float AttackTrigger { get; set; }
+        public TargetPriorityCalculation TargetPriorityCalculation { get; set; }
     }
 }

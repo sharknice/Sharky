@@ -75,6 +75,7 @@ namespace Sharky.MicroTasks
 
             foreach (var commander in UnitCommanders)
             {
+                if (commander.UnitRole != UnitRole.Scout) { commander.UnitRole = UnitRole.Scout; }
                 if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker) || e.Attributes.Contains(Attribute.Structure)))
                 {
                     // TODO: attack scv that is building something, then any worker, then buildlng

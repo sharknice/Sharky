@@ -80,6 +80,7 @@ namespace Sharky.Managers
             }
 
             var targetPriority = TargetPriorityService.CalculateTargetPriority(AttackTask.UnitCommanders.Select(c => c.UnitCalculation), enemyUnits);
+            AttackData.TargetPriorityCalculation = targetPriority;
 
             var overallTrigger = AttackData.RetreatTrigger;
             if (!AttackData.Attacking)

@@ -428,6 +428,11 @@ namespace Sharky.MicroControllers
                     range = attack.Range;
                 }
 
+                if (commander.UnitCalculation.Range < range && commander.UnitCalculation.UnitTypeData.MovementSpeed <= attack.UnitTypeData.MovementSpeed)
+                {
+                    return false; // if we can't get out of range before we attack again don't bother running away
+                }
+
                 if (commander.RetreatPathFrame + 20 < frame)
                 {
                     if (commander.UnitCalculation.Unit.IsFlying)
@@ -1477,5 +1482,93 @@ namespace Sharky.MicroControllers
             // TODO: get range of detection for units, calculate if this unit is in within detection range
             return commander.UnitCalculation.NearbyEnemies.Any(e => SharkyUnitData.DetectionTypes.Contains((UnitTypes)e.Unit.UnitType)) || commander.UnitCalculation.Unit.BuffIds.Any(b => b == (uint)Buffs.ORACLEREVELATION || b == (uint)Buffs.FUNGALGROWTH || b == (uint)Buffs.EMPDECLOAK);
         }
+
+        public List<SC2APIProtocol.Action> Support(UnitCommander commander, IEnumerable<UnitCommander> supportTargets, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
+        {
+            List<SC2APIProtocol.Action> action = null;
+
+            var unitToSupport = GetSupportTarget(commander, supportTargets, target, defensivePoint);
+
+            if (unitToSupport == null)
+            {
+                return Attack(commander, target, defensivePoint, groupCenter, frame);
+            }
+
+            var supportPoint = GetSupportSpot(unitToSupport, target, defensivePoint);
+
+            var formation = GetDesiredFormation(commander);
+            var bestTarget = GetBestTarget(commander, supportPoint, frame);
+
+            if (SpecialCaseMove(commander, supportPoint, defensivePoint, groupCenter, bestTarget, formation, frame, out action)) { return action; }
+
+            if (PreOffenseOrder(commander, supportPoint, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
+
+            if (AvoidTargettedOneHitKills(commander, supportPoint, defensivePoint, frame, out action)) { return action; }
+
+            if (OffensiveAbility(commander, supportPoint, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
+
+            if (MicroPriority == MicroPriority.StayOutOfRange)
+            {
+                if (SpecialCaseMove(commander, supportPoint, defensivePoint, groupCenter, bestTarget, formation, frame, out action)) { return action; }
+                if (MoveAway(commander, supportPoint, defensivePoint, frame, out action)) { return action; }
+            }
+
+            if (WeaponReady(commander))
+            {
+                if (AttackBestTarget(commander, supportPoint, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
+            }
+
+            if (Move(commander, supportPoint, defensivePoint, groupCenter, bestTarget, formation, frame, out action)) { return action; }
+
+            return commander.Order(frame, Abilities.ATTACK, target);
+        }
+
+        protected virtual UnitCommander GetSupportTarget(UnitCommander commander, IEnumerable<UnitCommander> supportTargets, Point2D target, Point2D defensivePoint)
+        {
+            if (supportTargets == null)
+            {
+                return null;
+            }
+
+            // out of nearby allies within 15 range
+            // select the friendlies with enemies in 15 range
+            // order by closest to the enemy
+            var friendlies = supportTargets.Where(c => Vector2.DistanceSquared(c.UnitCalculation.Position, commander.UnitCalculation.Position) < 225
+                    && c.UnitCalculation.NearbyEnemies.Any(e => Vector2.DistanceSquared(c.UnitCalculation.Position, e.Position) < 225)
+                ).OrderBy(u => Vector2.DistanceSquared(u.UnitCalculation.NearbyEnemies.OrderBy(e => Vector2.DistanceSquared(e.Position, u.UnitCalculation.Position)).First().Position, u.UnitCalculation.Position));
+
+            if (friendlies.Count() > 0)
+            {
+                return friendlies.First();
+            }
+
+            // if none
+            // get any allies
+            // select the friendies with enemies in 15 range
+            // order by closest to the enemy
+            friendlies = supportTargets.Where(u => u.UnitCalculation.NearbyEnemies.Any(e => Vector2.DistanceSquared(u.UnitCalculation.Position, e.Position) < 225)).OrderBy(u => Vector2.DistanceSquared(u.UnitCalculation.NearbyEnemies.OrderBy(e => Vector2.DistanceSquared(e.Position, u.UnitCalculation.Position)).First().Position, u.UnitCalculation.Position));
+
+            if (friendlies.Count() > 0)
+            {
+                return friendlies.First();
+            }
+
+            // if still none
+            //get ally closest to target
+            friendlies = supportTargets.OrderBy(u => Vector2.DistanceSquared(u.UnitCalculation.Position, new Vector2(target.X, target.Y)));
+
+            if (friendlies.Count() > 0)
+            {
+                return friendlies.First();
+            }
+
+            return null;
+        }
+
+        protected virtual Point2D GetSupportSpot(UnitCommander unitToSupport, Point2D target, Point2D defensivePoint)
+        {
+            return new Point2D { X = unitToSupport.UnitCalculation.Unit.Pos.X, Y = unitToSupport.UnitCalculation.Unit.Pos.Y };
+        }
+
     }
 }

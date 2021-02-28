@@ -86,7 +86,7 @@ namespace Sharky.MicroTasks
 
             var hiddenBase = TargetingData.HiddenEnemyBase;
 
-            TargetingData.AttackPoint = TargetingService.UpdateAttackPoint(AttackData.ArmyPoint, TargetingData.AttackPoint); 
+            TargetingData.AttackPoint = TargetingService.UpdateAttackPoint(AttackData.ArmyPoint, TargetingData.AttackPoint);
 
             if (!AttackData.CustomAttackFunction)
             {

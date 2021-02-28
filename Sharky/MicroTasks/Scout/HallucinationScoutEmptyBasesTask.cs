@@ -1,5 +1,4 @@
 ﻿using SC2APIProtocol;
-using Sharky.MicroControllers;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,20 +6,20 @@ using System.Numerics;
 
 namespace Sharky.MicroTasks
 {
-    public class HallucinationScoutTask : MicroTask
+    public class HallucinationScoutEmptyBasesTask : MicroTask
     {
-        TargetingData TargetingData;
         BaseData BaseData;
+        ActiveUnitData ActiveUnitData;
 
         bool started { get; set; }
         List<Point2D> ScoutLocations { get; set; }
         int ScoutLocationIndex { get; set; }
 
-        public HallucinationScoutTask(TargetingData targetingData, BaseData baseData, bool enabled, float priority)
+        public HallucinationScoutEmptyBasesTask(BaseData baseData, ActiveUnitData activeUnitData, bool enabled, float priority)
         {
-            TargetingData = targetingData;
             BaseData = baseData;
             Priority = priority;
+            ActiveUnitData = activeUnitData;
 
             UnitCommanders = new List<UnitCommander>();
             Enabled = enabled;
@@ -124,9 +123,13 @@ namespace Sharky.MicroTasks
         {
             ScoutLocations = new List<Point2D>();
 
-            foreach (var baseLocation in BaseData.BaseLocations.OrderBy(b => Vector2.DistanceSquared(new Vector2(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y), new Vector2(b.Location.X, b.Location.Y))).Take(4).Reverse())
+            foreach (var baseLocation in BaseData.EnemyBaseLocations.Where(b => !ActiveUnitData.EnemyUnits.Any(e => e.Value.UnitClassifications.Contains(UnitClassification.ResourceCenter) && Vector2.DistanceSquared(e.Value.Position, new Vector2(b.Location.X, b.Location.Y)) < 50) && !ActiveUnitData.SelfUnits.Any(e => e.Value.UnitClassifications.Contains(UnitClassification.ResourceCenter) && Vector2.DistanceSquared(e.Value.Position, new Vector2(b.Location.X, b.Location.Y)) < 50)))
             {
                 ScoutLocations.Add(baseLocation.MineralLineLocation);
+            }
+            if (ScoutLocations.Count() == 0)
+            {
+                ScoutLocations.AddRange(BaseData.EnemyBaseLocations.Select(b => b.MineralLineLocation));
             }
             ScoutLocationIndex = 0;
         }

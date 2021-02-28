@@ -132,56 +132,19 @@ namespace Sharky.MicroControllers.Protoss
 
 
             // follow behind at the range of cloak field
-            var unitToSupport = GetSupportTarget(commander, target, defensivePoint);
+            var armyUnits = ActiveUnitData.Commanders.Where(u => u.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.ArmyUnit)).Select(s => s.Value);
+
+            var unitToSupport = GetSupportTarget(commander, armyUnits, target, defensivePoint);
 
             if (unitToSupport == null)
             {
                 return false;
             }
 
-            var moveTo = GetSupportSpot(new Point2D { X = unitToSupport.Unit.Pos.X, Y = unitToSupport.Unit.Pos.Y }, defensivePoint);
+            var moveTo = GetSupportSpot(unitToSupport, target, defensivePoint);
 
             action = commander.Order(frame, Abilities.MOVE, moveTo);
             return true;
-        }
-
-        UnitCalculation GetSupportTarget(UnitCommander commander, Point2D target, Point2D defensivePoint)
-        {
-            var allyAttacks = ActiveUnitData.SelfUnits.Where(u => u.Value.UnitClassifications.Contains(UnitClassification.ArmyUnit));
-
-            // out of nearby allies within 15 range
-            // select the friendlies with enemies in 15 range
-            // order by closest to the enemy
-            var friendlies = allyAttacks.Where(u => Vector2.DistanceSquared(new Vector2(u.Value.Unit.Pos.X, u.Value.Unit.Pos.Y), new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y)) < 225
-                    && u.Value.NearbyEnemies.Any(e => DistanceSquared(u.Value, e) < 225)
-                ).OrderBy(u => DistanceSquared(u.Value.NearbyEnemies.OrderBy(e => DistanceSquared(e, u.Value)).First(), u.Value));
-
-            if (friendlies.Count() > 0)
-            {
-                return friendlies.First().Value;
-            }
-
-            // if none
-            // get any allies
-            // select the friendies with enemies in 15 range
-            // order by closest to the enemy
-            friendlies = allyAttacks.Where(u => u.Value.NearbyEnemies.Any(e => DistanceSquared(u.Value, e) < 225)).OrderBy(u => DistanceSquared(u.Value.NearbyEnemies.OrderBy(e => DistanceSquared(e, u.Value)).First(), u.Value));
-
-            if (friendlies.Count() > 0)
-            {
-                return friendlies.First().Value;
-            }
-
-            // if still none
-            //get ally closest to target
-            friendlies = allyAttacks.OrderBy(u => Vector2.DistanceSquared(new Vector2(u.Value.Unit.Pos.X, u.Value.Unit.Pos.Y), new Vector2(target.X, target.Y)));
-
-            if (friendlies.Count() > 0)
-            {
-                return friendlies.First().Value;
-            }
-
-            return null;
         }
 
         float DistanceSquared(UnitCalculation unit1, UnitCalculation unit2)
@@ -189,12 +152,12 @@ namespace Sharky.MicroControllers.Protoss
             return Vector2.DistanceSquared(new Vector2(unit1.Unit.Pos.X, unit1.Unit.Pos.Y), new Vector2(unit2.Unit.Pos.X, unit2.Unit.Pos.Y));
         }
 
-        Point2D GetSupportSpot(Point2D target, Point2D defensivePoint)
+        protected override Point2D GetSupportSpot(UnitCommander unitToSupport, Point2D target, Point2D defensivePoint)
         {
-            var angle = Math.Atan2(target.Y - defensivePoint.Y, defensivePoint.X - target.X);
+            var angle = Math.Atan2(unitToSupport.UnitCalculation.Position.Y - defensivePoint.Y, defensivePoint.X - unitToSupport.UnitCalculation.Position.X);
             var x = CloakRange * Math.Cos(angle);
             var y = CloakRange * Math.Sin(angle);
-            return new Point2D { X = target.X + (float)x, Y = target.Y - (float)y };
+            return new Point2D { X = unitToSupport.UnitCalculation.Position.X + (float)x, Y = unitToSupport.UnitCalculation.Position.Y - (float)y };
         }
     }
 }

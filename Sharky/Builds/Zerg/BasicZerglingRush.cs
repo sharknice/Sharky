@@ -45,7 +45,7 @@ namespace Sharky.Builds.Zerg
             if (UnitCountService.Completed(UnitTypes.ZERG_SPAWNINGPOOL) > 0)
             {
                 MacroData.DesiredUpgrades[Upgrades.ZERGLINGMOVEMENTSPEED] = true;
-                MacroData.DesiredUnitCounts[UnitTypes.ZERG_ZERGLING] = 30;
+                MacroData.DesiredUnitCounts[UnitTypes.ZERG_ZERGLING] = 100;
             }
 
             if (MacroData.FoodUsed > 20)
@@ -59,7 +59,6 @@ namespace Sharky.Builds.Zerg
                 {
                     MacroData.DesiredProductionCounts[UnitTypes.ZERG_HATCHERY] = 2;
                 }
-                BuildOptions.StrictWorkerCount = false;
                 MacroData.DesiredUnitCounts[UnitTypes.ZERG_QUEEN] = 2;
             }
         }

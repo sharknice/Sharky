@@ -245,7 +245,12 @@ namespace Sharky.MicroControllers.Protoss
                 commander.UnitCalculation.TargetPriorityCalculation.TargetPriority = TargetPriority.KillWorkers;
             }
 
-            return base.AttackBestTarget(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action);
+            if (AttackBestTargetInRange(commander, target, bestTarget, frame, out action))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         protected override bool AttackBestTargetInRange(UnitCommander commander, Point2D target, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)

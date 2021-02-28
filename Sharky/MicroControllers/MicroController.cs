@@ -123,5 +123,42 @@ namespace Sharky.MicroControllers
             }
             return actions;
         }
+
+        public List<Action> Support(IEnumerable<UnitCommander> commanders, IEnumerable<UnitCommander> supportTargets, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
+        {
+            var actions = new List<Action>();
+            var stopwatch = new Stopwatch();
+
+            foreach (var commander in commanders)
+            {
+                if (commander.SkipFrame)
+                {
+                    commander.SkipFrame = false;
+                    continue;
+                }
+                stopwatch.Restart();
+                List<Action> action;
+
+                if (MicroData.IndividualMicroControllers.TryGetValue((UnitTypes)commander.UnitCalculation.Unit.UnitType, out var individualMicroController))
+                {
+                    action = individualMicroController.Support(commander, supportTargets, target, defensivePoint, groupCenter, frame);
+                }
+                else
+                {
+                    action = MicroData.IndividualMicroController.Support(commander, supportTargets, target, defensivePoint, groupCenter, frame);
+                }
+
+                if (action != null)
+                {
+                    actions.AddRange(action);
+                }
+                var timeTaken = stopwatch.ElapsedMilliseconds;
+                if (timeTaken > 1)
+                {
+                    commander.SkipFrame = true;
+                }
+            }
+            return actions;
+        }
     }
 }

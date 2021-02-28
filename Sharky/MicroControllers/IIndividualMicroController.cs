@@ -7,6 +7,7 @@ namespace Sharky.MicroControllers
     {
         List<Action> Attack(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame);
         List<Action> Retreat(UnitCommander commander, Point2D defensivePoint, Point2D groupCenter, int frame);
+        List<Action> Support(UnitCommander commander, IEnumerable<UnitCommander> supportTargets, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame);
         List<Action> Idle(UnitCommander commander, Point2D defensivePoint, int frame);
         List<Action> Scout(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, bool prioritizeVision = false);
         List<Action> Bait(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame);
