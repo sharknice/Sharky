@@ -15,8 +15,9 @@ namespace Sharky.Pathing
 
         public List<Vector2> GetSafeGroundPath(float startX, float startY, float endX, float endY, int frame)
         {
-            var cells = MapDataService.GetCells(startX, startY, 1);
-            var best = cells.Where(c => c.Walkable).OrderBy(c => c.EnemyGroundDpsInRange).FirstOrDefault();
+            var cells = MapDataService.GetCells(startX, startY, 4);
+            var end = new Vector2(endX, endY);
+            var best = cells.Where(c => c.Walkable).OrderBy(c => c.EnemyGroundDpsInRange).ThenBy(c => Vector2.DistanceSquared(end, new Vector2(c.X, c.Y))).FirstOrDefault();
             if (best != null)
             {
                 return new List<Vector2> { new Vector2(startX, startY), new Vector2(best.X, best.Y) };
@@ -26,8 +27,9 @@ namespace Sharky.Pathing
 
         public List<Vector2> GetSafeAirPath(float startX, float startY, float endX, float endY, int frame)
         {
-            var cells = MapDataService.GetCells(startX, startY, 1);
-            var best = cells.OrderBy(c => c.EnemyAirDpsInRange).FirstOrDefault();
+            var cells = MapDataService.GetCells(startX, startY, 4);
+            var end = new Vector2(endX, endY);
+            var best = cells.OrderBy(c => c.EnemyAirDpsInRange).ThenBy(c => Vector2.DistanceSquared(end, new Vector2(c.X, c.Y))).FirstOrDefault();
             if (best != null)
             {
                 return new List<Vector2> { new Vector2(startX, startY), new Vector2(best.X, best.Y) };
@@ -48,8 +50,9 @@ namespace Sharky.Pathing
 
         public List<Vector2> GetUndetectedGroundPath(float startX, float startY, float endX, float endY, int frame)
         {
-            var cells = MapDataService.GetCells(startX, startY, 1);
-            var best = cells.Where(c => c.Walkable).OrderBy(c => c.InEnemyDetection).FirstOrDefault();
+            var cells = MapDataService.GetCells(startX, startY, 4);
+            var end = new Vector2(endX, endY);
+            var best = cells.Where(c => c.Walkable).OrderBy(c => c.InEnemyDetection).ThenBy(c => Vector2.DistanceSquared(end, new Vector2(c.X, c.Y))).FirstOrDefault();
             if (best != null)
             {
                 return new List<Vector2> { new Vector2(startX, startY), new Vector2(best.X, best.Y) };

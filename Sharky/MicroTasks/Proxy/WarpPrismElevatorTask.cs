@@ -148,7 +148,7 @@ namespace Sharky.MicroTasks.Proxy
 
         private void CheckComplete()
         {
-            if (MapDataService.SelfVisible(TargetLocation) && !ActiveUnitData.EnemyUnits.Any(e => Vector2.DistanceSquared(new Vector2(TargetLocation.X, TargetLocation.Y), new Vector2(e.Value.Unit.Pos.X, e.Value.Unit.Pos.Y)) < 100))
+            if (MapDataService.SelfVisible(TargetLocation) && !ActiveUnitData.EnemyUnits.Any(e => Vector2.DistanceSquared(new Vector2(TargetLocation.X, TargetLocation.Y), e.Value.Position) < 100))
             {
                 Disable();
                 ChatService.SendChatType("WarpPrismElevatorTask-TaskCompleted");
@@ -157,7 +157,7 @@ namespace Sharky.MicroTasks.Proxy
 
         private List<SC2APIProtocol.Action> OrderWarpPrism(UnitCommander warpPrism, IEnumerable<UnitCommander> droppedAttackers, IEnumerable<UnitCommander> unDroppedAttackers, int frame)
         {
-            var readyForPickup = unDroppedAttackers.Where(c => !warpPrism.UnitCalculation.Unit.Passengers.Any(p => p.Tag == c.UnitCalculation.Unit.Tag) && Vector2.DistanceSquared(new Vector2(c.UnitCalculation.Unit.Pos.X, c.UnitCalculation.Unit.Pos.Y), new Vector2(LoadingLocation.X, LoadingLocation.Y)) < 10);
+            var readyForPickup = unDroppedAttackers.Where(c => !warpPrism.UnitCalculation.Unit.Passengers.Any(p => p.Tag == c.UnitCalculation.Unit.Tag) && Vector2.DistanceSquared(c.UnitCalculation.Position, new Vector2(LoadingLocation.X, LoadingLocation.Y)) < 10);
             foreach (var pickup in readyForPickup)
             {
                 if (warpPrism.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISMPHASING)
@@ -167,7 +167,7 @@ namespace Sharky.MicroTasks.Proxy
 
                 if (warpPrism.UnitCalculation.Unit.CargoSpaceMax - warpPrism.UnitCalculation.Unit.CargoSpaceTaken >= UnitDataService.CargoSize((UnitTypes)pickup.UnitCalculation.Unit.UnitType) && !warpPrism.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.UNLOADALLAT_WARPPRISM))
                 {
-                    if (Vector2.DistanceSquared(new Vector2(warpPrism.UnitCalculation.Unit.Pos.X, warpPrism.UnitCalculation.Unit.Pos.Y), new Vector2(LoadingLocation.X, LoadingLocation.Y)) < PickupRangeSquared)
+                    if (Vector2.DistanceSquared(warpPrism.UnitCalculation.Position, new Vector2(LoadingLocation.X, LoadingLocation.Y)) < PickupRangeSquared)
                     {
                         return warpPrism.Order(frame, Abilities.LOAD, null, pickup.UnitCalculation.Unit.Tag);
                     }

@@ -64,28 +64,8 @@ namespace Sharky.MicroTasks
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            var vectors = UnitCommanders.Select(u => new Vector2(u.UnitCalculation.Unit.Pos.X, u.UnitCalculation.Unit.Pos.Y));
-            if (vectors.Count() > 0)
-            {
-                var average = new Vector2(vectors.Average(v => v.X), vectors.Average(v => v.Y));
-                var trimmed = vectors.Where(v => Vector2.DistanceSquared(average, v) < 200);
-                if (trimmed.Count() > 0)
-                {
-                    var trimmedAverage = new Point2D { X = trimmed.Average(v => v.X), Y = trimmed.Average(v => v.Y) };
-                    AttackData.ArmyPoint = trimmedAverage;
-                }
-                else
-                {
-                    AttackData.ArmyPoint = new Point2D { X = average.X, Y = average.Y };
-                }
-            }
-            else
-            {
-                AttackData.ArmyPoint = TargetingData.AttackPoint;
-            }
-
             var hiddenBase = TargetingData.HiddenEnemyBase;
-
+            AttackData.ArmyPoint = TargetingService.GetArmyPoint(UnitCommanders);
             TargetingData.AttackPoint = TargetingService.UpdateAttackPoint(AttackData.ArmyPoint, TargetingData.AttackPoint);
 
             if (!AttackData.CustomAttackFunction)
@@ -108,7 +88,7 @@ namespace Sharky.MicroTasks
             {
                 var armyPoint = new Vector2(AttackData.ArmyPoint.X, AttackData.ArmyPoint.Y);
                 var distanceToAttackPoint = Vector2.DistanceSquared(armyPoint, new Vector2(TargetingData.AttackPoint.X, TargetingData.AttackPoint.Y));
-                var closerEnemies = attackingEnemies.Where(e => Vector2.DistanceSquared(new Vector2(e.Unit.Pos.X, e.Unit.Pos.Y), armyPoint) < distanceToAttackPoint);
+                var closerEnemies = attackingEnemies.Where(e => Vector2.DistanceSquared(e.Position, armyPoint) < distanceToAttackPoint);
                 if (closerEnemies.Count() > 0)
                 {
                     actions = SplitArmy(frame, closerEnemies, TargetingData.AttackPoint);
@@ -163,7 +143,7 @@ namespace Sharky.MicroTasks
                 {
                     availableCommanders.RemoveAll(a => selfGroup.Any(s => a.UnitCalculation.Unit.Tag == s.UnitCalculation.Unit.Tag));
 
-                    var groupVectors = selfGroup.Select(u => new Vector2(u.UnitCalculation.Unit.Pos.X, u.UnitCalculation.Unit.Pos.Y));
+                    var groupVectors = selfGroup.Select(u => u.UnitCalculation.Position);
                     var groupPoint = new Point2D { X = groupVectors.Average(v => v.X), Y = groupVectors.Average(v => v.Y) };
                     var defensePoint = new Point2D { X = enemyGroup.FirstOrDefault().Unit.Pos.X, Y = enemyGroup.FirstOrDefault().Unit.Pos.Y };
                     actions.AddRange(MicroController.Attack(selfGroup, defensePoint, TargetingData.ForwardDefensePoint, groupPoint, frame));
@@ -172,7 +152,7 @@ namespace Sharky.MicroTasks
 
             if (availableCommanders.Count() > 0)
             {
-                var groupVectors = availableCommanders.Select(u => new Vector2(u.UnitCalculation.Unit.Pos.X, u.UnitCalculation.Unit.Pos.Y));
+                var groupVectors = availableCommanders.Select(u => u.UnitCalculation.Position);
                 var groupPoint = new Point2D { X = groupVectors.Average(v => v.X), Y = groupVectors.Average(v => v.Y) };
                 if (AttackData.Attacking)
                 {

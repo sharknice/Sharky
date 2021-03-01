@@ -61,7 +61,7 @@ namespace Sharky.MicroTasks.Scout
             {
                 foreach (var commander in scoutInfo.Harassers)
                 {
-                    if (Vector2.DistanceSquared(new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y), new Vector2(scoutInfo.Location.X, scoutInfo.Location.Y)) < 4)
+                    if (Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(scoutInfo.Location.X, scoutInfo.Location.Y)) < 4)
                     {
                         var action = IndividualMicroController.Attack(commander, scoutInfo.Location, TargetingData.ForwardDefensePoint, null, frame);
                         if (action != null)
@@ -69,7 +69,7 @@ namespace Sharky.MicroTasks.Scout
                             commands.AddRange(action);
                         }
 
-                        if (!commander.UnitCalculation.NearbyEnemies.Any(e => Vector2.DistanceSquared(new Vector2(scoutInfo.Location.X, scoutInfo.Location.Y), new Vector2(e.Unit.Pos.X, e.Unit.Pos.Y)) < 100))
+                        if (!commander.UnitCalculation.NearbyEnemies.Any(e => Vector2.DistanceSquared(new Vector2(scoutInfo.Location.X, scoutInfo.Location.Y), e.Position) < 100))
                         {
                             scoutInfo.LastClearedFrame = frame;
                             scoutInfo.Harassers.Remove(commander);
@@ -90,7 +90,7 @@ namespace Sharky.MicroTasks.Scout
             {
                 foreach (var commander in harassInfo.Harassers)
                 {
-                    if (Vector2.DistanceSquared(new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y), new Vector2(harassInfo.BaseLocation.MineralLineLocation.X, harassInfo.BaseLocation.MineralLineLocation.Y)) < 4)
+                    if (Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(harassInfo.BaseLocation.MineralLineLocation.X, harassInfo.BaseLocation.MineralLineLocation.Y)) < 4)
                     {
                         var action = IndividualMicroController.Attack(commander, harassInfo.BaseLocation.MineralLineLocation, TargetingData.ForwardDefensePoint, null, frame);
                         if (action != null)
@@ -98,7 +98,7 @@ namespace Sharky.MicroTasks.Scout
                             commands.AddRange(action);
                         }
 
-                        if (!commander.UnitCalculation.NearbyEnemies.Any(e => Vector2.DistanceSquared(new Vector2(harassInfo.BaseLocation.MineralLineLocation.X, harassInfo.BaseLocation.MineralLineLocation.Y), new Vector2(e.Unit.Pos.X, e.Unit.Pos.Y)) < 100))
+                        if (!commander.UnitCalculation.NearbyEnemies.Any(e => Vector2.DistanceSquared(new Vector2(harassInfo.BaseLocation.MineralLineLocation.X, harassInfo.BaseLocation.MineralLineLocation.Y), e.Position) < 100))
                         {
                             harassInfo.LastClearedFrame = frame;
                             harassInfo.Harassers.Remove(commander);

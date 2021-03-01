@@ -29,17 +29,17 @@ namespace Sharky.Builds.BuildingPlacement
 
         public bool Blocked(float x, float y, float radius, float padding = .5f)
         {
-            if (ActiveUnitData.NeutralUnits.Any(u => Vector2.DistanceSquared(new Vector2(x, y), new Vector2(u.Value.Unit.Pos.X, u.Value.Unit.Pos.Y)) < (u.Value.Unit.Radius + padding + radius) * (u.Value.Unit.Radius + padding + radius)))
+            if (ActiveUnitData.NeutralUnits.Any(u => Vector2.DistanceSquared(new Vector2(x, y), u.Value.Position) < (u.Value.Unit.Radius + padding + radius) * (u.Value.Unit.Radius + padding + radius)))
             {
                 return true;
             }
 
-            if (ActiveUnitData.EnemyUnits.Any(u => !u.Value.Unit.IsFlying && Vector2.DistanceSquared(new Vector2(x, y), new Vector2(u.Value.Unit.Pos.X, u.Value.Unit.Pos.Y)) < (u.Value.Unit.Radius + padding + radius) * (u.Value.Unit.Radius + padding + radius)))
+            if (ActiveUnitData.EnemyUnits.Any(u => !u.Value.Unit.IsFlying && Vector2.DistanceSquared(new Vector2(x, y), u.Value.Position) < (u.Value.Unit.Radius + padding + radius) * (u.Value.Unit.Radius + padding + radius)))
             {
                 return true;
             }
 
-            if (ActiveUnitData.Commanders.Any(c => (c.Value.UnitCalculation.Attributes.Contains(SC2APIProtocol.Attribute.Structure) || c.Value.UnitCalculation.Unit.BuildProgress < 1) && Vector2.DistanceSquared(new Vector2(x, y), new Vector2(c.Value.UnitCalculation.Unit.Pos.X, c.Value.UnitCalculation.Unit.Pos.Y)) < (c.Value.UnitCalculation.Unit.Radius + padding + radius) * (c.Value.UnitCalculation.Unit.Radius + padding + radius)))
+            if (ActiveUnitData.Commanders.Any(c => (c.Value.UnitCalculation.Attributes.Contains(SC2APIProtocol.Attribute.Structure) || c.Value.UnitCalculation.Unit.BuildProgress < 1) && Vector2.DistanceSquared(new Vector2(x, y), c.Value.UnitCalculation.Position) < (c.Value.UnitCalculation.Unit.Radius + padding + radius) * (c.Value.UnitCalculation.Unit.Radius + padding + radius)))
             {
                 return true;
             }

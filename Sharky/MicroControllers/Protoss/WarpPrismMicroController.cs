@@ -67,7 +67,7 @@ namespace Sharky.MicroControllers.Protoss
 
             if (!commander.UnitCalculation.NearbyAllies.Any(a => a.Unit.Tag == unitToSupport.Unit.Tag))
             {
-                if (Vector2.DistanceSquared(new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y), new Vector2(target.X, target.Y)) > Vector2.DistanceSquared(new Vector2(unitToSupport.Unit.Pos.X, unitToSupport.Unit.Pos.Y), new Vector2(target.X, target.Y)))
+                if (Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(target.X, target.Y)) > Vector2.DistanceSquared(unitToSupport.Position, new Vector2(target.X, target.Y)))
                 {
                     if (NavigateToSupportUnit(commander, target, frame, out action))
                     {
@@ -88,12 +88,12 @@ namespace Sharky.MicroControllers.Protoss
                 moveTo = new Point2D { X = unitToSupport.Unit.Pos.X, Y = unitToSupport.Unit.Pos.Y };
             }
 
-            if (InRange(moveTo, commander.UnitCalculation.Unit.Pos, 2) && InRange(unitToSupport.Unit.Pos, commander.UnitCalculation.Unit.Pos, PickupRange))
+            if (InRange(new Vector2(moveTo.X, moveTo.Y), commander.UnitCalculation.Position, 2) && InRange(unitToSupport.Position, commander.UnitCalculation.Position, PickupRange))
             {
                 //look at all units within pickup range, ordered by proximity to their closeest enemy
                 // get average hp + shields of back
                 // if unit is in front half weapon is off cooldown and (has below that hp + shields or could die in one hit) pick it up
-                var friendliesInRange = commander.UnitCalculation.NearbyAllies.Where(u => !commander.UnitCalculation.Unit.Passengers.Any(p => p.Tag == u.Unit.Tag) && InRange(u.Unit.Pos, commander.UnitCalculation.Unit.Pos, PickupRange)).OrderBy(u => ClosestEnemyDistance(u));
+                var friendliesInRange = commander.UnitCalculation.NearbyAllies.Where(u => !commander.UnitCalculation.Unit.Passengers.Any(p => p.Tag == u.Unit.Tag) && InRange(u.Position, commander.UnitCalculation.Position, PickupRange)).OrderBy(u => ClosestEnemyDistance(u));
                 var frontHalf = friendliesInRange.Take(friendliesInRange.Count() / 2);
                 var backHalf = friendliesInRange.Skip(friendliesInRange.Count() / 2);
                 var backAverageHealth = backHalf.Sum(u => u.Unit.Health + u.Unit.Shield) / backHalf.Count();
@@ -184,7 +184,7 @@ namespace Sharky.MicroControllers.Protoss
 
             if (commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISMPHASING)
             {
-                if (commander.UnitCalculation.NearbyAllies.Any(v => v.Unit.BuildProgress < 1 && Vector2.DistanceSquared(new Vector2(v.Unit.Pos.X, v.Unit.Pos.Y), new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y)) < 49)) // and not warping any units in
+                if (commander.UnitCalculation.NearbyAllies.Any(v => v.Unit.BuildProgress < 1 && Vector2.DistanceSquared(v.Position, commander.UnitCalculation.Position) < 49)) // and not warping any units in
                 {
                     return false;
                 }
@@ -219,10 +219,10 @@ namespace Sharky.MicroControllers.Protoss
 
         float ClosestEnemyDistance(UnitCalculation friendly)
         {
-            var closestEnemy = friendly.NearbyEnemies.OrderBy(u => Vector2.DistanceSquared(new Vector2(u.Unit.Pos.X, u.Unit.Pos.Y), new Vector2(friendly.Unit.Pos.X, friendly.Unit.Pos.Y))).FirstOrDefault();
+            var closestEnemy = friendly.NearbyEnemies.OrderBy(u => Vector2.DistanceSquared(u.Position, friendly.Position)).FirstOrDefault();
             if (closestEnemy != null)
             {
-                return Vector2.DistanceSquared(new Vector2(closestEnemy.Unit.Pos.X, closestEnemy.Unit.Pos.Y), new Vector2(friendly.Unit.Pos.X, friendly.Unit.Pos.Y));
+                return Vector2.DistanceSquared(closestEnemy.Position, friendly.Position);
             }
             return 0;
         }
@@ -307,7 +307,7 @@ namespace Sharky.MicroControllers.Protoss
 
             var friendlies = supportableUnits.Where(u => u.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !u.Unit.IsFlying
                 && !otherWarpPrisms.Any(o => DistanceSquared(o, u) < 64)
-                    && Vector2.DistanceSquared(new Vector2(u.Unit.Pos.X, u.Unit.Pos.Y), new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y)) < 225
+                    && Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position) < 225
                     && u.NearbyEnemies.Any(e => DistanceSquared(u, e) < 225)
                 ).OrderBy(u => DistanceSquared(u.NearbyEnemies.OrderBy(e => DistanceSquared(e, u)).First(), u));
 
@@ -371,9 +371,9 @@ namespace Sharky.MicroControllers.Protoss
 
                     foreach (var enemyAttack in commander.UnitCalculation.NearbyEnemies)
                     {
-                        if (DamageService.CanDamage(unit.Weapons, enemyAttack.Unit) && InRange(commander.UnitCalculation.Unit.Pos, enemyAttack.Unit.Pos, unit.Range + passengerUnit.Radius + enemyAttack.Unit.Radius) && MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos) == MapDataService.MapHeight(enemyAttack.Unit.Pos))
+                        if (DamageService.CanDamage(unit.Weapons, enemyAttack.Unit) && InRange(commander.UnitCalculation.Position, enemyAttack.Position, unit.Range + passengerUnit.Radius + enemyAttack.Unit.Radius) && MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos) == MapDataService.MapHeight(enemyAttack.Unit.Pos))
                         {
-                            if (!enemyAttack.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !InRange(commander.UnitCalculation.Unit.Pos, enemyAttack.Unit.Pos, 2 + passengerUnit.Radius + enemyAttack.Unit.Radius))
+                            if (!enemyAttack.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !InRange(commander.UnitCalculation.Position, enemyAttack.Position, 2 + passengerUnit.Radius + enemyAttack.Unit.Radius))
                             {
                                 continue;
                             }
@@ -385,7 +385,7 @@ namespace Sharky.MicroControllers.Protoss
                     }
                 }
 
-                if (InRange(target, commander.UnitCalculation.Unit.Pos, 3)) // if made it to the target just drop
+                if (InRange(new Vector2(target.X, target.Y), commander.UnitCalculation.Position, 3)) // if made it to the target just drop
                 {
                     action = commander.Order(frame, Abilities.UNLOADALLAT_WARPPRISM, null, commander.UnitCalculation.Unit.Tag);
                     return true;
@@ -395,7 +395,7 @@ namespace Sharky.MicroControllers.Protoss
 
             if (commander.UnitCalculation.Unit.CargoSpaceMax > commander.UnitCalculation.Unit.CargoSpaceTaken && commander.UnitCalculation.Unit.Shield + commander.UnitCalculation.Unit.Health > 50) // find more units to load
             {
-                var friendly = commander.UnitCalculation.NearbyAllies.Where(u => !u.Unit.IsFlying && u.Unit.BuildProgress == 1 && u.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !commander.UnitCalculation.Unit.Passengers.Any(p => p.Tag == u.Unit.Tag) && commander.UnitCalculation.Unit.CargoSpaceMax - commander.UnitCalculation.Unit.CargoSpaceTaken >= UnitDataService.CargoSize((UnitTypes)u.Unit.UnitType) && u.EnemiesInRange.Count == 0 && u.EnemiesInRangeOf.Count == 0).OrderBy(u => Vector2.DistanceSquared(new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y), new Vector2(u.Unit.Pos.X, u.Unit.Pos.Y))).FirstOrDefault();
+                var friendly = commander.UnitCalculation.NearbyAllies.Where(u => !u.Unit.IsFlying && u.Unit.BuildProgress == 1 && u.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !commander.UnitCalculation.Unit.Passengers.Any(p => p.Tag == u.Unit.Tag) && commander.UnitCalculation.Unit.CargoSpaceMax - commander.UnitCalculation.Unit.CargoSpaceTaken >= UnitDataService.CargoSize((UnitTypes)u.Unit.UnitType) && u.EnemiesInRange.Count == 0 && u.EnemiesInRangeOf.Count == 0).OrderBy(u => Vector2.DistanceSquared(commander.UnitCalculation.Position, u.Position)).FirstOrDefault();
 
                 if (friendly != null)
                 {
@@ -427,7 +427,7 @@ namespace Sharky.MicroControllers.Protoss
             {
                 return 0;
             }
-            return Vector2.DistanceSquared(new Vector2(unit1.Unit.Pos.X, unit1.Unit.Pos.Y), new Vector2(unit2.Unit.Pos.X, unit2.Unit.Pos.Y));
+            return Vector2.DistanceSquared(unit1.Position, unit2.Position);
         }
 
         bool DetermineMiningAction(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
@@ -468,16 +468,16 @@ namespace Sharky.MicroControllers.Protoss
             var otherWarpPrisms = ActiveUnitData.SelfUnits.Where(u => u.Value.Unit.Tag != commander.UnitCalculation.Unit.Tag && (u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISM || u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISMPHASING));
             foreach (var nexus in nexuses)
             {
-                if (!otherWarpPrisms.Any(o => Vector2.DistanceSquared(new Vector2(o.Value.Unit.Pos.X, o.Value.Unit.Pos.Y), new Vector2(nexus.Value.Unit.Pos.X, nexus.Value.Unit.Pos.Y)) < 25))
+                if (!otherWarpPrisms.Any(o => Vector2.DistanceSquared(o.Value.Position, nexus.Value.Position) < 25))
                 {
                     var miningLocation = GetMiningSpot(nexus.Value);
                     if (miningLocation != null)
                     {
                         //DrawSphere(SC2Util.Point(miningLocation.X, miningLocation.Y, 11));
 
-                        if (Vector2.DistanceSquared(new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y), new Vector2(miningLocation.X, miningLocation.Y)) < .5)
+                        if (Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(miningLocation.X, miningLocation.Y)) < .5)
                         {
-                            var probe = commander.UnitCalculation.NearbyAllies.Where(a => a.Unit.BuffIds.Any(b => SharkyUnitData.CarryingMineralBuffs.Contains((Buffs)b)) && InRange(a.Unit.Pos, commander.UnitCalculation.Unit.Pos, PickupRange) && !InRange(a.Unit.Pos, nexus.Value.Unit.Pos, nexus.Value.Unit.Radius + 1)).OrderByDescending(u => DistanceSquared(nexus.Value, u)).FirstOrDefault();
+                            var probe = commander.UnitCalculation.NearbyAllies.Where(a => a.Unit.BuffIds.Any(b => SharkyUnitData.CarryingMineralBuffs.Contains((Buffs)b)) && InRange(a.Position, commander.UnitCalculation.Position, PickupRange) && !InRange(a.Position, nexus.Value.Position, nexus.Value.Unit.Radius + 1)).OrderByDescending(u => DistanceSquared(nexus.Value, u)).FirstOrDefault();
                             if (probe != null)
                             {
                                 action = commander.Order(frame, Abilities.LOAD, null, probe.Unit.Tag);

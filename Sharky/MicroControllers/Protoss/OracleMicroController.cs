@@ -58,15 +58,15 @@ namespace Sharky.MicroControllers.Protoss
 
         Point2D CloakedInvader(UnitCommander commander)
         {
-            var pos = new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y);
+            var pos = commander.UnitCalculation.Position;
 
-            var hiddenUnits = ActiveUnitData.EnemyUnits.Where(e => e.Value.Unit.DisplayType == DisplayType.Hidden).OrderBy(e => Vector2.DistanceSquared(pos, new Vector2(e.Value.Unit.Pos.X, e.Value.Unit.Pos.Y)));
+            var hiddenUnits = ActiveUnitData.EnemyUnits.Where(e => e.Value.Unit.DisplayType == DisplayType.Hidden).OrderBy(e => Vector2.DistanceSquared(pos, e.Value.Position));
             if (hiddenUnits.Count() > 0)
             {
                 return new Point2D { X = hiddenUnits.FirstOrDefault().Value.Unit.Pos.X, Y = hiddenUnits.FirstOrDefault().Value.Unit.Pos.Y };
             }
 
-            var unit = ActiveUnitData.SelfUnits.Values.Where(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS).SelectMany(a => a.NearbyEnemies).Where(e => SharkyUnitData.CloakableAttackers.Contains((UnitTypes)e.Unit.UnitType) && !e.Unit.BuffIds.Contains((uint)Buffs.ORACLEREVELATION)).OrderBy(e => Vector2.DistanceSquared(pos, new Vector2(e.Unit.Pos.X, e.Unit.Pos.Y))).FirstOrDefault();
+            var unit = ActiveUnitData.SelfUnits.Values.Where(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS).SelectMany(a => a.NearbyEnemies).Where(e => SharkyUnitData.CloakableAttackers.Contains((UnitTypes)e.Unit.UnitType) && !e.Unit.BuffIds.Contains((uint)Buffs.ORACLEREVELATION)).OrderBy(e => Vector2.DistanceSquared(pos, e.Position)).FirstOrDefault();
             if (unit != null)
             {
                 return new Point2D { X = unit.Unit.Pos.X, Y = unit.Unit.Pos.Y };
@@ -108,7 +108,7 @@ namespace Sharky.MicroControllers.Protoss
 
         Point2D GetBestRevelationLocation(UnitCommander commander)
         {
-            var enemiesInRange = commander.UnitCalculation.NearbyEnemies.Where(e => !e.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && Vector2.DistanceSquared(new Vector2(e.Unit.Pos.X, e.Unit.Pos.Y), new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y)) < RevelationRange * RevelationRange);
+            var enemiesInRange = commander.UnitCalculation.NearbyEnemies.Where(e => !e.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position) < RevelationRange * RevelationRange);
 
             if (enemiesInRange.Count() == 0)
             {
@@ -125,7 +125,7 @@ namespace Sharky.MicroControllers.Protoss
                 float hits = 0;
                 foreach (var hitEnemy in enemiesInRange)
                 {
-                    if (Vector2.DistanceSquared(new Vector2(hitEnemy.Unit.Pos.X, hitEnemy.Unit.Pos.Y), new Vector2(enemyAttack.Unit.Pos.X, enemyAttack.Unit.Pos.Y)) <= (hitEnemy.Unit.Radius + RevelationRadius) * (hitEnemy.Unit.Radius + RevelationRadius))
+                    if (Vector2.DistanceSquared(hitEnemy.Position, enemyAttack.Position) <= (hitEnemy.Unit.Radius + RevelationRadius) * (hitEnemy.Unit.Radius + RevelationRadius))
                     {
                         hits += 1;
                     }
@@ -152,13 +152,13 @@ namespace Sharky.MicroControllers.Protoss
 
             foreach (var enemyAttack in commander.UnitCalculation.NearbyEnemies)
             {
-                if (DamageService.CanDamage(enemyAttack.Weapons, commander.UnitCalculation.Unit) && InRange(commander.UnitCalculation.Unit.Pos, enemyAttack.Unit.Pos, range + commander.UnitCalculation.Unit.Radius + enemyAttack.Unit.Radius))
+                if (DamageService.CanDamage(enemyAttack.Weapons, commander.UnitCalculation.Unit) && InRange(commander.UnitCalculation.Position, enemyAttack.Position, range + commander.UnitCalculation.Unit.Radius + enemyAttack.Unit.Radius))
                 {
                     enemiesInRange.Add(enemyAttack);
                 }
             }
 
-            var closestEnemy = enemiesInRange.OrderBy(u => Vector2.DistanceSquared(new Vector2(u.Unit.Pos.X, u.Unit.Pos.Y), new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y))).FirstOrDefault();
+            var closestEnemy = enemiesInRange.OrderBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position)).FirstOrDefault();
             if (closestEnemy == null)
             {
                 return false;
@@ -364,7 +364,7 @@ namespace Sharky.MicroControllers.Protoss
             attacks = new List<UnitCalculation>(); // nearby units not in range right now
             foreach (var enemyAttack in commander.UnitCalculation.NearbyEnemies)
             {
-                if (enemyAttack.Unit.DisplayType != DisplayType.Hidden && enemyAttack.UnitClassifications.Contains(UnitClassification.Worker) && !InRange(enemyAttack.Unit.Pos, commander.UnitCalculation.Unit.Pos, range + enemyAttack.Unit.Radius + commander.UnitCalculation.Unit.Radius))
+                if (enemyAttack.Unit.DisplayType != DisplayType.Hidden && enemyAttack.UnitClassifications.Contains(UnitClassification.Worker) && !InRange(enemyAttack.Position, commander.UnitCalculation.Position, range + enemyAttack.Unit.Radius + commander.UnitCalculation.Unit.Radius))
                 {
                     attacks.Add(enemyAttack);
                 }

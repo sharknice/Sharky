@@ -59,7 +59,7 @@ namespace Sharky.MicroTasks.Harass
             {
                 foreach (var commander in harassInfo.Harassers)
                 {           
-                    if (Vector2.DistanceSquared(new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y), new Vector2(harassInfo.BaseLocation.MineralLineLocation.X, harassInfo.BaseLocation.MineralLineLocation.Y)) < 100)
+                    if (Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(harassInfo.BaseLocation.MineralLineLocation.X, harassInfo.BaseLocation.MineralLineLocation.Y)) < 100)
                     {
                         var action = DarkTemplarMicroController.HarassWorkers(commander, harassInfo.BaseLocation.MineralLineLocation, TargetingData.ForwardDefensePoint, frame);
                         if (action != null)
@@ -67,13 +67,13 @@ namespace Sharky.MicroTasks.Harass
                             commands.AddRange(action);
                         }
 
-                        if (!commander.UnitCalculation.NearbyEnemies.Any(e => Vector2.DistanceSquared(new Vector2(harassInfo.BaseLocation.MineralLineLocation.X, harassInfo.BaseLocation.MineralLineLocation.Y), new Vector2(e.Unit.Pos.X, e.Unit.Pos.Y)) < 100))
+                        if (!commander.UnitCalculation.NearbyEnemies.Any(e => Vector2.DistanceSquared(new Vector2(harassInfo.BaseLocation.MineralLineLocation.X, harassInfo.BaseLocation.MineralLineLocation.Y), e.Position) < 100))
                         {
                             harassInfo.LastClearedFrame = frame;
                             harassInfo.Harassers.Remove(commander);
                             return commands;
                         }
-                        else if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Detector) && Vector2.DistanceSquared(new Vector2(harassInfo.BaseLocation.MineralLineLocation.X, harassInfo.BaseLocation.MineralLineLocation.Y), new Vector2(e.Unit.Pos.X, e.Unit.Pos.Y)) < 100))
+                        else if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Detector) && Vector2.DistanceSquared(new Vector2(harassInfo.BaseLocation.MineralLineLocation.X, harassInfo.BaseLocation.MineralLineLocation.Y), e.Position) < 100))
                         {
                             if (commander.UnitCalculation.TargetPriorityCalculation.GroundWinnability < 1 && commander.UnitCalculation.Unit.Shield < commander.UnitCalculation.Unit.ShieldMax)
                             {
@@ -83,7 +83,7 @@ namespace Sharky.MicroTasks.Harass
                             }
                         }
                     }
-                    else if (!MapDataService.InEnemyDetection(commander.UnitCalculation.Unit.Pos) && commander.UnitCalculation.NearbyEnemies.Any(e => !e.Unit.IsFlying && (e.Unit.Health + e.Unit.Shield < commander.UnitCalculation.Damage) && Vector2.DistanceSquared(new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y), new Vector2(e.Unit.Pos.X, e.Unit.Pos.Y)) < 8))  // if undetected and near one hit kills just kill them
+                    else if (!MapDataService.InEnemyDetection(commander.UnitCalculation.Unit.Pos) && commander.UnitCalculation.NearbyEnemies.Any(e => !e.Unit.IsFlying && (e.Unit.Health + e.Unit.Shield < commander.UnitCalculation.Damage) && Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position) < 8))  // if undetected and near one hit kills just kill them
                     {
                         var action = DarkTemplarMicroController.HarassWorkers(commander, harassInfo.BaseLocation.MineralLineLocation, TargetingData.ForwardDefensePoint, frame);
                         if (action != null)
@@ -101,7 +101,7 @@ namespace Sharky.MicroTasks.Harass
 
                         if (commander.RetreatPath.Count() == 0)
                         {
-                            if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Detector) && Vector2.DistanceSquared(new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y), new Vector2(e.Unit.Pos.X, e.Unit.Pos.Y)) < 120))
+                            if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Detector) && Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position) < 120))
                             {
                                 harassInfo.LastPathFailedFrame = frame;
                                 harassInfo.Harassers.Remove(commander);

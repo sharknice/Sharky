@@ -24,7 +24,7 @@ namespace Sharky.EnemyStrategies.Protoss
         {
             if (frame < SharkyOptions.FramesPerSecond * 60 * 3)
             {
-                if (ActiveUnitData.EnemyUnits.Values.Any(u => u.Unit.UnitType == (uint)UnitTypes.PROTOSS_PHOTONCANNON && Vector2.DistanceSquared(new Vector2(TargetingData.ForwardDefensePoint.X, TargetingData.ForwardDefensePoint.Y), new Vector2(u.Unit.Pos.X, u.Unit.Pos.Y)) < 900))
+                if (ActiveUnitData.EnemyUnits.Values.Any(u => u.Unit.UnitType == (uint)UnitTypes.PROTOSS_PHOTONCANNON && Vector2.DistanceSquared(new Vector2(TargetingData.ForwardDefensePoint.X, TargetingData.ForwardDefensePoint.Y), u.Position) < 900))
                 {
                     return true;
                 }

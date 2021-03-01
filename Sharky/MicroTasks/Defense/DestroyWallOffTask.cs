@@ -31,7 +31,7 @@ namespace Sharky.MicroTasks
                 if (point != null)
                 {
                     var vector = new Vector2(point.X, point.Y);
-                    foreach (var commander in commanders.Where(c => !c.Value.Claimed && c.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.ArmyUnit)).OrderBy(c => Vector2.DistanceSquared(vector, new Vector2(c.Value.UnitCalculation.Unit.Pos.X, c.Value.UnitCalculation.Unit.Pos.Y))))
+                    foreach (var commander in commanders.Where(c => !c.Value.Claimed && c.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.ArmyUnit)).OrderBy(c => Vector2.DistanceSquared(vector, c.Value.UnitCalculation.Position)))
                     {
                         commander.Value.Claimed = true;
                         UnitCommanders.Add(commander.Value);
@@ -57,7 +57,7 @@ namespace Sharky.MicroTasks
 
             if (WallPoints != null)
             {
-                var buildings = ActiveUnitData.Commanders.Where(u => u.Value.UnitCalculation.Attributes.Contains(Attribute.Structure) && WallPoints.Any(point => Vector2.DistanceSquared(new Vector2(point.X, point.Y), new Vector2(u.Value.UnitCalculation.Unit.Pos.X, u.Value.UnitCalculation.Unit.Pos.Y)) < 1)).Select(b => b.Value);
+                var buildings = ActiveUnitData.Commanders.Where(u => u.Value.UnitCalculation.Attributes.Contains(Attribute.Structure) && WallPoints.Any(point => Vector2.DistanceSquared(new Vector2(point.X, point.Y), u.Value.UnitCalculation.Position) < 1)).Select(b => b.Value);
 
                 if (buildings.Count() == 0)
                 {

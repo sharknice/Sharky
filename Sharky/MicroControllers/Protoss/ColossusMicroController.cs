@@ -27,7 +27,7 @@ namespace Sharky.MicroControllers.Protoss
                 var attackLine = GetAttackLine(commander.UnitCalculation.Unit.Pos, enemyAttack.Unit.Pos);
                 foreach (var splashedEnemy in secondaryTargets)
                 {
-                    if (CollisionCalculator.Collides(new Vector2(splashedEnemy.Unit.Pos.X, splashedEnemy.Unit.Pos.Y), splashedEnemy.Unit.Radius + splashRadius, attackLine.Start, attackLine.End))
+                    if (CollisionCalculator.Collides(splashedEnemy.Position, splashedEnemy.Unit.Radius + splashRadius, attackLine.Start, attackLine.End))
                     {
                         dpsReduction += splashedEnemy.Dps / TimeToKill(weapon, splashedEnemy.Unit, SharkyUnitData.UnitData[(UnitTypes)splashedEnemy.Unit.UnitType]);
                     }

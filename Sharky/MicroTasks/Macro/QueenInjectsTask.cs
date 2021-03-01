@@ -65,7 +65,7 @@ namespace Sharky.MicroTasks
 
             foreach (var hatchery in hatcheries)
             {
-                var closestQueen = UnitCommanders.Where(u => u.UnitCalculation.Unit.Energy >= 25).OrderBy(u => Vector2.DistanceSquared(new Vector2(u.UnitCalculation.Unit.Pos.X, u.UnitCalculation.Unit.Pos.Y), new Vector2(hatchery.Value.Unit.Pos.X, hatchery.Value.Unit.Pos.Y))).FirstOrDefault();
+                var closestQueen = UnitCommanders.Where(u => u.UnitCalculation.Unit.Energy >= 25).OrderBy(u => Vector2.DistanceSquared(u.UnitCalculation.Position, hatchery.Value.Position)).FirstOrDefault();
                 if (closestQueen != null)
                 {
                     var action = closestQueen.Order(frame, Abilities.EFFECT_INJECTLARVA, null, hatchery.Key);

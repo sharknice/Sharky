@@ -27,6 +27,10 @@ namespace Sharky
         public float SimulatedHitpoints { get; set; }
         public float SimulatedHealPerSecond { get; set; }
         public IEnumerable<SC2APIProtocol.Attribute> Attributes { get; set; }
+       
+        /// <summary>
+        /// Position this unit will be in the next frame
+        /// </summary>
         public Vector2 Position { get; set; }
         public Vector2 Vector { get; set; }
 
@@ -61,8 +65,8 @@ namespace Sharky
             Unit = unit;
             UnitTypeData = sharkyUnitData.UnitData[(UnitTypes)unit.UnitType];
 
-            Position = new Vector2(unit.Pos.X, unit.Pos.Y); // TODO: change all the spots we're making a new vector to use this
             Vector = new Vector2(unit.Pos.X - previousUnit.Pos.X, unit.Pos.Y - previousUnit.Pos.Y); // TODO: use this for micro to predict movement
+            Position = new Vector2(unit.Pos.X + Vector.X, unit.Pos.Y + Vector.Y); // TODO: change all the spots we're making a new vector to use this
 
             var unitRange = unitDataService.GetRange(unit);
             if (unitRange == 0)

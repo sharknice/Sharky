@@ -69,8 +69,8 @@ namespace Sharky.Managers
             }
 
             var attackVector = new Vector2(TargetingData.AttackPoint.X, TargetingData.AttackPoint.Y);
-            var enemyUnits = ActiveUnitData.EnemyUnits.Values.Where(e => (e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && Vector2.DistanceSquared(new Vector2(TargetingData.MainDefensePoint.X, TargetingData.MainDefensePoint.Y), new Vector2(e.Unit.Pos.X, e.Unit.Pos.Y)) > 400)
-            || (e.UnitClassifications.Contains(UnitClassification.DefensiveStructure) && Vector2.DistanceSquared(attackVector, new Vector2(e.Unit.Pos.X, e.Unit.Pos.Y)) < 625));
+            var enemyUnits = ActiveUnitData.EnemyUnits.Values.Where(e => (e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && Vector2.DistanceSquared(new Vector2(TargetingData.MainDefensePoint.X, TargetingData.MainDefensePoint.Y), e.Position) > 400)
+            || (e.UnitClassifications.Contains(UnitClassification.DefensiveStructure) && Vector2.DistanceSquared(attackVector, e.Position) < 625));
 
             if (enemyUnits.Count() < 1)
             {

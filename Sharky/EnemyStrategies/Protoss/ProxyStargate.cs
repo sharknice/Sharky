@@ -24,7 +24,7 @@ namespace Sharky.EnemyStrategies.Protoss
         {
             if (frame < SharkyOptions.FramesPerSecond * 60 * 5)
             {
-                if (ActiveUnitData.EnemyUnits.Values.Any(u => u.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && u.Unit.UnitType == (uint)UnitTypes.PROTOSS_STARGATE && Vector2.DistanceSquared(new Vector2(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y), new Vector2(u.Unit.Pos.X, u.Unit.Pos.Y)) > (75 * 75)))
+                if (ActiveUnitData.EnemyUnits.Values.Any(u => u.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && u.Unit.UnitType == (uint)UnitTypes.PROTOSS_STARGATE && Vector2.DistanceSquared(new Vector2(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y), u.Position) > (75 * 75)))
                 {
                     return true;
                 }

@@ -44,11 +44,11 @@ namespace Sharky.MicroControllers.Protoss
                 return true;
             }
 
-            var vectors = commander.UnitCalculation.NearbyAllies.Where(a => (!a.Unit.IsFlying && !commander.UnitCalculation.Unit.IsFlying) || (a.Unit.IsFlying && commander.UnitCalculation.Unit.IsFlying)).Select(u => new Vector2(u.Unit.Pos.X, u.Unit.Pos.Y));
+            var vectors = commander.UnitCalculation.NearbyAllies.Where(a => (!a.Unit.IsFlying && !commander.UnitCalculation.Unit.IsFlying) || (a.Unit.IsFlying && commander.UnitCalculation.Unit.IsFlying)).Select(u => u.Position);
             if (vectors.Count() > 0)
             {
                 var center = new Point2D { X = vectors.Average(v => v.X), Y = vectors.Average(v => v.Y) };
-                if (Vector2.DistanceSquared(new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y), new Vector2(center.X, center.Y)) + commander.UnitCalculation.Unit.Radius > 1)
+                if (Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(center.X, center.Y)) + commander.UnitCalculation.Unit.Radius > 1)
                 {
                     action = commander.Order(frame, Abilities.MOVE, center);
                     return true;
@@ -89,7 +89,7 @@ namespace Sharky.MicroControllers.Protoss
 
             var range = 4;
 
-            var attacks = new List<UnitCalculation>(commander.UnitCalculation.EnemiesInRange.Where(u => u.Unit.DisplayType != DisplayType.Hidden && !u.Unit.IsFlying && !u.Attributes.Contains(SC2APIProtocol.Attribute.Massive) && !u.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && !u.Unit.BuffIds.Contains((uint)Buffs.GRAVITONBEAM) && InRange(u.Unit.Pos, commander.UnitCalculation.Unit.Pos, range))); // units that are in range right now
+            var attacks = new List<UnitCalculation>(commander.UnitCalculation.EnemiesInRange.Where(u => u.Unit.DisplayType != DisplayType.Hidden && !u.Unit.IsFlying && !u.Attributes.Contains(SC2APIProtocol.Attribute.Massive) && !u.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && !u.Unit.BuffIds.Contains((uint)Buffs.GRAVITONBEAM) && InRange(u.Position, commander.UnitCalculation.Position, range))); // units that are in range right now
 
             if (attacks.Count > 0)
             {
@@ -100,7 +100,7 @@ namespace Sharky.MicroControllers.Protoss
                 }
             }
 
-            attacks = new List<UnitCalculation>(commander.UnitCalculation.NearbyEnemies.Where(u => u.Unit.DisplayType != DisplayType.Hidden && !u.Unit.IsFlying && !u.Attributes.Contains(SC2APIProtocol.Attribute.Massive) && !u.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && !u.Unit.BuffIds.Contains((uint)Buffs.GRAVITONBEAM) && !InRange(u.Unit.Pos, commander.UnitCalculation.Unit.Pos, range))); // units that are not in range right now
+            attacks = new List<UnitCalculation>(commander.UnitCalculation.NearbyEnemies.Where(u => u.Unit.DisplayType != DisplayType.Hidden && !u.Unit.IsFlying && !u.Attributes.Contains(SC2APIProtocol.Attribute.Massive) && !u.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && !u.Unit.BuffIds.Contains((uint)Buffs.GRAVITONBEAM) && !InRange(u.Position, commander.UnitCalculation.Position, range))); // units that are not in range right now
 
             if (attacks.Count > 0)
             {

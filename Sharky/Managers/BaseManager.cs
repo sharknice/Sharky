@@ -122,10 +122,10 @@ namespace Sharky.Managers
             if (BaseData.SelfBases.Count() != UnitCountService.EquivalentTypeCount(UnitTypes.PROTOSS_NEXUS) + UnitCountService.EquivalentTypeCount(UnitTypes.TERRAN_COMMANDCENTER) + UnitCountService.EquivalentTypeCount(UnitTypes.ZERG_HATCHERY))
             {
                 var resourceCenters = ActiveUnitData.SelfUnits.Values.Where(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter));
-                BaseData.SelfBases = BaseData.BaseLocations.Where(b => resourceCenters.Any(r => Vector2.DistanceSquared(new Vector2(r.Unit.Pos.X, r.Unit.Pos.Y), new Vector2(b.Location.X, b.Location.Y)) < 25)).ToList();
+                BaseData.SelfBases = BaseData.BaseLocations.Where(b => resourceCenters.Any(r => Vector2.DistanceSquared(r.Position, new Vector2(b.Location.X, b.Location.Y)) < 25)).ToList();
                 foreach (var selfBase in BaseData.SelfBases)
                 {
-                    selfBase.ResourceCenter = resourceCenters.FirstOrDefault(r => Vector2.DistanceSquared(new Vector2(r.Unit.Pos.X, r.Unit.Pos.Y), new Vector2(selfBase.Location.X, selfBase.Location.Y)) < 25).Unit;
+                    selfBase.ResourceCenter = resourceCenters.FirstOrDefault(r => Vector2.DistanceSquared(r.Position, new Vector2(selfBase.Location.X, selfBase.Location.Y)) < 25).Unit;
                 }
             }
             foreach (var selfBase in BaseData.SelfBases)
@@ -244,10 +244,10 @@ namespace Sharky.Managers
             if (BaseData.EnemyBases.Count() != UnitCountService.EquivalentTypeCount(UnitTypes.PROTOSS_NEXUS) + UnitCountService.EquivalentTypeCount(UnitTypes.TERRAN_COMMANDCENTER) + UnitCountService.EquivalentTypeCount(UnitTypes.ZERG_HATCHERY))
             {
                 var resourceCenters = ActiveUnitData.EnemyUnits.Values.Where(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter));
-                BaseData.EnemyBases = BaseData.BaseLocations.Where(b => resourceCenters.Any(r => Vector2.DistanceSquared(new Vector2(r.Unit.Pos.X, r.Unit.Pos.Y), new Vector2(b.Location.X, b.Location.Y)) < 25)).ToList();
+                BaseData.EnemyBases = BaseData.BaseLocations.Where(b => resourceCenters.Any(r => Vector2.DistanceSquared(r.Position, new Vector2(b.Location.X, b.Location.Y)) < 25)).ToList();
                 foreach (var enemyBase in BaseData.EnemyBases)
                 {
-                    enemyBase.ResourceCenter = resourceCenters.FirstOrDefault(r => Vector2.DistanceSquared(new Vector2(r.Unit.Pos.X, r.Unit.Pos.Y), new Vector2(enemyBase.Location.X, enemyBase.Location.Y)) < 25).Unit;
+                    enemyBase.ResourceCenter = resourceCenters.FirstOrDefault(r => Vector2.DistanceSquared(r.Position, new Vector2(enemyBase.Location.X, enemyBase.Location.Y)) < 25).Unit;
                 }
             }
         }

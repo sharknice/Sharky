@@ -43,7 +43,7 @@ namespace Sharky.MicroControllers.Terran
 
             if (bestTarget != null && commander.AbilityOffCooldown(Abilities.EFFECT_KD8CHARGE, frame, SharkyOptions.FramesPerSecond, SharkyUnitData))
             {
-                var distanceSqaured = Vector2.DistanceSquared(new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y), new Vector2(bestTarget.Unit.Pos.X, bestTarget.Unit.Pos.Y));
+                var distanceSqaured = Vector2.DistanceSquared(commander.UnitCalculation.Position, bestTarget.Position);
 
                 if (distanceSqaured <= Kd8Charge * Kd8Charge)
                 {

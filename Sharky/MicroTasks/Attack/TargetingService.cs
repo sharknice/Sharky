@@ -1,6 +1,7 @@
 ﻿using SC2APIProtocol;
 using Sharky.Pathing;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
@@ -33,8 +34,7 @@ namespace Sharky.MicroTasks.Attack
                 TargetingData.HiddenEnemyBase = false;
                 EnemyBuildingCount = currentEnemyBuildingCount;
 
-
-                var enemyBuilding = ActiveUnitData.EnemyUnits.Where(e => e.Value.UnitTypeData.Attributes.Contains(SC2APIProtocol.Attribute.Structure)).OrderBy(e => Vector2.DistanceSquared(new Vector2(e.Value.Unit.Pos.X, e.Value.Unit.Pos.Y), new Vector2(armyPoint.X, armyPoint.Y))).FirstOrDefault().Value;
+                var enemyBuilding = ActiveUnitData.EnemyUnits.Where(e => e.Value.UnitTypeData.Attributes.Contains(SC2APIProtocol.Attribute.Structure)).OrderBy(e => Vector2.DistanceSquared(e.Value.Position, new Vector2(armyPoint.X, armyPoint.Y))).FirstOrDefault().Value;
                 if (enemyBuilding != null)
                 {
                     return new Point2D { X = enemyBuilding.Unit.Pos.X, Y = enemyBuilding.Unit.Pos.Y };
@@ -58,6 +58,29 @@ namespace Sharky.MicroTasks.Attack
             }
 
             return attackPoint;
+        }
+
+        public Point2D GetArmyPoint(IEnumerable<UnitCommander> armyUnits)
+        {
+            var vectors = armyUnits.Select(u => u.UnitCalculation.Position);
+            if (vectors.Count() > 0)
+            {
+                var average = new Vector2(vectors.Average(v => v.X), vectors.Average(v => v.Y));
+                var trimmed = vectors.Where(v => Vector2.DistanceSquared(average, v) < 200);
+                if (trimmed.Count() > 0)
+                {
+                    var trimmedAverage = new Point2D { X = trimmed.Average(v => v.X), Y = trimmed.Average(v => v.Y) };
+                    return trimmedAverage;
+                }
+                else
+                {
+                    return new Point2D { X = average.X, Y = average.Y };
+                }
+            }
+            else
+            {
+                return TargetingData.AttackPoint;
+            }
         }
     }
 }

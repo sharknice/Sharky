@@ -94,7 +94,7 @@ namespace Sharky.MicroTasks
             foreach (var commander in UnitCommanders)
             {
                 var defensivePoint = TargetingData.ForwardDefensePoint;
-                var commanderVector = new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y);
+                var commanderVector = commander.UnitCalculation.Position;
                 var targetVector = new Vector2(Target.X, Target.Y);
 
                 if ((commander.UnitCalculation.Unit.Energy > 50 || commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.ORACLEWEAPON)) && commander.UnitCalculation.EnemiesInRangeOf.Count() == 0 &&
@@ -198,7 +198,7 @@ namespace Sharky.MicroTasks
             {
                 return false;
             }
-            if (commander.UnitCalculation.NearbyEnemies.Count(e => e.UnitClassifications.Contains(UnitClassification.Worker) && (Vector2.DistanceSquared(new Vector2(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y), new Vector2(e.Unit.Pos.X, e.Unit.Pos.Y)) <= 100)) < 1 && MapDataService.SelfVisible(new Point2D { X = target.X, Y = target.Y, }))
+            if (commander.UnitCalculation.NearbyEnemies.Count(e => e.UnitClassifications.Contains(UnitClassification.Worker) && (Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position) <= 100)) < 1 && MapDataService.SelfVisible(new Point2D { X = target.X, Y = target.Y, }))
             {
                 return false;
             }

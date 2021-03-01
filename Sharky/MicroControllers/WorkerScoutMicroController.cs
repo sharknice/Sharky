@@ -20,7 +20,7 @@ namespace Sharky.MicroControllers
             {
                 // if any are building something
                 var buildings = commander.UnitCalculation.NearbyEnemies.Where(u => u.Attributes.Contains(Attribute.Structure) && u.Unit.BuildProgress < 1);
-                var builders = enemyWorkers.Where(w => buildings.Any(b => Vector2.DistanceSquared(new Vector2(w.Unit.Pos.X, w.Unit.Pos.Y), new Vector2(b.Unit.Pos.X, b.Unit.Pos.Y)) <= b.Unit.Radius + w.Unit.Radius)).OrderBy(w => w.Unit.Health);
+                var builders = enemyWorkers.Where(w => buildings.Any(b => Vector2.DistanceSquared(w.Position, b.Position) <= b.Unit.Radius + w.Unit.Radius)).OrderBy(w => w.Unit.Health);
 
                 if (builders.Count() > 0) // TODO: if barracks almost finished build a pylon where the addon would go LUL
                 {

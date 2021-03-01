@@ -49,11 +49,9 @@ namespace Sharky.Managers.Protoss
         {
             if (nexus.UnitCalculation.Unit.Energy >= 50)
             {
-                var nexusVector = new Vector2(nexus.UnitCalculation.Unit.Pos.X, nexus.UnitCalculation.Unit.Pos.Y);
-                foreach (var shieldBattery in nexus.UnitCalculation.NearbyAllies.Where(u => u.Unit.UnitType == (uint)UnitTypes.PROTOSS_SHIELDBATTERY && u.Unit.BuildProgress == 1 && Vector2.DistanceSquared(nexusVector, new Vector2(u.Unit.Pos.X, u.Unit.Pos.Y)) < OverchargeRangeSquared).OrderBy(u => u.Unit.Energy))
+                foreach (var shieldBattery in nexus.UnitCalculation.NearbyAllies.Where(u => u.Unit.UnitType == (uint)UnitTypes.PROTOSS_SHIELDBATTERY && u.Unit.BuildProgress == 1 && Vector2.DistanceSquared(nexus.UnitCalculation.Position, u.Position) < OverchargeRangeSquared).OrderBy(u => u.Unit.Energy))
                 {
-                    var shieldBatteryVector = new Vector2(shieldBattery.Unit.Pos.X, shieldBattery.Unit.Pos.Y);
-                    if (shieldBattery.NearbyAllies.Any(a => a.EnemiesInRangeOf.Count() > 0 && a.Unit.Shield < 5 && Vector2.DistanceSquared(shieldBatteryVector, new Vector2(a.Unit.Pos.X, a.Unit.Pos.Y)) < RestoreRangeSquared))
+                    if (shieldBattery.NearbyAllies.Any(a => a.EnemiesInRangeOf.Count() > 0 && a.Unit.Shield < 5 && Vector2.DistanceSquared(shieldBattery.Position, a.Position) < RestoreRangeSquared))
                     {
                         return nexus.Order(frame, Abilities.BATTERYOVERCHARGE, null, shieldBattery.Unit.Tag);
                     }
