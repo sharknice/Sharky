@@ -2,13 +2,14 @@
 using Sharky.Pathing;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace Sharky.MicroControllers.Protoss
 {
     public class VoidRayMicroController : IndividualMicroController
     {
-        public VoidRayMicroController(MapDataService mapDataService, SharkyUnitData sharkyUnitData, ActiveUnitData activeUnitData, DebugService debugService, IPathFinder sharkyPathFinder, BaseData baseData, SharkyOptions sharkyOptions, DamageService damageService, UnitDataService unitDataService, MicroPriority microPriority, bool groupUpEnabled)
-            : base(mapDataService, sharkyUnitData, activeUnitData, debugService, sharkyPathFinder, baseData, sharkyOptions, damageService, unitDataService, microPriority, groupUpEnabled)
+        public VoidRayMicroController(MapDataService mapDataService, SharkyUnitData sharkyUnitData, ActiveUnitData activeUnitData, DebugService debugService, IPathFinder sharkyPathFinder, BaseData baseData, SharkyOptions sharkyOptions, DamageService damageService, UnitDataService unitDataService, TargetingData targetingData, MicroPriority microPriority, bool groupUpEnabled)
+            : base(mapDataService, sharkyUnitData, activeUnitData, debugService, sharkyPathFinder, baseData, sharkyOptions, damageService, unitDataService, targetingData, microPriority, groupUpEnabled)
         {
         }
 
@@ -62,6 +63,25 @@ namespace Sharky.MicroControllers.Protoss
                 }
             }
 
+            return false;
+        }
+
+        protected override bool RechargeShieldsAtBattery(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
+            if (commander.UnitCalculation.Unit.ShieldMax > 0 && commander.UnitCalculation.Unit.Shield < 10)
+            {
+                var shieldBatttery = ActiveUnitData.SelfUnits.Where(a => a.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_SHIELDBATTERY && a.Value.Unit.Energy > 5 && a.Value.Unit.Orders.Count() == 0).OrderBy(a => Vector2.DistanceSquared(commander.UnitCalculation.Position, a.Value.Position)).FirstOrDefault().Value;
+                if (shieldBatttery != null)
+                {
+                    var distanceSquared = Vector2.DistanceSquared(commander.UnitCalculation.Position, shieldBatttery.Position);
+                    if (distanceSquared > 35 && distanceSquared < 2500)
+                    {
+                        action = commander.Order(frame, Abilities.MOVE, new Point2D { X = shieldBatttery.Position.X, Y = shieldBatttery.Position.Y });
+                        return true;
+                    }
+                }
+            }
             return false;
         }
     }

@@ -5,6 +5,8 @@
         public bool StrictWorkerCount { get; set; }
         public bool StrictSupplyCount { get; set; }
         public bool StrictGasCount { get; set; }
+        public bool StrictWorkersPerGas { get; set; }
+        public int StrictWorkersPerGasCount { get; set; }
         public ProtossBuildOptions ProtossBuildOptions { get; set; }
 
         public BuildOptions()
@@ -12,6 +14,8 @@
             StrictWorkerCount = false;
             StrictSupplyCount = false;
             StrictGasCount = false;
+            StrictWorkersPerGas = false;
+            StrictWorkersPerGasCount = 3;
             ProtossBuildOptions = new ProtossBuildOptions { PylonsAtDefensivePoint = 0, ShieldsAtDefensivePoint = 0 };
         }
     }

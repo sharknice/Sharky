@@ -65,8 +65,15 @@ namespace Sharky
             Unit = unit;
             UnitTypeData = sharkyUnitData.UnitData[(UnitTypes)unit.UnitType];
 
-            Vector = new Vector2(unit.Pos.X - previousUnit.Pos.X, unit.Pos.Y - previousUnit.Pos.Y); // TODO: use this for micro to predict movement
-            Position = new Vector2(unit.Pos.X + Vector.X, unit.Pos.Y + Vector.Y); // TODO: change all the spots we're making a new vector to use this
+            if (previousUnit != unit)
+            {
+                SetPreviousUnit(previousUnit);
+            }
+            else
+            {
+                Vector = Vector2.Zero;
+                Position = new Vector2(unit.Pos.X, unit.Pos.Y);
+            }
 
             var unitRange = unitDataService.GetRange(unit);
             if (unitRange == 0)
@@ -294,6 +301,19 @@ namespace Sharky
             }
 
             return damage / Weapon.Speed;
+        }
+
+        public void SetPreviousUnit(Unit previousUnit)
+        {
+            PreviousUnit = previousUnit;
+            Vector = new Vector2(Unit.Pos.X - PreviousUnit.Pos.X, Unit.Pos.Y - PreviousUnit.Pos.Y);
+            Position = new Vector2(Unit.Pos.X + Vector.X, Unit.Pos.Y + Vector.Y);
+
+            if (Vector.LengthSquared() != 0)
+            {
+                var normalized = Vector2.Normalize(Vector);
+                Vector = Vector2.Multiply(normalized, UnitTypeData.MovementSpeed);
+            }
         }
     }
 }

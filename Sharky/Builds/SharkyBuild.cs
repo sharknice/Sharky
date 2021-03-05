@@ -41,6 +41,8 @@ namespace Sharky.Builds
             BuildOptions.StrictGasCount = false;
             BuildOptions.StrictSupplyCount = false;
             BuildOptions.StrictWorkerCount = false;
+            BuildOptions.StrictWorkersPerGas = false;
+            BuildOptions.StrictWorkersPerGasCount = 3;
 
             AttackData.UseAttackDataManager = true;
 

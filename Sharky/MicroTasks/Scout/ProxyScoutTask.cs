@@ -1,6 +1,5 @@
 ﻿using SC2APIProtocol;
 using Sharky.MicroControllers;
-using Sharky.Pathing;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,8 +11,8 @@ namespace Sharky.MicroTasks
     {
         SharkyUnitData SharkyUnitData;
         TargetingData TargetingData;
-        MapDataService MapDataService;
         BaseData BaseData;
+        SharkyOptions SharkyOptions;
         IIndividualMicroController IndividualMicroController;
 
         bool started { get; set; }
@@ -21,17 +20,20 @@ namespace Sharky.MicroTasks
         List<Point2D> ScoutLocations { get; set; }
         int ScoutLocationIndex { get; set; }
 
-        public ProxyScoutTask(SharkyUnitData sharkyUnitData, TargetingData targetingData, MapDataService mapDataService, BaseData baseData, bool enabled, float priority, IIndividualMicroController individualMicroController)
+        bool LateGame;
+
+        public ProxyScoutTask(SharkyUnitData sharkyUnitData, TargetingData targetingData, BaseData baseData, SharkyOptions sharkyOptions, bool enabled, float priority, IIndividualMicroController individualMicroController)
         {
             SharkyUnitData = sharkyUnitData;
             TargetingData = targetingData;
-            MapDataService = mapDataService;
             BaseData = baseData;
+            SharkyOptions = sharkyOptions;
             Priority = priority;
             IndividualMicroController = individualMicroController;
 
             UnitCommanders = new List<UnitCommander>();
             Enabled = enabled;
+            LateGame = false;
         }
 
         public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
@@ -69,6 +71,16 @@ namespace Sharky.MicroTasks
             if (ScoutLocations == null)
             {
                 GetScoutLocations();
+            }
+            if (!LateGame && frame > SharkyOptions.FramesPerSecond * 4 * 60)
+            {
+                LateGame = true;
+                ScoutLocations = new List<Point2D>();
+                foreach (var baseLocation in BaseData.BaseLocations.Where(b => !BaseData.SelfBases.Any(s => s.Location == b.Location) && !BaseData.EnemyBases.Any(s => s.Location == b.Location)))
+                {
+                    ScoutLocations.Add(baseLocation.MineralLineLocation);
+                }
+                ScoutLocationIndex = 0;
             }
 
             var commands = new List<SC2APIProtocol.Action>();

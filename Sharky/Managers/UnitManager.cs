@@ -112,7 +112,7 @@ namespace Sharky.Managers
                     var attack = new UnitCalculation(unit, unit, repairingUnitCount, SharkyUnitData, SharkyOptions, UnitDataService, frame);
                     if (ActiveUnitData.EnemyUnits.TryGetValue(unit.Tag, out UnitCalculation existing))
                     {
-                        attack.PreviousUnit = existing.Unit;
+                        attack.SetPreviousUnit(existing.Unit);
                     }
                     ActiveUnitData.EnemyUnits[unit.Tag] = attack;
                 }
@@ -121,7 +121,7 @@ namespace Sharky.Managers
                     var attack = new UnitCalculation(unit, unit, 0, SharkyUnitData, SharkyOptions, UnitDataService, frame);
                     if (ActiveUnitData.SelfUnits.TryGetValue(unit.Tag, out UnitCalculation existing))
                     {
-                        attack.PreviousUnit = existing.Unit;
+                        attack.SetPreviousUnit(existing.Unit);
                     }
                     ActiveUnitData.SelfUnits[unit.Tag] = attack;
                 }
@@ -130,7 +130,7 @@ namespace Sharky.Managers
                     var attack = new UnitCalculation(unit, unit, 0, SharkyUnitData, SharkyOptions, UnitDataService, frame);
                     if (ActiveUnitData.NeutralUnits.TryGetValue(unit.Tag, out UnitCalculation existing))
                     {
-                        attack.PreviousUnit = existing.Unit;
+                        attack.SetPreviousUnit(existing.Unit);
                     }
                     ActiveUnitData.NeutralUnits[unit.Tag] = attack;
                 }

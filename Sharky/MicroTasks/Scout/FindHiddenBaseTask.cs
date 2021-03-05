@@ -57,7 +57,7 @@ namespace Sharky.MicroTasks.Scout
 
             AssignHarassers();
 
-            foreach (var scoutInfo in ScoutInfos)
+            foreach (var scoutInfo in ScoutInfos.Where(s => s.Harassers.Count() > 0))
             {
                 foreach (var commander in scoutInfo.Harassers)
                 {
@@ -157,7 +157,7 @@ namespace Sharky.MicroTasks.Scout
                 }
             }
 
-            var unasignedCommanders = UnitCommanders.Where(u => !HarassInfos.Any(info => info.Harassers.Any(h => h.UnitCalculation.Unit.Tag == u.UnitCalculation.Unit.Tag) && !ScoutInfos.Any(info => info.Harassers.Any(h => h.UnitCalculation.Unit.Tag == u.UnitCalculation.Unit.Tag)))).ToList();
+            var unasignedCommanders = UnitCommanders.Where(u => !HarassInfos.Any(info => info.Harassers.Any(h => h.UnitCalculation.Unit.Tag == u.UnitCalculation.Unit.Tag) || ScoutInfos.Any(info => info.Harassers.Any(h => h.UnitCalculation.Unit.Tag == u.UnitCalculation.Unit.Tag)))).ToList();
 
             foreach (var scoutInfo in ScoutInfos)
             {

@@ -121,7 +121,7 @@ namespace Sharky.Builds
             if (workers == null)
             {
                 workers = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && !c.UnitCalculation.Unit.BuffIds.Any(b => SharkyUnitData.CarryingResourceBuffs.Contains((Buffs)b)));
-                availableWorkers = workers.Where(c => (c.UnitRole == UnitRole.None || c.UnitRole == UnitRole.Minerals || c.UnitRole == UnitRole.Gas) && !c.UnitCalculation.Unit.Orders.Any(o => SharkyUnitData.BuildingData.Values.Any(b => (uint)b.Ability == o.AbilityId)));
+                availableWorkers = workers.Where(c => (c.UnitRole == UnitRole.None || c.UnitRole == UnitRole.Minerals) && !c.UnitCalculation.Unit.Orders.Any(o => SharkyUnitData.BuildingData.Values.Any(b => (uint)b.Ability == o.AbilityId)));
             }
             else
             {

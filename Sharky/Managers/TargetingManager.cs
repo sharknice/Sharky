@@ -14,20 +14,28 @@ namespace Sharky.Managers
         MacroData MacroData;
         TargetingData TargetingData;
         ChokePointService ChokePointService;
+        ChokePointsService ChokePointsService;
         DebugService DebugService;
 
         int baseCount;
 
-        public TargetingManager(SharkyUnitData sharkyUnitData, BaseData baseData, MacroData macroData, TargetingData targetingData, ChokePointService chokePointService, DebugService debugService)
+        Point2D PreviousAttackPoint;
+        Point2D PreviousDefensePoint;
+        int LastUpdateFrame;
+
+        public TargetingManager(SharkyUnitData sharkyUnitData, BaseData baseData, MacroData macroData, TargetingData targetingData, ChokePointService chokePointService, ChokePointsService chokePointsService, DebugService debugService)
         {
             SharkyUnitData = sharkyUnitData;
             BaseData = baseData;
             MacroData = macroData;
             TargetingData = targetingData;
             ChokePointService = chokePointService;
+            ChokePointsService = chokePointsService;
             DebugService = debugService;
 
             baseCount = 0;
+            LastUpdateFrame = -10000;
+            TargetingData.ChokePoints = new ChokePoints();
         }
 
         public void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)
@@ -70,6 +78,7 @@ namespace Sharky.Managers
         public IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
         {
             UpdateDefensePoint((int)observation.Observation.GameLoop);
+            UpdateChokePoints((int)observation.Observation.GameLoop);
 
             DebugService.DrawSphere(new Point { X = TargetingData.MainDefensePoint.X, Y = TargetingData.MainDefensePoint.Y, Z = 12 }, 2, new Color { R = 0, G = 255, B = 0 });
             DebugService.DrawSphere(new Point { X = TargetingData.ForwardDefensePoint.X, Y = TargetingData.ForwardDefensePoint.Y, Z = 12 }, 2, new Color { R = 0, G = 0, B = 255 });
@@ -84,6 +93,30 @@ namespace Sharky.Managers
             }
 
             return new List<SC2APIProtocol.Action>();
+        }
+
+        void UpdateChokePoints(int frame)
+        {
+            if (frame == 0) //if (frame - LastUpdateFrame > 1500 && (PreviousAttackPoint != TargetingData.AttackPoint || PreviousDefensePoint != TargetingData.ForwardDefensePoint))
+            {
+                PreviousAttackPoint = TargetingData.AttackPoint;
+                PreviousDefensePoint = TargetingData.ForwardDefensePoint;
+                TargetingData.ChokePoints = ChokePointsService.GetChokePoints(TargetingData.ForwardDefensePoint, TargetingData.AttackPoint, frame);
+                LastUpdateFrame = frame;
+            }
+
+            foreach (var chokePoint in TargetingData.ChokePoints.Good)
+            {
+                DebugService.DrawSphere(new Point { X = chokePoint.Center.X, Y = chokePoint.Center.Y, Z = 12 }, 4, new Color { R = 0, G = 255, B = 0 });
+            }
+            foreach (var chokePoint in TargetingData.ChokePoints.Neutral)
+            {
+                DebugService.DrawSphere(new Point { X = chokePoint.Center.X, Y = chokePoint.Center.Y, Z = 12 }, 4, new Color { R = 0, G = 0, B = 255 });
+            }
+            foreach (var chokePoint in TargetingData.ChokePoints.Bad)
+            {
+                DebugService.DrawSphere(new Point { X = chokePoint.Center.X, Y = chokePoint.Center.Y, Z = 12 }, 4, new Color { R = 255, G = 0, B = 0 });
+            }
         }
 
         void UpdateDefensePoint(int frame)

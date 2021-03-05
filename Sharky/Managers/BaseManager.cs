@@ -256,6 +256,9 @@ namespace Sharky.Managers
         {
             var vectors = baseLocation.MineralFields.Select(m => new Vector2(m.Pos.X, m.Pos.Y));
             baseLocation.MineralLineLocation = new Point2D { X = vectors.Average(v => v.X), Y = vectors.Average(v => v.Y) };
+
+            var angle = Math.Atan2(baseLocation.Location.Y - baseLocation.MineralLineLocation.Y, baseLocation.MineralLineLocation.X - baseLocation.Location.X);
+            baseLocation.MineralLineBuildingLocation = new Point2D { X = baseLocation.MineralLineLocation.X + (float)(3 * Math.Cos(angle)), Y = baseLocation.MineralLineLocation.Y - (float)(3 * Math.Sin(angle)) };
         }
 
         void DetermineFinalLocation(BaseLocation baseLocation, List<Unit> gasses)

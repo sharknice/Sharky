@@ -13,8 +13,8 @@ namespace Sharky.MicroControllers.Protoss
         int TimeWarpRange = 9;
         float TImeWarpRadius = 3.5f;
 
-        public MothershipMicroController(MapDataService mapDataService, SharkyUnitData sharkyUnitData, ActiveUnitData activeUnitData, DebugService debugService, IPathFinder sharkyPathFinder, BaseData baseData, SharkyOptions sharkyOptions, DamageService damageService, UnitDataService unitDataService, MicroPriority microPriority, bool groupUpEnabled)
-            : base(mapDataService, sharkyUnitData, activeUnitData, debugService, sharkyPathFinder, baseData, sharkyOptions, damageService, unitDataService, microPriority, groupUpEnabled)
+        public MothershipMicroController(MapDataService mapDataService, SharkyUnitData sharkyUnitData, ActiveUnitData activeUnitData, DebugService debugService, IPathFinder sharkyPathFinder, BaseData baseData, SharkyOptions sharkyOptions, DamageService damageService, UnitDataService unitDataService, TargetingData targetingData, MicroPriority microPriority, bool groupUpEnabled)
+            : base(mapDataService, sharkyUnitData, activeUnitData, debugService, sharkyPathFinder, baseData, sharkyOptions, damageService, unitDataService, targetingData, microPriority, groupUpEnabled)
         {
         }
 
@@ -141,7 +141,7 @@ namespace Sharky.MicroControllers.Protoss
                 return false;
             }
 
-            var moveTo = GetSupportSpot(unitToSupport, target, defensivePoint);
+            var moveTo = GetSupportSpot(commander, unitToSupport, target, defensivePoint);
 
             action = commander.Order(frame, Abilities.MOVE, moveTo);
             return true;
@@ -152,7 +152,7 @@ namespace Sharky.MicroControllers.Protoss
             return Vector2.DistanceSquared(unit1.Position, unit2.Position);
         }
 
-        protected override Point2D GetSupportSpot(UnitCommander unitToSupport, Point2D target, Point2D defensivePoint)
+        protected override Point2D GetSupportSpot(UnitCommander commander, UnitCommander unitToSupport, Point2D target, Point2D defensivePoint)
         {
             var angle = Math.Atan2(unitToSupport.UnitCalculation.Position.Y - defensivePoint.Y, defensivePoint.X - unitToSupport.UnitCalculation.Position.X);
             var x = CloakRange * Math.Cos(angle);

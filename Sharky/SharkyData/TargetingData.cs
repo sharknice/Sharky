@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using Sharky.Pathing;
 using System.Collections.Generic;
 
 namespace Sharky
@@ -12,5 +13,6 @@ namespace Sharky
         public Point2D EnemyMainBasePoint { get; set; }
         public bool HiddenEnemyBase { get; set; }
         public List<Point2D> ForwardDefenseWallOffPoints { get; set; }
+        public ChokePoints ChokePoints { get; set; }
     }
 }

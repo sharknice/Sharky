@@ -13,7 +13,7 @@ namespace Sharky.MicroTasks
         TargetingData TargetingData;
         ActiveUnitData ActiveUnitData;
         MacroData MacroData;
-        WallOffPlacement WallOffPlacement;
+        public WallOffPlacement WallOffPlacement { get; set; }
 
         public List<Point2D> PlacementPoints;
 

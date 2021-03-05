@@ -106,9 +106,9 @@ namespace Sharky.MicroTasks
                     MicroTaskData.MicroTasks["FindHiddenBaseTask"].Enable();
                 }
             }
-            else if (hiddenBase && !TargetingData.HiddenEnemyBase)
+            else if (!TargetingData.HiddenEnemyBase)
             {
-                if (MicroTaskData.MicroTasks.ContainsKey("FindHiddenBaseTask"))
+                if (MicroTaskData.MicroTasks.ContainsKey("FindHiddenBaseTask") && MicroTaskData.MicroTasks["FindHiddenBaseTask"].Enabled)
                 {
                     MicroTaskData.MicroTasks["FindHiddenBaseTask"].Disable();
                 }

@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using Sharky.Builds;
 using Sharky.MicroTasks.Mining;
 using System;
 using System.Collections.Concurrent;
@@ -15,10 +16,11 @@ namespace Sharky.MicroTasks
         ActiveUnitData ActiveUnitData;
         MiningDefenseService MiningDefenseService;
         MacroData MacroData;
+        BuildOptions BuildOptions;
 
         bool LowMineralsHighGas;
 
-        public MiningTask(SharkyUnitData sharkyUnitData, BaseData baseData, ActiveUnitData activeUnitData, float priority, MiningDefenseService miningDefenseService, MacroData macroData)
+        public MiningTask(SharkyUnitData sharkyUnitData, BaseData baseData, ActiveUnitData activeUnitData, float priority, MiningDefenseService miningDefenseService, MacroData macroData, BuildOptions buildOptions)
         {
             SharkyUnitData = sharkyUnitData;
             BaseData = baseData;
@@ -26,6 +28,7 @@ namespace Sharky.MicroTasks
             Priority = priority;
             MiningDefenseService = miningDefenseService;
             MacroData = macroData;
+            BuildOptions = buildOptions;
 
             LowMineralsHighGas = false;
 
@@ -54,7 +57,7 @@ namespace Sharky.MicroTasks
 
             var commands = new List<SC2APIProtocol.Action>();
 
-            ReclaimBuliders();
+            ReclaimBuliders(frame);
             RemoveLostWorkers();
 
             commands.AddRange(BalanceGasWorkers(frame));
@@ -67,11 +70,11 @@ namespace Sharky.MicroTasks
             return commands;
         }
 
-        void ReclaimBuliders()
+        void ReclaimBuliders(int frame)
         {
             var incompleteRefineries = ActiveUnitData.SelfUnits.Where(u => SharkyUnitData.GasGeyserRefineryTypes.Contains((UnitTypes)u.Value.Unit.UnitType) && u.Value.Unit.BuildProgress < .99).Select(u => u.Key);
 
-            var workers = UnitCommanders.Where(c => c.UnitRole == UnitRole.Build && (c.UnitCalculation.Unit.Orders.Count() == 0 || !c.UnitCalculation.Unit.Orders.Any(o => SharkyUnitData.BuildingData.Values.Any(b => (uint)b.Ability == o.AbilityId))));
+            var workers = UnitCommanders.Where(c => c.UnitRole == UnitRole.Build && c.LastOrderFrame < frame - 5 && (c.UnitCalculation.Unit.Orders.Count() == 0 || !c.UnitCalculation.Unit.Orders.Any(o => SharkyUnitData.BuildingData.Values.Any(b => (uint)b.Ability == o.AbilityId))));
             foreach (var worker in workers)
             {
                 worker.UnitRole = UnitRole.None;
@@ -237,8 +240,14 @@ namespace Sharky.MicroTasks
         {
             var actions = new List<SC2APIProtocol.Action>();
 
+            var gasSaturationCount = 3;
+            if (BuildOptions.StrictWorkersPerGas)
+            {
+                gasSaturationCount = BuildOptions.StrictWorkersPerGasCount;
+            }
+
             var refinereries = ActiveUnitData.SelfUnits.Where(u => SharkyUnitData.GasGeyserRefineryTypes.Contains((UnitTypes)u.Value.Unit.UnitType) && u.Value.Unit.BuildProgress >= .99 && BaseData.SelfBases.Any(b => b.GasMiningInfo.Any(g => g.ResourceUnit.Tag == u.Value.Unit.Tag)));
-            var unsaturatedRefineries = refinereries.Where(u => BaseData.SelfBases.Any(b => b.GasMiningInfo.Any(g => g.ResourceUnit.Tag == u.Value.Unit.Tag && g.Workers.Count() < 3)));
+            var unsaturatedRefineries = refinereries.Where(u => BaseData.SelfBases.Any(b => b.GasMiningInfo.Any(g => g.ResourceUnit.Tag == u.Value.Unit.Tag && g.Workers.Count() < gasSaturationCount)));
             var unsaturatedMinerals = BaseData.SelfBases.Any(b => b.ResourceCenter.BuildProgress == 1 && b.MineralMiningInfo.Any(m => m.Workers.Count() < 2));
 
             if (LowMineralsHighGas)
@@ -283,7 +292,7 @@ namespace Sharky.MicroTasks
                 {
                     foreach (var info in selfBase.GasMiningInfo)
                     {
-                        if (info.Workers.Count() < 3)
+                        if (info.Workers.Count() < gasSaturationCount)
                         {
                             var idleWorkers = GetIdleWorkers();
                             bool remove = false;

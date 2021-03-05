@@ -68,6 +68,30 @@ namespace Sharky.Pathing
             return null;
         }
 
+        public Point2D FindLowGroundChokePoint(List<Vector2> path, float maxDistance = 30f)
+        {
+            if (path.Count > 0)
+            {
+                var startHeight = MapDataService.MapHeight(new Point2D { X = path[0].X, Y = path[0].Y });
+                var previousPoint = path[0];
+
+                foreach (var point in path)
+                {
+                    if (startHeight < MapDataService.MapHeight(new Point2D { X = point.X, Y = point.Y }))
+                    {
+                        if (Vector2.DistanceSquared(path[0], point) > maxDistance * maxDistance)
+                        {
+                            return null;
+                        }
+                        return new Point2D { X = previousPoint.X, Y = previousPoint.Y };
+                    }
+                    previousPoint = point;
+                }
+            }
+
+            return null;
+        }
+
         public Point2D FindFlatChokePoint(List<Vector2> path, float maxDistance = 15)
         {
             return null; // TODO: check points around if they are walkable, if you can fit a circle near, not sure how to do it exactly

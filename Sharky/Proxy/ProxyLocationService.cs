@@ -12,13 +12,15 @@ namespace Sharky.Proxy
         TargetingData TargetingData;
         IPathFinder PathFinder;
         MapDataService MapDataService;
+        AreaService AreaService;
 
-        public ProxyLocationService(BaseData baseData, TargetingData targetingData, IPathFinder pathFinder, MapDataService mapDataService)
+        public ProxyLocationService(BaseData baseData, TargetingData targetingData, IPathFinder pathFinder, MapDataService mapDataService, AreaService areaService)
         {
             BaseData = baseData;
             TargetingData = targetingData;
             PathFinder = pathFinder;
             MapDataService = mapDataService;
+            AreaService = areaService;
         }
 
         public Point2D GetCliffProxyLocation()
@@ -60,6 +62,26 @@ namespace Sharky.Proxy
         private int NumberOfCloseBaseLocations()
         {
             return BaseData.BaseLocations.Count(b => Vector2.DistanceSquared(new Vector2(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y), new Vector2(b.Location.X, b.Location.Y)) < 2000);
+        }
+
+        public CliffProxyData GetCliffProxyData()
+        {
+            var outsideProxyLocation = GetCliffProxyLocation();
+            var targetLocation = TargetingData.EnemyMainBasePoint;
+
+            var angle = Math.Atan2(targetLocation.Y - outsideProxyLocation.Y, outsideProxyLocation.X - targetLocation.X);
+            var x = -6 * Math.Cos(angle);
+            var y = -6 * Math.Sin(angle);
+            var loadingLocation = new Point2D { X = outsideProxyLocation.X + (float)x, Y = outsideProxyLocation.Y - (float)y };
+
+            var loadingVector = new Vector2(loadingLocation.X, loadingLocation.Y);
+            var DropArea = AreaService.GetTargetArea(targetLocation);
+            var dropVector = DropArea.OrderBy(p => Vector2.DistanceSquared(new Vector2(p.X, p.Y), loadingVector)).First();
+            x = -2 * Math.Cos(angle);
+            y = -2 * Math.Sin(angle);
+            var dropLocation = new Point2D { X = dropVector.X + (float)x, Y = dropVector.Y - (float)y };
+
+            return new CliffProxyData { OutsideProxyLocation = outsideProxyLocation, TargetLocation = targetLocation, LoadingLocation = loadingLocation, DropLocation = dropLocation };
         }
     }
 }
