@@ -19,7 +19,7 @@ namespace SharkyExampleBot
             var protossCounterTransitioner = new ProtossCounterTransitioner(defaultSharkyBot.EnemyData, defaultSharkyBot.SharkyOptions);
 
             // a probe microcontroller for our proxy builds
-            var probeMicroController = new IndividualMicroController(defaultSharkyBot.MapDataService, defaultSharkyBot.SharkyUnitData, defaultSharkyBot.ActiveUnitData, defaultSharkyBot.DebugService, defaultSharkyBot.SharkyPathFinder, defaultSharkyBot.BaseData, defaultSharkyBot.SharkyOptions, defaultSharkyBot.DamageService, defaultSharkyBot.UnitDataService, MicroPriority.JustLive, false);
+            var probeMicroController = new IndividualMicroController(defaultSharkyBot.MapDataService, defaultSharkyBot.SharkyUnitData, defaultSharkyBot.ActiveUnitData, defaultSharkyBot.DebugService, defaultSharkyBot.SharkyPathFinder, defaultSharkyBot.BaseData, defaultSharkyBot.SharkyOptions, defaultSharkyBot.DamageService, defaultSharkyBot.UnitDataService, defaultSharkyBot.TargetingData, MicroPriority.JustLive, false);
 
             // We create all of our builds
             var proxyVoidRay = new ProxyVoidRay(defaultSharkyBot.BuildOptions, defaultSharkyBot.MacroData, defaultSharkyBot.ActiveUnitData, defaultSharkyBot.AttackData, defaultSharkyBot.ChatService, defaultSharkyBot.ChronoData, defaultSharkyBot.SharkyOptions, defaultSharkyBot.MicroTaskData, protossCounterTransitioner, defaultSharkyBot.SharkyUnitData, defaultSharkyBot.ProxyLocationService, defaultSharkyBot.DebugService, defaultSharkyBot.UnitCountService, probeMicroController);
@@ -98,7 +98,7 @@ namespace SharkyExampleBot
 
         public static BuildChoices GetTerranBuildChoices(DefaultSharkyBot defaultSharkyBot)
         {
-            var scveMicroController = new IndividualMicroController(defaultSharkyBot.MapDataService, defaultSharkyBot.SharkyUnitData, defaultSharkyBot.ActiveUnitData, defaultSharkyBot.DebugService, defaultSharkyBot.SharkyPathFinder, defaultSharkyBot.BaseData, defaultSharkyBot.SharkyOptions, defaultSharkyBot.DamageService, defaultSharkyBot.UnitDataService, MicroPriority.JustLive, false);
+            var scveMicroController = new IndividualMicroController(defaultSharkyBot.MapDataService, defaultSharkyBot.SharkyUnitData, defaultSharkyBot.ActiveUnitData, defaultSharkyBot.DebugService, defaultSharkyBot.SharkyPathFinder, defaultSharkyBot.BaseData, defaultSharkyBot.SharkyOptions, defaultSharkyBot.DamageService, defaultSharkyBot.UnitDataService, defaultSharkyBot.TargetingData, MicroPriority.JustLive, false);
 
             var massMarines = new MassMarines(defaultSharkyBot.BuildOptions, defaultSharkyBot.MacroData, defaultSharkyBot.ActiveUnitData, defaultSharkyBot.AttackData, defaultSharkyBot.ChatService, defaultSharkyBot.UnitCountService);
             var bansheesAndMarines = new BansheesAndMarines(defaultSharkyBot.BuildOptions, defaultSharkyBot.MacroData, defaultSharkyBot.ActiveUnitData, defaultSharkyBot.AttackData, defaultSharkyBot.ChatService, defaultSharkyBot.MicroTaskData, defaultSharkyBot.UnitCountService);
