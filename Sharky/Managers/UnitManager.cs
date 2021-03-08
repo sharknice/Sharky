@@ -45,6 +45,8 @@ namespace Sharky.Managers
             ActiveUnitData.DeadUnits = new List<ulong>();
         }
 
+        public override bool NeverSkip { get { return true; } }
+
         public override IEnumerable<Action> OnFrame(ResponseObservation observation)
         {
             var frame = (int)observation.Observation.GameLoop;

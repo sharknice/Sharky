@@ -335,29 +335,34 @@ namespace Sharky.MicroControllers
                 return new Point2D { X = bestTarget.Unit.Pos.X, Y = bestTarget.Unit.Pos.Y };
             }
 
+            var angle = bestTarget.Unit.Facing;
+            if (angle == 0 && bestTarget.Vector.X != 0 && bestTarget.Vector.Y != 0)
+            {
+                angle = (float)Math.Atan2(bestTarget.Vector.Y, bestTarget.Vector.X);
+            }
             // block enemy unit, if already blocked then surround enemy unit, by forming circle around it, cover one of 4 sides, if the sides are all taken by allies just move directly on
-            var front = GetPoint(bestTarget.Unit.Pos, bestTarget.Unit.Facing, bestTarget.Unit.Radius);
+            var front = GetPoint(bestTarget.Position, angle, bestTarget.Unit.Radius);
             if (!PointBlocked(bestTarget, front, commander.UnitCalculation.Unit.Tag))
             {
                 return front;
             }
-            var behind = GetPoint(bestTarget.Unit.Pos, bestTarget.Unit.Facing + (float)Math.PI, bestTarget.Unit.Radius);
+            var behind = GetPoint(bestTarget.Position, angle + (float)Math.PI, bestTarget.Unit.Radius);
             if (!PointBlocked(bestTarget, behind, commander.UnitCalculation.Unit.Tag))
             {
                 return behind;
             }
-            var right = GetPoint(bestTarget.Unit.Pos, bestTarget.Unit.Facing + ((float)Math.PI * .5f), bestTarget.Unit.Radius);
+            var right = GetPoint(bestTarget.Position, angle + ((float)Math.PI * .5f), bestTarget.Unit.Radius);
             if (!PointBlocked(bestTarget, right, commander.UnitCalculation.Unit.Tag))
             {
                 return right;
             }
-            var left = GetPoint(bestTarget.Unit.Pos, bestTarget.Unit.Facing + ((float)Math.PI * 1.5f), bestTarget.Unit.Radius);
+            var left = GetPoint(bestTarget.Position, angle + ((float)Math.PI * 1.5f), bestTarget.Unit.Radius);
             if (!PointBlocked(bestTarget, left, commander.UnitCalculation.Unit.Tag))
             {
                 return left;
             }
 
-            return new Point2D { X = bestTarget.Unit.Pos.X, Y = bestTarget.Unit.Pos.Y };
+            return new Point2D { X = bestTarget.Position.X, Y = bestTarget.Position.Y };
         }
 
         protected bool PointBlocked(UnitCalculation unitCalculation, Point2D point, ulong excludedUnit)
@@ -374,7 +379,7 @@ namespace Sharky.MicroControllers
             return false;
         }
 
-        protected Point2D GetPoint(Point start, float angle, float distance)
+        protected Point2D GetPoint(Vector2 start, float angle, float distance)
         {
             var x = (float)(distance * Math.Sin(angle + (Math.PI / 2)));
             var y = (float)(distance * Math.Cos(angle + (Math.PI / 2)));

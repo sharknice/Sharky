@@ -14,22 +14,25 @@ namespace Sharky.MicroTasks
         DebugService DebugService;
         IIndividualMicroController IndividualMicroController;
 
+        public int DesiredWorkers { get; set; }
+
         public string ProxyName { get; set; }
 
         bool started { get; set; }
 
-        public ProxyTask(SharkyUnitData sharkyUnitData, bool enabled, float priority, MacroData macroData, string proxyName, MicroTaskData microTaskData, DebugService debugService, IIndividualMicroController individualMicroController)
+        public ProxyTask(SharkyUnitData sharkyUnitData, bool enabled, float priority, MacroData macroData, string proxyName, MicroTaskData microTaskData, DebugService debugService, IIndividualMicroController individualMicroController, int desiredWorkers = 1)
         {
             SharkyUnitData = sharkyUnitData;
             Priority = priority;
             MacroData = macroData;
             ProxyName = proxyName;
-           MicroTaskData = microTaskData;
+            MicroTaskData = microTaskData;
             DebugService = debugService;
             IndividualMicroController = individualMicroController;
 
             UnitCommanders = new List<UnitCommander>();
             Enabled = enabled;
+            DesiredWorkers = desiredWorkers;
         }
 
         public override void Enable()
@@ -59,9 +62,9 @@ namespace Sharky.MicroTasks
 
         public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
         {
-            if (UnitCommanders.Count() == 0)
+            if (UnitCommanders.Count() < DesiredWorkers)
             {
-                if (started)
+                if (started && DesiredWorkers == 1)
                 {
                     Disable();
                     return;

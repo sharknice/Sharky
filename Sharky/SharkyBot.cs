@@ -54,9 +54,19 @@ namespace Sharky
                 var managerStopwatch = new Stopwatch();
                 foreach (var manager in Managers)
                 {
+                    if (!manager.NeverSkip && manager.SkipFrame)
+                    {
+                        manager.SkipFrame = false;
+                        DebugService.DrawText($"{manager.GetType().Name}: skipped");
+                        continue;
+                    }
                     managerStopwatch.Restart();
                     Actions.AddRange(manager.OnFrame(observation));
                     DebugService.DrawText($"{manager.GetType().Name}: {managerStopwatch.ElapsedMilliseconds}");
+                    if (managerStopwatch.ElapsedMilliseconds > 1)
+                    {
+                        manager.SkipFrame = true;
+                    }
                 }
             }
             catch (Exception exception)

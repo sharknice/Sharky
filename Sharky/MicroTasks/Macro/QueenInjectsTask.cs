@@ -30,6 +30,7 @@ namespace Sharky.MicroTasks
             {
                 while (UnitCommanders.Count() > hatcheryCount)
                 {
+                    UnitCommanders.Last().Claimed = false;
                     UnitCommanders.Remove(UnitCommanders.Last());
                 }
                 return;
@@ -61,7 +62,7 @@ namespace Sharky.MicroTasks
         {
             var actions = new List<SC2APIProtocol.Action>();
 
-            var hatcheries = ActiveUnitData.SelfUnits.Where(u => u.Value.UnitClassifications.Contains(UnitClassification.ResourceCenter) && !u.Value.Unit.BuffIds.Contains((uint)Buffs.QUEENSPAWNLARVATIMER));
+            var hatcheries = ActiveUnitData.SelfUnits.Where(u => u.Value.UnitClassifications.Contains(UnitClassification.ResourceCenter) && u.Value.Unit.BuildProgress == 1 && !u.Value.Unit.BuffIds.Contains((uint)Buffs.QUEENSPAWNLARVATIMER));
 
             foreach (var hatchery in hatcheries)
             {

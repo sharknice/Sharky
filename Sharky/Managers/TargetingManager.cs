@@ -7,7 +7,7 @@ using System.Numerics;
 
 namespace Sharky.Managers
 {
-    public class TargetingManager : IManager
+    public class TargetingManager : SharkyManager
     {
         SharkyUnitData SharkyUnitData;
         BaseData BaseData;
@@ -38,7 +38,7 @@ namespace Sharky.Managers
             TargetingData.ChokePoints = new ChokePoints();
         }
 
-        public void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)
+        public override void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)
         {
             foreach (var location in gameInfo.StartRaw.StartLocations)
             {
@@ -70,12 +70,7 @@ namespace Sharky.Managers
             }
         }
 
-        public void OnEnd(ResponseObservation observation, Result result)
-        {
-
-        }
-
-        public IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
+        public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
         {
             UpdateDefensePoint((int)observation.Observation.GameLoop);
             UpdateChokePoints((int)observation.Observation.GameLoop);

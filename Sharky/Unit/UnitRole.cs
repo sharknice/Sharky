@@ -9,6 +9,7 @@
         Proxy,
         Minerals,
         Gas,
-        Defend
+        Defend,
+        Attack
     }
 }

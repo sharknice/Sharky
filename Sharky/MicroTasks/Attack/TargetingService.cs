@@ -60,13 +60,13 @@ namespace Sharky.MicroTasks.Attack
             return attackPoint;
         }
 
-        public Point2D GetArmyPoint(IEnumerable<UnitCommander> armyUnits)
+        public Point2D GetArmyPoint(IEnumerable<UnitCommander> armyUnits, float trimRangeSquared = 200)
         {
             var vectors = armyUnits.Select(u => u.UnitCalculation.Position);
             if (vectors.Count() > 0)
             {
                 var average = new Vector2(vectors.Average(v => v.X), vectors.Average(v => v.Y));
-                var trimmed = vectors.Where(v => Vector2.DistanceSquared(average, v) < 200);
+                var trimmed = vectors.Where(v => Vector2.DistanceSquared(average, v) < trimRangeSquared);
                 if (trimmed.Count() > 0)
                 {
                     var trimmedAverage = new Point2D { X = trimmed.Average(v => v.X), Y = trimmed.Average(v => v.Y) };

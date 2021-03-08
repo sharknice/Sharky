@@ -244,6 +244,16 @@ namespace Sharky.MicroTasks
             if (BuildOptions.StrictWorkersPerGas)
             {
                 gasSaturationCount = BuildOptions.StrictWorkersPerGasCount;
+                foreach (var selfBase in BaseData.SelfBases)
+                {
+                    foreach (var info in selfBase.GasMiningInfo)
+                    {
+                        while (info.Workers.Count() > gasSaturationCount)
+                        {
+                            info.Workers.RemoveAt(0);
+                        }
+                    }
+                }
             }
 
             var refinereries = ActiveUnitData.SelfUnits.Where(u => SharkyUnitData.GasGeyserRefineryTypes.Contains((UnitTypes)u.Value.Unit.UnitType) && u.Value.Unit.BuildProgress >= .99 && BaseData.SelfBases.Any(b => b.GasMiningInfo.Any(g => g.ResourceUnit.Tag == u.Value.Unit.Tag)));

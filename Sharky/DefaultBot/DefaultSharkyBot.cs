@@ -116,7 +116,6 @@ namespace Sharky.DefaultBot
         public ActiveChatData ActiveChatData { get; set; }
         public EnemyData EnemyData { get; set; }
         public SharkyUnitData SharkyUnitData { get; set; }
-
         public DefaultSharkyBot(GameConnection gameConnection)
         {
             var debug = false;
