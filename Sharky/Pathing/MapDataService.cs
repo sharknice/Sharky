@@ -142,5 +142,10 @@ namespace Sharky.Pathing
         {
             return MapData.Map[(int)point.X][(int)point.Y].EnemyAirDpsInRange;
         }
+
+        public int LastFrameAlliesTouched(Point2D point)
+        {
+            return MapData.Map[(int)point.X][(int)point.Y].LastFrameAlliesTouched;
+        }
     }
 }

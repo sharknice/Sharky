@@ -13,14 +13,14 @@ namespace Sharky.Pathing
             MapDataService = mapDataService;
         }
 
-        public List<Point2D> GetTargetArea(Point2D point)
+        public List<Point2D> GetTargetArea(Point2D point, int size = 25)
         {
             var points = new List<Point2D>();
 
             var startHeight = MapDataService.MapHeight(point);
-            for (var x = -25; x < 25; x++)
+            for (var x = -size; x < size; x++)
             {
-                for (var y = -25; y < 25; y++)
+                for (var y = -size; y < size; y++)
                 {
                     if (x + point.X > 0 && x + point.X < MapDataService.MapData.MapWidth && y + point.Y > 0 && y + point.Y < MapDataService.MapData.MapHeight)
                     {

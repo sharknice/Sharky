@@ -66,8 +66,8 @@ namespace Sharky.Builds.BuildChoosing
         public List<string> GetBestBuild(EnemyPlayer.EnemyPlayer enemyBot, List<List<string>> buildSequences, string map, List<EnemyPlayer.EnemyPlayer> enemyBots, Race enemyRace)
         {
             List<string> debugMessage = new List<string>();
-            debugMessage.Add($"Choosing build against {enemyBot.Name} - {enemyBot.Id}");
-            Console.WriteLine($"Choosing build against {enemyBot.Name} - {enemyBot.Id}");
+            debugMessage.Add($"Choosing build against {enemyBot.Name} - {enemyBot.Id} on {map}");
+            Console.WriteLine($"Choosing build against {enemyBot.Name} - {enemyBot.Id} on {map}");
 
             var bestBuildSequence = buildSequences.First();
 

@@ -23,6 +23,8 @@ namespace Sharky.Managers
 
         ActiveUnitData ActiveUnitData;
 
+        List<UnitTypes> UndeadTypes;
+
         public UnitManager(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, SharkyOptions sharkyOptions, TargetPriorityService targetPriorityService, CollisionCalculator collisionCalculator, MapDataService mapDataService, DebugService debugService, DamageService damageService, UnitDataService unitDataService)
         {
             ActiveUnitData = activeUnitData;
@@ -43,6 +45,8 @@ namespace Sharky.Managers
             ActiveUnitData.Commanders = new ConcurrentDictionary<ulong, UnitCommander>();
 
             ActiveUnitData.DeadUnits = new List<ulong>();
+
+            UndeadTypes = new List<UnitTypes> { UnitTypes.ZERG_BROODLING, UnitTypes.ZERG_EGG, UnitTypes.ZERG_LARVA };
         }
 
         public override bool NeverSkip { get { return true; } }
@@ -86,9 +90,20 @@ namespace Sharky.Managers
                 ActiveUnitData.Commanders.TryRemove(tag, out UnitCommander removedCommander);
             }
 
-            var enemyList = ActiveUnitData.EnemyUnits.Select(e => e.Value).ToList();
+            foreach (var unit in ActiveUnitData.EnemyUnits.Where(u => UndeadTypes.Contains((UnitTypes)u.Value.Unit.UnitType)))
+            {
+                ActiveUnitData.EnemyUnits.TryRemove(unit.Key, out UnitCalculation removed);
+            }
+            foreach (var unit in ActiveUnitData.SelfUnits.Where(u => UndeadTypes.Contains((UnitTypes)u.Value.Unit.UnitType)))
+            {
+                ActiveUnitData.SelfUnits.TryRemove(unit.Key, out UnitCalculation removed);
+            }
+            foreach (var unit in ActiveUnitData.Commanders.Where(u => UndeadTypes.Contains((UnitTypes)u.Value.UnitCalculation.Unit.UnitType)))
+            {
+                ActiveUnitData.Commanders.TryRemove(unit.Key, out UnitCommander removed);
+            }
 
-            foreach (var enemy in enemyList) // if we can see this area of the map and the unit isn't there anymore remove it (we just remove it because visible units will get re-added below)
+            foreach (var enemy in ActiveUnitData.EnemyUnits.Select(e => e.Value).ToList()) // if we can see this area of the map and the unit isn't there anymore remove it (we just remove it because visible units will get re-added below)
             {
                 if (MapDataService.SelfVisible(enemy.Unit.Pos))
                 {

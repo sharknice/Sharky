@@ -50,7 +50,7 @@ namespace Sharky.Managers
                     var walkable = GetDataValueBit(pathingGrid, x, y);
                     var height = GetDataValueByte(heightGrid, x, y);
                     var placeable = GetDataValueBit(placementGrid, x, y);
-                    row[y] = new MapCell { X = x, Y = y, Walkable = walkable, TerrainHeight = height, Buildable = placeable, HasCreep = false, CurrentlyBuildable = placeable, EnemyAirDpsInRange = 0, EnemyGroundDpsInRange = 0, InEnemyVision = false, InSelfVision = false, InEnemyDetection = false, Visibility = 0, LastFrameVisibility = 0, NumberOfAllies = 0, NumberOfEnemies = 0, PoweredBySelfPylon = false, SelfAirDpsInRange = 0, SelfGroundDpsInRange = 0 };
+                    row[y] = new MapCell { X = x, Y = y, Walkable = walkable, TerrainHeight = height, Buildable = placeable, HasCreep = false, CurrentlyBuildable = placeable, EnemyAirDpsInRange = 0, EnemyGroundDpsInRange = 0, InEnemyVision = false, InSelfVision = false, InEnemyDetection = false, Visibility = 0, LastFrameVisibility = 0, NumberOfAllies = 0, NumberOfEnemies = 0, PoweredBySelfPylon = false, SelfAirDpsInRange = 0, SelfGroundDpsInRange = 0, LastFrameAlliesTouched = 0 };
                 }
                 MapData.Map[x] = row;
             }
@@ -66,6 +66,7 @@ namespace Sharky.Managers
             UpdateCreep(observation.Observation.RawData.MapState.Creep);
             UpdateEnemyAirDpsInRange();
             UpdateInEnemyDetection();
+            UpdateNumberOfAllies((int)observation.Observation.GameLoop);
 
             //var buildings = shark.EnemyAttacks.Where(e => UnitTypes.BuildingTypes.Contains(e.Value.Unit.UnitType)).Select(e => e.Value).Concat(shark.AllyAttacks.Where(e => UnitTypes.BuildingTypes.Contains(e.Value.Unit.UnitType)).Select(e => e.Value));
             //var currentBuildingCount = buildings.Count();
@@ -88,6 +89,27 @@ namespace Sharky.Managers
 
 
             return new List<SC2APIProtocol.Action>();
+        }
+
+        void UpdateNumberOfAllies(int frame)
+        {
+            for (var x = 0; x < MapData.MapWidth; x++)
+            {
+                for (var y = 0; y < MapData.MapHeight; y++)
+                {
+                    MapData.Map[x][y].NumberOfAllies = 0;
+                }
+            }
+
+            foreach (var selfUnit in ActiveUnitData.SelfUnits)
+            {
+                var nodes = GetNodesInRange(selfUnit.Value.Unit.Pos, selfUnit.Value.Unit.Radius, MapData.MapWidth, MapData.MapHeight);
+                foreach (var node in nodes)
+                {
+                    MapData.Map[(int)node.X][(int)node.Y].NumberOfAllies += 1;
+                    MapData.Map[(int)node.X][(int)node.Y].LastFrameAlliesTouched = frame;
+                }
+            }
         }
 
         void UpdateEnemyAirDpsInRange()

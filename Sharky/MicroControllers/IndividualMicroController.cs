@@ -755,9 +755,9 @@ namespace Sharky.MicroControllers
         {
             var enemyPosition = new Point2D { X = bestTarget.Unit.Pos.X, Y = bestTarget.Unit.Pos.Y };
             // TODO: make sure this is working correctly, not sure if Vector is accurate, or this function is accurate
-            if (bestTarget.Vector.LengthSquared() > 0)
+            if (bestTarget.Velocity > 0)
             {
-                var interceptionPoint = GetInterceptionPoint(bestTarget.Position, bestTarget.Vector, commander.UnitCalculation.Position, commander.UnitCalculation.UnitTypeData.MovementSpeed);
+                var interceptionPoint = GetInterceptionPoint(bestTarget.Position, bestTarget.Vector, commander.UnitCalculation.Position, commander.UnitCalculation.Velocity);
                 var point = new Point2D { X = commander.UnitCalculation.Position.X - interceptionPoint.X, Y = commander.UnitCalculation.Position.Y - interceptionPoint.Y };
                 if (point != null && point.X > 0 && point.Y > 0 && point.X < MapDataService.MapData.MapWidth && interceptionPoint.Y < MapDataService.MapData.MapHeight)
                 {

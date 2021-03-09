@@ -33,6 +33,7 @@ namespace Sharky
         /// </summary>
         public Vector2 Position { get; set; }
         public Vector2 Vector { get; set; }
+        public float Velocity { get; set; }
 
         /// <summary>
         /// enemies this unit can attack
@@ -71,6 +72,7 @@ namespace Sharky
             }
             else
             {
+                Velocity = 0;
                 Vector = Vector2.Zero;
                 Position = new Vector2(unit.Pos.X, unit.Pos.Y);
             }
@@ -309,7 +311,8 @@ namespace Sharky
             Vector = new Vector2(Unit.Pos.X - PreviousUnit.Pos.X, Unit.Pos.Y - PreviousUnit.Pos.Y);
             Position = new Vector2(Unit.Pos.X + Vector.X, Unit.Pos.Y + Vector.Y);
 
-            if (Vector.LengthSquared() != 0)
+            Velocity = Vector.LengthSquared();
+            if (Velocity != 0)
             {
                 var normalized = Vector2.Normalize(Vector);
                 Vector = Vector2.Multiply(normalized, UnitTypeData.MovementSpeed);
