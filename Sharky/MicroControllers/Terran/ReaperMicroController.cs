@@ -1,7 +1,7 @@
 ﻿using SC2APIProtocol;
 using Sharky.Pathing;
-using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 
 namespace Sharky.MicroControllers.Terran
@@ -17,16 +17,24 @@ namespace Sharky.MicroControllers.Terran
             Kd8Charge = 5;
         }
 
+        // TODO: use offensiveability when retreating
+
         protected override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
-            if (commander.UnitCalculation.Unit.Health < 10)
+            if (commander.UnitCalculation.Unit.Health < 10 || (commander.UnitCalculation.Unit.Health < 30 && commander.UnitCalculation.NearbyEnemies.Any(e => e.DamageGround && e.Damage > commander.UnitCalculation.Unit.Health)))
             {
                 if (AvoidDamage(commander, target, defensivePoint, frame, out action))
                 {
                     return true;
                 }
+            }
+
+            if (commander.UnitCalculation.Unit.Health < 10 && commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit)))
+            {
+                action = Retreat(commander, defensivePoint, groupCenter, frame);
+                return true;
             }
 
             if (commander.UnitCalculation.Unit.Health == commander.UnitCalculation.Unit.HealthMax)
@@ -41,21 +49,42 @@ namespace Sharky.MicroControllers.Terran
         {
             action = null;
 
-            if (bestTarget != null && commander.AbilityOffCooldown(Abilities.EFFECT_KD8CHARGE, frame, SharkyOptions.FramesPerSecond, SharkyUnitData))
+            if (commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.EFFECT_KD8CHARGE)) { return true; }
+
+            if (commander.UnitCalculation.NearbyAllies.Any(a => a.Unit.UnitType == (uint)UnitTypes.TERRAN_KD8CHARGE)) { return false;  } // don't spam them all at once
+
+            if (bestTarget != null && bestTarget.Unit.Tag != commander.UnitCalculation.Unit.Tag && bestTarget.FrameLastSeen == frame && !bestTarget.Attributes.Contains(Attribute.Structure) && commander.AbilityOffCooldown(Abilities.EFFECT_KD8CHARGE, frame, SharkyOptions.FramesPerSecond, SharkyUnitData))
             {
-                var distanceSqaured = Vector2.DistanceSquared(commander.UnitCalculation.Position, bestTarget.Position);
+                var distanceSqaured = Vector2.DistanceSquared(commander.UnitCalculation.Position, bestTarget.Position); // TODO: use unit velocity to predict where to place the charge and check if in range of that
 
-                if (distanceSqaured <= Kd8Charge * Kd8Charge)
+                if (distanceSqaured <= 100)
                 {
-                    var x = bestTarget.Unit.Radius * Math.Cos(bestTarget.Unit.Facing);
-                    var y = bestTarget.Unit.Radius * Math.Sin(bestTarget.Unit.Facing);
-                    var blinkPoint = new Point2D { X = bestTarget.Unit.Pos.X + (float)x, Y = bestTarget.Unit.Pos.Y - (float)y };
-
-                    action = commander.Order(frame, Abilities.EFFECT_KD8CHARGE, blinkPoint);
-                    return true;
+                    var enemyPosition = new Point2D { X = bestTarget.Unit.Pos.X, Y = bestTarget.Unit.Pos.Y };
+                    if (bestTarget.Velocity > 0)
+                    {
+                        var futurePosition = bestTarget.Position + (bestTarget.Vector * (bestTarget.Velocity * SharkyOptions.FramesPerSecond));
+                        if (Vector2.DistanceSquared(commander.UnitCalculation.Position, futurePosition) < Kd8Charge * Kd8Charge)
+                        {
+                            var interceptionPoint = new Point2D { X = futurePosition.X, Y = futurePosition.Y };
+                            action = commander.Order(frame, Abilities.EFFECT_KD8CHARGE, interceptionPoint);
+                            return true;
+                        }
+                    }
+                    else if (distanceSqaured < Kd8Charge * Kd8Charge)
+                    {
+                        var point = new Point2D { X = bestTarget.Position.X, Y = bestTarget.Position.Y };
+                        action = commander.Order(frame, Abilities.EFFECT_KD8CHARGE, point);
+                        return true;
+                    }
                 }
             }
 
+            return false;
+        }
+
+        protected override bool GetHighGroundVision(UnitCommander commander, Point2D target, Point2D defensivePoint, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
             return false;
         }
     }

@@ -242,6 +242,7 @@ namespace Sharky.DefaultBot
             var workerProxyScoutMicroController = new WorkerScoutMicroController(MapDataService, SharkyUnitData, ActiveUnitData, DebugService, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, UnitDataService, TargetingData, MicroPriority.AttackForward, false);
 
             var oracleHarassMicroController = new OracleMicroController(MapDataService, SharkyUnitData, ActiveUnitData, DebugService, SharkyPathFinder, BaseData, SharkyOptions, DamageService, UnitDataService, TargetingData, MicroPriority.LiveAndAttack, false);
+            var reaperHarassMicroController = new ReaperMicroController(MapDataService, SharkyUnitData, ActiveUnitData, DebugService, SharkyPathFinder, BaseData, SharkyOptions, DamageService, UnitDataService, TargetingData, MicroPriority.LiveAndAttack, false);
 
             var individualMicroControllers = new Dictionary<UnitTypes, IIndividualMicroController>
             {
@@ -290,6 +291,7 @@ namespace Sharky.DefaultBot
             var adeptWorkerHarassTask = new AdeptWorkerHarassTask(BaseData, TargetingData, adeptMicroController, 2, false);
             var oracleWorkerHarassTask = new OracleWorkerHarassTask(TargetingData, BaseData, ChatService, MapDataService, MapData, oracleHarassMicroController, 1, false);
             var lateGameOracleHarassTask = new LateGameOracleHarassTask(BaseData, TargetingData, MapDataService, oracleHarassMicroController, 1, false);
+            var reaperWorkerHarassTask = new ReaperWorkerHarassTask(BaseData, TargetingData, reaperHarassMicroController, 2, false);
             var hallucinationScoutTask = new HallucinationScoutTask(TargetingData, BaseData, false, .5f);
             var wallOffTask = new WallOffTask(SharkyUnitData, TargetingData, ActiveUnitData, MacroData, (WallOffPlacement)WallOffPlacement, false, .25f);
             var destroyWallOffTask = new DestroyWallOffTask(ActiveUnitData, false, .25f);
@@ -304,6 +306,7 @@ namespace Sharky.DefaultBot
             MicroTaskData.MicroTasks[adeptWorkerHarassTask.GetType().Name] = adeptWorkerHarassTask;
             MicroTaskData.MicroTasks[oracleWorkerHarassTask.GetType().Name] = oracleWorkerHarassTask;
             MicroTaskData.MicroTasks[lateGameOracleHarassTask.GetType().Name] = lateGameOracleHarassTask;
+            MicroTaskData.MicroTasks[reaperWorkerHarassTask.GetType().Name] = reaperWorkerHarassTask;
             MicroTaskData.MicroTasks[hallucinationScoutTask.GetType().Name] = hallucinationScoutTask;
             MicroTaskData.MicroTasks[wallOffTask.GetType().Name] = wallOffTask;
             MicroTaskData.MicroTasks[destroyWallOffTask.GetType().Name] = destroyWallOffTask;

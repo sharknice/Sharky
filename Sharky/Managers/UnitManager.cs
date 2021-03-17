@@ -46,7 +46,7 @@ namespace Sharky.Managers
 
             ActiveUnitData.DeadUnits = new List<ulong>();
 
-            UndeadTypes = new List<UnitTypes> { UnitTypes.ZERG_BROODLING, UnitTypes.ZERG_EGG, UnitTypes.ZERG_LARVA };
+            UndeadTypes = new List<UnitTypes> { UnitTypes.ZERG_BROODLING, UnitTypes.ZERG_EGG, UnitTypes.ZERG_LARVA, UnitTypes.TERRAN_KD8CHARGE };
         }
 
         public override bool NeverSkip { get { return true; } }
@@ -103,27 +103,16 @@ namespace Sharky.Managers
                 ActiveUnitData.Commanders.TryRemove(unit.Key, out UnitCommander removed);
             }
 
-            foreach (var enemy in ActiveUnitData.EnemyUnits.Select(e => e.Value).ToList()) // if we can see this area of the map and the unit isn't there anymore remove it (we just remove it because visible units will get re-added below)
+            foreach (var unit in ActiveUnitData.EnemyUnits.Where(u => u.Value.UnitTypeData.Attributes.Contains(SC2APIProtocol.Attribute.Structure))) // structures get replaced by snapshots if we can't see them, so just remove them and let them get readded
             {
-                if (MapDataService.SelfVisible(enemy.Unit.Pos))
-                {
-                    ActiveUnitData.EnemyUnits.TryRemove(enemy.Unit.Tag, out UnitCalculation removed);
-                }
-                else if (enemy.Attributes.Contains(Attribute.Structure)) // structures get replaced by snapshots if we can't see them, so just remove them and let them get readded
-                {
-                    ActiveUnitData.EnemyUnits.TryRemove(enemy.Unit.Tag, out UnitCalculation removed);
-                }
+                ActiveUnitData.EnemyUnits.TryRemove(unit.Key, out UnitCalculation removed);
             }
 
             var repairers = observation.Observation.RawData.Units.Where(u => u.UnitType == (uint)UnitTypes.TERRAN_SCV || u.UnitType == (uint)UnitTypes.TERRAN_MULE);
 
             Parallel.ForEach(observation.Observation.RawData.Units, (unit) =>
             {
-                if (unit.UnitType == (uint)UnitTypes.TERRAN_KD8CHARGE)
-                {
-
-                }
-                else if (unit.Alliance == Alliance.Enemy)
+                if (unit.Alliance == Alliance.Enemy)
                 {
                     var repairingUnitCount = repairers.Where(u => u.Alliance == Alliance.Enemy && Vector2.DistanceSquared(new Vector2(u.Pos.X, u.Pos.Y), new Vector2(unit.Pos.X, unit.Pos.Y)) < (1.0 + u.Radius + unit.Radius) * (0.1 + u.Radius + unit.Radius)).Count();
                     var attack = new UnitCalculation(unit, unit, repairingUnitCount, SharkyUnitData, SharkyOptions, UnitDataService, frame);
@@ -152,6 +141,14 @@ namespace Sharky.Managers
                     ActiveUnitData.NeutralUnits[unit.Tag] = attack;
                 }
             });
+
+            foreach (var enemy in ActiveUnitData.EnemyUnits.Select(e => e.Value).ToList()) // if we can see this area of the map and the unit isn't there anymore remove it (we just remove it because visible units will get re-added below)
+            {
+                if (enemy.FrameLastSeen != frame && MapDataService.SelfVisible(enemy.Unit.Pos))
+                {
+                    ActiveUnitData.EnemyUnits.TryRemove(enemy.Unit.Tag, out UnitCalculation removed);
+                }
+            }
 
             foreach (var allyAttack in ActiveUnitData.SelfUnits)
             {

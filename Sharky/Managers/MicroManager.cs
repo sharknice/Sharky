@@ -13,6 +13,7 @@ namespace Sharky.Managers
         {
             ActiveUnitData = activeUnitData;
             MicroTaskData = microTaskData;
+            NeverSkip = true;
         }
 
         public override IEnumerable<Action> OnFrame(ResponseObservation observation)
@@ -28,7 +29,14 @@ namespace Sharky.Managers
                 }
 
                 microTask.ClaimUnits(ActiveUnitData.Commanders);
-                actions.AddRange(microTask.PerformActions(frame));
+                if (!SkipFrame)
+                {
+                    actions.AddRange(microTask.PerformActions(frame));
+                }
+            }
+            if (SkipFrame)
+            {
+                SkipFrame = false;
             }
             return actions;
         }

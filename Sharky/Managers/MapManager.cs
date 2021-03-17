@@ -64,7 +64,7 @@ namespace Sharky.Managers
 
             UpdateVisibility(observation.Observation.RawData.MapState.Visibility, (int)observation.Observation.GameLoop);
             UpdateCreep(observation.Observation.RawData.MapState.Creep);
-            UpdateEnemyAirDpsInRange();
+            UpdateEnemyDpsInRange();
             UpdateInEnemyDetection();
             UpdateNumberOfAllies((int)observation.Observation.GameLoop);
 
@@ -112,22 +112,34 @@ namespace Sharky.Managers
             }
         }
 
-        void UpdateEnemyAirDpsInRange()
+        void UpdateEnemyDpsInRange()
         {
             for (var x = 0; x < MapData.MapWidth; x++)
             {
                 for (var y = 0; y < MapData.MapHeight; y++)
                 {
                     MapData.Map[x][y].EnemyAirDpsInRange = 0;
+                    MapData.Map[x][y].EnemyGroundDpsInRange = 0;
                 }
             }
 
-            foreach (var enemy in ActiveUnitData.EnemyUnits.Where(e => e.Value.DamageAir && e.Value.Unit.BuildProgress == 1))
+            foreach (var enemy in ActiveUnitData.EnemyUnits.Where(e => e.Value.Unit.BuildProgress == 1))
             {
-                var nodes = GetNodesInRange(enemy.Value.Unit.Pos, enemy.Value.Range + 2, MapData.MapWidth, MapData.MapHeight);
-                foreach (var node in nodes)
+                if (enemy.Value.DamageAir)
                 {
-                    MapData.Map[(int)node.X][(int)node.Y].EnemyAirDpsInRange += enemy.Value.Dps;
+                    var nodes = GetNodesInRange(enemy.Value.Unit.Pos, enemy.Value.Range + 2, MapData.MapWidth, MapData.MapHeight);
+                    foreach (var node in nodes)
+                    {
+                        MapData.Map[(int)node.X][(int)node.Y].EnemyAirDpsInRange += enemy.Value.Dps;
+                    }
+                }
+                if (enemy.Value.DamageGround)
+                {
+                    var nodes = GetNodesInRange(enemy.Value.Unit.Pos, enemy.Value.Range + 2, MapData.MapWidth, MapData.MapHeight);
+                    foreach (var node in nodes)
+                    {
+                        MapData.Map[(int)node.X][(int)node.Y].EnemyGroundDpsInRange += enemy.Value.Dps;
+                    }
                 }
             }
         }

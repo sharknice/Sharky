@@ -27,9 +27,11 @@ namespace Sharky.Builds
         {
             if (unitData.Minerals <= macroData.Minerals && unitData.Gas <= macroData.VespeneGas)
             {
+                bool anyBase = false;
                 var location = generalLocation;
                 if (location == null)
                 {
+                    anyBase = true;
                     location = GetReferenceLocation(TargetingData.SelfMainBasePoint);
                 }
                 var placementLocation = BuildingPlacement.FindPlacement(location, unitType, unitData.Size, ignoreMineralProximity, maxDistance);
@@ -37,6 +39,17 @@ namespace Sharky.Builds
                 if (placementLocation == null)
                 {
                     placementLocation = BuildingPlacement.FindPlacement(location, unitType, unitData.Size, true, maxDistance);
+                }
+                if (placementLocation == null)
+                {
+                    foreach (var selfBase in BaseData.SelfBases)
+                    {
+                        placementLocation = BuildingPlacement.FindPlacement(selfBase.Location, unitType, unitData.Size, true, maxDistance);
+                        if (placementLocation != null)
+                        {
+                            break;
+                        }
+                    }
                 }
                 if (placementLocation != null)
                 {

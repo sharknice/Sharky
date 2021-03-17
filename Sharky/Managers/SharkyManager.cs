@@ -7,7 +7,7 @@ namespace Sharky.Managers
     {
         public virtual bool SkipFrame { get; set; }
 
-        public virtual bool NeverSkip { get { return false; } }
+        public virtual bool NeverSkip { protected set { } get { return false; } }
 
         public virtual void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)
         {
