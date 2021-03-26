@@ -250,6 +250,27 @@ namespace Sharky.Managers
                     enemyBase.ResourceCenter = resourceCenters.FirstOrDefault(r => Vector2.DistanceSquared(r.Position, new Vector2(enemyBase.Location.X, enemyBase.Location.Y)) < 25).Unit;
                 }
             }
+
+            var takenGases = ActiveUnitData.EnemyUnits.Where(u => SharkyUnitData.GasGeyserRefineryTypes.Contains((UnitTypes)u.Value.Unit.UnitType)).Concat(ActiveUnitData.SelfUnits.Where(u => SharkyUnitData.GasGeyserRefineryTypes.Contains((UnitTypes)u.Value.Unit.UnitType)));
+            foreach (var enemyBase in BaseData.EnemyBases)
+            {
+                for (var index = 0; index < enemyBase.VespeneGeysers.Count; index++)
+                {
+                    if (enemyBase.VespeneGeysers[index].DisplayType == DisplayType.Snapshot)
+                    {
+                        var visibleGeyser = ActiveUnitData.NeutralUnits.FirstOrDefault(m => m.Value.Unit.DisplayType == DisplayType.Visible && m.Value.Unit.Pos.X == enemyBase.VespeneGeysers[index].Pos.X && m.Value.Unit.Pos.Y == enemyBase.VespeneGeysers[index].Pos.Y).Value;
+                        if (visibleGeyser != null)
+                        {
+                            enemyBase.VespeneGeysers[index] = visibleGeyser.Unit;
+                        }
+                    }
+                    var takenGas = takenGases.FirstOrDefault(g => g.Value.Position.X == enemyBase.VespeneGeysers[index].Pos.X && g.Value.Position.Y == enemyBase.VespeneGeysers[index].Pos.Y).Value;
+                    if (takenGas != null)
+                    {
+                        enemyBase.VespeneGeysers[index] = takenGas.Unit;
+                    }
+                }
+            }
         }
 
         void SetMineralLineLocation(BaseLocation baseLocation)

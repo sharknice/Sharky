@@ -40,7 +40,7 @@ namespace Sharky.Builds
                 {
                     placementLocation = BuildingPlacement.FindPlacement(location, unitType, unitData.Size, true, maxDistance);
                 }
-                if (placementLocation == null)
+                if (placementLocation == null && anyBase)
                 {
                     foreach (var selfBase in BaseData.SelfBases)
                     {

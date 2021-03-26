@@ -371,7 +371,7 @@ namespace Sharky.MicroControllers.Protoss
 
                     foreach (var enemyAttack in commander.UnitCalculation.NearbyEnemies)
                     {
-                        if (DamageService.CanDamage(unit.Weapons, enemyAttack.Unit) && InRange(commander.UnitCalculation.Position, enemyAttack.Position, unit.Range + passengerUnit.Radius + enemyAttack.Unit.Radius) && MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos) == MapDataService.MapHeight(enemyAttack.Unit.Pos))
+                        if (DamageService.CanDamage(unit, enemyAttack) && InRange(commander.UnitCalculation.Position, enemyAttack.Position, unit.Range + passengerUnit.Radius + enemyAttack.Unit.Radius) && MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos) == MapDataService.MapHeight(enemyAttack.Unit.Pos))
                         {
                             if (!enemyAttack.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !InRange(commander.UnitCalculation.Position, enemyAttack.Position, 2 + passengerUnit.Radius + enemyAttack.Unit.Radius))
                             {

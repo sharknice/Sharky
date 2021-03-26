@@ -154,12 +154,12 @@ namespace Sharky.Managers
             {
                 foreach (var enemyAttack in ActiveUnitData.EnemyUnits)
                 {
-                    if (DamageService.CanDamage(allyAttack.Value.Weapons, enemyAttack.Value.Unit) && Vector2.DistanceSquared(allyAttack.Value.Position, enemyAttack.Value.Position) <= (allyAttack.Value.Range + allyAttack.Value.Unit.Radius + enemyAttack.Value.Unit.Radius) * (allyAttack.Value.Range + allyAttack.Value.Unit.Radius + enemyAttack.Value.Unit.Radius))
+                    if (DamageService.CanDamage(allyAttack.Value, enemyAttack.Value) && Vector2.DistanceSquared(allyAttack.Value.Position, enemyAttack.Value.Position) <= (allyAttack.Value.Range + allyAttack.Value.Unit.Radius + enemyAttack.Value.Unit.Radius) * (allyAttack.Value.Range + allyAttack.Value.Unit.Radius + enemyAttack.Value.Unit.Radius))
                     {
                         allyAttack.Value.EnemiesInRange.Add(enemyAttack.Value);
                         enemyAttack.Value.EnemiesInRangeOf.Add(allyAttack.Value);
                     }
-                    if (DamageService.CanDamage(enemyAttack.Value.Weapons, allyAttack.Value.Unit) && Vector2.DistanceSquared(allyAttack.Value.Position, enemyAttack.Value.Position) <= (enemyAttack.Value.Range + allyAttack.Value.Unit.Radius + enemyAttack.Value.Unit.Radius) * (enemyAttack.Value.Range + allyAttack.Value.Unit.Radius + enemyAttack.Value.Unit.Radius))
+                    if (DamageService.CanDamage(enemyAttack.Value, allyAttack.Value) && Vector2.DistanceSquared(allyAttack.Value.Position, enemyAttack.Value.Position) <= (enemyAttack.Value.Range + allyAttack.Value.Unit.Radius + enemyAttack.Value.Unit.Radius) * (enemyAttack.Value.Range + allyAttack.Value.Unit.Radius + enemyAttack.Value.Unit.Radius))
                     {
                         enemyAttack.Value.EnemiesInRange.Add(allyAttack.Value);
                         allyAttack.Value.EnemiesInRangeOf.Add(enemyAttack.Value);
@@ -181,6 +181,11 @@ namespace Sharky.Managers
                     commander.UnitCalculation = allyAttack.Value;
                     return commander;
                 });
+            }
+
+            foreach (var enemyAttack in ActiveUnitData.EnemyUnits)
+            {
+                enemyAttack.Value.NearbyAllies = ActiveUnitData.EnemyUnits.Where(a => a.Key != enemyAttack.Key && Vector2.DistanceSquared(enemyAttack.Value.Position, a.Value.Position) <= NearbyDistance * NearbyDistance).Select(a => a.Value).ToList();
             }
 
             foreach (var selfUnit in ActiveUnitData.SelfUnits)
@@ -219,7 +224,7 @@ namespace Sharky.Managers
 
             Parallel.ForEach(unitCalculation.EnemiesInRangeOf, (enemyAttack) =>
             {
-                if (DamageService.CanDamage(enemyAttack.Weapons, unitCalculation.Unit) && CollisionCalculator.Collides(unitCalculation.Position, unitCalculation.Unit.Radius, enemyAttack.Start, enemyAttack.End))
+                if (DamageService.CanDamage(enemyAttack, unitCalculation) && CollisionCalculator.Collides(unitCalculation.Position, unitCalculation.Unit.Radius, enemyAttack.Start, enemyAttack.End))
                 {
                     attacks.Add(enemyAttack);
                 }

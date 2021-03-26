@@ -72,7 +72,14 @@ namespace Sharky.MicroTasks.Proxy
             var supportUnits = UnitCommanders.Where(c => !MainAttackers.Contains((UnitTypes)c.UnitCalculation.Unit.UnitType));
 
             var hiddenBase = TargetingData.HiddenEnemyBase;
-            AttackData.ArmyPoint = TargetingService.GetArmyPoint(UnitCommanders);
+            if (mainUnits.Count() > 0)
+            {
+                AttackData.ArmyPoint = TargetingService.GetArmyPoint(mainUnits);
+            }
+            else
+            {
+                AttackData.ArmyPoint = TargetingService.GetArmyPoint(UnitCommanders);
+            }
             TargetingData.AttackPoint = TargetingService.UpdateAttackPoint(AttackData.ArmyPoint, TargetingData.AttackPoint);
 
             var attackingEnemies = ActiveUnitData.SelfUnits.Where(u => u.Value.UnitClassifications.Contains(UnitClassification.ResourceCenter) || u.Value.UnitClassifications.Contains(UnitClassification.ProductionStructure)).SelectMany(u => u.Value.NearbyEnemies).Distinct();
@@ -110,23 +117,23 @@ namespace Sharky.MicroTasks.Proxy
             {
                 if (AttackData.Attacking)
                 {
-                    actions.AddRange(MicroController.Attack(mainUnits, TargetingData.AttackPoint, TargetingData.ForwardDefensePoint, null, frame));
+                    actions.AddRange(MicroController.Attack(mainUnits, TargetingData.AttackPoint, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame));
                 }
                 else
                 {
                     actions.AddRange(MicroController.Retreat(mainUnits, TargetingData.ForwardDefensePoint, null, frame));
                 }
-                actions.AddRange(MicroController.Support(supportUnits, mainUnits, TargetingData.AttackPoint, TargetingData.ForwardDefensePoint, null, frame));
+                actions.AddRange(MicroController.Support(supportUnits, mainUnits, TargetingData.AttackPoint, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame));
             }
             else
             {
                 if (AttackData.Attacking)
                 {
-                    actions.AddRange(MicroController.Attack(supportUnits, TargetingData.AttackPoint, TargetingData.ForwardDefensePoint, null, frame));
+                    actions.AddRange(MicroController.Attack(supportUnits, TargetingData.AttackPoint, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame));
                 }
                 else
                 {
-                    actions.AddRange(MicroController.Retreat(supportUnits, TargetingData.ForwardDefensePoint, null, frame));
+                    actions.AddRange(MicroController.Retreat(supportUnits, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame));
                 }
             }
 

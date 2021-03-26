@@ -15,12 +15,14 @@ namespace Sharky.MicroControllers.Protoss
 
         protected override bool WeaponReady(UnitCommander commander)
         {
-            return commander.UnitCalculation.Unit.WeaponCooldown == 0 || commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.ATTACK || o.AbilityId == (uint)Abilities.ATTACK_ATTACK);
+            return true;
         }
 
         protected override bool AvoidTargettedDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
+
+            if (commander.UnitCalculation.Unit.Shield == commander.UnitCalculation.Unit.ShieldMax) { return false; }
 
             var dps = commander.UnitCalculation.Attackers.Sum(a => a.Dps);
             var hp = commander.UnitCalculation.Attackers.Sum(a => a.Unit.Health + a.Unit.Shield);
@@ -69,9 +71,9 @@ namespace Sharky.MicroControllers.Protoss
         protected override bool RechargeShieldsAtBattery(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
-            if (commander.UnitCalculation.Unit.ShieldMax > 0 && commander.UnitCalculation.Unit.Shield < 10)
+            if (commander.UnitCalculation.Unit.ShieldMax > 0 && commander.UnitCalculation.Unit.Shield < 25)
             {
-                var shieldBatttery = ActiveUnitData.SelfUnits.Where(a => a.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_SHIELDBATTERY && a.Value.Unit.Energy > 5 && a.Value.Unit.Orders.Count() == 0).OrderBy(a => Vector2.DistanceSquared(commander.UnitCalculation.Position, a.Value.Position)).FirstOrDefault().Value;
+                var shieldBatttery = ActiveUnitData.SelfUnits.Where(a => a.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_SHIELDBATTERY && a.Value.Unit.BuildProgress == 1 && a.Value.Unit.Energy > 5 && a.Value.Unit.Orders.Count() == 0).OrderBy(a => Vector2.DistanceSquared(commander.UnitCalculation.Position, a.Value.Position)).FirstOrDefault().Value;
                 if (shieldBatttery != null)
                 {
                     var distanceSquared = Vector2.DistanceSquared(commander.UnitCalculation.Position, shieldBatttery.Position);

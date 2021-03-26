@@ -52,6 +52,10 @@ namespace Sharky
             {
                 return new Weapon { Attacks = 1, Damage = 15, Range = 4, Type = Weapon.Types.TargetType.Ground, Speed = 0.61f };
             }
+            if (unitType == UnitTypes.PROTOSS_CARRIER)
+            {
+                return new Weapon { Attacks = 16, Damage = 5, Range = 14, Type = Weapon.Types.TargetType.Any, Speed = 2.14f };
+            }
             if (unitType == UnitTypes.ZERG_BANELING || unitType == UnitTypes.ZERG_BANELINGBURROWED)
             {
                 return new Weapon { Attacks = 1, Damage = 16, Range = 2.2f, Type = Weapon.Types.TargetType.Ground, Speed = 1f };

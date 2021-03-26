@@ -147,5 +147,10 @@ namespace Sharky.Pathing
         {
             return MapData.Map[(int)point.X][(int)point.Y].LastFrameAlliesTouched;
         }
+
+        internal bool InEnemyVision(Point point)
+        {
+            return MapData.Map[(int)point.X][(int)point.Y].InEnemyVision;
+        }
     }
 }

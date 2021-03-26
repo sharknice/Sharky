@@ -11,14 +11,16 @@ namespace Sharky.Builds
         ActiveUnitData ActiveUnitData;
         MacroData MacroData;
         SharkyUnitData SharkyUnitData;
+        BaseData BaseData;
         UnitCountService UnitCountService;
 
-        public MacroBalancer(BuildOptions buildOptions, ActiveUnitData activeUnitData, MacroData macroData, SharkyUnitData sharkyUnitData, UnitCountService unitCountService)
+        public MacroBalancer(BuildOptions buildOptions, ActiveUnitData activeUnitData, MacroData macroData, SharkyUnitData sharkyUnitData, BaseData baseData, UnitCountService unitCountService)
         {
             BuildOptions = buildOptions;
             ActiveUnitData = activeUnitData;
             MacroData = macroData;
             SharkyUnitData = sharkyUnitData;
+            BaseData = baseData;
             UnitCountService = unitCountService;
         }
 
@@ -82,18 +84,7 @@ namespace Sharky.Builds
                 }
             }
 
-            if (MacroData.Race == Race.Protoss)
-            {
-                MacroData.BuildGas = MacroData.DesiredGases > UnitCountService.Count(UnitTypes.PROTOSS_ASSIMILATOR) + ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.BUILD_ASSIMILATOR));
-            }
-            else if (MacroData.Race == Race.Terran)
-            {
-                MacroData.BuildGas = MacroData.DesiredGases > UnitCountService.Count(UnitTypes.TERRAN_REFINERY) + ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_SCV && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.BUILD_REFINERY));
-            }
-            else if (MacroData.Race == Race.Zerg)
-            {
-                MacroData.BuildGas = MacroData.DesiredGases > UnitCountService.Count(UnitTypes.ZERG_EXTRACTOR) + ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.ZERG_DRONE && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.BUILD_EXTRACTOR));
-            }
+            MacroData.BuildGas = MacroData.DesiredGases > BaseData.SelfBases.Sum(b => b.GasMiningInfo.Count());
         }
 
         public void BalanceTech()
@@ -174,9 +165,9 @@ namespace Sharky.Builds
                 {
                     desiredWorkers = 40;
                 }
-                if (desiredWorkers > 70)
+                if (desiredWorkers > 90)
                 {
-                    desiredWorkers = 70;
+                    desiredWorkers = 90;
                 }
 
                 var workerType = UnitTypes.PROTOSS_PROBE;

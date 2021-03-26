@@ -66,6 +66,7 @@ namespace Sharky.Managers
             UpdateCreep(observation.Observation.RawData.MapState.Creep);
             UpdateEnemyDpsInRange();
             UpdateInEnemyDetection();
+            UpdateInEnemyVision();
             UpdateNumberOfAllies((int)observation.Observation.GameLoop);
 
             //var buildings = shark.EnemyAttacks.Where(e => UnitTypes.BuildingTypes.Contains(e.Value.Unit.UnitType)).Select(e => e.Value).Concat(shark.AllyAttacks.Where(e => UnitTypes.BuildingTypes.Contains(e.Value.Unit.UnitType)).Select(e => e.Value));
@@ -169,6 +170,35 @@ namespace Sharky.Managers
                 foreach (var node in nodes)
                 {
                     MapData.Map[(int)node.X][(int)node.Y].InEnemyDetection = true;
+                }
+            }
+        }
+
+        void UpdateInEnemyVision()
+        {
+            for (var x = 0; x < MapData.MapWidth; x++)
+            {
+                for (var y = 0; y < MapData.MapHeight; y++)
+                {
+                    MapData.Map[x][y].InEnemyVision = false;
+                }
+            }
+
+            foreach (var enemy in ActiveUnitData.EnemyUnits.Where(e => e.Value.Unit.BuildProgress == 1))
+            {
+                var nodes = GetNodesInRange(enemy.Value.Unit.Pos, 12, MapData.MapWidth, MapData.MapHeight);
+                foreach (var node in nodes)
+                {
+                    MapData.Map[(int)node.X][(int)node.Y].InEnemyVision = true;
+                }
+            }
+
+            foreach (var scan in SharkyUnitData.Effects.Where(e => e.EffectId == (uint)Effects.SCAN))
+            {
+                var nodes = GetNodesInRange(new Point { X = scan.Pos[0].X, Y = scan.Pos[0].Y, Z = 1 }, scan.Radius + 2, MapData.MapWidth, MapData.MapHeight);
+                foreach (var node in nodes)
+                {
+                    MapData.Map[(int)node.X][(int)node.Y].InEnemyVision = true;
                 }
             }
         }

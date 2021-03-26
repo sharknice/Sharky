@@ -6,17 +6,17 @@ namespace Sharky
 {
     public class DamageService
     {
-        public bool CanDamage(IEnumerable<Weapon> weapons, Unit unit)
+        public bool CanDamage(UnitCalculation attacker, UnitCalculation victim)
         {
-            if (weapons.Count() == 0 || weapons.All(w => w.Damage == 0))
+            if (attacker.Damage == 0)
             {
                 return false;
             }
-            if ((unit.IsFlying || unit.UnitType == (uint)UnitTypes.PROTOSS_COLOSSUS || unit.BuffIds.Contains((uint)Buffs.GRAVITONBEAM)) && weapons.Any(w => w.Type == Weapon.Types.TargetType.Air || w.Type == Weapon.Types.TargetType.Any))
+            if (attacker.DamageAir && (victim.Unit.IsFlying || victim.Unit.UnitType == (uint)UnitTypes.PROTOSS_COLOSSUS || victim.Unit.BuffIds.Contains((uint)Buffs.GRAVITONBEAM)))
             {
                 return true;
             }
-            if (!unit.IsFlying && weapons.Any(w => w.Type == Weapon.Types.TargetType.Ground || w.Type == Weapon.Types.TargetType.Any))
+            if (attacker.DamageGround && !victim.Unit.IsFlying)
             {
                 return true;
             }
