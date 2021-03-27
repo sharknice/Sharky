@@ -58,24 +58,17 @@ namespace Sharky
         public UnitTypeData UnitTypeData { get; set; }
         public int FrameLastSeen { get; set; }
 
-        public UnitCalculation(Unit previousUnit, Unit unit, int repairers, SharkyUnitData sharkyUnitData, SharkyOptions sharkyOptions, UnitDataService unitDataService, int frame)
+        public UnitCalculation(Unit unit, int repairers, SharkyUnitData sharkyUnitData, SharkyOptions sharkyOptions, UnitDataService unitDataService, int frame)
         {
-            FrameLastSeen = frame;
-
-            PreviousUnit = previousUnit;
+            PreviousUnit = unit;
             Unit = unit;
             UnitTypeData = sharkyUnitData.UnitData[(UnitTypes)unit.UnitType];
 
-            if (previousUnit != unit)
-            {
-                SetPreviousUnit(previousUnit);
-            }
-            else
-            {
-                Velocity = 0;
-                Vector = Vector2.Zero;
-                Position = new Vector2(unit.Pos.X, unit.Pos.Y);
-            }
+            Velocity = 0;
+            Vector = Vector2.Zero;
+            Position = new Vector2(unit.Pos.X, unit.Pos.Y);
+
+            FrameLastSeen = frame;
 
             var unitRange = unitDataService.GetRange(unit);
             if (unitRange == 0)
@@ -305,18 +298,16 @@ namespace Sharky
             return damage / Weapon.Speed;
         }
 
-        public void SetPreviousUnit(Unit previousUnit)
+        public void SetPreviousUnit(Unit previousUnit, int frame)
         {
+            if (FrameLastSeen == frame) { return; }
+
             PreviousUnit = previousUnit;
             Vector = new Vector2(Unit.Pos.X - PreviousUnit.Pos.X, Unit.Pos.Y - PreviousUnit.Pos.Y);
             Position = new Vector2(Unit.Pos.X + Vector.X, Unit.Pos.Y + Vector.Y);
 
+            Vector = Vector / (FrameLastSeen - frame);
             Velocity = Vector.LengthSquared();
-            if (Velocity != 0)
-            {
-                var normalized = Vector2.Normalize(Vector);
-                Vector = Vector2.Multiply(normalized, UnitTypeData.MovementSpeed);
-            }
         }
     }
 }

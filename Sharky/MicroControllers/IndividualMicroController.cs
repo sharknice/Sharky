@@ -751,7 +751,7 @@ namespace Sharky.MicroControllers
                 var fakeMainBase = new Unit(commander.UnitCalculation.Unit);
                 fakeMainBase.Pos = new Point { X = target.X, Y = target.Y, Z = 1 };
                 fakeMainBase.Alliance = Alliance.Enemy;
-                return new UnitCalculation(fakeMainBase, fakeMainBase, 0, SharkyUnitData, SharkyOptions, UnitDataService, frame);
+                return new UnitCalculation(fakeMainBase, 0, SharkyUnitData, SharkyOptions, UnitDataService, frame);
             }
             var unitsNearEnemyMain = ActiveUnitData.EnemyUnits.Values.Where(e => e.Unit.UnitType != (uint)UnitTypes.ZERG_LARVA && InRange(new Vector2(target.X, target.Y), e.Position, 20));
             if (unitsNearEnemyMain.Count() > 0 && InRange(new Vector2(target.X, target.Y), commander.UnitCalculation.Position, 100))
@@ -783,12 +783,15 @@ namespace Sharky.MicroControllers
             if (bestTarget.Velocity > 0)
             {
                 var interceptionPoint = GetInterceptionPoint(bestTarget.Position, bestTarget.Vector, commander.UnitCalculation.Position, commander.UnitCalculation.Velocity);
-                var point = new Point2D { X = commander.UnitCalculation.Position.X - interceptionPoint.X, Y = commander.UnitCalculation.Position.Y - interceptionPoint.Y };
+                var point = new Point2D { X = interceptionPoint.X, Y = interceptionPoint.Y };
                 if (point != null && point.X > 0 && point.Y > 0 && point.X < MapDataService.MapData.MapWidth && interceptionPoint.Y < MapDataService.MapData.MapHeight)
                 {
                     if ((!commander.UnitCalculation.Unit.IsFlying || !bestTarget.Unit.IsFlying) && (!MapDataService.PathWalkable(point) || MapDataService.MapHeight(point) != MapDataService.MapHeight(enemyPosition)))
                     {
                         // TODO: also check if enemy position is walkable, and if it isn't figure out the best spot to move
+                        DebugService.DrawLine(commander.UnitCalculation.Unit.Pos, new Point { X = point.X, Y = point.Y, Z = 12 }, new Color { B = 0, G = 0, R = 255 });
+                        DebugService.DrawLine(bestTarget.Unit.Pos, new Point { X = point.X, Y = point.Y, Z = 12 }, new Color { B = 0, G = 0, R = 255 });
+                        DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 }, .5f, new Color { B = 255, G = 255, R = 255 });
                         return enemyPosition;
                     }
                     if (Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(point.X, point.Y)) > 625)
@@ -1947,7 +1950,7 @@ namespace Sharky.MicroControllers
             var time_to_collision = (float)b / Magnitude(target_vel);
             var collision_pos = target_pos + (target_vel * time_to_collision);
 
-            return interceptor_pos - collision_pos;
+            return collision_pos;
         }
     }
 }

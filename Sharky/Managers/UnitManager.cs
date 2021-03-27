@@ -115,28 +115,28 @@ namespace Sharky.Managers
                 if (unit.Alliance == Alliance.Enemy)
                 {
                     var repairingUnitCount = repairers.Where(u => u.Alliance == Alliance.Enemy && Vector2.DistanceSquared(new Vector2(u.Pos.X, u.Pos.Y), new Vector2(unit.Pos.X, unit.Pos.Y)) < (1.0 + u.Radius + unit.Radius) * (0.1 + u.Radius + unit.Radius)).Count();
-                    var attack = new UnitCalculation(unit, unit, repairingUnitCount, SharkyUnitData, SharkyOptions, UnitDataService, frame);
+                    var attack = new UnitCalculation(unit, repairingUnitCount, SharkyUnitData, SharkyOptions, UnitDataService, frame);
                     if (ActiveUnitData.EnemyUnits.TryGetValue(unit.Tag, out UnitCalculation existing))
                     {
-                        attack.SetPreviousUnit(existing.Unit);
+                        attack.SetPreviousUnit(existing.Unit, existing.FrameLastSeen);
                     }
                     ActiveUnitData.EnemyUnits[unit.Tag] = attack;
                 }
                 else if (unit.Alliance == Alliance.Self)
                 {
-                    var attack = new UnitCalculation(unit, unit, 0, SharkyUnitData, SharkyOptions, UnitDataService, frame);
+                    var attack = new UnitCalculation(unit, 0, SharkyUnitData, SharkyOptions, UnitDataService, frame);
                     if (ActiveUnitData.SelfUnits.TryGetValue(unit.Tag, out UnitCalculation existing))
                     {
-                        attack.SetPreviousUnit(existing.Unit);
+                        attack.SetPreviousUnit(existing.Unit, existing.FrameLastSeen);
                     }
                     ActiveUnitData.SelfUnits[unit.Tag] = attack;
                 }
                 else if (unit.Alliance == Alliance.Neutral)
                 {
-                    var attack = new UnitCalculation(unit, unit, 0, SharkyUnitData, SharkyOptions, UnitDataService, frame);
+                    var attack = new UnitCalculation(unit, 0, SharkyUnitData, SharkyOptions, UnitDataService, frame);
                     if (ActiveUnitData.NeutralUnits.TryGetValue(unit.Tag, out UnitCalculation existing))
                     {
-                        attack.SetPreviousUnit(existing.Unit);
+                        attack.SetPreviousUnit(existing.Unit, existing.FrameLastSeen);
                     }
                     ActiveUnitData.NeutralUnits[unit.Tag] = attack;
                 }
