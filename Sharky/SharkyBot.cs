@@ -68,14 +68,14 @@ namespace Sharky
                         manager.SkipFrame = true;
                     }
                 }
+
+                stopwatch.Stop();
+                DebugService.DrawText($"OnFrame: {stopwatch.ElapsedMilliseconds}");
             }
             catch (Exception exception)
             {
                 Console.WriteLine(exception.ToString());
             }
-
-            stopwatch.Stop();
-            DebugService.DrawText($"OnFrame: {stopwatch.ElapsedMilliseconds}");
 
             if (Actions.Any(a => a == null))
             {

@@ -62,7 +62,7 @@ namespace Sharky.MicroControllers.Terran
                     var enemyPosition = new Point2D { X = bestTarget.Unit.Pos.X, Y = bestTarget.Unit.Pos.Y };
                     if (bestTarget.Velocity > 0)
                     {
-                        var futurePosition = bestTarget.Position + (bestTarget.Vector * (bestTarget.Velocity * SharkyOptions.FramesPerSecond));
+                        var futurePosition = bestTarget.Position + (bestTarget.AverageVector * (bestTarget.AverageVelocity * SharkyOptions.FramesPerSecond));
                         if (Vector2.DistanceSquared(commander.UnitCalculation.Position, futurePosition) < Kd8Charge * Kd8Charge)
                         {
                             var interceptionPoint = new Point2D { X = futurePosition.X, Y = futurePosition.Y };

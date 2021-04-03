@@ -11,26 +11,26 @@ namespace Sharky.Builds.BuildingPlacement
         ActiveUnitData ActiveUnitData;
         SharkyUnitData SharkyUnitData;
         DebugService DebugService;
-        MapData MapData;
+        MapDataService MapDataService;
         BuildingService BuildingService;
 
-        public ProtossBuildingPlacement(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, DebugService debugService, MapData mapData, BuildingService buildingService)
+        public ProtossBuildingPlacement(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, DebugService debugService, MapDataService mapDataService, BuildingService buildingService)
         {
             ActiveUnitData = activeUnitData;
             SharkyUnitData = sharkyUnitData;
             DebugService = debugService;
-            MapData = mapData;
+            MapDataService = mapDataService;
             BuildingService = buildingService;
         }
 
-        public Point2D FindPlacement(Point2D target, UnitTypes unitType, int size, bool ignoreResourceProximity = false, float maxDistance = 50)
+        public Point2D FindPlacement(Point2D target, UnitTypes unitType, int size, bool ignoreResourceProximity = false, float maxDistance = 50, bool requireSameHeight = false)
         {
             var mineralProximity = 2;
             if (ignoreResourceProximity) { mineralProximity = 0; };
 
             if (unitType == UnitTypes.PROTOSS_PYLON)
             {
-                return FindPylonPlacement(target, maxDistance, mineralProximity);
+                return FindPylonPlacement(target, maxDistance, mineralProximity, requireSameHeight);
             }
             else
             {
@@ -38,7 +38,7 @@ namespace Sharky.Builds.BuildingPlacement
             }
         }
 
-        public Point2D FindPylonPlacement(Point2D reference, float maxDistance, float minimumMineralProximinity = 2)
+        public Point2D FindPylonPlacement(Point2D reference, float maxDistance, float minimumMineralProximinity = 2, bool requireSameHeight = false)
         {
             var x = reference.X;
             var y = reference.Y;
@@ -72,7 +72,7 @@ namespace Sharky.Builds.BuildingPlacement
                     //    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 }, 1, new Color { R = 0, G = 255, B = 0 });
                     //}
 
-                    if (BuildingService.AreaBuildable(point.X, point.Y, 1.25f) && !BuildingService.Blocked(point.X, point.Y, 1.25f, .1f) && !BuildingService.HasCreep(point.X, point.Y, 1.5f))
+                    if (BuildingService.AreaBuildable(point.X, point.Y, 1.25f) && !BuildingService.Blocked(point.X, point.Y, 1.25f, .1f) && !BuildingService.HasCreep(point.X, point.Y, 1.5f) && (!requireSameHeight || MapDataService.MapHeight(point) == MapDataService.MapHeight(reference)))
                     {
                         var mineralFields = ActiveUnitData.NeutralUnits.Where(u => SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType) || SharkyUnitData.GasGeyserTypes.Contains((UnitTypes)u.Value.Unit.UnitType));
                         var squared = (1 + minimumMineralProximinity + .5) * (1 + minimumMineralProximinity + .5);

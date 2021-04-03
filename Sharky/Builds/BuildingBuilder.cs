@@ -23,7 +23,7 @@ namespace Sharky.Builds
             BaseData = baseData;
         }
 
-        public List<Action> BuildBuilding(MacroData macroData, UnitTypes unitType, BuildingTypeData unitData, Point2D generalLocation = null, bool ignoreMineralProximity = false, float maxDistance = 50, List<UnitCommander> workerPool = null)
+        public List<Action> BuildBuilding(MacroData macroData, UnitTypes unitType, BuildingTypeData unitData, Point2D generalLocation = null, bool ignoreMineralProximity = false, float maxDistance = 50, List<UnitCommander> workerPool = null, bool requireSameHeight = false)
         {
             if (unitData.Minerals <= macroData.Minerals && unitData.Gas <= macroData.VespeneGas)
             {
@@ -34,17 +34,17 @@ namespace Sharky.Builds
                     anyBase = true;
                     location = GetReferenceLocation(TargetingData.SelfMainBasePoint);
                 }
-                var placementLocation = BuildingPlacement.FindPlacement(location, unitType, unitData.Size, ignoreMineralProximity, maxDistance);
+                var placementLocation = BuildingPlacement.FindPlacement(location, unitType, unitData.Size, ignoreMineralProximity, maxDistance, requireSameHeight);
                 
                 if (placementLocation == null)
                 {
-                    placementLocation = BuildingPlacement.FindPlacement(location, unitType, unitData.Size, true, maxDistance);
+                    placementLocation = BuildingPlacement.FindPlacement(location, unitType, unitData.Size, true, maxDistance, requireSameHeight);
                 }
                 if (placementLocation == null && anyBase)
                 {
                     foreach (var selfBase in BaseData.SelfBases)
                     {
-                        placementLocation = BuildingPlacement.FindPlacement(selfBase.Location, unitType, unitData.Size, true, maxDistance);
+                        placementLocation = BuildingPlacement.FindPlacement(selfBase.Location, unitType, unitData.Size, true, maxDistance, requireSameHeight);
                         if (placementLocation != null)
                         {
                             break;

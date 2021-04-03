@@ -10,6 +10,7 @@ namespace Sharky.MicroTasks
     public class WorkerScoutGasStealTask : MicroTask
     {
         public bool BlockExpansion { get; set; }
+        public bool HidePylonInBase { get; set; }
 
         SharkyUnitData SharkyUnitData;
         TargetingData TargetingData;
@@ -20,6 +21,7 @@ namespace Sharky.MicroTasks
         AreaService AreaService;
 
         List<Point2D> ScoutPoints;
+        List<Point2D> EnemyMainArea;
 
         bool started { get; set; }
 
@@ -38,6 +40,7 @@ namespace Sharky.MicroTasks
             Enabled = enabled;
 
             BlockExpansion = false;
+            HidePylonInBase = false;
         }
 
         public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
@@ -76,7 +79,9 @@ namespace Sharky.MicroTasks
 
             if (ScoutPoints == null)
             {
-                ScoutPoints = AreaService.GetTargetArea(TargetingData.EnemyMainBasePoint);
+                EnemyMainArea = AreaService.GetTargetArea(TargetingData.EnemyMainBasePoint);
+                ScoutPoints = new List<Point2D>();
+                ScoutPoints.AddRange(EnemyMainArea);
                 ScoutPoints.Add(BaseData.EnemyBaseLocations.Skip(1).First().Location);
             }
 
@@ -101,7 +106,7 @@ namespace Sharky.MicroTasks
                     {
                         foreach (var gas in enemyBase.VespeneGeysers.Where(g => g.Alliance == Alliance.Neutral))
                         {
-                            if (Vector2.DistanceSquared(new Vector2(gas.Pos.X, gas.Pos.Y), commander.UnitCalculation.Position) < 225)
+                            if (Vector2.DistanceSquared(new Vector2(gas.Pos.X, gas.Pos.Y), commander.UnitCalculation.Position) < 400)
                             {
                                 var gasSteal = commander.Order(frame, Abilities.BUILD_ASSIMILATOR, null, gas.Tag);
                                 if (gasSteal != null)
@@ -133,18 +138,17 @@ namespace Sharky.MicroTasks
                             }
                         }
                     }
-                    foreach (var enemyBase in BaseData.EnemyBases)
+
+                    if (HidePylonInBase)
                     {
-                        foreach (var gas in enemyBase.VespeneGeysers.Where(g => g.Alliance == Alliance.Neutral))
+                        var hideLocation = EnemyMainArea.Where(p => MapDataService.SelfVisible(p) && !MapDataService.InEnemyVision(p)).OrderBy(p => Vector2.DistanceSquared(new Vector2(p.X, p.Y), mainVector)).FirstOrDefault();
+                        if (hideLocation != null)
                         {
-                            if (Vector2.DistanceSquared(new Vector2(gas.Pos.X, gas.Pos.Y), commander.UnitCalculation.Position) < 400)
+                            var hidenPylonOrder = commander.Order(frame, Abilities.BUILD_PYLON, hideLocation);
+                            if (hidenPylonOrder != null)
                             {
-                                var gasSteal = commander.Order(frame, Abilities.BUILD_ASSIMILATOR, null, gas.Tag);
-                                if (gasSteal != null)
-                                {
-                                    commands.AddRange(gasSteal);
-                                    return commands;
-                                }
+                                commands.AddRange(hidenPylonOrder);
+                                return commands;
                             }
                         }
                     }

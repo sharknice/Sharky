@@ -34,9 +34,15 @@ namespace Sharky.Managers
         bool SkipTech;
         bool SkipAddons;
 
+        int LastRunFrame;
+
+        public int RunFrequency { get; set; }
+
         public MacroManager(MacroSetup macroSetup, ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, IBuildingBuilder buildingBuilder, SharkyOptions sharkyOptions, BaseData baseData, TargetingData targetingData, AttackData attackData, IBuildingPlacement warpInPlacement, MacroData macroData, Morpher morpher, 
             BuildPylonService buildPylonService, BuildDefenseService buildDefenseService, BuildProxyService buildProxyService, UnitCountService unitCountService, BuildingCancelService buildingCancelService)
         {
+            NeverSkip = true;
+
             MacroSetup = macroSetup;
             ActiveUnitData = activeUnitData;
             SharkyUnitData = sharkyUnitData;
@@ -56,6 +62,9 @@ namespace Sharky.Managers
             BuildingCancelService = buildingCancelService;
 
             MacroData.DesiredUpgrades = new Dictionary<Upgrades, bool>();
+
+            LastRunFrame = -10;
+            RunFrequency = 5;
         }
 
         public override void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)
@@ -74,11 +83,7 @@ namespace Sharky.Managers
         public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
         {
             var actions = new List<Action>();
-            if (SkipFrame)
-            {
-                SkipFrame = false;
-                return actions;
-            }
+
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
@@ -88,6 +93,12 @@ namespace Sharky.Managers
             MacroData.Minerals = (int)observation.Observation.PlayerCommon.Minerals;
             MacroData.VespeneGas = (int)observation.Observation.PlayerCommon.Vespene;
             MacroData.Frame = (int)observation.Observation.GameLoop;
+
+            if (LastRunFrame + RunFrequency > observation.Observation.GameLoop)
+            {
+                return actions;
+            }
+            LastRunFrame = (int)observation.Observation.GameLoop;
 
             actions.AddRange(BuildProxyService.BuildPylons());
             actions.AddRange(BuildProxyService.MorphBuildings());
@@ -117,11 +128,6 @@ namespace Sharky.Managers
             actions.AddRange(ProduceUnits());
 
             actions.AddRange(BuildingCancelService.CancelBuildings());
-
-            if (stopwatch.ElapsedMilliseconds > 1)
-            {
-                SkipFrame = true;
-            }
 
             return actions;
         }

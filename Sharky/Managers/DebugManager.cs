@@ -15,6 +15,7 @@ namespace Sharky.Managers
             GameConnection = gameConnection;
             SharkyOptions = sharkyOptions;
             DebugService = debugService;
+            NeverSkip = true;
         }
 
         public override IEnumerable<Action> OnFrame(ResponseObservation observation)
@@ -22,8 +23,15 @@ namespace Sharky.Managers
             if (SharkyOptions.Debug)
             {
                 ReadCommand(observation.Chat, observation.Observation.RawData.Player.Camera);
-                GameConnection.SendRequest(DebugService.DrawRequest).Wait();
-                GameConnection.SendRequest(DebugService.SpawnRequest).Wait();
+                try
+                {
+                    GameConnection.SendRequest(DebugService.DrawRequest).Wait();
+                    GameConnection.SendRequest(DebugService.SpawnRequest).Wait();
+                }
+                catch(System.Exception e)
+                {
+
+                }
             }
 
             DebugService.ResetDrawRequest();

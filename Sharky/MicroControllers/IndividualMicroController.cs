@@ -782,25 +782,29 @@ namespace Sharky.MicroControllers
             // TODO: make sure this is working correctly, not sure if Vector is accurate, or this function is accurate
             if (bestTarget.Velocity > 0)
             {
-                var interceptionPoint = GetInterceptionPoint(bestTarget.Position, bestTarget.Vector, commander.UnitCalculation.Position, commander.UnitCalculation.Velocity);
+                var interceptionPoint = CalculateInterceptionPoint(bestTarget.Position, bestTarget.AverageVector, commander.UnitCalculation.End, commander.UnitCalculation.Velocity);
                 var point = new Point2D { X = interceptionPoint.X, Y = interceptionPoint.Y };
                 if (point != null && point.X > 0 && point.Y > 0 && point.X < MapDataService.MapData.MapWidth && interceptionPoint.Y < MapDataService.MapData.MapHeight)
                 {
                     if ((!commander.UnitCalculation.Unit.IsFlying || !bestTarget.Unit.IsFlying) && (!MapDataService.PathWalkable(point) || MapDataService.MapHeight(point) != MapDataService.MapHeight(enemyPosition)))
                     {
                         // TODO: also check if enemy position is walkable, and if it isn't figure out the best spot to move
-                        DebugService.DrawLine(commander.UnitCalculation.Unit.Pos, new Point { X = point.X, Y = point.Y, Z = 12 }, new Color { B = 0, G = 0, R = 255 });
-                        DebugService.DrawLine(bestTarget.Unit.Pos, new Point { X = point.X, Y = point.Y, Z = 12 }, new Color { B = 0, G = 0, R = 255 });
-                        DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 }, .5f, new Color { B = 255, G = 255, R = 255 });
+                        DebugService.DrawLine(commander.UnitCalculation.Unit.Pos, new Point { X = point.X, Y = point.Y, Z = commander.UnitCalculation.Unit.Pos.Z + 1f }, new Color { B = 0, G = 0, R = 255 });
+                        DebugService.DrawLine(bestTarget.Unit.Pos, new Point { X = point.X, Y = point.Y, Z = commander.UnitCalculation.Unit.Pos.Z + 1f }, new Color { B = 0, G = 0, R = 255 });
+                        DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = commander.UnitCalculation.Unit.Pos.Z + 1f }, .5f, new Color { B = 0, G = 0, R = 255 });
                         return enemyPosition;
                     }
                     if (Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(point.X, point.Y)) > 625)
                     {
                         return enemyPosition;
                     }
-                    DebugService.DrawLine(commander.UnitCalculation.Unit.Pos, new Point { X = point.X, Y = point.Y, Z = 12 }, new Color { B = 255, G = 0, R = 0 });
-                    DebugService.DrawLine(bestTarget.Unit.Pos, new Point { X = point.X, Y = point.Y, Z = 12 }, new Color { B = 255, G = 0, R = 0 });
-                    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 }, .5f, new Color { B = 255, G = 255, R = 255 });
+                    if (Math.Abs(Math.Atan2(bestTarget.AverageVector.X, bestTarget.AverageVector.Y) - Math.Atan2(bestTarget.AverageVector.X, bestTarget.AverageVector.Y)) < .5) // if they're both goign the same direction just go straight at the enemy instead to prevent bug going opposite direction
+                    {
+                        return enemyPosition;
+                    }
+                    DebugService.DrawLine(commander.UnitCalculation.Unit.Pos, new Point { X = point.X, Y = point.Y, Z = commander.UnitCalculation.Unit.Pos.Z + 1f }, new Color { B = 255, G = 0, R = 0 });
+                    DebugService.DrawLine(bestTarget.Unit.Pos, new Point { X = point.X, Y = point.Y, Z = commander.UnitCalculation.Unit.Pos.Z + 1f }, new Color { B = 255, G = 0, R = 0 });
+                    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = commander.UnitCalculation.Unit.Pos.Z + 1f }, .5f, new Color { B = 255, G = 0, R = 0 });
                     return point;
                 }
             }
@@ -1917,40 +1921,31 @@ namespace Sharky.MicroControllers
             return action;
         }
 
-        float Dot(Vector2 a, Vector2 b)
+        protected Vector2 CalculateInterceptionPoint(Vector2 targetPosition, Vector2 targetVelocity, Vector2 interceptorPosition, float interceptorSpeed)
         {
-            return a.X * b.X + a.Y * b.Y;
-        }
-        float Magnitude(Vector2 vec)
-        {
-            return (float)Math.Sqrt(vec.X * vec.X + vec.Y * vec.Y);
-        }
-        float AngleBetween(Vector2 b, Vector2 c)
-        {
-            return (float)Math.Acos(Dot(b, c) / (Magnitude(b) * Magnitude(c)));
-        }
+            var totarget = targetPosition - interceptorPosition;
 
-        protected Vector2 GetInterceptionPoint(Vector2 target_pos, Vector2 target_vel, Vector2 interceptor_pos, float interceptor_speed)
-        {
-            var k = Magnitude(target_vel) / interceptor_speed;
-            var distance_to_target = Magnitude(interceptor_pos - target_pos);
+            var a = Vector2.Dot(targetVelocity, targetVelocity) - (interceptorSpeed * interceptorSpeed);
+            var b = 2 * Vector2.Dot(targetVelocity, totarget);
+            var c = Vector2.Dot(totarget, totarget);
 
-            var b_hat = target_vel;
-            var c_hat = interceptor_pos - target_pos;
+            var p = -b / (2 * a);
+            var q = (float)Math.Sqrt((b * b) - 4 * a * c) / (2 * a);
 
-            var CAB = AngleBetween(b_hat, c_hat);
-            var ABC = Math.Asin(Math.Sin(CAB) * k);
-            var ACB = (Math.PI) - (CAB + ABC);
+            var t1 = p - q;
+            var t2 = p + q;
+            float t;
 
-            var j = distance_to_target / Math.Sin(ACB);
-            var a = j * Math.Sin(CAB);
-            var b = j * Math.Sin(ABC);
+            if (t1 > t2 && t2 > 0)
+            {
+                t = t2;
+            }
+            else
+            {
+                t = t1;
+            }
 
-
-            var time_to_collision = (float)b / Magnitude(target_vel);
-            var collision_pos = target_pos + (target_vel * time_to_collision);
-
-            return collision_pos;
+            return  targetPosition + targetVelocity * t;
         }
     }
 }

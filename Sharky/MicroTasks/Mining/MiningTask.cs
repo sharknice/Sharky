@@ -1,5 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.Builds;
+﻿using Sharky.Builds;
 using Sharky.MicroTasks.Mining;
 using System;
 using System.Collections.Concurrent;
@@ -126,7 +125,7 @@ namespace Sharky.MicroTasks
                 foreach (var miningInfo in selfBase.MineralMiningInfo)
                 {
                     var mineralVector = new Vector2(miningInfo.ResourceUnit.Pos.X, miningInfo.ResourceUnit.Pos.Y);
-                    foreach (var worker in miningInfo.Workers)
+                    foreach (var worker in miningInfo.Workers.Where(w => w.UnitRole == UnitRole.Minerals))
                     {
                         var workerVector = worker.UnitCalculation.Position;
                         if (worker.UnitCalculation.Unit.BuffIds.Any(b => SharkyUnitData.CarryingResourceBuffs.Contains((Buffs)b)))
@@ -186,7 +185,7 @@ namespace Sharky.MicroTasks
                 foreach (var miningInfo in selfBase.GasMiningInfo)
                 {
                     var mineralVector = new Vector2(miningInfo.ResourceUnit.Pos.X, miningInfo.ResourceUnit.Pos.Y);
-                    foreach (var worker in miningInfo.Workers)
+                    foreach (var worker in miningInfo.Workers.Where(w => w.UnitRole == UnitRole.Gas))
                     {
                         var workerVector = worker.UnitCalculation.Position;
                         if (worker.UnitCalculation.Unit.BuffIds.Any(b => SharkyUnitData.CarryingResourceBuffs.Contains((Buffs)b)))
@@ -305,12 +304,10 @@ namespace Sharky.MicroTasks
                         if (info.Workers.Count() < gasSaturationCount)
                         {
                             var idleWorkers = GetIdleWorkers();
-                            bool remove = false;
                             if (idleWorkers.Count() == 0 && !LowMineralsHighGas)
                             {
                                 var gasVector = new Vector2(info.ResourceUnit.Pos.X, info.ResourceUnit.Pos.Y);
                                 idleWorkers = UnitCommanders.Where(c => c.UnitRole == UnitRole.Minerals && !c.UnitCalculation.Unit.BuffIds.Any(b => SharkyUnitData.CarryingMineralBuffs.Contains((Buffs)b)) && BaseData.SelfBases.Any(b => Vector2.DistanceSquared(new Vector2(b.ResourceCenter.Pos.X, b.ResourceCenter.Pos.Y), c.UnitCalculation.Position) < 16) && !selfBase.GasMiningInfo.Any(m => m.Workers.Any(w => w.UnitCalculation.Unit.Tag == c.UnitCalculation.Unit.Tag))).OrderBy(c => Vector2.DistanceSquared(gasVector, c.UnitCalculation.Position));
-                                remove = true;
                             }
                             if (idleWorkers.Count() > 0)
                             {
@@ -339,8 +336,9 @@ namespace Sharky.MicroTasks
                 if (unsaturated.Count() == 0)
                 {
                     saturationCount++;
-                    unsaturated = BaseData.SelfBases.Where(b => b.ResourceCenter.BuildProgress == 1 && b.MineralMiningInfo.Any(m => m.Workers.Count() < saturationCount));                
+                    unsaturated = BaseData.SelfBases.Where(b => b.ResourceCenter.BuildProgress == 1 && b.MineralMiningInfo.Any(m => m.Workers.Count() < saturationCount)).OrderBy(b => Vector2.DistanceSquared(new Vector2(b.Location.X, b.Location.Y), worker.UnitCalculation.Position));
                 }
+
                 foreach (var selfBase in unsaturated)
                 {
                     foreach (var info in selfBase.MineralMiningInfo.Where(m => m.Workers.Count() < saturationCount))
@@ -350,7 +348,6 @@ namespace Sharky.MicroTasks
                         return actions;
                     }
                 }
-
             }
 
             return actions;

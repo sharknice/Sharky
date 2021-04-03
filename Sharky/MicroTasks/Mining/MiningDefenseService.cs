@@ -182,7 +182,7 @@ namespace Sharky.MicroTasks.Mining
                 }
             }
 
-            var safeWorkers = ActiveUnitData.Commanders.Where(c => c.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && (c.Value.UnitCalculation.EnemiesInRangeOf.Count() == 0 || (c.Value.UnitCalculation.Unit.Health == c.Value.UnitCalculation.Unit.HealthMax && c.Value.UnitCalculation.Unit.Shield == c.Value.UnitCalculation.Unit.ShieldMax)) && c.Value.UnitRole == UnitRole.Defend || c.Value.UnitRole == UnitRole.Bait);
+            var safeWorkers = ActiveUnitData.Commanders.Where(c => c.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && (c.Value.UnitRole == UnitRole.Defend || c.Value.UnitRole == UnitRole.Bait) && c.Value.UnitCalculation.Unit.Orders.Count() == 0);
             foreach (var safeWorker in safeWorkers)
             {
                 if (safeWorker.Value.UnitRole == UnitRole.Bait && safeWorker.Value.UnitCalculation.NearbyEnemies.Count() > 0)
