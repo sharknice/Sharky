@@ -62,13 +62,21 @@ namespace Sharky.Managers
             }
 
             EnemyPlayer = EnemyPlayerService.Enemies.FirstOrDefault(e => e.Id == opponentId);
-            if (opponentId == "test")
+            if (opponentId == "test" && EnemyPlayer == null)
             {
                 EnemyPlayer = new EnemyPlayer.EnemyPlayer { ChatMatches = new List<string>(), Games = new List<Game>(), Id = opponentId, Name = "test" };
             }
             if (EnemyPlayer == null)
             {
                 EnemyPlayer = new EnemyPlayer.EnemyPlayer { ChatMatches = new List<string>(), Games = new List<Game>(), Id = opponentId, Name = enemyName };
+            }
+
+            if (EnemyPlayerService.Tournament.Enabled)
+            {
+                foreach (var buildSequence in EnemyPlayerService.Tournament.BuildSequences)
+                {
+                    BuildChoices[ActualRace].BuildSequences[buildSequence.Key] = buildSequence.Value;
+                }
             }
 
             var buildSequences = BuildChoices[ActualRace].BuildSequences[EnemyRace.ToString()];

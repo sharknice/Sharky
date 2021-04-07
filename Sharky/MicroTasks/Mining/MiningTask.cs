@@ -1,4 +1,5 @@
-﻿using Sharky.Builds;
+﻿using SC2APIProtocol;
+using Sharky.Builds;
 using Sharky.MicroTasks.Mining;
 using System;
 using System.Collections.Concurrent;
@@ -13,7 +14,7 @@ namespace Sharky.MicroTasks
         SharkyUnitData SharkyUnitData;
         BaseData BaseData;
         ActiveUnitData ActiveUnitData;
-        MiningDefenseService MiningDefenseService;
+        public MiningDefenseService MiningDefenseService { get; set; }
         MacroData MacroData;
         BuildOptions BuildOptions;
 
@@ -65,6 +66,7 @@ namespace Sharky.MicroTasks
             commands.AddRange(MiningDefenseService.DealWithEnemies(frame, UnitCommanders));
             commands.AddRange(MineMinerals(frame));
             commands.AddRange(MineGas(frame));
+            commands.AddRange(RecallWorkers(frame));
 
             return commands;
         }
@@ -420,6 +422,36 @@ namespace Sharky.MicroTasks
             }
 
             return miningAssignments;
+        }
+
+        List<SC2APIProtocol.Action> RecallWorkers(int frame)
+        {
+            var actions = new List<SC2APIProtocol.Action>();
+            if (BaseData.SelfBases.Count() > 1) { return actions; }
+            foreach (var selfBase in BaseData.SelfBases.Where(b => b.ResourceCenter.UnitType == (uint)UnitTypes.PROTOSS_NEXUS && b.ResourceCenter.Energy >= 50))
+            {
+                var baseVector = new Vector2(selfBase.ResourceCenter.Pos.X, selfBase.ResourceCenter.Pos.Y);
+                foreach (var miningInfo in selfBase.MineralMiningInfo)
+                {
+                    foreach (var worker in miningInfo.Workers.Where(w => w.UnitRole == UnitRole.Minerals))
+                    {
+                        if (Vector2.DistanceSquared(baseVector, worker.UnitCalculation.Position) > 2500)
+                        {
+                            if (ActiveUnitData.Commanders.ContainsKey(selfBase.ResourceCenter.Tag))
+                            {
+                                var action = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].Order(frame, Abilities.NEXUSMASSRECALL, new Point2D { X = worker.UnitCalculation.Position.X, Y = worker.UnitCalculation.Position.Y });
+                                if (action != null)
+                                {
+                                    actions.AddRange(action);
+                                }
+                            }
+                            
+                        }
+                    }
+                }
+            }
+
+            return actions;
         }
     }
 }

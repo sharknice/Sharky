@@ -13,7 +13,7 @@ namespace Sharky.EnemyPlayer
 
         public List<EnemyPlayer> Enemies { get; private set; }
         List<Game> Games { get; set; }
-        Tournament Tournament { get; set; }
+        public Tournament Tournament { get; private set; }
         string DataFolder { get; set; }
 
         public EnemyPlayerService(EnemyNameService enemyNameService)

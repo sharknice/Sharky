@@ -170,6 +170,11 @@ namespace Sharky.MicroControllers
             var formation = GetDesiredFormation(commander);
             var bestTarget = GetBestTarget(commander, target, frame);
 
+            if (WorkerEscapeSurround(commander, target, defensivePoint, frame, out action))
+            {
+                return action;
+            }
+
             if (AvoidTargettedOneHitKills(commander, target, defensivePoint, frame, out action))
             {
                 return action;
@@ -458,6 +463,8 @@ namespace Sharky.MicroControllers
             }
             else if (MicroPriority == MicroPriority.LiveAndAttack)
             {
+                if (WorkerEscapeSurround(commander, target, defensivePoint, frame, out action)) { return true; }
+
                 if (AvoidTargettedDamage(commander, target, defensivePoint, frame, out action))
                 {
                     return true;
