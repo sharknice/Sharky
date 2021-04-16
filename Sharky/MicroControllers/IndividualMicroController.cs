@@ -805,7 +805,7 @@ namespace Sharky.MicroControllers
                     {
                         return enemyPosition;
                     }
-                    if (Math.Abs(Math.Atan2(bestTarget.AverageVector.X, bestTarget.AverageVector.Y) - Math.Atan2(bestTarget.AverageVector.X, bestTarget.AverageVector.Y)) < .5) // if they're both goign the same direction just go straight at the enemy instead to prevent bug going opposite direction
+                    if (Math.Abs(Math.Atan2(commander.UnitCalculation.Vector.X, commander.UnitCalculation.Vector.Y) - Math.Atan2(bestTarget.AverageVector.X, bestTarget.AverageVector.Y)) < .5) // if they're both goign the same direction just go straight at the enemy instead to prevent bug going opposite direction
                     {
                         return enemyPosition;
                     }

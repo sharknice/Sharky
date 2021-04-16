@@ -83,5 +83,21 @@ namespace Sharky.Proxy
 
             return new CliffProxyData { OutsideProxyLocation = outsideProxyLocation, TargetLocation = targetLocation, LoadingLocation = loadingLocation, DropLocation = dropLocation };
         }
+
+        public BaseLocation GetSelfCliffProxyBaseLocation()
+        {
+            var numberOfCloseLocations = NumberOfCloseBaseLocations();
+            var closeAirLocations = BaseData.BaseLocations.Take(5).OrderBy(b => Vector2.DistanceSquared(new Vector2(TargetingData.SelfMainBasePoint.X, TargetingData.SelfMainBasePoint.Y), new Vector2(b.Location.X, b.Location.Y))).Take(numberOfCloseLocations);
+
+            return closeAirLocations.OrderBy(b => PathFinder.GetGroundPath(TargetingData.SelfMainBasePoint.X + 4, TargetingData.SelfMainBasePoint.Y + 4, b.Location.X, b.Location.Y, 0).Count()).Last();
+        }
+
+        public BaseLocation GetSelfGroundProxyBaseLocation()
+        {
+            int proxyBase = NumberOfCloseBaseLocations() + 1;
+            var orderedLocations = BaseData.BaseLocations.OrderBy(b => PathFinder.GetGroundPath(TargetingData.SelfMainBasePoint.X + 4, TargetingData.SelfMainBasePoint.Y + 4, b.Location.X, b.Location.Y, 0).Count());
+
+            return orderedLocations.Take(proxyBase).Last();
+        }
     }
 }

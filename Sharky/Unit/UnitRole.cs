@@ -10,6 +10,7 @@
         Minerals,
         Gas,
         Defend,
-        Attack
+        Attack,
+        PreventGasSteal
     }
 }

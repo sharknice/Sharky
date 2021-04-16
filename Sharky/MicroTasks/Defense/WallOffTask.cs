@@ -55,11 +55,12 @@ namespace Sharky.MicroTasks
             }
         }
 
+        // TODO: make BuildOptions for partial wall, or full wall, and build buildings at the wall until that is fulfilled
         public override IEnumerable<SC2APIProtocol.Action> PerformActions(int frame)
         {
             var commands = new List<SC2APIProtocol.Action>();
 
-            foreach (var point in TargetingData.ForwardDefenseWallOffPoints)
+            foreach (var point in TargetingData.ForwardDefenseWallOffPoints) // TODO: wall with gap, make sure all but one of the wall off points has a building touching, make sure placement doesn't block that, pass in that spot that can't be touched to findplacement method
             {
                 var vector = new Vector2(point.X, point.Y);
                 if (!ActiveUnitData.Commanders.Any(c => c.Value.UnitCalculation.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && Vector2.DistanceSquared(vector, c.Value.UnitCalculation.Position) < c.Value.UnitCalculation.Unit.Radius * c.Value.UnitCalculation.Unit.Radius))

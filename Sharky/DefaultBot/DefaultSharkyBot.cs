@@ -161,7 +161,7 @@ namespace Sharky.DefaultBot
             DamageService = new DamageService();
             
             UnitManager = new UnitManager(ActiveUnitData, SharkyUnitData, SharkyOptions, TargetPriorityService, CollisionCalculator, MapDataService, DebugService, DamageService, UnitDataService);
-            MapManager = new MapManager(MapData, ActiveUnitData, SharkyOptions, SharkyUnitData);
+            MapManager = new MapManager(MapData, ActiveUnitData, SharkyOptions, SharkyUnitData, DebugService);
             Managers.Add(MapManager);
             Managers.Add(UnitManager);
 

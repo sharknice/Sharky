@@ -23,6 +23,11 @@ namespace Sharky
             return ActiveUnitData.EnemyUnits.Count(u => u.Value.Unit.UnitType == (uint)unitType);
         }
 
+        public int EnemyCompleted(UnitTypes unitType)
+        {
+            return ActiveUnitData.EnemyUnits.Count(u => u.Value.Unit.UnitType == (uint)unitType && u.Value.Unit.BuildProgress == 1);
+        }
+
         public int UnitsInProgressCount(UnitTypes unitType)
         {
             var unitData = SharkyUnitData.TrainingData[unitType];

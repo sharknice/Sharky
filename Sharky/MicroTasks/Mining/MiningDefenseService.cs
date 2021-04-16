@@ -1,4 +1,6 @@
-﻿using Sharky.MicroControllers;
+﻿using SC2APIProtocol;
+using Sharky.MicroControllers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -23,8 +25,9 @@ namespace Sharky.MicroTasks.Mining
         public List<SC2APIProtocol.Action> DealWithEnemies(int frame, List<UnitCommander> unitCommanders)
         {
             var actions = new List<SC2APIProtocol.Action>();
-            foreach (var selfBase in BaseData.SelfBases) // TODO: attack pylons and cannons that are in base with 4 workers, make an anti-worker rush build, where you just get a zealot asap, stop probe production to get zealot if gateway is built
+            foreach (var selfBase in BaseData.SelfBases)
             {
+                bool preventGasSteal = false;
                 if (ActiveUnitData.Commanders.ContainsKey(selfBase.ResourceCenter.Tag) && ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Count() > 0)
                 {
                     if (!ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyAllies.Any(a => a.UnitClassifications.Contains(UnitClassification.ArmyUnit)) && (ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker) || e.Attributes.Contains(SC2APIProtocol.Attribute.Structure))))
@@ -41,6 +44,28 @@ namespace Sharky.MicroTasks.Mining
                             var workers = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Where(u => u.UnitClassifications.Contains(UnitClassification.Worker));
 
                             desiredWorkers = 1;
+                            if (workers.Count(w => w.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE) > 0)
+                            {      
+                                var takenGases = selfBase.GasMiningInfo.Select(i => i.ResourceUnit);
+                                var openGeysers = BaseData.BaseLocations.SelectMany(b => b.VespeneGeysers).Where(g => g.VespeneContents > 0 && !takenGases.Any(t => t.Pos.X == g.Pos.X && t.Pos.Y == g.Pos.Y));
+                                foreach (var gas in openGeysers)
+                                {
+                                    foreach (var worker in workers)
+                                    {
+                                        if (Vector2.DistanceSquared(new Vector2(gas.Pos.X, gas.Pos.Y), worker.Position) < 64)
+                                        {
+                                            preventGasSteal = true; // If enemy probe looking at empty gas send closest worker to touch that gas and prevent a steal
+                                            var closestDefender = commanders.OrderBy(d => Vector2.DistanceSquared(d.Value.UnitCalculation.Position, new Vector2(gas.Pos.X, gas.Pos.Y))).FirstOrDefault();
+                                            closestDefender.Value.UnitRole = UnitRole.PreventGasSteal;
+                                            var action = closestDefender.Value.Order(frame, Abilities.MOVE, new SC2APIProtocol.Point2D { X = gas.Pos.X, Y = gas.Pos.Y });
+                                            if (action != null)
+                                            {
+                                                actions.AddRange(action);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                             if (workers.Count() > 1)
                             {
                                 desiredWorkers = workers.Count() + 1;
@@ -59,7 +84,7 @@ namespace Sharky.MicroTasks.Mining
                                 DebugService.DrawText("--------------Defending Worker Rush-------------");
                                 while (commanders.Count(c => c.Value.UnitRole == UnitRole.Defend) < desiredWorkers)
                                 {
-                                    commanders.FirstOrDefault(c => c.Value.UnitRole != UnitRole.Defend).Value.UnitRole = UnitRole.Defend;
+                                    commanders.FirstOrDefault(c => c.Value.UnitRole != UnitRole.Defend && c.Value.UnitRole != UnitRole.PreventGasSteal).Value.UnitRole = UnitRole.Defend;
                                 }
                                 var defenders = commanders.Where(c => c.Value.UnitRole == UnitRole.Defend);
                                 foreach (var defender in defenders)
@@ -80,7 +105,7 @@ namespace Sharky.MicroTasks.Mining
                                 { // TODO: test this
                                     while (commanders.Count(c => c.Value.UnitRole == UnitRole.Defend) < desiredWorkers && commanders.Count(c => c.Value.UnitRole == UnitRole.Defend) < commanders.Count())
                                     {
-                                        commanders.FirstOrDefault(c => c.Value.UnitRole != UnitRole.Defend).Value.UnitRole = UnitRole.Defend;
+                                        commanders.FirstOrDefault(c => c.Value.UnitRole != UnitRole.Defend && c.Value.UnitRole != UnitRole.PreventGasSteal).Value.UnitRole = UnitRole.Defend;
                                     }
                                     var defenders = commanders.Where(c => c.Value.UnitRole == UnitRole.Defend);
                                     var sentWorkers = new List<ulong>();
@@ -100,7 +125,6 @@ namespace Sharky.MicroTasks.Mining
                                     foreach (var enemyWorker in workers.OrderBy(u => Vector2.DistanceSquared(u.Position, baseVector)))
                                     {
                                         var closestDefenders = defenders.Where(d => !sentWorkers.Contains(d.Key)).OrderBy(d => Vector2.DistanceSquared(d.Value.UnitCalculation.Position, enemyWorker.Position)).Take(1);
-                                        sentWorkers.AddRange(closestDefenders.Select(d => d.Key));
                                         foreach (var defender in closestDefenders)
                                         {
                                             var action = defender.Value.Order(frame, Abilities.ATTACK, null, enemyWorker.Unit.Tag);
@@ -109,6 +133,7 @@ namespace Sharky.MicroTasks.Mining
                                                 actions.AddRange(action);
                                             }
                                         }
+                                        sentWorkers.AddRange(closestDefenders.Select(d => d.Key));
                                     }
                                 }
                                 else if (commanders.Count() < desiredWorkers)
@@ -119,7 +144,7 @@ namespace Sharky.MicroTasks.Mining
                                 {
                                     while (commanders.Count(c => c.Value.UnitRole == UnitRole.Defend) < desiredWorkers && commanders.Count(c => c.Value.UnitRole == UnitRole.Defend) < commanders.Count())
                                     {
-                                        commanders.FirstOrDefault(c => c.Value.UnitRole != UnitRole.Defend).Value.UnitRole = UnitRole.Defend;
+                                        commanders.FirstOrDefault(c => c.Value.UnitRole != UnitRole.Defend && c.Value.UnitRole != UnitRole.PreventGasSteal).Value.UnitRole = UnitRole.Defend;
                                     }
 
                                     var defenders = commanders.Where(c => c.Value.UnitRole == UnitRole.Defend);
@@ -140,6 +165,13 @@ namespace Sharky.MicroTasks.Mining
                         actions.AddRange(Run(frame, unitCommanders, selfBase));
                     }
                 }
+                if (!preventGasSteal)
+                {
+                    foreach (var commander in unitCommanders.Where(c => c.UnitRole == UnitRole.PreventGasSteal))
+                    {
+                        commander.UnitRole = UnitRole.None;
+                    }
+                }
             }
 
             var safeWorkers = ActiveUnitData.Commanders.Where(c => c.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && (c.Value.UnitRole == UnitRole.Defend || c.Value.UnitRole == UnitRole.Bait) && c.Value.UnitCalculation.Unit.Orders.Count() == 0);
@@ -153,7 +185,7 @@ namespace Sharky.MicroTasks.Mining
             }
 
             // only defend near the base, don't chase too far
-            foreach (var commander in unitCommanders)
+            foreach (var commander in unitCommanders.Where(u => u.UnitRole == UnitRole.Defend))
             {
                 if (commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.ATTACK_ATTACK) && (!commander.UnitCalculation.NearbyAllies.Any(a => a.UnitClassifications.Contains(UnitClassification.ResourceCenter)) || commander.UnitCalculation.NearbyAllies.Any(a => a.UnitClassifications.Contains(UnitClassification.ArmyUnit))))
                 {
@@ -199,6 +231,14 @@ namespace Sharky.MicroTasks.Mining
                             {
                                 actions.AddRange(action);
                             }
+                        }
+                    }
+                    else if (commander.UnitCalculation.Unit.WeaponCooldown == 0 && commander.UnitCalculation.EnemiesInRange.Count() > 0) // TODO: test this, attack any units if they walk by
+                    {
+                        var action = commander.Order(frame, Abilities.ATTACK, null, commander.UnitCalculation.EnemiesInRange.OrderBy(e => e.Unit.Health + e.Unit.Shield).FirstOrDefault().Unit.Tag);
+                        if (action != null)
+                        {
+                            actions.AddRange(action);
                         }
                     }
                 }

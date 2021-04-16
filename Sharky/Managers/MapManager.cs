@@ -14,6 +14,7 @@ namespace Sharky.Managers
         MapData MapData;
         SharkyOptions SharkyOptions;
         SharkyUnitData SharkyUnitData;
+        DebugService DebugService;
 
         private int LastBuildingCount;
         private int LastVisibleEnemyUnitCount;
@@ -21,12 +22,13 @@ namespace Sharky.Managers
         private readonly int MillisecondsPerUpdate;
         private double MillisecondsUntilUpdate;
 
-        public MapManager(MapData mapData, ActiveUnitData activeUnitData, SharkyOptions sharkyOptions, SharkyUnitData sharkyUnitData)
+        public MapManager(MapData mapData, ActiveUnitData activeUnitData, SharkyOptions sharkyOptions, SharkyUnitData sharkyUnitData, DebugService debugService)
         {
             MapData = mapData;
             ActiveUnitData = activeUnitData;
             SharkyOptions = sharkyOptions;
             SharkyUnitData = sharkyUnitData;
+            DebugService = debugService;
 
             LastBuildingCount = 0;
             LastVisibleEnemyUnitCount = 0;
@@ -58,6 +60,8 @@ namespace Sharky.Managers
 
         public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
         {
+            DrawGrid(observation.Observation.RawData.Player.Camera);
+
             MillisecondsUntilUpdate -= (1 / SharkyOptions.FramesPerSecond) * 1000;
             if (MillisecondsUntilUpdate > 0) { return new List<SC2APIProtocol.Action>(); }
             MillisecondsUntilUpdate = MillisecondsPerUpdate;
@@ -90,6 +94,31 @@ namespace Sharky.Managers
 
 
             return new List<SC2APIProtocol.Action>();
+        }
+
+        private void DrawGrid(Point camera)
+        {
+            // TODO: for walloff get point of wall, build building exactly down/up/left/right it's radius distance away
+
+            for (int x = -5; x <= 5; x++)
+            {
+                for (int y = -5; y <= 5; y++)
+                {
+                    var point = new Point { X = (int)camera.X + x, Y = (int)camera.Y + y, Z = 14 };
+                    var color = new Color { R = 255, G = 255, B = 255 };
+                    if (point.X + 1 < MapData.MapWidth && point.Y + 1 < MapData.MapHeight && point.X > 0 && point.Y > 0)
+                    {
+                        var height = 13;
+                        if (!MapData.Map[(int)point.X][(int)point.Y].CurrentlyBuildable)
+                        {
+                            color = new Color { R = 255, G = 0, B = 0 };
+                        }
+                        //DebugService.DrawLine(point, new Point { X = point.X + 1, Y = point.Y, Z = height + 1 }, color);
+                        //DebugService.DrawLine(point, new Point { X = point.X, Y = point.Y + 1, Z = height + 1 }, color);
+                        //DebugService.DrawLine(point, new Point { X = point.X, Y = point.Y + 1, Z = 1 }, color);
+                    }
+                }
+            }
         }
 
         void UpdateNumberOfAllies(int frame)
