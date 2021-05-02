@@ -19,7 +19,7 @@ namespace Sharky.Managers
         DamageService DamageService;
         UnitDataService UnitDataService;
 
-        float NearbyDistance = 25;
+        float NearbyDistance = 16;
 
         ActiveUnitData ActiveUnitData;
 
@@ -46,7 +46,7 @@ namespace Sharky.Managers
 
             ActiveUnitData.DeadUnits = new List<ulong>();
 
-            UndeadTypes = new List<UnitTypes> { UnitTypes.ZERG_BROODLING, UnitTypes.ZERG_EGG, UnitTypes.ZERG_LARVA, UnitTypes.TERRAN_KD8CHARGE };
+            UndeadTypes = new List<UnitTypes> { UnitTypes.ZERG_BROODLING, UnitTypes.ZERG_EGG, UnitTypes.ZERG_LARVA, UnitTypes.TERRAN_KD8CHARGE, UnitTypes.ZERG_OVERLORD, UnitTypes.ZERG_OVERLORDCOCOON, UnitTypes.ZERG_OVERLORDTRANSPORT, UnitTypes.ZERG_TRANSPORTOVERLORDCOCOON, UnitTypes.ZERG_DRONE };
         }
 
         public override bool NeverSkip { get { return true; } }

@@ -1,5 +1,4 @@
 ﻿using Sharky.Chat;
-using Sharky.Managers;
 using System.Linq;
 using System.Numerics;
 

@@ -12,7 +12,7 @@ namespace Sharky.MicroControllers.Protoss
             : base(mapDataService, sharkyUnitData, activeUnitData, debugService, sharkyPathFinder, baseData, sharkyOptions, damageService, unitDataService, targetingData, microPriority, groupUpEnabled)
         {
         }
-
+        // TODO: when retreating cancel prismatic alignment
         protected override bool WeaponReady(UnitCommander commander)
         {
             return true;

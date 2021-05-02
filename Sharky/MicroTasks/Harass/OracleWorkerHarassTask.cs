@@ -211,13 +211,21 @@ namespace Sharky.MicroTasks
 
         void GetNextTarget()
         {
-            Target = BaseData.BaseLocations.OrderBy(b => Vector2.DistanceSquared(new Vector2(b.Location.X, b.Location.Y), new Vector2(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y))).Skip(TargetIndex + 1).First().MineralLineLocation;
-            TargetIndex++;
-            if (TargetIndex > 3)
+            var target = BaseData.BaseLocations.OrderBy(b => Vector2.DistanceSquared(new Vector2(b.Location.X, b.Location.Y), new Vector2(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y))).Skip(TargetIndex + 1).FirstOrDefault();
+            if (target == null)
             {
                 TargetIndex = 0;
             }
-            GetTargetPath(Target);
+            else
+            {
+                Target = target.MineralLineLocation;
+                TargetIndex++;
+                if (TargetIndex > 3)
+                {
+                    TargetIndex = 0;
+                }
+                GetTargetPath(Target);
+            }
         }
 
         void GetTargetPath(Point2D target)

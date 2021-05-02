@@ -1,4 +1,6 @@
-﻿namespace Sharky.Builds
+﻿using Sharky.Builds.BuildingPlacement;
+
+namespace Sharky.Builds
 {
     public class BuildOptions
     {
@@ -8,6 +10,7 @@
         public bool StrictWorkersPerGas { get; set; }
         public int StrictWorkersPerGasCount { get; set; }
         public ProtossBuildOptions ProtossBuildOptions { get; set; }
+        public WallOffType WallOffType { get; set; }
 
         public BuildOptions()
         {
@@ -17,6 +20,7 @@
             StrictWorkersPerGas = false;
             StrictWorkersPerGasCount = 3;
             ProtossBuildOptions = new ProtossBuildOptions { PylonsAtDefensivePoint = 0, ShieldsAtDefensivePoint = 0 };
+            WallOffType = WallOffType.None;
         }
     }
 }

@@ -2,6 +2,7 @@
 using Sharky.Chat;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Sharky.Builds
 {
@@ -31,7 +32,6 @@ namespace Sharky.Builds
 
         public virtual void OnFrame(ResponseObservation observation)
         {
-
         }
 
         public virtual void StartBuild(int frame)

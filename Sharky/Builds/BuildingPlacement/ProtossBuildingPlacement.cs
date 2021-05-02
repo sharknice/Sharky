@@ -13,32 +13,57 @@ namespace Sharky.Builds.BuildingPlacement
         DebugService DebugService;
         MapDataService MapDataService;
         BuildingService BuildingService;
+        IBuildingPlacement WallOffPlacement;
 
-        public ProtossBuildingPlacement(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, DebugService debugService, MapDataService mapDataService, BuildingService buildingService)
+        public ProtossBuildingPlacement(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, DebugService debugService, MapDataService mapDataService, BuildingService buildingService, IBuildingPlacement wallOffPlacement)
         {
             ActiveUnitData = activeUnitData;
             SharkyUnitData = sharkyUnitData;
             DebugService = debugService;
             MapDataService = mapDataService;
             BuildingService = buildingService;
+            WallOffPlacement = wallOffPlacement;
         }
 
-        public Point2D FindPlacement(Point2D target, UnitTypes unitType, int size, bool ignoreResourceProximity = false, float maxDistance = 50, bool requireSameHeight = false)
+        public Point2D FindPlacement(Point2D target, UnitTypes unitType, int size, bool ignoreResourceProximity = false, float maxDistance = 50, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.None)
         {
             var mineralProximity = 2;
             if (ignoreResourceProximity) { mineralProximity = 0; };
 
+            if (wallOffType == WallOffType.Full)
+            {
+                if (!BuildingService.FullyWalled())
+                {
+                    var point = WallOffPlacement.FindPlacement(target, unitType, size, ignoreResourceProximity, maxDistance, requireSameHeight, wallOffType);
+                    if (point != null)
+                    {
+                        return point;
+                    }
+                }
+            }
+            else if (wallOffType == WallOffType.Partial)
+            {
+                if (!BuildingService.PartiallyWalled())
+                {
+                    var point = WallOffPlacement.FindPlacement(target, unitType, size, ignoreResourceProximity, maxDistance, requireSameHeight, wallOffType);
+                    if (point != null)
+                    {
+                        return point;
+                    }
+                }
+            }
+
             if (unitType == UnitTypes.PROTOSS_PYLON)
             {
-                return FindPylonPlacement(target, maxDistance, mineralProximity, requireSameHeight);
+                return FindPylonPlacement(target, maxDistance, mineralProximity, requireSameHeight, wallOffType);
             }
             else
             {
-                return FindProductionPlacement(target, size, maxDistance, mineralProximity);
+                return FindProductionPlacement(target, size, maxDistance, mineralProximity, wallOffType);
             }
         }
 
-        public Point2D FindPylonPlacement(Point2D reference, float maxDistance, float minimumMineralProximinity = 2, bool requireSameHeight = false)
+        public Point2D FindPylonPlacement(Point2D reference, float maxDistance, float minimumMineralProximinity = 2, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.None)
         {
             var x = reference.X;
             var y = reference.Y;
@@ -100,7 +125,7 @@ namespace Sharky.Builds.BuildingPlacement
             return null;
         }
 
-        public Point2D FindProductionPlacement(Point2D target, float size, float maxDistance, float minimumMineralProximinity = 2)
+        public Point2D FindProductionPlacement(Point2D target, float size, float maxDistance, float minimumMineralProximinity = 2, WallOffType wallOffType = WallOffType.None)
         {
             var powerSources = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && c.UnitCalculation.Unit.BuildProgress == 1).OrderBy(c => Vector2.DistanceSquared(c.UnitCalculation.Position, new Vector2(target.X, target.Y)));
             foreach (var powerSource in powerSources)

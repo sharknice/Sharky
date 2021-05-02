@@ -1,6 +1,6 @@
 ﻿using SC2APIProtocol;
 using Sharky.Pathing;
-using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
@@ -13,65 +13,176 @@ namespace Sharky.Builds.BuildingPlacement
         DebugService DebugService;
         MapData MapData;
         BuildingService BuildingService;
+        TargetingData TargetingData;
 
-        public WallOffPlacement(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, DebugService debugService, MapData mapData, BuildingService buildingService)
+        public WallOffPlacement(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, DebugService debugService, MapData mapData, BuildingService buildingService, TargetingData targetingData)
         {
             ActiveUnitData = activeUnitData;
             SharkyUnitData = sharkyUnitData;
             DebugService = debugService;
             MapData = mapData;
             BuildingService = buildingService;
+            TargetingData = targetingData;
         }
 
-        public Point2D FindPlacement(Point2D target, UnitTypes unitType, int size, bool ignoreResourceProximity = false, float maxDistance = 50, bool requireSameHeight = false)
+        public Point2D FindPlacement(Point2D target, UnitTypes unitType, int size, bool ignoreResourceProximity = false, float maxDistance = 50, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.Full)
         {
             var mineralProximity = 2;
             if (ignoreResourceProximity) { mineralProximity = 0; };
 
+            if (TargetingData.ForwardDefenseWallOffPoints == null) { return null; }
+            var wallPoint = TargetingData.ForwardDefenseWallOffPoints.FirstOrDefault();
+            if (wallPoint == null) { return null; }
+            if (Vector2.DistanceSquared(new Vector2(wallPoint.X, wallPoint.Y), new Vector2(target.X, target.Y)) > maxDistance * maxDistance) { return null; }
+
             if (unitType == UnitTypes.PROTOSS_PYLON)
             {
-                return FindPylonPlacement(target, maxDistance, mineralProximity);
+                return FindPylonPlacement(TargetingData.ForwardDefenseWallOffPoints, maxDistance, mineralProximity, wallOffType);
             }
             else
             {
-                return FindProductionPlacement(target, size, maxDistance, mineralProximity);
+                if (unitType == UnitTypes.PROTOSS_GATEWAY || unitType == UnitTypes.PROTOSS_CYBERNETICSCORE || unitType == UnitTypes.PROTOSS_SHIELDBATTERY || unitType == UnitTypes.PROTOSS_PHOTONCANNON)
+                {
+                    return FindProductionPlacement(TargetingData.ForwardDefenseWallOffPoints, size, maxDistance, mineralProximity, wallOffType);
+                }
+                return null;
             }
         }
 
-        public Point2D FindPylonPlacement(Point2D reference, float maxDistance, float minimumMineralProximinity = 0)
+        public Point2D FindPylonPlacement(List<Point2D> wallPoints, float maxDistance, float minimumMineralProximinity = 0, WallOffType wallOffType = WallOffType.Full)
+        {
+            if (ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && Vector2.DistanceSquared(c.UnitCalculation.Position, new Vector2(wallPoints.FirstOrDefault().X, wallPoints.FirstOrDefault().Y)) < 100) > 0)
+            {
+                return null; // if there is already a pylon by the wall don't build more there
+            }
+
+            if (wallOffType == WallOffType.Partial)
+            {
+                return FindPartialWallPylonPlacement(wallPoints, 4);
+            }
+
+            return FindFullWallPylonPlacement(wallPoints, 4);
+        }
+
+        public Point2D FindPartialWallPylonPlacement(List<Point2D> wallPoints, float maxDistance)
         {
             var unitData = SharkyUnitData.BuildingData[UnitTypes.PROTOSS_PYLON];
-            var pylonRadius = unitData.Size / 2f;
+            var pylonRadius = (unitData.Size / 2f) - .00000f;
 
-            var distance = pylonRadius;
+            var distance = 6;
 
-            while (distance < maxDistance)
+            Point2D best = null;
+            int bestCount = 0;
+
+            while (distance <= 7)
             {
-                var point = new Point2D { X = reference.X, Y = reference.Y };
-                if (Buildable(point, pylonRadius)) { return point; } // TODO: also make sure it's actually touching an unbuildable area or another building to form a complete wall, maybe just add .25 radius to the areabuildable and blocked check and if either of them return true it is good
-                point = new Point2D { X = reference.X, Y = reference.Y + distance };
-                if (Buildable(point, pylonRadius)) { return point; }
-                point = new Point2D { X = reference.X, Y = reference.Y - distance };
-                if (Buildable(point, pylonRadius)) { return point; }
+                foreach (var reference in wallPoints)
+                {
+                    var point = new Point2D { X = reference.X, Y = reference.Y };
+                    var count = PylonPowersWall(point, pylonRadius);
+                    if (count > bestCount) { 
+                        best = point;
+                        bestCount = count;
+                    }
+                    point = new Point2D { X = reference.X, Y = reference.Y + distance };
+                    count = PylonPowersWall(point, pylonRadius);
+                    if (count > bestCount)
+                    {
+                        best = point;
+                        bestCount = count;
+                    }
+                    point = new Point2D { X = reference.X, Y = reference.Y - distance };
+                    count = PylonPowersWall(point, pylonRadius);
+                    if (count > bestCount)
+                    {
+                        best = point;
+                        bestCount = count;
+                    }
 
-                point = new Point2D { X = reference.X + distance, Y = reference.Y };
-                if (Buildable(point, pylonRadius)) { return point; }
-                point = new Point2D { X = reference.X + distance, Y = reference.Y + distance };
-                if (Buildable(point, pylonRadius)) { return point; }
-                point = new Point2D { X = reference.X + distance, Y = reference.Y - distance };
-                if (Buildable(point, pylonRadius)) { return point; }
+                    point = new Point2D { X = reference.X + distance, Y = reference.Y };
+                    count = PylonPowersWall(point, pylonRadius);
+                    if (count > bestCount)
+                    {
+                        best = point;
+                        bestCount = count;
+                    }
+                    point = new Point2D { X = reference.X + distance, Y = reference.Y + distance };
+                    count = PylonPowersWall(point, pylonRadius);
+                    if (count > bestCount)
+                    {
+                        best = point;
+                        bestCount = count;
+                    }
+                    point = new Point2D { X = reference.X + distance, Y = reference.Y - distance };
+                    count = PylonPowersWall(point, pylonRadius);
+                    if (count > bestCount)
+                    {
+                        best = point;
+                        bestCount = count;
+                    }
 
-                point = new Point2D { X = reference.X - distance, Y = reference.Y };
-                if (Buildable(point, pylonRadius)) { return point; }
-                point = new Point2D { X = reference.X - distance, Y = reference.Y + distance };
-                if (Buildable(point, pylonRadius)) { return point; }
-                point = new Point2D { X = reference.X - distance, Y = reference.Y - distance };
-                if (Buildable(point, pylonRadius)) { return point; }
+                    point = new Point2D { X = reference.X - distance, Y = reference.Y };
+                    count = PylonPowersWall(point, pylonRadius);
+                    if (count > bestCount)
+                    {
+                        best = point;
+                        bestCount = count;
+                    }
+                    point = new Point2D { X = reference.X - distance, Y = reference.Y + distance };
+                    count = PylonPowersWall(point, pylonRadius);
+                    if (count > bestCount)
+                    {
+                        best = point;
+                        bestCount = count;
+                    }
+                    point = new Point2D { X = reference.X - distance, Y = reference.Y - distance };
+                    count = PylonPowersWall(point, pylonRadius);
+                    if (count > bestCount)
+                    {
+                        best = point;
+                        bestCount = count;
+                    }
+                }
 
                 distance++;
             }
 
-            return null;
+            return best;
+        }
+
+        public Point2D FindFullWallPylonPlacement(List<Point2D> wallPoints, float maxDistance)
+        {
+            return FindPartialWallPylonPlacement(wallPoints, maxDistance);
+        }
+
+        private int PylonPowersWall(Point2D point, float radius)
+        {
+            if (Buildable(point, radius) && !TargetingData.ForwardDefenseWallOffPoints.Any(p => Vector2.DistanceSquared(new Vector2(p.X, p.Y), new Vector2(point.X, point.Y)) < 3))
+            {
+                return TargetingData.ForwardDefenseWallOffPoints.Count(p => Vector2.DistanceSquared(new Vector2(p.X, p.Y), new Vector2(point.X, point.Y)) <= 49);
+            }
+
+            return -1;
+        }
+
+        private int BuildablePartialWall(IEnumerable<UnitCommander> powerSources, Point2D point, float radius)
+        {
+            if (Buildable(point, radius) && Powered(powerSources, point, radius) && FormingPartialWall(point, radius))
+            {
+                return TargetingData.ForwardDefenseWallOffPoints.Count(p => Vector2.DistanceSquared(new Vector2(p.X, p.Y), new Vector2(point.X, point.Y)) <= (radius + 1) * (radius + 1));
+            }
+
+            return -1;
+        }
+
+        private int BuildableWall(IEnumerable<UnitCommander> powerSources, Point2D point, float radius)
+        {
+            if (Buildable(point, radius) && Powered(powerSources, point, radius) && FormingWall(point, radius))
+            {
+                return TargetingData.ForwardDefenseWallOffPoints.Count(p => Vector2.DistanceSquared(new Vector2(p.X, p.Y), new Vector2(point.X, point.Y)) <= (radius + 1) * (radius + 1));
+            }
+
+            return -1;
         }
 
         private bool Buildable(Point2D point, float radius)
@@ -94,128 +205,225 @@ namespace Sharky.Builds.BuildingPlacement
             return false;
         }
 
-        public Point2D FindProductionPlacement(Point2D target, float size, float maxDistance, float minimumMineralProximinity = 2)
+        private bool FormingWall(Point2D point, float radius)
         {
-            var powerSources = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && c.UnitCalculation.Unit.BuildProgress == 1).OrderBy(c => Vector2.DistanceSquared(c.UnitCalculation.Position, new Vector2(target.X, target.Y)));
-            foreach (var powerSource in powerSources)
+            if (!Buildable(point, radius + 1f))
             {
-                var x = powerSource.UnitCalculation.Unit.Pos.X;
-                var y = powerSource.UnitCalculation.Unit.Pos.Y;
-                var radius = size / 2f;
-                var powerRadius = 7 - (size / 2f);
-
-                // start at 12 o'clock then rotate around 12 times, increase radius by 1 until it's more than powerRadius
-                while (radius <= powerRadius)
-                {
-                    var fullCircle = Math.PI * 2;
-                    var sliceSize = fullCircle / 24.0;
-                    var angle = 0.0;
-                    while (angle + (sliceSize / 2) < fullCircle)
-                    {
-                        var point = new Point2D { X = x + (float)(radius * Math.Cos(angle)), Y = y + (float)(radius * Math.Sin(angle)) };
-                        //DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
-
-                        //if (!BuildingService.AreaBuildable(point.X, point.Y, 1.25f))
-                        //{
-                        //    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 10 }, 1, new Color { R = 255, G = 0, B = 0 });
-                        //}
-                        //else if (BuildingService.Blocked(point.X, point.Y, 1.25f))
-                        //{
-                        //    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 10 }, 1, new Color { R = 255, G = 255, B = 0 });
-                        //}
-                        //else if (BuildingService.HasCreep(point.X, point.Y, 1.5f))
-                        //{
-                        //    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 10 }, 1, new Color { R = 255, G = 255, B = 255 });
-                        //}
-                        //else
-                        //{
-                        //    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 10 }, 1, new Color { R = 0, G = 255, B = 0 });
-                        //}
-
-                        if (BuildingService.AreaBuildable(point.X, point.Y, size / 2.0f) && !BuildingService.Blocked(point.X, point.Y, size / 2.0f) && !BuildingService.HasCreep(point.X, point.Y, size / 2.0f))
-                        {
-                            var mineralFields = ActiveUnitData.NeutralUnits.Where(u => SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType));
-                            var squared = (1 + minimumMineralProximinity + (size / 2f)) * (1 + minimumMineralProximinity + (size / 2f));
-                            var clashes = mineralFields.Where(u => Vector2.DistanceSquared(u.Value.Position, new Vector2(point.X, point.Y)) < squared);
-
-                            if (clashes.Count() == 0)
-                            {
-                                if (Vector2.DistanceSquared(new Vector2(target.X, target.Y), new Vector2(point.X, point.Y)) <= maxDistance * maxDistance)
-                                {
-                                    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
-                                    return point;
-                                }
-                            }
-                        }
-
-                        angle += sliceSize;
-                    }
-                    radius += 1;
-                }
+                return true;
             }
-            return FindProductionPlacementTryHarder(target, size, maxDistance, minimumMineralProximinity);
+
+            return false;
         }
 
-        Point2D FindProductionPlacementTryHarder(Point2D target, float size, float maxDistance, float minimumMineralProximinity)
+        private bool FormingPartialWall(Point2D point, float radius)
         {
-            var powerSources = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && c.UnitCalculation.Unit.BuildProgress == 1).OrderBy(c => Vector2.DistanceSquared(c.UnitCalculation.Position, new Vector2(target.X, target.Y)));
-            foreach (var powerSource in powerSources)
+            if (!Buildable(point, radius + 1f)) // it's touching a wall
             {
-                var x = powerSource.UnitCalculation.Unit.Pos.X;
-                var y = powerSource.UnitCalculation.Unit.Pos.Y;
-                var radius = size / 2f;
-                var powerRadius = 7 - (size / 2f);
-
-                // start at 12 o'clock then rotate around 12 times, increase radius by 1 until it's more than powerRadius
-                while (radius <= powerRadius)
+                var gaps = BuildingService.UnWalledPoints();
+                foreach (var gap in gaps)
                 {
-                    var fullCircle = Math.PI * 2;
-                    var sliceSize = fullCircle / 48.0;
-                    var angle = 0.0;
-                    while (angle + (sliceSize / 2) < fullCircle)
+                    if (Vector2.DistanceSquared(new Vector2(point.X, point.Y), new Vector2(gap.X, gap.Y)) > radius * radius)
                     {
-                        var point = new Point2D { X = x + (float)(radius * Math.Cos(angle)), Y = y + (float)(radius * Math.Sin(angle)) };
-                        //DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
-
-                        //if (!BuildingService.AreaBuildable(point.X, point.Y, size / 2.0f))
-                        //{
-                        //    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 10 }, 1, new Color { R = 255, G = 0, B = 0 });
-                        //}
-                        //else if (BuildingService.Blocked(point.X, point.Y, size / 2.0f, 0))
-                        //{
-                        //    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 10 }, 1, new Color { R = 255, G = 255, B = 0 });
-                        //}
-                        //else if (BuildingService.HasCreep(point.X, point.Y, size / 2.0f))
-                        //{
-                        //    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 10 }, 1, new Color { R = 255, G = 255, B = 255 });
-                        //}
-                        //else
-                        //{
-                        //    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 10 }, 1, new Color { R = 0, G = 255, B = 0 });
-                        //}
-
-                        if (BuildingService.AreaBuildable(point.X, point.Y, size / 2.0f) && !BuildingService.Blocked(point.X, point.Y, size / 2.0f, 0) && !BuildingService.HasCreep(point.X, point.Y, size / 2.0f))
-                        {
-                            var mineralFields = ActiveUnitData.NeutralUnits.Where(u => SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType));
-                            var squared = (1 + minimumMineralProximinity + (size / 2f)) * (1 + minimumMineralProximinity + (size / 2f));
-                            var clashes = mineralFields.Where(u => Vector2.DistanceSquared(u.Value.Position, new Vector2(point.X, point.Y)) < squared);
-
-                            if (clashes.Count() == 0)
-                            {
-                                if (Vector2.DistanceSquared(new Vector2(target.X, target.Y), new Vector2(point.X, point.Y)) <= maxDistance * maxDistance)
-                                {
-                                    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
-                                    return point;
-                                }
-                            }
-                        }
-
-                        angle += sliceSize;
+                        return true; // at least one gap is open
                     }
-                    radius += 1;
                 }
             }
+
+            return false;
+        }
+
+        public Point2D FindProductionPlacement(List<Point2D> wallPoints, float size, float maxDistance, float minimumMineralProximinity = 2, WallOffType wallOffType = WallOffType.Full)
+        {
+            if (wallOffType == WallOffType.Partial)
+            {
+                return FindPartialWallProductionPlacement(wallPoints, size, 4);
+            }
+
+            return FindFullWallProductionPlacement(wallPoints, size, 4);
+        }
+
+        public Point2D FindPartialWallProductionPlacement(List<Point2D> wallPoints, float size, float maxDistance)
+        {
+            var powerSources = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && c.UnitCalculation.Unit.BuildProgress == 1).Where(c => Vector2.DistanceSquared(c.UnitCalculation.Position, new Vector2(wallPoints.FirstOrDefault().X, wallPoints.FirstOrDefault().Y)) < 15 * 15);
+            if (powerSources.Count() == 0) { return null; }
+
+            var radius = (size / 2f) - .00000f;
+
+            var distance = 0;
+
+            Point2D best = null;
+            int bestCount = -1;
+
+            while (distance < maxDistance)
+            {
+                foreach (var reference in wallPoints)
+                {
+                    var point = new Point2D { X = reference.X, Y = reference.Y };
+                    var count = BuildablePartialWall(powerSources, point, radius);
+                    if (count > bestCount)
+                    {
+                        best = point;
+                        bestCount = count;
+                    }
+                    point = new Point2D { X = reference.X, Y = reference.Y + distance };
+                    count = BuildablePartialWall(powerSources, point, radius);
+                    if (count > bestCount)
+                    {
+                        best = point;
+                        bestCount = count;
+                    }
+                    point = new Point2D { X = reference.X, Y = reference.Y - distance };
+                    count = BuildablePartialWall(powerSources, point, radius);
+                    if (count > bestCount)
+                    {
+                        best = point;
+                        bestCount = count;
+                    }
+
+                    point = new Point2D { X = reference.X + distance, Y = reference.Y };
+                    count = BuildablePartialWall(powerSources, point, radius);
+                    if (count > bestCount)
+                    {
+                        best = point;
+                        bestCount = count;
+                    }
+                    point = new Point2D { X = reference.X + distance, Y = reference.Y + distance };
+                    count = BuildablePartialWall(powerSources, point, radius);
+                    if (count > bestCount)
+                    {
+                        best = point;
+                        bestCount = count;
+                    }
+                    point = new Point2D { X = reference.X + distance, Y = reference.Y - distance };
+                    count = BuildablePartialWall(powerSources, point, radius);
+                    if (count > bestCount)
+                    {
+                        best = point;
+                        bestCount = count;
+                    }
+
+                    point = new Point2D { X = reference.X - distance, Y = reference.Y };
+                    count = BuildablePartialWall(powerSources, point, radius);
+                    if (count > bestCount)
+                    {
+                        best = point;
+                        bestCount = count;
+                    }
+                    point = new Point2D { X = reference.X - distance, Y = reference.Y + distance };
+                    count = BuildablePartialWall(powerSources, point, radius);
+                    if (count > bestCount)
+                    {
+                        best = point;
+                        bestCount = count;
+                    }
+                    point = new Point2D { X = reference.X - distance, Y = reference.Y - distance };
+                    count = BuildablePartialWall(powerSources, point, radius);
+                    if (count > bestCount)
+                    {
+                        best = point;
+                        bestCount = count;
+                    }
+                }
+
+                distance++;
+            }
+
+            return best;
+        }
+
+        public Point2D FindFullWallProductionPlacement(List<Point2D> wallPoints, float size, float maxDistance)
+        {
+            var powerSources = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && c.UnitCalculation.Unit.BuildProgress == 1).Where(c => Vector2.DistanceSquared(c.UnitCalculation.Position, new Vector2(wallPoints.FirstOrDefault().X, wallPoints.FirstOrDefault().Y)) < 15 * 15);
+            if (powerSources.Count() == 0) { return null; }
+
+            var radius = (size / 2f) - .00000f;
+
+            var distance = 0;
+
+            Point2D best = null;
+            int bestCount = 0;
+
+            while (distance < maxDistance)
+            {
+                foreach (var reference in wallPoints)
+                {
+                    var point = new Point2D { X = reference.X, Y = reference.Y };
+                    var count = BuildableWall(powerSources, point, radius);
+                    if (count > bestCount)
+                    {
+                        best = point;
+                        bestCount = count;
+                    }
+                    point = new Point2D { X = reference.X, Y = reference.Y + distance };
+                    count = BuildableWall(powerSources, point, radius);
+                    if (count > bestCount)
+                    {
+                        best = point;
+                        bestCount = count;
+                    }
+                    point = new Point2D { X = reference.X, Y = reference.Y - distance };
+                    count = BuildableWall(powerSources, point, radius);
+                    if (count > bestCount)
+                    {
+                        best = point;
+                        bestCount = count;
+                    }
+
+                    point = new Point2D { X = reference.X + distance, Y = reference.Y };
+                    count = BuildableWall(powerSources, point, radius);
+                    if (count > bestCount)
+                    {
+                        best = point;
+                        bestCount = count;
+                    }
+                    point = new Point2D { X = reference.X + distance, Y = reference.Y + distance };
+                    count = BuildableWall(powerSources, point, radius);
+                    if (count > bestCount)
+                    {
+                        best = point;
+                        bestCount = count;
+                    }
+                    point = new Point2D { X = reference.X + distance, Y = reference.Y - distance };
+                    count = BuildableWall(powerSources, point, radius);
+                    if (count > bestCount)
+                    {
+                        best = point;
+                        bestCount = count;
+                    }
+
+                    point = new Point2D { X = reference.X - distance, Y = reference.Y };
+                    count = BuildableWall(powerSources, point, radius);
+                    if (count > bestCount)
+                    {
+                        best = point;
+                        bestCount = count;
+                    }
+                    point = new Point2D { X = reference.X - distance, Y = reference.Y + distance };
+                    count = BuildableWall(powerSources, point, radius);
+                    if (count > bestCount)
+                    {
+                        best = point;
+                        bestCount = count;
+                    }
+                    point = new Point2D { X = reference.X - distance, Y = reference.Y - distance };
+                    count = BuildableWall(powerSources, point, radius);
+                    if (count > bestCount)
+                    {
+                        best = point;
+                        bestCount = count;
+                    }
+                }
+
+                distance++;
+            }
+
             return null;
+        }
+
+        bool Powered(IEnumerable<UnitCommander> powerSources, Point2D point, float radius)
+        {
+            var vector = new Vector2(point.X, point.Y);
+            return powerSources.Any(p => Vector2.DistanceSquared(p.UnitCalculation.Position, vector) <= (7 - radius) * (7 - radius));
         }
     }
 }

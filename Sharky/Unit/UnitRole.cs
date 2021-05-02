@@ -11,6 +11,8 @@
         Gas,
         Defend,
         Attack,
-        PreventGasSteal
+        PreventGasSteal,
+        Wall,
+        Door // TODO: move to door position if not there, hold position if there
     }
 }

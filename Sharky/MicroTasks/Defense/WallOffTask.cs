@@ -13,11 +13,11 @@ namespace Sharky.MicroTasks
         TargetingData TargetingData;
         ActiveUnitData ActiveUnitData;
         MacroData MacroData;
-        public WallOffPlacement WallOffPlacement { get; set; }
+        public IBuildingPlacement WallOffPlacement { get; set; }
 
         public List<Point2D> PlacementPoints;
 
-        public WallOffTask(SharkyUnitData sharkyUnitData, TargetingData targetingData, ActiveUnitData activeUnitData, MacroData macroData, WallOffPlacement wallOffPlacement, bool enabled, float priority)
+        public WallOffTask(SharkyUnitData sharkyUnitData, TargetingData targetingData, ActiveUnitData activeUnitData, MacroData macroData, IBuildingPlacement wallOffPlacement, bool enabled, float priority)
         {
             SharkyUnitData = sharkyUnitData;
             TargetingData = targetingData;
@@ -59,6 +59,10 @@ namespace Sharky.MicroTasks
         public override IEnumerable<SC2APIProtocol.Action> PerformActions(int frame)
         {
             var commands = new List<SC2APIProtocol.Action>();
+            if (TargetingData.ForwardDefenseWallOffPoints == null)
+            {
+                return commands;
+            }
 
             foreach (var point in TargetingData.ForwardDefenseWallOffPoints) // TODO: wall with gap, make sure all but one of the wall off points has a building touching, make sure placement doesn't block that, pass in that spot that can't be touched to findplacement method
             {
@@ -68,7 +72,8 @@ namespace Sharky.MicroTasks
                     // build a pylon there
                     foreach (var commander in UnitCommanders)
                     {
-                        var placement = WallOffPlacement.FindPylonPlacement(point, 3.75f, 0);
+                        //var placement = WallOffPlacement.FindPlacement(TargetingData.ForwardDefenseWallOffPoints, 3.75f, 0);
+                        Point2D placement = null;
                         if (placement != null)
                         {
                             if (MacroData.Minerals < 100)

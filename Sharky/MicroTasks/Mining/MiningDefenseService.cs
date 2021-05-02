@@ -1,5 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.MicroControllers;
+﻿using Sharky.MicroControllers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -84,7 +83,15 @@ namespace Sharky.MicroTasks.Mining
                                 DebugService.DrawText("--------------Defending Worker Rush-------------");
                                 while (commanders.Count(c => c.Value.UnitRole == UnitRole.Defend) < desiredWorkers)
                                 {
-                                    commanders.FirstOrDefault(c => c.Value.UnitRole != UnitRole.Defend && c.Value.UnitRole != UnitRole.PreventGasSteal).Value.UnitRole = UnitRole.Defend;
+                                    var commander = commanders.FirstOrDefault(c => c.Value.UnitRole != UnitRole.Defend && c.Value.UnitRole != UnitRole.PreventGasSteal).Value;
+                                    if (commander != null)
+                                    {
+                                        commander.UnitRole = UnitRole.Defend;
+                                    }
+                                    else
+                                    {
+                                        break;
+                                    }
                                 }
                                 var defenders = commanders.Where(c => c.Value.UnitRole == UnitRole.Defend);
                                 foreach (var defender in defenders)
@@ -105,7 +112,15 @@ namespace Sharky.MicroTasks.Mining
                                 { // TODO: test this
                                     while (commanders.Count(c => c.Value.UnitRole == UnitRole.Defend) < desiredWorkers && commanders.Count(c => c.Value.UnitRole == UnitRole.Defend) < commanders.Count())
                                     {
-                                        commanders.FirstOrDefault(c => c.Value.UnitRole != UnitRole.Defend && c.Value.UnitRole != UnitRole.PreventGasSteal).Value.UnitRole = UnitRole.Defend;
+                                        var commander = commanders.FirstOrDefault(c => c.Value.UnitRole != UnitRole.Defend && c.Value.UnitRole != UnitRole.PreventGasSteal).Value;
+                                        if (commander != null)
+                                        {
+                                            commander.UnitRole = UnitRole.Defend;
+                                        }
+                                        else
+                                        {
+                                            break;
+                                        }
                                     }
                                     var defenders = commanders.Where(c => c.Value.UnitRole == UnitRole.Defend);
                                     var sentWorkers = new List<ulong>();
@@ -144,7 +159,15 @@ namespace Sharky.MicroTasks.Mining
                                 {
                                     while (commanders.Count(c => c.Value.UnitRole == UnitRole.Defend) < desiredWorkers && commanders.Count(c => c.Value.UnitRole == UnitRole.Defend) < commanders.Count())
                                     {
-                                        commanders.FirstOrDefault(c => c.Value.UnitRole != UnitRole.Defend && c.Value.UnitRole != UnitRole.PreventGasSteal).Value.UnitRole = UnitRole.Defend;
+                                        var commander = commanders.FirstOrDefault(c => c.Value.UnitRole != UnitRole.Defend && c.Value.UnitRole != UnitRole.PreventGasSteal).Value;
+                                        if (commander != null)
+                                        {
+                                            commander.UnitRole = UnitRole.Defend;
+                                        }
+                                        else
+                                        {
+                                            break;
+                                        }
                                     }
 
                                     var defenders = commanders.Where(c => c.Value.UnitRole == UnitRole.Defend);

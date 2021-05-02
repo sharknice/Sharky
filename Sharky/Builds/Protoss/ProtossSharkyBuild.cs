@@ -20,5 +20,13 @@ namespace Sharky.Builds
         {
             return CounterTransitioner.DefaultCounterTransition(frame);
         }
+
+        public override void StartBuild(int frame)
+        {  
+            base.StartBuild(frame);
+
+            // TODO: if against terran wallType.None, else partial
+            BuildOptions.WallOffType = BuildingPlacement.WallOffType.Partial;
+        }
     }
 }

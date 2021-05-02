@@ -22,6 +22,8 @@ namespace Sharky.Managers
         IBuildingPlacement WarpInPlacement;
         MacroData MacroData;
         Morpher Morpher;
+        BuildOptions BuildOptions;
+
         BuildPylonService BuildPylonService;
         BuildDefenseService BuildDefenseService;
         BuildProxyService BuildProxyService;
@@ -38,7 +40,7 @@ namespace Sharky.Managers
 
         public int RunFrequency { get; set; }
 
-        public MacroManager(MacroSetup macroSetup, ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, IBuildingBuilder buildingBuilder, SharkyOptions sharkyOptions, BaseData baseData, TargetingData targetingData, AttackData attackData, IBuildingPlacement warpInPlacement, MacroData macroData, Morpher morpher, 
+        public MacroManager(MacroSetup macroSetup, ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, IBuildingBuilder buildingBuilder, SharkyOptions sharkyOptions, BaseData baseData, TargetingData targetingData, AttackData attackData, IBuildingPlacement warpInPlacement, MacroData macroData, Morpher morpher, BuildOptions buildOptions,
             BuildPylonService buildPylonService, BuildDefenseService buildDefenseService, BuildProxyService buildProxyService, UnitCountService unitCountService, BuildingCancelService buildingCancelService)
         {
             NeverSkip = true;
@@ -55,6 +57,8 @@ namespace Sharky.Managers
 
             MacroData = macroData;
             Morpher = morpher;
+            BuildOptions = buildOptions;
+
             BuildPylonService = buildPylonService;
             BuildDefenseService = buildDefenseService;
             BuildProxyService = buildProxyService;
@@ -305,7 +309,7 @@ namespace Sharky.Managers
             if (MacroData.BuildPylon)
             {
                 var unitData = SharkyUnitData.BuildingData[UnitTypes.PROTOSS_PYLON];
-                var command = BuildingBuilder.BuildBuilding(MacroData, UnitTypes.PROTOSS_PYLON, unitData);
+                var command = BuildingBuilder.BuildBuilding(MacroData, UnitTypes.PROTOSS_PYLON, unitData, wallOffType: BuildOptions.WallOffType);
                 if (command != null)
                 {
                     commands.AddRange(command);
@@ -316,7 +320,7 @@ namespace Sharky.Managers
             if (MacroData.BuildSupplyDepot)
             {
                 var unitData = SharkyUnitData.BuildingData[UnitTypes.TERRAN_SUPPLYDEPOT];
-                var command = BuildingBuilder.BuildBuilding(MacroData, UnitTypes.TERRAN_SUPPLYDEPOT, unitData);
+                var command = BuildingBuilder.BuildBuilding(MacroData, UnitTypes.TERRAN_SUPPLYDEPOT, unitData, wallOffType: BuildOptions.WallOffType);
                 if (command != null)
                 {
                     commands.AddRange(command);
@@ -352,7 +356,7 @@ namespace Sharky.Managers
                 if (unit.Value)
                 {
                     var unitData = SharkyUnitData.BuildingData[unit.Key];
-                    var command = BuildingBuilder.BuildBuilding(MacroData, unit.Key, unitData);
+                    var command = BuildingBuilder.BuildBuilding(MacroData, unit.Key, unitData, wallOffType: BuildOptions.WallOffType);
                     if (command != null)
                     {
                         commands.AddRange(command);
@@ -405,7 +409,7 @@ namespace Sharky.Managers
                 if (unit.Value)
                 {
                     var unitData = SharkyUnitData.BuildingData[unit.Key];
-                    var command = BuildingBuilder.BuildBuilding(MacroData, unit.Key, unitData);
+                    var command = BuildingBuilder.BuildBuilding(MacroData, unit.Key, unitData, wallOffType: BuildOptions.WallOffType);
                     if (command != null)
                     {
                         commands.AddRange(command);

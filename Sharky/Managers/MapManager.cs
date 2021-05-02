@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using Sharky.Builds.BuildingPlacement;
 using Sharky.Pathing;
 using Sharky.S2ClientTypeEnums;
 using System;
@@ -15,6 +16,7 @@ namespace Sharky.Managers
         SharkyOptions SharkyOptions;
         SharkyUnitData SharkyUnitData;
         DebugService DebugService;
+        WallDataService WallDataService;
 
         private int LastBuildingCount;
         private int LastVisibleEnemyUnitCount;
@@ -22,13 +24,14 @@ namespace Sharky.Managers
         private readonly int MillisecondsPerUpdate;
         private double MillisecondsUntilUpdate;
 
-        public MapManager(MapData mapData, ActiveUnitData activeUnitData, SharkyOptions sharkyOptions, SharkyUnitData sharkyUnitData, DebugService debugService)
+        public MapManager(MapData mapData, ActiveUnitData activeUnitData, SharkyOptions sharkyOptions, SharkyUnitData sharkyUnitData, DebugService debugService, WallDataService wallDataService)
         {
             MapData = mapData;
             ActiveUnitData = activeUnitData;
             SharkyOptions = sharkyOptions;
             SharkyUnitData = sharkyUnitData;
             DebugService = debugService;
+            WallDataService = wallDataService;
 
             LastBuildingCount = 0;
             LastVisibleEnemyUnitCount = 0;
@@ -56,11 +59,12 @@ namespace Sharky.Managers
                 }
                 MapData.Map[x] = row;
             }
+            MapData.PartialWallData = WallDataService.GetPartialWallData(gameInfo.MapName);
         }
 
         public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
         {
-            DrawGrid(observation.Observation.RawData.Player.Camera);
+            //DrawGrid(observation.Observation.RawData.Player.Camera);
 
             MillisecondsUntilUpdate -= (1 / SharkyOptions.FramesPerSecond) * 1000;
             if (MillisecondsUntilUpdate > 0) { return new List<SC2APIProtocol.Action>(); }
@@ -98,7 +102,8 @@ namespace Sharky.Managers
 
         private void DrawGrid(Point camera)
         {
-            // TODO: for walloff get point of wall, build building exactly down/up/left/right it's radius distance away
+            DebugService.DrawText($"Point: {camera.X},{camera.Y}");
+            DebugService.DrawSphere(new Point { X = camera.X, Y = camera.Y, Z = 13 }, .25f);
 
             for (int x = -5; x <= 5; x++)
             {
@@ -113,9 +118,9 @@ namespace Sharky.Managers
                         {
                             color = new Color { R = 255, G = 0, B = 0 };
                         }
-                        //DebugService.DrawLine(point, new Point { X = point.X + 1, Y = point.Y, Z = height + 1 }, color);
-                        //DebugService.DrawLine(point, new Point { X = point.X, Y = point.Y + 1, Z = height + 1 }, color);
-                        //DebugService.DrawLine(point, new Point { X = point.X, Y = point.Y + 1, Z = 1 }, color);
+                        DebugService.DrawLine(point, new Point { X = point.X + 1, Y = point.Y, Z = height + 1 }, color);
+                        DebugService.DrawLine(point, new Point { X = point.X, Y = point.Y + 1, Z = height + 1 }, color);
+                        DebugService.DrawLine(point, new Point { X = point.X, Y = point.Y + 1, Z = 1 }, color);
                     }
                 }
             }

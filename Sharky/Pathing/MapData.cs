@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Sharky.Builds.BuildingPlacement;
+using System.Collections.Generic;
 
 namespace Sharky.Pathing
 {
@@ -8,5 +9,6 @@ namespace Sharky.Pathing
         public int MapHeight { get; set; }
         public Dictionary<int, Dictionary<int, MapCell>> Map { get; set; }
         public string MapName { get; set; }
+        public List<WallData> PartialWallData { get; set; }
     }
 }

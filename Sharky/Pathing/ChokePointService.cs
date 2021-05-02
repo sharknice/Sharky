@@ -1,5 +1,7 @@
 ﻿using SC2APIProtocol;
+using Sharky.Builds.BuildingPlacement;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 
 namespace Sharky.Pathing
@@ -8,11 +10,13 @@ namespace Sharky.Pathing
     {
         IPathFinder PathFinder;
         MapDataService MapDataService;
+        BuildingService BuildingService;
 
-        public ChokePointService(IPathFinder pathFinder, MapDataService mapDataService)
+        public ChokePointService(IPathFinder pathFinder, MapDataService mapDataService, BuildingService buildingService)
         {
             PathFinder = pathFinder;
             MapDataService = mapDataService;
+            BuildingService = buildingService;
         }
 
         public List<Point2D> FindWallPoints(Point2D start, Point2D end, int frame, float maxDistance = 30f)
@@ -166,6 +170,36 @@ namespace Sharky.Pathing
 
             return chokePoints;
         }
+
+        public List<Point2D> GetWallOffPoints(List<Point2D> chokePoints)
+        {
+            var wallPoints = new List<Point2D>();
+
+            foreach (var point in chokePoints)
+            {
+                if (BuildingService.AreaBuildable(point.X, point.Y, 1))
+                {
+                    wallPoints.Add(point);
+                }
+                else
+                {
+                    if (BuildingService.AreaBuildable(point.X, point.Y - 1, .1f)) { wallPoints.Add(point); }
+                    if (BuildingService.AreaBuildable(point.X, point.Y + 1, .1f)) { wallPoints.Add(point); }
+
+                    if (BuildingService.AreaBuildable(point.X - 1, point.Y, .1f)) { wallPoints.Add(point); }
+                    if (BuildingService.AreaBuildable(point.X - 1, point.Y - 1, .1f)) { wallPoints.Add(point); }
+                    if (BuildingService.AreaBuildable(point.X - 1, point.Y + 1, .1f)) { wallPoints.Add(point); }
+
+                    if (BuildingService.AreaBuildable(point.X + 1, point.Y, .1f)) { wallPoints.Add(point); }
+                    if (BuildingService.AreaBuildable(point.X + 1, point.Y - 1, .1f)) { wallPoints.Add(point); }
+                    if (BuildingService.AreaBuildable(point.X + 1, point.Y + 1, .1f)) { wallPoints.Add(point); }
+                }
+            }
+
+            return wallPoints.Distinct().ToList();
+        }
+
+
 
         private bool TouchingLowerPoint(int x, int y, int startHeight)
         {

@@ -53,10 +53,14 @@ namespace Sharky.Managers
                 if (chokePoint != null)
                 {
                     TargetingData.ForwardDefensePoint = chokePoint;
-                    var wallPoints = ChokePointService.GetEntireChokePoint(chokePoint);
-                    if (wallPoints != null)
+                    var chokePoints = ChokePointService.GetEntireChokePoint(chokePoint);
+                    if (chokePoints != null)
                     {
-                        TargetingData.ForwardDefenseWallOffPoints = wallPoints;
+                        var wallPoints = ChokePointService.GetWallOffPoints(chokePoints);
+                        if (wallPoints != null)
+                        {
+                            TargetingData.ForwardDefenseWallOffPoints = wallPoints;
+                        }
                     }
                 }
                 else
@@ -127,10 +131,14 @@ namespace Sharky.Managers
                     if (chokePoint != null)
                     {
                         TargetingData.ForwardDefensePoint = chokePoint;
-                        var wallPoints = ChokePointService.GetEntireChokePoint(chokePoint);
-                        if (wallPoints != null)
+                        var chokePoints = ChokePointService.GetEntireChokePoint(chokePoint);
+                        if (chokePoints != null)
                         {
-                            TargetingData.ForwardDefenseWallOffPoints = wallPoints;
+                            var wallPoints = ChokePointService.GetWallOffPoints(chokePoints);
+                            if (wallPoints != null)
+                            {
+                                TargetingData.ForwardDefenseWallOffPoints = wallPoints;
+                            }
                         }
                     }
                     else
