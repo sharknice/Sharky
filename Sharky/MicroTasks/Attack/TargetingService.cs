@@ -39,6 +39,10 @@ namespace Sharky.MicroTasks.Attack
                 {
                     return new Point2D { X = enemyBuilding.Unit.Pos.X, Y = enemyBuilding.Unit.Pos.Y };
                 }
+                else
+                {
+                    return TargetingData.EnemyMainBasePoint;
+                }
             }
 
             if (currentEnemyBuildingCount == 0 && MapDataService.SelfVisible(attackPoint) && MapDataService.Visibility(TargetingData.EnemyMainBasePoint) > 0)
