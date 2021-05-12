@@ -41,7 +41,7 @@ namespace Sharky.MicroTasks.Attack
                 }
                 else
                 {
-                    return TargetingData.EnemyMainBasePoint;
+                    attackPoint = TargetingData.EnemyMainBasePoint;
                 }
             }
 
