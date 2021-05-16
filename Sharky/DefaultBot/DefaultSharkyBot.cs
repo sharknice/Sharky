@@ -46,6 +46,7 @@ namespace Sharky.DefaultBot
         public TargetingManager TargetingManager { get; set; }
         public MacroManager MacroManager { get; set; }
         public NexusManager NexusManager { get; set; }
+        public OrbitalManager OrbitalManager { get; set; }
         public ShieldBatteryManager ShieldBatteryManager { get; set; }
         public ChatManager ChatManager { get; set; }
         public MicroManager MicroManager { get; set; }
@@ -204,6 +205,9 @@ namespace Sharky.DefaultBot
             Managers.Add(NexusManager);
             ShieldBatteryManager = new ShieldBatteryManager(ActiveUnitData);
             Managers.Add(ShieldBatteryManager);
+
+            OrbitalManager = new OrbitalManager(ActiveUnitData, BaseData, EnemyData);
+            Managers.Add(OrbitalManager);
 
             HttpClient = new HttpClient();
             ChatHistory = new ChatHistory();
