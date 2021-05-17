@@ -108,7 +108,12 @@ namespace Sharky.Builds.MacroServices
                         {
                             var unitData = SharkyUnitData.BuildingData[unit.Key];
 
-                            var orderedBuildings = ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
+                            var orderedBuildings = 0;
+                            if (MacroData.Race != Race.Terran)
+                            {
+                                ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
+                            }              
+
                             if (unit.Key == UnitTypes.PROTOSS_GATEWAY)
                             {
                                 orderedBuildings += ActiveUnitData.SelfUnits.Count(u => u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPGATE && Vector2.DistanceSquared(u.Value.Position, new Vector2(proxy.Value.Location.X, proxy.Value.Location.Y)) < proxy.Value.MaximumBuildingDistance * proxy.Value.MaximumBuildingDistance);

@@ -50,6 +50,7 @@ namespace Sharky.MicroTasks
             foreach (var commander in UnitCommanders)
             {
                 commander.Claimed = false;
+                commander.UnitRole = UnitRole.None;
             }
             UnitCommanders = new List<UnitCommander>();
 

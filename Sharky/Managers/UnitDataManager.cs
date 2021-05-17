@@ -170,7 +170,14 @@ namespace Sharky.Managers
             {
                 UnitTypes.PROTOSS_DARKTEMPLAR,
                 UnitTypes.TERRAN_GHOST,
-                UnitTypes.TERRAN_BANSHEE
+                UnitTypes.TERRAN_BANSHEE,
+                UnitTypes.TERRAN_WIDOWMINE,
+                UnitTypes.TERRAN_WIDOWMINEBURROWED,
+                UnitTypes.ZERG_LURKERMPBURROWED,
+                UnitTypes.ZERG_LURKERMP,
+                UnitTypes.ZERG_SWARMHOSTBURROWEDMP,
+                UnitTypes.ZERG_SWARMHOSTMP,
+                UnitTypes.PROTOSS_MOTHERSHIP
             };
 
             SharkyUnitData.DetectionTypes = new HashSet<UnitTypes>
