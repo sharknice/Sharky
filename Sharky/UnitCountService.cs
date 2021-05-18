@@ -15,17 +15,17 @@ namespace Sharky
 
         public int Count(UnitTypes unitType)
         {
-            return ActiveUnitData.SelfUnits.Count(u => u.Value.Unit.UnitType == (uint)unitType);
+            return ActiveUnitData.SelfUnits.Count(u => u.Value.Unit.UnitType == (uint)unitType && !u.Value.Unit.IsHallucination);
         }
 
         public int EnemyCount(UnitTypes unitType)
         {
-            return ActiveUnitData.EnemyUnits.Count(u => u.Value.Unit.UnitType == (uint)unitType);
+            return ActiveUnitData.EnemyUnits.Count(u => u.Value.Unit.UnitType == (uint)unitType && !u.Value.Unit.IsHallucination);
         }
 
         public int EnemyCompleted(UnitTypes unitType)
         {
-            return ActiveUnitData.EnemyUnits.Count(u => u.Value.Unit.UnitType == (uint)unitType && u.Value.Unit.BuildProgress == 1);
+            return ActiveUnitData.EnemyUnits.Count(u => u.Value.Unit.UnitType == (uint)unitType && u.Value.Unit.BuildProgress == 1 && !u.Value.Unit.IsHallucination);
         }
 
         public int UnitsInProgressCount(UnitTypes unitType)
@@ -87,7 +87,7 @@ namespace Sharky
 
         public int Completed(UnitTypes unitType)
         {
-            return ActiveUnitData.SelfUnits.Count(u => u.Value.Unit.UnitType == (uint)unitType && u.Value.Unit.BuildProgress == 1);
+            return ActiveUnitData.SelfUnits.Count(u => u.Value.Unit.UnitType == (uint)unitType && u.Value.Unit.BuildProgress == 1 && !u.Value.Unit.IsHallucination);
         }
 
         public int EquivalentTypeCompleted(UnitTypes unitType)

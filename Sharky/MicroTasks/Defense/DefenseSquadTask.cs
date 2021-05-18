@@ -1,11 +1,9 @@
 ﻿using SC2APIProtocol;
-using Sharky.Managers;
 using Sharky.MicroControllers;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Numerics;
 
 namespace Sharky.MicroTasks
 {
@@ -44,7 +42,7 @@ namespace Sharky.MicroTasks
                     var unitType = commander.Value.UnitCalculation.Unit.UnitType;
                     foreach (var desiredUnitClaim in DesiredUnitsClaims)
                     {
-                        if ((uint)desiredUnitClaim.UnitType == unitType && UnitCommanders.Count(u => u.UnitCalculation.Unit.UnitType == (uint)desiredUnitClaim.UnitType) < desiredUnitClaim.Count)
+                        if ((uint)desiredUnitClaim.UnitType == unitType && !commander.Value.UnitCalculation.Unit.IsHallucination && UnitCommanders.Count(u => u.UnitCalculation.Unit.UnitType == (uint)desiredUnitClaim.UnitType) < desiredUnitClaim.Count)
                         {
                             commander.Value.Claimed = true;
                             UnitCommanders.Add(commander.Value);
