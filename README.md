@@ -7,6 +7,8 @@ You can pull it to use directly in your solution, or install it via the nuget pa
 
 There is an example bot included in the source, and another one using the nuget package here https://github.com/sharknice/SharkyExampleBot
 
+And a video tutorial here https://www.youtube.com/watch?v=2Tf0jLTJQME
+
 ## Features
 - Works with every race, Terran, Protoss, Zerg, and Random
 - Supports Multiple builds, with the ability to intelligently switch builds on the fly
@@ -16,6 +18,7 @@ There is an example bot included in the source, and another one using the nuget 
 - Indentifies enemy strategies so you can counter them
 - Saves game results to json files that contain the builds used and the enemy strategies used as well as the chat, these files are used to determine what build to use the next game
 - Spawn friendly or enemy units in debug mode with chat commands.  Ex. type "spawn enemy protoss_zealot" to spawn an enemy zealot at the current camera location or "spawn friendly terran_reaper" for a friendly reaper unit.  List of units here: https://github.com/sharknice/Sharky/blob/master/Sharky/S2ClientTypeEnums/UnitTypes.cs
+- Turbo Mining - mines minerals ~8% faster than humanly possible by individually microing each worker
 - And much more!
 
 ## Architecture
