@@ -17,7 +17,7 @@ And a video tutorial here https://www.youtube.com/watch?v=2Tf0jLTJQME
 - Humanlike chat - add json files to data/default to respond to player chat, add json files to data/type to respond to enemy strategies, announce your attack, or anything you want.  You can even connect it to the sharkbot chat api https://github.com/sharkson/sharkbot
 - Indentifies enemy strategies so you can counter them
 - Saves game results to json files that contain the builds used and the enemy strategies used as well as the chat, these files are used to determine what build to use the next game
-- Spawn friendly or enemy units in debug mode with chat commands.  Ex. type "spawn enemy protoss_zealot" to spawn an enemy zealot at the current camera location or "spawn friendly terran_reaper" for a friendly reaper unit.  List of units here: https://github.com/sharknice/Sharky/blob/master/Sharky/S2ClientTypeEnums/UnitTypes.cs
+- Spawn friendly or enemy units in debug mode with chat commands.  Ex. type "spawn 10 enemy protoss_zealot" to spawn 10 enemy zealots at the current camera location or "spawn friendly terran_reaper" for a friendly reaper unit.  List of units here: https://github.com/sharknice/Sharky/blob/master/Sharky/S2ClientTypeEnums/UnitTypes.cs
 - Turbo Mining - mines minerals ~8% faster than humanly possible by individually microing each worker
 - And much more!
 
