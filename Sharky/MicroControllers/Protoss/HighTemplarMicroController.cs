@@ -9,9 +9,9 @@ namespace Sharky.MicroControllers.Protoss
     public class HighTemplarMicroController : IndividualMicroController
     {
         private int StormRange = 9;
-        private double StormRadiusSquared = 2.25;
         private double StormRadius = 1.5;
         private double FeedbackRangeSquared = 100;
+        private int lastStormFrame = 0;
 
         public HighTemplarMicroController(MapDataService mapDataService, SharkyUnitData sharkyUnitData, ActiveUnitData activeUnitData, DebugService debugService, IPathFinder sharkyPathFinder, BaseData baseData, SharkyOptions sharkyOptions, DamageService damageService, UnitDataService unitDataService, TargetingData targetingData, MicroPriority microPriority, bool groupUpEnabled) 
             : base(mapDataService, sharkyUnitData, activeUnitData, debugService, sharkyPathFinder, baseData, sharkyOptions, damageService, unitDataService, targetingData, microPriority, groupUpEnabled)
@@ -39,6 +39,7 @@ namespace Sharky.MicroControllers.Protoss
         {
             if (Storm(commander, frame, out action))
             {
+                lastStormFrame = frame;
                 return true;
             }
 
@@ -80,14 +81,101 @@ namespace Sharky.MicroControllers.Protoss
         bool Storm(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
-            if (commander.UnitCalculation.Unit.Energy < 75)
+            if (!commander.AbilityOffCooldown(Abilities.EFFECT_PSISTORM, frame, SharkyOptions.FramesPerSecond, SharkyUnitData))
+            {
+                return true; // don't do anything until it storms
+            }
+
+            if (commander.UnitCalculation.Unit.Energy < 75 || !SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.PSISTORMTECH))
             {
                 return false;
             }
 
-            // TODO: psistorm
-            
+            if (lastStormFrame >= frame - 5)
+            {
+                return false;
+            }
+
+            var enemies = commander.UnitCalculation.NearbyEnemies.Where(a => !a.Attributes.Contains(Attribute.Structure) && !a.Unit.BuffIds.Contains((uint)Buffs.PSISTORM)).OrderBy(u => u.Unit.Health);
+            if (enemies.Count() > 2)
+            {
+                var bestAttack = GetBestAttack(commander.UnitCalculation, enemies);
+                if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.WinAir)
+                {
+                    var airAttackers = enemies.Where(u => u.DamageAir);
+                    if (airAttackers.Count() > 0)
+                    {
+                        var air = GetBestAttack(commander.UnitCalculation, airAttackers);
+                        if (air != null)
+                        {
+                            bestAttack = air;
+                        }
+                    }
+                }
+                else if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.WinGround)
+                {
+                    var groundAttackers = enemies.Where(u => u.DamageGround);
+                    if (groundAttackers.Count() > 0)
+                    {
+                        var ground = GetBestAttack(commander.UnitCalculation, groundAttackers);
+                        if (ground != null)
+                        {
+                            bestAttack = ground;
+                        }
+                    }
+                }
+                else
+                {
+                    if (enemies.Count() > 0)
+                    {
+                        var any = GetBestAttack(commander.UnitCalculation, enemies);
+                        if (any != null)
+                        {
+                            bestAttack = any;
+                        }
+                    }
+                }
+
+                if (bestAttack != null)
+                {
+                    action = commander.Order(frame, Abilities.EFFECT_PSISTORM, bestAttack);
+                    return true;
+                }
+            }
+
             return false;
+        }
+
+        private Point2D GetBestAttack(UnitCalculation potentialAttack, IEnumerable<UnitCalculation> enemies)
+        {
+            var killCounts = new Dictionary<Point, float>();
+            foreach (var enemyAttack in enemies)
+            {
+                int killCount = 0;
+                foreach (var splashedEnemy in enemyAttack.NearbyAllies.Where(a => !a.Attributes.Contains(Attribute.Structure) && !a.Unit.BuffIds.Contains((uint)Buffs.PSISTORM)))
+                {
+                    if (Vector2.DistanceSquared(splashedEnemy.Position, enemyAttack.Position) < (splashedEnemy.Unit.Radius + StormRadius) * (splashedEnemy.Unit.Radius + StormRadius))
+                    {
+                        killCount++;
+                    }
+                }
+                foreach (var splashedAlly in potentialAttack.NearbyAllies.Where(a => !a.Attributes.Contains(Attribute.Structure)))
+                {
+                    if (Vector2.DistanceSquared(splashedAlly.Position, enemyAttack.Position) < (splashedAlly.Unit.Radius + StormRadius) * (splashedAlly.Unit.Radius + StormRadius))
+                    {
+                        killCount-=3;
+                    }
+                }
+                killCounts[enemyAttack.Unit.Pos] = killCount;
+            }
+
+            var best = killCounts.OrderByDescending(x => x.Value).FirstOrDefault();
+
+            if (best.Value < 3) // only attack if going to kill >= 3 units
+            {
+                return null;
+            }
+            return new Point2D { X = best.Key.X, Y = best.Key.Y };
         }
     }
 }

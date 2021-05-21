@@ -44,7 +44,30 @@ namespace Sharky.Managers
         {
             foreach (var chatReceived in chatsReceived)
             {
-                var match = Regex.Match(chatReceived.Message.ToLower(), "spawn friendly (.*)");
+                var match = Regex.Match(chatReceived.Message.ToLower(), @"spawn (\d+) friendly (.*)");
+                if (match.Success)
+                {
+                    var quantity = match.Groups[1].Value;
+                    var unitType = (UnitTypes)System.Enum.Parse(typeof(UnitTypes), match.Groups[2].Value, true);
+                    DebugService.SpawnUnits(unitType, new Point2D { X = camera.X, Y = camera.Y }, (int)chatReceived.PlayerId, int.Parse(quantity));
+                    return;
+                }
+
+                match = Regex.Match(chatReceived.Message.ToLower(), @"spawn (\d+) enemy (.*)");
+                if (match.Success)
+                {
+                    var quantity = match.Groups[1].Value;
+                    var unitType = (UnitTypes)System.Enum.Parse(typeof(UnitTypes), match.Groups[2].Value, true);
+                    var enemyId = 1;
+                    if (chatReceived.PlayerId == 1)
+                    {
+                        enemyId = 2;
+                    }
+                    DebugService.SpawnUnits(unitType, new Point2D { X = camera.X, Y = camera.Y }, enemyId, int.Parse(quantity));
+                    return;
+                }
+
+                match = Regex.Match(chatReceived.Message.ToLower(), "spawn friendly (.*)");
                 if (match.Success)
                 {
                     var unitType = (UnitTypes)System.Enum.Parse(typeof(UnitTypes), match.Groups[1].Value, true);

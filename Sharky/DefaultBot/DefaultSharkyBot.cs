@@ -228,6 +228,7 @@ namespace Sharky.DefaultBot
             var darkTemplarMicroController = new DarkTemplarMicroController(MapDataService, SharkyUnitData, ActiveUnitData, DebugService, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, UnitDataService, TargetingData, MicroPriority.LiveAndAttack, false);
             var disruptorMicroController = new DisruptorMicroController(MapDataService, SharkyUnitData, ActiveUnitData, DebugService, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, UnitDataService, TargetingData, MicroPriority.LiveAndAttack, false);
             var disruptorPhasedMicroController = new DisruptorPhasedMicroController(MapDataService, SharkyUnitData, ActiveUnitData, DebugService, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, UnitDataService, TargetingData, MicroPriority.LiveAndAttack, false);
+            var highTemplarMicroController = new HighTemplarMicroController(MapDataService, SharkyUnitData, ActiveUnitData, DebugService, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, UnitDataService, TargetingData, MicroPriority.LiveAndAttack, false);
             var mothershipMicroController = new MothershipMicroController(MapDataService, SharkyUnitData, ActiveUnitData, DebugService, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, UnitDataService, TargetingData, MicroPriority.LiveAndAttack, false);
             var oracleMicroController = new OracleMicroController(MapDataService, SharkyUnitData, ActiveUnitData, DebugService, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, UnitDataService, TargetingData, MicroPriority.LiveAndAttack, false);
             var phoenixMicroController = new PhoenixMicroController(MapDataService, SharkyUnitData, ActiveUnitData, DebugService, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, UnitDataService, TargetingData, MicroPriority.StayOutOfRange, true);
@@ -260,6 +261,7 @@ namespace Sharky.DefaultBot
                 { UnitTypes.PROTOSS_DARKTEMPLAR, darkTemplarMicroController },
                 { UnitTypes.PROTOSS_DISRUPTOR, disruptorMicroController },
                 { UnitTypes.PROTOSS_DISRUPTORPHASED, disruptorPhasedMicroController },
+                { UnitTypes.PROTOSS_HIGHTEMPLAR, highTemplarMicroController },
                 { UnitTypes.PROTOSS_MOTHERSHIP, mothershipMicroController },
                 { UnitTypes.PROTOSS_ORACLE, oracleMicroController },
                 { UnitTypes.PROTOSS_PHOENIX, phoenixMicroController },

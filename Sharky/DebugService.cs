@@ -89,5 +89,19 @@ namespace Sharky
                 }
             });
         }
+
+        public void SpawnUnits(UnitTypes unitType, Point2D location, int playerId, int quantity)
+        {
+            SpawnRequest.Debug.Debug.Add(new DebugCommand()
+            {
+                CreateUnit = new DebugCreateUnit()
+                {
+                    Owner = playerId,
+                    Pos = location,
+                    Quantity = (uint)quantity,
+                    UnitType = (uint)unitType
+                }
+            });
+        }
     }
 }

@@ -87,6 +87,17 @@ namespace Sharky.MicroControllers.Protoss
                             }
                         }
                     }
+                    else
+                    {
+                        if (oneShotKills.Count() > 0)
+                        {
+                            var any = GetBestAttack(commander.UnitCalculation, oneShotKills, attacks);
+                            if (any != null)
+                            {
+                                bestAttack = any;
+                            }
+                        }
+                    }
 
                     if (bestAttack != null)
                     {
