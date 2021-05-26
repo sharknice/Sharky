@@ -293,7 +293,7 @@ namespace Sharky.DefaultBot
 
             var defenseSquadTask = new DefenseSquadTask(ActiveUnitData, TargetingData, DefenseService, MicroController, new List<DesiredUnitsClaim>(), 0, false);
             var workerScoutTask = new WorkerScoutTask(SharkyUnitData, TargetingData, MapDataService, false, 0.5f, workerDefenseMicroController, DebugService, BaseData, AreaService);
-            var workerScoutGasStealTask = new WorkerScoutGasStealTask(SharkyUnitData, TargetingData, MacroData, MapDataService, false, 0.5f, DebugService, BaseData, AreaService);
+            var workerScoutGasStealTask = new WorkerScoutGasStealTask(SharkyUnitData, TargetingData, MacroData, MapDataService, false, 0.5f, DebugService, BaseData, AreaService, MapData, BuildingService, ActiveUnitData);
             var findHiddenBaseTask = new FindHiddenBaseTask(BaseData, TargetingData, MapDataService, individualMicroController, 15, false, 0.5f);
             var proxyScoutTask = new ProxyScoutTask(SharkyUnitData, TargetingData, BaseData, SharkyOptions, false, 0.5f, workerProxyScoutMicroController);
             var miningDefenseService = new MiningDefenseService(BaseData, ActiveUnitData, workerDefenseMicroController, DebugService);

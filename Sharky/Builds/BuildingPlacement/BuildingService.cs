@@ -31,6 +31,18 @@ namespace Sharky.Builds.BuildingPlacement
                 && MapData.Map[(int)x - (int)radius][(int)y].CurrentlyBuildable && MapData.Map[(int)x - (int)radius][(int)y + (int)radius].CurrentlyBuildable && MapData.Map[(int)x - (int)radius][(int)y - (int)radius].CurrentlyBuildable;
         }
 
+        public bool SameHeight(float x, float y, float radius)
+        {
+            if (x - radius < 0 || y - radius < 0 || x + radius >= MapData.MapWidth || y + radius >= MapData.MapHeight)
+            {
+                return false;
+            }
+            var height = MapData.Map[(int)x][(int)y].TerrainHeight;
+            return (height == MapData.Map[(int)x][(int)y + (int)radius].TerrainHeight) && (height == MapData.Map[(int)x][(int)y - (int)radius].TerrainHeight)
+               && (height ==  MapData.Map[(int)x + (int)radius][(int)y].TerrainHeight) && (height == MapData.Map[(int)x + (int)radius][(int)y + (int)radius].TerrainHeight) && (height == MapData.Map[(int)x + (int)radius][(int)y - (int)radius].TerrainHeight)
+               && (height == MapData.Map[(int)x - (int)radius][(int)y].TerrainHeight) && (height == MapData.Map[(int)x - (int)radius][(int)y + (int)radius].TerrainHeight) && (height == MapData.Map[(int)x - (int)radius][(int)y - (int)radius].TerrainHeight);
+        }
+
         public bool Blocked(float x, float y, float radius, float padding = .5f)
         {
             if (ActiveUnitData.NeutralUnits.Any(u => Vector2.DistanceSquared(new Vector2(x, y), u.Value.Position) < (u.Value.Unit.Radius + padding + radius) * (u.Value.Unit.Radius + padding + radius)))

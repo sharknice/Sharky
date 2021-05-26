@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using Sharky.Builds.BuildingPlacement;
 using Sharky.Pathing;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -11,6 +12,7 @@ namespace Sharky.MicroTasks
     {
         public bool BlockExpansion { get; set; }
         public bool HidePylonInBase { get; set; }
+        public bool BlockWall { get; set; }
 
         SharkyUnitData SharkyUnitData;
         TargetingData TargetingData;
@@ -18,14 +20,18 @@ namespace Sharky.MicroTasks
         MapDataService MapDataService;
         DebugService DebugService;
         BaseData BaseData;
+        MapData MapData;
         AreaService AreaService;
+        BuildingService BuildingService;
+        ActiveUnitData ActiveUnitData;
 
         List<Point2D> ScoutPoints;
         List<Point2D> EnemyMainArea;
 
         bool started { get; set; }
 
-        public WorkerScoutGasStealTask(SharkyUnitData sharkyUnitData, TargetingData targetingData, MacroData macroData, MapDataService mapDataService, bool enabled, float priority, DebugService debugService, BaseData baseData, AreaService areaService)
+        public WorkerScoutGasStealTask(SharkyUnitData sharkyUnitData, TargetingData targetingData, MacroData macroData, MapDataService mapDataService, 
+            bool enabled, float priority, DebugService debugService, BaseData baseData, AreaService areaService, MapData mapData, BuildingService buildingService, ActiveUnitData activeUnitData)
         {
             SharkyUnitData = sharkyUnitData;
             TargetingData = targetingData;
@@ -35,12 +41,16 @@ namespace Sharky.MicroTasks
             DebugService = debugService;
             BaseData = baseData;
             AreaService = areaService;
+            BuildingService = buildingService;
+            MapData = mapData;
+            ActiveUnitData = activeUnitData;
 
             UnitCommanders = new List<UnitCommander>();
             Enabled = enabled;
 
             BlockExpansion = false;
             HidePylonInBase = false;
+            BlockWall = false;
         }
 
         public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
@@ -77,6 +87,8 @@ namespace Sharky.MicroTasks
         {
             var commands = new List<SC2APIProtocol.Action>();
 
+            var positions = ActiveUnitData.Commanders.Values.Where(u => u.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON).Select(p => p.UnitCalculation.Position);
+
             if (ScoutPoints == null)
             {
                 EnemyMainArea = AreaService.GetTargetArea(TargetingData.EnemyMainBasePoint);
@@ -106,7 +118,7 @@ namespace Sharky.MicroTasks
                     {
                         foreach (var gas in enemyBase.VespeneGeysers.Where(g => g.Alliance == Alliance.Neutral))
                         {
-                            if (Vector2.DistanceSquared(new Vector2(gas.Pos.X, gas.Pos.Y), commander.UnitCalculation.Position) < 400)
+                            if (Vector2.DistanceSquared(new Vector2(gas.Pos.X, gas.Pos.Y), commander.UnitCalculation.Position) < 400 && !commander.UnitCalculation.NearbyEnemies.Any(u => u.Unit.UnitType == (uint)UnitTypes.PROTOSS_ASSIMILATOR || u.Unit.UnitType == (uint)UnitTypes.ZERG_EXTRACTOR || u.Unit.UnitType == (uint)UnitTypes.TERRAN_REFINERY))
                             {
                                 var gasSteal = commander.Order(frame, Abilities.BUILD_ASSIMILATOR, null, gas.Tag);
                                 if (gasSteal != null)
@@ -121,6 +133,34 @@ namespace Sharky.MicroTasks
 
                 if (MacroData.Minerals >= 100 && commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE)
                 {
+                    var enemyBase = BaseData.EnemyBaseLocations.FirstOrDefault();
+                    if (BlockWall && enemyBase != null && MapData.BlockWallData != null)
+                    {
+                        var wallData = MapData.BlockWallData.FirstOrDefault(b => b.BasePosition.X == enemyBase.Location.X && b.BasePosition.Y == enemyBase.Location.Y);
+                        if (wallData != null)
+                        {
+                            var vector = new Vector2(enemyBase.Location.X, enemyBase.Location.Y);
+                            if (Vector2.DistanceSquared(vector, commander.UnitCalculation.Position) < 225)
+                            {
+                                if (!ActiveUnitData.SelfUnits.Any(a => a.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && wallData.Pylons.Any(p => Vector2.DistanceSquared(new Vector2(p.X, p.Y), a.Value.Position) < 4)))
+                                {
+                                    foreach (var point in wallData.Pylons)
+                                    {
+                                        if (!BuildingService.Blocked(point.X, point.Y, 1, -.5f))
+                                        {
+                                            var wallBlock = commander.Order(frame, Abilities.BUILD_PYLON, point);
+                                            if (wallBlock != null)
+                                            {
+                                                commands.AddRange(wallBlock);
+                                                return commands;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     var expansion = BaseData.EnemyBaseLocations.Skip(1).FirstOrDefault();
                     if (BlockExpansion && expansion != null)
                     {

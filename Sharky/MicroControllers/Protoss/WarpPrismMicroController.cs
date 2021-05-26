@@ -277,18 +277,24 @@ namespace Sharky.MicroControllers.Protoss
                 // use LoadTimes to calculate weapon cooldown
                 if (commander.UnitCalculation.Unit.Shield + commander.UnitCalculation.Unit.Health < 50 || passenger.Shield > 25) // unload any units that regained shields, or if warp prism dying
                 {
-                    //action = commander.Order(frame, Abilities.UNLOADALLAT_WARPPRISM, null, commander.UnitCalculation.Unit.Tag); // TODO: dropping a specific unit not working due to api bug, can only drop all, change it if they ever fix the api
                     action = commander.UnloadSpecificUnit(frame, Abilities.UNLOADUNIT_WARPPRISM, passenger.Tag);
                     return true;
                 }
                 else
                 {
-                    var weapon = ActiveUnitData.SelfUnits[passenger.Tag].Weapon;
-                    if (weapon == null || (frame - commander.LoadTimes[passenger.Tag]) / SharkyOptions.FramesPerSecond > weapon.Speed) // unload any units ready to fire
+                    if (!ActiveUnitData.SelfUnits.ContainsKey(passenger.Tag))
                     {
-                        //action = commander.Order(frame, Abilities.UNLOADALLAT_WARPPRISM, null, commander.UnitCalculation.Unit.Tag); // TODO: dropping a specific unit not working, can only drop all, change it if they ever fix the api
-                        action = commander.UnloadSpecificUnit(frame, Abilities.UNLOADUNIT_WARPPRISM, passenger.Tag);
+                        action = commander.Order(frame, Abilities.UNLOADALLAT_WARPPRISM, null, commander.UnitCalculation.Unit.Tag);
                         return true;
+                    }
+                    else
+                    {
+                        var weapon = ActiveUnitData.SelfUnits[passenger.Tag].Weapon;
+                        if (weapon == null || (frame - commander.LoadTimes[passenger.Tag]) / SharkyOptions.FramesPerSecond > weapon.Speed) // unload any units ready to fire
+                        {
+                            action = commander.UnloadSpecificUnit(frame, Abilities.UNLOADUNIT_WARPPRISM, passenger.Tag);
+                            return true;
+                        }
                     }
                 }
             }
@@ -417,7 +423,14 @@ namespace Sharky.MicroControllers.Protoss
 
         public override List<SC2APIProtocol.Action> Retreat(UnitCommander commander, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
+            List<SC2APIProtocol.Action> action = null;
+
             // TODO: pick up nearby units that are retreating to help them retreat faster
+            if (commander.UnitCalculation.NearbyEnemies.Count() > 0)
+            {
+                if (Retreat(commander, defensivePoint, defensivePoint, frame, out action)) { return action; }
+            }
+
             return Idle(commander, defensivePoint, frame);
         }
 

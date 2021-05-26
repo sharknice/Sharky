@@ -130,6 +130,11 @@ namespace Sharky.Builds.BuildingPlacement
             var powerSources = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && c.UnitCalculation.Unit.BuildProgress == 1).OrderBy(c => Vector2.DistanceSquared(c.UnitCalculation.Position, new Vector2(target.X, target.Y)));
             foreach (var powerSource in powerSources)
             {
+                if (Vector2.DistanceSquared(new Vector2(target.X, target.Y), powerSource.UnitCalculation.Position) > (maxDistance + 8) * (maxDistance + 8)) 
+                { 
+                    continue; 
+                }
+
                 var x = powerSource.UnitCalculation.Unit.Pos.X;
                 var y = powerSource.UnitCalculation.Unit.Pos.Y;
                 var radius = size / 2f;
@@ -162,8 +167,14 @@ namespace Sharky.Builds.BuildingPlacement
                         //{
                         //    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 10 }, 1, new Color { R = 0, G = 255, B = 0 });
                         //}
+                        var vector = new Vector2(point.X, point.Y);
+                        var tooClose = false;
+                        if (MapDataService.MapData.BlockWallData != null && MapDataService.MapData.BlockWallData.Any(d => d.Pylons.Any(p => Vector2.DistanceSquared(new Vector2(p.X, p.Y), vector) < 25)))
+                        {
+                            tooClose = true;
+                        }
 
-                        if (BuildingService.AreaBuildable(point.X, point.Y, size / 2.0f) && !BuildingService.Blocked(point.X, point.Y, size / 2.0f) && !BuildingService.HasCreep(point.X, point.Y, size / 2.0f))
+                        if (!tooClose && BuildingService.SameHeight(point.X, point.Y, size + 1 / 2.0f) && BuildingService.AreaBuildable(point.X, point.Y, (size + 1) / 2.0f) && !BuildingService.Blocked(point.X, point.Y, (size + 1) / 2.0f) && !BuildingService.HasCreep(point.X, point.Y, size / 2.0f)) // size +1 because want 1 space to move around to prevent walling self in
                         {
                             var mineralFields = ActiveUnitData.NeutralUnits.Where(u => SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType));
                             var squared = (1 + minimumMineralProximinity + (size / 2f)) * (1 + minimumMineralProximinity + (size / 2f));
@@ -190,8 +201,14 @@ namespace Sharky.Builds.BuildingPlacement
         Point2D FindProductionPlacementTryHarder(Point2D target, float size, float maxDistance, float minimumMineralProximinity)
         {
             var powerSources = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && c.UnitCalculation.Unit.BuildProgress == 1).OrderBy(c => Vector2.DistanceSquared(c.UnitCalculation.Position, new Vector2(target.X, target.Y)));
+
             foreach (var powerSource in powerSources)
             {
+                if (Vector2.DistanceSquared(new Vector2(target.X, target.Y), powerSource.UnitCalculation.Position) > (maxDistance + 8) * (maxDistance + 8))
+                {
+                    continue;
+                }
+
                 var x = powerSource.UnitCalculation.Unit.Pos.X;
                 var y = powerSource.UnitCalculation.Unit.Pos.Y;
                 var radius = size / 2f;
@@ -225,7 +242,14 @@ namespace Sharky.Builds.BuildingPlacement
                         //    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 10 }, 1, new Color { R = 0, G = 255, B = 0 });
                         //}
 
-                        if (BuildingService.AreaBuildable(point.X, point.Y, size / 2.0f) && !BuildingService.Blocked(point.X, point.Y, size / 2.0f, 0) && !BuildingService.HasCreep(point.X, point.Y, size / 2.0f))
+                        var vector = new Vector2(point.X, point.Y);
+                        var tooClose = false;
+                        if (MapDataService.MapData.BlockWallData != null && MapDataService.MapData.BlockWallData.Any(d => d.Pylons.Any(p => Vector2.DistanceSquared(new Vector2(p.X, p.Y), vector) < 16)))
+                        {
+                            tooClose = true;
+                        }
+
+                        if (!tooClose && BuildingService.AreaBuildable(point.X, point.Y, size / 2.0f) && !BuildingService.Blocked(point.X, point.Y, size / 2.0f, 0) && !BuildingService.HasCreep(point.X, point.Y, size / 2.0f))
                         {
                             var mineralFields = ActiveUnitData.NeutralUnits.Where(u => SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType));
                             var squared = (1 + minimumMineralProximinity + (size / 2f)) * (1 + minimumMineralProximinity + (size / 2f));

@@ -259,7 +259,8 @@ namespace Sharky.Managers
             {
                 var unitData = GetGasTypeData();
                 var takenGases = ActiveUnitData.SelfUnits.Where(u => SharkyUnitData.GasGeyserRefineryTypes.Contains((UnitTypes)u.Value.Unit.UnitType)).Concat(ActiveUnitData.EnemyUnits.Where(u => SharkyUnitData.GasGeyserRefineryTypes.Contains((UnitTypes)u.Value.Unit.UnitType)));
-                var openGeysers = BaseData.BaseLocations.SelectMany(b => b.VespeneGeysers).Where(g => g.VespeneContents > 0 && !takenGases.Any(t => t.Value.Unit.Pos.X == g.Pos.X && t.Value.Unit.Pos.Y == g.Pos.Y));
+                var orderedGases = ActiveUnitData.SelfUnits.Where(u => u.Value.UnitClassifications.Contains(UnitClassification.Worker) && u.Value.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.BUILD_ASSIMILATOR || o.AbilityId == (uint)Abilities.BUILD_EXTRACTOR || o.AbilityId == (uint)Abilities.BUILD_REFINERY)).Select(u => u.Value.Unit.Orders.FirstOrDefault(o => o.AbilityId == (uint)Abilities.BUILD_ASSIMILATOR || o.AbilityId == (uint)Abilities.BUILD_EXTRACTOR || o.AbilityId == (uint)Abilities.BUILD_REFINERY));
+                var openGeysers = BaseData.BaseLocations.SelectMany(b => b.VespeneGeysers).Where(g => g.VespeneContents > 0 && !takenGases.Any(t => t.Value.Unit.Pos.X == g.Pos.X && t.Value.Unit.Pos.Y == g.Pos.Y) && !orderedGases.Any(o => o.TargetUnitTag == g.Tag));
                 if (openGeysers.Count() > 0)
                 {
                     var baseLocation = BuildingBuilder.GetReferenceLocation(TargetingData.SelfMainBasePoint);

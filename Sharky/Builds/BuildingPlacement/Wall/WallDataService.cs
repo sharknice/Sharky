@@ -8,16 +8,18 @@ namespace Sharky.Builds.BuildingPlacement
     public class WallDataService
     {
         List<MapWallData> PartialMapWallData;
+        List<MapWallData> BlockMapWallData;
 
         public WallDataService()
         {
-            PartialMapWallData = LoadPartialMapWallData();
+            PartialMapWallData = LoadMapWallData("partial");
+            BlockMapWallData = LoadMapWallData("block");
         }
 
-        List<MapWallData> LoadPartialMapWallData()
+        List<MapWallData> LoadMapWallData(string folder)
         {
             var mapWallData = new List<MapWallData>();
-            var wallFolder = Directory.GetCurrentDirectory() + "/data/wall/partial";
+            var wallFolder = Directory.GetCurrentDirectory() + "/data/wall/" + folder;
             if (Directory.Exists(wallFolder))
             {
                 foreach (var fileName in Directory.GetFiles(wallFolder))
@@ -37,6 +39,16 @@ namespace Sharky.Builds.BuildingPlacement
         public List<WallData> GetPartialWallData(string map)
         {
             var data = PartialMapWallData.FirstOrDefault(m => map.Replace(" ","").ToLower().Contains(m.MapName.ToLower()));
+            if (data != null)
+            {
+                return data.WallData;
+            }
+            return null;
+        }
+
+        public List<WallData> GetBlockWallData(string map)
+        {
+            var data = BlockMapWallData.FirstOrDefault(m => map.Replace(" ", "").ToLower().Contains(m.MapName.ToLower()));
             if (data != null)
             {
                 return data.WallData;

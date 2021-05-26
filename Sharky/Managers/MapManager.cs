@@ -60,6 +60,7 @@ namespace Sharky.Managers
                 MapData.Map[x] = row;
             }
             MapData.PartialWallData = WallDataService.GetPartialWallData(gameInfo.MapName);
+            MapData.BlockWallData = WallDataService.GetBlockWallData(gameInfo.MapName);
         }
 
         public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)

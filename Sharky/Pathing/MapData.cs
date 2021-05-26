@@ -10,5 +10,6 @@ namespace Sharky.Pathing
         public Dictionary<int, Dictionary<int, MapCell>> Map { get; set; }
         public string MapName { get; set; }
         public List<WallData> PartialWallData { get; set; }
+        public List<WallData> BlockWallData { get; set; }
     }
 }

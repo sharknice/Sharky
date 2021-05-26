@@ -18,6 +18,7 @@ namespace Sharky.MicroTasks.Harass
         int DesiredCount { get; set; }
         List<HarassInfo> HarassInfos { get; set; }
 
+        // TODO: if 5 dts have died, end the task
         public DarkTemplarHarassTask(BaseData baseData, TargetingData targetingData, MapDataService mapDataService, DarkTemplarMicroController darkTemplarMicroController, int desiredCount = 5, bool enabled = true, float priority = -1f)
         {
             BaseData = baseData;
