@@ -223,7 +223,7 @@ namespace Sharky
 
         public float SimulatedDamagePerSecond(IEnumerable<SC2APIProtocol.Attribute> includedAttributes, bool air, bool ground)
         {
-            if (Unit.UnitType == (uint)UnitTypes.TERRAN_BUNKER) // assume 4 marines
+            if (Unit.UnitType == (uint)UnitTypes.TERRAN_BUNKER && Unit.BuildProgress == 1) // assume 4 marines
             {
                 return 24 / 0.61f;
             }

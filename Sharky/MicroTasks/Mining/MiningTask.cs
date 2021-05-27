@@ -309,7 +309,12 @@ namespace Sharky.MicroTasks
                             if (idleWorkers.Count() == 0 && !LowMineralsHighGas)
                             {
                                 var gasVector = new Vector2(info.ResourceUnit.Pos.X, info.ResourceUnit.Pos.Y);
-                                idleWorkers = UnitCommanders.Where(c => c.UnitRole == UnitRole.Minerals && !c.UnitCalculation.Unit.BuffIds.Any(b => SharkyUnitData.CarryingMineralBuffs.Contains((Buffs)b)) && BaseData.SelfBases.Any(b => Vector2.DistanceSquared(new Vector2(b.ResourceCenter.Pos.X, b.ResourceCenter.Pos.Y), c.UnitCalculation.Position) < 16) && !selfBase.GasMiningInfo.Any(m => m.Workers.Any(w => w.UnitCalculation.Unit.Tag == c.UnitCalculation.Unit.Tag))).OrderBy(c => Vector2.DistanceSquared(gasVector, c.UnitCalculation.Position));
+                                if (ActiveUnitData.SelfUnits.ContainsKey(info.ResourceUnit.Tag))
+                                {
+                                    var unitCalculation = ActiveUnitData.SelfUnits[info.ResourceUnit.Tag];
+                                    var workers = unitCalculation.NearbyAllies.Where(c => c.UnitClassifications.Contains(UnitClassification.Worker) && !c.Unit.BuffIds.Any(b => SharkyUnitData.CarryingMineralBuffs.Contains((Buffs)b)));
+                                    idleWorkers = UnitCommanders.Where(c => c.UnitRole == UnitRole.Minerals && workers.Any(w => w.Unit.Tag == c.UnitCalculation.Unit.Tag)).OrderBy(c => Vector2.DistanceSquared(gasVector, c.UnitCalculation.Position));
+                                }
                             }
                             if (idleWorkers.Count() > 0)
                             {

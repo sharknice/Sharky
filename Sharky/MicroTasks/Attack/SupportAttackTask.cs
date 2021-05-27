@@ -23,6 +23,10 @@ namespace Sharky.MicroTasks.Proxy
         DefenseService DefenseService;
 
         float lastFrameTime;
+        float LastSplitFrame;
+
+        List<ArmySplits> ArmySplits;
+        List<UnitCommander> AvailableCommanders;
 
         public List<UnitTypes> MainAttackers { get; set; }
 
@@ -42,6 +46,8 @@ namespace Sharky.MicroTasks.Proxy
             Priority = priority;
             Enabled = enabled;
             UnitCommanders = new List<UnitCommander>();
+
+            LastSplitFrame = -1000;
         }
 
         public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
@@ -82,7 +88,7 @@ namespace Sharky.MicroTasks.Proxy
             }
             TargetingData.AttackPoint = TargetingService.UpdateAttackPoint(AttackData.ArmyPoint, TargetingData.AttackPoint);
 
-            var attackingEnemies = ActiveUnitData.SelfUnits.Where(u => u.Value.UnitClassifications.Contains(UnitClassification.ResourceCenter) || u.Value.UnitClassifications.Contains(UnitClassification.ProductionStructure)).SelectMany(u => u.Value.NearbyEnemies).Distinct();
+            var attackingEnemies = ActiveUnitData.SelfUnits.Where(u => u.Value.UnitClassifications.Contains(UnitClassification.ResourceCenter) || u.Value.UnitClassifications.Contains(UnitClassification.ProductionStructure) || u.Value.UnitClassifications.Contains(UnitClassification.DefensiveStructure)).SelectMany(u => u.Value.NearbyEnemies).Distinct();
             if (attackingEnemies.Count() > 0)
             {
                 var armyPoint = new Vector2(AttackData.ArmyPoint.X, AttackData.ArmyPoint.Y);
@@ -90,7 +96,7 @@ namespace Sharky.MicroTasks.Proxy
                 var closerEnemies = attackingEnemies.Where(e => Vector2.DistanceSquared(e.Position, armyPoint) < distanceToAttackPoint);
                 if (closerEnemies.Count() > 0)
                 {
-                    actions = SplitArmy(frame, closerEnemies, TargetingData.AttackPoint, UnitCommanders);
+                    actions = SplitArmy(frame, closerEnemies, TargetingData.AttackPoint);
                     stopwatch.Stop();
                     lastFrameTime = stopwatch.ElapsedMilliseconds;
                     return actions;
@@ -118,12 +124,12 @@ namespace Sharky.MicroTasks.Proxy
                 if (AttackData.Attacking)
                 {
                     actions.AddRange(MicroController.Attack(mainUnits, TargetingData.AttackPoint, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame));
+                    actions.AddRange(MicroController.Support(supportUnits, mainUnits, TargetingData.AttackPoint, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame));
                 }
                 else
                 {
-                    actions.AddRange(MicroController.Retreat(mainUnits, TargetingData.ForwardDefensePoint, null, frame));
+                    actions.AddRange(MicroController.Retreat(UnitCommanders, TargetingData.ForwardDefensePoint, null, frame));
                 }
-                actions.AddRange(MicroController.Support(supportUnits, mainUnits, TargetingData.AttackPoint, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame));
             }
             else
             {
@@ -143,42 +149,58 @@ namespace Sharky.MicroTasks.Proxy
         }
 
         // TODO: put this in a service and use it for this and the regular AttackTask
-        List<SC2APIProtocol.Action> SplitArmy(int frame, IEnumerable<UnitCalculation> closerEnemies, Point2D attackPoint, List<UnitCommander> availableCommanders)
+        List<SC2APIProtocol.Action> SplitArmy(int frame, IEnumerable<UnitCalculation> closerEnemies, Point2D attackPoint)
         {
             var actions = new List<SC2APIProtocol.Action>();
 
-            var commanders = availableCommanders.ToList();
-
-            var enemyGroups = DefenseService.GetEnemyGroups(closerEnemies);
-            foreach (var enemyGroup in enemyGroups)
+            if (LastSplitFrame + 100 < frame)
             {
-                var selfGroup = DefenseService.GetDefenseGroup(enemyGroup, commanders);
-                if (selfGroup.Count() > 0)
-                {
-                    commanders.RemoveAll(a => selfGroup.Any(s => a.UnitCalculation.Unit.Tag == s.UnitCalculation.Unit.Tag));
+                ReSplitArmy(frame, closerEnemies, attackPoint);
+                LastSplitFrame = frame;
+            }
 
-                    var groupVectors = selfGroup.Select(u => u.UnitCalculation.Position);
+            foreach (var split in ArmySplits)
+            {
+                if (split.SelfGroup.Count() > 0)
+                {
+                    var groupVectors = split.SelfGroup.Select(u => u.UnitCalculation.Position);
                     var groupPoint = new Point2D { X = groupVectors.Average(v => v.X), Y = groupVectors.Average(v => v.Y) };
-                    var defensePoint = new Point2D { X = enemyGroup.FirstOrDefault().Unit.Pos.X, Y = enemyGroup.FirstOrDefault().Unit.Pos.Y };
-                    actions.AddRange(MicroController.Attack(selfGroup, defensePoint, TargetingData.ForwardDefensePoint, groupPoint, frame));
+                    var defensePoint = new Point2D { X = split.EnemyGroup.FirstOrDefault().Unit.Pos.X, Y = split.EnemyGroup.FirstOrDefault().Unit.Pos.Y };
+                    actions.AddRange(MicroController.Attack(split.SelfGroup, defensePoint, TargetingData.ForwardDefensePoint, groupPoint, frame));
                 }
             }
 
-            if (commanders.Count() > 0)
+            if (AvailableCommanders.Count() > 0)
             {
-                var groupVectors = commanders.Select(u => u.UnitCalculation.Position);
+                var groupVectors = AvailableCommanders.Select(u => u.UnitCalculation.Position);
                 var groupPoint = new Point2D { X = groupVectors.Average(v => v.X), Y = groupVectors.Average(v => v.Y) };
                 if (AttackData.Attacking)
                 {
-                    actions.AddRange(MicroController.Attack(commanders, attackPoint, TargetingData.ForwardDefensePoint, groupPoint, frame));
+                    actions.AddRange(MicroController.Attack(AvailableCommanders, attackPoint, TargetingData.ForwardDefensePoint, groupPoint, frame));
                 }
                 else
                 {
-                    actions.AddRange(MicroController.Attack(commanders, new Point2D { X = closerEnemies.FirstOrDefault().Unit.Pos.X, Y = closerEnemies.FirstOrDefault().Unit.Pos.Y }, TargetingData.ForwardDefensePoint, groupPoint, frame));
+                    actions.AddRange(MicroController.Attack(AvailableCommanders, new Point2D { X = closerEnemies.FirstOrDefault().Unit.Pos.X, Y = closerEnemies.FirstOrDefault().Unit.Pos.Y }, TargetingData.ForwardDefensePoint, groupPoint, frame));
                 }
             }
 
             return actions;
+        }
+
+        void ReSplitArmy(int frame, IEnumerable<UnitCalculation> closerEnemies, Point2D attackPoint)
+        {
+            ArmySplits = new List<ArmySplits>();
+            var enemyGroups = DefenseService.GetEnemyGroups(closerEnemies);
+            AvailableCommanders = UnitCommanders.ToList();
+            foreach (var enemyGroup in enemyGroups)
+            {
+                var selfGroup = DefenseService.GetDefenseGroup(enemyGroup, AvailableCommanders);
+                if (selfGroup.Count() > 0)
+                {
+                    AvailableCommanders.RemoveAll(a => selfGroup.Any(s => a.UnitCalculation.Unit.Tag == s.UnitCalculation.Unit.Tag));
+                }
+                ArmySplits.Add(new ArmySplits { EnemyGroup = enemyGroup, SelfGroup = selfGroup });
+            }
         }
     }
 }

@@ -152,7 +152,7 @@ namespace Sharky.MicroControllers
 
         public virtual List<SC2APIProtocol.Action> Retreat(UnitCommander commander, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
-            if (Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(defensivePoint.X, defensivePoint.Y)) > 100)
+            if (Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(defensivePoint.X, defensivePoint.Y)) > 25)
             {
                 if (Retreat(commander, defensivePoint, defensivePoint, frame, out List<SC2APIProtocol.Action> action)) { return action; }
                 return commander.Order(frame, Abilities.MOVE, defensivePoint);
@@ -213,11 +213,28 @@ namespace Sharky.MicroControllers
             return NavigateToTarget(commander, target, groupCenter, bestTarget, formation, frame, out action);
         }
 
+        protected virtual bool SupportMove(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, Formation formation, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
+            if (!commander.UnitCalculation.TargetPriorityCalculation.Overwhelm && MicroPriority != MicroPriority.AttackForward && (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.Retreat || commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.FullRetreat))
+            {
+                if (Retreat(commander, target, defensivePoint, frame, out action)) { return true; }
+            }
+
+            if (SpecialCaseMove(commander, target, defensivePoint, groupCenter, bestTarget, formation, frame, out action)) { return true; }
+
+            if (MoveAway(commander, target, defensivePoint, frame, out action)) { return true; }
+
+            return SupportNavigateToTarget(commander, target, groupCenter, bestTarget, formation, frame, out action);
+        }
+
         protected virtual bool SpecialCaseMove(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, Formation formation, int frame, out List<SC2APIProtocol.Action> action)
         {
             if (AvoidPurificationNovas(commander, target, defensivePoint, frame, out action)) { return true; }
 
             if (AvoidRavagerShots(commander, target, defensivePoint, frame, out action)) { return true; }
+
+            if (AvoidStorms(commander, target, defensivePoint, frame, out action)) { return true; }
 
             if (DealWithCyclones(commander, target, defensivePoint, frame, out action)) { return true; }
 
@@ -316,6 +333,42 @@ namespace Sharky.MicroControllers
             }
 
             action = commander.Order(frame, Abilities.MOVE, target);
+            return true;
+        }
+
+        public virtual bool SupportNavigateToTarget(UnitCommander commander, Point2D target, Point2D groupCenter, UnitCalculation bestTarget, Formation formation, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
+
+            if (GetInFormation(commander, formation, frame, out action))
+            {
+                return true;
+            }
+
+            if (bestTarget != null && commander.UnitCalculation.NearbyEnemies.Any(enemy => enemy.Unit.Tag == bestTarget.Unit.Tag))
+            {
+                if ((MicroPriority == MicroPriority.NavigateToLocation) && !commander.UnitCalculation.EnemiesInRange.Any(enemy => enemy.Unit.Tag == bestTarget.Unit.Tag))
+                {
+
+                }
+                else
+                {
+                    return MoveToAttackTarget(commander, bestTarget, frame, out action);
+                }
+            }
+
+            if (GroupUpEnabled && GroupUp(commander, target, groupCenter, false, frame, out action)) { return true; }
+
+            if (bestTarget != null && MicroPriority != MicroPriority.NavigateToLocation && MapDataService.SelfVisible(bestTarget.Unit.Pos))
+            {
+                return MoveToAttackTarget(commander, bestTarget, frame, out action);
+            }
+
+            if (Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(target.X, target.Y)) > 9)
+            {
+                action = commander.Order(frame, Abilities.MOVE, target);
+            }
+
             return true;
         }
 
@@ -1428,6 +1481,35 @@ namespace Sharky.MicroControllers
             return false;
         }
 
+        protected virtual bool AvoidStorms(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
+
+            foreach (var effect in SharkyUnitData.Effects)
+            {
+                if (effect.EffectId == (uint)Effects.STORM)
+                {
+                    if (Vector2.DistanceSquared(new Vector2(effect.Pos[0].X, effect.Pos[0].Y), commander.UnitCalculation.Position) < 8)
+                    {
+                        Point2D avoidPoint;
+                        if (commander.UnitCalculation.Unit.IsFlying)
+                        {
+                            avoidPoint = GetAirAvoidPoint(commander.UnitCalculation.Unit.Pos, new Point { X = effect.Pos[0].X, Y = effect.Pos[0].Y, Z = 1 }, target, defensivePoint, 5);
+                        }
+                        else
+                        {
+                            avoidPoint = GetGroundAvoidPoint(commander.UnitCalculation.Unit.Pos, new Point { X = effect.Pos[0].X, Y = effect.Pos[0].Y, Z = 1 }, target, defensivePoint, 5);
+
+                        }
+                        action = commander.Order(frame, Abilities.MOVE, avoidPoint);
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
         protected virtual bool AvoidReaperCharges(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
@@ -1645,13 +1727,16 @@ namespace Sharky.MicroControllers
                 }
             }
 
-            if (Move(commander, supportPoint, defensivePoint, groupCenter, bestTarget, formation, frame, out action)) { return action; }
+            if (SupportMove(commander, supportPoint, defensivePoint, groupCenter, bestTarget, formation, frame, out action)) { return action; }
 
             return commander.Order(frame, Abilities.ATTACK, target);
         }
 
         protected virtual UnitCommander GetSupportTarget(UnitCommander commander, IEnumerable<UnitCommander> supportTargets, Point2D target, Point2D defensivePoint)
         {
+            // support targets are ordered before they're passed in
+            return supportTargets.FirstOrDefault();
+
             if (supportTargets == null)
             {
                 return null;
@@ -1694,6 +1779,11 @@ namespace Sharky.MicroControllers
 
         protected virtual Point2D GetSupportSpot(UnitCommander commander, UnitCommander unitToSupport, Point2D target, Point2D defensivePoint)
         {
+            if (commander.UnitCalculation.Range < unitToSupport.UnitCalculation.Range)
+            {
+                return new Point2D { X = unitToSupport.UnitCalculation.Position.X, Y = unitToSupport.UnitCalculation.Position.Y };
+            }
+
             var angle = Math.Atan2(unitToSupport.UnitCalculation.Position.Y - defensivePoint.Y, defensivePoint.X - unitToSupport.UnitCalculation.Position.X);
             var x = commander.UnitCalculation.Range * Math.Cos(angle);
             var y = commander.UnitCalculation.Range * Math.Sin(angle);

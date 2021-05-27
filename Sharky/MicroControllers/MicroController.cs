@@ -1,6 +1,8 @@
 ﻿using SC2APIProtocol;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using System.Numerics;
 
 namespace Sharky.MicroControllers
 {
@@ -128,6 +130,9 @@ namespace Sharky.MicroControllers
         {
             var actions = new List<Action>();
             var stopwatch = new Stopwatch();
+
+            var targetVector = new Vector2(target.X, target.Y);
+            var friendlies = supportTargets.OrderByDescending(c => c.UnitCalculation.EnemiesInRangeOf.Count()).ThenByDescending(c => c.UnitCalculation.EnemiesInRange.Count()).ThenByDescending(c => c.UnitCalculation.NearbyEnemies.Count()).ThenBy(c => Vector2.DistanceSquared(c.UnitCalculation.Position, targetVector));
 
             foreach (var commander in commanders)
             {
