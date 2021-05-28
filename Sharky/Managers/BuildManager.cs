@@ -130,7 +130,7 @@ namespace Sharky.Managers
             MacroBalancer.BalanceMorphs();
             MacroBalancer.BalanceGasWorkers();
 
-            return new List<SC2APIProtocol.Action>();
+            return null;
         }
 
         public override void OnEnd(ResponseObservation observation, Result result)

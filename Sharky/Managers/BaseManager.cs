@@ -114,7 +114,7 @@ namespace Sharky.Managers
             UpdateSelfBases();
             UpdateEnemyBases();
 
-            return new List<SC2APIProtocol.Action>();
+            return null;
         }
 
         void UpdateSelfBases()
@@ -135,6 +135,14 @@ namespace Sharky.Managers
                     if (updatedUnit != null)
                     {
                         selfBase.ResourceCenter = updatedUnit.Unit;
+                    }
+                }
+                else
+                {
+                    var resourceCenter = ActiveUnitData.SelfUnits.Values.Where(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter)).FirstOrDefault(r => Vector2.DistanceSquared(r.Position, new Vector2(selfBase.Location.X, selfBase.Location.Y)) < 25);
+                    if (resourceCenter != null)
+                    {
+                        selfBase.ResourceCenter = resourceCenter.Unit;
                     }
                 }
 

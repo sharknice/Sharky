@@ -86,8 +86,6 @@ namespace Sharky.MicroTasks
             stopwatch.Stop();
             lastFrameTime = stopwatch.ElapsedMilliseconds;
             return actions;
-
-            return new List<SC2APIProtocol.Action>();
         }
 
         private List<Action> SplitDefenders(int frame, IEnumerable<UnitCalculation> attackingEnemies)

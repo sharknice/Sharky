@@ -13,10 +13,18 @@ namespace Sharky
         DebugService DebugService;
         List<SC2APIProtocol.Action> Actions;
 
+        Stopwatch Stopwatch;
+        Stopwatch ManagerStopwatch;
+
+        double TotalFrameTime;
+
         public SharkyBot(List<IManager> managers, DebugService debugService)
         {
             Managers = managers;
             DebugService = debugService;
+
+            Stopwatch = new Stopwatch();
+            ManagerStopwatch = new Stopwatch();
         }
 
         public void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)
@@ -32,6 +40,8 @@ namespace Sharky
 
             stopwatch.Stop();
             Console.WriteLine($"OnStart: {stopwatch.ElapsedMilliseconds} ms");
+
+            TotalFrameTime = 0;
         }
 
         public void OnEnd(ResponseObservation observation, Result result)
@@ -40,18 +50,20 @@ namespace Sharky
             {
                 manager.OnEnd(observation, result);
             }
+            
+            Console.WriteLine($"Total Frames: {observation.Observation.GameLoop}");
+            Console.WriteLine($"Average Frame Time: {TotalFrameTime/ observation.Observation.GameLoop}");
         }
 
         public IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
         {
             Actions = new List<SC2APIProtocol.Action>();
 
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
+            //Stopwatch.Restart();
+            var begin = DateTime.UtcNow;
 
             try
             {
-                var managerStopwatch = new Stopwatch();
                 foreach (var manager in Managers)
                 {
                     if (!manager.NeverSkip && manager.SkipFrame)
@@ -60,17 +72,41 @@ namespace Sharky
                         DebugService.DrawText($"{manager.GetType().Name}: skipped");
                         continue;
                     }
-                    managerStopwatch.Restart();
-                    Actions.AddRange(manager.OnFrame(observation));
-                    DebugService.DrawText($"{manager.GetType().Name}: {managerStopwatch.ElapsedMilliseconds}");
-                    if (managerStopwatch.ElapsedMilliseconds > 1)
+                    //ManagerStopwatch.Restart();
+                    var beginManager = DateTime.UtcNow;
+                    var actions = manager.OnFrame(observation);
+                    if (actions != null)
                     {
+                        Actions.AddRange(actions);
+                    }
+
+                    var endManager = DateTime.UtcNow;
+                    var managerTime = (endManager - beginManager).TotalMilliseconds;
+                    DebugService.DrawText($"{manager.GetType().Name}: {managerTime}");
+
+                    //DebugService.DrawText($"{manager.GetType().Name}: {ManagerStopwatch.ElapsedMilliseconds}");
+                    //ManagerStopwatch.Stop();
+                    //if (manager.GetType().Name == "UnitManager")
+                    //    Debug.WriteLine($"{manager.GetType().Name} {ManagerStopwatch.ElapsedMilliseconds}");
+
+                    if (managerTime > 1)
+                    //if (ManagerStopwatch.ElapsedMilliseconds > 1)
+                    {
+                        //if (managerStopwatch.ElapsedMilliseconds > 10)
+                        //{
+                        //    Debug.WriteLine($"{manager.GetType().Name} {ManagerStopwatch.ElapsedMilliseconds}");
+                        //    var lol = true;
+                        //}
                         manager.SkipFrame = true;
                     }
                 }
 
-                stopwatch.Stop();
-                DebugService.DrawText($"OnFrame: {stopwatch.ElapsedMilliseconds}");
+                //Stopwatch.Stop();
+                //DebugService.DrawText($"OnFrame: {Stopwatch.ElapsedMilliseconds}");
+                var end = DateTime.UtcNow;
+                var endTime = (end - begin).TotalMilliseconds;
+                TotalFrameTime += endTime;
+                DebugService.DrawText($"OnFrame: {endTime}");
             }
             catch (Exception exception)
             {

@@ -12,7 +12,7 @@ namespace Sharky
             SharkyUnitData = sharkyUnitData;
         }
 
-        public TargetPriorityCalculation CalculateTargetPriority(UnitCalculation unitCalculation)
+        public TargetPriorityCalculation CalculateTargetPriority(UnitCalculation unitCalculation, int frame)
         {
             var allies = unitCalculation.NearbyAllies.Where(e => e.UnitClassifications.Contains(UnitClassification.DefensiveStructure) || e.UnitClassifications.Contains(UnitClassification.ArmyUnit));
             var enemies = unitCalculation.NearbyEnemies.Where(e => e.UnitClassifications.Contains(UnitClassification.DefensiveStructure) || e.UnitClassifications.Contains(UnitClassification.ArmyUnit));
@@ -25,6 +25,7 @@ namespace Sharky
                 return calculation;
             }
 
+            calculation.FrameCalculated = frame;
             return calculation;
         }
 
@@ -142,14 +143,9 @@ namespace Sharky
 
         bool ShouldTargetDetection(UnitCalculation unitCalculation)
         {
-            if (unitCalculation.NearbyAllies.Any(e => SharkyUnitData.CloakableAttackers.Contains((UnitTypes)e.Unit.UnitType) || e.Unit.UnitType == (uint)UnitTypes.PROTOSS_MOTHERSHIP))
+            if (unitCalculation.NearbyAllies.Any(e => SharkyUnitData.CloakableAttackers.Contains((UnitTypes)e.Unit.UnitType)))
             {
-                if (unitCalculation.NearbyEnemies.Any(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_OBSERVER || e.Unit.UnitType == (uint)UnitTypes.TERRAN_RAVEN || e.Unit.UnitType == (uint)UnitTypes.ZERG_OVERSEER || e.Unit.UnitType == (uint)UnitTypes.PROTOSS_ORACLE))
-                {
-                    return true;
-                }
-
-                if (unitCalculation.NearbyEnemies.Any(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_MISSILETURRET || e.Unit.UnitType == (uint)UnitTypes.PROTOSS_PHOTONCANNON || e.Unit.UnitType == (uint)UnitTypes.ZERG_SPORECRAWLER || e.Unit.UnitType == (uint)UnitTypes.ZERG_SPORECRAWLERUPROOTED || e.Unit.UnitType == (uint)UnitTypes.TERRAN_GHOST || e.Unit.UnitType == (uint)UnitTypes.ZERG_INFESTOR))
+                if (unitCalculation.NearbyEnemies.Any(e => SharkyUnitData.DetectionTypes.Contains((UnitTypes)e.Unit.UnitType) || SharkyUnitData.AbilityDetectionTypes.Contains((UnitTypes)e.Unit.UnitType)))
                 {
                     return true;
                 }

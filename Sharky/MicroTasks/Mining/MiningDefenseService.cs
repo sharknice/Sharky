@@ -27,8 +27,30 @@ namespace Sharky.MicroTasks.Mining
             foreach (var selfBase in BaseData.SelfBases)
             {
                 bool preventGasSteal = false;
+                bool preventBuildingLanding = false;
                 if (ActiveUnitData.Commanders.ContainsKey(selfBase.ResourceCenter.Tag) && ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Count() > 0)
                 {
+                    var flyingBuildings = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Where(u => u.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && u.Unit.IsFlying);
+                    if (flyingBuildings.Count() > 0)
+                    {
+                        var nearbyWorkers = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyAllies.Where(a => a.UnitClassifications.Contains(UnitClassification.Worker));
+                        var commanders = ActiveUnitData.Commanders.Where(c => nearbyWorkers.Any(w => w.Unit.Tag == c.Key));
+                        preventBuildingLanding = true;
+                        foreach (var flyingBuilding in flyingBuildings)
+                        {
+                            var closestDefender = commanders.OrderBy(d => Vector2.DistanceSquared(d.Value.UnitCalculation.Position, flyingBuilding.Position)).FirstOrDefault();
+                            if (closestDefender.Value != null)
+                            {
+                                closestDefender.Value.UnitRole = UnitRole.PreventBuildingLand;
+                                var action = closestDefender.Value.Order(frame, Abilities.MOVE, new SC2APIProtocol.Point2D { X = flyingBuilding.Position.X, Y = flyingBuilding.Position.Y });
+                                if (action != null)
+                                {
+                                    actions.AddRange(action);
+                                }
+                            }
+                        }
+                    }
+
                     if (!ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyAllies.Any(a => a.UnitClassifications.Contains(UnitClassification.ArmyUnit)) && (ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker) || e.Attributes.Contains(SC2APIProtocol.Attribute.Structure))))
                     {
                         var enemyGroundDamage = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Where(e => e.DamageGround).Sum(e => e.Damage);
@@ -43,6 +65,7 @@ namespace Sharky.MicroTasks.Mining
                             var workers = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Where(u => u.UnitClassifications.Contains(UnitClassification.Worker));
 
                             desiredWorkers = 1;
+
                             if (workers.Count(w => w.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE) > 0)
                             {      
                                 var takenGases = selfBase.GasMiningInfo.Select(i => i.ResourceUnit);
@@ -191,6 +214,13 @@ namespace Sharky.MicroTasks.Mining
                 if (!preventGasSteal)
                 {
                     foreach (var commander in unitCommanders.Where(c => c.UnitRole == UnitRole.PreventGasSteal))
+                    {
+                        commander.UnitRole = UnitRole.None;
+                    }
+                }
+                if (!preventBuildingLanding)
+                {
+                    foreach (var commander in unitCommanders.Where(c => c.UnitRole == UnitRole.PreventBuildingLand))
                     {
                         commander.UnitRole = UnitRole.None;
                     }

@@ -13,8 +13,9 @@ namespace Sharky.Managers
         {
             ActiveUnitData = activeUnitData;
             MicroTaskData = microTaskData;
-            NeverSkip = true;
         }
+
+        public override bool NeverSkip { get => true; }
 
         public override IEnumerable<Action> OnFrame(ResponseObservation observation)
         {

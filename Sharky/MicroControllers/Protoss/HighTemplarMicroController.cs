@@ -10,7 +10,7 @@ namespace Sharky.MicroControllers.Protoss
     {
         private int StormRange = 9;
         private double StormRadius = 1.5;
-        private double FeedbackRangeSquared = 100;
+        private double FeedbackRangeSquared = 121; // actually range 10, but give an extra 1 range to get first feedback in
         private int lastStormFrame = 0;
 
         public HighTemplarMicroController(MapDataService mapDataService, SharkyUnitData sharkyUnitData, ActiveUnitData activeUnitData, DebugService debugService, IPathFinder sharkyPathFinder, BaseData baseData, SharkyOptions sharkyOptions, DamageService damageService, UnitDataService unitDataService, TargetingData targetingData, MicroPriority microPriority, bool groupUpEnabled) 
@@ -39,7 +39,6 @@ namespace Sharky.MicroControllers.Protoss
         {
             if (Storm(commander, frame, out action))
             {
-                lastStormFrame = frame;
                 return true;
             }
 
@@ -139,6 +138,7 @@ namespace Sharky.MicroControllers.Protoss
                 if (bestAttack != null)
                 {
                     action = commander.Order(frame, Abilities.EFFECT_PSISTORM, bestAttack);
+                    lastStormFrame = frame;
                     return true;
                 }
             }

@@ -68,7 +68,7 @@ namespace Sharky.Managers
             //DrawGrid(observation.Observation.RawData.Player.Camera);
 
             MillisecondsUntilUpdate -= (1 / SharkyOptions.FramesPerSecond) * 1000;
-            if (MillisecondsUntilUpdate > 0) { return new List<SC2APIProtocol.Action>(); }
+            if (MillisecondsUntilUpdate > 0) { return null; }
             MillisecondsUntilUpdate = MillisecondsPerUpdate;
 
             UpdateVisibility(observation.Observation.RawData.MapState.Visibility, (int)observation.Observation.GameLoop);
@@ -98,7 +98,7 @@ namespace Sharky.Managers
 
 
 
-            return new List<SC2APIProtocol.Action>();
+            return null;
         }
 
         private void DrawGrid(Point camera)

@@ -93,7 +93,11 @@ namespace Sharky.MicroTasks.Proxy
             {
                 var armyPoint = new Vector2(AttackData.ArmyPoint.X, AttackData.ArmyPoint.Y);
                 var distanceToAttackPoint = Vector2.DistanceSquared(armyPoint, new Vector2(TargetingData.AttackPoint.X, TargetingData.AttackPoint.Y));
-                var closerEnemies = attackingEnemies.Where(e => Vector2.DistanceSquared(e.Position, armyPoint) < distanceToAttackPoint);
+                var closerEnemies = attackingEnemies;
+                if (AttackData.Attacking)
+                {
+                    closerEnemies = attackingEnemies.Where(e => Vector2.DistanceSquared(e.Position, armyPoint) < distanceToAttackPoint);
+                }
                 if (closerEnemies.Count() > 0)
                 {
                     actions = SplitArmy(frame, closerEnemies, TargetingData.AttackPoint);

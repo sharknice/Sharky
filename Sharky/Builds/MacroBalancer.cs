@@ -182,7 +182,7 @@ namespace Sharky.Builds
 
                 MacroData.DesiredUnitCounts[workerType] = desiredWorkers;
 
-                if (UnitCountService.Count(workerType) < desiredWorkers && UnitCountService.Count(workerType) + UnitCountService.UnitsInProgressCount(workerType) < 70)
+                if (UnitCountService.Count(workerType) < desiredWorkers && UnitCountService.Count(workerType) + UnitCountService.UnitsInProgressCount(workerType) < desiredWorkers)
                 {
                     MacroData.BuildUnits[workerType] = true;
                 }

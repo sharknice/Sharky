@@ -7,5 +7,6 @@
         public float OverallWinnability { get; set; }
         public float AirWinnability { get; set; }
         public float GroundWinnability { get; set; }
+        public int FrameCalculated { get; set; }
     }
 }

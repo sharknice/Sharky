@@ -13,7 +13,7 @@ namespace Sharky
         /// TODO: currently only set for enemies, allies is just the same as the current
         /// </summary>
         public Unit PreviousUnit { get; set; }
-        public Dictionary<int, Unit> PreviousUnits { get; set; }
+        //public Dictionary<int, Unit> PreviousUnits { get; set; }
         public Vector2 Start { get; set; }
         public Vector2 End { get; set; }
         public float DamageRadius { get; set; }
@@ -66,10 +66,11 @@ namespace Sharky
 
         public UnitCalculation(Unit unit, int repairers, SharkyUnitData sharkyUnitData, SharkyOptions sharkyOptions, UnitDataService unitDataService, int frame)
         {
+            TargetPriorityCalculation = new TargetPriorityCalculation();
             oneSecondInFrames = sharkyOptions.FramesPerSecond;
 
-            PreviousUnits = new Dictionary<int, Unit>();
-            PreviousUnits[frame] = unit;
+            //PreviousUnits = new Dictionary<int, Unit>();
+            //PreviousUnits[frame] = unit;
             PreviousUnit = unit;
             Unit = unit;
             UnitTypeData = sharkyUnitData.UnitData[(UnitTypes)unit.UnitType];
@@ -314,6 +315,7 @@ namespace Sharky
         {
             if (FrameLastSeen == frame) { return; }
 
+            TargetPriorityCalculation = previous.TargetPriorityCalculation;
             PreviousUnit = previous.Unit;
             var vector = new Vector2(Unit.Pos.X - PreviousUnit.Pos.X, Unit.Pos.Y - PreviousUnit.Pos.Y);
             Position = new Vector2(Unit.Pos.X + vector.X, Unit.Pos.Y + vector.Y);
@@ -323,22 +325,22 @@ namespace Sharky
             Velocity = Vector.LengthSquared();
             AverageVelocity = Velocity;
 
-            PreviousUnits = previous.PreviousUnits;
-            PreviousUnits[frame] = Unit;
+            //PreviousUnits = previous.PreviousUnits;
+            //PreviousUnits[frame] = Unit;
 
-            var oneSecondAgo = frame - (int)oneSecondInFrames;
-            foreach (var key in PreviousUnits.Keys.Where(k => k < oneSecondAgo).ToList())
-            {
-                PreviousUnits.Remove(key);
-            }
+            //var oneSecondAgo = frame - (int)oneSecondInFrames;
+            //if (PreviousUnits.Count() > 50)
+            //{
+            //    PreviousUnits.Remove(PreviousUnits.Keys.First());
+            //}
 
-            Unit oneSecondOldUnit;
-            if (PreviousUnits.TryGetValue(oneSecondAgo, out oneSecondOldUnit))
-            {
-                vector = new Vector2(Unit.Pos.X - oneSecondOldUnit.Pos.X, Unit.Pos.Y - oneSecondOldUnit.Pos.Y);
-                AverageVector = vector / (oneSecondAgo - frame);
-                AverageVelocity = AverageVector.LengthSquared();
-            }
+            //Unit oneSecondOldUnit;
+            //if (PreviousUnits.TryGetValue(oneSecondAgo, out oneSecondOldUnit))
+            //{
+            //    vector = new Vector2(Unit.Pos.X - oneSecondOldUnit.Pos.X, Unit.Pos.Y - oneSecondOldUnit.Pos.Y);
+            //    AverageVector = vector / (oneSecondAgo - frame);
+            //    AverageVelocity = AverageVector.LengthSquared();
+            //}
         }
     }
 }

@@ -40,11 +40,11 @@ namespace Sharky.Managers
 
         public int RunFrequency { get; set; }
 
+        public override bool NeverSkip { get => true; }
+
         public MacroManager(MacroSetup macroSetup, ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, IBuildingBuilder buildingBuilder, SharkyOptions sharkyOptions, BaseData baseData, TargetingData targetingData, AttackData attackData, IBuildingPlacement warpInPlacement, MacroData macroData, Morpher morpher, BuildOptions buildOptions,
             BuildPylonService buildPylonService, BuildDefenseService buildDefenseService, BuildProxyService buildProxyService, UnitCountService unitCountService, BuildingCancelService buildingCancelService)
         {
-            NeverSkip = true;
-
             MacroSetup = macroSetup;
             ActiveUnitData = activeUnitData;
             SharkyUnitData = sharkyUnitData;
@@ -87,9 +87,6 @@ namespace Sharky.Managers
         public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
         {
             var actions = new List<Action>();
-
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
 
             MacroData.FoodUsed = (int)observation.Observation.PlayerCommon.FoodUsed;
             MacroData.FoodLeft = (int)observation.Observation.PlayerCommon.FoodCap - MacroData.FoodUsed;
@@ -260,7 +257,7 @@ namespace Sharky.Managers
                 var unitData = GetGasTypeData();
                 var takenGases = ActiveUnitData.SelfUnits.Where(u => SharkyUnitData.GasGeyserRefineryTypes.Contains((UnitTypes)u.Value.Unit.UnitType)).Concat(ActiveUnitData.EnemyUnits.Where(u => SharkyUnitData.GasGeyserRefineryTypes.Contains((UnitTypes)u.Value.Unit.UnitType)));
                 var orderedGases = ActiveUnitData.SelfUnits.Where(u => u.Value.UnitClassifications.Contains(UnitClassification.Worker) && u.Value.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.BUILD_ASSIMILATOR || o.AbilityId == (uint)Abilities.BUILD_EXTRACTOR || o.AbilityId == (uint)Abilities.BUILD_REFINERY)).Select(u => u.Value.Unit.Orders.FirstOrDefault(o => o.AbilityId == (uint)Abilities.BUILD_ASSIMILATOR || o.AbilityId == (uint)Abilities.BUILD_EXTRACTOR || o.AbilityId == (uint)Abilities.BUILD_REFINERY));
-                var openGeysers = BaseData.BaseLocations.SelectMany(b => b.VespeneGeysers).Where(g => g.VespeneContents > 0 && !takenGases.Any(t => t.Value.Unit.Pos.X == g.Pos.X && t.Value.Unit.Pos.Y == g.Pos.Y) && !orderedGases.Any(o => o.TargetUnitTag == g.Tag));
+                var openGeysers = BaseData.BaseLocations.Where(b => b.ResourceCenter != null && b.ResourceCenter.BuildProgress > .9f).SelectMany(b => b.VespeneGeysers).Where(g => g.VespeneContents > 0 && !takenGases.Any(t => t.Value.Unit.Pos.X == g.Pos.X && t.Value.Unit.Pos.Y == g.Pos.Y) && !orderedGases.Any(o => o.TargetUnitTag == g.Tag));
                 if (openGeysers.Count() > 0)
                 {
                     var baseLocation = BuildingBuilder.GetReferenceLocation(TargetingData.SelfMainBasePoint);
@@ -305,7 +302,8 @@ namespace Sharky.Managers
                 SkipSupply = false;
                 return commands;
             }
-            var stopwatch = new Stopwatch();
+
+            var begin = System.DateTime.UtcNow;
 
             if (MacroData.BuildPylon)
             {
@@ -334,7 +332,8 @@ namespace Sharky.Managers
                 MacroData.BuildUnits[UnitTypes.ZERG_OVERLORD] = true;
             }
 
-            if (stopwatch.ElapsedMilliseconds > 1)
+            var endTime = (System.DateTime.UtcNow - begin).TotalMilliseconds;
+            if (endTime > 1)
             {
                 SkipSupply = true;
             }    
@@ -350,7 +349,7 @@ namespace Sharky.Managers
                 SkipProduction = false;
                 return commands;
             }
-            var stopwatch = new Stopwatch();
+            var begin = System.DateTime.UtcNow;
 
             foreach (var unit in MacroData.BuildProduction)
             {
@@ -366,7 +365,8 @@ namespace Sharky.Managers
                 }
             }
 
-            if (stopwatch.ElapsedMilliseconds > 1)
+            var endTime = (System.DateTime.UtcNow - begin).TotalMilliseconds;
+            if (endTime > 1)
             {
                 SkipProduction = true;
             }
@@ -403,7 +403,7 @@ namespace Sharky.Managers
                 SkipTech = false;
                 return commands;
             }
-            var stopwatch = new Stopwatch();
+            var begin = System.DateTime.UtcNow;
 
             foreach (var unit in MacroData.BuildTech)
             {
@@ -419,7 +419,8 @@ namespace Sharky.Managers
                 }
             }
 
-            if (stopwatch.ElapsedMilliseconds > 1)
+            var endTime = (System.DateTime.UtcNow - begin).TotalMilliseconds;
+            if (endTime > 1)
             {
                 SkipTech = true;
             }
@@ -435,7 +436,7 @@ namespace Sharky.Managers
                 SkipAddons = false;
                 return commands;
             }
-            var stopwatch = new Stopwatch();
+            var begin = System.DateTime.UtcNow;
 
             foreach (var unit in MacroData.BuildAddOns)
             {
@@ -451,7 +452,8 @@ namespace Sharky.Managers
                 }
             }
 
-            if (stopwatch.ElapsedMilliseconds > 1)
+            var endTime = (System.DateTime.UtcNow - begin).TotalMilliseconds;
+            if (endTime > 1)
             {
                 SkipAddons = true;
             }

@@ -15,8 +15,9 @@ namespace Sharky.Managers
             GameConnection = gameConnection;
             SharkyOptions = sharkyOptions;
             DebugService = debugService;
-            NeverSkip = true;
         }
+
+        public override bool NeverSkip { get => true; }
 
         public override IEnumerable<Action> OnFrame(ResponseObservation observation)
         {

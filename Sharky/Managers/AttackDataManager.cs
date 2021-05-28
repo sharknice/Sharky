@@ -37,35 +37,35 @@ namespace Sharky.Managers
         {
             if (!AttackData.UseAttackDataManager)
             {
-                return new List<SC2APIProtocol.Action>();
+                return null;
             }
 
             if (MacroData.FoodUsed > 185)
             {
                 AttackData.Attacking = true;
                 DebugService.DrawText("Attacking: > 185 supply");
-                return new List<SC2APIProtocol.Action>();
+                return null;
             }
 
             if (ActiveUnitData.SelfUnits.Count(u => u.Value.UnitClassifications.Contains(UnitClassification.Worker)) == 0)
             {
                 AttackData.Attacking = true;
                 DebugService.DrawText("Attacking: no workers");
-                return new List<SC2APIProtocol.Action>();
+                return null;
             }
 
             if (ActiveUnitData.SelfUnits.Count(u => u.Value.UnitClassifications.Contains(UnitClassification.ResourceCenter)) == 0)
             {
                 AttackData.Attacking = true;
                 DebugService.DrawText("Attacking: no base");
-                return new List<SC2APIProtocol.Action>();
+                return null;
             }
 
             if (AttackTask.UnitCommanders.Count() < 1)
             {
                 AttackData.Attacking = false;
                 DebugService.DrawText("Not Attacking: no attacking army");
-                return new List<SC2APIProtocol.Action>();
+                return null;
             }
 
             var attackVector = new Vector2(TargetingData.AttackPoint.X, TargetingData.AttackPoint.Y);
@@ -76,7 +76,7 @@ namespace Sharky.Managers
             {
                 AttackData.Attacking = true;
                 DebugService.DrawText("Attacking: no enemy army");
-                return new List<SC2APIProtocol.Action>();
+                return null;
             }
 
             var targetPriority = TargetPriorityService.CalculateTargetPriority(AttackTask.UnitCommanders.Select(c => c.UnitCalculation), enemyUnits);
@@ -99,7 +99,7 @@ namespace Sharky.Managers
                 DebugService.DrawText($"Not Attacking: O:{targetPriority.OverallWinnability:0.00}, G:{targetPriority.GroundWinnability:0.00}, A:{targetPriority.AirWinnability:0.00}");
             }
 
-            return new List<SC2APIProtocol.Action>();
+            return null;
         }
     }
 }

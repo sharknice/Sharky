@@ -22,7 +22,7 @@ namespace Sharky.MicroControllers.Protoss
             action = null;
 
             var cloakedPosition = CloakedInvader(commander);
-            if (cloakedPosition != null)
+            if (cloakedPosition != null && commander.UnitCalculation.Unit.Energy >= 25)
             {
                 action = commander.Order(frame, Abilities.EFFECT_ORACLEREVELATION, cloakedPosition);
                 return true;

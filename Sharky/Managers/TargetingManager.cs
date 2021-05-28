@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using Sharky.Builds.BuildingPlacement;
 using Sharky.Pathing;
 using System;
 using System.Collections.Generic;
@@ -13,6 +14,8 @@ namespace Sharky.Managers
         BaseData BaseData;
         MacroData MacroData;
         TargetingData TargetingData;
+        MapData MapData;
+
         ChokePointService ChokePointService;
         ChokePointsService ChokePointsService;
         DebugService DebugService;
@@ -23,12 +26,15 @@ namespace Sharky.Managers
         Point2D PreviousDefensePoint;
         int LastUpdateFrame;
 
-        public TargetingManager(SharkyUnitData sharkyUnitData, BaseData baseData, MacroData macroData, TargetingData targetingData, ChokePointService chokePointService, ChokePointsService chokePointsService, DebugService debugService)
+        public TargetingManager(SharkyUnitData sharkyUnitData, BaseData baseData, MacroData macroData, TargetingData targetingData, MapData mapData,
+            ChokePointService chokePointService, ChokePointsService chokePointsService, DebugService debugService)
         {
             SharkyUnitData = sharkyUnitData;
             BaseData = baseData;
             MacroData = macroData;
             TargetingData = targetingData;
+            MapData = mapData;
+
             ChokePointService = chokePointService;
             ChokePointsService = chokePointsService;
             DebugService = debugService;
@@ -67,7 +73,12 @@ namespace Sharky.Managers
                 {
                     TargetingData.ForwardDefensePoint = new Point2D { X = unit.Pos.X, Y = unit.Pos.Y };
                 }
-                TargetingData.ForwardDefensePoint = new Point2D { X = unit.Pos.X, Y = unit.Pos.Y };
+
+                var wallData = MapData.PartialWallData.FirstOrDefault(b => b.BasePosition.X == unit.Pos.X && b.BasePosition.Y == unit.Pos.Y);
+                if (wallData != null && wallData.Door != null) 
+                {
+                    TargetingData.ForwardDefensePoint = wallData.Door;
+                }
 
                 TargetingData.SelfMainBasePoint = new Point2D { X = unit.Pos.X, Y = unit.Pos.Y };
                 return;
@@ -91,7 +102,7 @@ namespace Sharky.Managers
                 }
             }
 
-            return new List<SC2APIProtocol.Action>();
+            return null;
         }
 
         void UpdateChokePoints(int frame)
@@ -145,6 +156,11 @@ namespace Sharky.Managers
                     {
                         var angle = Math.Atan2(closestBase.Location.Y - TargetingData.EnemyMainBasePoint.Y, TargetingData.EnemyMainBasePoint.X - closestBase.Location.X);
                         TargetingData.ForwardDefensePoint = new Point2D { X = closestBase.Location.X + (float)(6 * Math.Cos(angle)), Y = closestBase.Location.Y - (float)(6 * Math.Sin(angle)) };
+                    }
+                    var wallData = MapData.PartialWallData.FirstOrDefault(b => b.BasePosition.X == closestBase.Location.X && b.BasePosition.Y == closestBase.Location.Y);
+                    if (wallData != null && wallData.Door != null)
+                    {
+                        TargetingData.ForwardDefensePoint = wallData.Door;
                     }
                 }
                 var farthestBase = ordered.LastOrDefault();

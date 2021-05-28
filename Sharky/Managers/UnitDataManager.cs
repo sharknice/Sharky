@@ -249,7 +249,7 @@ namespace Sharky.Managers
         {
             SharkyUnitData.ResearchedUpgrades = observation.Observation.RawData.Player.UpgradeIds;
             SharkyUnitData.Effects = observation.Observation.RawData.Effects;
-            return new List<SC2APIProtocol.Action>();
+            return null;
         }
     }
 }
