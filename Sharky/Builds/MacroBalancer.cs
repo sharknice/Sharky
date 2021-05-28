@@ -84,7 +84,10 @@ namespace Sharky.Builds
                 }
             }
 
-            MacroData.BuildGas = MacroData.DesiredGases > BaseData.SelfBases.Sum(b => b.GasMiningInfo.Count());
+            var assimilator = SharkyUnitData.BuildingData[UnitTypes.PROTOSS_ASSIMILATOR];
+            var extractor = SharkyUnitData.BuildingData[UnitTypes.ZERG_EXTRACTOR];
+            var refinery = SharkyUnitData.BuildingData[UnitTypes.TERRAN_REFINERY];
+            MacroData.BuildGas = MacroData.DesiredGases > BaseData.SelfBases.Sum(b => b.GasMiningInfo.Count()) + ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)assimilator.Ability || o.AbilityId == (uint)extractor.Ability || o.AbilityId == (uint)refinery.Ability));
         }
 
         public void BalanceTech()
