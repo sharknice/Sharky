@@ -74,10 +74,13 @@ namespace Sharky.Managers
                     TargetingData.ForwardDefensePoint = new Point2D { X = unit.Pos.X, Y = unit.Pos.Y };
                 }
 
-                var wallData = MapData.PartialWallData.FirstOrDefault(b => b.BasePosition.X == unit.Pos.X && b.BasePosition.Y == unit.Pos.Y);
-                if (wallData != null && wallData.Door != null) 
+                if (MapData.PartialWallData != null)
                 {
-                    TargetingData.ForwardDefensePoint = wallData.Door;
+                    var wallData = MapData.PartialWallData.FirstOrDefault(b => b.BasePosition.X == unit.Pos.X && b.BasePosition.Y == unit.Pos.Y);
+                    if (wallData != null && wallData.Door != null)
+                    {
+                        TargetingData.ForwardDefensePoint = wallData.Door;
+                    }
                 }
 
                 TargetingData.SelfMainBasePoint = new Point2D { X = unit.Pos.X, Y = unit.Pos.Y };
@@ -157,10 +160,14 @@ namespace Sharky.Managers
                         var angle = Math.Atan2(closestBase.Location.Y - TargetingData.EnemyMainBasePoint.Y, TargetingData.EnemyMainBasePoint.X - closestBase.Location.X);
                         TargetingData.ForwardDefensePoint = new Point2D { X = closestBase.Location.X + (float)(6 * Math.Cos(angle)), Y = closestBase.Location.Y - (float)(6 * Math.Sin(angle)) };
                     }
-                    var wallData = MapData.PartialWallData.FirstOrDefault(b => b.BasePosition.X == closestBase.Location.X && b.BasePosition.Y == closestBase.Location.Y);
-                    if (wallData != null && wallData.Door != null)
+
+                    if (MapData.PartialWallData != null)
                     {
-                        TargetingData.ForwardDefensePoint = wallData.Door;
+                        var wallData = MapData.PartialWallData.FirstOrDefault(b => b.BasePosition.X == closestBase.Location.X && b.BasePosition.Y == closestBase.Location.Y);
+                        if (wallData != null && wallData.Door != null)
+                        {
+                            TargetingData.ForwardDefensePoint = wallData.Door;
+                        }
                     }
                 }
                 var farthestBase = ordered.LastOrDefault();
