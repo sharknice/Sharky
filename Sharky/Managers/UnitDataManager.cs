@@ -107,15 +107,21 @@ namespace Sharky.Managers
                 UnitTypes.NEUTRAL_PURIFIERVESPENEGEYSER,
                 UnitTypes.NEUTRAL_PROTOSSVESPENEGEYSER,
                 UnitTypes.ZERG_EXTRACTOR,
+                UnitTypes.ZERG_EXTRACTORRICH,
                 UnitTypes.PROTOSS_ASSIMILATOR,
-                UnitTypes.TERRAN_REFINERY
+                UnitTypes.PROTOSS_ASSIMILATORRICH,
+                UnitTypes.TERRAN_REFINERY,
+                UnitTypes.TERRAN_REFINERYRICH
             };
 
             SharkyUnitData.GasGeyserRefineryTypes = new HashSet<UnitTypes>
             {
                 UnitTypes.ZERG_EXTRACTOR,
+                UnitTypes.ZERG_EXTRACTORRICH,
                 UnitTypes.PROTOSS_ASSIMILATOR,
-                UnitTypes.TERRAN_REFINERY
+                UnitTypes.PROTOSS_ASSIMILATORRICH,
+                UnitTypes.TERRAN_REFINERY,
+                UnitTypes.TERRAN_REFINERYRICH
             };
 
             SharkyUnitData.MiningAbilities = new HashSet<Abilities>

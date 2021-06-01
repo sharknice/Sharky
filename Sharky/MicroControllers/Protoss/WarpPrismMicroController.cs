@@ -203,17 +203,27 @@ namespace Sharky.MicroControllers.Protoss
                     return false;
                 }
             }
+
             if (friendly.Unit.UnitType == (uint)UnitTypes.PROTOSS_DISRUPTOR)
             {
-                if (friendly.Unit.Shield != friendly.Unit.ShieldMax)
+                if (friendly.Unit.Shield != friendly.Unit.ShieldMax && ActiveUnitData.Commanders.ContainsKey(friendly.Unit.Tag) && (!friendly.NearbyAllies.Any(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_DISRUPTORPHASED) || ActiveUnitData.Commanders[friendly.Unit.Tag].AbilityOffCooldown(Abilities.EFFECT_PURIFICATIONNOVA, frame, SharkyOptions.FramesPerSecond, SharkyUnitData)))
                 {
-                    return ActiveUnitData.Commanders[friendly.Unit.Tag].AbilityOffCooldown(Abilities.EFFECT_PURIFICATIONNOVA, frame, SharkyOptions.FramesPerSecond, SharkyUnitData);
+                    return true;
                 }
             }
-            if (friendly.Unit.WeaponCooldown > 0 && (friendly.Unit.Health + friendly.Unit.Shield) < healthLimit && friendly.Unit.Shield != friendly.Unit.ShieldMax) // TODO: or could die in one hit
+            else if (friendly.Unit.WeaponCooldown > 0 && (friendly.Unit.Health + friendly.Unit.Shield) < healthLimit && friendly.Unit.Shield != friendly.Unit.ShieldMax) // TODO: or could die in one hit
             {
                 return true;
             }
+            else if (friendly.NearbyAllies.Any(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_DISRUPTORPHASED && Vector2.DistanceSquared(friendly.Position, e.Position) < 10))
+            {
+                return true;
+            }
+            else if (friendly.NearbyEnemies.Any(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_DISRUPTORPHASED && Vector2.DistanceSquared(friendly.Position, e.Position) < 10))
+            {
+                return true;
+            }
+
             return false;
         }
 

@@ -44,7 +44,7 @@ namespace Sharky.Builds
         {
             if (!BuildOptions.StrictSupplyCount)
             {
-                var productionCapacity = UnitCountService.Count(UnitTypes.PROTOSS_NEXUS) + (UnitCountService.Count(UnitTypes.PROTOSS_GATEWAY) * 2) + (UnitCountService.Count(UnitTypes.PROTOSS_ROBOTICSFACILITY) * 6) + (UnitCountService.Count(UnitTypes.PROTOSS_STARGATE) * 6);
+                var productionCapacity = UnitCountService.Count(UnitTypes.PROTOSS_NEXUS) + (UnitCountService.EquivalentTypeCount(UnitTypes.PROTOSS_GATEWAY) * 2) + (UnitCountService.Count(UnitTypes.PROTOSS_ROBOTICSFACILITY) * 6) + (UnitCountService.Count(UnitTypes.PROTOSS_STARGATE) * 6);
                 MacroData.DesiredPylons = (int)Math.Ceiling(((MacroData.FoodUsed - (UnitCountService.Count(UnitTypes.PROTOSS_NEXUS) * 12)) / 8.0) + (productionCapacity / 8.0));
             }
 

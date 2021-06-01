@@ -41,14 +41,14 @@ namespace Sharky.Builds.Protoss
                     MacroData.DesiredProductionCounts[UnitTypes.PROTOSS_GATEWAY] = 1;
                 }
             }
-            if (MacroData.FoodUsed >= 17 && UnitCountService.Count(UnitTypes.PROTOSS_GATEWAY) > 0)
+            if (MacroData.FoodUsed >= 17 && UnitCountService.EquivalentTypeCount(UnitTypes.PROTOSS_GATEWAY) > 0)
             {
                 if (MacroData.DesiredGases < 1)
                 {
                     MacroData.DesiredGases = 1;
                 }
             }
-            if (MacroData.FoodUsed >= 18 && UnitCountService.Count(UnitTypes.PROTOSS_GATEWAY) > 0)
+            if (MacroData.FoodUsed >= 18 && UnitCountService.EquivalentTypeCount(UnitTypes.PROTOSS_GATEWAY) > 0)
             {
                 if (MacroData.DesiredGases < 2)
                 {
@@ -56,7 +56,7 @@ namespace Sharky.Builds.Protoss
                 }
                 BuildOptions.StrictGasCount = false;
             }
-            if (UnitCountService.Count(UnitTypes.PROTOSS_GATEWAY) > 0)
+            if (UnitCountService.EquivalentTypeCount(UnitTypes.PROTOSS_GATEWAY) > 0)
             {
                 if (MacroData.DesiredTechCounts[UnitTypes.PROTOSS_CYBERNETICSCORE] < 1)
                 {
@@ -65,7 +65,7 @@ namespace Sharky.Builds.Protoss
                 ChronoData.ChronodUnits.Remove(UnitTypes.PROTOSS_PROBE);
             }
 
-            if (UnitCountService.Count(UnitTypes.PROTOSS_GATEWAY) > 0 && UnitCountService.Count(UnitTypes.PROTOSS_CYBERNETICSCORE) > 0)
+            if (UnitCountService.EquivalentTypeCount(UnitTypes.PROTOSS_GATEWAY) > 0 && UnitCountService.Count(UnitTypes.PROTOSS_CYBERNETICSCORE) > 0)
             {
                 if (MacroData.DesiredProductionCounts[UnitTypes.PROTOSS_GATEWAY] < 3)
                 {

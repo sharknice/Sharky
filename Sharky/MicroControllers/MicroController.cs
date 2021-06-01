@@ -146,11 +146,11 @@ namespace Sharky.MicroControllers
 
                 if (MicroData.IndividualMicroControllers.TryGetValue((UnitTypes)commander.UnitCalculation.Unit.UnitType, out var individualMicroController))
                 {
-                    action = individualMicroController.Support(commander, supportTargets, target, defensivePoint, groupCenter, frame);
+                    action = individualMicroController.Support(commander, friendlies, target, defensivePoint, groupCenter, frame);
                 }
                 else
                 {
-                    action = MicroData.IndividualMicroController.Support(commander, supportTargets, target, defensivePoint, groupCenter, frame);
+                    action = MicroData.IndividualMicroController.Support(commander, friendlies, target, defensivePoint, groupCenter, frame);
                 }
 
                 if (action != null)

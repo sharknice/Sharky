@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Net.WebSockets;
@@ -11,18 +10,17 @@ namespace Sharky
 {
     public class GameConnection
     {
-        ProtobufProxy proxy = new ProtobufProxy();
+        ProtobufProxy Proxy = new ProtobufProxy();
         string address = "127.0.0.1";
 
         string starcraftExe;
         string starcraftDir;
 
-        public GameConnection()
-        { }
+        public GameConnection() { }
 
         public void StartSC2Instance(int port)
         {
-            ProcessStartInfo processStartInfo = new ProcessStartInfo(starcraftExe);
+            var processStartInfo = new ProcessStartInfo(starcraftExe);
             processStartInfo.Arguments = String.Format("-listen {0} -port {1} -displayMode 0", address, port);
             processStartInfo.WorkingDirectory = Path.Combine(starcraftDir, "Support64");
             Process.Start(processStartInfo);
@@ -30,12 +28,11 @@ namespace Sharky
 
         public async Task Connect(int port)
         {
-
             for (int i = 0; i < 40; i++)
             {
                 try
                 {
-                    await proxy.Connect(address, port);
+                    await Proxy.Connect(address, port);
                     return;
                 }
                 catch (WebSocketException) { }
@@ -46,41 +43,43 @@ namespace Sharky
 
         public async Task CreateGame(String mapName, Race opponentRace, Difficulty opponentDifficulty, AIBuild aIBuild)
         {
-            RequestCreateGame createGame = new RequestCreateGame();
+            var createGame = new RequestCreateGame();
             createGame.Realtime = false;
 
             string mapPath = Path.Combine(starcraftDir, "Maps", mapName);
             if (!File.Exists(mapPath))
+            {
                 throw new Exception("Could not find map at " + mapPath);
+            }
             createGame.LocalMap = new LocalMap();
             createGame.LocalMap.MapPath = mapPath;
 
-            PlayerSetup player1 = new PlayerSetup();
+            var player1 = new PlayerSetup();
             createGame.PlayerSetup.Add(player1);
             player1.Type = PlayerType.Participant;
 
-            PlayerSetup player2 = new PlayerSetup();
+            var player2 = new PlayerSetup();
             createGame.PlayerSetup.Add(player2);
             player2.Race = opponentRace;
             player2.Type = PlayerType.Computer;
             player2.Difficulty = opponentDifficulty;
             player2.AiBuild = aIBuild;
 
-            Request request = new Request();
+            var request = new Request();
             request.CreateGame = createGame;
-            Response response = await proxy.SendRequest(request);
+            var response = await Proxy.SendRequest(request);
         }
 
         private void readSettings()
         {
-            string myDocuments = Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
-            string executeInfo = Path.Combine(myDocuments, "Starcraft II", "ExecuteInfo.txt");
+            var myDocuments = Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
+            var executeInfo = Path.Combine(myDocuments, "Starcraft II", "ExecuteInfo.txt");
             if (File.Exists(executeInfo))
             {
-                string[] lines = File.ReadAllLines(executeInfo);
+                var lines = File.ReadAllLines(executeInfo);
                 foreach (string line in lines)
                 {
-                    string argument = line.Substring(line.IndexOf('=') + 1).Trim();
+                    var argument = line.Substring(line.IndexOf('=') + 1).Trim();
                     if (line.Trim().StartsWith("executable"))
                     {
                         starcraftExe = argument;
@@ -96,7 +95,7 @@ namespace Sharky
         
         public async Task<uint> JoinGame(Race race)
         {
-            RequestJoinGame joinGame = new RequestJoinGame();
+            var joinGame = new RequestJoinGame();
             joinGame.Race = race;
 
             joinGame.Options = new InterfaceOptions();
@@ -108,15 +107,15 @@ namespace Sharky
             joinGame.Options.RawCropToPlayableArea = true;
             joinGame.Options.RawAffectsSelection = true;
 
-            Request request = new Request();
+            var request = new Request();
             request.JoinGame = joinGame;
-            Response response = await proxy.SendRequest(request);
+            var response = await Proxy.SendRequest(request);
             return response.JoinGame.PlayerId;
         }
 
         public async Task<uint> JoinGameLadder(Race race, int startPort)
         {
-            RequestJoinGame joinGame = new RequestJoinGame();
+            var joinGame = new RequestJoinGame();
             joinGame.Race = race;
             
             joinGame.SharedPort = startPort + 1;
@@ -136,49 +135,45 @@ namespace Sharky
             joinGame.Options.RawCropToPlayableArea = true;
             joinGame.Options.RawAffectsSelection = true;
 
-            Request request = new Request();
+            var request = new Request();
             request.JoinGame = joinGame;
 
-            Response response = await proxy.SendRequest(request);
+            var response = await Proxy.SendRequest(request);
             return response.JoinGame.PlayerId;
         }
 
         public async Task<ResponsePing> Ping()
         {
-            Request request = new Request();
+            var request = new Request();
             request.Ping = new RequestPing();
-            Response response = await proxy.SendRequest(request);
+            var response = await Proxy.SendRequest(request);
             return response.Ping;
         }
 
         public async Task RequestLeaveGame()
         {
-            Request requestLeaveGame = new Request();
-            requestLeaveGame.LeaveGame = new RequestLeaveGame();
-            await proxy.SendRequest(requestLeaveGame);
+            await Proxy.SendRequest(new Request { LeaveGame = new RequestLeaveGame() });
         }
 
         public async Task SendRequest(Request request)
         {
-            await proxy.SendRequest(request);
+            await Proxy.SendRequest(request);
         }
 
         public async Task<ResponseQuery> SendQuery(RequestQuery query)
         {
-            Request request = new Request();
-            request.Query = query;
-            Response response = await proxy.SendRequest(request);
+            var response = await Proxy.SendRequest(new Request { Query = query });
             return response.Query;
         }
 
         public async Task Run(ISharkyBot bot, uint playerId, string opponentID)
         {
-            Request gameInfoReq = new Request();
+            var gameInfoReq = new Request();
             gameInfoReq.GameInfo = new RequestGameInfo();
 
-            Response gameInfoResponse = await proxy.SendRequest(gameInfoReq);
+            var gameInfoResponse = await Proxy.SendRequest(gameInfoReq);
 
-            Request gameDataRequest = new Request();
+            var gameDataRequest = new Request();
             gameDataRequest.Data = new RequestData();
             gameDataRequest.Data.UnitTypeId = true;
             gameDataRequest.Data.AbilityId = true;
@@ -186,19 +181,25 @@ namespace Sharky
             gameDataRequest.Data.EffectId = true;
             gameDataRequest.Data.UpgradeId = true;
 
-            Response dataResponse = await proxy.SendRequest(gameDataRequest);
+            var dataResponse = await Proxy.SendRequest(gameDataRequest);
 
-            ResponsePing pingResponse = await Ping();
+            var pingResponse = await Ping();
 
-            bool start = true;
-            
+            var start = true;
+
+            var observationRequest = new Request();
+            observationRequest.Observation = new RequestObservation();
+
             while (true)
             {
-                Request observationRequest = new Request();
-                observationRequest.Observation = new RequestObservation();
-                Response response = await proxy.SendRequest(observationRequest);
+                //var beginTotal = DateTime.UtcNow;
 
-                ResponseObservation observation = response.Observation;
+                //var begin = DateTime.UtcNow;
+                var response = await Proxy.SendRequest(observationRequest);
+                //var endTime = (DateTime.UtcNow - begin).TotalMilliseconds;
+                //Debug.WriteLine($"ObserverationRequest: {endTime}");
+
+                var observation = response.Observation;
 
                 if (observation == null)
                 {
@@ -216,22 +217,33 @@ namespace Sharky
                     start = false;
                     bot.OnStart(gameInfoResponse.GameInfo, dataResponse.Data, pingResponse, observation, playerId, opponentID);
                 }
-                
-                IEnumerable<SC2APIProtocol.Action> actions = bot.OnFrame(observation);
 
-                Request actionRequest = new Request();
+                //begin = DateTime.UtcNow;
+                var actions = bot.OnFrame(observation);
+                //endTime = (DateTime.UtcNow - begin).TotalMilliseconds;
+                //Debug.WriteLine($"OnFrame: {endTime}");
 
+                //begin = DateTime.UtcNow;
+                var actionRequest = new Request();
                 actionRequest.Action = new RequestAction();
                 actionRequest.Action.Actions.AddRange(actions);
                 if (actionRequest.Action.Actions.Count > 0)
                 {
-                    await proxy.SendRequest(actionRequest);
+                    await Proxy.SendRequest(actionRequest);
                 }
+                //endTime = (DateTime.UtcNow - begin).TotalMilliseconds;
+                //Debug.WriteLine($"SendActions: {endTime}");
 
-                Request stepRequest = new Request();
+                //begin = DateTime.UtcNow;
+                var stepRequest = new Request();
                 stepRequest.Step = new RequestStep();
                 stepRequest.Step.Count = 1;
-                await proxy.SendRequest(stepRequest);
+                await Proxy.SendRequest(stepRequest);
+                //endTime = (DateTime.UtcNow - begin).TotalMilliseconds;
+                //Debug.WriteLine($"SendStepRequest: {endTime}");
+
+                //endTime = (DateTime.UtcNow - beginTotal).TotalMilliseconds;
+                //Debug.WriteLine($"{endTime}");
             }
         }
         
@@ -241,20 +253,20 @@ namespace Sharky
             StartSC2Instance(5678);
             await Connect(5678);
             await CreateGame(map, opponentRace, opponentDifficulty, aIBuild);
-            uint playerId = await JoinGame(myRace);
+            var playerId = await JoinGame(myRace);
             await Run(bot, playerId, "test");
         }
 
         public async Task RunLadder(ISharkyBot bot, Race myRace, int gamePort, int startPort, String opponentID)
         {
             await Connect(gamePort);
-            uint playerId = await JoinGameLadder(myRace, startPort);
+            var playerId = await JoinGameLadder(myRace, startPort);
             await Run(bot, playerId, opponentID);
         }
 
         public async Task RunLadder(ISharkyBot bot, Race myRace, string[] args)
         {
-            CLArgs clargs = new CLArgs(args);
+            var clargs = new CLArgs(args);
             await RunLadder(bot, myRace, clargs.GamePort, clargs.StartPort, clargs.OpponentID);
         }
     }

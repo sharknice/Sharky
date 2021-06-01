@@ -8,7 +8,8 @@ namespace Sharky.MicroControllers.Protoss
 {
     public class DisruptorPhasedMicroController : IndividualMicroController
     {
-        private int PurificationNovaRange = 13;
+        int PurificationNovaRange = 13;
+        float PurificationNovaSpeed = 5.95f;
 
         public DisruptorPhasedMicroController(MapDataService mapDataService, SharkyUnitData sharkyUnitData, ActiveUnitData activeUnitData, DebugService debugService, IPathFinder sharkyPathFinder, BaseData baseData, SharkyOptions sharkyOptions, DamageService damageService, UnitDataService unitDataService, TargetingData targetingData, MicroPriority microPriority, bool groupUpEnabled)
             : base(mapDataService, sharkyUnitData, activeUnitData, debugService, sharkyPathFinder, baseData, sharkyOptions, damageService, unitDataService, targetingData, microPriority, groupUpEnabled)
@@ -32,7 +33,7 @@ namespace Sharky.MicroControllers.Protoss
 
             foreach (var enemyAttack in commander.UnitCalculation.NearbyEnemies)
             {
-                if (!enemyAttack.Unit.IsFlying && enemyAttack.Damage > 0 && InRange(enemyAttack.Position, commander.UnitCalculation.Position, PurificationNovaRange + enemyAttack.Unit.Radius + commander.UnitCalculation.Unit.Radius)) // TODO: do actual pathing to see if the shot can make it there, if a wall is in the way it can't
+                if (!enemyAttack.Unit.IsFlying && InRange(enemyAttack.Position, commander.UnitCalculation.Position, ((PurificationNovaSpeed / SharkyOptions.FramesPerSecond) * commander.UnitCalculation.Unit.BuffDurationRemain) + 3f + enemyAttack.Unit.Radius + commander.UnitCalculation.Unit.Radius)) // TODO: do actual pathing to see if the shot can make it there, if a wall is in the way it can't
                 {
                     attacks.Add(enemyAttack);
                 }
@@ -40,7 +41,7 @@ namespace Sharky.MicroControllers.Protoss
 
             if (attacks.Count > 0)
             {
-                var oneShotKills = attacks.Where(a => a.Unit.Health + a.Unit.Shield < GetPurificationNovaDamage(a.Unit, SharkyUnitData.UnitData[(UnitTypes)a.Unit.UnitType]) && !a.Unit.BuffIds.Contains((uint)Buffs.IMMORTALOVERLOAD)).OrderByDescending(u => u.Dps);
+                var oneShotKills = attacks.OrderBy(a => GetPurificationNovaDamage(a.Unit, SharkyUnitData.UnitData[(UnitTypes)a.Unit.UnitType])).ThenByDescending(u => u.Dps);
                 if (oneShotKills.Count() > 0)
                 {
                     var bestAttack = GetBestAttack(commander.UnitCalculation, oneShotKills, attacks);
@@ -77,6 +78,20 @@ namespace Sharky.MicroControllers.Protoss
                 }
             }
 
+            return AvoidFriendlyFire(commander, frame, out action);
+        }
+
+        private bool AvoidFriendlyFire(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
+
+            var closest = commander.UnitCalculation.NearbyAllies.OrderBy(a => Vector2.DistanceSquared(a.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+            if (closest != null)
+            {
+                var avoidPoint = GetPositionFromRange(closest.Unit.Pos, commander.UnitCalculation.Unit.Pos, 3f + commander.UnitCalculation.Unit.Radius + closest.Unit.Radius + .5f);
+                action = commander.Order(frame, Abilities.MOVE, avoidPoint);
+                return true;
+            }
             return false;
         }
 
@@ -108,7 +123,7 @@ namespace Sharky.MicroControllers.Protoss
                         }
                     }
                 }
-                foreach (var splashedAlly in potentialAttack.NearbyAllies)
+                foreach (var splashedAlly in potentialAttack.NearbyAllies.Where(a => !a.Unit.IsFlying && a.Unit.UnitType != (uint)UnitTypes.PROTOSS_DISRUPTOR && a.Unit.UnitType != (uint)UnitTypes.PROTOSS_DISRUPTORPHASED))
                 {
                     if (Vector2.DistanceSquared(splashedAlly.Position, enemyAttack.Position) < (splashedAlly.Unit.Radius + splashRadius) * (splashedAlly.Unit.Radius + splashRadius))
                     {
@@ -123,11 +138,16 @@ namespace Sharky.MicroControllers.Protoss
 
             var best = killCounts.OrderByDescending(x => x.Value).FirstOrDefault();
 
-            if (best.Value < 3) // only attack if going to kill >= 3 units
+            if (best.Value < 0) // don't kill own units
             {
                 return null;
             }
             return new Point2D { X = best.Key.X, Y = best.Key.Y };
+        }
+
+        public override List<SC2APIProtocol.Action> Retreat(UnitCommander commander, Point2D defensivePoint, Point2D groupCenter, int frame)
+        {
+            return Attack(commander, defensivePoint, defensivePoint, groupCenter, frame);
         }
     }
 }

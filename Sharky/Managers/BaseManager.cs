@@ -158,6 +158,19 @@ namespace Sharky.Managers
                     }
                 }
 
+                for (var index = 0; index < selfBase.MineralFields.Count; index++)
+                {
+                    if (ActiveUnitData.NeutralUnits.ContainsKey(selfBase.MineralFields[index].Tag))
+                    {
+                        selfBase.MineralFields[index] = ActiveUnitData.NeutralUnits[selfBase.MineralFields[index].Tag].Unit;
+                    }
+                    else
+                    {
+                        selfBase.MineralFields.RemoveAt(index);
+                        break;
+                    }
+                }
+
                 for (var index = 0; index < selfBase.VespeneGeysers.Count; index++)
                 {
                     if (selfBase.VespeneGeysers[index].DisplayType == DisplayType.Snapshot)

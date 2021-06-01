@@ -15,7 +15,7 @@ namespace Sharky.Pathing
 
         public List<Vector2> GetSafeGroundPath(float startX, float startY, float endX, float endY, int frame)
         {
-            var cells = MapDataService.GetCells(startX, startY, 4);
+            var cells = MapDataService.GetCells(startX, startY, 10);
             var end = new Vector2(endX, endY);
             var best = cells.Where(c => c.Walkable).OrderBy(c => c.EnemyGroundDpsInRange).ThenBy(c => Vector2.DistanceSquared(end, new Vector2(c.X, c.Y))).FirstOrDefault();
             if (best != null)
@@ -27,7 +27,7 @@ namespace Sharky.Pathing
 
         public List<Vector2> GetSafeAirPath(float startX, float startY, float endX, float endY, int frame)
         {
-            var cells = MapDataService.GetCells(startX, startY, 4);
+            var cells = MapDataService.GetCells(startX, startY, 10);
             var end = new Vector2(endX, endY);
             var best = cells.OrderBy(c => c.EnemyAirDpsInRange).ThenBy(c => Vector2.DistanceSquared(end, new Vector2(c.X, c.Y))).FirstOrDefault();
             if (best != null)
@@ -39,7 +39,7 @@ namespace Sharky.Pathing
 
         public List<Vector2> GetGroundPath(float startX, float startY, float endX, float endY, int frame)
         {
-            var cells = MapDataService.GetCells(startX, startY, 1);
+            var cells = MapDataService.GetCells(startX, startY, 10);
             var best = cells.Where(c => c.Walkable).FirstOrDefault();
             if (best != null)
             {
@@ -50,7 +50,7 @@ namespace Sharky.Pathing
 
         public List<Vector2> GetUndetectedGroundPath(float startX, float startY, float endX, float endY, int frame)
         {
-            var cells = MapDataService.GetCells(startX, startY, 4);
+            var cells = MapDataService.GetCells(startX, startY, 10);
             var end = new Vector2(endX, endY);
             var best = cells.Where(c => c.Walkable).OrderBy(c => c.InEnemyDetection).ThenBy(c => Vector2.DistanceSquared(end, new Vector2(c.X, c.Y))).FirstOrDefault();
             if (best != null)

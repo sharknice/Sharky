@@ -20,9 +20,9 @@ namespace Sharky
 
         public bool SkipFrame { get; set; }
 
-        Abilities LastAbility;
-        Point2D LastTargetLocation;
-        ulong LastTargetTag;
+        public Abilities LastAbility { get; private set; }
+        public Point2D LastTargetLocation { get; private set; }
+        public ulong LastTargetTag { get; private set; }
 
         Dictionary<Abilities, int> AbilityOrderTimes;
         public Dictionary<ulong, int> LoadTimes;

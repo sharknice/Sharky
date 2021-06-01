@@ -186,9 +186,30 @@ namespace Sharky.MicroTasks
                 var baseVector = new Vector2(selfBase.ResourceCenter.Pos.X, selfBase.ResourceCenter.Pos.Y);
                 foreach (var miningInfo in selfBase.GasMiningInfo)
                 {
+                    if (miningInfo.Workers.Count() > 0 && miningInfo.ResourceUnit.VespeneContents == 0)
+                    {
+                        foreach (var worker in miningInfo.Workers)
+                        {
+                            worker.UnitRole = UnitRole.None;
+                        }
+                        miningInfo.Workers.Clear();
+                    }
+
                     var mineralVector = new Vector2(miningInfo.ResourceUnit.Pos.X, miningInfo.ResourceUnit.Pos.Y);
                     foreach (var worker in miningInfo.Workers.Where(w => w.UnitRole == UnitRole.Gas))
                     {
+                        if (miningInfo.ResourceUnit.UnitType == (uint)UnitTypes.PROTOSS_ASSIMILATORRICH || miningInfo.ResourceUnit.UnitType == (uint)UnitTypes.TERRAN_REFINERYRICH || miningInfo.ResourceUnit.UnitType == (uint)UnitTypes.ZERG_EXTRACTORRICH)
+                        {
+                            if (worker.LastTargetTag != miningInfo.ResourceUnit.Tag && worker.LastAbility != Abilities.SMART)
+                            {
+                                var action = worker.Order(frame, Abilities.SMART, null, miningInfo.ResourceUnit.Tag, false);
+                                if (action != null)
+                                {
+                                    actions.AddRange(action);
+                                }
+                            }
+                            continue;
+                        }
                         var workerVector = worker.UnitCalculation.Position;
                         if (worker.UnitCalculation.Unit.BuffIds.Any(b => SharkyUnitData.CarryingResourceBuffs.Contains((Buffs)b)))
                         {
@@ -258,7 +279,7 @@ namespace Sharky.MicroTasks
             }
 
             var refinereries = ActiveUnitData.SelfUnits.Where(u => SharkyUnitData.GasGeyserRefineryTypes.Contains((UnitTypes)u.Value.Unit.UnitType) && u.Value.Unit.BuildProgress >= .99 && BaseData.SelfBases.Any(b => b.GasMiningInfo.Any(g => g.ResourceUnit.Tag == u.Value.Unit.Tag)));
-            var unsaturatedRefineries = refinereries.Where(u => BaseData.SelfBases.Any(b => b.GasMiningInfo.Any(g => g.ResourceUnit.Tag == u.Value.Unit.Tag && g.Workers.Count() < gasSaturationCount)));
+            var unsaturatedRefineries = refinereries.Where(u => BaseData.SelfBases.Any(b => b.GasMiningInfo.Any(g => g.ResourceUnit.VespeneContents > 0 && g.ResourceUnit.Tag == u.Value.Unit.Tag && g.Workers.Count() < gasSaturationCount)));
             var unsaturatedMinerals = BaseData.SelfBases.Any(b => b.ResourceCenter.BuildProgress == 1 && b.MineralMiningInfo.Any(m => m.Workers.Count() < 2));
 
             if (LowMineralsHighGas)
@@ -282,7 +303,7 @@ namespace Sharky.MicroTasks
 
             if (LowMineralsHighGas && unsaturatedMinerals)
             {
-                foreach (var selfBase in BaseData.SelfBases)
+                foreach (var selfBase in BaseData.SelfBases.Where(b => b.MineralMiningInfo.Any(m => m.Workers.Count() < 2)))
                 {
                     foreach (var info in selfBase.GasMiningInfo)
                     {
@@ -301,7 +322,7 @@ namespace Sharky.MicroTasks
             {
                 foreach (var selfBase in BaseData.SelfBases)
                 {
-                    foreach (var info in selfBase.GasMiningInfo)
+                    foreach (var info in selfBase.GasMiningInfo.Where(g => g.ResourceUnit.VespeneContents > 0))
                     {
                         if (info.Workers.Count() < gasSaturationCount)
                         {

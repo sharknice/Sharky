@@ -1,5 +1,4 @@
 ﻿using SC2APIProtocol;
-using Sharky.Managers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -24,8 +23,8 @@ namespace Sharky.MicroTasks
             var enemyDps = enemyGroup.Sum(e => e.SimulatedDamagePerSecond(new List<Attribute>(), true, true));
             var enemyHps = enemyGroup.Sum(e => e.SimulatedHealPerSecond);
             var enemyAttributes = enemyGroup.SelectMany(e => e.Attributes).Distinct();
-            var hasGround = enemyGroup.All(e => e.Unit.IsFlying);
-            var hasAir = enemyGroup.All(e => e.Unit.IsFlying);
+            var hasGround = enemyGroup.Any(e => !e.Unit.IsFlying);
+            var hasAir = enemyGroup.Any(e => e.Unit.IsFlying);
             var cloakable = enemyGroup.Any(e => e.UnitClassifications.Contains(UnitClassification.Cloakable));
 
             var counterGroup = new List<UnitCommander>();
@@ -37,19 +36,14 @@ namespace Sharky.MicroTasks
                     counterGroup.Add(commander);
 
                     var wwinnability = CalculateWinability(counterGroup, enemyAttributes, enemyHps, enemyHealth, enemyDps);
-                    if (wwinnability > 2)
+                    if (wwinnability > 1)
                     {
                         return counterGroup;
                     }
                 }
             }
 
-            var endWwinnability = CalculateWinability(counterGroup, enemyAttributes, enemyHps, enemyHealth, enemyDps);
-            if (endWwinnability > 1)
-            {
-                return counterGroup;
-            }
-            return counterGroup;
+            return new List<UnitCommander>();
         }
 
         float CalculateWinability(List<UnitCommander> counterGroup, IEnumerable<Attribute> enemyAttributes, float enemyHps, float enemyHealth, float enemyDps)

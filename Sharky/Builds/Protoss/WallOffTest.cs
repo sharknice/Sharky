@@ -44,7 +44,7 @@ namespace Sharky.Builds.Protoss
             {
                 MacroData.DesiredProductionCounts[UnitTypes.PROTOSS_GATEWAY] = 1;
             }
-            if (UnitCountService.Completed(UnitTypes.PROTOSS_GATEWAY) > 0)
+            if (UnitCountService.EquivalentTypeCompleted(UnitTypes.PROTOSS_GATEWAY) > 0)
             {
                 if (MacroData.DesiredTechCounts[UnitTypes.PROTOSS_CYBERNETICSCORE] < 1)
                 {

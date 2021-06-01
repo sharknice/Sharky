@@ -90,7 +90,7 @@ namespace Sharky.MicroControllers.Protoss
             var range = 4;
 
             var attacks = commander.UnitCalculation.NearbyEnemies.Where(u => u.Unit.DisplayType != DisplayType.Hidden && !u.Unit.IsFlying && !u.Attributes.Contains(SC2APIProtocol.Attribute.Massive) && !u.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && !u.Unit.BuffIds.Contains((uint)Buffs.GRAVITONBEAM)
-                && u.EnemiesInRange.Count() > 1 && u.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED || u.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANK || u.Unit.UnitType == (uint)UnitTypes.TERRAN_CYCLONE || u.Unit.UnitType == (uint)UnitTypes.PROTOSS_IMMORTAL && u.EnemiesInRange.Count() > 0);
+                && u.EnemiesInRange.Count() > 1 && u.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED || u.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANK || u.Unit.UnitType == (uint)UnitTypes.TERRAN_CYCLONE || u.Unit.UnitType == (uint)UnitTypes.PROTOSS_IMMORTAL || u.Unit.UnitType == (uint)UnitTypes.PROTOSS_DISRUPTOR && u.EnemiesInRange.Count() > 0);
 
             if (attacks.Count() > 0)
             {

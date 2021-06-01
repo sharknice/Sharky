@@ -47,6 +47,43 @@ namespace Sharky.MicroControllers.Protoss
                 return true;
             }
 
+            if (Merge(commander, frame, out action))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        bool Merge(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
+            if (commander.UnitCalculation.Unit.Energy > 40 || commander.UnitCalculation.NearbyEnemies.Count() == 0)
+            {
+                return false;
+            }
+
+            if (commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.MORPH_ARCHON))
+            {
+                return true;
+            }
+
+            var otherHighTemplar = commander.UnitCalculation.NearbyAllies.Where(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_HIGHTEMPLAR && a.Unit.Energy <= 40);
+
+            if (otherHighTemplar.Count() > 0)
+            {
+                var target = otherHighTemplar.OrderBy(o => Vector2.DistanceSquared(o.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+                if (target != null)
+                {
+                    var merge = commander.Merge(target.Unit.Tag);
+                    if (merge != null)
+                    {
+                        action = new List<Action> { merge };
+                    }
+                    return true;
+                }
+            }
+
             return false;
         }
 
@@ -59,7 +96,7 @@ namespace Sharky.MicroControllers.Protoss
             }
 
             var vector = commander.UnitCalculation.Position;
-            var enemiesInRange = commander.UnitCalculation.NearbyEnemies.Where(e => e.Unit.Energy > 1 && Vector2.DistanceSquared(e.Position, vector) < FeedbackRangeSquared).OrderByDescending(e => e.Unit.Energy);
+            var enemiesInRange = commander.UnitCalculation.NearbyEnemies.Where(e => e.Unit.Energy > 1 && e.Unit.DisplayType == DisplayType.Visible && Vector2.DistanceSquared(e.Position, vector) < FeedbackRangeSquared).OrderByDescending(e => e.Unit.Energy);
 
             var oneShotKill = enemiesInRange.Where(e => e.Unit.Energy * .5 > e.Unit.Health + e.Unit.Shield).FirstOrDefault();
             if (oneShotKill != null)
