@@ -133,28 +133,25 @@ namespace Sharky.Builds
             IEnumerable<UnitCommander> availableWorkers;
             if (workers == null)
             {
-                workers = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && !c.UnitCalculation.Unit.BuffIds.Any(b => SharkyUnitData.CarryingResourceBuffs.Contains((Buffs)b)));
-                availableWorkers = workers.Where(c => (c.UnitRole == UnitRole.None || c.UnitRole == UnitRole.Minerals) && !c.UnitCalculation.Unit.Orders.Any(o => SharkyUnitData.BuildingData.Values.Any(b => (uint)b.Ability == o.AbilityId)));
+                availableWorkers = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && !c.UnitCalculation.Unit.BuffIds.Any(b => SharkyUnitData.CarryingResourceBuffs.Contains((Buffs)b))).Where(c => (c.UnitRole == UnitRole.None || c.UnitRole == UnitRole.Minerals) && !c.UnitCalculation.Unit.Orders.Any(o => SharkyUnitData.BuildingData.Values.Any(b => (uint)b.Ability == o.AbilityId))).OrderBy(p => Vector2.DistanceSquared(p.UnitCalculation.Position, new Vector2(location.X, location.Y)));
             }
             else
             {
-                availableWorkers = workers.Where(c => !c.UnitCalculation.Unit.Orders.Any(o => SharkyUnitData.BuildingData.Values.Any(b => (uint)b.Ability == o.AbilityId)));
+                availableWorkers = workers.Where(c => !c.UnitCalculation.Unit.Orders.Any(o => SharkyUnitData.BuildingData.Values.Any(b => (uint)b.Ability == o.AbilityId))).OrderBy(p => Vector2.DistanceSquared(p.UnitCalculation.Position, new Vector2(location.X, location.Y)));
             }
 
-            var closestWorkers = availableWorkers.OrderBy(p => Vector2.DistanceSquared(p.UnitCalculation.Position, new Vector2(location.X, location.Y)));
-            if (closestWorkers.Count() == 0)
+            if (availableWorkers.Count() == 0)
             {
                 return null;
             }
             else
             {
-                var closest = closestWorkers.First();
+                var closest = availableWorkers.First();
                 var pos = closest.UnitCalculation.Position;
                 var distanceSquared = Vector2.DistanceSquared(pos, new Vector2(location.X, location.Y));
                 if (distanceSquared > 1000)
                 {
-                    closestWorkers = workers.OrderBy(p => Vector2.DistanceSquared(p.UnitCalculation.Position, new Vector2(location.X, location.Y)));
-                    pos = closestWorkers.First().UnitCalculation.Position;
+                    pos = availableWorkers.First().UnitCalculation.Position;
 
                     if (Vector2.DistanceSquared(new Vector2(pos.X, pos.Y), new Vector2(location.X, location.Y)) > distanceSquared)
                     {
@@ -162,11 +159,11 @@ namespace Sharky.Builds
                     }
                     else
                     {
-                        return closestWorkers.First();
+                        return availableWorkers.First();
                     }
                 }
             }
-            return closestWorkers.First();
+            return availableWorkers.First();
         }
     }
 }

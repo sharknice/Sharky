@@ -33,30 +33,52 @@ namespace Sharky.Builds.BuildingPlacement
             if (ignoreResourceProximity) { mineralProximity = 0; };
 
             if (wallOffType == WallOffType.Partial && MapData.PartialWallData == null) { return null; }
-            if (TargetingData.ForwardDefenseWallOffPoints == null) { return null; }
-            var wallPoint = TargetingData.ForwardDefenseWallOffPoints.FirstOrDefault();
-            if (wallPoint == null) { return null; }
-            if (Vector2.DistanceSquared(new Vector2(wallPoint.X, wallPoint.Y), new Vector2(target.X, target.Y)) > maxDistance * maxDistance) { return null; }
-            var baseLocation = BaseData.SelfBases.OrderBy(b => Vector2.DistanceSquared(new Vector2(b.Location.X, b.Location.Y), new Vector2(wallPoint.X, wallPoint.Y))).FirstOrDefault();
+
+            var baseLocation = GetBaseLocation();
             if (baseLocation == null) { return null; }
+
             WallData wallData = null;
             if (wallOffType == WallOffType.Partial)
             {
-                wallData = MapData.PartialWallData.FirstOrDefault(b => b.BasePosition.X == baseLocation.Location.X && b.BasePosition.Y == baseLocation.Location.Y);
+                wallData = MapData.PartialWallData.FirstOrDefault(b => b.BasePosition.X == baseLocation.X && b.BasePosition.Y == baseLocation.Y);
                 if (wallData == null) { return null; }
             }
 
             if (unitType == UnitTypes.PROTOSS_PYLON)
             {
-                return FindPylonPlacement(wallData, maxDistance, mineralProximity, wallOffType);
+                var placement = FindPylonPlacement(wallData, maxDistance, mineralProximity, wallOffType);
+                if (placement == null) { return null; }
+                if (Vector2.DistanceSquared(new Vector2(placement.X, placement.Y), new Vector2(target.X, target.Y)) > maxDistance * maxDistance) { return null; }
+                return placement;
             }
             else
             {
-                if (unitType == UnitTypes.PROTOSS_GATEWAY || unitType == UnitTypes.PROTOSS_CYBERNETICSCORE || unitType == UnitTypes.PROTOSS_SHIELDBATTERY || unitType == UnitTypes.PROTOSS_PHOTONCANNON)
-                {
-                    return FindProductionPlacement(wallData, size, maxDistance, mineralProximity, wallOffType);
-                }
-                return null;
+                var placement = FindProductionPlacement(wallData, size, maxDistance, mineralProximity, wallOffType);
+                if (placement == null) { return null; }
+                if (Vector2.DistanceSquared(new Vector2(placement.X, placement.Y), new Vector2(target.X, target.Y)) > maxDistance * maxDistance) { return null; }
+                return placement;
+            }
+        }
+
+        Point2D GetBaseLocation()
+        {
+            if (TargetingData.WallOffBasePosition == WallOffBasePosition.Main)
+            {
+                return TargetingData.EnemyMainBasePoint;
+            }
+            else if (TargetingData.WallOffBasePosition == WallOffBasePosition.Natural)
+            {
+                return TargetingData.NaturalBasePoint;
+            }
+            else
+            {
+                if (TargetingData.ForwardDefenseWallOffPoints == null) { return null; }
+                var wallPoint = TargetingData.ForwardDefenseWallOffPoints.FirstOrDefault();
+                if (wallPoint == null) { return null; }
+
+                var baseLocation = BaseData.SelfBases.OrderBy(b => Vector2.DistanceSquared(new Vector2(b.Location.X, b.Location.Y), new Vector2(wallPoint.X, wallPoint.Y))).FirstOrDefault();
+                if (baseLocation == null) { return null; }
+                return baseLocation.Location;
             }
         }
 

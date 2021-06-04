@@ -88,9 +88,8 @@ namespace Sharky.MicroTasks
             foreach (var commander in UnitCommanders)
             {
                 if (commander.UnitRole != UnitRole.Scout) { commander.UnitRole = UnitRole.Scout; }
-                if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker) || e.Attributes.Contains(Attribute.Structure)))
+                if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker) || e.Attributes.Contains(Attribute.Structure)) && commander.UnitCalculation.NearbyEnemies.Count() < 5)
                 {
-                    // TODO: attack scv that is building something, then any worker, then buildlng
                     var enemy = commander.UnitCalculation.NearbyEnemies.FirstOrDefault();
                     var action = IndividualMicroController.Attack(commander, new Point2D { X = enemy.Unit.Pos.X, Y = enemy.Unit.Pos.Y }, TargetingData.ForwardDefensePoint, null, frame);
                     if (action != null)

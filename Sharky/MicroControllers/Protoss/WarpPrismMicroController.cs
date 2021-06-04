@@ -462,7 +462,7 @@ namespace Sharky.MicroControllers.Protoss
                 return false;
             }
 
-            var nexuses = ActiveUnitData.SelfUnits.Where(u => u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS && u.Value.Unit.BuildProgress == 1 && u.Value.Unit.AssignedHarvesters > 0 && u.Value.Unit.IdealHarvesters > 0).OrderBy(u => u.Value.Unit.AssignedHarvesters / (float)u.Value.Unit.IdealHarvesters).ThenBy(u => DistanceSquared(commander.UnitCalculation, u.Value));
+            var nexuses = BaseData.SelfBases.Where(u => u.ResourceCenter.BuildProgress == 1 && u.MineralMiningInfo.Count() > 0).OrderBy(u => u.MineralMiningInfo.Sum(m => m.Workers.Count) / u.MineralMiningInfo.Count()).ThenBy(u => Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(u.Location.X, u.Location.Y)));
 
             //foreach (var nexusBase in BaseData.Bases)
             //{
@@ -491,16 +491,16 @@ namespace Sharky.MicroControllers.Protoss
             var otherWarpPrisms = ActiveUnitData.SelfUnits.Where(u => u.Value.Unit.Tag != commander.UnitCalculation.Unit.Tag && (u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISM || u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISMPHASING));
             foreach (var nexus in nexuses)
             {
-                if (!otherWarpPrisms.Any(o => Vector2.DistanceSquared(o.Value.Position, nexus.Value.Position) < 25))
+                if (!otherWarpPrisms.Any(o => Vector2.DistanceSquared(o.Value.Position, new Vector2(nexus.Location.X, nexus.Location.Y)) < 25))
                 {
-                    var miningLocation = GetMiningSpot(nexus.Value);
+                    var miningLocation = GetMiningSpot(nexus);
                     if (miningLocation != null)
                     {
                         //DrawSphere(SC2Util.Point(miningLocation.X, miningLocation.Y, 11));
 
                         if (Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(miningLocation.X, miningLocation.Y)) < .5)
                         {
-                            var probe = commander.UnitCalculation.NearbyAllies.Where(a => a.Unit.BuffIds.Any(b => SharkyUnitData.CarryingMineralBuffs.Contains((Buffs)b)) && InRange(a.Position, commander.UnitCalculation.Position, PickupRange) && !InRange(a.Position, nexus.Value.Position, nexus.Value.Unit.Radius + 1)).OrderByDescending(u => DistanceSquared(nexus.Value, u)).FirstOrDefault();
+                            var probe = commander.UnitCalculation.NearbyAllies.Where(a => a.Unit.BuffIds.Any(b => SharkyUnitData.CarryingMineralBuffs.Contains((Buffs)b)) && InRange(a.Position, commander.UnitCalculation.Position, PickupRange) && !InRange(a.Position, new Vector2(nexus.Location.X, nexus.Location.Y), nexus.ResourceCenter.Radius + 1)).OrderByDescending(u => Vector2.DistanceSquared(new Vector2(nexus.Location.X, nexus.Location.Y), u.Position)).FirstOrDefault();
                             if (probe != null)
                             {
                                 action = commander.Order(frame, Abilities.LOAD, null, probe.Unit.Tag);
@@ -516,20 +516,18 @@ namespace Sharky.MicroControllers.Protoss
             return false;
         }
 
-        Point2D GetMiningSpot(UnitCalculation nexus)
+        Point2D GetMiningSpot(BaseLocation nexusBase)
         {
-            var nexusPoint = new Point2D { X = nexus.Unit.Pos.X, Y = nexus.Unit.Pos.Y };
-            var nexusBase = BaseData.BaseLocations.Where(b => b.Location.X == nexusPoint.X && b.Location.Y == nexusPoint.Y).FirstOrDefault();
             if (nexusBase == null)
             {
-                return nexusPoint;
+                return null;
             }
             var mineralPos = nexusBase.MineralLineLocation;
 
-            var angle = Math.Atan2(nexusPoint.Y - mineralPos.Y, mineralPos.X - nexusPoint.X);
-            var x = nexus.Unit.Radius * Math.Cos(angle);
-            var y = nexus.Unit.Radius * Math.Sin(angle);
-            return new Point2D { X = nexusPoint.X + (float)x, Y = nexusPoint.Y - (float)y };
+            var angle = Math.Atan2(nexusBase.Location.Y - mineralPos.Y, mineralPos.X - nexusBase.Location.X);
+            var x = nexusBase.ResourceCenter.Radius * Math.Cos(angle);
+            var y = nexusBase.ResourceCenter.Radius * Math.Sin(angle);
+            return new Point2D { X = nexusBase.Location.X + (float)x, Y = nexusBase.Location.Y - (float)y };
         }
     }
 }

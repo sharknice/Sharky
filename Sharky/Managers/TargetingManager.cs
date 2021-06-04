@@ -42,6 +42,7 @@ namespace Sharky.Managers
             baseCount = 0;
             LastUpdateFrame = -10000;
             TargetingData.ChokePoints = new ChokePoints();
+            TargetingData.WallOffBasePosition = WallOffBasePosition.Current;
         }
 
         public override void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)
@@ -84,6 +85,11 @@ namespace Sharky.Managers
                 }
 
                 TargetingData.SelfMainBasePoint = new Point2D { X = unit.Pos.X, Y = unit.Pos.Y };
+                var naturalBaseLocation = BaseData.BaseLocations.Skip(1).Take(1).FirstOrDefault();
+                if (naturalBaseLocation != null)
+                {
+                    TargetingData.NaturalBasePoint = naturalBaseLocation.Location;
+                }
                 return;
             }
         }
