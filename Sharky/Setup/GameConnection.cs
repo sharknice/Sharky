@@ -187,17 +187,34 @@ namespace Sharky
 
             var start = true;
 
-            var observationRequest = new Request();
-            observationRequest.Observation = new RequestObservation();
+            var observationRequest = new Request
+            {
+                Observation = new RequestObservation()
+            };
+
+            var stepRequest = new Request
+            {
+                Step = new RequestStep { Count = 1 }
+            };
+
+            double totalTime = 0;
+            int frames = 0;
+
+            double specificTime = 0;
+            int actionCount = 0;
 
             while (true)
             {
-                //var beginTotal = DateTime.UtcNow;
+                var beginTotal = DateTime.UtcNow;
 
-                //var begin = DateTime.UtcNow;
+                if (!start)
+                {
+                    await Proxy.SendRequest(stepRequest);
+                }
+                var begin = DateTime.UtcNow;
                 var response = await Proxy.SendRequest(observationRequest);
-                //var endTime = (DateTime.UtcNow - begin).TotalMilliseconds;
-                //Debug.WriteLine($"ObserverationRequest: {endTime}");
+
+                specificTime += (DateTime.UtcNow - begin).TotalMilliseconds;
 
                 var observation = response.Observation;
 
@@ -218,32 +235,21 @@ namespace Sharky
                     bot.OnStart(gameInfoResponse.GameInfo, dataResponse.Data, pingResponse, observation, playerId, opponentID);
                 }
 
-                //begin = DateTime.UtcNow;
                 var actions = bot.OnFrame(observation);
-                //endTime = (DateTime.UtcNow - begin).TotalMilliseconds;
-                //Debug.WriteLine($"OnFrame: {endTime}");
 
-                //begin = DateTime.UtcNow;
                 var actionRequest = new Request();
                 actionRequest.Action = new RequestAction();
                 actionRequest.Action.Actions.AddRange(actions);
+               
                 if (actionRequest.Action.Actions.Count > 0)
                 {
                     await Proxy.SendRequest(actionRequest);
+                    actionCount += actionRequest.Action.Actions.Count;
                 }
-                //endTime = (DateTime.UtcNow - begin).TotalMilliseconds;
-                //Debug.WriteLine($"SendActions: {endTime}");
 
-                //begin = DateTime.UtcNow;
-                var stepRequest = new Request();
-                stepRequest.Step = new RequestStep();
-                stepRequest.Step.Count = 1;
-                await Proxy.SendRequest(stepRequest);
-                //endTime = (DateTime.UtcNow - begin).TotalMilliseconds;
-                //Debug.WriteLine($"SendStepRequest: {endTime}");
-
-                //endTime = (DateTime.UtcNow - beginTotal).TotalMilliseconds;
-                //Debug.WriteLine($"{endTime}");
+                var frameTotal = (DateTime.UtcNow - beginTotal).TotalMilliseconds;
+                totalTime += frameTotal;
+                frames++;
             }
         }
         

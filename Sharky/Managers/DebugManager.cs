@@ -88,6 +88,15 @@ namespace Sharky.Managers
                     DebugService.SpawnUnit(unitType, new Point2D { X = camera.X, Y = camera.Y }, enemyId);
                     return;
                 }
+
+                match = Regex.Match(chatReceived.Message.ToLower(), @"camera (\d+\.?\d*) (\d+\.?\d*)");
+                if (match.Success)
+                {
+                    var x = float.Parse(match.Groups[1].Value);
+                    var y = float.Parse(match.Groups[2].Value);
+                    DebugService.SetCamera(new Point { X = x, Y = y, Z = camera.Z });
+                    return;
+                }
             }
         }
     }

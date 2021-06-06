@@ -103,5 +103,21 @@ namespace Sharky
                 }
             });
         }
+
+        public void SetCamera(Point location)
+        {
+            var action = new SC2APIProtocol.Action
+            {
+                ActionRaw = new ActionRaw
+                {
+                    CameraMove = new ActionRawCameraMove()
+                    {
+                        CenterWorldSpace = location
+                    }
+                }
+            };
+            SpawnRequest.Action = new RequestAction();
+            SpawnRequest.Action.Actions.Add(action);
+        }
     }
 }

@@ -105,7 +105,7 @@ namespace Sharky.Builds.BuildingPlacement
                 {
                     return pylon;
                 }
-            }
+            }            
             return null;
         }
 

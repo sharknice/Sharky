@@ -103,18 +103,20 @@ namespace Sharky.Managers
 
         private void DrawGrid(Point camera)
         {
+            var height = 12;
+
             DebugService.DrawText($"Point: {camera.X},{camera.Y}");
-            DebugService.DrawSphere(new Point { X = camera.X, Y = camera.Y, Z = 13 }, .25f);
+            DebugService.DrawSphere(new Point { X = camera.X, Y = camera.Y, Z = height }, .25f);
+            DebugService.DrawLine(new Point { X = camera.X, Y = camera.Y, Z = height }, new Point { X = camera.X, Y = camera.Y, Z = 0 }, new Color { R = 255, G = 255, B = 255 });
 
             for (int x = -5; x <= 5; x++)
             {
                 for (int y = -5; y <= 5; y++)
                 {
-                    var point = new Point { X = (int)camera.X + x, Y = (int)camera.Y + y, Z = 14 };
+                    var point = new Point { X = (int)camera.X + x, Y = (int)camera.Y + y, Z = height + 1 };
                     var color = new Color { R = 255, G = 255, B = 255 };
                     if (point.X + 1 < MapData.MapWidth && point.Y + 1 < MapData.MapHeight && point.X > 0 && point.Y > 0)
-                    {
-                        var height = 13;
+                    {        
                         if (!MapData.Map[(int)point.X][(int)point.Y].CurrentlyBuildable)
                         {
                             color = new Color { R = 255, G = 0, B = 0 };

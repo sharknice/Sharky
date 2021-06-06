@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
 using System.Net.WebSockets;
 using System.Threading;
@@ -42,24 +41,21 @@ namespace Sharky
 
         async Task<Response> Receive()
         {
-            var begin = DateTime.UtcNow;
-
             var buffer = new ArraySegment<byte>(new byte[1024]);
             var ms = new MemoryStream();
 
             var result = await ClientWebSocket.ReceiveAsync(buffer, CancellationToken.None);
+
             ms.Write(buffer.Array, buffer.Offset, result.Count);
+
             var count = 0;
             while (!result.EndOfMessage)
             {
                 result = await ClientWebSocket.ReceiveAsync(buffer, CancellationToken.None);
                 ms.Write(buffer.Array, buffer.Offset, result.Count);
+
                 count++;
             }
-
-            var endTime = (DateTime.UtcNow - begin).TotalMilliseconds;
-            Debug.WriteLine($"receive {count}: {endTime}");
-            begin = DateTime.UtcNow;
 
             ms.Seek(0, SeekOrigin.Begin);
             var response = Response.Parser.ParseFrom(ms);
