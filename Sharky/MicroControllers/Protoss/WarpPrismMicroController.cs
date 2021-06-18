@@ -506,7 +506,13 @@ namespace Sharky.MicroControllers.Protoss
                                 action = commander.Order(frame, Abilities.LOAD, null, probe.Unit.Tag);
                                 return true;
                             }
+                            else
+                            {
+                                action = commander.Order(frame, Abilities.UNLOADALLAT_WARPPRISM, miningLocation);
+                                return true;
+                            }
                         }
+
                         action = commander.Order(frame, Abilities.MOVE, miningLocation);
                         return true;
                     }

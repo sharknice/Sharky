@@ -27,7 +27,7 @@ namespace Sharky
         Dictionary<Abilities, int> AbilityOrderTimes;
         public Dictionary<ulong, int> LoadTimes;
 
-        int SpamFrames = 10;
+        int SpamFrames = 100;
 
         public UnitCommander(UnitCalculation unitCalculation)
         {

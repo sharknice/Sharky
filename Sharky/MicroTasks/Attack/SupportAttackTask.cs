@@ -1,4 +1,5 @@
-﻿using Sharky.Chat;
+﻿using Sharky;
+using Sharky.Chat;
 using Sharky.MicroControllers;
 using Sharky.MicroTasks.Attack;
 using System.Collections.Concurrent;
@@ -22,6 +23,8 @@ namespace Sharky.MicroTasks.Proxy
         ChatService ChatService;
         TargetingService TargetingService;
         DefenseService DefenseService;
+        DistractionSquadService DistractionSquadService;
+        EnemyCleanupService EnemyCleanupService;
 
         ArmySplitter ArmySplitter;
 
@@ -31,7 +34,7 @@ namespace Sharky.MicroTasks.Proxy
 
         public SupportAttackTask(AttackData attackData, TargetingData targetingData, ActiveUnitData activeUnitData, MicroTaskData microTaskData, 
             IMicroController microController, 
-            DebugService debugService, ChatService chatService, TargetingService targetingService, DefenseService defenseService, 
+            DebugService debugService, ChatService chatService, TargetingService targetingService, DefenseService defenseService, DistractionSquadService distractionSquadService, EnemyCleanupService enemyCleanupService,
             ArmySplitter armySplitter,
             List<UnitTypes> mainAttackerTypes, 
             float priority, bool enabled = true)
@@ -47,6 +50,8 @@ namespace Sharky.MicroTasks.Proxy
             ChatService = chatService;
             TargetingService = targetingService;
             DefenseService = defenseService;
+            DistractionSquadService = distractionSquadService;
+            EnemyCleanupService = enemyCleanupService;
 
             ArmySplitter = armySplitter;
 
@@ -81,7 +86,21 @@ namespace Sharky.MicroTasks.Proxy
             stopwatch.Start();
 
             var mainUnits = UnitCommanders.Where(c => MainAttackers.Contains((UnitTypes)c.UnitCalculation.Unit.UnitType));
-            var supportUnits = UnitCommanders.Where(c => !MainAttackers.Contains((UnitTypes)c.UnitCalculation.Unit.UnitType));
+
+            var otherUnits = UnitCommanders.Where(c => !MainAttackers.Contains((UnitTypes)c.UnitCalculation.Unit.UnitType));
+            DistractionSquadService.UpdateDistractionSquad(otherUnits);
+
+            DistractionSquadService.Enabled = UnitCommanders.Count() > 25;
+
+            IEnumerable<UnitCommander> supportUnits;
+            if (DistractionSquadService.DistractionSquadState == DistractionSquadState.NotDistracting)
+            {
+                supportUnits = otherUnits;
+            }
+            else
+            {
+                supportUnits = otherUnits.Where(c => !DistractionSquadService.DistractionSquad.Any(d => d.UnitCalculation.Unit.Tag == c.UnitCalculation.Unit.Tag));
+            }
 
             var hiddenBase = TargetingData.HiddenEnemyBase;
             if (mainUnits.Count() > 0)
@@ -90,7 +109,7 @@ namespace Sharky.MicroTasks.Proxy
             }
             else
             {
-                AttackData.ArmyPoint = TargetingService.GetArmyPoint(UnitCommanders);
+                AttackData.ArmyPoint = TargetingService.GetArmyPoint(supportUnits);
             }
             TargetingData.AttackPoint = TargetingService.UpdateAttackPoint(AttackData.ArmyPoint, TargetingData.AttackPoint);
 
@@ -106,7 +125,7 @@ namespace Sharky.MicroTasks.Proxy
                 }
                 if (closerEnemies.Count() > 0)
                 {
-                    actions = ArmySplitter.SplitArmy(frame, closerEnemies, TargetingData.AttackPoint, UnitCommanders, false);
+                    actions = ArmySplitter.SplitArmy(frame, closerEnemies, TargetingData.AttackPoint, mainUnits.Concat(supportUnits), false);
                     stopwatch.Stop();
                     lastFrameTime = stopwatch.ElapsedMilliseconds;
                     return actions;
@@ -129,6 +148,8 @@ namespace Sharky.MicroTasks.Proxy
                 }
             }
 
+            actions.AddRange(DistractionSquadService.TakeAction(frame));
+
             if (mainUnits.Count() > 0)
             {
                 if (AttackData.Attacking)
@@ -138,7 +159,16 @@ namespace Sharky.MicroTasks.Proxy
                 }
                 else
                 {
-                    actions.AddRange(MicroController.Retreat(UnitCommanders, TargetingData.ForwardDefensePoint, null, frame));
+                    var cleanupActions = EnemyCleanupService.CleanupEnemies(mainUnits.Concat(supportUnits), TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame);
+                    if (cleanupActions != null)
+                    {
+                        actions.AddRange(cleanupActions);
+                    }
+                    else
+                    {
+                        actions.AddRange(MicroController.Retreat(mainUnits, TargetingData.ForwardDefensePoint, null, frame));
+                        actions.AddRange(MicroController.Retreat(supportUnits, TargetingData.ForwardDefensePoint, null, frame));
+                    }
                 }
             }
             else
@@ -149,7 +179,15 @@ namespace Sharky.MicroTasks.Proxy
                 }
                 else
                 {
-                    actions.AddRange(MicroController.Retreat(supportUnits, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame));
+                    var cleanupActions = EnemyCleanupService.CleanupEnemies(supportUnits, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame);
+                    if (cleanupActions != null)
+                    {
+                        actions.AddRange(cleanupActions);
+                    }
+                    else
+                    {
+                        actions.AddRange(MicroController.Retreat(supportUnits, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame));
+                    }
                 }
             }
 

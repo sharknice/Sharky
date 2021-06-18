@@ -21,8 +21,8 @@ namespace Sharky.Managers
         private int LastBuildingCount;
         private int LastVisibleEnemyUnitCount;
 
-        private readonly int MillisecondsPerUpdate;
-        private double MillisecondsUntilUpdate;
+        private int LastUpdateFrame;
+        private readonly int FramesPerUpdate;
 
         public MapManager(MapData mapData, ActiveUnitData activeUnitData, SharkyOptions sharkyOptions, SharkyUnitData sharkyUnitData, DebugService debugService, WallDataService wallDataService)
         {
@@ -35,8 +35,8 @@ namespace Sharky.Managers
 
             LastBuildingCount = 0;
             LastVisibleEnemyUnitCount = 0;
-            MillisecondsPerUpdate = 500;
-            MillisecondsUntilUpdate = 0;
+            FramesPerUpdate = 5;
+            LastUpdateFrame = -100;
         }
 
         public override void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)
@@ -55,21 +55,21 @@ namespace Sharky.Managers
                     var walkable = GetDataValueBit(pathingGrid, x, y);
                     var height = GetDataValueByte(heightGrid, x, y);
                     var placeable = GetDataValueBit(placementGrid, x, y);
-                    row[y] = new MapCell { X = x, Y = y, Walkable = walkable, TerrainHeight = height, Buildable = placeable, HasCreep = false, CurrentlyBuildable = placeable, EnemyAirDpsInRange = 0, EnemyGroundDpsInRange = 0, InEnemyVision = false, InSelfVision = false, InEnemyDetection = false, Visibility = 0, LastFrameVisibility = 0, NumberOfAllies = 0, NumberOfEnemies = 0, PoweredBySelfPylon = false, SelfAirDpsInRange = 0, SelfGroundDpsInRange = 0, LastFrameAlliesTouched = 0 };
+                    row[y] = new MapCell { X = x, Y = y, Walkable = walkable, TerrainHeight = height, Buildable = placeable, HasCreep = false, CurrentlyBuildable = placeable, EnemyAirDpsInRange = 0, EnemyGroundDpsInRange = 0, InEnemyVision = false, InSelfVision = false, InEnemyDetection = false, Visibility = 0, LastFrameVisibility = 0, NumberOfAllies = 0, NumberOfEnemies = 0, PoweredBySelfPylon = false, SelfAirDpsInRange = 0, SelfGroundDpsInRange = 0, LastFrameAlliesTouched = 0, PathBlocked = false };
                 }
                 MapData.Map[x] = row;
             }
             MapData.PartialWallData = WallDataService.GetPartialWallData(gameInfo.MapName);
             MapData.BlockWallData = WallDataService.GetBlockWallData(gameInfo.MapName);
+            MapData.MapName = gameInfo.MapName;
         }
 
         public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
         {
             //DrawGrid(observation.Observation.RawData.Player.Camera);
 
-            MillisecondsUntilUpdate -= (1 / SharkyOptions.FramesPerSecond) * 1000;
-            if (MillisecondsUntilUpdate > 0) { return null; }
-            MillisecondsUntilUpdate = MillisecondsPerUpdate;
+            if (FramesPerUpdate > observation.Observation.GameLoop - LastUpdateFrame) { return null; }
+            LastUpdateFrame = (int)observation.Observation.GameLoop;
 
             UpdateVisibility(observation.Observation.RawData.MapState.Visibility, (int)observation.Observation.GameLoop);
             UpdateCreep(observation.Observation.RawData.MapState.Creep);
@@ -77,6 +77,7 @@ namespace Sharky.Managers
             UpdateInEnemyDetection();
             UpdateInEnemyVision();
             UpdateNumberOfAllies((int)observation.Observation.GameLoop);
+            UpdatePathBlocked();
 
             //var buildings = shark.EnemyAttacks.Where(e => UnitTypes.BuildingTypes.Contains(e.Value.Unit.UnitType)).Select(e => e.Value).Concat(shark.AllyAttacks.Where(e => UnitTypes.BuildingTypes.Contains(e.Value.Unit.UnitType)).Select(e => e.Value));
             //var currentBuildingCount = buildings.Count();
@@ -178,6 +179,44 @@ namespace Sharky.Managers
                     {
                         MapData.Map[(int)node.X][(int)node.Y].EnemyGroundDpsInRange += enemy.Value.Dps;
                     }
+                }
+            }
+        }
+
+        void UpdatePathBlocked()
+        {
+            for (var x = 0; x < MapData.MapWidth; x++)
+            {
+                for (var y = 0; y < MapData.MapHeight; y++)
+                {
+                    MapData.Map[x][y].PathBlocked = false;
+                }
+            }
+
+            foreach (var enemy in ActiveUnitData.EnemyUnits.Where(e => !e.Value.Unit.IsFlying && e.Value.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && e.Value.Unit.UnitType != (uint)UnitTypes.TERRAN_SUPPLYDEPOTLOWERED))
+            {
+                var nodes = GetNodesInRange(enemy.Value.Unit.Pos, enemy.Value.Unit.Radius, MapData.MapWidth, MapData.MapHeight);
+                foreach (var node in nodes)
+                {
+                    MapData.Map[(int)node.X][(int)node.Y].PathBlocked = true;
+                }
+            }
+
+            foreach (var enemy in ActiveUnitData.SelfUnits.Where(e => !e.Value.Unit.IsFlying && e.Value.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && e.Value.Unit.UnitType != (uint)UnitTypes.TERRAN_SUPPLYDEPOTLOWERED))
+            {
+                var nodes = GetNodesInRange(enemy.Value.Unit.Pos, enemy.Value.Unit.Radius, MapData.MapWidth, MapData.MapHeight);
+                foreach (var node in nodes)
+                {
+                    MapData.Map[(int)node.X][(int)node.Y].PathBlocked = true;
+                }
+            }
+
+            foreach (var enemy in ActiveUnitData.NeutralUnits.Where(e => !e.Value.Unit.IsFlying && e.Value.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && e.Value.Unit.UnitType != (uint)UnitTypes.TERRAN_SUPPLYDEPOTLOWERED))
+            {
+                var nodes = GetNodesInRange(enemy.Value.Unit.Pos, enemy.Value.Unit.Radius, MapData.MapWidth, MapData.MapHeight);
+                foreach (var node in nodes)
+                {
+                    MapData.Map[(int)node.X][(int)node.Y].PathBlocked = true;
                 }
             }
         }

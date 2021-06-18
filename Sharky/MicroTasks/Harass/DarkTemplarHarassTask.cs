@@ -60,7 +60,15 @@ namespace Sharky.MicroTasks.Harass
             {
                 foreach (var commander in harassInfo.Harassers)
                 {           
-                    if (Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(harassInfo.BaseLocation.MineralLineLocation.X, harassInfo.BaseLocation.MineralLineLocation.Y)) < 100)
+                    if (commander.UnitCalculation.Unit.Shield == commander.UnitCalculation.Unit.ShieldMax && !MapDataService.InEnemyDetection(commander.UnitCalculation.Unit.Pos) && commander.UnitCalculation.NearbyEnemies.Count(e => e.UnitClassifications.Contains(UnitClassification.Worker) && !MapDataService.InEnemyDetection(e.Unit.Pos)) > 0)
+                    {
+                        var action = DarkTemplarMicroController.HarassWorkers(commander, harassInfo.BaseLocation.MineralLineLocation, TargetingData.ForwardDefensePoint, frame);
+                        if (action != null)
+                        {
+                            commands.AddRange(action);
+                        }
+                    }
+                    else if (Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(harassInfo.BaseLocation.MineralLineLocation.X, harassInfo.BaseLocation.MineralLineLocation.Y)) < 100)
                     {
                         var action = DarkTemplarMicroController.HarassWorkers(commander, harassInfo.BaseLocation.MineralLineLocation, TargetingData.ForwardDefensePoint, frame);
                         if (action != null)

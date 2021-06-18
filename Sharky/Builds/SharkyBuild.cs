@@ -2,7 +2,6 @@
 using Sharky.Chat;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Sharky.Builds
 {

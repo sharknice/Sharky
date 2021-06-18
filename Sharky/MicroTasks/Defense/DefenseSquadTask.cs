@@ -1,5 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.MicroControllers;
+﻿using Sharky.MicroControllers;
 using Sharky.MicroTasks.Attack;
 using System.Collections.Concurrent;
 using System.Collections.Generic;

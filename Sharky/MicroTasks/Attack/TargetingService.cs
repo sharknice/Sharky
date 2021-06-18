@@ -83,7 +83,7 @@ namespace Sharky.MicroTasks.Attack
             }
             else
             {
-                return TargetingData.AttackPoint;
+                return TargetingData.ForwardDefensePoint;
             }
         }
     }

@@ -86,5 +86,18 @@ namespace Sharky.MicroControllers.Protoss
             }
             return false;
         }
+
+        public override List<SC2APIProtocol.Action> Retreat(UnitCommander commander, Point2D defensivePoint, Point2D groupCenter, int frame)
+        {
+            if (commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.VOIDRAYSWARMDAMAGEBOOST))
+            {
+                var action = commander.Order(frame, Abilities.CANCEL);
+                if (action != null)
+                {
+                    return action;
+                }
+            }
+            return base.Retreat(commander, defensivePoint, groupCenter, frame);
+        }
     }
 }

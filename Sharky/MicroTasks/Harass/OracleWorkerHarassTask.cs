@@ -202,7 +202,7 @@ namespace Sharky.MicroTasks
             {
                 return false;
             }
-            if (commander.UnitCalculation.Unit.Shield <= 5)
+            if (commander.UnitCalculation.Unit.Shield <= 5 || (commander.UnitCalculation.Unit.Shield < commander.UnitCalculation.Unit.ShieldMax && commander.UnitCalculation.NearbyEnemies.Where(e => !e.Attributes.Contains(Attribute.Structure) && e.DamageAir).Sum(e => e.Damage) * 3 > commander.UnitCalculation.Unit.Shield))
             {
                 return false;
             }

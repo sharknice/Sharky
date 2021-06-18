@@ -253,7 +253,7 @@ namespace Sharky.Managers
                     {
                         var priorityCalculation = TargetPriorityService.CalculateTargetPriority(selfUnit.Value, frame);
                         selfUnit.Value.TargetPriorityCalculation = priorityCalculation;
-                        foreach (var nearbyUnit in selfUnit.Value.NearbyAllies)
+                        foreach (var nearbyUnit in selfUnit.Value.NearbyAllies.Where(a => a.NearbyEnemies.Count() == selfUnit.Value.NearbyAllies.Count()))
                         {
                             nearbyUnit.TargetPriorityCalculation = priorityCalculation;
                         }

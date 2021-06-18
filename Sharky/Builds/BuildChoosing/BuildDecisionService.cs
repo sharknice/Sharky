@@ -2,6 +2,7 @@
 using Sharky.Chat;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Sharky.Builds.BuildChoosing
@@ -104,6 +105,7 @@ namespace Sharky.Builds.BuildChoosing
                 {
                     if (GetSequenceRecord(mapGames, buildSequence).Losses.Count() > 0) { continue; }
                     var buildRecord = GetSequenceRecord(enemyBot.Games.Where(g => g.EnemyRace == enemyRace), buildSequence);
+                    Debug.WriteLine($"{string.Join(" ", buildSequence)} {buildRecord.Wins.Count()}-{buildRecord.Ties.Count()}-{buildRecord.Losses.Count()}");
                     if (BetterBuild(bestRecord, buildRecord))
                     {
                         bestBuildSequence = buildSequence;

@@ -135,7 +135,7 @@ namespace Sharky.MicroTasks
                             var distanceSquared = Vector2.DistanceSquared(baseVector, workerVector);
                             if (distanceSquared > 25 || distanceSquared < 10)
                             {
-                                var action = worker.Order(frame, Abilities.HARVEST_RETURN, null, 0, false);
+                                var action = worker.Order(frame, Abilities.HARVEST_RETURN, null, 0, true);
                                 if (action != null)
                                 {
                                     actions.AddRange(action);
@@ -216,7 +216,7 @@ namespace Sharky.MicroTasks
                             var distanceSquared = Vector2.DistanceSquared(baseVector, workerVector);
                             if (distanceSquared > 25 || distanceSquared < 10)
                             {
-                                var action = worker.Order(frame, Abilities.HARVEST_RETURN, null, 0, false);
+                                var action = worker.Order(frame, Abilities.HARVEST_RETURN, null, 0, true);
                                 if (action != null)
                                 {
                                     actions.AddRange(action);

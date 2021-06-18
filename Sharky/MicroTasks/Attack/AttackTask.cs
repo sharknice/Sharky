@@ -18,12 +18,13 @@ namespace Sharky.MicroTasks
         AttackData AttackData;
         TargetingService TargetingService;
         MicroTaskData MicroTaskData;
+        EnemyCleanupService EnemyCleanupService;
 
         ArmySplitter ArmySplitter;
 
         float lastFrameTime;
 
-        public AttackTask(IMicroController microController, TargetingData targetingData, ActiveUnitData activeUnitData, DefenseService defenseService, MacroData macroData, AttackData attackData, TargetingService targetingService, MicroTaskData microTaskData, ArmySplitter armySplitter, float priority)
+        public AttackTask(IMicroController microController, TargetingData targetingData, ActiveUnitData activeUnitData, DefenseService defenseService, MacroData macroData, AttackData attackData, TargetingService targetingService, MicroTaskData microTaskData, ArmySplitter armySplitter, EnemyCleanupService enemyCleanupService, float priority)
         {
             MicroController = microController;
             TargetingData = targetingData;
@@ -34,6 +35,7 @@ namespace Sharky.MicroTasks
             TargetingService = targetingService;
             MicroTaskData = microTaskData;
             ArmySplitter = armySplitter;
+            EnemyCleanupService = enemyCleanupService;
             Priority = priority;
 
             UnitCommanders = new List<UnitCommander>();
@@ -129,7 +131,16 @@ namespace Sharky.MicroTasks
             }
             else
             {
-                actions = MicroController.Retreat(UnitCommanders, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame);
+                var cleanupActions = EnemyCleanupService.CleanupEnemies(UnitCommanders, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame);
+                if (cleanupActions != null)
+                {
+                    actions = cleanupActions;
+                }
+                else
+                {
+                    actions = MicroController.Retreat(UnitCommanders, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame);
+                }
+
                 stopwatch.Stop();
                 lastFrameTime = stopwatch.ElapsedMilliseconds;
                 return actions;

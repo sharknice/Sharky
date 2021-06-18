@@ -31,7 +31,7 @@ namespace Sharky.MicroTasks.Attack
             LastSplitFrame = -1000;
         }
 
-        public List<SC2APIProtocol.Action> SplitArmy(int frame, IEnumerable<UnitCalculation> closerEnemies, Point2D attackPoint, List<UnitCommander> unitCommanders, bool defendToDeath)
+        public List<SC2APIProtocol.Action> SplitArmy(int frame, IEnumerable<UnitCalculation> closerEnemies, Point2D attackPoint, IEnumerable<UnitCommander> unitCommanders, bool defendToDeath)
         {
             var actions = new List<SC2APIProtocol.Action>();
 
@@ -80,7 +80,7 @@ namespace Sharky.MicroTasks.Attack
             return actions;
         }
 
-        void ReSplitArmy(int frame, IEnumerable<UnitCalculation> closerEnemies, Point2D attackPoint, List<UnitCommander> unitCommanders)
+        void ReSplitArmy(int frame, IEnumerable<UnitCalculation> closerEnemies, Point2D attackPoint, IEnumerable<UnitCommander> unitCommanders)
         {
             ArmySplits = new List<ArmySplits>();
             var enemyGroups = DefenseService.GetEnemyGroups(closerEnemies);

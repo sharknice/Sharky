@@ -1,7 +1,6 @@
 ﻿using SC2APIProtocol;
 using Sharky.Builds.BuildChoosing;
 using Sharky.Chat;
-using Sharky.Managers;
 using Sharky.MicroTasks;
 using System.Collections.Generic;
 

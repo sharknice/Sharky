@@ -85,6 +85,57 @@ namespace Sharky
             return count;
         }
 
+        public int EquivalentEnemyTypeCount(UnitTypes unitType)
+        {
+            var count = EnemyCount(unitType);
+            if (unitType == UnitTypes.PROTOSS_GATEWAY)
+            {
+                count += EnemyCount(UnitTypes.PROTOSS_WARPGATE);
+            }
+            else if (unitType == UnitTypes.ZERG_HATCHERY)
+            {
+                count += EnemyCount(UnitTypes.ZERG_HIVE);
+                count += EnemyCount(UnitTypes.ZERG_LAIR);
+            }
+            else if (unitType == UnitTypes.ZERG_LAIR)
+            {
+                count += EnemyCount(UnitTypes.ZERG_HIVE);
+            }
+            else if (unitType == UnitTypes.TERRAN_COMMANDCENTER)
+            {
+                count += EnemyCount(UnitTypes.TERRAN_COMMANDCENTERFLYING);
+                count += EnemyCount(UnitTypes.TERRAN_ORBITALCOMMAND);
+                count += EnemyCount(UnitTypes.TERRAN_ORBITALCOMMANDFLYING);
+                count += EnemyCount(UnitTypes.TERRAN_PLANETARYFORTRESS);
+            }
+            else if (unitType == UnitTypes.TERRAN_ORBITALCOMMAND)
+            {
+                count += EnemyCount(UnitTypes.TERRAN_ORBITALCOMMANDFLYING);
+            }
+            else if (unitType == UnitTypes.TERRAN_SUPPLYDEPOT)
+            {
+                count += EnemyCount(UnitTypes.TERRAN_SUPPLYDEPOTLOWERED);
+            }
+            else if (unitType == UnitTypes.TERRAN_BARRACKS)
+            {
+                count += EnemyCount(UnitTypes.TERRAN_BARRACKSFLYING);
+            }
+            else if (unitType == UnitTypes.TERRAN_FACTORY)
+            {
+                count += EnemyCount(UnitTypes.TERRAN_FACTORYFLYING);
+            }
+            else if (unitType == UnitTypes.TERRAN_STARPORT)
+            {
+                count += EnemyCount(UnitTypes.TERRAN_STARPORTFLYING);
+            }
+            else if (unitType == UnitTypes.ZERG_SPIRE)
+            {
+                count += EnemyCount(UnitTypes.ZERG_GREATERSPIRE);
+            }
+
+            return count;
+        }
+
         public int Completed(UnitTypes unitType)
         {
             return ActiveUnitData.SelfUnits.Count(u => u.Value.Unit.UnitType == (uint)unitType && u.Value.Unit.BuildProgress == 1 && !u.Value.Unit.IsHallucination);

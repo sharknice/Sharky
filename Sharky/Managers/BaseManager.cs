@@ -262,7 +262,7 @@ namespace Sharky.Managers
 
         void UpdateEnemyBases()
         {
-            if (BaseData.EnemyBases.Count() != UnitCountService.EquivalentTypeCount(UnitTypes.PROTOSS_NEXUS) + UnitCountService.EquivalentTypeCount(UnitTypes.TERRAN_COMMANDCENTER) + UnitCountService.EquivalentTypeCount(UnitTypes.ZERG_HATCHERY))
+            if (BaseData.EnemyBases.Count() != UnitCountService.EquivalentEnemyTypeCount(UnitTypes.PROTOSS_NEXUS) + UnitCountService.EquivalentEnemyTypeCount(UnitTypes.TERRAN_COMMANDCENTER) + UnitCountService.EquivalentEnemyTypeCount(UnitTypes.ZERG_HATCHERY))
             {
                 var resourceCenters = ActiveUnitData.EnemyUnits.Values.Where(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter));
                 BaseData.EnemyBases = BaseData.BaseLocations.Where(b => resourceCenters.Any(r => Vector2.DistanceSquared(r.Position, new Vector2(b.Location.X, b.Location.Y)) < 25)).ToList();

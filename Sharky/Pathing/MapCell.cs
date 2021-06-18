@@ -25,5 +25,6 @@
         public int Visibility { get; set; }
         public int LastFrameVisibility { get; set; }
         public int LastFrameAlliesTouched { get; set; }
+        public bool PathBlocked { get; set; }
     }
 }

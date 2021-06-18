@@ -29,7 +29,7 @@ namespace Sharky.MicroControllers.Protoss
 
             if (bestTarget != null && commander.UnitCalculation.NearbyEnemies.Any(e => e.Unit.Tag == bestTarget.Unit.Tag) && MicroPriority != MicroPriority.NavigateToLocation)
             {
-                action = commander.Order(frame, Abilities.MOVE, GetPositionFromRange(bestTarget.Unit.Pos, commander.UnitCalculation.Unit.Pos, commander.UnitCalculation.Range));
+                action = commander.Order(frame, Abilities.MOVE, GetPositionFromRange(commander, bestTarget.Unit.Pos, commander.UnitCalculation.Unit.Pos, commander.UnitCalculation.Range));
                 return true;
             }
 
@@ -40,7 +40,7 @@ namespace Sharky.MicroControllers.Protoss
 
             if (bestTarget != null && MicroPriority != MicroPriority.NavigateToLocation)
             {
-                action = commander.Order(frame, Abilities.MOVE, GetPositionFromRange(bestTarget.Unit.Pos, commander.UnitCalculation.Unit.Pos, commander.UnitCalculation.Range));
+                action = commander.Order(frame, Abilities.MOVE, GetPositionFromRange(commander, bestTarget.Unit.Pos, commander.UnitCalculation.Unit.Pos, commander.UnitCalculation.Range));
                 return true;
             }
 

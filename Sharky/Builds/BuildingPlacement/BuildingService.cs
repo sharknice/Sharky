@@ -12,12 +12,14 @@ namespace Sharky.Builds.BuildingPlacement
         MapData MapData;
         ActiveUnitData ActiveUnitData;
         TargetingData TargetingData;
+        BaseData BaseData;
 
-        public BuildingService(MapData mapData, ActiveUnitData activeUnitData, TargetingData targetingData)
+        public BuildingService(MapData mapData, ActiveUnitData activeUnitData, TargetingData targetingData, BaseData baseData)
         {
             MapData = mapData;
             ActiveUnitData = activeUnitData;
             TargetingData = targetingData;
+            BaseData = baseData;
         }
 
         public bool AreaBuildable(float x, float y, float radius)
@@ -60,6 +62,15 @@ namespace Sharky.Builds.BuildingPlacement
                 return true;
             }
 
+            return false;
+        }
+
+        public bool BlocksResourceCenter(float x, float y, float radius)
+        {
+            if (BaseData.BaseLocations.Any(b => Vector2.DistanceSquared(new Vector2(x, y), new Vector2(b.Location.X, b.Location.Y)) < (4  + radius) * (4 + radius)))
+            {
+                return true;
+            }
             return false;
         }
 

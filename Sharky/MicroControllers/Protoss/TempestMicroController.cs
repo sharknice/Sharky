@@ -1,5 +1,6 @@
 ﻿using SC2APIProtocol;
 using Sharky.Pathing;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -49,9 +50,22 @@ namespace Sharky.MicroControllers.Protoss
                 range = 12; // sight range
             }
 
-            var avoidPoint = GetPositionFromRange(closestEnemy.Unit.Pos, commander.UnitCalculation.Unit.Pos, range + commander.UnitCalculation.Unit.Radius + closestEnemy.Unit.Radius);
+            var avoidPoint = GetPositionFromRange(commander, closestEnemy.Unit.Pos, commander.UnitCalculation.Unit.Pos, range + commander.UnitCalculation.Unit.Radius + closestEnemy.Unit.Radius);
             action = commander.Order(frame, Abilities.MOVE, avoidPoint);
             return true;
+        }
+
+        protected override Point2D GetPositionFromRange(UnitCommander commander, Point target, Point position, float range)
+        {
+            if (range > 10 && !commander.UnitCalculation.NearbyEnemies.Any(e => e.Unit.IsFlying))
+            {
+                range = 10;
+            }
+
+            var angle = Math.Atan2(target.Y - position.Y, position.X - target.X);
+            var x = range * Math.Cos(angle);
+            var y = range * Math.Sin(angle);
+            return new Point2D { X = target.X + (float)x, Y = target.Y - (float)y };
         }
     }
 }

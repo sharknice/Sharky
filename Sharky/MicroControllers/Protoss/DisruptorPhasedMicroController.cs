@@ -88,7 +88,7 @@ namespace Sharky.MicroControllers.Protoss
             var closest = commander.UnitCalculation.NearbyAllies.OrderBy(a => Vector2.DistanceSquared(a.Position, commander.UnitCalculation.Position)).FirstOrDefault();
             if (closest != null)
             {
-                var avoidPoint = GetPositionFromRange(closest.Unit.Pos, commander.UnitCalculation.Unit.Pos, 3f + commander.UnitCalculation.Unit.Radius + closest.Unit.Radius + .5f);
+                var avoidPoint = GetPositionFromRange(commander, closest.Unit.Pos, commander.UnitCalculation.Unit.Pos, 3f + commander.UnitCalculation.Unit.Radius + closest.Unit.Radius + .5f);
                 action = commander.Order(frame, Abilities.MOVE, avoidPoint);
                 return true;
             }

@@ -14,9 +14,11 @@ namespace Sharky.Managers
         TargetPriorityService TargetPriorityService;
         TargetingData TargetingData;
         MacroData MacroData;
+        BaseData BaseData;
+
         DebugService DebugService;
 
-        public AttackDataManager(AttackData attackData, ActiveUnitData activeUnitData, AttackTask attackTask, TargetPriorityService targetPriorityService, TargetingData targetingData, MacroData macroData, DebugService debugService)
+        public AttackDataManager(AttackData attackData, ActiveUnitData activeUnitData, AttackTask attackTask, TargetPriorityService targetPriorityService, TargetingData targetingData, MacroData macroData, BaseData baseData, DebugService debugService)
         {
             AttackData = attackData;
             ActiveUnitData = activeUnitData;
@@ -24,6 +26,8 @@ namespace Sharky.Managers
             TargetPriorityService = targetPriorityService;
             TargetingData = targetingData;
             MacroData = macroData;
+            BaseData = baseData;
+
             DebugService = debugService;
         }
 
@@ -55,6 +59,14 @@ namespace Sharky.Managers
             }
 
             if (ActiveUnitData.SelfUnits.Count(u => u.Value.UnitClassifications.Contains(UnitClassification.ResourceCenter)) == 0)
+            {
+                AttackData.Attacking = true;
+                DebugService.DrawText("Attacking: not mining minerals");
+                return null;
+            }
+
+            // attack if no workers mining minerals or if no bases
+            if (!BaseData.SelfBases.Any(b => b.GasMiningInfo.Any(m => m.Workers.Count() > 0)))
             {
                 AttackData.Attacking = true;
                 DebugService.DrawText("Attacking: no base");

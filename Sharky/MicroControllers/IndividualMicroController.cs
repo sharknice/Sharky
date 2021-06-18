@@ -54,7 +54,7 @@ namespace Sharky.MicroControllers
 
         public virtual List<SC2APIProtocol.Action> Attack(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
-            if (commander.UnitCalculation.Unit.IsSelected)
+            if (commander.UnitCalculation.Unit.IsOnScreen)
             {
                 var breakpoint = true;
             }
@@ -375,18 +375,18 @@ namespace Sharky.MicroControllers
 
         protected virtual bool MoveToAttackTarget(UnitCommander commander, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
-            if (commander.UnitCalculation.Unit.IsFlying && bestTarget.Attributes.Contains(SC2APIProtocol.Attribute.Structure) ||
+            if (commander.UnitCalculation.Unit.IsFlying && bestTarget.Attributes.Contains(SC2APIProtocol.Attribute.Structure) || commander.UnitCalculation.Unit.Shield < commander.UnitCalculation.Unit.ShieldMax ||
                 (!commander.UnitCalculation.TargetPriorityCalculation.Overwhelm && MicroPriority != MicroPriority.AttackForward && 
                 (commander.UnitCalculation.Unit.IsFlying || commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_REAPER || commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_COLOSSUS || MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos) == MapDataService.MapHeight(bestTarget.Unit.Pos))))
             {
                 if (SharkyUnitData.NoWeaponCooldownTypes.Contains((UnitTypes)commander.UnitCalculation.Unit.UnitType))
                 {
-                    var point = GetPositionFromRange(bestTarget.Unit.Pos, commander.UnitCalculation.Unit.Pos, commander.UnitCalculation.Range - 1);
+                    var point = GetPositionFromRange(commander, bestTarget.Unit.Pos, commander.UnitCalculation.Unit.Pos, commander.UnitCalculation.Range - 1);
                     action = commander.Order(frame, Abilities.MOVE, point);
                     return true;
                 }
 
-                var attackPoint = GetPositionFromRange(bestTarget.Unit.Pos, commander.UnitCalculation.Unit.Pos, commander.UnitCalculation.Range + bestTarget.Unit.Radius + commander.UnitCalculation.Unit.Radius);
+                var attackPoint = GetPositionFromRange(commander, bestTarget.Unit.Pos, commander.UnitCalculation.Unit.Pos, commander.UnitCalculation.Range + bestTarget.Unit.Radius + commander.UnitCalculation.Unit.Radius);
                 action = commander.Order(frame, Abilities.MOVE, attackPoint);
                 return true;
             }
@@ -474,7 +474,7 @@ namespace Sharky.MicroControllers
                 {
                     if (Vector2.DistanceSquared(commander.UnitCalculation.Position, closestAlly.Position) < (LooseFormationDistance + commander.UnitCalculation.Unit.Radius + closestAlly.Unit.Radius) * (LooseFormationDistance + commander.UnitCalculation.Unit.Radius + closestAlly.Unit.Radius))
                     {
-                        var avoidPoint = GetPositionFromRange(closestAlly.Unit.Pos, commander.UnitCalculation.Unit.Pos, LooseFormationDistance + commander.UnitCalculation.Unit.Radius + closestAlly.Unit.Radius + .5f);
+                        var avoidPoint = GetPositionFromRange(commander, closestAlly.Unit.Pos, commander.UnitCalculation.Unit.Pos, LooseFormationDistance + commander.UnitCalculation.Unit.Radius + closestAlly.Unit.Radius + .5f);
                         action = commander.Order(frame, Abilities.MOVE, avoidPoint);
                         return true;
                     }
@@ -580,7 +580,7 @@ namespace Sharky.MicroControllers
                     return true;
                 }
 
-                var avoidPoint = GetGroundAvoidPoint(commander.UnitCalculation.Unit.Pos, attack.Unit.Pos, target, defensivePoint, attack.Range + attack.Unit.Radius + commander.UnitCalculation.Unit.Radius + AvoidDamageDistance);
+                var avoidPoint = GetGroundAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, attack.Unit.Pos, target, defensivePoint, attack.Range + attack.Unit.Radius + commander.UnitCalculation.Unit.Radius + AvoidDamageDistance);
                 action = commander.Order(frame, Abilities.MOVE, avoidPoint);
                 return true;
             }
@@ -616,7 +616,7 @@ namespace Sharky.MicroControllers
                 return false;
             }
 
-            var avoidPoint = GetPositionFromRange(closestEnemy.Unit.Pos, commander.UnitCalculation.Unit.Pos, range + commander.UnitCalculation.Unit.Radius + closestEnemy.Unit.Radius);
+            var avoidPoint = GetPositionFromRange(commander, closestEnemy.Unit.Pos, commander.UnitCalculation.Unit.Pos, range + commander.UnitCalculation.Unit.Radius + closestEnemy.Unit.Radius);
             action = commander.Order(frame, Abilities.MOVE, avoidPoint);
             return true;
         }
@@ -630,7 +630,7 @@ namespace Sharky.MicroControllers
             if (commander.UnitCalculation.EnemiesInRange.Any() && WeaponReady(commander) && !SharkyUnitData.NoWeaponCooldownTypes.Contains((UnitTypes)commander.UnitCalculation.Unit.UnitType)) // keep shooting as you retreat
             {
                 var bestTarget = GetBestTarget(commander, target, frame);
-                if (bestTarget != null)
+                if (bestTarget != null && MapDataService.SelfVisible(bestTarget.Unit.Pos))
                 {
                     action = commander.Order(frame, Abilities.ATTACK, null, bestTarget.Unit.Tag);
                     return true;
@@ -1394,13 +1394,13 @@ namespace Sharky.MicroControllers
             {
                 if (commander.UnitCalculation.Unit.IsFlying)
                 {
-                    var avoidPoint = GetAirAvoidPoint(commander.UnitCalculation.Unit.Pos, attack.Unit.Pos, target, defensivePoint, attack.Range + attack.Unit.Radius + commander.UnitCalculation.Unit.Radius + AvoidDamageDistance);
+                    var avoidPoint = GetAirAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, attack.Unit.Pos, target, defensivePoint, attack.Range + attack.Unit.Radius + commander.UnitCalculation.Unit.Radius + AvoidDamageDistance);
                     action = commander.Order(frame, Abilities.MOVE, avoidPoint);
                     return true;
                 }
                 else
                 {
-                    var avoidPoint = GetGroundAvoidPoint(commander.UnitCalculation.Unit.Pos, attack.Unit.Pos, target, defensivePoint, attack.Range + attack.Unit.Radius + commander.UnitCalculation.Unit.Radius + AvoidDamageDistance);
+                    var avoidPoint = GetGroundAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, attack.Unit.Pos, target, defensivePoint, attack.Range + attack.Unit.Radius + commander.UnitCalculation.Unit.Radius + AvoidDamageDistance);
                     action = commander.Order(frame, Abilities.MOVE, avoidPoint);
                     return true;
                 }
@@ -1418,13 +1418,13 @@ namespace Sharky.MicroControllers
             {
                 if (commander.UnitCalculation.Unit.IsFlying)
                 {
-                    var avoidPoint = GetAirAvoidPoint(commander.UnitCalculation.Unit.Pos, attack.Unit.Pos, target, defensivePoint, attack.Range + attack.Unit.Radius + commander.UnitCalculation.Unit.Radius + AvoidDamageDistance);
+                    var avoidPoint = GetAirAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, attack.Unit.Pos, target, defensivePoint, attack.Range + attack.Unit.Radius + commander.UnitCalculation.Unit.Radius + AvoidDamageDistance);
                     action = commander.Order(frame, Abilities.MOVE, avoidPoint);
                     return true;
                 }
                 else
                 {
-                    var avoidPoint = GetGroundAvoidPoint(commander.UnitCalculation.Unit.Pos, attack.Unit.Pos, target, defensivePoint, attack.Range + attack.Unit.Radius + commander.UnitCalculation.Unit.Radius + AvoidDamageDistance);
+                    var avoidPoint = GetGroundAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, attack.Unit.Pos, target, defensivePoint, attack.Range + attack.Unit.Radius + commander.UnitCalculation.Unit.Radius + AvoidDamageDistance);
                     action = commander.Order(frame, Abilities.MOVE, avoidPoint);
                     return true;
                 }
@@ -1446,7 +1446,7 @@ namespace Sharky.MicroControllers
 
             if (nova != null)
             {
-                var avoidPoint = GetGroundAvoidPoint(commander.UnitCalculation.Unit.Pos, nova.Unit.Pos, target, defensivePoint, 5);
+                var avoidPoint = GetGroundAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, nova.Unit.Pos, target, defensivePoint, 5);
                 action = commander.Order(frame, Abilities.MOVE, avoidPoint);
                 return true;
             }
@@ -1467,11 +1467,11 @@ namespace Sharky.MicroControllers
                         Point2D avoidPoint;
                         if (commander.UnitCalculation.Unit.IsFlying)
                         {
-                            avoidPoint = GetAirAvoidPoint(commander.UnitCalculation.Unit.Pos, new Point { X = effect.Pos[0].X, Y = effect.Pos[0].Y, Z = 1 }, target, defensivePoint, 5);
+                            avoidPoint = GetAirAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, new Point { X = effect.Pos[0].X, Y = effect.Pos[0].Y, Z = 1 }, target, defensivePoint, 5);
                         }
                         else
                         {
-                            avoidPoint = GetGroundAvoidPoint(commander.UnitCalculation.Unit.Pos, new Point { X = effect.Pos[0].X, Y = effect.Pos[0].Y, Z = 1 }, target, defensivePoint, 5);
+                            avoidPoint = GetGroundAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, new Point { X = effect.Pos[0].X, Y = effect.Pos[0].Y, Z = 1 }, target, defensivePoint, 5);
 
                         }
                         action = commander.Order(frame, Abilities.MOVE, avoidPoint);
@@ -1496,11 +1496,11 @@ namespace Sharky.MicroControllers
                         Point2D avoidPoint;
                         if (commander.UnitCalculation.Unit.IsFlying)
                         {
-                            avoidPoint = GetAirAvoidPoint(commander.UnitCalculation.Unit.Pos, new Point { X = effect.Pos[0].X, Y = effect.Pos[0].Y, Z = 1 }, target, defensivePoint, 5);
+                            avoidPoint = GetAirAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, new Point { X = effect.Pos[0].X, Y = effect.Pos[0].Y, Z = 1 }, target, defensivePoint, 5);
                         }
                         else
                         {
-                            avoidPoint = GetGroundAvoidPoint(commander.UnitCalculation.Unit.Pos, new Point { X = effect.Pos[0].X, Y = effect.Pos[0].Y, Z = 1 }, target, defensivePoint, 5);
+                            avoidPoint = GetGroundAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, new Point { X = effect.Pos[0].X, Y = effect.Pos[0].Y, Z = 1 }, target, defensivePoint, 5);
 
                         }
                         action = commander.Order(frame, Abilities.MOVE, avoidPoint);
@@ -1525,7 +1525,7 @@ namespace Sharky.MicroControllers
 
             if (charge != null)
             {
-                var avoidPoint = GetGroundAvoidPoint(commander.UnitCalculation.Unit.Pos, charge.Unit.Pos, target, defensivePoint, 5);
+                var avoidPoint = GetGroundAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, charge.Unit.Pos, target, defensivePoint, 5);
                 action = commander.Order(frame, Abilities.MOVE, avoidPoint);
                 return true;
             }
@@ -1596,7 +1596,7 @@ namespace Sharky.MicroControllers
             return false;
         }
 
-        protected virtual Point2D GetPositionFromRange(Point target, Point position, float range)
+        protected virtual Point2D GetPositionFromRange(UnitCommander commander, Point target, Point position, float range)
         {
             var angle = Math.Atan2(target.Y - position.Y, position.X - target.X);
             var x = range * Math.Cos(angle);
@@ -1604,9 +1604,9 @@ namespace Sharky.MicroControllers
             return new Point2D { X = target.X + (float)x, Y = target.Y - (float)y };
         }
 
-        protected virtual Point2D GetGroundAvoidPoint(Point start, Point avoid, Point2D target, Point2D defensivePoint, float range)
+        protected virtual Point2D GetGroundAvoidPoint(UnitCommander commander, Point start, Point avoid, Point2D target, Point2D defensivePoint, float range)
         {
-            var avoidPoint = GetPositionFromRange(avoid, start, range);
+            var avoidPoint = GetPositionFromRange(commander, avoid, start, range);
             if (!MapDataService.PathWalkable(start, avoidPoint))
             {
                 if (Vector2.DistanceSquared(new Vector2(avoidPoint.X, avoidPoint.Y), new Vector2(target.X, target.Y)) < Vector2.DistanceSquared(new Vector2(avoidPoint.X, avoidPoint.Y), new Vector2(defensivePoint.X, defensivePoint.Y)))
@@ -1621,9 +1621,9 @@ namespace Sharky.MicroControllers
             return avoidPoint;
         }
 
-        protected virtual Point2D GetAirAvoidPoint(Point start, Point avoid, Point2D target, Point2D defensivePoint, float range)
+        protected virtual Point2D GetAirAvoidPoint(UnitCommander commander, Point start, Point avoid, Point2D target, Point2D defensivePoint, float range)
         {
-            var avoidPoint = GetPositionFromRange(avoid, start, range);
+            var avoidPoint = GetPositionFromRange(commander, avoid, start, range);
             if (!MapDataService.PathFlyable(start, avoidPoint))
             {
                 if (Vector2.DistanceSquared(new Vector2(avoidPoint.X, avoidPoint.Y), new Vector2(target.X, target.Y)) < Vector2.DistanceSquared(new Vector2(avoidPoint.X, avoidPoint.Y), new Vector2(defensivePoint.X, defensivePoint.Y)))
