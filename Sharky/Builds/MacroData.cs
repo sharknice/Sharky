@@ -56,6 +56,7 @@ namespace Sharky
         public int DesiredPylons;
         public bool BuildPylon;
         public int DesiredPylonsAtEveryBase;
+        public int DesiredPylonsAtNextBase;
         public int DesiredPylonsAtDefensivePoint;
         public int DesiredPylonsAtEveryMineralLine;
         public bool BuildSupplyDepot;

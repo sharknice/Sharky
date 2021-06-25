@@ -214,5 +214,16 @@ namespace Sharky.MicroControllers.Protoss
             }
             return new Point2D { X = best.Key.X, Y = best.Key.Y };
         }
+
+        public override List<SC2APIProtocol.Action> Retreat(UnitCommander commander, Point2D defensivePoint, Point2D groupCenter, int frame)
+        {
+            List<Action> actions = null;
+            if (OffensiveAbility(commander, defensivePoint, defensivePoint, groupCenter, null, frame, out actions))
+            {
+                return actions;
+            }
+
+            return base.Retreat(commander, defensivePoint, groupCenter, frame);
+        }
     }
 }

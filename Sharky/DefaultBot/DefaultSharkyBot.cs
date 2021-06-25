@@ -199,7 +199,7 @@ namespace Sharky.DefaultBot
             WarpInPlacement = new WarpInPlacement(ActiveUnitData, DebugService, MapData);
             
             Morpher = new Morpher(ActiveUnitData);
-            BuildPylonService = new BuildPylonService(MacroData, BuildingBuilder, SharkyUnitData, ActiveUnitData, BaseData, TargetingData);
+            BuildPylonService = new BuildPylonService(MacroData, BuildingBuilder, SharkyUnitData, ActiveUnitData, BaseData, TargetingData, BuildingService);
             BuildDefenseService = new BuildDefenseService(MacroData, BuildingBuilder, SharkyUnitData, ActiveUnitData, BaseData, TargetingData, BuildOptions);
 
             ChronoData = new ChronoData();

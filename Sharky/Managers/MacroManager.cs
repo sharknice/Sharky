@@ -111,6 +111,7 @@ namespace Sharky.Managers
             actions.AddRange(BuildPylonService.BuildPylonsAtEveryMineralLine());
             actions.AddRange(BuildPylonService.BuildPylonsAtDefensivePoint());
             actions.AddRange(BuildPylonService.BuildPylonsAtEveryBase());
+            actions.AddRange(BuildPylonService.BuildPylonsAtNextBase());
             actions.AddRange(BuildSupply());
 
             actions.AddRange(BuildDefenseService.BuildDefensiveBuildingsAtEveryMineralLine());

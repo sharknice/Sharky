@@ -67,6 +67,7 @@ namespace Sharky.Builds.Protoss
 
                 MacroData.DesiredPylonsAtDefensivePoint = 1;
                 MacroData.DesiredPylonsAtEveryBase = 1;
+                MacroData.DesiredPylonsAtNextBase = 1;
                 MacroData.DesiredPylonsAtEveryMineralLine = 1;
 
                 MacroData.DesiredDefensiveBuildingsAtDefensivePoint[UnitTypes.PROTOSS_PHOTONCANNON] = 1;
