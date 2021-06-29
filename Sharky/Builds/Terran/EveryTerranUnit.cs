@@ -1,6 +1,5 @@
 ﻿using SC2APIProtocol;
 using Sharky.Chat;
-using Sharky.Managers;
 using Sharky.MicroTasks;
 
 namespace Sharky.Builds.Terran
