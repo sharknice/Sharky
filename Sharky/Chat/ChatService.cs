@@ -79,5 +79,11 @@ namespace Sharky.Chat
             var chatAction = new Action { ActionChat = new ActionChat { Message = message } };
             ActiveChatData.ChatActions.Add(chatAction);
         }
+
+        public void SendInstantAllyChatMessage(string message)
+        {
+            var chatAction = new Action { ActionChat = new ActionChat { Message = message, Channel = ActionChat.Types.Channel.Team } };
+            ActiveChatData.ChatActions.Add(chatAction);
+        }
     }
 }

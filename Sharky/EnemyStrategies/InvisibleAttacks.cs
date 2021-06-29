@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace Sharky.EnemyStrategies
 {
-    class InvisibleAttacks : EnemyStrategy
+    public class InvisibleAttacks : EnemyStrategy
     {
         public InvisibleAttacks(EnemyStrategyHistory enemyStrategyHistory, ChatService chatService, ActiveUnitData activeUnitData, SharkyOptions sharkyOptions, DebugService debugService, UnitCountService unitCountService)
         {
