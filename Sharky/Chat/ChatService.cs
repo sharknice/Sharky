@@ -40,12 +40,28 @@ namespace Sharky.Chat
             }
         }
 
-        public async void SendChatMessages(IEnumerable<string> messages)
+        public async void SendAllyChatMessage(string message, bool instant = false)
+        {
+            if (instant)
+            {
+                SendInstantChatMessage(message, true);
+            }
+            else
+            {
+                SendChatMessages(new List<string> { message }, true);
+            }
+        }
+
+        public async void SendChatMessages(IEnumerable<string> messages, bool teamChannel = false)
         {
             var typeTime = 0;
             foreach (var message in messages)
             {
                 var chatAction = new Action { ActionChat = new ActionChat { Message = message } };
+                if (teamChannel)
+                {
+                    chatAction.ActionChat.Channel = ActionChat.Types.Channel.Team;
+                }
 
                 typeTime += message.Length * 80; // simulate typing at 80 ms per keystroke
                 // translate framerate to real
@@ -74,15 +90,13 @@ namespace Sharky.Chat
             }
         }
 
-        void SendInstantChatMessage(string message)
+        void SendInstantChatMessage(string message, bool teamChannel = false)
         {
             var chatAction = new Action { ActionChat = new ActionChat { Message = message } };
-            ActiveChatData.ChatActions.Add(chatAction);
-        }
-
-        public void SendInstantAllyChatMessage(string message)
-        {
-            var chatAction = new Action { ActionChat = new ActionChat { Message = message, Channel = ActionChat.Types.Channel.Team } };
+            if (teamChannel)
+            {
+                chatAction.ActionChat.Channel = ActionChat.Types.Channel.Team;
+            }
             ActiveChatData.ChatActions.Add(chatAction);
         }
     }

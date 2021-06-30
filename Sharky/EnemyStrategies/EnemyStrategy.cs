@@ -46,7 +46,10 @@ namespace Sharky.EnemyStrategies
         protected void DetectedChat()
         {
             ChatService.SendChatType($"{Name()}-EnemyStrategy");
-            ChatService.SendInstantAllyChatMessage($"Tag:EnemyStrategy-{Name()}");
+            if (SharkyOptions.TagsEnabled)
+            {
+                ChatService.SendAllyChatMessage($"Tag:EnemyStrategy-{Name()}");
+            }
         }
 
         protected abstract bool Detect(int frame);

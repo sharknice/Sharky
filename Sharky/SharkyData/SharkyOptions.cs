@@ -4,5 +4,6 @@
     {
         public bool Debug { get; set; }
         public float FramesPerSecond { get; set; }
+        public bool TagsEnabled { get; set; }
     }
 }
