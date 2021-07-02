@@ -295,7 +295,7 @@ namespace Sharky.DefaultBot
 
             MicroTaskData = new MicroTaskData { MicroTasks = new Dictionary<string, IMicroTask>() };
 
-            var defenseSquadTask = new DefenseSquadTask(ActiveUnitData, TargetingData, DefenseService, MicroController, new ArmySplitter(AttackData, TargetingData, DefenseService, MicroController), new List<DesiredUnitsClaim>(), 0, false);
+            var defenseSquadTask = new DefenseSquadTask(ActiveUnitData, TargetingData, DefenseService, MicroController, new ArmySplitter(AttackData, TargetingData, ActiveUnitData, DefenseService, MicroController), new List<DesiredUnitsClaim>(), 0, false);
             var workerScoutTask = new WorkerScoutTask(SharkyUnitData, TargetingData, MapDataService, false, 0.5f, workerDefenseMicroController, DebugService, BaseData, AreaService);
             var workerScoutGasStealTask = new WorkerScoutGasStealTask(SharkyUnitData, TargetingData, MacroData, MapDataService, false, 0.5f, DebugService, BaseData, AreaService, MapData, BuildingService, ActiveUnitData);
             var findHiddenBaseTask = new FindHiddenBaseTask(BaseData, TargetingData, MapDataService, individualMicroController, 15, false, 0.5f);
@@ -303,7 +303,7 @@ namespace Sharky.DefaultBot
             var miningDefenseService = new MiningDefenseService(BaseData, ActiveUnitData, workerDefenseMicroController, DebugService);
             var miningTask = new MiningTask(SharkyUnitData, BaseData, ActiveUnitData, 1, miningDefenseService, MacroData, BuildOptions);
             var queenInjectTask = new QueenInjectsTask(ActiveUnitData, 1.1f, UnitCountService);
-            var attackTask = new AttackTask(MicroController, TargetingData, ActiveUnitData, DefenseService, MacroData, AttackData, TargetingService, MicroTaskData, new ArmySplitter(AttackData, TargetingData, DefenseService, MicroController), new EnemyCleanupService(MicroController), 2);
+            var attackTask = new AttackTask(MicroController, TargetingData, ActiveUnitData, DefenseService, MacroData, AttackData, TargetingService, MicroTaskData, new ArmySplitter(AttackData, TargetingData, ActiveUnitData, DefenseService, MicroController), new EnemyCleanupService(MicroController), 2);
             var adeptWorkerHarassTask = new AdeptWorkerHarassTask(BaseData, TargetingData, adeptMicroController, 2, false);
             var oracleWorkerHarassTask = new OracleWorkerHarassTask(TargetingData, BaseData, ChatService, MapDataService, MapData, oracleHarassMicroController, 1, false);
             var lateGameOracleHarassTask = new LateGameOracleHarassTask(BaseData, TargetingData, MapDataService, oracleHarassMicroController, 1, false);
@@ -354,9 +354,12 @@ namespace Sharky.DefaultBot
                 ["ZealotRush"] = new ZealotRush(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, DebugService, UnitCountService),
 
                 ["MarineRush"] = new MarineRush(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, DebugService, UnitCountService),
+                ["BunkerRush"] = new BunkerRush(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, TargetingData, DebugService, UnitCountService),
                 ["MassVikings"] = new MassVikings(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, DebugService, UnitCountService),
+                ["ThreeRax"] = new ThreeRax(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, DebugService, UnitCountService),
 
-                ["ZerglingRush"] = new ZerglingRush(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, DebugService, UnitCountService)
+                ["ZerglingRush"] = new ZerglingRush(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, DebugService, UnitCountService),
+                ["RoachRavager"] = new RoachRavager(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, DebugService, UnitCountService)
             };
 
             EnemyStrategyManager = new EnemyStrategyManager(EnemyData);

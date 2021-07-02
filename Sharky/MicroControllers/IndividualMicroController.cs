@@ -624,8 +624,9 @@ namespace Sharky.MicroControllers
         protected bool Retreat(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
-          
-            // if you can outrun and outrange the enemy do that isntead of a full on retreat
+
+            // TODO: if this unit is low health and the enemies will catch up if it shoots, don't shoot, just keep running, for example stalker running away from roach, if distancetoroach - (roachspeed * stalkerfiretime) < roachrange , do not fire, just run
+            // but also if the unit is just going to die because it's in range of enemies already, fire away because it's going to die anyways
 
             if (commander.UnitCalculation.EnemiesInRange.Any() && WeaponReady(commander) && !SharkyUnitData.NoWeaponCooldownTypes.Contains((UnitTypes)commander.UnitCalculation.Unit.UnitType)) // keep shooting as you retreat
             {

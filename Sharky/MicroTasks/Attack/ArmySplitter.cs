@@ -2,6 +2,7 @@
 using Sharky.MicroControllers;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace Sharky.MicroTasks.Attack
 {
@@ -9,6 +10,7 @@ namespace Sharky.MicroTasks.Attack
     {
         AttackData AttackData;
         TargetingData TargetingData;
+        ActiveUnitData ActiveUnitData;
 
         DefenseService DefenseService;
 
@@ -19,10 +21,12 @@ namespace Sharky.MicroTasks.Attack
         List<ArmySplits> ArmySplits;
         List<UnitCommander> AvailableCommanders;
 
-        public ArmySplitter(AttackData attackData, TargetingData targetingData, DefenseService defenseService, IMicroController microController)
+        public ArmySplitter(AttackData attackData, TargetingData targetingData, ActiveUnitData activeUnitData,
+            DefenseService defenseService, IMicroController microController)
         {
             AttackData = attackData;
             TargetingData = targetingData;
+            ActiveUnitData = activeUnitData;
 
             DefenseService = defenseService;
 
@@ -72,7 +76,16 @@ namespace Sharky.MicroTasks.Attack
                     }
                     else
                     {
-                        actions.AddRange(MicroController.Retreat(AvailableCommanders, TargetingData.MainDefensePoint, groupPoint, frame));
+                        var defensiveVector = new Vector2(TargetingData.ForwardDefensePoint.X, TargetingData.ForwardDefensePoint.Y);
+                        var shieldBattery = ActiveUnitData.SelfUnits.Values.Where(u => u.Unit.UnitType == (uint)UnitTypes.PROTOSS_SHIELDBATTERY && u.Unit.IsPowered && u.Unit.BuildProgress == 1 && u.Unit.Energy > 5).OrderBy(u => Vector2.DistanceSquared(u.Position, defensiveVector)).FirstOrDefault();
+                        if (shieldBattery != null)
+                        {
+                            actions.AddRange(MicroController.Retreat(AvailableCommanders, new Point2D { X = shieldBattery.Position.X, Y = shieldBattery.Position.Y }, groupPoint, frame));
+                        }
+                        else
+                        {
+                            actions.AddRange(MicroController.Retreat(AvailableCommanders, TargetingData.MainDefensePoint, groupPoint, frame));
+                        }
                     }
                 }
             }

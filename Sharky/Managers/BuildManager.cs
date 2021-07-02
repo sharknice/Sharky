@@ -44,9 +44,9 @@ namespace Sharky.Managers
         public override void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)
         {
             string enemyName = string.Empty;
-
+            
             foreach (var playerInfo in gameInfo.PlayerInfo)
-            {
+            {                
                 if (playerInfo.PlayerId == playerId)
                 {
                     ActualRace = playerInfo.RaceActual;

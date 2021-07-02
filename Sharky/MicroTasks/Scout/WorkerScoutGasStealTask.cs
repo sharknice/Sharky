@@ -114,17 +114,20 @@ namespace Sharky.MicroTasks
 
                 if (MacroData.Minerals >= 75 && commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE)
                 {
-                    foreach (var enemyBase in BaseData.EnemyBases)
+                    if (!BaseData.EnemyBases.Any(enemyBase => enemyBase.VespeneGeysers.Any(g => g.Alliance == Alliance.Enemy)))
                     {
-                        foreach (var gas in enemyBase.VespeneGeysers.Where(g => g.Alliance == Alliance.Neutral))
+                        foreach (var enemyBase in BaseData.EnemyBases)
                         {
-                            if (Vector2.DistanceSquared(new Vector2(gas.Pos.X, gas.Pos.Y), commander.UnitCalculation.Position) < 400 && !commander.UnitCalculation.NearbyEnemies.Any(u => u.Unit.UnitType == (uint)UnitTypes.PROTOSS_ASSIMILATOR || u.Unit.UnitType == (uint)UnitTypes.ZERG_EXTRACTOR || u.Unit.UnitType == (uint)UnitTypes.TERRAN_REFINERY))
+                            foreach (var gas in enemyBase.VespeneGeysers.Where(g => g.Alliance == Alliance.Neutral))
                             {
-                                var gasSteal = commander.Order(frame, Abilities.BUILD_ASSIMILATOR, null, gas.Tag);
-                                if (gasSteal != null)
+                                if (Vector2.DistanceSquared(new Vector2(gas.Pos.X, gas.Pos.Y), commander.UnitCalculation.Position) < 400)
                                 {
-                                    commands.AddRange(gasSteal);
-                                    return commands;
+                                    var gasSteal = commander.Order(frame, Abilities.BUILD_ASSIMILATOR, null, gas.Tag);
+                                    if (gasSteal != null)
+                                    {
+                                        commands.AddRange(gasSteal);
+                                        return commands;
+                                    }
                                 }
                             }
                         }

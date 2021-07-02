@@ -22,6 +22,11 @@ namespace Sharky.EnemyStrategies.Protoss
                 return false;
             }
 
+            if (UnitCountService.EnemyCount(UnitTypes.PROTOSS_CYBERNETICSCORE) > 0)
+            {
+                return false;
+            }
+
             if (UnitCountService.EnemyCount(UnitTypes.PROTOSS_ZEALOT) >= 2 && frame < SharkyOptions.FramesPerSecond * 3 * 60)
             {
                 return true;
