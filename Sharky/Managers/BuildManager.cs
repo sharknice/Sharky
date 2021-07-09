@@ -12,23 +12,25 @@ namespace Sharky.Managers
 {
     public class BuildManager : SharkyManager
     {
-        DebugService DebugService;
-        Dictionary<Race, BuildChoices> BuildChoices;
-        IBuildDecisionService BuildDecisionService;
-        IEnemyPlayerService EnemyPlayerService;
+        protected DebugService DebugService;
+        protected Dictionary<Race, BuildChoices> BuildChoices;
+        protected IBuildDecisionService BuildDecisionService;
+        protected IEnemyPlayerService EnemyPlayerService;
 
-        IMacroBalancer MacroBalancer;
-        ISharkyBuild CurrentBuild;
-        List<string> BuildSequence;
+        protected IMacroBalancer MacroBalancer;
+        protected ISharkyBuild CurrentBuild;
+        protected List<string> BuildSequence;
 
-        Dictionary<int, string> BuildHistory { get; set; }
+        protected Dictionary<int, string> BuildHistory { get; set; }
 
-        Race ActualRace;
-        Race EnemyRace;
-        string MapName;
-        EnemyPlayer.EnemyPlayer EnemyPlayer;
-        ChatHistory ChatHistory;
-        EnemyStrategyHistory EnemyStrategyHistory;
+        protected Race SelectedRace;
+        protected Race ActualRace;
+        protected Race EnemySelectedRace;
+        protected Race EnemyRace;
+        protected string MapName;
+        protected EnemyPlayer.EnemyPlayer EnemyPlayer;
+        protected ChatHistory ChatHistory;
+        protected EnemyStrategyHistory EnemyStrategyHistory;
 
         public BuildManager(Dictionary<Race, BuildChoices> buildChoices, DebugService debugService, IMacroBalancer macroBalancer, IBuildDecisionService buildDecisionService, IEnemyPlayerService enemyPlayerService, ChatHistory chatHistory, EnemyStrategyHistory enemyStrategyHistory)
         {
@@ -43,33 +45,7 @@ namespace Sharky.Managers
 
         public override void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)
         {
-            string enemyName = string.Empty;
-            
-            foreach (var playerInfo in gameInfo.PlayerInfo)
-            {                
-                if (playerInfo.PlayerId == playerId)
-                {
-                    ActualRace = playerInfo.RaceActual;
-                }
-                else
-                {
-                    if (playerInfo.PlayerName != null)
-                    {
-                        enemyName = playerInfo.PlayerName;
-                    }
-                    EnemyRace = playerInfo.RaceRequested;
-                }
-            }
-
-            EnemyPlayer = EnemyPlayerService.Enemies.FirstOrDefault(e => e.Id == opponentId);
-            if (opponentId == "test" && EnemyPlayer == null)
-            {
-                EnemyPlayer = new EnemyPlayer.EnemyPlayer { ChatMatches = new List<string>(), Games = new List<Game>(), Id = opponentId, Name = "test" };
-            }
-            if (EnemyPlayer == null)
-            {
-                EnemyPlayer = new EnemyPlayer.EnemyPlayer { ChatMatches = new List<string>(), Games = new List<Game>(), Id = opponentId, Name = enemyName };
-            }
+            GetPlayerInfo(gameInfo, playerId, opponentId);
 
             if (EnemyPlayerService.Tournament.Enabled)
             {
@@ -90,6 +66,39 @@ namespace Sharky.Managers
 
             BuildHistory = new Dictionary<int, string>();
             SwitchBuild(BuildSequence.First(), 0);
+        }
+
+        protected void GetPlayerInfo(ResponseGameInfo gameInfo, uint playerId, string opponentId)
+        {
+            string enemyName = string.Empty;
+
+            foreach (var playerInfo in gameInfo.PlayerInfo)
+            {
+                if (playerInfo.PlayerId == playerId)
+                {
+                    ActualRace = playerInfo.RaceActual;
+                    SelectedRace = playerInfo.RaceRequested;
+                }
+                else
+                {
+                    if (playerInfo.PlayerName != null)
+                    {
+                        enemyName = playerInfo.PlayerName;
+                    }
+                    EnemyRace = playerInfo.RaceRequested;
+                    EnemySelectedRace = playerInfo.RaceRequested;
+                }
+            }
+
+            EnemyPlayer = EnemyPlayerService.Enemies.FirstOrDefault(e => e.Id == opponentId);
+            if (opponentId == "test" && EnemyPlayer == null)
+            {
+                EnemyPlayer = new EnemyPlayer.EnemyPlayer { ChatMatches = new List<string>(), Games = new List<Game>(), Id = opponentId, Name = "test" };
+            }
+            if (EnemyPlayer == null)
+            {
+                EnemyPlayer = new EnemyPlayer.EnemyPlayer { ChatMatches = new List<string>(), Games = new List<Game>(), Id = opponentId, Name = enemyName };
+            }
         }
 
         public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
@@ -120,6 +129,13 @@ namespace Sharky.Managers
 
             CurrentBuild.OnFrame(observation);
 
+            MacroBalance();
+
+            return null;
+        }
+
+        protected void MacroBalance()
+        {
             MacroBalancer.BalanceSupply();
             MacroBalancer.BalanceGases();
             MacroBalancer.BalanceTech();
@@ -129,14 +145,17 @@ namespace Sharky.Managers
             MacroBalancer.BalanceProductionBuildings();
             MacroBalancer.BalanceMorphs();
             MacroBalancer.BalanceGasWorkers();
-
-            return null;
         }
 
         public override void OnEnd(ResponseObservation observation, Result result)
         {
-            var game = new Game { DateTime = DateTime.Now, EnemyRace = EnemyRace, Length = (int)observation.Observation.GameLoop, MapName = MapName, Result = (int)result, EnemyId = EnemyPlayer.Id, Builds = BuildHistory, EnemyStrategies = EnemyStrategyHistory.History, EnemyChat = ChatHistory.EnemyChatHistory, MyChat = ChatHistory.MyChatHistory };
+            var game = GetGame(observation, result);
             EnemyPlayerService.SaveGame(game);
+        }
+
+        protected Game GetGame(ResponseObservation observation, Result result)
+        {
+            return new Game { DateTime = DateTime.Now, EnemySelectedRace = EnemySelectedRace, MySelectedRace = SelectedRace, MyRace = ActualRace, EnemyRace = EnemyRace, Length = (int)observation.Observation.GameLoop, MapName = MapName, Result = (int)result, EnemyId = EnemyPlayer.Id, Builds = BuildHistory, EnemyStrategies = EnemyStrategyHistory.History, EnemyChat = ChatHistory.EnemyChatHistory, MyChat = ChatHistory.MyChatHistory };
         }
 
         void SwitchBuild(string buildName, int frame)

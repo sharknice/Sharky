@@ -13,7 +13,15 @@ namespace Sharky
         public string EnemyId { get; set; }
         public string MapName { get; set; }
 
+        public Race EnemySelectedRace { get; set; }
         public Race EnemyRace { get; set; }
+        
+        public Race MySelectedRace { get; set; }
+
+        /// <summary>
+        /// The actual race, terran, protoss, or zerg, not random
+        /// </summary>
+        public Race MyRace { get; set; }
 
         /// <summary>
         /// how many frames the game lasted
