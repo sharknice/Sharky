@@ -1,13 +1,15 @@
 # Sharky
 A C# framework for developing StarCraft 2 AI bots
 
-The goal of Sharky is to proide a framework that handles all the complex setup and mundane details of creating a bot so you can focus on the fun stuff like builds, strategies, and micro.  
+The goal of Sharky is to provide a framework that handles all the complex setup and mundane details of creating a bot so you can focus on the fun stuff like builds, strategies, and micro.  
 
-You can pull it to use directly in your solution, or install it via the nuget package 'Sharky'
+You can clone it and use it directly in your solution (recomended), or install it to your project via the nuget package 'Sharky' (not updated as frequently)
 
-There is an example bot included in the source, and another one using the nuget package here https://github.com/sharknice/SharkyExampleBot
+There is an example bot included in the Sharky source, and another example using the nuget package here https://github.com/sharknice/SharkyExampleBot
 
 And a video tutorial here https://www.youtube.com/watch?v=2Tf0jLTJQME
+
+Make sure you have the ladder maps installed. Download them here https://aiarena.net/wiki/maps/ and then put them in your C:\Program Files (x86)\StarCraft II\maps folder.
 
 ## Features
 - Works with every race, Terran, Protoss, Zerg, and Random
@@ -18,7 +20,7 @@ And a video tutorial here https://www.youtube.com/watch?v=2Tf0jLTJQME
 - Indentifies enemy strategies so you can counter them
 - Saves game results to json files that contain the builds used and the enemy strategies used as well as the chat, these files are used to determine what build to use the next game
 - Spawn friendly or enemy units in debug mode with chat commands.  Ex. type "spawn 10 enemy protoss_zealot" to spawn 10 enemy zealots at the current camera location or "spawn friendly terran_reaper" for a friendly reaper unit.  List of units here: https://github.com/sharknice/Sharky/blob/master/Sharky/S2ClientTypeEnums/UnitTypes.cs
-- Turbo Mining - mines minerals ~8% faster than humanly possible by individually microing each worker
+- Turbo Mining - mines minerals over 10% faster than humanly possible by individually microing each worker
 - And much more!
 
 ## Architecture

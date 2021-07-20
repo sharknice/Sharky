@@ -36,7 +36,7 @@ namespace Sharky.Managers.Protoss
 
         List<SC2APIProtocol.Action> Restore(UnitCommander shieldBattery, IEnumerable<UnitOrder> unitsBeingRestored, uint frame)
         {
-            var target = shieldBattery.UnitCalculation.NearbyAllies.Where(a => a.Unit.BuildProgress == 1 && a.Unit.Shield < a.Unit.ShieldMax && !unitsBeingRestored.Any(o => o.TargetUnitTag == a.Unit.Tag) && Vector2.DistanceSquared(a.Position, shieldBattery.UnitCalculation.Position) <= RestoreRangeSquared + (a.Unit.Radius * a.Unit.Radius)).OrderByDescending(a => a.Dps).ThenBy(a => a.Unit.Shield).FirstOrDefault(); 
+            var target = shieldBattery.UnitCalculation.NearbyAllies.Where(a => a.Unit.BuildProgress == 1 && a.Unit.Shield < a.Unit.ShieldMax - 5 && (!a.Attributes.Contains(Attribute.Structure) || (a.Attributes.Contains(Attribute.Structure) && a.Unit.Shield < 10)) && !unitsBeingRestored.Any(o => o.TargetUnitTag == a.Unit.Tag) && Vector2.DistanceSquared(a.Position, shieldBattery.UnitCalculation.Position) <= RestoreRangeSquared + (a.Unit.Radius * a.Unit.Radius)).OrderByDescending(a => a.Dps).ThenBy(a => a.Unit.Shield).FirstOrDefault(); 
             if (target != null)
             {
                 var order = shieldBattery.UnitCalculation.Unit.Orders.FirstOrDefault();
