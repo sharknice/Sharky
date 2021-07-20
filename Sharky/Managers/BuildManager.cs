@@ -158,14 +158,14 @@ namespace Sharky.Managers
             return new Game { DateTime = DateTime.Now, EnemySelectedRace = EnemySelectedRace, MySelectedRace = SelectedRace, MyRace = ActualRace, EnemyRace = EnemyRace, Length = (int)observation.Observation.GameLoop, MapName = MapName, Result = (int)result, EnemyId = EnemyPlayer.Id, Builds = BuildHistory, EnemyStrategies = EnemyStrategyHistory.History, EnemyChat = ChatHistory.EnemyChatHistory, MyChat = ChatHistory.MyChatHistory };
         }
 
-        void SwitchBuild(string buildName, int frame)
+        protected void SwitchBuild(string buildName, int frame)
         {
             BuildHistory[frame] = buildName;
             CurrentBuild = BuildChoices[ActualRace].Builds[buildName];
             CurrentBuild.StartBuild(frame);
         }
 
-        void TransitionBuild(int frame)
+        protected void TransitionBuild(int frame)
         {
             BuildSequence = BuildChoices[ActualRace].BuildSequences["Transition"][new Random().Next(BuildChoices[ActualRace].BuildSequences["Transition"].Count)];
             SwitchBuild(BuildSequence[0], frame);

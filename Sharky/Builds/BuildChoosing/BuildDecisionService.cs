@@ -16,7 +16,7 @@ namespace Sharky.Builds.BuildChoosing
             ChatService = chatService;
         }
 
-        private bool BetterBuild(Record original, Record current)
+        protected bool BetterBuild(Record original, Record current)
         {
             if (original == null)
             {
@@ -51,7 +51,7 @@ namespace Sharky.Builds.BuildChoosing
             return false;
         }
 
-        private bool WonLastGame(Record record)
+        protected bool WonLastGame(Record record)
         {
             if (record.Wins.Count() > 0 && record.Losses.Count() == 0)
             {
@@ -165,7 +165,7 @@ namespace Sharky.Builds.BuildChoosing
             return bestBuildSequence;
         }
 
-        private Record GetSequenceRecord(IEnumerable<Game> games, List<string> sequence)
+        protected Record GetSequenceRecord(IEnumerable<Game> games, List<string> sequence)
         {
             var record = new Record { Wins = new List<DateTime>(), Losses = new List<DateTime>(), Ties = new List<DateTime>() };
             foreach (var game in games)
@@ -189,7 +189,7 @@ namespace Sharky.Builds.BuildChoosing
             return record;
         }
 
-        private Record GetRecord(IEnumerable<Game> games)
+        protected Record GetRecord(IEnumerable<Game> games)
         {
             var record = new Record { Wins = new List<DateTime>(), Losses = new List<DateTime>(), Ties = new List<DateTime>() };
             foreach (var game in games)
@@ -210,7 +210,7 @@ namespace Sharky.Builds.BuildChoosing
             return record;
         }
 
-        private bool MatchesBuildSequence(Game game, List<string> sequence)
+        protected bool MatchesBuildSequence(Game game, List<string> sequence)
         {
             if (game.Builds.First().Value != sequence.First())
             {

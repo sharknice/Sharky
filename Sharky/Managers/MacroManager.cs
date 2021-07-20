@@ -207,11 +207,14 @@ namespace Sharky.Managers
                                 }
 
                                 var location = WarpInPlacement.FindPlacement(targetLocation, unit.Key, 1);
-                                var action = building.First().Value.Order(MacroData.Frame, unitData.WarpInAbility, location);
-                                if (action != null)
+                                if (location != null)
                                 {
-                                    commands.AddRange(action);
-                                    return commands;
+                                    var action = building.First().Value.Order(MacroData.Frame, unitData.WarpInAbility, location);
+                                    if (action != null)
+                                    {
+                                        commands.AddRange(action);
+                                        return commands;
+                                    }
                                 }
                             }
                             else

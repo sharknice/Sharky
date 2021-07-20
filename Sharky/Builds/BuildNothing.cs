@@ -1,5 +1,6 @@
 ﻿using SC2APIProtocol;
 using Sharky.Chat;
+using System;
 using System.Linq;
 
 namespace Sharky.Builds
@@ -15,9 +16,13 @@ namespace Sharky.Builds
         {
             base.StartBuild(frame);
 
-            BuildOptions.StrictGasCount = false;
+            BuildOptions.StrictGasCount = true;
             BuildOptions.StrictSupplyCount = true;
-            BuildOptions.StrictWorkerCount = false;
+            BuildOptions.StrictWorkerCount = true;
+
+            AttackData.CustomAttackFunction = true;
+            AttackData.Attacking = false;
+            AttackData.UseAttackDataManager = false;
         }
 
         public override void OnFrame(ResponseObservation observation)
@@ -45,6 +50,11 @@ namespace Sharky.Builds
             foreach (var cybercore in cybers)
             {
                 positions += $"cybercore {cybercore.UnitCalculation.Position}, ";
+            }
+
+            if (MacroData.Minerals == 1000)
+            {
+                Console.WriteLine($"1000 minerals at {observation.Observation.GameLoop} frames");
             }
         }
     }

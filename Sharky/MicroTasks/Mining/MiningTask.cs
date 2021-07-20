@@ -148,6 +148,11 @@ namespace Sharky.MicroTasks
                                 {
                                     actions.AddRange(action);
                                 }
+                                action  = worker.Order(frame, Abilities.HARVEST_RETURN, null, 0, false, true);
+                                if (action != null)
+                                {
+                                    actions.AddRange(action);
+                                }
                             }
                         }
                         else
@@ -160,10 +165,20 @@ namespace Sharky.MicroTasks
                                 {
                                     actions.AddRange(action);
                                 }
+                                action = worker.Order(frame, Abilities.MOVE, miningInfo.DropOffPoint, 0, false, true);
+                                if (action != null)
+                                {
+                                    actions.AddRange(action);
+                                }
                             }
                             else
                             {
                                 var action = worker.Order(frame, Abilities.MOVE, miningInfo.HarvestPoint, 0, false);
+                                if (action != null)
+                                {
+                                    actions.AddRange(action);
+                                }
+                                action = worker.Order(frame, Abilities.HARVEST_GATHER, null, miningInfo.ResourceUnit.Tag, false, true);
                                 if (action != null)
                                 {
                                     actions.AddRange(action);
@@ -369,7 +384,7 @@ namespace Sharky.MicroTasks
 
                 foreach (var selfBase in unsaturated)
                 {
-                    foreach (var info in selfBase.MineralMiningInfo.Where(m => m.Workers.Count() < saturationCount))
+                    foreach (var info in selfBase.MineralMiningInfo.Where(m => m.Workers.Count() < saturationCount).OrderBy(m => m.Workers.Count()))
                     {
                         worker.UnitRole = UnitRole.Minerals;
                         info.Workers.Add(worker);
@@ -444,7 +459,7 @@ namespace Sharky.MicroTasks
             foreach (var worker in UnitCommanders)
             {
                 worker.UnitRole = UnitRole.Minerals;
-                miningAssignments.Where(m => m.Workers.Count < Math.Ceiling(workersPerField)).OrderBy(m => Vector2.DistanceSquared(new Vector2(m.ResourceUnit.Pos.X, m.ResourceUnit.Pos.Y), worker.UnitCalculation.Position)).First().Workers.Add(worker);
+                miningAssignments.Where(m => m.Workers.Count < Math.Ceiling(workersPerField)).OrderBy(m => m.Workers.Count()).ThenBy(m => Vector2.DistanceSquared(new Vector2(m.ResourceUnit.Pos.X, m.ResourceUnit.Pos.Y), worker.UnitCalculation.Position)).First().Workers.Add(worker);
             }
 
             return miningAssignments;

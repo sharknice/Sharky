@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -48,11 +49,30 @@ namespace Sharky
             LastOrderFrame = 0;
         }
 
-        public List<Action> Order(int frame, Abilities ability, Point2D targetLocation = null, ulong targetTag = 0, bool allowSpam = false)
+        public List<SC2APIProtocol.Action> Order(int frame, Abilities ability, Point2D targetLocation = null, ulong targetTag = 0, bool allowSpam = false, bool queue = false)
         {
-            if (!allowSpam && ability == LastAbility && targetTag == LastTargetTag && ((targetLocation == null && LastTargetLocation == null) || (targetLocation.X == LastTargetLocation.X && targetLocation.Y == LastTargetLocation.Y)) && AbilityOrderTimes[ability] > frame - SpamFrames)
+            if (!allowSpam)
             {
-                return new List<Action>(); // if new action is exactly the same, don't do anything to prevent apm spam
+                if (ability == LastAbility && targetTag == LastTargetTag && ((targetLocation == null && LastTargetLocation == null) || (targetLocation.X == LastTargetLocation.X && targetLocation.Y == LastTargetLocation.Y)) && AbilityOrderTimes[ability] > frame - SpamFrames)
+                {
+                    return new List<SC2APIProtocol.Action>(); // if new action is exactly the same, don't do anything to prevent apm spam
+                }
+                else
+                {
+                    UnitOrder unitOrder;
+                    if (queue)
+                    {
+                        unitOrder = UnitCalculation.Unit.Orders.FirstOrDefault(o => EquivalentAbility(ability, o.AbilityId));
+                    }
+                    else
+                    {
+                        unitOrder = UnitCalculation.Unit.Orders.FirstOrDefault();
+                    }
+                    if (unitOrder != null && EquivalentAbility(ability, unitOrder.AbilityId) && targetTag == unitOrder.TargetUnitTag && ((targetLocation == null && unitOrder.TargetWorldSpacePos == null) || (Math.Abs(targetLocation.X - unitOrder.TargetWorldSpacePos.X) < .01 && Math.Abs(targetLocation.Y - unitOrder.TargetWorldSpacePos.Y) < .01)))
+                    {
+                        return new List<SC2APIProtocol.Action>(); // if new action is exactly the same, don't do anything to prevent apm spam
+                    }
+                }
             }
 
             var command = new ActionRawUnitCommand();
@@ -72,7 +92,7 @@ namespace Sharky
             LastTargetTag = targetTag;
             AbilityOrderTimes[ability] = frame;
 
-            var action = new Action
+            var action = new SC2APIProtocol.Action
             {
                 ActionRaw = new ActionRaw
                 {
@@ -80,19 +100,24 @@ namespace Sharky
                 }
             };
 
+            if (queue)
+            {
+                action.ActionRaw.UnitCommand.QueueCommand = true;
+            }
+
             LastOrderFrame = frame;
 
-            return new List<Action> { action };
+            return new List<SC2APIProtocol.Action> { action };
         }
 
-        public Action Merge(ulong targetTag)
+        public SC2APIProtocol.Action Merge(ulong targetTag)
         {
             var command = new ActionRawUnitCommand();
             command.AbilityId = (int)Abilities.MORPH_ARCHON;
             command.UnitTags.Add(UnitCalculation.Unit.Tag);
             command.UnitTags.Add(targetTag);
 
-            var action = new Action
+            var action = new SC2APIProtocol.Action
             {
                 ActionRaw = new ActionRaw
                 {
@@ -142,7 +167,7 @@ namespace Sharky
             return true;
         }
 
-        public List<Action> UnloadSpecificUnit(int frame, Abilities ability, ulong targetTag, bool allowSpam = false)
+        public List<SC2APIProtocol.Action> UnloadSpecificUnit(int frame, Abilities ability, ulong targetTag, bool allowSpam = false)
         {
             if (!allowSpam && ability == LastAbility && targetTag == LastTargetTag && AbilityOrderTimes[ability] > frame - SpamFrames)
             {
@@ -158,7 +183,7 @@ namespace Sharky
             var selectionCommand = new ActionRawUnitCommand();
             selectionCommand.UnitTags.Add(UnitCalculation.Unit.Tag);
             selectionCommand.AbilityId = 0;
-            var selectAction = new Action
+            var selectAction = new SC2APIProtocol.Action
             {
                 ActionRaw = new ActionRaw
                 {
@@ -166,7 +191,7 @@ namespace Sharky
                 },
             };
 
-            var unloadAction = new Action
+            var unloadAction = new SC2APIProtocol.Action
             {
                 ActionUi = new ActionUI
                 {
@@ -180,7 +205,30 @@ namespace Sharky
             AbilityOrderTimes[ability] = frame;
             LastOrderFrame = frame;
 
-            return new List<Action> { selectAction, unloadAction };
+            return new List<SC2APIProtocol.Action> { selectAction, unloadAction };
+        }
+
+        bool EquivalentAbility(Abilities abilities, uint abilityId)
+        {
+            if ((uint)abilities == abilityId)
+            {
+                return true;
+            }
+            if (abilities == Abilities.HARVEST_RETURN)
+            {
+                if ((uint)Abilities.HARVEST_RETURN_DRONE == abilityId || (uint)Abilities.HARVEST_RETURN_PROBE == abilityId || (uint)Abilities.HARVEST_RETURN_SCV == abilityId || (uint)Abilities.HARVEST_RETURN_MULE == abilityId)
+                {
+                    return true;
+                }
+            }
+            if (abilities == Abilities.HARVEST_GATHER)
+            {
+                if ((uint)Abilities.HARVEST_GATHER_DRONE == abilityId || (uint)Abilities.HARVEST_GATHER_PROBE == abilityId || (uint)Abilities.HARVEST_GATHER_SCV == abilityId)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }

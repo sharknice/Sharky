@@ -128,7 +128,7 @@ namespace Sharky.MicroControllers.Protoss
         {
             if (supportableUnits == null)
             {
-                supportableUnits = ActiveUnitData.SelfUnits.Values.Where(u => u.Unit.UnitType != (uint)UnitTypes.PROTOSS_OBSERVER && u.UnitClassifications.Contains(UnitClassification.ArmyUnit));
+                supportableUnits = ActiveUnitData.SelfUnits.Values.Where(u => u.Unit.UnitType != (uint)UnitTypes.PROTOSS_OBSERVER && u.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !u.Unit.IsHallucination);
             }
 
             // no allies that already have a friendly observer within 4 range
