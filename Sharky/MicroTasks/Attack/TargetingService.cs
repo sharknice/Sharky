@@ -26,7 +26,7 @@ namespace Sharky.MicroTasks.Attack
 
         public Point2D UpdateAttackPoint(Point2D armyPoint, Point2D attackPoint)
         {
-            var enemyBuildings = ActiveUnitData.EnemyUnits.Where(e => e.Value.UnitTypeData.Attributes.Contains(SC2APIProtocol.Attribute.Structure));
+            var enemyBuildings = ActiveUnitData.EnemyUnits.Where(e => e.Value.UnitTypeData.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && e.Value.Unit.UnitType != (uint)UnitTypes.ZERG_CREEPTUMOR && e.Value.Unit.UnitType != (uint)UnitTypes.ZERG_CREEPTUMORBURROWED && e.Value.Unit.UnitType != (uint)UnitTypes.ZERG_CREEPTUMORQUEEN);
             var currentEnemyBuildingCount = enemyBuildings.Count();
 
             if (MapDataService.SelfVisible(attackPoint) || EnemyBuildingCount != currentEnemyBuildingCount)
