@@ -48,6 +48,7 @@ namespace Sharky.DefaultBot
         public NexusManager NexusManager { get; set; }
         public OrbitalManager OrbitalManager { get; set; }
         public ShieldBatteryManager ShieldBatteryManager { get; set; }
+        public PhotonCannonManager PhotonCannonManager { get; set; }
         public ChatManager ChatManager { get; set; }
         public MicroManager MicroManager { get; set; }
         public EnemyStrategyManager EnemyStrategyManager { get; set; }
@@ -207,6 +208,8 @@ namespace Sharky.DefaultBot
             Managers.Add(NexusManager);
             ShieldBatteryManager = new ShieldBatteryManager(ActiveUnitData);
             Managers.Add(ShieldBatteryManager);
+            PhotonCannonManager = new PhotonCannonManager(ActiveUnitData);
+            Managers.Add(PhotonCannonManager);
 
             OrbitalManager = new OrbitalManager(ActiveUnitData, BaseData, EnemyData);
             Managers.Add(OrbitalManager);

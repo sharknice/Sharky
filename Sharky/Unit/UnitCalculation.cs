@@ -62,6 +62,11 @@ namespace Sharky
         public UnitTypeData UnitTypeData { get; set; }
         public int FrameLastSeen { get; set; }
 
+        /// <summary>
+        /// amount of damage this unit will take from the next frame of attacks
+        /// </summary>
+        public float IncomingDamage { get; set; }
+
         float oneSecondInFrames;
 
         public UnitCalculation(Unit unit, int repairers, SharkyUnitData sharkyUnitData, SharkyOptions sharkyOptions, UnitDataService unitDataService, int frame)
@@ -220,6 +225,7 @@ namespace Sharky
             NearbyAllies = new List<UnitCalculation>();
             NearbyEnemies = new List<UnitCalculation>();
             Attackers = new List<UnitCalculation>();
+            IncomingDamage = 0;
         }
 
         public float SimulatedDamagePerSecond(IEnumerable<SC2APIProtocol.Attribute> includedAttributes, bool air, bool ground)

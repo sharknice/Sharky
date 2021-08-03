@@ -75,6 +75,11 @@ namespace Sharky.MicroTasks
             {
                 ScoutPoints = AreaService.GetTargetArea(TargetingData.EnemyMainBasePoint);
                 ScoutPoints.Add(BaseData.EnemyBaseLocations.Skip(1).First().Location);
+                var ramp = TargetingData.ChokePoints.Bad.FirstOrDefault();
+                if (ramp != null)
+                {
+                    ScoutPoints.Add(new Point2D { X = ramp.Center.X, Y = ramp.Center.Y });
+                }
             }
 
             var mainVector = new Vector2(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y);

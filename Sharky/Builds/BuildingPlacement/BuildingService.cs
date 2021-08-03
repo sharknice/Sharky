@@ -140,5 +140,14 @@ namespace Sharky.Builds.BuildingPlacement
 
             return gaps;
         }
+
+        public bool BlocksGas(float x, float y, float radius)
+        {
+            if (BaseData.BaseLocations.Any(b => b.VespeneGeysers.Any(g => Vector2.DistanceSquared(new Vector2(x, y), new Vector2(g.Pos.X, g.Pos.Y)) < (4 + radius) * (4 + radius))))
+            {
+                return true;
+            }
+            return false;
+        }
     }
 }

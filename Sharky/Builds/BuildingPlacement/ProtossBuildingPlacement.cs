@@ -73,7 +73,7 @@ namespace Sharky.Builds.BuildingPlacement
             while (radius < maxDistance / 2.0)
             {
                 var fullCircle = Math.PI * 2;
-                var sliceSize = fullCircle / (4.0 + radius);
+                var sliceSize = fullCircle / (8.0 + radius);
                 var angle = 0.0;
                 while (angle + (sliceSize / 2) < fullCircle)
                 {
@@ -251,7 +251,7 @@ namespace Sharky.Builds.BuildingPlacement
                             tooClose = true;
                         }
 
-                        if (!tooClose && (minimumMineralProximinity == 0 || !BuildingService.BlocksResourceCenter(point.X, point.Y, size + 1 / 2.0f)) && BuildingService.AreaBuildable(point.X, point.Y, size / 2.0f) && !BuildingService.Blocked(point.X, point.Y, size / 2.0f, 0) && !BuildingService.HasCreep(point.X, point.Y, size / 2.0f))
+                        if (!tooClose && (minimumMineralProximinity == 0 || !BuildingService.BlocksResourceCenter(point.X, point.Y, size + 1 / 2.0f)) && BuildingService.AreaBuildable(point.X, point.Y, size / 2.0f) && !BuildingService.Blocked(point.X, point.Y, size / 2.0f, 0) && !BuildingService.HasCreep(point.X, point.Y, size / 2.0f) && !BuildingService.BlocksGas(point.X, point.Y, size / 2.0f))
                         {
                             var mineralFields = ActiveUnitData.NeutralUnits.Where(u => SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType));
                             var squared = (1 + minimumMineralProximinity + (size / 2f)) * (1 + minimumMineralProximinity + (size / 2f));

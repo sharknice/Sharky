@@ -14,6 +14,8 @@ namespace Sharky.Builds
         protected ChatService ChatService;
         protected UnitCountService UnitCountService;
 
+        protected int StartFrame;
+
         public SharkyBuild(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, UnitCountService unitCountService)
         {
             BuildOptions = buildOptions;
@@ -36,6 +38,7 @@ namespace Sharky.Builds
         public virtual void StartBuild(int frame)
         {
             Console.WriteLine($"{frame} Build: {Name()}");
+            StartFrame = frame;
 
             BuildOptions.StrictGasCount = false;
             BuildOptions.StrictSupplyCount = false;

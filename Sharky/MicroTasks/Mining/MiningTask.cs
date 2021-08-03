@@ -436,7 +436,7 @@ namespace Sharky.MicroTasks
             {
                 foreach (var worker in miningAssignment.Workers)
                 {
-                    var action = worker.Order(frame, Abilities.HARVEST_GATHER, null, miningAssignment.ResourceUnit.Tag);
+                    var action = worker.Order(frame, Abilities.MOVE, miningAssignment.HarvestPoint);
                     if (action != null)
                     {
                         actions.AddRange(action);

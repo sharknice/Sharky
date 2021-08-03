@@ -61,7 +61,7 @@ namespace Sharky.MicroControllers.Protoss
             UnitCalculation bestAttack = null;
             if (attacks.Count > 0)
             {
-                var oneShotKills = attacks.Where(a => a.Unit.Health + a.Unit.Shield < GetDamage(commander.UnitCalculation.Weapon, a.Unit, a.UnitTypeData));
+                var oneShotKills = attacks.Where(a => a.Unit.Health + a.Unit.Shield < GetDamage(commander.UnitCalculation.Weapons, a.Unit, a.UnitTypeData));
                 if (oneShotKills.Count() > 0)
                 {
                     if (existingAttackOrder != null)

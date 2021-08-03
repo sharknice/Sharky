@@ -95,11 +95,19 @@ namespace Sharky.Pathing
 
         public bool SelfVisible(Point2D point)
         {
+            if (point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
+            {
+                return false;
+            }
             return MapData.Map[(int)point.X][(int)point.Y].InSelfVision;
         }
 
         public bool SelfVisible(Point point)
         {
+            if (point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
+            {
+                return false;
+            }
             return MapData.Map[(int)point.X][(int)point.Y].InSelfVision;
         }
 

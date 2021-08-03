@@ -50,7 +50,8 @@ namespace Sharky
             {
                 manager.OnEnd(observation, result);
             }
-            
+
+            Console.WriteLine($"Result: {result}");
             Console.WriteLine($"Total Frames: {observation.Observation.GameLoop}");
             Console.WriteLine($"Average Frame Time: {TotalFrameTime/ observation.Observation.GameLoop}");
         }
