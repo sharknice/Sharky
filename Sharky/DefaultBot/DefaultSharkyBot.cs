@@ -370,12 +370,12 @@ namespace Sharky.DefaultBot
 
             EmptyCounterTransitioner = new EmptyCounterTransitioner(EnemyData, SharkyOptions);
 
-            var antiMassMarine = new AntiMassMarine(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, EmptyCounterTransitioner, UnitCountService);
-            var fourGate = new FourGate(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, SharkyUnitData, EmptyCounterTransitioner, UnitCountService);
-            var nexusFirst = new NexusFirst(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, EmptyCounterTransitioner, UnitCountService);
+            var antiMassMarine = new AntiMassMarine(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, EmptyCounterTransitioner, UnitCountService, MicroTaskData);
+            var fourGate = new FourGate(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, SharkyUnitData, EmptyCounterTransitioner, UnitCountService, MicroTaskData);
+            var nexusFirst = new NexusFirst(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, EmptyCounterTransitioner, UnitCountService, MicroTaskData);
             var robo = new Robo(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, EnemyData, MicroTaskData, EmptyCounterTransitioner, UnitCountService);
             var protossRobo = new ProtossRobo(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, SharkyOptions, MicroTaskData, EnemyData, EmptyCounterTransitioner, UnitCountService);
-            var everyProtossUnit = new EveryProtossUnit(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, EmptyCounterTransitioner, UnitCountService);
+            var everyProtossUnit = new EveryProtossUnit(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, EmptyCounterTransitioner, UnitCountService, MicroTaskData);
 
             var protossBuilds = new Dictionary<string, ISharkyBuild>
             {
@@ -402,8 +402,8 @@ namespace Sharky.DefaultBot
                 ["Transition"] = protossSequences
             };
 
-            var massMarine = new MassMarines(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, UnitCountService);
-            var battleCruisers = new BattleCruisers(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, UnitCountService);
+            var massMarine = new MassMarines(BuildOptions, MacroData, ActiveUnitData, AttackData, MicroTaskData, ChatService, UnitCountService);
+            var battleCruisers = new BattleCruisers(BuildOptions, MacroData, ActiveUnitData, AttackData, MicroTaskData, ChatService, UnitCountService);
             var everyTerranUnit = new EveryTerranUnit(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, MicroTaskData, UnitCountService);
             var terranBuilds = new Dictionary<string, ISharkyBuild>
             {
@@ -427,7 +427,7 @@ namespace Sharky.DefaultBot
             };
 
             var basicZerglingRush = new BasicZerglingRush(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, MicroTaskData, UnitCountService);
-            var everyZergUnit = new EveryZergUnit(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, UnitCountService);
+            var everyZergUnit = new EveryZergUnit(BuildOptions, MacroData, ActiveUnitData, AttackData, MicroTaskData, ChatService, UnitCountService);
             var zergBuilds = new Dictionary<string, ISharkyBuild>
             {
                 [everyZergUnit.Name()] = everyZergUnit,

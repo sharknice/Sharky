@@ -6,15 +6,13 @@ namespace Sharky.Builds.Terran
 {
     public class EveryTerranUnit : TerranSharkyBuild
     {
-        MicroTaskData MicroTaskData;
         WorkerScoutTask WorkerScoutTask;
         ProxyScoutTask ProxyScoutTask;
         bool Scouted;
 
         public EveryTerranUnit(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, MicroTaskData microTaskData, UnitCountService unitCountService) 
-            : base(buildOptions, macroData, activeUnitData, attackData, chatService, unitCountService)
+            : base(buildOptions, macroData, activeUnitData, attackData, microTaskData, chatService, unitCountService)
         {
-           MicroTaskData = microTaskData;
             Scouted = false;
         }
 

@@ -18,7 +18,8 @@ namespace SharkyExampleBot.Builds
         bool OpeningAttackChatSent;
         ProxyTask ProxyTask;
 
-        public ReaperCheese(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, MicroTaskData microTaskData, UnitCountService unitCountService, SharkyUnitData sharkyUnitData, ProxyLocationService proxyLocationService, DebugService debugService, IIndividualMicroController scvMicroController) : base(buildOptions, macroData, activeUnitData, attackData, chatService, unitCountService)
+        public ReaperCheese(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, MicroTaskData microTaskData, UnitCountService unitCountService, SharkyUnitData sharkyUnitData, ProxyLocationService proxyLocationService, DebugService debugService, IIndividualMicroController scvMicroController) 
+            : base(buildOptions, macroData, activeUnitData, attackData, microTaskData, chatService, unitCountService)
         {
             MicroTaskData = microTaskData;
             ProxyLocationService = proxyLocationService;

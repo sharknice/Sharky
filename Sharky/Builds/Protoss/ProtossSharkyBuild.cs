@@ -9,8 +9,8 @@ namespace Sharky.Builds
         protected ChronoData ChronoData;
         protected ICounterTransitioner CounterTransitioner;
 
-        public ProtossSharkyBuild(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, ChronoData chronoData, ICounterTransitioner counterTransitioner, UnitCountService unitCountService) 
-            : base(buildOptions, macroData, activeUnitData, attackData, chatService, unitCountService)
+        public ProtossSharkyBuild(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, ChronoData chronoData, ICounterTransitioner counterTransitioner, UnitCountService unitCountService, MicroTaskData microTaskData) 
+            : base(buildOptions, macroData, activeUnitData, attackData, microTaskData, chatService, unitCountService)
         {
             ChronoData = chronoData;
             CounterTransitioner = counterTransitioner;

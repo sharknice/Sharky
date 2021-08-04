@@ -15,7 +15,6 @@ namespace SharkyExampleBot.Builds
     public class ProxyVoidRay : ProtossSharkyBuild
     {
         SharkyOptions SharkyOptions;
-        MicroTaskData MicroTaskData;
         SharkyUnitData SharkyUnitData;
         ProxyLocationService ProxyLocationService;
 
@@ -25,10 +24,9 @@ namespace SharkyExampleBot.Builds
         ProxyTask ProxyTask;
 
         public ProxyVoidRay(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, ChronoData chronoData, SharkyOptions sharkyOptions, MicroTaskData microTaskData, ICounterTransitioner counterTransitioner, SharkyUnitData sharkyUnitData, ProxyLocationService proxyLocationService, DebugService debugService, UnitCountService unitCountService, IIndividualMicroController probeMicroController) 
-            : base(buildOptions, macroData, activeUnitData, attackData, chatService, chronoData, counterTransitioner, unitCountService)
+            : base(buildOptions, macroData, activeUnitData, attackData, chatService, chronoData, counterTransitioner, unitCountService, microTaskData)
         {
             SharkyOptions = sharkyOptions;
-            MicroTaskData = microTaskData;
             SharkyUnitData = sharkyUnitData;
             ProxyLocationService = proxyLocationService;
 

@@ -13,7 +13,7 @@ namespace Sharky.Builds.Protoss
         EnemyData EnemyData;
 
         public ProtossRobo(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, ChronoData chronoData, SharkyOptions sharkyOptions, MicroTaskData microTaskData, EnemyData enemyData, ICounterTransitioner counterTransitioner, UnitCountService unitCountService) 
-            : base(buildOptions, macroData, activeUnitData, attackData, chatService, chronoData, counterTransitioner, unitCountService)
+            : base(buildOptions, macroData, activeUnitData, attackData, chatService, chronoData, counterTransitioner, unitCountService, microTaskData)
         {
             SharkyOptions = sharkyOptions;
            MicroTaskData = microTaskData;

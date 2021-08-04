@@ -5,8 +5,10 @@ namespace Sharky.Builds.Terran
 {
     public class MassMarines : TerranSharkyBuild
     {
-        public MassMarines(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, UnitCountService unitCountService) 
-            : base(buildOptions, macroData, activeUnitData, attackData, chatService, unitCountService)
+        public MassMarines(BuildOptions buildOptions, 
+            MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, MicroTaskData microTaskData,
+            ChatService chatService, UnitCountService unitCountService) 
+            : base(buildOptions, macroData, activeUnitData, attackData, microTaskData, chatService, unitCountService)
         {
 
         }

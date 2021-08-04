@@ -15,7 +15,10 @@ namespace SharkyExampleBot.Builds
 
         MicroTaskData MicroTaskData;
 
-        public BansheesAndMarines(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, MicroTaskData microTaskData, UnitCountService unitCountService) : base(buildOptions, macroData, activeUnitData, attackData, chatService, unitCountService)
+        public BansheesAndMarines(BuildOptions buildOptions, 
+            MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, 
+            ChatService chatService, MicroTaskData microTaskData, UnitCountService unitCountService) 
+            : base(buildOptions, macroData, activeUnitData, attackData, microTaskData, chatService, unitCountService)
         {
             MicroTaskData = microTaskData;
         }

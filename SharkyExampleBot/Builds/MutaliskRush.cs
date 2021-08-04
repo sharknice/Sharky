@@ -8,7 +8,9 @@ namespace SharkyExampleBot.Builds
 {
     public class MutaliskRush : ZergSharkyBuild
     {
-        public MutaliskRush(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, UnitCountService unitCountService) : base(buildOptions, macroData, activeUnitData, attackData, chatService, unitCountService)
+        public MutaliskRush(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, MicroTaskData microTaskData,
+            ChatService chatService, UnitCountService unitCountService) 
+            : base(buildOptions, macroData, activeUnitData, attackData, microTaskData, chatService, unitCountService)
         {
         }
 
@@ -67,11 +69,20 @@ namespace SharkyExampleBot.Builds
                 }
             }
 
-            if (UnitCountService.Completed(UnitTypes.ZERG_SPIRE) > 0)
+            if (UnitCountService.EquivalentTypeCompleted(UnitTypes.ZERG_SPIRE) > 0)
             {
                 if (MacroData.DesiredUnitCounts[UnitTypes.ZERG_MUTALISK] < 75)
                 {
                     MacroData.DesiredUnitCounts[UnitTypes.ZERG_MUTALISK] = 75;
+                }
+
+                if (MacroData.VespeneGas >= 100)
+                {
+                    MacroData.DesiredUnitCounts[UnitTypes.ZERG_ZERGLING] = 0;
+                }
+                else
+                {
+                    MacroData.DesiredUnitCounts[UnitTypes.ZERG_ZERGLING] = UnitCountService.Count(UnitTypes.ZERG_ZERGLING) + (UnitCountService.Count(UnitTypes.ZERG_LARVA) * 2);
                 }
 
                 if (MacroData.DesiredUnitCounts[UnitTypes.ZERG_OVERSEER] < 1)

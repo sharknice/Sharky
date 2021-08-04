@@ -5,12 +5,11 @@ namespace Sharky.Builds.Zerg
 {
     public class BasicZerglingRush : ZergSharkyBuild
     {
-        MicroTaskData MicroTaskData;
-
-        public BasicZerglingRush(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, MicroTaskData microTaskData, UnitCountService unitCountService) 
-            : base(buildOptions, macroData, activeUnitData, attackData, chatService, unitCountService)
+        public BasicZerglingRush(BuildOptions buildOptions, 
+            MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData,
+            ChatService chatService, MicroTaskData microTaskData, UnitCountService unitCountService) 
+            : base(buildOptions, macroData, activeUnitData, attackData, microTaskData, chatService, unitCountService)
         {
-           MicroTaskData = microTaskData;
         }
 
         public override void StartBuild(int frame)

@@ -9,8 +9,8 @@ namespace Sharky.Builds.Protoss
     {
        ICounterTransitioner ProtossCounterTransitioner;
 
-        public NexusFirstWithForge(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, ChronoData chronoData, ICounterTransitioner protossCounterTransitioner, UnitCountService unitCountService) 
-            : base(buildOptions, macroData, activeUnitData, attackData, chatService, chronoData, protossCounterTransitioner, unitCountService)
+        public NexusFirstWithForge(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, ChronoData chronoData, ICounterTransitioner protossCounterTransitioner, UnitCountService unitCountService, MicroTaskData microTaskData) 
+            : base(buildOptions, macroData, activeUnitData, attackData, chatService, chronoData, protossCounterTransitioner, unitCountService, microTaskData)
         {
             ProtossCounterTransitioner = protossCounterTransitioner;
         }

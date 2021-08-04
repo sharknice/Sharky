@@ -15,7 +15,7 @@ namespace Sharky.Builds.Protoss
 
         public WallOffTest(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, ChronoData chronoData, MicroTaskData microTaskData, 
             ICounterTransitioner counterTransitioner, UnitCountService unitCountService)
-            : base(buildOptions, macroData, activeUnitData, attackData, chatService, chronoData, counterTransitioner, unitCountService)
+            : base(buildOptions, macroData, activeUnitData, attackData, chatService, chronoData, counterTransitioner, unitCountService, microTaskData)
         {
             MicroTaskData = microTaskData;
 

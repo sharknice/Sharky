@@ -11,12 +11,15 @@ namespace Sharky.Builds
         protected MacroData MacroData;
         protected ActiveUnitData ActiveUnitData;
         protected AttackData AttackData;
+        protected MicroTaskData MicroTaskData;
+
         protected ChatService ChatService;
         protected UnitCountService UnitCountService;
 
         protected int StartFrame;
 
-        public SharkyBuild(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, UnitCountService unitCountService)
+        public SharkyBuild(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, MicroTaskData microTaskData,
+            ChatService chatService, UnitCountService unitCountService)
         {
             BuildOptions = buildOptions;
             MacroData = macroData;
@@ -24,6 +27,7 @@ namespace Sharky.Builds
             AttackData = attackData;
             ChatService = chatService;
             UnitCountService = unitCountService;
+            MicroTaskData = microTaskData;
         }
 
         public string Name()
@@ -68,6 +72,11 @@ namespace Sharky.Builds
             else if (MacroData.Race == SC2APIProtocol.Race.Zerg)
             {
                 MacroData.DesiredProductionCounts[UnitTypes.ZERG_HATCHERY] = 1;
+            }
+
+            if (MicroTaskData.MicroTasks.ContainsKey("AttackTask"))
+            {
+                MicroTaskData.MicroTasks["AttackTask"].Enable();
             }
         }
 
