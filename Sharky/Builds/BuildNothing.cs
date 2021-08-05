@@ -1,5 +1,6 @@
 ﻿using SC2APIProtocol;
 using Sharky.Chat;
+using Sharky.DefaultBot;
 using System;
 using System.Linq;
 
@@ -7,11 +8,14 @@ namespace Sharky.Builds
 {
     public class BuildNothing : SharkyBuild
     {
+        public BuildNothing(DefaultSharkyBot defaultSharkyBot) : base(defaultSharkyBot)
+        {
+        }
+
         public BuildNothing(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, MicroTaskData microTaskData,
             ChatService chatService, UnitCountService unitCountService) 
             : base(buildOptions, macroData, activeUnitData, attackData, microTaskData, chatService, unitCountService)
         {
-
         }
 
         public override void StartBuild(int frame)

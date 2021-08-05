@@ -2,6 +2,7 @@
 using Sharky.Builds;
 using Sharky.Builds.BuildChoosing;
 using Sharky.Chat;
+using Sharky.DefaultBot;
 using Sharky.EnemyPlayer;
 using Sharky.EnemyStrategies;
 using System;
@@ -31,6 +32,17 @@ namespace Sharky.Managers
         protected EnemyPlayer.EnemyPlayer EnemyPlayer;
         protected ChatHistory ChatHistory;
         protected EnemyStrategyHistory EnemyStrategyHistory;
+
+        public BuildManager(DefaultSharkyBot defaultSharkyBot)
+        {
+            BuildChoices = defaultSharkyBot.BuildChoices;
+            DebugService = defaultSharkyBot.DebugService;
+            MacroBalancer = defaultSharkyBot.MacroBalancer;
+            BuildDecisionService = defaultSharkyBot.BuildDecisionService;
+            EnemyPlayerService = defaultSharkyBot.EnemyPlayerService;
+            ChatHistory = defaultSharkyBot.ChatHistory;
+            EnemyStrategyHistory = defaultSharkyBot.EnemyStrategyHistory;
+        }
 
         public BuildManager(Dictionary<Race, BuildChoices> buildChoices, DebugService debugService, IMacroBalancer macroBalancer, IBuildDecisionService buildDecisionService, IEnemyPlayerService enemyPlayerService, ChatHistory chatHistory, EnemyStrategyHistory enemyStrategyHistory)
         {
