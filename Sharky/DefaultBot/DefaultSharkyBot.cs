@@ -402,7 +402,7 @@ namespace Sharky.DefaultBot
                 ["Transition"] = protossSequences
             };
 
-            var massMarine = new MassMarines(BuildOptions, MacroData, ActiveUnitData, AttackData, MicroTaskData, ChatService, UnitCountService);
+            var massMarine = new MassMarines(this);
             var battleCruisers = new BattleCruisers(BuildOptions, MacroData, ActiveUnitData, AttackData, MicroTaskData, ChatService, UnitCountService);
             var everyTerranUnit = new EveryTerranUnit(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, MicroTaskData, UnitCountService);
             var terranBuilds = new Dictionary<string, ISharkyBuild>

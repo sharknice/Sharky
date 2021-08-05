@@ -16,17 +16,17 @@ namespace SharkyExampleBot
         public static BuildChoices GetProtossBuildChoices(DefaultSharkyBot defaultSharkyBot)
         {
             // we can use this to switch builds mid-game if we detect certain strategies (it can also be handled specificly for each build)
-            var protossCounterTransitioner = new ProtossCounterTransitioner(defaultSharkyBot.EnemyData, defaultSharkyBot.SharkyOptions);
+            var protossCounterTransitioner = new ProtossCounterTransitioner(defaultSharkyBot);
 
             // a probe microcontroller for our proxy builds
-            var probeMicroController = new IndividualMicroController(defaultSharkyBot.MapDataService, defaultSharkyBot.SharkyUnitData, defaultSharkyBot.ActiveUnitData, defaultSharkyBot.DebugService, defaultSharkyBot.SharkyPathFinder, defaultSharkyBot.BaseData, defaultSharkyBot.SharkyOptions, defaultSharkyBot.DamageService, defaultSharkyBot.UnitDataService, defaultSharkyBot.TargetingData, MicroPriority.JustLive, false);
+            var probeMicroController = new IndividualMicroController(defaultSharkyBot, MicroPriority.JustLive, false);
 
             // We create all of our builds
-            var proxyVoidRay = new ProxyVoidRay(defaultSharkyBot.BuildOptions, defaultSharkyBot.MacroData, defaultSharkyBot.ActiveUnitData, defaultSharkyBot.AttackData, defaultSharkyBot.ChatService, defaultSharkyBot.ChronoData, defaultSharkyBot.SharkyOptions, defaultSharkyBot.MicroTaskData, protossCounterTransitioner, defaultSharkyBot.SharkyUnitData, defaultSharkyBot.ProxyLocationService, defaultSharkyBot.DebugService, defaultSharkyBot.UnitCountService, probeMicroController);
-            var zealotRush = new ZealotRush(defaultSharkyBot.BuildOptions, defaultSharkyBot.MacroData, defaultSharkyBot.ActiveUnitData, defaultSharkyBot.AttackData, defaultSharkyBot.ChatService, defaultSharkyBot.ChronoData, protossCounterTransitioner, defaultSharkyBot.UnitCountService, defaultSharkyBot.MicroTaskData);
-            var robo = new Robo(defaultSharkyBot.BuildOptions, defaultSharkyBot.MacroData, defaultSharkyBot.ActiveUnitData, defaultSharkyBot.AttackData, defaultSharkyBot.ChatService, defaultSharkyBot.ChronoData, defaultSharkyBot.EnemyData, defaultSharkyBot.MicroTaskData, protossCounterTransitioner, defaultSharkyBot.UnitCountService);
-            var nexusFirst = new NexusFirst(defaultSharkyBot.BuildOptions, defaultSharkyBot.MacroData, defaultSharkyBot.ActiveUnitData, defaultSharkyBot.AttackData, defaultSharkyBot.ChatService, defaultSharkyBot.ChronoData, protossCounterTransitioner, defaultSharkyBot.UnitCountService, defaultSharkyBot.MicroTaskData);
-            var protossRobo = new ProtossRobo(defaultSharkyBot.BuildOptions, defaultSharkyBot.MacroData, defaultSharkyBot.ActiveUnitData, defaultSharkyBot.AttackData, defaultSharkyBot.ChatService, defaultSharkyBot.ChronoData, defaultSharkyBot.SharkyOptions, defaultSharkyBot.MicroTaskData, defaultSharkyBot.EnemyData, protossCounterTransitioner, defaultSharkyBot.UnitCountService);
+            var proxyVoidRay = new ProxyVoidRay(defaultSharkyBot, protossCounterTransitioner, probeMicroController);
+            var zealotRush = new ZealotRush(defaultSharkyBot, protossCounterTransitioner);
+            var robo = new Robo(defaultSharkyBot, protossCounterTransitioner);
+            var nexusFirst = new NexusFirst(defaultSharkyBot, protossCounterTransitioner);
+            var protossRobo = new ProtossRobo(defaultSharkyBot, protossCounterTransitioner);
 
             // We add all the builds to a build dictionary which we will later pass to the BuildChoices. 
             var protossBuilds = new Dictionary<string, ISharkyBuild>
@@ -69,8 +69,8 @@ namespace SharkyExampleBot
 
         public static BuildChoices GetZergBuildChoices(DefaultSharkyBot defaultSharkyBot)
         {
-            var zerglingRush = new BasicZerglingRush(defaultSharkyBot.BuildOptions, defaultSharkyBot.MacroData, defaultSharkyBot.ActiveUnitData, defaultSharkyBot.AttackData, defaultSharkyBot.ChatService, defaultSharkyBot.MicroTaskData, defaultSharkyBot.UnitCountService);
-            var mutaliskRush = new MutaliskRush(defaultSharkyBot.BuildOptions, defaultSharkyBot.MacroData, defaultSharkyBot.ActiveUnitData, defaultSharkyBot.AttackData, defaultSharkyBot.MicroTaskData, defaultSharkyBot.ChatService, defaultSharkyBot.UnitCountService);
+            var zerglingRush = new BasicZerglingRush(defaultSharkyBot);
+            var mutaliskRush = new MutaliskRush(defaultSharkyBot);
 
             var zergBuilds = new Dictionary<string, ISharkyBuild>
             {
@@ -98,11 +98,11 @@ namespace SharkyExampleBot
 
         public static BuildChoices GetTerranBuildChoices(DefaultSharkyBot defaultSharkyBot)
         {
-            var scveMicroController = new IndividualMicroController(defaultSharkyBot.MapDataService, defaultSharkyBot.SharkyUnitData, defaultSharkyBot.ActiveUnitData, defaultSharkyBot.DebugService, defaultSharkyBot.SharkyPathFinder, defaultSharkyBot.BaseData, defaultSharkyBot.SharkyOptions, defaultSharkyBot.DamageService, defaultSharkyBot.UnitDataService, defaultSharkyBot.TargetingData, MicroPriority.JustLive, false);
+            var scveMicroController = new IndividualMicroController(defaultSharkyBot, MicroPriority.JustLive, false);
 
-            var massMarines = new MassMarines(defaultSharkyBot.BuildOptions, defaultSharkyBot.MacroData, defaultSharkyBot.ActiveUnitData, defaultSharkyBot.AttackData, defaultSharkyBot.MicroTaskData, defaultSharkyBot.ChatService, defaultSharkyBot.UnitCountService);
-            var bansheesAndMarines = new BansheesAndMarines(defaultSharkyBot.BuildOptions, defaultSharkyBot.MacroData, defaultSharkyBot.ActiveUnitData, defaultSharkyBot.AttackData, defaultSharkyBot.ChatService, defaultSharkyBot.MicroTaskData, defaultSharkyBot.UnitCountService);
-            var reaperCheese = new ReaperCheese(defaultSharkyBot.BuildOptions, defaultSharkyBot.MacroData, defaultSharkyBot.ActiveUnitData, defaultSharkyBot.AttackData, defaultSharkyBot.ChatService, defaultSharkyBot.MicroTaskData, defaultSharkyBot.UnitCountService, defaultSharkyBot.SharkyUnitData, defaultSharkyBot.ProxyLocationService, defaultSharkyBot.DebugService, scveMicroController);
+            var massMarines = new MassMarines(defaultSharkyBot);
+            var bansheesAndMarines = new BansheesAndMarines(defaultSharkyBot);
+            var reaperCheese = new ReaperCheese(defaultSharkyBot, scveMicroController);
 
             var builds = new Dictionary<string, ISharkyBuild>
             {

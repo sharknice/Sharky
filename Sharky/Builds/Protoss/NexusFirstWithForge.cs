@@ -1,18 +1,21 @@
 ﻿using SC2APIProtocol;
 using Sharky.Builds.BuildChoosing;
 using Sharky.Chat;
+using Sharky.DefaultBot;
 using System.Collections.Generic;
 
 namespace Sharky.Builds.Protoss
 {
     public class NexusFirstWithForge : ProtossSharkyBuild
     {
-       ICounterTransitioner ProtossCounterTransitioner;
-
-        public NexusFirstWithForge(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, ChronoData chronoData, ICounterTransitioner protossCounterTransitioner, UnitCountService unitCountService, MicroTaskData microTaskData) 
-            : base(buildOptions, macroData, activeUnitData, attackData, chatService, chronoData, protossCounterTransitioner, unitCountService, microTaskData)
+        public NexusFirstWithForge(DefaultSharkyBot defaultSharkyBot, ICounterTransitioner counterTransitioner)
+            : base(defaultSharkyBot, counterTransitioner)
         {
-            ProtossCounterTransitioner = protossCounterTransitioner;
+        }
+
+        public NexusFirstWithForge(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, ChronoData chronoData, ICounterTransitioner counterTransitioner, UnitCountService unitCountService, MicroTaskData microTaskData) 
+            : base(buildOptions, macroData, activeUnitData, attackData, chatService, chronoData, counterTransitioner, unitCountService, microTaskData)
+        {
         }
 
         public override void StartBuild(int frame)
@@ -76,11 +79,6 @@ namespace Sharky.Builds.Protoss
         public override bool Transition(int frame)
         {
             return UnitCountService.Count(UnitTypes.PROTOSS_NEXUS) > 1 && UnitCountService.Count(UnitTypes.PROTOSS_CYBERNETICSCORE) > 0;
-        }
-
-        public override List<string> CounterTransition(int frame)
-        {
-            return ProtossCounterTransitioner.DefaultCounterTransition(frame);
         }
     }
 }

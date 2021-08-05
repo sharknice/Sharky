@@ -1,10 +1,15 @@
 ﻿using SC2APIProtocol;
 using Sharky.Chat;
+using Sharky.DefaultBot;
 
 namespace Sharky.Builds.Zerg
 {
     public class BasicZerglingRush : ZergSharkyBuild
     {
+        public BasicZerglingRush(DefaultSharkyBot defaultSharkyBot) : base(defaultSharkyBot)
+        {
+        }
+
         public BasicZerglingRush(BuildOptions buildOptions, 
             MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData,
             ChatService chatService, MicroTaskData microTaskData, UnitCountService unitCountService) 

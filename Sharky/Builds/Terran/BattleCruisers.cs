@@ -1,10 +1,15 @@
 ﻿using SC2APIProtocol;
 using Sharky.Chat;
+using Sharky.DefaultBot;
 
 namespace Sharky.Builds.Terran
 {
     public class BattleCruisers : TerranSharkyBuild
     {
+        public BattleCruisers(DefaultSharkyBot defaultSharkyBot) : base(defaultSharkyBot)
+        {
+        }
+
         public BattleCruisers(BuildOptions buildOptions, 
             MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, MicroTaskData microTaskData, 
             ChatService chatService, UnitCountService unitCountService) 

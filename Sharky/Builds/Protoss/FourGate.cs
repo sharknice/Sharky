@@ -1,6 +1,7 @@
 ﻿using SC2APIProtocol;
 using Sharky.Builds.BuildChoosing;
 using Sharky.Chat;
+using Sharky.DefaultBot;
 using System.Collections.Generic;
 
 namespace Sharky.Builds.Protoss
@@ -10,6 +11,14 @@ namespace Sharky.Builds.Protoss
         SharkyUnitData SharkyUnitData;
 
         bool OpeningAttackChatSent;
+
+        public FourGate(DefaultSharkyBot defaultSharkyBot, ICounterTransitioner counterTransitioner)
+            : base(defaultSharkyBot, counterTransitioner)
+        {
+            SharkyUnitData = defaultSharkyBot.SharkyUnitData;
+
+            OpeningAttackChatSent = false;
+        }
 
         public FourGate(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, ChronoData chronoData, SharkyUnitData sharkyUnitData, ICounterTransitioner counterTransitioner, UnitCountService unitCountService, MicroTaskData microTaskData) 
             : base(buildOptions, macroData, activeUnitData, attackData, chatService, chronoData, counterTransitioner, unitCountService, microTaskData)

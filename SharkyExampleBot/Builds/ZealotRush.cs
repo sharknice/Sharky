@@ -3,6 +3,7 @@ using Sharky;
 using Sharky.Builds;
 using Sharky.Builds.BuildChoosing;
 using Sharky.Chat;
+using Sharky.DefaultBot;
 using System.Collections.Generic;
 
 namespace SharkyExampleBot.Builds
@@ -11,8 +12,8 @@ namespace SharkyExampleBot.Builds
     {
         bool OpeningAttackChatSent;
 
-        public ZealotRush(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, ChronoData chronoData, ICounterTransitioner counterTransitioner, UnitCountService unitCountService, MicroTaskData microTaskData) 
-            : base(buildOptions, macroData, activeUnitData, attackData, chatService, chronoData, counterTransitioner, unitCountService, microTaskData)
+        public ZealotRush(DefaultSharkyBot defaultSharkyBot, ICounterTransitioner counterTransitioner)
+            : base(defaultSharkyBot, counterTransitioner)
         {
             OpeningAttackChatSent = false;
         }

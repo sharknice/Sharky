@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using Sharky.DefaultBot;
 using Sharky.Pathing;
 using Sharky.S2ClientTypeEnums;
 using System;
@@ -44,6 +45,30 @@ namespace Sharky.MicroControllers
             DamageService = damageService;
             UnitDataService = unitDataService;
             TargetingData = targetingData;
+
+            GroupUpDistanceSmall = 5;
+            GroupUpDistance = 10;
+            GroupUpDistanceMax = 50;
+            AvoidDamageDistance = avoidDamageDistance;
+            LooseFormationDistance = 1.75f;
+        }
+
+        public IndividualMicroController(DefaultSharkyBot defaultSharkyBot, MicroPriority microPriority, bool groupUpEnabled, float avoidDamageDistance = .5f)
+        {
+            MapDataService = defaultSharkyBot.MapDataService;
+            SharkyUnitData = defaultSharkyBot.SharkyUnitData;
+            ActiveUnitData = defaultSharkyBot.ActiveUnitData;
+            DebugService = defaultSharkyBot.DebugService;
+            SharkyPathFinder = defaultSharkyBot.SharkyPathFinder;
+            BaseData = defaultSharkyBot.BaseData;
+            SharkyOptions = defaultSharkyBot.SharkyOptions;
+
+            MicroPriority = microPriority;
+            GroupUpEnabled = groupUpEnabled;
+
+            DamageService = defaultSharkyBot.DamageService;
+            UnitDataService = defaultSharkyBot.UnitDataService;
+            TargetingData = defaultSharkyBot.TargetingData;
 
             GroupUpDistanceSmall = 5;
             GroupUpDistance = 10;

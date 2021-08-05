@@ -1,10 +1,15 @@
 ﻿using SC2APIProtocol;
 using Sharky.Chat;
+using Sharky.DefaultBot;
 
 namespace Sharky.Builds.Zerg
 {
     public class EveryZergUnit : ZergSharkyBuild
     {
+        public EveryZergUnit(DefaultSharkyBot defaultSharkyBot) : base(defaultSharkyBot)
+        {
+        }
+
         public EveryZergUnit(BuildOptions buildOptions, 
             MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, MicroTaskData microTaskData,
             ChatService chatService, UnitCountService unitCountService) 

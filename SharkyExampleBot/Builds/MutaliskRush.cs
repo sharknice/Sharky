@@ -2,15 +2,13 @@
 using Sharky;
 using Sharky.Builds;
 using Sharky.Builds.Zerg;
-using Sharky.Chat;
+using Sharky.DefaultBot;
 
 namespace SharkyExampleBot.Builds
 {
     public class MutaliskRush : ZergSharkyBuild
     {
-        public MutaliskRush(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, MicroTaskData microTaskData,
-            ChatService chatService, UnitCountService unitCountService) 
-            : base(buildOptions, macroData, activeUnitData, attackData, microTaskData, chatService, unitCountService)
+        public MutaliskRush(DefaultSharkyBot defaultSharkyBot) : base(defaultSharkyBot)
         {
         }
 

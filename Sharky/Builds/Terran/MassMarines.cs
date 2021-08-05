@@ -1,16 +1,12 @@
 ﻿using SC2APIProtocol;
-using Sharky.Chat;
+using Sharky.DefaultBot;
 
 namespace Sharky.Builds.Terran
 {
     public class MassMarines : TerranSharkyBuild
     {
-        public MassMarines(BuildOptions buildOptions, 
-            MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, MicroTaskData microTaskData,
-            ChatService chatService, UnitCountService unitCountService) 
-            : base(buildOptions, macroData, activeUnitData, attackData, microTaskData, chatService, unitCountService)
+        public MassMarines(DefaultSharkyBot defaultSharkyBot) : base(defaultSharkyBot)
         {
-
         }
 
         public override void StartBuild(int frame)

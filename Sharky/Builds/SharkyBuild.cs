@@ -1,5 +1,6 @@
 ﻿using SC2APIProtocol;
 using Sharky.Chat;
+using Sharky.DefaultBot;
 using System;
 using System.Collections.Generic;
 
@@ -17,6 +18,17 @@ namespace Sharky.Builds
         protected UnitCountService UnitCountService;
 
         protected int StartFrame;
+
+        public SharkyBuild(DefaultSharkyBot defaultSharkyBot)
+        {
+            BuildOptions = defaultSharkyBot.BuildOptions;
+            MacroData = defaultSharkyBot.MacroData;
+            ActiveUnitData = defaultSharkyBot.ActiveUnitData;
+            AttackData = defaultSharkyBot.AttackData;
+            ChatService = defaultSharkyBot.ChatService;
+            UnitCountService = defaultSharkyBot.UnitCountService;
+            MicroTaskData = defaultSharkyBot.MicroTaskData;
+        }
 
         public SharkyBuild(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, MicroTaskData microTaskData,
             ChatService chatService, UnitCountService unitCountService)

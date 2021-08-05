@@ -2,7 +2,7 @@
 using Sharky;
 using Sharky.Builds;
 using Sharky.Builds.Terran;
-using Sharky.Chat;
+using Sharky.DefaultBot;
 using Sharky.MicroTasks;
 
 namespace SharkyExampleBot.Builds
@@ -13,14 +13,8 @@ namespace SharkyExampleBot.Builds
         ProxyScoutTask ProxyScoutTask;
         bool Scouted;
 
-        MicroTaskData MicroTaskData;
-
-        public BansheesAndMarines(BuildOptions buildOptions, 
-            MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, 
-            ChatService chatService, MicroTaskData microTaskData, UnitCountService unitCountService) 
-            : base(buildOptions, macroData, activeUnitData, attackData, microTaskData, chatService, unitCountService)
+        public BansheesAndMarines(DefaultSharkyBot defaultSharkyBot) : base(defaultSharkyBot)
         {
-            MicroTaskData = microTaskData;
         }
 
         public override void StartBuild(int frame)
@@ -40,6 +34,13 @@ namespace SharkyExampleBot.Builds
         }
 
         public override void OnFrame(ResponseObservation observation)
+        {
+            Opening();
+            TechUp();
+            LateGame();
+        }
+
+        private void Opening()
         {
             if (MacroData.FoodUsed >= 15)
             {
@@ -65,7 +66,26 @@ namespace SharkyExampleBot.Builds
                     MacroData.DesiredUnitCounts[UnitTypes.TERRAN_MARINE] = 20;
                 }
             }
+        }
 
+        private void Scout()
+        {
+            if (!Scouted)
+            {
+                if (WorkerScoutTask != null)
+                {
+                    WorkerScoutTask.Enable();
+                }
+                if (ProxyScoutTask != null)
+                {
+                    ProxyScoutTask.Enable();
+                }
+                Scouted = true;
+            }
+        }
+
+        private void TechUp()
+        {
             if (UnitCountService.Completed(UnitTypes.TERRAN_BARRACKS) > 0 && UnitCountService.EquivalentTypeCount(UnitTypes.TERRAN_COMMANDCENTER) >= 2)
             {
                 BuildOptions.StrictGasCount = false;
@@ -105,7 +125,9 @@ namespace SharkyExampleBot.Builds
                     MacroData.DesiredProductionCounts[UnitTypes.TERRAN_STARPORT] = 2;
                 }
             }
-
+        }
+        private void LateGame()
+        {
             if (UnitCountService.Count(UnitTypes.TERRAN_STARPORT) > 0)
             {
                 if (MacroData.DesiredProductionCounts[UnitTypes.TERRAN_BARRACKS] < 2)
@@ -141,6 +163,12 @@ namespace SharkyExampleBot.Builds
                 }
             }
 
+            ExpandProduction();
+            ExpandForever();
+        }
+
+        private void ExpandProduction()
+        {
             if (UnitCountService.EquivalentTypeCompleted(UnitTypes.TERRAN_COMMANDCENTER) > 2)
             {
                 if (MacroData.DesiredUnitCounts[UnitTypes.TERRAN_RAVEN] < 1)
@@ -166,29 +194,16 @@ namespace SharkyExampleBot.Builds
                     MacroData.DesiredAddOnCounts[UnitTypes.TERRAN_BARRACKSREACTOR] = 3;
                 }
             }
+        }
 
+        private void ExpandForever()
+        {
             if (MacroData.Minerals > 500)
             {
                 if (MacroData.DesiredProductionCounts[UnitTypes.TERRAN_COMMANDCENTER] <= UnitCountService.EquivalentTypeCount(UnitTypes.TERRAN_COMMANDCENTER))
                 {
                     MacroData.DesiredProductionCounts[UnitTypes.TERRAN_COMMANDCENTER]++;
                 }
-            }
-        }
-
-        private void Scout()
-        {
-            if (!Scouted)
-            {
-                if (WorkerScoutTask != null)
-                {
-                    WorkerScoutTask.Enable();
-                }
-                if (ProxyScoutTask != null)
-                {
-                    ProxyScoutTask.Enable();
-                }
-                Scouted = true;
             }
         }
     }

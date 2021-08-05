@@ -3,6 +3,7 @@ using Sharky;
 using Sharky.Builds;
 using Sharky.Builds.BuildChoosing;
 using Sharky.Chat;
+using Sharky.DefaultBot;
 using Sharky.MicroControllers;
 using Sharky.MicroTasks;
 using Sharky.Proxy;
@@ -23,17 +24,17 @@ namespace SharkyExampleBot.Builds
 
         ProxyTask ProxyTask;
 
-        public ProxyVoidRay(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, ChronoData chronoData, SharkyOptions sharkyOptions, MicroTaskData microTaskData, ICounterTransitioner counterTransitioner, SharkyUnitData sharkyUnitData, ProxyLocationService proxyLocationService, DebugService debugService, UnitCountService unitCountService, IIndividualMicroController probeMicroController) 
-            : base(buildOptions, macroData, activeUnitData, attackData, chatService, chronoData, counterTransitioner, unitCountService, microTaskData)
+        public ProxyVoidRay(DefaultSharkyBot defaultSharkyBot, ICounterTransitioner counterTransitioner, IIndividualMicroController probeMicroController) 
+            : base(defaultSharkyBot, counterTransitioner)
         {
-            SharkyOptions = sharkyOptions;
-            SharkyUnitData = sharkyUnitData;
-            ProxyLocationService = proxyLocationService;
+            SharkyOptions = defaultSharkyBot.SharkyOptions;
+            SharkyUnitData = defaultSharkyBot.SharkyUnitData;
+            ProxyLocationService = defaultSharkyBot.ProxyLocationService;
 
             OpeningAttackChatSent = false;
             CancelledProxyChatSent = false;
 
-            ProxyTask = new ProxyTask(SharkyUnitData, false, 0.9f, MacroData, string.Empty, MicroTaskData, debugService, probeMicroController);
+            ProxyTask = new ProxyTask(SharkyUnitData, false, 0.9f, MacroData, string.Empty, MicroTaskData, defaultSharkyBot.DebugService, probeMicroController);
             ProxyTask.ProxyName = GetType().Name;
         }
 

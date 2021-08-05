@@ -3,6 +3,7 @@ using Sharky;
 using Sharky.Builds;
 using Sharky.Builds.Terran;
 using Sharky.Chat;
+using Sharky.DefaultBot;
 using Sharky.MicroControllers;
 using Sharky.MicroTasks;
 using Sharky.Proxy;
@@ -12,20 +13,17 @@ namespace SharkyExampleBot.Builds
 {
     public class ReaperCheese : TerranSharkyBuild
     {
-        MicroTaskData MicroTaskData;
         ProxyLocationService ProxyLocationService;
 
         bool OpeningAttackChatSent;
         ProxyTask ProxyTask;
 
-        public ReaperCheese(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, MicroTaskData microTaskData, UnitCountService unitCountService, SharkyUnitData sharkyUnitData, ProxyLocationService proxyLocationService, DebugService debugService, IIndividualMicroController scvMicroController) 
-            : base(buildOptions, macroData, activeUnitData, attackData, microTaskData, chatService, unitCountService)
+        public ReaperCheese(DefaultSharkyBot defaultSharkyBot, IIndividualMicroController scvMicroController) : base(defaultSharkyBot)
         {
-            MicroTaskData = microTaskData;
-            ProxyLocationService = proxyLocationService;
+            ProxyLocationService = defaultSharkyBot.ProxyLocationService;
 
             OpeningAttackChatSent = false;
-            ProxyTask = new ProxyTask(sharkyUnitData, false, 0.9f, MacroData, string.Empty, MicroTaskData, debugService, scvMicroController);
+            ProxyTask = new ProxyTask(defaultSharkyBot.SharkyUnitData, false, 0.9f, MacroData, string.Empty, MicroTaskData, defaultSharkyBot.DebugService, scvMicroController);
             ProxyTask.ProxyName = GetType().Name;
         }
 

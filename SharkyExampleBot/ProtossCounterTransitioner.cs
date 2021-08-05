@@ -1,5 +1,6 @@
 ﻿using Sharky;
 using Sharky.Builds.BuildChoosing;
+using Sharky.DefaultBot;
 using System.Collections.Generic;
 
 namespace SharkyExampleBot
@@ -9,10 +10,10 @@ namespace SharkyExampleBot
         EnemyData EnemyData;
         SharkyOptions SharkyOptions;
 
-        public ProtossCounterTransitioner(EnemyData enemyData, SharkyOptions sharkyOptions)
+        public ProtossCounterTransitioner(DefaultSharkyBot defaultSharkyBot)
         {
-            EnemyData = enemyData;
-            SharkyOptions = sharkyOptions;
+            EnemyData = defaultSharkyBot.EnemyData;
+            SharkyOptions = defaultSharkyBot.SharkyOptions;
         }
 
         public List<string> DefaultCounterTransition(int frame)
