@@ -5,7 +5,7 @@ namespace Sharky.EnemyStrategies
 {
     public class InvisibleAttacks : EnemyStrategy
     {
-        public InvisibleAttacks(EnemyStrategyHistory enemyStrategyHistory, ChatService chatService, ActiveUnitData activeUnitData, SharkyOptions sharkyOptions, DebugService debugService, UnitCountService unitCountService)
+        public InvisibleAttacks(EnemyStrategyHistory enemyStrategyHistory, ChatService chatService, ActiveUnitData activeUnitData, SharkyOptions sharkyOptions, DebugService debugService, UnitCountService unitCountService, FrameToTimeConverter frameToTimeConverter)
         {
             EnemyStrategyHistory = enemyStrategyHistory;
             ChatService = chatService;
@@ -13,6 +13,7 @@ namespace Sharky.EnemyStrategies
             SharkyOptions = sharkyOptions;
             DebugService = debugService;
             UnitCountService = unitCountService;
+            FrameToTimeConverter = frameToTimeConverter;
         }
 
         protected override bool Detect(int frame)

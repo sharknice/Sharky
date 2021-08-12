@@ -8,7 +8,7 @@ namespace Sharky.EnemyStrategies.Terran
     {
         TargetingData TargetingData;
 
-        public BunkerRush(EnemyStrategyHistory enemyStrategyHistory, ChatService chatService, ActiveUnitData activeUnitData, SharkyOptions sharkyOptions, TargetingData targetingData, DebugService debugService, UnitCountService unitCountService)
+        public BunkerRush(EnemyStrategyHistory enemyStrategyHistory, ChatService chatService, ActiveUnitData activeUnitData, SharkyOptions sharkyOptions, TargetingData targetingData, DebugService debugService, UnitCountService unitCountService, FrameToTimeConverter frameToTimeConverter)
         {
             EnemyStrategyHistory = enemyStrategyHistory;
             ChatService = chatService;
@@ -17,6 +17,7 @@ namespace Sharky.EnemyStrategies.Terran
             TargetingData = targetingData;
             DebugService = debugService;
             UnitCountService = unitCountService;
+            FrameToTimeConverter = frameToTimeConverter;
         }
 
         protected override bool Detect(int frame)

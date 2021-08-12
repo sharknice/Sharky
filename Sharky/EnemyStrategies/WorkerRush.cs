@@ -8,7 +8,7 @@ namespace Sharky.EnemyStrategies
     {
         TargetingData TargetingData;
 
-        public WorkerRush(EnemyStrategyHistory enemyStrategyHistory, ChatService chatService, ActiveUnitData activeUnitData, SharkyOptions sharkyOptions, TargetingData targetingData, DebugService debugService, UnitCountService unitCountService)
+        public WorkerRush(EnemyStrategyHistory enemyStrategyHistory, ChatService chatService, ActiveUnitData activeUnitData, SharkyOptions sharkyOptions, TargetingData targetingData, DebugService debugService, UnitCountService unitCountService, FrameToTimeConverter frameToTimeConverter)
         {
             EnemyStrategyHistory = enemyStrategyHistory;
             ChatService = chatService;
@@ -17,6 +17,7 @@ namespace Sharky.EnemyStrategies
             TargetingData = targetingData;
             DebugService = debugService;
             UnitCountService = unitCountService;
+            FrameToTimeConverter = frameToTimeConverter;
         }
 
         protected override bool Detect(int frame)

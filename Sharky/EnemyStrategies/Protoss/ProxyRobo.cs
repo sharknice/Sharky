@@ -8,7 +8,7 @@ namespace Sharky.EnemyStrategies.Protoss
     {
         TargetingData TargetingData;
 
-        public ProxyRobo(EnemyStrategyHistory enemyStrategyHistory, ChatService chatService, ActiveUnitData activeUnitData, SharkyOptions sharkyOptions, DebugService debugService, UnitCountService unitCountService, TargetingData targetingData)
+        public ProxyRobo(EnemyStrategyHistory enemyStrategyHistory, ChatService chatService, ActiveUnitData activeUnitData, SharkyOptions sharkyOptions, DebugService debugService, UnitCountService unitCountService, TargetingData targetingData, FrameToTimeConverter frameToTimeConverter)
         {
             EnemyStrategyHistory = enemyStrategyHistory;
             ChatService = chatService;
@@ -18,6 +18,7 @@ namespace Sharky.EnemyStrategies.Protoss
             UnitCountService = unitCountService;
 
             TargetingData = targetingData;
+            FrameToTimeConverter = frameToTimeConverter;
         }
 
         protected override bool Detect(int frame)

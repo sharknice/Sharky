@@ -4,7 +4,7 @@ namespace Sharky.EnemyStrategies.Terran
 {
     public class ThreeRax : EnemyStrategy
     {
-        public ThreeRax(EnemyStrategyHistory enemyStrategyHistory, ChatService chatService, ActiveUnitData activeUnitData, SharkyOptions sharkyOptions, DebugService debugService, UnitCountService unitCountService)
+        public ThreeRax(EnemyStrategyHistory enemyStrategyHistory, ChatService chatService, ActiveUnitData activeUnitData, SharkyOptions sharkyOptions, DebugService debugService, UnitCountService unitCountService, FrameToTimeConverter frameToTimeConverter)
         {
             EnemyStrategyHistory = enemyStrategyHistory;
             ChatService = chatService;
@@ -12,6 +12,7 @@ namespace Sharky.EnemyStrategies.Terran
             SharkyOptions = sharkyOptions;
             DebugService = debugService;
             UnitCountService = unitCountService;
+            FrameToTimeConverter = frameToTimeConverter;
         }
 
         protected override bool Detect(int frame)

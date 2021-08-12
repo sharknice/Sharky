@@ -5,7 +5,7 @@ namespace Sharky.EnemyStrategies.Protoss
 {
     public class AdeptRush : EnemyStrategy
     {
-        public AdeptRush(EnemyStrategyHistory enemyStrategyHistory, ChatService chatService, ActiveUnitData activeUnitData, SharkyOptions sharkyOptions, DebugService debugService, UnitCountService unitCountService)
+        public AdeptRush(EnemyStrategyHistory enemyStrategyHistory, ChatService chatService, ActiveUnitData activeUnitData, SharkyOptions sharkyOptions, DebugService debugService, UnitCountService unitCountService, FrameToTimeConverter frameToTimeConverter)
         {
             EnemyStrategyHistory = enemyStrategyHistory;
             ChatService = chatService;
@@ -13,6 +13,7 @@ namespace Sharky.EnemyStrategies.Protoss
             SharkyOptions = sharkyOptions;
             DebugService = debugService;
             UnitCountService = unitCountService;
+            FrameToTimeConverter = frameToTimeConverter;
         }
 
         protected override bool Detect(int frame)
