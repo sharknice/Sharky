@@ -17,6 +17,7 @@ namespace Sharky.Managers
         protected Dictionary<Race, BuildChoices> BuildChoices;
         protected IBuildDecisionService BuildDecisionService;
         protected IEnemyPlayerService EnemyPlayerService;
+        protected FrameToTimeConverter FrameToTimeConverter;
 
         protected IMacroBalancer MacroBalancer;
         protected ISharkyBuild CurrentBuild;
@@ -42,9 +43,10 @@ namespace Sharky.Managers
             EnemyPlayerService = defaultSharkyBot.EnemyPlayerService;
             ChatHistory = defaultSharkyBot.ChatHistory;
             EnemyStrategyHistory = defaultSharkyBot.EnemyStrategyHistory;
+            FrameToTimeConverter = defaultSharkyBot.FrameToTimeConverter;
         }
 
-        public BuildManager(Dictionary<Race, BuildChoices> buildChoices, DebugService debugService, IMacroBalancer macroBalancer, IBuildDecisionService buildDecisionService, IEnemyPlayerService enemyPlayerService, ChatHistory chatHistory, EnemyStrategyHistory enemyStrategyHistory)
+        public BuildManager(Dictionary<Race, BuildChoices> buildChoices, DebugService debugService, IMacroBalancer macroBalancer, IBuildDecisionService buildDecisionService, IEnemyPlayerService enemyPlayerService, ChatHistory chatHistory, EnemyStrategyHistory enemyStrategyHistory, FrameToTimeConverter frameToTimeConverter)
         {
             BuildChoices = buildChoices;
             DebugService = debugService;
@@ -53,6 +55,7 @@ namespace Sharky.Managers
             EnemyPlayerService = enemyPlayerService;
             ChatHistory = chatHistory;
             EnemyStrategyHistory = enemyStrategyHistory;
+            FrameToTimeConverter = frameToTimeConverter;
         }
 
         public override void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)

@@ -14,7 +14,7 @@ namespace Sharky
 
         public TargetPriorityCalculation CalculateTargetPriority(UnitCalculation unitCalculation, int frame)
         {
-            var allies = unitCalculation.NearbyAllies.Where(e => e.UnitClassifications.Contains(UnitClassification.DefensiveStructure) || e.UnitClassifications.Contains(UnitClassification.ArmyUnit));
+            var allies = unitCalculation.NearbyAllies.Where(e => e.UnitClassifications.Contains(UnitClassification.DefensiveStructure) || e.UnitClassifications.Contains(UnitClassification.ArmyUnit)).Concat(new List<UnitCalculation> { unitCalculation });
             var enemies = unitCalculation.NearbyEnemies.Where(e => e.UnitClassifications.Contains(UnitClassification.DefensiveStructure) || e.UnitClassifications.Contains(UnitClassification.ArmyUnit));
 
             var calculation = CalculateTargetPriority(allies, enemies);
@@ -83,6 +83,10 @@ namespace Sharky
             }
 
             calculation.AirWinnability = secondsToKillAllies / airKillSeconds;
+            if (!enemies.Any(e => e.DamageAir) && allies.Any(a => a.Unit.IsFlying))
+            {
+                calculation.AirWinnability = 1000f;
+            }
 
             var groundAttackingEnemies = enemies.Where(e => e.DamageGround || e.Unit.UnitType == (uint)UnitTypes.TERRAN_MEDIVAC || e.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISM || e.Unit.UnitType == (uint)UnitTypes.PROTOSS_SHIELDBATTERY);
             var groundKillSeconds = 1000f;
@@ -100,6 +104,10 @@ namespace Sharky
             }
 
             calculation.GroundWinnability = secondsToKillAllies / groundKillSeconds;
+            if (!enemies.Any(e => e.DamageGround) && allies.Any(a => !a.Unit.IsFlying))
+            {
+                calculation.GroundWinnability = 1000f;
+            }
 
             if (calculation.OverallWinnability < 1 && calculation.AirWinnability < 1 && calculation.GroundWinnability < 1)
             {
@@ -117,12 +125,18 @@ namespace Sharky
                 return calculation;
             }
 
+            if (enemies.Sum(e => e.Repairers) >= 5)
+            {
+                calculation.TargetPriority = TargetPriority.KillWorkers;
+                return calculation;
+            }
+
             if (calculation.GroundWinnability > calculation.AirWinnability)
             {
                 var bunker = groundAttackingEnemies.Where(b => b.Unit.UnitType == (uint)UnitTypes.TERRAN_BUNKER).FirstOrDefault();
                 if (bunker != null && groundAttackingEnemies.Count() < 10)
                 {
-                    if (bunker.Unit.BuildProgress < 1 || (bunker.Unit.Health > 100 && enemyHps > enemyDps && groundAttackingEnemies.Count(u => u.Unit.UnitType == (uint)UnitTypes.TERRAN_SCV) > 2))
+                    if (bunker.Unit.BuildProgress < 1 || (bunker.Unit.Health > 100 && enemyHps > enemyDps && bunker.Repairers > 2))
                     {
                         calculation.TargetPriority = TargetPriority.KillWorkers;
                         return calculation;

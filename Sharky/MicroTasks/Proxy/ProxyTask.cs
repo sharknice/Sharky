@@ -1,4 +1,5 @@
 ﻿using Sharky.MicroControllers;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -71,24 +72,28 @@ namespace Sharky.MicroTasks
                     return;
                 }
 
-                foreach (var commander in commanders.OrderBy(c => c.Value.UnitCalculation.Unit.BuffIds.Count()))
+                foreach (var commander in commanders.OrderBy(c => c.Value.Claimed).ThenBy(c => c.Value.UnitCalculation.Unit.BuffIds.Count()).ThenBy(c => DistanceToResourceCenter(c)))
                 {
                     if ((!commander.Value.Claimed || commander.Value.UnitRole == UnitRole.Minerals) && commander.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker))
                     {
-                        if (commander.Value.UnitCalculation.Unit.Orders.Any(o => !SharkyUnitData.MiningAbilities.Contains((Abilities)o.AbilityId)))
-                        {
-                        }
-                        else
-                        {
-                            commander.Value.UnitRole = UnitRole.Proxy;
-                            commander.Value.Claimed = true;
-                            UnitCommanders.Add(commander.Value);
-                            started = true;
-                            return;
-                        }
+                        commander.Value.UnitRole = UnitRole.Proxy;
+                        commander.Value.Claimed = true;
+                        UnitCommanders.Add(commander.Value);
+                        started = true;
+                        return;
                     }
                 }
             }
+        }
+
+        float DistanceToResourceCenter(KeyValuePair<ulong, UnitCommander> commander)
+        {
+            var resourceCenter = commander.Value.UnitCalculation.NearbyAllies.FirstOrDefault(a => a.UnitClassifications.Contains(UnitClassification.ResourceCenter));
+            if (resourceCenter != null)
+            {
+                return Vector2.DistanceSquared(commander.Value.UnitCalculation.Position, resourceCenter.Position);
+            }
+            return 0;
         }
 
         public override IEnumerable<SC2APIProtocol.Action> PerformActions(int frame)

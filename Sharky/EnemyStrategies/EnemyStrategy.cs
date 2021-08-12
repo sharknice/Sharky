@@ -14,6 +14,7 @@ namespace Sharky.EnemyStrategies
         protected SharkyOptions SharkyOptions;
         protected DebugService DebugService;
         protected UnitCountService UnitCountService;
+        protected FrameToTimeConverter FrameToTimeConverter;
 
         public string Name()
         {
@@ -31,7 +32,7 @@ namespace Sharky.EnemyStrategies
                 if (!Detected)
                 {
                     EnemyStrategyHistory.History[frame] = Name();
-                    Console.WriteLine($"{frame} Detected: {Name()}");
+                    Console.WriteLine($"{frame} {FrameToTimeConverter.GetTime(frame)} Detected: {Name()}");
                     Detected = true;
                     DetectedChat();
                 }

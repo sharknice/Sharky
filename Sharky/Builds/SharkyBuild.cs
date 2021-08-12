@@ -17,6 +17,8 @@ namespace Sharky.Builds
         protected ChatService ChatService;
         protected UnitCountService UnitCountService;
 
+        protected FrameToTimeConverter FrameToTimeConverter;
+
         protected int StartFrame;
 
         public SharkyBuild(DefaultSharkyBot defaultSharkyBot)
@@ -28,10 +30,12 @@ namespace Sharky.Builds
             ChatService = defaultSharkyBot.ChatService;
             UnitCountService = defaultSharkyBot.UnitCountService;
             MicroTaskData = defaultSharkyBot.MicroTaskData;
+            FrameToTimeConverter = defaultSharkyBot.FrameToTimeConverter;
         }
 
         public SharkyBuild(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, MicroTaskData microTaskData,
-            ChatService chatService, UnitCountService unitCountService)
+            ChatService chatService, UnitCountService unitCountService,
+            FrameToTimeConverter frameToTimeConverter)
         {
             BuildOptions = buildOptions;
             MacroData = macroData;
@@ -40,6 +44,7 @@ namespace Sharky.Builds
             ChatService = chatService;
             UnitCountService = unitCountService;
             MicroTaskData = microTaskData;
+            FrameToTimeConverter = frameToTimeConverter;
         }
 
         public string Name()
@@ -53,7 +58,7 @@ namespace Sharky.Builds
 
         public virtual void StartBuild(int frame)
         {
-            Console.WriteLine($"{frame} Build: {Name()}");
+            Console.WriteLine($"{frame} {FrameToTimeConverter.GetTime(frame)} Build: {Name()}");
             StartFrame = frame;
 
             BuildOptions.StrictGasCount = false;

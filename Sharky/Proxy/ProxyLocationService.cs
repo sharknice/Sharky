@@ -47,6 +47,10 @@ namespace Sharky.Proxy
             var orderedLocations = BaseData.BaseLocations.OrderBy(b => PathFinder.GetGroundPath(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y, b.Location.X, b.Location.Y, 0).Count());
 
             var baseLocation = orderedLocations.Take(proxyBase).Last().Location;
+            if (MapDataService.MapData.MapName.ToLower().Contains("blackburn"))
+            {
+                baseLocation = orderedLocations.Take(proxyBase).Skip(2).First().Location;
+            }
 
             var angle = Math.Atan2(TargetingData.EnemyMainBasePoint.Y - baseLocation.Y, baseLocation.X - TargetingData.EnemyMainBasePoint.X);
             var x = 6 * Math.Cos(angle);

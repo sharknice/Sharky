@@ -23,6 +23,7 @@ namespace Sharky.Managers
         IEnemyNameService EnemyNameService;
         ChatService ChatService;
         ActiveChatData ActiveChatData;
+        FrameToTimeConverter FrameToTimeConverter;
 
         Dictionary<TypeEnum, int> LastResponseTimes;
         Dictionary<TypeEnum, int> ChatTypeFrequencies;
@@ -37,7 +38,7 @@ namespace Sharky.Managers
 
         bool ApiEnabled;
 
-        public ChatManager(HttpClient httpClient, ChatHistory chatHistory, SharkyOptions sharkyOptions, IChatDataService chatDataService, IEnemyPlayerService enemyPlayerManager, IEnemyNameService enemyNameService, ChatService chatService, ActiveChatData activeChatData)
+        public ChatManager(HttpClient httpClient, ChatHistory chatHistory, SharkyOptions sharkyOptions, IChatDataService chatDataService, IEnemyPlayerService enemyPlayerManager, IEnemyNameService enemyNameService, ChatService chatService, ActiveChatData activeChatData, FrameToTimeConverter frameToTimeConverter)
         {
             HttpClient = httpClient;
             ChatHistory = chatHistory;
@@ -47,6 +48,7 @@ namespace Sharky.Managers
             EnemyNameService = enemyNameService;
             ChatService = chatService;
             ActiveChatData = activeChatData;
+            FrameToTimeConverter = frameToTimeConverter;
 
             ApiEnabled = false;
             
@@ -110,7 +112,7 @@ namespace Sharky.Managers
                 var chat = new Chat.Chat { botName = Self.PlayerName, message = chatReceived.Message, time = DateTimeOffset.Now.ToUnixTimeMilliseconds(), user = Enemy.PlayerName };
                 if (chatReceived.PlayerId == Self.PlayerId)
                 {
-                    Console.WriteLine($"{frame} sharkbot chat: {chatReceived.Message}");
+                    Console.WriteLine($"{frame} {FrameToTimeConverter.GetTime(frame)} sharkbot chat: {chatReceived.Message}");
                     ChatHistory.MyChatHistory[frame] = chatReceived.Message;
                     if (ApiEnabled)
                     {
@@ -119,7 +121,7 @@ namespace Sharky.Managers
                 }
                 else
                 {
-                    Console.WriteLine($"{frame} enemy chat: {chatReceived.Message}");
+                    Console.WriteLine($"{frame} {FrameToTimeConverter.GetTime(frame)} enemy chat: {chatReceived.Message}");
                     ChatHistory.EnemyChatHistory[frame] = chatReceived.Message;
                     if (string.IsNullOrEmpty(ActiveChatData.EnemyName))
                     {

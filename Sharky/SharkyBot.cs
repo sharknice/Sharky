@@ -11,6 +11,8 @@ namespace Sharky
     {
         List<IManager> Managers;
         DebugService DebugService;
+        FrameToTimeConverter FrameToTimeConverter;
+
         List<SC2APIProtocol.Action> Actions;
 
         Stopwatch Stopwatch;
@@ -18,10 +20,11 @@ namespace Sharky
 
         double TotalFrameTime;
 
-        public SharkyBot(List<IManager> managers, DebugService debugService)
+        public SharkyBot(List<IManager> managers, DebugService debugService, FrameToTimeConverter frameToTimeConverter)
         {
             Managers = managers;
             DebugService = debugService;
+            FrameToTimeConverter = frameToTimeConverter;
 
             Stopwatch = new Stopwatch();
             ManagerStopwatch = new Stopwatch();
@@ -52,7 +55,7 @@ namespace Sharky
             }
 
             Console.WriteLine($"Result: {result}");
-            Console.WriteLine($"Total Frames: {observation.Observation.GameLoop}");
+            Console.WriteLine($"Total Frames: {observation.Observation.GameLoop} {FrameToTimeConverter.GetTime((int)observation.Observation.GameLoop)}");
             Console.WriteLine($"Average Frame Time: {TotalFrameTime/ observation.Observation.GameLoop}");
         }
 
@@ -116,7 +119,7 @@ namespace Sharky
 
             if (Actions.Any(a => a == null))
             {
-                Actions.RemoveAll(a => a == null); // TODO: figure out what is adding null actions
+                Actions.RemoveAll(a => a == null);
             }
 
             return Actions;

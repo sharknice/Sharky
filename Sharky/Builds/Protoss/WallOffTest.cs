@@ -7,18 +7,15 @@ namespace Sharky.Builds.Protoss
 {
     public class WallOffTest : ProtossSharkyBuild
     {
-        MicroTaskData MicroTaskData;
-
         IMicroTask WallOffTask;
 
         bool WallOffStarted;
 
         public WallOffTest(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, ChronoData chronoData, MicroTaskData microTaskData, 
-            ICounterTransitioner counterTransitioner, UnitCountService unitCountService)
-            : base(buildOptions, macroData, activeUnitData, attackData, chatService, chronoData, counterTransitioner, unitCountService, microTaskData)
+            ICounterTransitioner counterTransitioner, UnitCountService unitCountService,
+            FrameToTimeConverter frameToTimeConverter)
+            : base(buildOptions, macroData, activeUnitData, attackData, chatService, chronoData, counterTransitioner, unitCountService, microTaskData, frameToTimeConverter)
         {
-            MicroTaskData = microTaskData;
-
             WallOffStarted = false;
         }
 

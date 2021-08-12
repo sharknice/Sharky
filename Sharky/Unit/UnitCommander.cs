@@ -24,6 +24,8 @@ namespace Sharky
         public Abilities LastAbility { get; private set; }
         public Point2D LastTargetLocation { get; private set; }
         public ulong LastTargetTag { get; private set; }
+        public int LastInRangeAttackFrame { get; set; }
+        public CommanderState CommanderState { get; set; }
 
         Dictionary<Abilities, int> AbilityOrderTimes;
         public Dictionary<ulong, int> LoadTimes;
@@ -46,7 +48,8 @@ namespace Sharky
             RetreatPath = new List<Vector2>();
             RetreatPathIndex = 0;
 
-            LastOrderFrame = 0;
+            LastInRangeAttackFrame = -100;
+            LastOrderFrame = -100;
         }
 
         public List<SC2APIProtocol.Action> Order(int frame, Abilities ability, Point2D targetLocation = null, ulong targetTag = 0, bool allowSpam = false, bool queue = false)

@@ -12,6 +12,8 @@ namespace Sharky.MicroControllers.Protoss
         float RevelationRange = 9;
         float RevelationRadius = 6;
 
+        float WeaponCooldown = 0.61f;
+
         public OracleMicroController(MapDataService mapDataService, SharkyUnitData unitDataManager, ActiveUnitData activeUnitData, DebugService debugService, IPathFinder sharkyPathFinder, BaseData baseData, SharkyOptions sharkyOptions, DamageService damageService, UnitDataService unitDataService, TargetingData targetingData, MicroPriority microPriority, bool groupUpEnabled)
             : base(mapDataService, unitDataManager, activeUnitData, debugService, sharkyPathFinder, baseData, sharkyOptions, damageService, unitDataService, targetingData, microPriority, groupUpEnabled)
         {
@@ -20,6 +22,7 @@ namespace Sharky.MicroControllers.Protoss
         protected override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
+            commander.SkipFrame = false;
 
             var cloakedPosition = CloakedInvader(commander);
             if (cloakedPosition != null && commander.UnitCalculation.Unit.Energy >= 25)
@@ -138,9 +141,13 @@ namespace Sharky.MicroControllers.Protoss
             return new Point2D { X = position.X, Y = position.Y }; // TODO: if there are any cloaked units, go for the spot that hits the most cloaked units
         }
 
-        protected override bool WeaponReady(UnitCommander commander)
+        protected override bool WeaponReady(UnitCommander commander, int frame)
         {
-            return commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.ORACLEWEAPON);
+            if (commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.ORACLEWEAPON))
+            {
+                return true;
+            }
+            return false;
         }
 
         protected override bool MaintainRange(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
@@ -148,6 +155,10 @@ namespace Sharky.MicroControllers.Protoss
             action = null;
 
             var range = 9f;
+            if (commander.UnitRole == UnitRole.Harass)
+            {
+                range = commander.UnitCalculation.Weapon.Range;
+            }
             var enemiesInRange = new List<UnitCalculation>();
 
             foreach (var enemyAttack in commander.UnitCalculation.NearbyEnemies)
@@ -165,6 +176,7 @@ namespace Sharky.MicroControllers.Protoss
             }
 
             var avoidPoint = GetPositionFromRange(commander, closestEnemy.Unit.Pos, commander.UnitCalculation.Unit.Pos, range + commander.UnitCalculation.Unit.Radius + closestEnemy.Unit.Radius);
+            if (AvoidDeceleration(commander, avoidPoint, frame, out action)) { return true; }
             action = commander.Order(frame, Abilities.MOVE, avoidPoint);
             return true;
         }
@@ -260,8 +272,32 @@ namespace Sharky.MicroControllers.Protoss
             {
                 if (commander.UnitCalculation.EnemiesInRange.Any(e => e.Unit.Tag == bestTarget.Unit.Tag) && bestTarget.Unit.DisplayType == DisplayType.Visible)
                 {
-                    action = commander.Order(frame, Abilities.ATTACK, null, bestTarget.Unit.Tag);
-                    return true;
+                    if (bestTarget.Unit.Health + bestTarget.Unit.Shield < bestTarget.PreviousUnit.Health + bestTarget.PreviousUnit.Shield)
+                    {
+                        if (!commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.ATTACK_ATTACK && o.TargetWorldSpacePos != null))
+                        {
+                            action = commander.Order(frame, Abilities.ATTACK, new Point2D { X = bestTarget.Position.X, Y = bestTarget.Position.Y });
+                        }
+                        else
+                        {
+                            action = commander.Order(frame, Abilities.ATTACK, null, bestTarget.Unit.Tag);
+                        }
+                        commander.LastInRangeAttackFrame = frame;
+                        return true;
+                    }
+                    else
+                    {
+                        if (commander.UnitCalculation.Unit.Orders.Any(o => o.TargetWorldSpacePos != null && o.AbilityId == (uint)Abilities.ATTACK_ATTACK))
+                        {
+                            action = commander.Order(frame, Abilities.ATTACK, new Point2D { X = bestTarget.Position.X, Y = bestTarget.Position.Y }, 0, true);
+                        }
+                        else
+                        {
+                            action = commander.Order(frame, Abilities.ATTACK, null, bestTarget.Unit.Tag);
+                        }
+                        commander.LastInRangeAttackFrame = frame;
+                        return true;
+                    }
                 }
             }
 
@@ -307,15 +343,37 @@ namespace Sharky.MicroControllers.Protoss
 
             if (PulsarBeam(commander, frame, bestTarget, out action)) { return action; }
 
-            if (WeaponReady(commander))
+            if (commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.ORACLEWEAPON))
             {
-                if (AttackBestTarget(commander, target, defensivePoint, null, bestTarget, frame, out action)) { return action; }
+                if (WeaponReady(commander, frame))
+                {
+                    if (AttackBestTarget(commander, target, defensivePoint, null, bestTarget, frame, out action)) { return action; }
+                }
+                else
+                {
+                    if (Move(commander, target, defensivePoint, null, bestTarget, formation, frame, out action)) { return action; }
+                }
             }
 
             return NavigateToPoint(commander, target, defensivePoint, null, frame);
             if (Move(commander, target, defensivePoint, null, bestTarget, formation, frame, out action)) { return action; }
 
             return commander.Order(frame, Abilities.MOVE, target);
+        }
+
+        protected override bool MoveToAttackTarget(UnitCommander commander, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            if (WeaponReady(commander, frame))
+            {
+                var point = new Point2D { X = bestTarget.Position.X, Y = bestTarget.Position.Y };
+                action = commander.Order(frame, Abilities.MOVE, point);
+                return true;
+            }
+
+            var attackPoint = GetPositionFromRange(commander, bestTarget.Unit.Pos, commander.UnitCalculation.Unit.Pos, commander.UnitCalculation.Range + bestTarget.Unit.Radius + commander.UnitCalculation.Unit.Radius);
+            if (AvoidDeceleration(commander, attackPoint, frame, out action)) { return true; }
+            action = commander.Order(frame, Abilities.MOVE, attackPoint);
+            return true;
         }
     }
 }

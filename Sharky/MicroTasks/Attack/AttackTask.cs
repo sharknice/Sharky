@@ -60,11 +60,11 @@ namespace Sharky.MicroTasks
         {
             var actions = new List<SC2APIProtocol.Action>();
 
-            if (lastFrameTime > 5)
-            {
-                lastFrameTime = 0;
-                return actions;
-            }
+            //if (lastFrameTime > 5)
+            //{
+            //    lastFrameTime = 0;
+            //    return actions;
+            //}
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 

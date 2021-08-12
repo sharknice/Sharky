@@ -34,6 +34,7 @@ namespace Sharky.DefaultBot
     public class DefaultSharkyBot
     {
         public SharkyOptions SharkyOptions { get; set; }
+        public FrameToTimeConverter FrameToTimeConverter { get; set; }
         public List<IManager> Managers { get; set; }
 
         public DebugManager DebugManager { get; set; }
@@ -130,6 +131,7 @@ namespace Sharky.DefaultBot
             var framesPerSecond = 22.4f;
 
             SharkyOptions = new SharkyOptions { Debug = debug, FramesPerSecond = framesPerSecond, TagsEnabled = true };
+            FrameToTimeConverter = new FrameToTimeConverter(SharkyOptions);
             MacroData = new MacroData();
             AttackData = new AttackData { ArmyFoodAttack = 30, ArmyFoodRetreat = 25, Attacking = false, UseAttackDataManager = true, CustomAttackFunction = true, RetreatTrigger = 1f, AttackTrigger = 1.5f };
             TargetingData = new TargetingData { HiddenEnemyBase = false };
@@ -220,7 +222,7 @@ namespace Sharky.DefaultBot
             EnemyNameService = new EnemyNameService();
             EnemyPlayerService = new EnemyPlayerService(EnemyNameService);
             ChatService = new ChatService(ChatDataService, SharkyOptions, ActiveChatData);
-            ChatManager = new ChatManager(HttpClient, ChatHistory, SharkyOptions, ChatDataService, EnemyPlayerService, EnemyNameService, ChatService, ActiveChatData);
+            ChatManager = new ChatManager(HttpClient, ChatHistory, SharkyOptions, ChatDataService, EnemyPlayerService, EnemyNameService, ChatService, ActiveChatData, FrameToTimeConverter);
             Managers.Add((IManager)ChatManager);
 
             ProxyLocationService = new ProxyLocationService(BaseData, TargetingData, SharkyPathFinder, MapDataService, AreaService);
@@ -244,6 +246,7 @@ namespace Sharky.DefaultBot
             var tempestMicroController = new TempestMicroController(MapDataService, SharkyUnitData, ActiveUnitData, DebugService, SharkyAdvancedPathFinder, BaseData, SharkyOptions, DamageService, UnitDataService, TargetingData, MicroPriority.LiveAndAttack, false);
             var voidrayMicroController = new VoidRayMicroController(MapDataService, SharkyUnitData, ActiveUnitData, DebugService, SharkyAdvancedPathFinder, BaseData, SharkyOptions, DamageService, UnitDataService, TargetingData, MicroPriority.LiveAndAttack, false);
             var carrierMicroController = new CarrierMicroController(MapDataService, SharkyUnitData, ActiveUnitData, DebugService, SharkyAdvancedPathFinder, BaseData, SharkyOptions, DamageService, UnitDataService, TargetingData, MicroPriority.LiveAndAttack, false);
+            var interceptorMicroController = new InterceptorMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
             var warpPrismpMicroController = new WarpPrismMicroController(MapDataService, SharkyUnitData, ActiveUnitData, DebugService, SharkyAdvancedPathFinder, BaseData, SharkyOptions, DamageService, UnitDataService, TargetingData, MicroPriority.LiveAndAttack, false);
             var zealotMicroController = new ZealotMicroController(MapDataService, SharkyUnitData, ActiveUnitData, DebugService, SharkyAdvancedPathFinder, BaseData, SharkyOptions, DamageService, UnitDataService, TargetingData, MicroPriority.AttackForward, false);
 
@@ -277,6 +280,7 @@ namespace Sharky.DefaultBot
                 { UnitTypes.PROTOSS_TEMPEST, tempestMicroController },
                 { UnitTypes.PROTOSS_VOIDRAY, voidrayMicroController },
                 { UnitTypes.PROTOSS_CARRIER, carrierMicroController },
+                { UnitTypes.PROTOSS_INTERCEPTOR, interceptorMicroController },
                 { UnitTypes.PROTOSS_WARPPRISM, warpPrismpMicroController },
                 { UnitTypes.PROTOSS_WARPPRISMPHASING, warpPrismpMicroController },
                 { UnitTypes.PROTOSS_ZEALOT, zealotMicroController },
@@ -370,12 +374,12 @@ namespace Sharky.DefaultBot
 
             EmptyCounterTransitioner = new EmptyCounterTransitioner(EnemyData, SharkyOptions);
 
-            var antiMassMarine = new AntiMassMarine(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, EmptyCounterTransitioner, UnitCountService, MicroTaskData);
-            var fourGate = new FourGate(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, SharkyUnitData, EmptyCounterTransitioner, UnitCountService, MicroTaskData);
-            var nexusFirst = new NexusFirst(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, EmptyCounterTransitioner, UnitCountService, MicroTaskData);
-            var robo = new Robo(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, EnemyData, MicroTaskData, EmptyCounterTransitioner, UnitCountService);
-            var protossRobo = new ProtossRobo(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, SharkyOptions, MicroTaskData, EnemyData, EmptyCounterTransitioner, UnitCountService);
-            var everyProtossUnit = new EveryProtossUnit(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, EmptyCounterTransitioner, UnitCountService, MicroTaskData);
+            var antiMassMarine = new AntiMassMarine(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, EmptyCounterTransitioner, UnitCountService, MicroTaskData, FrameToTimeConverter);
+            var fourGate = new FourGate(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, SharkyUnitData, EmptyCounterTransitioner, UnitCountService, MicroTaskData, FrameToTimeConverter);
+            var nexusFirst = new NexusFirst(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, EmptyCounterTransitioner, UnitCountService, MicroTaskData, FrameToTimeConverter);
+            var robo = new Robo(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, EnemyData, MicroTaskData, EmptyCounterTransitioner, UnitCountService, FrameToTimeConverter);
+            var protossRobo = new ProtossRobo(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, SharkyOptions, MicroTaskData, EnemyData, EmptyCounterTransitioner, UnitCountService, FrameToTimeConverter);
+            var everyProtossUnit = new EveryProtossUnit(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, EmptyCounterTransitioner, UnitCountService, MicroTaskData, FrameToTimeConverter);
 
             var protossBuilds = new Dictionary<string, ISharkyBuild>
             {
@@ -403,8 +407,8 @@ namespace Sharky.DefaultBot
             };
 
             var massMarine = new MassMarines(this);
-            var battleCruisers = new BattleCruisers(BuildOptions, MacroData, ActiveUnitData, AttackData, MicroTaskData, ChatService, UnitCountService);
-            var everyTerranUnit = new EveryTerranUnit(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, MicroTaskData, UnitCountService);
+            var battleCruisers = new BattleCruisers(BuildOptions, MacroData, ActiveUnitData, AttackData, MicroTaskData, ChatService, UnitCountService, FrameToTimeConverter);
+            var everyTerranUnit = new EveryTerranUnit(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, MicroTaskData, UnitCountService, FrameToTimeConverter);
             var terranBuilds = new Dictionary<string, ISharkyBuild>
             {
                 [massMarine.Name()] = massMarine,
@@ -426,8 +430,8 @@ namespace Sharky.DefaultBot
                 ["Transition"] = terranSequences
             };
 
-            var basicZerglingRush = new BasicZerglingRush(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, MicroTaskData, UnitCountService);
-            var everyZergUnit = new EveryZergUnit(BuildOptions, MacroData, ActiveUnitData, AttackData, MicroTaskData, ChatService, UnitCountService);
+            var basicZerglingRush = new BasicZerglingRush(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, MicroTaskData, UnitCountService, FrameToTimeConverter);
+            var everyZergUnit = new EveryZergUnit(BuildOptions, MacroData, ActiveUnitData, AttackData, MicroTaskData, ChatService, UnitCountService, FrameToTimeConverter);
             var zergBuilds = new Dictionary<string, ISharkyBuild>
             {
                 [everyZergUnit.Name()] = everyZergUnit,
@@ -455,12 +459,12 @@ namespace Sharky.DefaultBot
                 { Race.Zerg, new BuildChoices { Builds = zergBuilds, BuildSequences = zergBuildSequences } }
             };
             BuildDecisionService = new BuildDecisionService(ChatService);
-            BuildManager = new BuildManager(BuildChoices, DebugService, MacroBalancer, BuildDecisionService, EnemyPlayerService, ChatHistory, EnemyStrategyHistory);
+            BuildManager = new BuildManager(BuildChoices, DebugService, MacroBalancer, BuildDecisionService, EnemyPlayerService, ChatHistory, EnemyStrategyHistory, FrameToTimeConverter);
             Managers.Add(BuildManager);
         }
         public SharkyBot CreateBot(List<IManager> managers, DebugService debugService)
         {
-            return new SharkyBot(managers, DebugService);
+            return new SharkyBot(managers, DebugService, FrameToTimeConverter);
         }
     }
 }

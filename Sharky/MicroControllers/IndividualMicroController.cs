@@ -53,16 +53,16 @@ namespace Sharky.MicroControllers
             LooseFormationDistance = 1.75f;
         }
 
-        public IndividualMicroController(DefaultSharkyBot defaultSharkyBot, MicroPriority microPriority, bool groupUpEnabled, float avoidDamageDistance = .5f)
+        public IndividualMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder pathFinder, MicroPriority microPriority, bool groupUpEnabled, float avoidDamageDistance = .5f)
         {
             MapDataService = defaultSharkyBot.MapDataService;
             SharkyUnitData = defaultSharkyBot.SharkyUnitData;
             ActiveUnitData = defaultSharkyBot.ActiveUnitData;
             DebugService = defaultSharkyBot.DebugService;
-            SharkyPathFinder = defaultSharkyBot.SharkyPathFinder;
             BaseData = defaultSharkyBot.BaseData;
             SharkyOptions = defaultSharkyBot.SharkyOptions;
 
+            SharkyPathFinder = pathFinder;
             MicroPriority = microPriority;
             GroupUpEnabled = groupUpEnabled;
 
@@ -89,6 +89,8 @@ namespace Sharky.MicroControllers
             var formation = GetDesiredFormation(commander);
             var bestTarget = GetBestTarget(commander, target, frame);
 
+            UpdateState(commander, target, defensivePoint, groupCenter, bestTarget, formation, frame);
+
             if (SpecialCaseMove(commander, target, defensivePoint, groupCenter, bestTarget, formation, frame, out action)) { return action; }
 
             if (PreOffenseOrder(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
@@ -103,7 +105,7 @@ namespace Sharky.MicroControllers
                 if (MoveAway(commander, target, defensivePoint, frame, out action)) { return action; }
             }
 
-            if (WeaponReady(commander))
+            if (WeaponReady(commander, frame))
             {
                 if (AttackBestTarget(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
             }
@@ -116,6 +118,7 @@ namespace Sharky.MicroControllers
         public virtual List<SC2APIProtocol.Action> Idle(UnitCommander commander, Point2D defensivePoint, int frame)
         {
             List<SC2APIProtocol.Action> action = null;
+            UpdateState(commander, defensivePoint, defensivePoint, null, null, Formation.Normal, frame);
             if (RechargeShieldsAtBattery(commander, defensivePoint, defensivePoint, frame, out action)) { return action; }
             return action;
         }
@@ -123,10 +126,11 @@ namespace Sharky.MicroControllers
         public virtual List<SC2APIProtocol.Action> Scout(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, bool prioritizeVision = false)
         {
             List<SC2APIProtocol.Action> action = null;
+            UpdateState(commander, target, defensivePoint, null, null, Formation.Normal, frame);
 
             if (!prioritizeVision || MapDataService.SelfVisible(target))
             {
-                if (WeaponReady(commander) && (commander.UnitCalculation.Unit.Shield + commander.UnitCalculation.Unit.Health) > (commander.UnitCalculation.Unit.ShieldMax + (commander.UnitCalculation.Unit.HealthMax / 2.0f)))
+                if (WeaponReady(commander, frame) && (commander.UnitCalculation.Unit.Shield + commander.UnitCalculation.Unit.Health) > (commander.UnitCalculation.Unit.ShieldMax + (commander.UnitCalculation.Unit.HealthMax / 2.0f)))
                 {
                     var bestTarget = GetBestTarget(commander, target, frame);
                     if (bestTarget != null && bestTarget.UnitClassifications.Contains(UnitClassification.Worker) && commander.UnitCalculation.EnemiesInRange.Any(e => e.Unit.Tag == bestTarget.Unit.Tag))
@@ -177,6 +181,7 @@ namespace Sharky.MicroControllers
 
         public virtual List<SC2APIProtocol.Action> Retreat(UnitCommander commander, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
+            UpdateState(commander, defensivePoint, defensivePoint, groupCenter, null, Formation.Normal, frame);
             // TODO: setup a concave above the ramp if there is a ramp, get earch grid point on high ground, make sure at least one unit on each point
             if (Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(defensivePoint.X, defensivePoint.Y)) > 25 || MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos) < MapDataService.MapHeight(defensivePoint))
             {
@@ -192,6 +197,7 @@ namespace Sharky.MicroControllers
         public virtual List<SC2APIProtocol.Action> Bait(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
             List<SC2APIProtocol.Action> action = null;
+            UpdateState(commander, target, defensivePoint, groupCenter, null, Formation.Normal, frame);
 
             var formation = GetDesiredFormation(commander);
             var bestTarget = GetBestTarget(commander, target, frame);
@@ -353,6 +359,8 @@ namespace Sharky.MicroControllers
 
             if (GroupUpEnabled && GroupUp(commander, target, groupCenter, false, frame, out action)) { return true; }
 
+            if (AvoidDeceleration(commander, target, frame, out action)) { return true; }
+
             if (bestTarget != null && MicroPriority != MicroPriority.NavigateToLocation && MapDataService.SelfVisible(bestTarget.Unit.Pos))
             {
                 return MoveToAttackTarget(commander, bestTarget, frame, out action);
@@ -360,6 +368,32 @@ namespace Sharky.MicroControllers
 
             action = commander.Order(frame, Abilities.MOVE, target);
             return true;
+        }
+
+        public virtual bool AvoidDeceleration(UnitCommander commander, Point2D target, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
+
+            // if air unit or worker (units with acceleration) and within X distance of target move at a 45 degree angle from target to avoid decelerating
+            if (commander.UnitCalculation.Unit.IsFlying || commander.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker))
+            {
+                if (Vector2.DistanceSquared(new Vector2(target.X, target.Y), commander.UnitCalculation.Position) < 4)
+                {
+                    var angle = commander.UnitCalculation.Unit.Facing + ((float)Math.PI * .25f);
+                    var point = GetPoint(commander.UnitCalculation.Position, angle, 5);
+                    if (point.X < 0 || point.X > MapDataService.MapData.MapWidth)
+                    {
+                        point.X = target.X;
+                    }
+                    if (point.Y < 0 || point.Y > MapDataService.MapData.MapHeight)
+                    {
+                        point.Y = target.Y;
+                    }
+                    action = commander.Order(frame, Abilities.MOVE, point);
+                    return true;
+                }
+            }
+            return false;
         }
 
         public virtual bool SupportNavigateToTarget(UnitCommander commander, Point2D target, Point2D groupCenter, UnitCalculation bestTarget, Formation formation, int frame, out List<SC2APIProtocol.Action> action)
@@ -406,12 +440,21 @@ namespace Sharky.MicroControllers
             {
                 if (SharkyUnitData.NoWeaponCooldownTypes.Contains((UnitTypes)commander.UnitCalculation.Unit.UnitType))
                 {
-                    var point = GetPositionFromRange(commander, bestTarget.Unit.Pos, commander.UnitCalculation.Unit.Pos, commander.UnitCalculation.Range - 1);
+                    var point = new Point2D { X = bestTarget.Position.X, Y = bestTarget.Position.Y };
                     action = commander.Order(frame, Abilities.MOVE, point);
                     return true;
                 }
 
                 var attackPoint = GetPositionFromRange(commander, bestTarget.Unit.Pos, commander.UnitCalculation.Unit.Pos, commander.UnitCalculation.Range + bestTarget.Unit.Radius + commander.UnitCalculation.Unit.Radius);
+                if (commander.UnitCalculation.Unit.IsFlying)
+                {
+                    if (!commander.UnitCalculation.NearbyEnemies.Any(e => e.DamageAir))
+                    {
+                        attackPoint = new Point2D { X = bestTarget.Unit.Pos.X, Y = bestTarget.Unit.Pos.Y };
+                    }
+                    if (AvoidDeceleration(commander, attackPoint, frame, out action)) { return true; }
+                }
+
                 action = commander.Order(frame, Abilities.MOVE, attackPoint);
                 return true;
             }
@@ -567,7 +610,7 @@ namespace Sharky.MicroControllers
 
             foreach (var enemyAttack in commander.UnitCalculation.NearbyEnemies)
             {
-                if (DamageService.CanDamage(enemyAttack, commander.UnitCalculation) && InRange(commander.UnitCalculation.Position, enemyAttack.Position, UnitDataService.GetRange(enemyAttack.Unit) + commander.UnitCalculation.Unit.Radius + enemyAttack.Unit.Radius + AvoidDamageDistance) && AttackersFilter(commander, enemyAttack))
+                if (DamageService.CanDamage(enemyAttack, commander.UnitCalculation) && InRange(commander.UnitCalculation.Position, enemyAttack.Position, UnitDataService.GetRange(enemyAttack.Unit) + commander.UnitCalculation.Unit.Radius + enemyAttack.Unit.Radius + AvoidDamageDistance))
                 {
                     attacks.Add(enemyAttack);
                 }
@@ -606,6 +649,7 @@ namespace Sharky.MicroControllers
                 }
 
                 var avoidPoint = GetGroundAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, attack.Unit.Pos, target, defensivePoint, attack.Range + attack.Unit.Radius + commander.UnitCalculation.Unit.Radius + AvoidDamageDistance);
+                if (AvoidDeceleration(commander, avoidPoint, frame, out action)) { return true; }
                 action = commander.Order(frame, Abilities.MOVE, avoidPoint);
                 return true;
             }
@@ -653,7 +697,7 @@ namespace Sharky.MicroControllers
             // TODO: if this unit is low health and the enemies will catch up if it shoots, don't shoot, just keep running, for example stalker running away from roach, if distancetoroach - (roachspeed * stalkerfiretime) < roachrange , do not fire, just run
             // but also if the unit is just going to die because it's in range of enemies already, fire away because it's going to die anyways
 
-            if (commander.UnitCalculation.EnemiesInRange.Any() && WeaponReady(commander) && !SharkyUnitData.NoWeaponCooldownTypes.Contains((UnitTypes)commander.UnitCalculation.Unit.UnitType)) // keep shooting as you retreat
+            if (commander.UnitCalculation.EnemiesInRange.Any() && WeaponReady(commander, frame) && !SharkyUnitData.NoWeaponCooldownTypes.Contains((UnitTypes)commander.UnitCalculation.Unit.UnitType)) // keep shooting as you retreat
             {
                 var bestTarget = GetBestTarget(commander, target, frame);
                 if (bestTarget != null && MapDataService.SelfVisible(bestTarget.Unit.Pos))
@@ -732,7 +776,7 @@ namespace Sharky.MicroControllers
                     action = commander.Order(frame, Abilities.MOVE, new Point2D { X = point.X, Y = point.Y });
                     DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = commander.UnitCalculation.Unit.Pos.Z }, 1, new Color { R = 0, G = 0, B = 255 });
 
-                    if (Vector2.DistanceSquared(commander.UnitCalculation.Position, point) < 2)
+                    if (Vector2.DistanceSquared(commander.UnitCalculation.Position, point) < 4)
                     {
                         commander.RetreatPathIndex++;
                     }
@@ -1358,7 +1402,7 @@ namespace Sharky.MicroControllers
             return damage * weapon.Attacks;
         }
 
-        protected virtual bool WeaponReady(UnitCommander commander)
+        protected virtual bool WeaponReady(UnitCommander commander, int frame)
         {
             return commander.UnitCalculation.Unit.WeaponCooldown < 2;
         }
@@ -1617,7 +1661,7 @@ namespace Sharky.MicroControllers
                 return false;
             }
 
-            if (WeaponReady(commander)) { return false; }
+            if (WeaponReady(commander, frame)) { return false; }
 
             var siegeRange = 13; // 13 siege mode range, can't shoot within 2 range
             var enemySiegedTanks = commander.UnitCalculation.EnemiesInRangeOf.Where(u => u.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED);
@@ -1738,7 +1782,7 @@ namespace Sharky.MicroControllers
             return commander.UnitCalculation.NearbyEnemies.Any(e => SharkyUnitData.DetectionTypes.Contains((UnitTypes)e.Unit.UnitType)) || commander.UnitCalculation.Unit.BuffIds.Any(b => b == (uint)Buffs.ORACLEREVELATION || b == (uint)Buffs.FUNGALGROWTH || b == (uint)Buffs.EMPDECLOAK);
         }
 
-        public List<SC2APIProtocol.Action> Support(UnitCommander commander, IEnumerable<UnitCommander> supportTargets, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
+        public virtual List<SC2APIProtocol.Action> Support(UnitCommander commander, IEnumerable<UnitCommander> supportTargets, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
             List<SC2APIProtocol.Action> action = null;
 
@@ -1768,7 +1812,7 @@ namespace Sharky.MicroControllers
                 if (MoveAway(commander, supportPoint, defensivePoint, frame, out action)) { return action; }
             }
 
-            if (WeaponReady(commander))
+            if (WeaponReady(commander, frame))
             {
                 // don't initiate the attack, just defend yourself and the support target
                 if (commander.UnitCalculation.EnemiesInRange.Count() > 0 || commander.UnitCalculation.EnemiesInRangeOf.Count() > 0 || unitToSupport.UnitCalculation.EnemiesInRangeOf.Count() > 0)
@@ -1948,7 +1992,7 @@ namespace Sharky.MicroControllers
             if (AvoidTargettedOneHitKills(commander, target, defensivePoint, frame, out action)) { return action; }
             if (OffensiveAbility(commander, target, defensivePoint, null, bestTarget, frame, out action)) { return action; }
 
-            if (WeaponReady(commander))
+            if (WeaponReady(commander, frame))
             {
                 if (AttackBestTarget(commander, target, defensivePoint, null, bestTarget, frame, out action)) { return action; }
             }
@@ -2093,6 +2137,10 @@ namespace Sharky.MicroControllers
             }
 
             return  targetPosition + targetVelocity * t;
+        }
+
+        protected virtual void UpdateState(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, Formation formation, int frame)
+        {
         }
     }
 }

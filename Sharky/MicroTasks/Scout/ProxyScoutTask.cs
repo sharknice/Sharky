@@ -97,7 +97,7 @@ namespace Sharky.MicroTasks
                         commands.AddRange(action);
                     }
                 }
-                else if (Vector2.DistanceSquared(new Vector2(ScoutLocations[ScoutLocationIndex].X, ScoutLocations[ScoutLocationIndex].Y), commander.UnitCalculation.Position) < 2)
+                else if (Vector2.DistanceSquared(new Vector2(ScoutLocations[ScoutLocationIndex].X, ScoutLocations[ScoutLocationIndex].Y), commander.UnitCalculation.Position) < 4)
                 {
                     ScoutLocationIndex++;
                     if (ScoutLocationIndex >= ScoutLocations.Count())

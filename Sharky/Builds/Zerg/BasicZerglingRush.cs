@@ -12,8 +12,9 @@ namespace Sharky.Builds.Zerg
 
         public BasicZerglingRush(BuildOptions buildOptions, 
             MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData,
-            ChatService chatService, MicroTaskData microTaskData, UnitCountService unitCountService) 
-            : base(buildOptions, macroData, activeUnitData, attackData, microTaskData, chatService, unitCountService)
+            ChatService chatService, MicroTaskData microTaskData, UnitCountService unitCountService,
+            FrameToTimeConverter frameToTimeConverter) 
+            : base(buildOptions, macroData, activeUnitData, attackData, microTaskData, chatService, unitCountService, frameToTimeConverter)
         {
         }
 

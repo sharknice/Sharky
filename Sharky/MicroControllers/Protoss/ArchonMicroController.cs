@@ -25,7 +25,7 @@ namespace Sharky.MicroControllers.Protoss
             return base.AvoidTargettedDamage(commander, target, defensivePoint, frame, out action);
         }
 
-        protected override bool WeaponReady(UnitCommander commander)
+        protected override bool WeaponReady(UnitCommander commander, int frame)
         {
             return commander.UnitCalculation.Unit.WeaponCooldown < 5;
         }

@@ -11,8 +11,9 @@ namespace Sharky.Builds.Terran
         }
 
         public TerranSharkyBuild(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, MicroTaskData microTaskData, 
-            ChatService chatService, UnitCountService unitCountService) 
-            : base(buildOptions, macroData, activeUnitData, attackData, microTaskData, chatService, unitCountService)
+            ChatService chatService, UnitCountService unitCountService, 
+            FrameToTimeConverter frameToTimeConverter) 
+            : base(buildOptions, macroData, activeUnitData, attackData, microTaskData, chatService, unitCountService, frameToTimeConverter)
         {
         }
     }

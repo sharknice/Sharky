@@ -70,6 +70,7 @@ namespace Sharky.MicroTasks
                     if (!commander.Value.Claimed && commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_ORACLE)
                     {
                         commander.Value.Claimed = true;
+                        commander.Value.UnitRole = UnitRole.Harass;
                         UnitCommanders.Add(commander.Value);
                     }
                     if (UnitCommanders.Count() == DesiredCount)
@@ -156,7 +157,7 @@ namespace Sharky.MicroTasks
                     if (Left || Right)
                     {
                         var side = new Point2D { X = StagingPoint.X, Y = commander.UnitCalculation.Unit.Pos.Y };
-                        if (commander.RetreatPathFrame + 20 < frame && Vector2.DistanceSquared(commanderVector, new Vector2(side.X, side.Y)) > 1)
+                        if (commander.RetreatPathFrame + 20 < frame && Vector2.DistanceSquared(commanderVector, new Vector2(side.X, side.Y)) > 4)
                         {
                             var action = OracleMicroController.NavigateToPoint(commander, side, defensivePoint, side, frame);
                             if (action != null)
@@ -169,7 +170,7 @@ namespace Sharky.MicroTasks
                     else if (Top || Bottom)
                     {
                         var side = new Point2D { X = commander.UnitCalculation.Unit.Pos.X, Y = StagingPoint.Y };
-                        if (commander.RetreatPathFrame + 20 < frame && Vector2.DistanceSquared(commanderVector, new Vector2(side.X, side.Y)) > 1)
+                        if (commander.RetreatPathFrame + 20 < frame && Vector2.DistanceSquared(commanderVector, new Vector2(side.X, side.Y)) > 4)
                         {
                             var action = OracleMicroController.NavigateToPoint(commander, side, defensivePoint, side, frame);
                             if (action != null)

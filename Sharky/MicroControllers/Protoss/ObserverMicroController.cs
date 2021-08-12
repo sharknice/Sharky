@@ -48,7 +48,7 @@ namespace Sharky.MicroControllers.Protoss
             return null;
         }
 
-        protected override bool WeaponReady(UnitCommander commander)
+        protected override bool WeaponReady(UnitCommander commander, int frame)
         {
             return false;
         }

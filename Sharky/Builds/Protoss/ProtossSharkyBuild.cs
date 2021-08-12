@@ -17,8 +17,8 @@ namespace Sharky.Builds
             CounterTransitioner = counterTransitioner;
         }
 
-        public ProtossSharkyBuild(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, ChronoData chronoData, ICounterTransitioner counterTransitioner, UnitCountService unitCountService, MicroTaskData microTaskData) 
-            : base(buildOptions, macroData, activeUnitData, attackData, microTaskData, chatService, unitCountService)
+        public ProtossSharkyBuild(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, ChronoData chronoData, ICounterTransitioner counterTransitioner, UnitCountService unitCountService, MicroTaskData microTaskData, FrameToTimeConverter frameToTimeConverter) 
+            : base(buildOptions, macroData, activeUnitData, attackData, microTaskData, chatService, unitCountService, frameToTimeConverter)
         {
             ChronoData = chronoData;
             CounterTransitioner = counterTransitioner;

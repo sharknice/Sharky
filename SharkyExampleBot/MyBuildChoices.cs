@@ -19,7 +19,7 @@ namespace SharkyExampleBot
             var protossCounterTransitioner = new ProtossCounterTransitioner(defaultSharkyBot);
 
             // a probe microcontroller for our proxy builds
-            var probeMicroController = new IndividualMicroController(defaultSharkyBot, MicroPriority.JustLive, false);
+            var probeMicroController = new IndividualMicroController(defaultSharkyBot, defaultSharkyBot.SharkyAdvancedPathFinder, MicroPriority.JustLive, false);
 
             // We create all of our builds
             var proxyVoidRay = new ProxyVoidRay(defaultSharkyBot, protossCounterTransitioner, probeMicroController);
@@ -98,11 +98,11 @@ namespace SharkyExampleBot
 
         public static BuildChoices GetTerranBuildChoices(DefaultSharkyBot defaultSharkyBot)
         {
-            var scveMicroController = new IndividualMicroController(defaultSharkyBot, MicroPriority.JustLive, false);
+            var scvMicroController = new IndividualMicroController(defaultSharkyBot, defaultSharkyBot.SharkyAdvancedPathFinder, MicroPriority.JustLive, false);
 
             var massMarines = new MassMarines(defaultSharkyBot);
             var bansheesAndMarines = new BansheesAndMarines(defaultSharkyBot);
-            var reaperCheese = new ReaperCheese(defaultSharkyBot, scveMicroController);
+            var reaperCheese = new ReaperCheese(defaultSharkyBot, scvMicroController);
 
             var builds = new Dictionary<string, ISharkyBuild>
             {

@@ -113,11 +113,6 @@ namespace Sharky.Managers
                 ActiveUnitData.Commanders.TryRemove(unit.Key, out UnitCommander removed);
             }
 
-            foreach (var unit in ActiveUnitData.EnemyUnits.Where(u => u.Value.UnitTypeData.Attributes.Contains(SC2APIProtocol.Attribute.Structure))) // structures get replaced by snapshots if we can't see them, so just remove them and let them get readded
-            {
-                ActiveUnitData.EnemyUnits.TryRemove(unit.Key, out UnitCalculation removed);
-            }
-
             //Debug.WriteLine($"removal {stopwatch.ElapsedMilliseconds}");
             //stopwatch.Restart();
 
@@ -185,6 +180,11 @@ namespace Sharky.Managers
                     }
                     ActiveUnitData.NeutralUnits[unit.Tag] = attack;
                 }
+            }
+
+            foreach (var unit in ActiveUnitData.EnemyUnits.Where(u => u.Value.FrameLastSeen != frame && u.Value.UnitTypeData.Attributes.Contains(SC2APIProtocol.Attribute.Structure))) // structures get replaced by snapshots if we can't see them, so just remove them and let them get readded
+            {
+                ActiveUnitData.EnemyUnits.TryRemove(unit.Key, out UnitCalculation removed);
             }
 
             //Debug.WriteLine($"parallel {stopwatch.ElapsedMilliseconds}");

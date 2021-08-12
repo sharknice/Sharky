@@ -77,7 +77,7 @@ namespace Sharky.MicroControllers.Terran
 
             if (PreOffenseOrder(commander, target, defensivePoint, null, bestTarget, frame, out action)) { return action; }
 
-            if (WeaponReady(commander) && commander.UnitCalculation.EnemiesInRange.Count() > 0)
+            if (WeaponReady(commander, frame) && commander.UnitCalculation.EnemiesInRange.Count() > 0)
             {
                 if (AttackBestTarget(commander, target, defensivePoint, null, bestTarget, frame, out action)) { return action; }
             }

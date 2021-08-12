@@ -67,6 +67,8 @@ namespace Sharky
         /// </summary>
         public float IncomingDamage { get; set; }
 
+        public int Repairers { get; set; }
+
         float oneSecondInFrames;
 
         public UnitCalculation(Unit unit, int repairers, SharkyUnitData sharkyUnitData, SharkyOptions sharkyOptions, UnitDataService unitDataService, int frame)
@@ -80,6 +82,8 @@ namespace Sharky
             Unit = unit;
             UnitTypeData = sharkyUnitData.UnitData[(UnitTypes)unit.UnitType];
 
+            Repairers = repairers;
+
             Velocity = 0;
             AverageVelocity = 0;
             Vector = Vector2.Zero;
@@ -88,15 +92,7 @@ namespace Sharky
 
             FrameLastSeen = frame;
 
-            var unitRange = unitDataService.GetRange(unit);
-            if (unitRange == 0)
-            {
-                Range = 0;
-            }
-            else
-            {
-                Range = unitRange + unit.Radius;
-            }
+            Range = unitDataService.GetRange(unit);
 
             Start = new Vector2(unit.Pos.X, unit.Pos.Y);
 

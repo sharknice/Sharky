@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using Sharky.DefaultBot;
 using Sharky.Pathing;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,12 +9,18 @@ namespace Sharky.MicroControllers.Protoss
 {
     public class VoidRayMicroController : IndividualMicroController
     {
+        public VoidRayMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder pathFinder, MicroPriority microPriority, bool groupUpEnabled)
+            :base(defaultSharkyBot, pathFinder, microPriority, groupUpEnabled)
+        {
+
+        }
+
         public VoidRayMicroController(MapDataService mapDataService, SharkyUnitData sharkyUnitData, ActiveUnitData activeUnitData, DebugService debugService, IPathFinder sharkyPathFinder, BaseData baseData, SharkyOptions sharkyOptions, DamageService damageService, UnitDataService unitDataService, TargetingData targetingData, MicroPriority microPriority, bool groupUpEnabled)
             : base(mapDataService, sharkyUnitData, activeUnitData, debugService, sharkyPathFinder, baseData, sharkyOptions, damageService, unitDataService, targetingData, microPriority, groupUpEnabled)
         {
         }
-        // TODO: when retreating cancel prismatic alignment
-        protected override bool WeaponReady(UnitCommander commander)
+
+        protected override bool WeaponReady(UnitCommander commander, int frame)
         {
             return true;
         }

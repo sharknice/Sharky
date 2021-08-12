@@ -29,7 +29,8 @@ namespace Sharky.MicroControllers.Protoss
 
             if (bestTarget != null && commander.UnitCalculation.NearbyEnemies.Any(e => e.Unit.Tag == bestTarget.Unit.Tag) && MicroPriority != MicroPriority.NavigateToLocation)
             {
-                action = commander.Order(frame, Abilities.MOVE, GetPositionFromRange(commander, bestTarget.Unit.Pos, commander.UnitCalculation.Unit.Pos, commander.UnitCalculation.Range));
+                action = commander.Order(frame, Abilities.ATTACK, null, bestTarget.Unit.Tag);
+                //action = commander.Order(frame, Abilities.MOVE, GetPositionFromRange(commander, bestTarget.Unit.Pos, commander.UnitCalculation.Unit.Pos, commander.UnitCalculation.Range));
                 return true;
             }
 
@@ -40,7 +41,8 @@ namespace Sharky.MicroControllers.Protoss
 
             if (bestTarget != null && MicroPriority != MicroPriority.NavigateToLocation)
             {
-                action = commander.Order(frame, Abilities.MOVE, GetPositionFromRange(commander, bestTarget.Unit.Pos, commander.UnitCalculation.Unit.Pos, commander.UnitCalculation.Range));
+                action = commander.Order(frame, Abilities.ATTACK, null, bestTarget.Unit.Tag);
+                //action = commander.Order(frame, Abilities.MOVE, GetPositionFromRange(commander, bestTarget.Unit.Pos, commander.UnitCalculation.Unit.Pos, commander.UnitCalculation.Range));
                 return true;
             }
 
@@ -122,6 +124,19 @@ namespace Sharky.MicroControllers.Protoss
                 if (bestOutOfRangeAttack != null)
                 {
                     return bestOutOfRangeAttack;
+                }
+            }
+
+            if (!commander.UnitCalculation.NearbyEnemies.Any(e => e.DamageAir) && commander.UnitCalculation.NearbyAllies.Any(a => a.DamageAir))
+            {
+                attacks = commander.UnitCalculation.NearbyEnemies.Where(u => u.Unit.DisplayType != DisplayType.Hidden && !u.Unit.IsFlying && !u.Attributes.Contains(SC2APIProtocol.Attribute.Massive) && !u.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && !u.Unit.BuffIds.Contains((uint)Buffs.GRAVITONBEAM));
+                if (attacks.Count() > 0)
+                {
+                    var bestSafeLift = GetBestTargetFromList(commander, attacks, existingOrder);
+                    if (bestSafeLift != null)
+                    {
+                        return bestSafeLift;
+                    }
                 }
             }
 

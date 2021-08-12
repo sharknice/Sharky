@@ -1,4 +1,6 @@
-﻿using Sharky.Pathing;
+﻿using SC2APIProtocol;
+using Sharky.Pathing;
+using System.Collections.Generic;
 using System.Linq;
 
 
@@ -11,11 +13,28 @@ namespace Sharky.MicroControllers.Protoss
         {
         }
 
-        // TODO: regular range is 8, but leash range is 14
-
-        protected override bool WeaponReady(UnitCommander commander)
+        protected override bool WeaponReady(UnitCommander commander, int frame)
         {
-            return commander.UnitCalculation.Unit.WeaponCooldown == 0 || commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.ATTACK || o.AbilityId == (uint)Abilities.ATTACK_ATTACK);
+            return true;
+        }
+
+        protected override bool AttackBestTarget(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            var interceptorCount = commander.UnitCalculation.NearbyAllies.Count(u => u.Unit.UnitType == (uint)UnitTypes.PROTOSS_INTERCEPTOR);
+            var carrierCount = commander.UnitCalculation.NearbyAllies.Count(u => u.Unit.UnitType == (uint)UnitTypes.PROTOSS_CARRIER) + 1;
+
+            if (bestTarget != null && interceptorCount >= carrierCount * 8)
+            {
+                if (commander.UnitCalculation.NearbyAllies.Count(u => u.Unit.UnitType == (uint)UnitTypes.PROTOSS_INTERCEPTOR && u.Unit.Orders.Any(o => o.TargetUnitTag == bestTarget.Unit.Tag)) >= 8)
+                {
+                    // move up to 14 range away from target
+                    // move to target, avoid deceleration, etc.
+                    action = null;
+                    return false;
+                }
+            }
+
+            return base.AttackBestTarget(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action);
         }
     }
 }

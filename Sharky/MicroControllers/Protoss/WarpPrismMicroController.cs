@@ -62,6 +62,11 @@ namespace Sharky.MicroControllers.Protoss
             var unitToSupport = GetSupportTarget(commander, target, defensivePoint, supportableUnits);
             if (unitToSupport == null)
             {
+                if (UnloadUnits(commander, defensivePoint, frame, out action))
+                {
+                    return true;
+                }
+
                 return false;
             }
 
@@ -139,8 +144,15 @@ namespace Sharky.MicroControllers.Protoss
                     }
                 }
 
-                StartWarping(commander, frame, out action);
-                return true;
+                if (StartWarping(commander, frame, out action))
+                {
+                    return true;
+                }
+
+                if (AvoidDeceleration(commander, moveTo, frame, out action))
+                {
+                    return true;
+                }
             }
             else
             {
@@ -153,6 +165,8 @@ namespace Sharky.MicroControllers.Protoss
                 action = commander.Order(frame, Abilities.MOVE, moveTo);
                 return true;
             }
+
+            return false;
         }
 
         bool StartWarping(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
@@ -251,8 +265,8 @@ namespace Sharky.MicroControllers.Protoss
         Point2D GetPickupSpot(Point2D target, Point2D defensivePoint)
         {
             var angle = Math.Atan2(target.Y - defensivePoint.Y, defensivePoint.X - target.X);
-            var x = PickupRange * Math.Cos(angle);
-            var y = PickupRange * Math.Sin(angle);
+            var x = (PickupRange - .5) * Math.Cos(angle);
+            var y = (PickupRange -.5) * Math.Sin(angle);
             return new Point2D { X = target.X + (float)x, Y = target.Y - (float)y };
         }
 

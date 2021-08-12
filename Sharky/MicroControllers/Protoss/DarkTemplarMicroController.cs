@@ -113,7 +113,7 @@ namespace Sharky.MicroControllers.Protoss
 
             if (OffensiveAbility(commander, target, defensivePoint, null, bestTarget, frame, out action)) { return action; }
 
-            if (WeaponReady(commander))
+            if (WeaponReady(commander, frame))
             {
                 if (AttackBestTarget(commander, target, defensivePoint, null, bestTarget, frame, out action)) { return action; }
             }
