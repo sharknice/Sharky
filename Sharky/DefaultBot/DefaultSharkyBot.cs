@@ -172,7 +172,13 @@ namespace Sharky.DefaultBot
             Managers.Add(MapManager);
             Managers.Add(UnitManager);
 
-            EnemyRaceManager = new EnemyRaceManager(ActiveUnitData, SharkyUnitData, EnemyData);
+            HttpClient = new HttpClient();
+            ChatHistory = new ChatHistory();
+            ChatDataService = new ChatDataService();
+            EnemyNameService = new EnemyNameService();
+            EnemyPlayerService = new EnemyPlayerService(EnemyNameService);
+            ChatService = new ChatService(ChatDataService, SharkyOptions, ActiveChatData);
+            EnemyRaceManager = new EnemyRaceManager(ActiveUnitData, SharkyUnitData, EnemyData, SharkyOptions, ChatService);
             Managers.Add(EnemyRaceManager);
 
             SharkyPathFinder = new SharkyPathFinder(new Roy_T.AStar.Paths.PathFinder(), MapData, MapDataService, DebugService);
@@ -216,12 +222,6 @@ namespace Sharky.DefaultBot
             OrbitalManager = new OrbitalManager(ActiveUnitData, BaseData, EnemyData);
             Managers.Add(OrbitalManager);
 
-            HttpClient = new HttpClient();
-            ChatHistory = new ChatHistory();
-            ChatDataService = new ChatDataService();
-            EnemyNameService = new EnemyNameService();
-            EnemyPlayerService = new EnemyPlayerService(EnemyNameService);
-            ChatService = new ChatService(ChatDataService, SharkyOptions, ActiveChatData);
             ChatManager = new ChatManager(HttpClient, ChatHistory, SharkyOptions, ChatDataService, EnemyPlayerService, EnemyNameService, ChatService, ActiveChatData, FrameToTimeConverter);
             Managers.Add((IManager)ChatManager);
 
@@ -459,7 +459,7 @@ namespace Sharky.DefaultBot
                 { Race.Zerg, new BuildChoices { Builds = zergBuilds, BuildSequences = zergBuildSequences } }
             };
             BuildDecisionService = new BuildDecisionService(ChatService);
-            BuildManager = new BuildManager(BuildChoices, DebugService, MacroBalancer, BuildDecisionService, EnemyPlayerService, ChatHistory, EnemyStrategyHistory, FrameToTimeConverter);
+            BuildManager = new BuildManager(BuildChoices, DebugService, MacroBalancer, BuildDecisionService, EnemyPlayerService, ChatHistory, EnemyStrategyHistory, FrameToTimeConverter, SharkyOptions, ChatService);
             Managers.Add(BuildManager);
         }
         public SharkyBot CreateBot(List<IManager> managers, DebugService debugService)

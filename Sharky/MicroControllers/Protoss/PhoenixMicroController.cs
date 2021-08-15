@@ -41,8 +41,7 @@ namespace Sharky.MicroControllers.Protoss
 
             if (bestTarget != null && MicroPriority != MicroPriority.NavigateToLocation)
             {
-                action = commander.Order(frame, Abilities.ATTACK, null, bestTarget.Unit.Tag);
-                //action = commander.Order(frame, Abilities.MOVE, GetPositionFromRange(commander, bestTarget.Unit.Pos, commander.UnitCalculation.Unit.Pos, commander.UnitCalculation.Range));
+                action = commander.Order(frame, Abilities.MOVE, GetPositionFromRange(commander, bestTarget.Unit.Pos, commander.UnitCalculation.Unit.Pos, commander.UnitCalculation.Range));
                 return true;
             }
 

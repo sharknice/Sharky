@@ -18,6 +18,8 @@ namespace Sharky.Managers
         protected IBuildDecisionService BuildDecisionService;
         protected IEnemyPlayerService EnemyPlayerService;
         protected FrameToTimeConverter FrameToTimeConverter;
+        protected SharkyOptions SharkyOptions;
+        protected ChatService ChatService;
 
         protected IMacroBalancer MacroBalancer;
         protected ISharkyBuild CurrentBuild;
@@ -44,9 +46,11 @@ namespace Sharky.Managers
             ChatHistory = defaultSharkyBot.ChatHistory;
             EnemyStrategyHistory = defaultSharkyBot.EnemyStrategyHistory;
             FrameToTimeConverter = defaultSharkyBot.FrameToTimeConverter;
+            SharkyOptions = defaultSharkyBot.SharkyOptions;
+            ChatService = defaultSharkyBot.ChatService;
         }
 
-        public BuildManager(Dictionary<Race, BuildChoices> buildChoices, DebugService debugService, IMacroBalancer macroBalancer, IBuildDecisionService buildDecisionService, IEnemyPlayerService enemyPlayerService, ChatHistory chatHistory, EnemyStrategyHistory enemyStrategyHistory, FrameToTimeConverter frameToTimeConverter)
+        public BuildManager(Dictionary<Race, BuildChoices> buildChoices, DebugService debugService, IMacroBalancer macroBalancer, IBuildDecisionService buildDecisionService, IEnemyPlayerService enemyPlayerService, ChatHistory chatHistory, EnemyStrategyHistory enemyStrategyHistory, FrameToTimeConverter frameToTimeConverter, SharkyOptions sharkyOptions, ChatService chatService)
         {
             BuildChoices = buildChoices;
             DebugService = debugService;
@@ -56,6 +60,8 @@ namespace Sharky.Managers
             ChatHistory = chatHistory;
             EnemyStrategyHistory = enemyStrategyHistory;
             FrameToTimeConverter = frameToTimeConverter;
+            SharkyOptions = sharkyOptions;
+            ChatService = chatService;
         }
 
         public override void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)
@@ -93,6 +99,10 @@ namespace Sharky.Managers
                 {
                     ActualRace = playerInfo.RaceActual;
                     SelectedRace = playerInfo.RaceRequested;
+                    if (SharkyOptions.TagsEnabled && playerInfo.RaceRequested == Race.Random)
+                    {
+                        ChatService.SendAllyChatMessage($"Tag:SelfRandomRace-{playerInfo.RaceActual}");
+                    }
                 }
                 else
                 {

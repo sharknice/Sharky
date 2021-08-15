@@ -2,7 +2,7 @@
 using Sharky.Pathing;
 using System.Collections.Generic;
 using System.Linq;
-
+using System.Numerics;
 
 namespace Sharky.MicroControllers.Protoss
 {
@@ -35,6 +35,51 @@ namespace Sharky.MicroControllers.Protoss
             }
 
             return base.AttackBestTarget(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action);
+        }
+
+        protected override bool Retreat(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
+
+            var closestEnemy = commander.UnitCalculation.NearbyEnemies.OrderBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+
+            if (commander.UnitCalculation.NearbyEnemies.All(e => e.Range < commander.UnitCalculation.Range && e.UnitTypeData.MovementSpeed < commander.UnitCalculation.UnitTypeData.MovementSpeed))
+            {
+                if (closestEnemy != null && MapDataService.SelfVisible(closestEnemy.Unit.Pos))
+                {
+                    if (commander.UnitCalculation.Range > closestEnemy.Range)
+                    {
+                        var speed = commander.UnitCalculation.UnitTypeData.MovementSpeed;
+                        var enemySpeed = closestEnemy.UnitTypeData.MovementSpeed;
+                        if (closestEnemy.Unit.BuffIds.Contains((uint)Buffs.MEDIVACSPEEDBOOST))
+                        {
+                            enemySpeed = 5.94f;
+                        }
+                        if (closestEnemy.Unit.BuffIds.Contains((uint)Buffs.STIMPACK) || closestEnemy.Unit.BuffIds.Contains((uint)Buffs.STIMPACKMARAUDER))
+                        {
+                            enemySpeed += 1.57f;
+                        }
+
+                        if (speed > enemySpeed || closestEnemy.Range + 3 < commander.UnitCalculation.Range)
+                        {
+                            if (MaintainRange(commander, frame, out action)) { return true; }
+                        }
+                    }
+                }
+            }
+
+            if (closestEnemy != null && commander.RetreatPathFrame + 20 < frame)
+            {
+                commander.RetreatPath = SharkyPathFinder.GetSafeAirPath(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y, defensivePoint.X, defensivePoint.Y, frame);
+
+                commander.RetreatPathFrame = frame;
+                commander.RetreatPathIndex = 1;
+            }
+
+            if (FollowPath(commander, frame, out action)) { return true; }
+
+            action = commander.Order(frame, Abilities.MOVE, defensivePoint);
+            return true;
         }
     }
 }

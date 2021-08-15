@@ -107,7 +107,7 @@ namespace Sharky.MicroTasks
             }
             else
             {
-                actions = MicroController.Attack(UnitCommanders, TargetingData.MainDefensePoint, TargetingData.ForwardDefensePoint, TargetingData.MainDefensePoint, frame);
+                actions = MicroController.Attack(UnitCommanders, TargetingData.ForwardDefensePoint, TargetingData.MainDefensePoint, null, frame);
             }
             StopDefendingWithWorkers();
             stopwatch.Stop();
