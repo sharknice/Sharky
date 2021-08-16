@@ -260,7 +260,8 @@ namespace Sharky
             await Connect(5678);
             await CreateGame(map, opponentRace, opponentDifficulty, aIBuild);
             var playerId = await JoinGame(myRace);
-            await Run(bot, playerId, "test");
+            var opponentID = "test";
+            await Run(bot, playerId, opponentID);
         }
 
         public async Task RunLadder(ISharkyBot bot, Race myRace, int gamePort, int startPort, String opponentID)
