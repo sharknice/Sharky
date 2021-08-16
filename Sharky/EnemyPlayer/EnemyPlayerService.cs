@@ -81,7 +81,7 @@ namespace Sharky.EnemyPlayer
 
         private List<EnemyPlayer> LoadEnemies()
         {
-            Enemies = LoadEnemies(DataFolder + "opponents/");
+            Enemies = LoadEnemies("/StaticData/opponents/");
             return Enemies;
         }
 

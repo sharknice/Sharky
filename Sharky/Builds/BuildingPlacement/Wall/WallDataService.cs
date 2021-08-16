@@ -19,7 +19,7 @@ namespace Sharky.Builds.BuildingPlacement
         List<MapWallData> LoadMapWallData(string folder)
         {
             var mapWallData = new List<MapWallData>();
-            var wallFolder = Directory.GetCurrentDirectory() + "/data/wall/" + folder;
+            var wallFolder = Directory.GetCurrentDirectory() + "/StaticData/wall/" + folder;
             if (Directory.Exists(wallFolder))
             {
                 foreach (var fileName in Directory.GetFiles(wallFolder))

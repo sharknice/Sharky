@@ -24,7 +24,7 @@ namespace Sharky.Chat
         Dictionary<string, ChatTypeData> LoadChatTypeData()
         {
             var data = new Dictionary<string, ChatTypeData>();
-            var chatFolder = Directory.GetCurrentDirectory() + "/data/chat/type";
+            var chatFolder = Directory.GetCurrentDirectory() + "/StaticData/chat/type";
             if (Directory.Exists(chatFolder))
             {
                 foreach (var fileName in Directory.GetFiles(chatFolder))
@@ -45,7 +45,7 @@ namespace Sharky.Chat
         List<ChatData> LoadDefaultChatData()
         {
             var chatData = new List<ChatData>();
-            var chatFolder = Directory.GetCurrentDirectory() + "/data/chat/default";
+            var chatFolder = Directory.GetCurrentDirectory() + "/StaticData/chat/default";
             if (Directory.Exists(chatFolder))
             {
                 foreach (var fileName in Directory.GetFiles(chatFolder))

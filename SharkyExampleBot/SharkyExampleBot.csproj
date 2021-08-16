@@ -11,16 +11,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="data\chat\default\default.json">
+    <None Update="StaticData\chat\default\default.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="data\chat\type\attacks.json">
+    <None Update="StaticData\chat\type\attacks.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="data\chat\type\greetings.json">
+    <None Update="StaticData\chat\type\greetings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="data\chat\type\strategies.json">
+    <None Update="StaticData\chat\type\strategies.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="ladderbots.json">

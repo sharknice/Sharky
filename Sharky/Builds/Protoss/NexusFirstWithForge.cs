@@ -8,14 +8,18 @@ namespace Sharky.Builds.Protoss
 {
     public class NexusFirstWithForge : ProtossSharkyBuild
     {
+        TargetingData TargetingData;
+
         public NexusFirstWithForge(DefaultSharkyBot defaultSharkyBot, ICounterTransitioner counterTransitioner)
             : base(defaultSharkyBot, counterTransitioner)
         {
+            TargetingData = defaultSharkyBot.TargetingData;
         }
 
-        public NexusFirstWithForge(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, ChronoData chronoData, ICounterTransitioner counterTransitioner, UnitCountService unitCountService, MicroTaskData microTaskData, FrameToTimeConverter frameToTimeConverter) 
+        public NexusFirstWithForge(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, ChronoData chronoData, ICounterTransitioner counterTransitioner, UnitCountService unitCountService, MicroTaskData microTaskData, FrameToTimeConverter frameToTimeConverter, TargetingData targetingData) 
             : base(buildOptions, macroData, activeUnitData, attackData, chatService, chronoData, counterTransitioner, unitCountService, microTaskData, frameToTimeConverter)
         {
+            TargetingData = targetingData;
         }
 
         public override void StartBuild(int frame)
@@ -35,6 +39,8 @@ namespace Sharky.Builds.Protoss
             };
 
             MacroData.DesiredProductionCounts[UnitTypes.PROTOSS_NEXUS] = 1;
+
+            TargetingData.WallOffBasePosition = BuildingPlacement.WallOffBasePosition.Natural;
         }
 
         public override void OnFrame(ResponseObservation observation)

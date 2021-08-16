@@ -376,7 +376,7 @@ namespace Sharky.DefaultBot
 
             var antiMassMarine = new AntiMassMarine(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, EmptyCounterTransitioner, UnitCountService, MicroTaskData, FrameToTimeConverter);
             var fourGate = new FourGate(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, SharkyUnitData, EmptyCounterTransitioner, UnitCountService, MicroTaskData, FrameToTimeConverter);
-            var nexusFirst = new NexusFirst(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, EmptyCounterTransitioner, UnitCountService, MicroTaskData, FrameToTimeConverter);
+            var nexusFirst = new NexusFirst(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, EmptyCounterTransitioner, UnitCountService, MicroTaskData, FrameToTimeConverter, TargetingData);
             var robo = new Robo(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, EnemyData, MicroTaskData, EmptyCounterTransitioner, UnitCountService, FrameToTimeConverter);
             var protossRobo = new ProtossRobo(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, SharkyOptions, MicroTaskData, EnemyData, EmptyCounterTransitioner, UnitCountService, FrameToTimeConverter);
             var everyProtossUnit = new EveryProtossUnit(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, ChronoData, EmptyCounterTransitioner, UnitCountService, MicroTaskData, FrameToTimeConverter);
