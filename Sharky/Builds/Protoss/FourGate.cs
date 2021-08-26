@@ -20,14 +20,6 @@ namespace Sharky.Builds.Protoss
             OpeningAttackChatSent = false;
         }
 
-        public FourGate(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, ChronoData chronoData, SharkyUnitData sharkyUnitData, ICounterTransitioner counterTransitioner, UnitCountService unitCountService, MicroTaskData microTaskData, FrameToTimeConverter frameToTimeConverter) 
-            : base(buildOptions, macroData, activeUnitData, attackData, chatService, chronoData, counterTransitioner, unitCountService, microTaskData, frameToTimeConverter)
-        {
-            SharkyUnitData = sharkyUnitData;
-
-            OpeningAttackChatSent = false;
-        }
-
         public override void StartBuild(int frame)
         {
             base.StartBuild(frame);

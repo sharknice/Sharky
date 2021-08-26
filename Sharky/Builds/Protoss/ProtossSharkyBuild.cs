@@ -2,6 +2,7 @@
 using Sharky.Chat;
 using Sharky.DefaultBot;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Sharky.Builds
 {
@@ -10,17 +11,21 @@ namespace Sharky.Builds
         protected ChronoData ChronoData;
         protected ICounterTransitioner CounterTransitioner;
 
+        TargetingData TargetingData;
+
         public ProtossSharkyBuild(DefaultSharkyBot defaultSharkyBot, ICounterTransitioner counterTransitioner)
             : base(defaultSharkyBot)
         {
             ChronoData = defaultSharkyBot.ChronoData;
+            TargetingData = defaultSharkyBot.TargetingData;
             CounterTransitioner = counterTransitioner;
         }
 
-        public ProtossSharkyBuild(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, ChronoData chronoData, ICounterTransitioner counterTransitioner, UnitCountService unitCountService, MicroTaskData microTaskData, FrameToTimeConverter frameToTimeConverter) 
+        public ProtossSharkyBuild(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, ChronoData chronoData, ICounterTransitioner counterTransitioner, UnitCountService unitCountService, MicroTaskData microTaskData, TargetingData targetingData, FrameToTimeConverter frameToTimeConverter) 
             : base(buildOptions, macroData, activeUnitData, attackData, microTaskData, chatService, unitCountService, frameToTimeConverter)
         {
             ChronoData = chronoData;
+            TargetingData = targetingData;
             CounterTransitioner = counterTransitioner;
         }
 
@@ -34,6 +39,54 @@ namespace Sharky.Builds
             base.StartBuild(frame);
 
             BuildOptions.WallOffType = BuildingPlacement.WallOffType.Partial;
+        }
+
+        protected void SendProbeForFirstPylon(int frame)
+        {
+            if (MacroData.FoodUsed == 13 && MacroData.Minerals > 80 && UnitCountService.Count(UnitTypes.PROTOSS_PYLON) == 0)
+            {
+                PrePositionBuilderTask.SendBuilder(TargetingData.ForwardDefensePoint, frame);
+            }
+        }
+
+        protected void SendProbeForFirstGateway(int frame)
+        {
+            if (MacroData.FoodUsed >= 14 && UnitCountService.Completed(UnitTypes.PROTOSS_PYLON) == 0 && ActiveUnitData.SelfUnits.Any(u => u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && u.Value.Unit.BuildProgress > .75f))
+            {
+                PrePositionBuilderTask.SendBuilder(TargetingData.ForwardDefensePoint, frame);
+            }
+        }
+
+        protected void SendProbeForCyberneticsCore(int frame)
+        {
+            if (UnitCountService.EquivalentTypeCompleted(UnitTypes.PROTOSS_GATEWAY) == 0 && ActiveUnitData.SelfUnits.Any(u => u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_GATEWAY && u.Value.Unit.BuildProgress > .90f))
+            {
+                PrePositionBuilderTask.SendBuilder(TargetingData.ForwardDefensePoint, frame);
+            }
+        }
+
+        protected void SendProbeToNaturalForFirstPylon(int frame)
+        {
+            if (MacroData.FoodUsed == 13 && MacroData.Minerals > 15 && UnitCountService.Count(UnitTypes.PROTOSS_PYLON) == 0)
+            {
+                PrePositionBuilderTask.SendBuilder(TargetingData.NaturalBasePoint, frame);
+            }
+        }
+
+        protected void SendProbeToNaturalForFirstGateway(int frame)
+        {
+            if (MacroData.FoodUsed >= 14 && UnitCountService.Completed(UnitTypes.PROTOSS_PYLON) == 0 && ActiveUnitData.SelfUnits.Any(u => u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && u.Value.Unit.BuildProgress > .5f))
+            {
+                PrePositionBuilderTask.SendBuilder(TargetingData.NaturalBasePoint, frame);
+            }
+        }
+
+        protected void SendProbeToNaturalForCyberneticsCore(int frame)
+        {
+            if (UnitCountService.EquivalentTypeCompleted(UnitTypes.PROTOSS_GATEWAY) == 0 && ActiveUnitData.SelfUnits.Any(u => u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_GATEWAY && u.Value.Unit.BuildProgress > .7f))
+            {
+                PrePositionBuilderTask.SendBuilder(TargetingData.NaturalBasePoint, frame);
+            }
         }
     }
 }

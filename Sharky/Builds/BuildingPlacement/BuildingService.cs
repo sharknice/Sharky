@@ -74,6 +74,21 @@ namespace Sharky.Builds.BuildingPlacement
             return false;
         }
 
+        public bool BlocksPath(float x, float y, float unitRadius)
+        {
+            var radius = unitRadius + 2f;
+            if (x - radius < 0 || y - radius < 0 || x + radius >= MapData.MapWidth || y + radius >= MapData.MapHeight)
+            {
+                return true;
+            }
+            var blocked = MapData.Map[(int)x][(int)y].Walkable && MapData.Map[(int)x][(int)y + (int)radius].Walkable && MapData.Map[(int)x][(int)y - (int)radius].Walkable
+                && MapData.Map[(int)x + (int)radius][(int)y].Walkable && MapData.Map[(int)x + (int)radius][(int)y + (int)radius].Walkable && MapData.Map[(int)x + (int)radius][(int)y - (int)radius].Walkable
+                && MapData.Map[(int)x - (int)radius][(int)y].Walkable && MapData.Map[(int)x - (int)radius][(int)y + (int)radius].Walkable && MapData.Map[(int)x - (int)radius][(int)y - (int)radius].Walkable;
+
+            if (blocked) { return true; }
+            return !SameHeight(x, y, radius);
+        }
+
         public bool HasCreep(float x, float y, float radius)
         {
             if (x - radius < 0 || y - radius < 0 || x + radius >= MapData.MapWidth || y + radius >= MapData.MapHeight)

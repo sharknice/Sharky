@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using Sharky.DefaultBot;
 using Sharky.Pathing;
 using System;
 using System.Collections.Generic;
@@ -11,10 +12,16 @@ namespace Sharky.MicroControllers.Protoss
     {
         CollisionCalculator CollisionCalculator;
 
-        public ColossusMicroController(MapDataService mapDataService, SharkyUnitData unitDataManager, ActiveUnitData activeUnitData, DebugService debugService, IPathFinder sharkyPathFinder, BaseData baseData, SharkyOptions sharkyOptions, DamageService damageService, UnitDataService unitDataService, TargetingData targetingData, MicroPriority microPriority, bool groupUpEnabled, CollisionCalculator collisionCalculator)
-            : base(mapDataService, unitDataManager, activeUnitData, debugService, sharkyPathFinder, baseData, sharkyOptions, damageService, unitDataService, targetingData, microPriority, groupUpEnabled)
+        public ColossusMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled)
+            : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled)
         {
-            CollisionCalculator = collisionCalculator;
+            CollisionCalculator = defaultSharkyBot.CollisionCalculator;
+        }
+
+        protected override bool DealWithSiegedTanks(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
+            return false;
         }
 
         protected override UnitCalculation GetBestDpsReduction(UnitCommander commander, Weapon weapon, IEnumerable<UnitCalculation> primaryTargets, IEnumerable<UnitCalculation> secondaryTargets)
@@ -23,16 +30,16 @@ namespace Sharky.MicroControllers.Protoss
             var dpsReductions = new Dictionary<ulong, float>();
             foreach (var enemyAttack in primaryTargets)
             {
-                float dpsReduction = 0;
+                float totalDamage = 0;
                 var attackLine = GetAttackLine(commander.UnitCalculation.Unit.Pos, enemyAttack.Unit.Pos);
                 foreach (var splashedEnemy in secondaryTargets)
                 {
                     if (CollisionCalculator.Collides(splashedEnemy.Position, splashedEnemy.Unit.Radius + splashRadius, attackLine.Start, attackLine.End))
                     {
-                        dpsReduction += splashedEnemy.Dps / TimeToKill(weapon, splashedEnemy.Unit, SharkyUnitData.UnitData[(UnitTypes)splashedEnemy.Unit.UnitType]);
+                        totalDamage +=  GetDamage(weapon, splashedEnemy.Unit, SharkyUnitData.UnitData[(UnitTypes)splashedEnemy.Unit.UnitType]);
                     }
                 }
-                dpsReductions[enemyAttack.Unit.Tag] = dpsReduction;
+                dpsReductions[enemyAttack.Unit.Tag] = totalDamage;
             }
 
             var best = dpsReductions.OrderByDescending(x => x.Value).FirstOrDefault().Key;

@@ -4,6 +4,7 @@
     {
         None,
         Attacking,
-        RegeneratingShields
+        RegeneratingShields,
+        Grouping
     }
 }

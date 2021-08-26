@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using Sharky.DefaultBot;
 using Sharky.MicroControllers;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,7 @@ namespace Sharky.MicroTasks.Attack
         ActiveUnitData ActiveUnitData;
 
         DefenseService DefenseService;
+        TargetingService TargetingService;
 
         IMicroController MicroController;
 
@@ -21,14 +23,29 @@ namespace Sharky.MicroTasks.Attack
         List<ArmySplits> ArmySplits;
         List<UnitCommander> AvailableCommanders;
 
+        public ArmySplitter(DefaultSharkyBot defaultSharkyBot)
+        {
+            AttackData = defaultSharkyBot.AttackData;
+            TargetingData = defaultSharkyBot.TargetingData;
+            ActiveUnitData = defaultSharkyBot.ActiveUnitData;
+
+            DefenseService = defaultSharkyBot.DefenseService;
+            TargetingService = defaultSharkyBot.TargetingService;
+
+            MicroController = defaultSharkyBot.MicroController;
+
+            LastSplitFrame = -1000;
+        }
+
         public ArmySplitter(AttackData attackData, TargetingData targetingData, ActiveUnitData activeUnitData,
-            DefenseService defenseService, IMicroController microController)
+            DefenseService defenseService, TargetingService targetingService, IMicroController microController)
         {
             AttackData = attackData;
             TargetingData = targetingData;
             ActiveUnitData = activeUnitData;
 
             DefenseService = defenseService;
+            TargetingService = targetingService;
 
             MicroController = microController;
 
@@ -51,8 +68,7 @@ namespace Sharky.MicroTasks.Attack
             {
                 if (split.SelfGroup.Count() > 0)
                 {
-                    var groupVectors = split.SelfGroup.Select(u => u.UnitCalculation.Position);
-                    var groupPoint = new Point2D { X = groupVectors.Average(v => v.X), Y = groupVectors.Average(v => v.Y) };
+                    var groupPoint = TargetingService.GetArmyPoint(AvailableCommanders);
                     var defensePoint = new Point2D { X = split.EnemyGroup.FirstOrDefault().Unit.Pos.X, Y = split.EnemyGroup.FirstOrDefault().Unit.Pos.Y };
                     actions.AddRange(MicroController.Attack(split.SelfGroup, defensePoint, TargetingData.ForwardDefensePoint, groupPoint, frame));
 
@@ -62,8 +78,7 @@ namespace Sharky.MicroTasks.Attack
 
             if (AvailableCommanders.Count() > 0)
             {
-                var groupVectors = AvailableCommanders.Select(u => u.UnitCalculation.Position);
-                var groupPoint = new Point2D { X = groupVectors.Average(v => v.X), Y = groupVectors.Average(v => v.Y) };
+                var groupPoint = TargetingService.GetArmyPoint(AvailableCommanders);
                 if (AttackData.Attacking)
                 {
                     actions.AddRange(MicroController.Attack(AvailableCommanders, attackPoint, TargetingData.ForwardDefensePoint, groupPoint, frame));

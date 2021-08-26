@@ -124,18 +124,18 @@ namespace Sharky.Managers
                 LastUpdateFrame = frame;
             }
 
-            foreach (var chokePoint in TargetingData.ChokePoints.Good)
-            {
-                DebugService.DrawSphere(new Point { X = chokePoint.Center.X, Y = chokePoint.Center.Y, Z = 12 }, 4, new Color { R = 0, G = 255, B = 0 });
-            }
-            foreach (var chokePoint in TargetingData.ChokePoints.Neutral)
-            {
-                DebugService.DrawSphere(new Point { X = chokePoint.Center.X, Y = chokePoint.Center.Y, Z = 12 }, 4, new Color { R = 0, G = 0, B = 255 });
-            }
-            foreach (var chokePoint in TargetingData.ChokePoints.Bad)
-            {
-                DebugService.DrawSphere(new Point { X = chokePoint.Center.X, Y = chokePoint.Center.Y, Z = 12 }, 4, new Color { R = 255, G = 0, B = 0 });
-            }
+            //foreach (var chokePoint in TargetingData.ChokePoints.Good)
+            //{
+            //    DebugService.DrawSphere(new Point { X = chokePoint.Center.X, Y = chokePoint.Center.Y, Z = 12 }, 4, new Color { R = 0, G = 255, B = 0 });
+            //}
+            //foreach (var chokePoint in TargetingData.ChokePoints.Neutral)
+            //{
+            //    DebugService.DrawSphere(new Point { X = chokePoint.Center.X, Y = chokePoint.Center.Y, Z = 12 }, 4, new Color { R = 0, G = 0, B = 255 });
+            //}
+            //foreach (var chokePoint in TargetingData.ChokePoints.Bad)
+            //{
+            //    DebugService.DrawSphere(new Point { X = chokePoint.Center.X, Y = chokePoint.Center.Y, Z = 12 }, 4, new Color { R = 255, G = 0, B = 0 });
+            //}
         }
 
         void UpdateDefensePoint(int frame)

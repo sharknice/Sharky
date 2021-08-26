@@ -34,7 +34,9 @@ namespace Sharky.MicroTasks.Attack
                 TargetingData.HiddenEnemyBase = false;
                 EnemyBuildingCount = currentEnemyBuildingCount;
 
-                var enemyBuilding = ActiveUnitData.EnemyUnits.Where(e => e.Value.Unit.UnitType != (uint)UnitTypes.ZERG_CREEPTUMORBURROWED && e.Value.Unit.UnitType != (uint)UnitTypes.ZERG_CREEPTUMOR && e.Value.UnitTypeData.Attributes.Contains(SC2APIProtocol.Attribute.Structure)).OrderBy(e => Vector2.DistanceSquared(e.Value.Position, new Vector2(armyPoint.X, armyPoint.Y))).FirstOrDefault().Value;
+                var armyVector = new Vector2(armyPoint.X, armyPoint.Y);
+
+                var enemyBuilding = ActiveUnitData.EnemyUnits.Where(e => e.Value.Unit.UnitType != (uint)UnitTypes.ZERG_CREEPTUMORBURROWED && e.Value.Unit.UnitType != (uint)UnitTypes.ZERG_CREEPTUMOR && e.Value.UnitTypeData.Attributes.Contains(SC2APIProtocol.Attribute.Structure)).OrderBy(e => Vector2.DistanceSquared(e.Value.Position, armyVector)).FirstOrDefault().Value;
                 if (enemyBuilding != null)
                 {
                     return new Point2D { X = enemyBuilding.Unit.Pos.X, Y = enemyBuilding.Unit.Pos.Y };
@@ -64,9 +66,19 @@ namespace Sharky.MicroTasks.Attack
             return attackPoint;
         }
 
-        public Point2D GetArmyPoint(IEnumerable<UnitCommander> armyUnits, float trimRangeSquared = 200)
+        public Point2D GetArmyPoint(IEnumerable<UnitCommander> armyUnits, float trimRangeSquared = 100)
         {
             var vectors = armyUnits.Select(u => u.UnitCalculation.Position);
+            return GetArmyPoint(vectors, trimRangeSquared);
+        }
+
+        public Point2D GetArmyPoint(IEnumerable<UnitCalculation> armyUnits, float trimRangeSquared = 100)
+        {
+            var vectors = armyUnits.Select(u => u.Position);
+            return GetArmyPoint(vectors, trimRangeSquared);
+        }
+        Point2D GetArmyPoint(IEnumerable<Vector2> vectors, float trimRangeSquared)
+        {
             if (vectors.Count() > 0)
             {
                 var average = new Vector2(vectors.Average(v => v.X), vectors.Average(v => v.Y));

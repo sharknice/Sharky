@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using Sharky.DefaultBot;
 using Sharky.Pathing;
 using System;
 using System.Collections.Generic;
@@ -14,9 +15,10 @@ namespace Sharky.MicroControllers.Protoss
 
         float WeaponCooldown = 0.61f;
 
-        public OracleMicroController(MapDataService mapDataService, SharkyUnitData unitDataManager, ActiveUnitData activeUnitData, DebugService debugService, IPathFinder sharkyPathFinder, BaseData baseData, SharkyOptions sharkyOptions, DamageService damageService, UnitDataService unitDataService, TargetingData targetingData, MicroPriority microPriority, bool groupUpEnabled)
-            : base(mapDataService, unitDataManager, activeUnitData, debugService, sharkyPathFinder, baseData, sharkyOptions, damageService, unitDataService, targetingData, microPriority, groupUpEnabled)
+        public OracleMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled)
+            : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled)
         {
+
         }
 
         protected override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)

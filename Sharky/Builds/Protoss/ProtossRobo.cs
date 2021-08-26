@@ -19,13 +19,6 @@ namespace Sharky.Builds.Protoss
             EnemyData = defaultSharkyBot.EnemyData;
         }
 
-        public ProtossRobo(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, ChronoData chronoData, SharkyOptions sharkyOptions, MicroTaskData microTaskData, EnemyData enemyData, ICounterTransitioner counterTransitioner, UnitCountService unitCountService, FrameToTimeConverter frameToTimeConverter) 
-            : base(buildOptions, macroData, activeUnitData, attackData, chatService, chronoData, counterTransitioner, unitCountService, microTaskData, frameToTimeConverter)
-        {
-            SharkyOptions = sharkyOptions;
-            EnemyData = enemyData;
-        }
-
         public override void StartBuild(int frame)
         {
             base.StartBuild(frame);

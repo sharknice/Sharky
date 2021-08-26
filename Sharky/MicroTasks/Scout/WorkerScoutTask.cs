@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using Sharky.DefaultBot;
 using Sharky.MicroControllers;
 using Sharky.Pathing;
 using System.Collections.Concurrent;
@@ -13,25 +14,26 @@ namespace Sharky.MicroTasks
         SharkyUnitData SharkyUnitData;
         TargetingData TargetingData;
         MapDataService MapDataService;
-        IIndividualMicroController IndividualMicroController;
         DebugService DebugService;
         BaseData BaseData;
         AreaService AreaService;
+        MineralWalker MineralWalker;
 
         List<Point2D> ScoutPoints;
 
         bool started { get; set; }
 
-        public WorkerScoutTask(SharkyUnitData sharkyUnitData, TargetingData targetingData, MapDataService mapDataService, bool enabled, float priority, IIndividualMicroController individualMicroController, DebugService debugService, BaseData baseData, AreaService areaService)
+        public WorkerScoutTask(DefaultSharkyBot defaultSharkyBot, bool enabled, float priority)
         {
-            SharkyUnitData = sharkyUnitData;
-            TargetingData = targetingData;
-            MapDataService = mapDataService;
+            SharkyUnitData = defaultSharkyBot.SharkyUnitData;
+            TargetingData = defaultSharkyBot.TargetingData;
+            MapDataService = defaultSharkyBot.MapDataService;
+            DebugService = defaultSharkyBot.DebugService;
+            BaseData = defaultSharkyBot.BaseData;
+            AreaService = defaultSharkyBot.AreaService;
+            MineralWalker = defaultSharkyBot.MineralWalker;
+
             Priority = priority;
-            IndividualMicroController = individualMicroController;
-            DebugService = debugService;
-            BaseData = baseData;
-            AreaService = areaService;
 
             UnitCommanders = new List<UnitCommander>();
             Enabled = enabled;
@@ -49,7 +51,7 @@ namespace Sharky.MicroTasks
 
                 foreach (var commander in commanders)
                 {
-                    if (!commander.Value.Claimed && commander.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker))
+                    if (!commander.Value.Claimed && commander.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && !commander.Value.UnitCalculation.Unit.BuffIds.Any(b => SharkyUnitData.CarryingResourceBuffs.Contains((Buffs)b)))
                     {
                         if (commander.Value.UnitCalculation.Unit.Orders.Any(o => !SharkyUnitData.MiningAbilities.Contains((Abilities)o.AbilityId)))
                         {
@@ -83,7 +85,7 @@ namespace Sharky.MicroTasks
             }
 
             var mainVector = new Vector2(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y);
-            var points = ScoutPoints.OrderBy(p => MapDataService.LastFrameVisibility(p)).ThenByDescending(p => Vector2.DistanceSquared(mainVector, new Vector2(p.X, p.Y)));
+            var points = ScoutPoints.OrderBy(p => MapDataService.LastFrameVisibility(p)).ThenBy(p => Vector2.DistanceSquared(mainVector, new Vector2(p.X, p.Y)));
 
             foreach (var point in points)
             {
@@ -92,6 +94,15 @@ namespace Sharky.MicroTasks
 
             foreach (var commander in UnitCommanders)
             {
+                if (commander.UnitCalculation.Unit.ShieldMax > 5 && (commander.UnitCalculation.Unit.Shield < 5 || (commander.UnitCalculation.Unit.Shield < commander.UnitCalculation.Unit.ShieldMax && commander.UnitCalculation.EnemiesInRangeOf.Count() > 0)))
+                {
+                    if (MineralWalker.MineralWalkHome(commander, frame, out List<Action> mineralWalk))
+                    {
+                        commands.AddRange(mineralWalk);
+                        return commands;
+                    }
+                }
+
                 var action = commander.Order(frame, Abilities.MOVE, points.FirstOrDefault());
                 if (action != null)
                 {

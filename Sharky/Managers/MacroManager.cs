@@ -186,7 +186,6 @@ namespace Sharky.Managers
                             }
                         }
 
-
                         if (building.Count() > 0)
                         {
                             if (building.First().Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_GATEWAY && SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.WARPGATERESEARCH))
@@ -201,7 +200,12 @@ namespace Sharky.Managers
                             else if (building.First().Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPGATE)
                             {
                                 var targetLocation = TargetingData.ForwardDefensePoint;
-                                if (AttackData.Attacking)
+                                var undefendedNexus = ActiveUnitData.SelfUnits.FirstOrDefault(u => u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS && u.Value.NearbyEnemies.Any(a => a.UnitClassifications.Contains(UnitClassification.ArmyUnit)) && !u.Value.NearbyAllies.Any(a => a.UnitClassifications.Contains(UnitClassification.ArmyUnit))).Value;
+                                if (undefendedNexus != null)
+                                {
+                                    targetLocation = new Point2D { X = undefendedNexus.Position.X, Y = undefendedNexus.Position.Y };
+                                }
+                                else if (AttackData.Attacking)
                                 {
                                     targetLocation = AttackData.ArmyPoint;
                                 }

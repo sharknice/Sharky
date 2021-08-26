@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using Sharky.DefaultBot;
 using Sharky.Pathing;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,9 +12,10 @@ namespace Sharky.MicroControllers.Protoss
         int PurificationNovaRange = 13;
         float PurificationNovaSpeed = 5.95f;
 
-        public DisruptorPhasedMicroController(MapDataService mapDataService, SharkyUnitData sharkyUnitData, ActiveUnitData activeUnitData, DebugService debugService, IPathFinder sharkyPathFinder, BaseData baseData, SharkyOptions sharkyOptions, DamageService damageService, UnitDataService unitDataService, TargetingData targetingData, MicroPriority microPriority, bool groupUpEnabled)
-            : base(mapDataService, sharkyUnitData, activeUnitData, debugService, sharkyPathFinder, baseData, sharkyOptions, damageService, unitDataService, targetingData, microPriority, groupUpEnabled)
+        public DisruptorPhasedMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled)
+            : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled)
         {
+
         }
 
         public override List<SC2APIProtocol.Action> Attack(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
@@ -148,6 +150,36 @@ namespace Sharky.MicroControllers.Protoss
         public override List<SC2APIProtocol.Action> Retreat(UnitCommander commander, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
             return Attack(commander, defensivePoint, defensivePoint, groupCenter, frame);
+        }
+
+        public override List<Action> Support(UnitCommander commander, IEnumerable<UnitCommander> supportTargets, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
+        {
+            return Attack(commander, defensivePoint, defensivePoint, groupCenter, frame);
+        }
+
+        public override List<Action> Idle(UnitCommander commander, Point2D defensivePoint, int frame)
+        {
+            return Attack(commander, defensivePoint, defensivePoint, null, frame);
+        }
+
+        public override List<Action> Scout(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, bool prioritizeVision = false)
+        {
+            return Attack(commander, target, defensivePoint, null, frame);
+        }
+
+        public override List<Action> Bait(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
+        {
+            return Attack(commander, target, defensivePoint, null, frame);
+        }
+
+        public override List<SC2APIProtocol.Action> HarassWorkers(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame)
+        {
+            return Attack(commander, target, defensivePoint, null, frame);
+        }
+
+        public override List<SC2APIProtocol.Action> NavigateToPoint(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
+        {
+            return Attack(commander, target, defensivePoint, null, frame);
         }
     }
 }

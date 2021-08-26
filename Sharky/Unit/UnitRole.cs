@@ -5,6 +5,7 @@
         None,
         Bait,
         Scout,
+        PreBuild,
         Build,
         Proxy,
         Minerals,

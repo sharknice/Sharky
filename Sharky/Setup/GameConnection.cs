@@ -41,10 +41,15 @@ namespace Sharky
             throw new Exception("Unable to make a connection.");
         }
 
-        public async Task CreateGame(String mapName, Race opponentRace, Difficulty opponentDifficulty, AIBuild aIBuild)
+        public async Task CreateGame(String mapName, Race opponentRace, Difficulty opponentDifficulty, AIBuild aIBuild, int randomSeed = -1)
         {
             var createGame = new RequestCreateGame();
             createGame.Realtime = false;
+
+            if (randomSeed >= 0)
+            {
+                createGame.RandomSeed = (uint)randomSeed;
+            }
 
             string mapPath = Path.Combine(starcraftDir, "Maps", mapName);
             if (!File.Exists(mapPath))
@@ -253,12 +258,12 @@ namespace Sharky
             }
         }
         
-        public async Task RunSinglePlayer(ISharkyBot bot, string map, Race myRace, Race opponentRace, Difficulty opponentDifficulty, AIBuild aIBuild)
+        public async Task RunSinglePlayer(ISharkyBot bot, string map, Race myRace, Race opponentRace, Difficulty opponentDifficulty, AIBuild aIBuild, int randomSeed = -1)
         {
             readSettings();
             StartSC2Instance(5678);
             await Connect(5678);
-            await CreateGame(map, opponentRace, opponentDifficulty, aIBuild);
+            await CreateGame(map, opponentRace, opponentDifficulty, aIBuild, randomSeed);
             var playerId = await JoinGame(myRace);
             var opponentID = "test";
             await Run(bot, playerId, opponentID);

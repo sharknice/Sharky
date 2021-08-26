@@ -1,5 +1,7 @@
 ﻿using SC2APIProtocol;
 using Sharky.Builds.BuildingPlacement;
+using Sharky.DefaultBot;
+using Sharky.MicroControllers;
 using Sharky.Pathing;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -25,28 +27,31 @@ namespace Sharky.MicroTasks
         BuildingService BuildingService;
         ActiveUnitData ActiveUnitData;
 
+        MineralWalker MineralWalker;
+
         List<Point2D> ScoutPoints;
         List<Point2D> EnemyMainArea;
 
         bool started { get; set; }
 
-        public WorkerScoutGasStealTask(SharkyUnitData sharkyUnitData, TargetingData targetingData, MacroData macroData, MapDataService mapDataService, 
-            bool enabled, float priority, DebugService debugService, BaseData baseData, AreaService areaService, MapData mapData, BuildingService buildingService, ActiveUnitData activeUnitData)
+        public WorkerScoutGasStealTask(DefaultSharkyBot defaultSharkyBot, bool enabled, float priority)
         {
-            SharkyUnitData = sharkyUnitData;
-            TargetingData = targetingData;
-            MacroData = macroData;
-            MapDataService = mapDataService;
-            Priority = priority;
-            DebugService = debugService;
-            BaseData = baseData;
-            AreaService = areaService;
-            BuildingService = buildingService;
-            MapData = mapData;
-            ActiveUnitData = activeUnitData;
+            SharkyUnitData = defaultSharkyBot.SharkyUnitData;
+            TargetingData = defaultSharkyBot.TargetingData;
+            MacroData = defaultSharkyBot.MacroData;
+            MapDataService = defaultSharkyBot.MapDataService;
+            DebugService = defaultSharkyBot.DebugService;
+            BaseData = defaultSharkyBot.BaseData;
+            AreaService = defaultSharkyBot.AreaService;
+            BuildingService = defaultSharkyBot.BuildingService;
+            MapData = defaultSharkyBot.MapData;
+            ActiveUnitData = defaultSharkyBot.ActiveUnitData;
+            MineralWalker = defaultSharkyBot.MineralWalker;
 
             UnitCommanders = new List<UnitCommander>();
+
             Enabled = enabled;
+            Priority = priority;
 
             BlockExpansion = false;
             HidePylonInBase = false;
@@ -65,7 +70,7 @@ namespace Sharky.MicroTasks
 
                 foreach (var commander in commanders)
                 {
-                    if (!commander.Value.Claimed && commander.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker))
+                    if (!commander.Value.Claimed && commander.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && !commander.Value.UnitCalculation.Unit.BuffIds.Any(b => SharkyUnitData.CarryingResourceBuffs.Contains((Buffs)b)))
                     {
                         if (commander.Value.UnitCalculation.Unit.Orders.Any(o => !SharkyUnitData.MiningAbilities.Contains((Abilities)o.AbilityId)))
                         {
@@ -110,6 +115,15 @@ namespace Sharky.MicroTasks
                 if (commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.BUILD_ASSIMILATOR) || commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.BUILD_PYLON))
                 {
                     return commands;
+                }
+
+                if (commander.UnitCalculation.Unit.ShieldMax > 5 && (commander.UnitCalculation.Unit.Shield < 5 || (commander.UnitCalculation.Unit.Shield < commander.UnitCalculation.Unit.ShieldMax && commander.UnitCalculation.EnemiesInRangeOf.Count() > 0)))
+                {
+                    if (MineralWalker.MineralWalkHome(commander, frame, out List<Action> mineralWalk))
+                    {
+                        commands.AddRange(mineralWalk);
+                        return commands;
+                    }
                 }
 
                 if (MacroData.Minerals >= 75 && commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE)

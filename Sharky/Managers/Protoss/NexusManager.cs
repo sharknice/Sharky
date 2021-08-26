@@ -68,7 +68,7 @@ namespace Sharky.Managers.Protoss
                 foreach (var upgrade in ChronoData.ChronodUpgrades)
                 {
                     var upgradeData = SharkyUnitData.UpgradeData[upgrade];
-                    var building = ActiveUnitData.SelfUnits.Where(u => !u.Value.Unit.BuffIds.Contains((uint)Buffs.CHRONOBOOST) && upgradeData.ProducingUnits.Contains((UnitTypes)u.Value.Unit.UnitType) && u.Value.Unit.Orders.Any(o => o.AbilityId == (uint)upgradeData.Ability)).FirstOrDefault().Value;
+                    var building = ActiveUnitData.SelfUnits.Where(u => u.Value.Unit.IsPowered && !u.Value.Unit.BuffIds.Contains((uint)Buffs.CHRONOBOOST) && upgradeData.ProducingUnits.Contains((UnitTypes)u.Value.Unit.UnitType) && u.Value.Unit.Orders.Any(o => o.AbilityId == (uint)upgradeData.Ability)).FirstOrDefault().Value;
                     if (building != null)
                     {
                         return nexus.Order(frame, Abilities.CHRONOBOOST, null, building.Unit.Tag);
@@ -78,7 +78,7 @@ namespace Sharky.Managers.Protoss
                 foreach (var unit in ChronoData.ChronodUnits)
                 {
                     var trainingData = SharkyUnitData.TrainingData[unit];
-                    var building = ActiveUnitData.SelfUnits.Where(u => !u.Value.Unit.BuffIds.Contains((uint)Buffs.CHRONOBOOST) && trainingData.ProducingUnits.Contains((UnitTypes)u.Value.Unit.UnitType) && u.Value.Unit.Orders.Any(o => o.AbilityId == (uint)trainingData.Ability)).FirstOrDefault().Value;
+                    var building = ActiveUnitData.SelfUnits.Where(u => u.Value.Unit.IsPowered && !u.Value.Unit.BuffIds.Contains((uint)Buffs.CHRONOBOOST) && trainingData.ProducingUnits.Contains((UnitTypes)u.Value.Unit.UnitType) && u.Value.Unit.Orders.Any(o => o.AbilityId == (uint)trainingData.Ability)).FirstOrDefault().Value;
                     if (building != null)
                     {
                         return nexus.Order(frame, Abilities.CHRONOBOOST, null, building.Unit.Tag);

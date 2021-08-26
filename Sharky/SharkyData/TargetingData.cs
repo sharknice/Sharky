@@ -1,5 +1,6 @@
 ﻿using SC2APIProtocol;
 using Sharky.Builds.BuildingPlacement;
+using Sharky.MicroTasks.Attack;
 using Sharky.Pathing;
 using System.Collections.Generic;
 
@@ -17,5 +18,6 @@ namespace Sharky
         public List<Point2D> ForwardDefenseWallOffPoints { get; set; }
         public ChokePoints ChokePoints { get; set; }
         public WallOffBasePosition WallOffBasePosition { get; set; }
+        public AttackState AttackState { get; set; }
     }
 }

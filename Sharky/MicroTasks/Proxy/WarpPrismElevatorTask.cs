@@ -1,7 +1,9 @@
 ﻿using SC2APIProtocol;
 using Sharky.Chat;
+using Sharky.DefaultBot;
 using Sharky.MicroControllers;
 using Sharky.MicroControllers.Protoss;
+using Sharky.MicroTasks.Attack;
 using Sharky.Pathing;
 using Sharky.Proxy;
 using System;
@@ -25,6 +27,7 @@ namespace Sharky.MicroTasks.Proxy
         ActiveUnitData ActiveUnitData;
         ChatService ChatService;
         AreaService AreaService;
+        TargetingService TargetingService;
 
         float lastFrameTime;
 
@@ -40,18 +43,20 @@ namespace Sharky.MicroTasks.Proxy
         int PickupRangeSquared { get; set; }
         List<Point2D> DropArea { get; set; }
 
-        public WarpPrismElevatorTask(TargetingData targetingData, IMicroController microController, WarpPrismMicroController warpPrismMicroController, ProxyLocationService proxyLocationService, MapDataService mapDataService, DebugService debugService, UnitDataService unitDataService, ActiveUnitData activeUnitData, ChatService chatService, AreaService areaService, List<DesiredUnitsClaim> desiredUnitsClaims, float priority, bool enabled = true)
+        public WarpPrismElevatorTask(DefaultSharkyBot defaultSharkyBot, IMicroController microController, WarpPrismMicroController warpPrismMicroController, List<DesiredUnitsClaim> desiredUnitsClaims, float priority, bool enabled = true)
         {
-            TargetingData = targetingData;
+            TargetingData = defaultSharkyBot.TargetingData;
+            ProxyLocationService = defaultSharkyBot.ProxyLocationService;
+            MapDataService = defaultSharkyBot.MapDataService;
+            DebugService = defaultSharkyBot.DebugService;
+            UnitDataService = defaultSharkyBot.UnitDataService;
+            ActiveUnitData = defaultSharkyBot.ActiveUnitData;
+            AreaService = defaultSharkyBot.AreaService;
+            ChatService = defaultSharkyBot.ChatService;
+            TargetingService = defaultSharkyBot.TargetingService;
+
             MicroController = microController;
             WarpPrismMicroController = warpPrismMicroController;
-            ProxyLocationService = proxyLocationService;
-            MapDataService = mapDataService;
-            DebugService = debugService;
-            UnitDataService = unitDataService;
-            ActiveUnitData = activeUnitData;
-            AreaService = areaService;
-            ChatService = chatService;
 
             DesiredUnitsClaims = desiredUnitsClaims;
             Priority = priority;
@@ -130,12 +135,14 @@ namespace Sharky.MicroTasks.Proxy
                 if (droppedAttackers.Count() > 0)
                 {
                     // don't wait for another warp prism, just attack
-                    actions.AddRange(MicroController.Attack(unDroppedAttackers, TargetLocation, DefensiveLocation, null, frame));
+                    var groupPoint = TargetingService.GetArmyPoint(unDroppedAttackers);
+                    actions.AddRange(MicroController.Attack(unDroppedAttackers, TargetLocation, DefensiveLocation, groupPoint, frame));
                 }
                 else
                 {
                     // wait for a warp prism
-                    actions.AddRange(MicroController.Retreat(unDroppedAttackers, DefensiveLocation, null, frame));
+                    var groupPoint = TargetingService.GetArmyPoint(unDroppedAttackers);
+                    actions.AddRange(MicroController.Retreat(unDroppedAttackers, DefensiveLocation, groupPoint, frame));
                 }
             }
 

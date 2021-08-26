@@ -8,8 +8,11 @@ namespace Sharky.Builds
 {
     public class BuildNothing : SharkyBuild
     {
+        SharkyOptions SharkyOptions;
+
         public BuildNothing(DefaultSharkyBot defaultSharkyBot) : base(defaultSharkyBot)
         {
+            SharkyOptions = defaultSharkyBot.SharkyOptions;
         }
 
         public BuildNothing(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, MicroTaskData microTaskData,
@@ -62,6 +65,11 @@ namespace Sharky.Builds
             if (MacroData.Minerals == 1000)
             {
                 Console.WriteLine($"1000 minerals at {observation.Observation.GameLoop} frames");
+            }
+
+            if (MacroData.Frame == SharkyOptions.FramesPerSecond * 60 * 5)
+            {
+                Console.WriteLine($"{MacroData.Minerals} minerals at {observation.Observation.GameLoop} frames, {FrameToTimeConverter.GetTime((int)observation.Observation.GameLoop)}");
             }
         }
     }

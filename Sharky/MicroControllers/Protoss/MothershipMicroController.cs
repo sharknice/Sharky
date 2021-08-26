@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using Sharky.DefaultBot;
 using Sharky.Pathing;
 using System;
 using System.Collections.Generic;
@@ -13,9 +14,10 @@ namespace Sharky.MicroControllers.Protoss
         int TimeWarpRange = 9;
         float TImeWarpRadius = 3.5f;
 
-        public MothershipMicroController(MapDataService mapDataService, SharkyUnitData sharkyUnitData, ActiveUnitData activeUnitData, DebugService debugService, IPathFinder sharkyPathFinder, BaseData baseData, SharkyOptions sharkyOptions, DamageService damageService, UnitDataService unitDataService, TargetingData targetingData, MicroPriority microPriority, bool groupUpEnabled)
-            : base(mapDataService, sharkyUnitData, activeUnitData, debugService, sharkyPathFinder, baseData, sharkyOptions, damageService, unitDataService, targetingData, microPriority, groupUpEnabled)
+        public MothershipMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled)
+            : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled)
         {
+
         }
 
         protected override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
@@ -143,13 +145,13 @@ namespace Sharky.MicroControllers.Protoss
 
             var moveTo = GetSupportSpot(commander, unitToSupport, target, defensivePoint);
 
+            if (AvoidDeceleration(commander, moveTo, frame, out action))
+            {
+                return true;
+            }
+
             action = commander.Order(frame, Abilities.MOVE, moveTo);
             return true;
-        }
-
-        float DistanceSquared(UnitCalculation unit1, UnitCalculation unit2)
-        {
-            return Vector2.DistanceSquared(unit1.Position, unit2.Position);
         }
 
         protected override Point2D GetSupportSpot(UnitCommander commander, UnitCommander unitToSupport, Point2D target, Point2D defensivePoint)

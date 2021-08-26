@@ -1,5 +1,6 @@
 ﻿using SC2APIProtocol;
 using Sharky.Builds;
+using Sharky.DefaultBot;
 using Sharky.MicroTasks.Mining;
 using System;
 using System.Collections.Concurrent;
@@ -11,16 +12,40 @@ namespace Sharky.MicroTasks
 {
     public class MiningTask : MicroTask
     {
+        MineralMiner MineralMiner;
+        GasMiner GasMiner;
+
         SharkyUnitData SharkyUnitData;
         BaseData BaseData;
         ActiveUnitData ActiveUnitData;
         public MiningDefenseService MiningDefenseService { get; set; }
         MacroData MacroData;
         BuildOptions BuildOptions;
+        MicroTaskData MicroTaskData;
 
         bool LowMineralsHighGas;
 
-        public MiningTask(SharkyUnitData sharkyUnitData, BaseData baseData, ActiveUnitData activeUnitData, float priority, MiningDefenseService miningDefenseService, MacroData macroData, BuildOptions buildOptions)
+        public MiningTask(DefaultSharkyBot defaultSharkyBot, float priority, MiningDefenseService miningDefenseService, MineralMiner mineralMiner, GasMiner gasMiner)
+        {
+            SharkyUnitData = defaultSharkyBot.SharkyUnitData;
+            BaseData = defaultSharkyBot.BaseData;
+            ActiveUnitData = defaultSharkyBot.ActiveUnitData;
+            Priority = priority;
+            MiningDefenseService = miningDefenseService;
+            MacroData = defaultSharkyBot.MacroData;
+            BuildOptions = defaultSharkyBot.BuildOptions;
+            MicroTaskData = defaultSharkyBot.MicroTaskData;
+
+            MineralMiner = mineralMiner;
+            GasMiner = gasMiner;
+
+            LowMineralsHighGas = false;
+
+            UnitCommanders = new List<UnitCommander>();
+            Enabled = true;
+        }
+
+        public MiningTask(SharkyUnitData sharkyUnitData, BaseData baseData, ActiveUnitData activeUnitData, float priority, MiningDefenseService miningDefenseService, MacroData macroData, BuildOptions buildOptions, MicroTaskData microTaskData, MineralMiner mineralMiner, GasMiner gasMiner)
         {
             SharkyUnitData = sharkyUnitData;
             BaseData = baseData;
@@ -29,6 +54,10 @@ namespace Sharky.MicroTasks
             MiningDefenseService = miningDefenseService;
             MacroData = macroData;
             BuildOptions = buildOptions;
+            MicroTaskData = microTaskData;
+
+            MineralMiner = mineralMiner;
+            GasMiner = gasMiner;
 
             LowMineralsHighGas = false;
 
@@ -57,21 +86,24 @@ namespace Sharky.MicroTasks
 
             var commands = new List<SC2APIProtocol.Action>();
 
-            ReclaimBuliders(frame);
+            ReclaimBuilders(frame);
             RemoveLostWorkers();
+            StopAttackingWithSafeWorkers();
 
             commands.AddRange(BalanceGasWorkers(frame));
             commands.AddRange(MineWithIdleWorkers(frame));
             commands.AddRange(TransferWorkers(frame));
             commands.AddRange(MiningDefenseService.DealWithEnemies(frame, UnitCommanders));
-            commands.AddRange(MineMinerals(frame));
-            commands.AddRange(MineGas(frame));
+            commands.AddRange(MineralMiner.MineMinerals(frame));
+            commands.AddRange(GasMiner.MineGas(frame));
             commands.AddRange(RecallWorkers(frame));
+
+            commands.AddRange(DistanceMineWithExtraIdleWorkers(frame));
 
             return commands;
         }
 
-        void ReclaimBuliders(int frame)
+        void ReclaimBuilders(int frame)
         {
             var incompleteRefineries = ActiveUnitData.SelfUnits.Where(u => SharkyUnitData.GasGeyserRefineryTypes.Contains((UnitTypes)u.Value.Unit.UnitType) && u.Value.Unit.BuildProgress < .99).Select(u => u.Key);
 
@@ -115,162 +147,6 @@ namespace Sharky.MicroTasks
         IEnumerable<UnitCommander> GetIdleWorkers()
         {
             return UnitCommanders.Where(c => c.UnitRole == UnitRole.None);
-        }
-
-        List<SC2APIProtocol.Action> MineMinerals(int frame)
-        {
-            var actions = new List<SC2APIProtocol.Action>();
-
-            foreach (var selfBase in BaseData.SelfBases)
-            {
-                var baseVector = new Vector2(selfBase.ResourceCenter.Pos.X, selfBase.ResourceCenter.Pos.Y);
-                foreach (var miningInfo in selfBase.MineralMiningInfo)
-                {
-                    var mineralVector = new Vector2(miningInfo.ResourceUnit.Pos.X, miningInfo.ResourceUnit.Pos.Y);
-                    foreach (var worker in miningInfo.Workers.Where(w => w.UnitRole == UnitRole.Minerals))
-                    {
-                        var workerVector = worker.UnitCalculation.Position;
-                        if (worker.UnitCalculation.Unit.BuffIds.Any(b => SharkyUnitData.CarryingResourceBuffs.Contains((Buffs)b)))
-                        {
-                            var distanceSquared = Vector2.DistanceSquared(baseVector, workerVector);
-                            if (distanceSquared > 25 || distanceSquared < 10)
-                            {
-                                var action = worker.Order(frame, Abilities.HARVEST_RETURN, null, 0, true);
-                                if (action != null)
-                                {
-                                    actions.AddRange(action);
-                                }
-                            }
-                            else
-                            {
-                                var action = worker.Order(frame, Abilities.MOVE, miningInfo.DropOffPoint, 0, false);
-                                if (action != null)
-                                {
-                                    actions.AddRange(action);
-                                }
-                                action  = worker.Order(frame, Abilities.HARVEST_RETURN, null, 0, false, true);
-                                if (action != null)
-                                {
-                                    actions.AddRange(action);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            var touchingWorker = worker.UnitCalculation.NearbyAllies.Any(w => Vector2.DistanceSquared(workerVector, w.Position) < .5);
-                            if (touchingWorker || Vector2.DistanceSquared(mineralVector, workerVector) < 4)
-                            {
-                                var action = worker.Order(frame, Abilities.HARVEST_GATHER, null, miningInfo.ResourceUnit.Tag, false);
-                                if (action != null)
-                                {
-                                    actions.AddRange(action);
-                                }
-                                action = worker.Order(frame, Abilities.MOVE, miningInfo.DropOffPoint, 0, false, true);
-                                if (action != null)
-                                {
-                                    actions.AddRange(action);
-                                }
-                            }
-                            else
-                            {
-                                var action = worker.Order(frame, Abilities.MOVE, miningInfo.HarvestPoint, 0, false);
-                                if (action != null)
-                                {
-                                    actions.AddRange(action);
-                                }
-                                action = worker.Order(frame, Abilities.HARVEST_GATHER, null, miningInfo.ResourceUnit.Tag, false, true);
-                                if (action != null)
-                                {
-                                    actions.AddRange(action);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            return actions;
-        }
-
-        List<SC2APIProtocol.Action> MineGas(int frame)
-        {
-            var actions = new List<SC2APIProtocol.Action>();
-
-            foreach (var selfBase in BaseData.SelfBases)
-            {
-                var baseVector = new Vector2(selfBase.ResourceCenter.Pos.X, selfBase.ResourceCenter.Pos.Y);
-                foreach (var miningInfo in selfBase.GasMiningInfo)
-                {
-                    if (miningInfo.Workers.Count() > 0 && miningInfo.ResourceUnit.VespeneContents == 0)
-                    {
-                        foreach (var worker in miningInfo.Workers)
-                        {
-                            worker.UnitRole = UnitRole.None;
-                        }
-                        miningInfo.Workers.Clear();
-                    }
-
-                    var mineralVector = new Vector2(miningInfo.ResourceUnit.Pos.X, miningInfo.ResourceUnit.Pos.Y);
-                    foreach (var worker in miningInfo.Workers.Where(w => w.UnitRole == UnitRole.Gas))
-                    {
-                        if (miningInfo.ResourceUnit.UnitType == (uint)UnitTypes.PROTOSS_ASSIMILATORRICH || miningInfo.ResourceUnit.UnitType == (uint)UnitTypes.TERRAN_REFINERYRICH || miningInfo.ResourceUnit.UnitType == (uint)UnitTypes.ZERG_EXTRACTORRICH)
-                        {
-                            if (worker.LastTargetTag != miningInfo.ResourceUnit.Tag && worker.LastAbility != Abilities.SMART)
-                            {
-                                var action = worker.Order(frame, Abilities.SMART, null, miningInfo.ResourceUnit.Tag, false);
-                                if (action != null)
-                                {
-                                    actions.AddRange(action);
-                                }
-                            }
-                            continue;
-                        }
-                        var workerVector = worker.UnitCalculation.Position;
-                        if (worker.UnitCalculation.Unit.BuffIds.Any(b => SharkyUnitData.CarryingResourceBuffs.Contains((Buffs)b)))
-                        {
-                            var distanceSquared = Vector2.DistanceSquared(baseVector, workerVector);
-                            if (distanceSquared > 25 || distanceSquared < 10)
-                            {
-                                var action = worker.Order(frame, Abilities.HARVEST_RETURN, null, 0, true);
-                                if (action != null)
-                                {
-                                    actions.AddRange(action);
-                                }
-                            }
-                            else
-                            {
-                                var action = worker.Order(frame, Abilities.MOVE, miningInfo.DropOffPoint, 0, false);
-                                if (action != null)
-                                {
-                                    actions.AddRange(action);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            var touchingWorker = worker.UnitCalculation.NearbyAllies.Any(w => Vector2.DistanceSquared(workerVector, w.Position) < .5);
-                            if (touchingWorker || Vector2.DistanceSquared(mineralVector, workerVector) < 4)
-                            {
-                                var action = worker.Order(frame, Abilities.HARVEST_GATHER, null, miningInfo.ResourceUnit.Tag, false);
-                                if (action != null)
-                                {
-                                    actions.AddRange(action);
-                                }
-                            }
-                            else
-                            {
-                                var action = worker.Order(frame, Abilities.MOVE, miningInfo.HarvestPoint, 0, false);
-                                if (action != null)
-                                {
-                                    actions.AddRange(action);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            return actions;
         }
 
         List<SC2APIProtocol.Action> BalanceGasWorkers(int frame)
@@ -376,11 +252,11 @@ namespace Sharky.MicroTasks
             {
                 var saturationCount = 2;
                 var unsaturated = BaseData.SelfBases.Where(b => b.ResourceCenter.BuildProgress == 1 && b.MineralMiningInfo.Any(m => m.Workers.Count() < saturationCount));
-                if (unsaturated.Count() == 0)
-                {
-                    saturationCount++;
-                    unsaturated = BaseData.SelfBases.Where(b => b.ResourceCenter.BuildProgress == 1 && b.MineralMiningInfo.Any(m => m.Workers.Count() < saturationCount)).OrderBy(b => Vector2.DistanceSquared(new Vector2(b.Location.X, b.Location.Y), worker.UnitCalculation.Position));
-                }
+                //if (unsaturated.Count() == 0)
+                //{
+                //    saturationCount++;
+                //    unsaturated = BaseData.SelfBases.Where(b => b.ResourceCenter.BuildProgress == 1 && b.MineralMiningInfo.Any(m => m.Workers.Count() < saturationCount)).OrderBy(b => Vector2.DistanceSquared(new Vector2(b.Location.X, b.Location.Y), worker.UnitCalculation.Position));
+                //}
 
                 foreach (var selfBase in unsaturated)
                 {
@@ -493,6 +369,78 @@ namespace Sharky.MicroTasks
             }
 
             return actions;
+        }
+
+        private IEnumerable<SC2APIProtocol.Action> DistanceMineWithExtraIdleWorkers(int frame)
+        {
+            var actions = new List<SC2APIProtocol.Action>();
+            foreach (var worker in GetIdleWorkers())
+            {
+                if (worker.UnitCalculation.Unit.BuffIds.Any(b => SharkyUnitData.CarryingResourceBuffs.Contains((Buffs)b)))
+                {
+                    var action = worker.Order(frame, Abilities.HARVEST_RETURN, null, 0);
+                    if (action != null)
+                    {
+                        actions.AddRange(action);
+                    }
+                }
+                else if (worker.UnitCalculation.NearbyEnemies.Any())
+                {
+                    var attackTask = MicroTaskData.MicroTasks["AttackTask"];
+                    if (attackTask.Enabled)
+                    {
+                        worker.UnitRole = UnitRole.Attack;
+                        attackTask.UnitCommanders.Add(worker);
+                    }
+                }
+                else if (worker.UnitCalculation.Unit.Orders.Count() == 0 || worker.UnitCalculation.Unit.Orders.Any(o => BaseData.SelfBases.Any(b => b.MineralMiningInfo.Any(m => m.ResourceUnit.Tag == o.TargetUnitTag))))
+                {
+                    var closestPatch = ActiveUnitData.NeutralUnits.Where(u => SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType) && !BaseData.SelfBases.Any(b => b.MineralFields.Any(m => m.Tag == u.Value.Unit.Tag))).OrderBy(m => Vector2.DistanceSquared(m.Value.Position, worker.UnitCalculation.Position)).FirstOrDefault().Value;
+                    if (closestPatch != null)
+                    {
+                        var action = worker.Order(frame, Abilities.HARVEST_GATHER, null, closestPatch.Unit.Tag);
+                        if (action != null)
+                        {
+                            actions.AddRange(action);
+                        }
+                    }
+                    else
+                    {
+                        AttackWithWorker(worker);
+                    }
+                }
+            }
+            return actions;
+        }
+
+        private void AttackWithWorker(UnitCommander worker)
+        {
+            if (MicroTaskData.MicroTasks.ContainsKey("AttackTask"))
+            {
+                var attackTask = MicroTaskData.MicroTasks["AttackTask"];
+                if (attackTask.Enabled)
+                {
+                    attackTask.UnitCommanders.Add(worker);
+                    worker.UnitRole = UnitRole.Attack;
+                }
+            }
+        }
+
+        private void StopAttackingWithSafeWorkers()
+        {
+            if (MicroTaskData.MicroTasks.ContainsKey("AttackTask"))
+            {
+                var attackTask = MicroTaskData.MicroTasks["AttackTask"];
+                if (attackTask.Enabled)
+                {
+                    foreach (var worker in attackTask.UnitCommanders.Where(u => u.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && u.UnitCalculation.NearbyEnemies.Count() == 0 && u.UnitRole != UnitRole.Harass))
+                    {
+                        worker.UnitRole = UnitRole.None;
+                        worker.Claimed = false;
+                    }
+                    attackTask.UnitCommanders.RemoveAll(u => u.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && u.UnitCalculation.NearbyEnemies.Count() == 0 && u.UnitRole != UnitRole.Harass);
+                }
+            }
         }
     }
 }

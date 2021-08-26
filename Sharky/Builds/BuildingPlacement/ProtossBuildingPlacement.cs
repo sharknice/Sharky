@@ -97,7 +97,11 @@ namespace Sharky.Builds.BuildingPlacement
                     //    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 }, 1, new Color { R = 0, G = 255, B = 0 });
                     //}
 
-                    if (BuildingService.AreaBuildable(point.X, point.Y, 1.25f) && (minimumMineralProximinity == 0 || !BuildingService.BlocksResourceCenter(point.X, point.Y, 1.25f)) && !BuildingService.Blocked(point.X, point.Y, 1.25f, .1f) && !BuildingService.HasCreep(point.X, point.Y, 1.5f) && (!requireSameHeight || MapDataService.MapHeight(point) == MapDataService.MapHeight(reference)))
+                    if (BuildingService.AreaBuildable(point.X, point.Y, 1.25f) && 
+                        (minimumMineralProximinity == 0 || !BuildingService.BlocksResourceCenter(point.X, point.Y, 1.25f)) && 
+                        !BuildingService.Blocked(point.X, point.Y, 1.25f, .1f) && !BuildingService.HasCreep(point.X, point.Y, 1.5f) && 
+                        (!requireSameHeight || MapDataService.MapHeight(point) == MapDataService.MapHeight(reference)) &&
+                        (minimumMineralProximinity == 0 || !BuildingService.BlocksPath(point.X, point.Y, 1.25f)))
                     {
                         var mineralFields = ActiveUnitData.NeutralUnits.Where(u => SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType) || SharkyUnitData.GasGeyserTypes.Contains((UnitTypes)u.Value.Unit.UnitType));
                         var squared = (1 + minimumMineralProximinity + .5) * (1 + minimumMineralProximinity + .5);
@@ -175,7 +179,11 @@ namespace Sharky.Builds.BuildingPlacement
                             tooClose = true;
                         }
 
-                        if (!tooClose && BuildingService.SameHeight(point.X, point.Y, size + 1 / 2.0f) && (minimumMineralProximinity == 0 || !BuildingService.BlocksResourceCenter(point.X, point.Y, size + 1 / 2.0f)) && BuildingService.AreaBuildable(point.X, point.Y, (size + 1) / 2.0f) && !BuildingService.Blocked(point.X, point.Y, (size + 1) / 2.0f) && !BuildingService.HasCreep(point.X, point.Y, size / 2.0f)) // size +1 because want 1 space to move around to prevent walling self in
+                        if (!tooClose && BuildingService.SameHeight(point.X, point.Y, size + 1 / 2.0f) && 
+                            (minimumMineralProximinity == 0 || !BuildingService.BlocksResourceCenter(point.X, point.Y, size + 1 / 2.0f)) && 
+                            BuildingService.AreaBuildable(point.X, point.Y, (size + 1) / 2.0f) && !BuildingService.Blocked(point.X, point.Y, (size + 1) / 2.0f) &&  // size +1 because want 1 space to move around to prevent walling self in
+                            !BuildingService.HasCreep(point.X, point.Y, size / 2.0f) && 
+                            !BuildingService.BlocksPath(point.X, point.Y, size / 2f))
                         {
                             var mineralFields = ActiveUnitData.NeutralUnits.Where(u => SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType));
                             var squared = (1 + minimumMineralProximinity + (size / 2f)) * (1 + minimumMineralProximinity + (size / 2f));

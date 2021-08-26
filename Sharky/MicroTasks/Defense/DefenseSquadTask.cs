@@ -107,7 +107,7 @@ namespace Sharky.MicroTasks
             }
             else
             {
-                actions = MicroController.Attack(UnitCommanders, TargetingData.ForwardDefensePoint, TargetingData.MainDefensePoint, null, frame);
+                actions = MicroController.Retreat(UnitCommanders, TargetingData.ForwardDefensePoint, null, frame);
             }
             StopDefendingWithWorkers();
             stopwatch.Stop();
@@ -147,6 +147,7 @@ namespace Sharky.MicroTasks
                 {
                     worker.UnitCalculation.TargetPriorityCalculation.TargetPriority = TargetPriority.KillBunker;
                 }
+
                 return MicroController.Attack(WorkerDefenders, new Point2D { X = bunker.Position.X, Y = bunker.Position.Y }, TargetingData.ForwardDefensePoint, TargetingData.MainDefensePoint, frame);
             }
 

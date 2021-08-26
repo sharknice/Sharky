@@ -20,6 +20,7 @@ namespace Sharky.Managers
         UnitDataService UnitDataService;
 
         float NearbyDistance = 16;
+        float AvoidRange = 1;
 
         ActiveUnitData ActiveUnitData;
 
@@ -74,7 +75,14 @@ namespace Sharky.Managers
                 ActiveUnitData.DeadUnits = new List<ulong>();
             }
 
-            foreach (var unit in ActiveUnitData.SelfUnits.Where(u => u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_DISRUPTORPHASED)) // remove things like purification novas that don't have dead unit events
+            foreach (var unit in ActiveUnitData.SelfUnits.Where(u => u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_DISRUPTORPHASED || u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_INTERCEPTOR)) // remove things like purification novas that don't have dead unit events
+            {
+                if (!observation.Observation.RawData.Units.Any(u => u.Tag == unit.Key))
+                {
+                    ActiveUnitData.DeadUnits.Add(unit.Key);
+                }
+            }
+            foreach (var unit in ActiveUnitData.EnemyUnits.Where(u => u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_DISRUPTORPHASED || u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_INTERCEPTOR)) // remove things like purification novas that don't have dead unit events
             {
                 if (!observation.Observation.RawData.Units.Any(u => u.Tag == unit.Key))
                 {
@@ -111,6 +119,11 @@ namespace Sharky.Managers
             foreach (var unit in ActiveUnitData.Commanders.Where(u => UndeadTypes.Contains((UnitTypes)u.Value.UnitCalculation.Unit.UnitType)))
             {
                 ActiveUnitData.Commanders.TryRemove(unit.Key, out UnitCommander removed);
+            }
+
+            foreach (var unit in ActiveUnitData.NeutralUnits.Where(u => u.Value.Unit.DisplayType == DisplayType.Snapshot))
+            {
+                ActiveUnitData.NeutralUnits.TryRemove(unit.Key, out UnitCalculation removed);
             }
 
             //Debug.WriteLine($"removal {stopwatch.ElapsedMilliseconds}");
@@ -210,10 +223,18 @@ namespace Sharky.Managers
                         allyAttack.Value.EnemiesInRange.Add(enemyAttack.Value);
                         enemyAttack.Value.EnemiesInRangeOf.Add(allyAttack.Value);
                     }
-                    if (DamageService.CanDamage(enemyAttack.Value, allyAttack.Value) && Vector2.DistanceSquared(allyAttack.Value.Position, enemyAttack.Value.Position) <= (enemyAttack.Value.Range + allyAttack.Value.Unit.Radius + enemyAttack.Value.Unit.Radius) * (enemyAttack.Value.Range + allyAttack.Value.Unit.Radius + enemyAttack.Value.Unit.Radius))
+                    if (DamageService.CanDamage(enemyAttack.Value, allyAttack.Value))
                     {
-                        enemyAttack.Value.EnemiesInRange.Add(allyAttack.Value);
-                        allyAttack.Value.EnemiesInRangeOf.Add(enemyAttack.Value);
+                        var distanceSquared = Vector2.DistanceSquared(allyAttack.Value.Position, enemyAttack.Value.Position);
+                        if (distanceSquared <= (AvoidRange + enemyAttack.Value.Range + allyAttack.Value.Unit.Radius + enemyAttack.Value.Unit.Radius) * (AvoidRange + enemyAttack.Value.Range + allyAttack.Value.Unit.Radius + enemyAttack.Value.Unit.Radius))
+                        {
+                            allyAttack.Value.EnemiesInRangeOfAvoid.Add(enemyAttack.Value);
+                            if (distanceSquared <= (enemyAttack.Value.Range + allyAttack.Value.Unit.Radius + enemyAttack.Value.Unit.Radius) * (enemyAttack.Value.Range + allyAttack.Value.Unit.Radius + enemyAttack.Value.Unit.Radius))
+                            {
+                                enemyAttack.Value.EnemiesInRange.Add(allyAttack.Value);
+                                allyAttack.Value.EnemiesInRangeOf.Add(enemyAttack.Value);
+                            }
+                        }
                     }
 
                     if (Vector2.DistanceSquared(allyAttack.Value.Position, enemyAttack.Value.Position) <= NearbyDistance * NearbyDistance)

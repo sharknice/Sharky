@@ -1,6 +1,5 @@
 ﻿using SC2APIProtocol;
 using Sharky.Builds.BuildChoosing;
-using Sharky.Chat;
 using Sharky.DefaultBot;
 
 namespace Sharky.Builds.Protoss
@@ -9,11 +8,6 @@ namespace Sharky.Builds.Protoss
     {
         public Twilight(DefaultSharkyBot defaultSharkyBot, ICounterTransitioner counterTransitioner)
             : base(defaultSharkyBot, counterTransitioner)
-        {
-        }
-
-        public Twilight(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, ChronoData chronoData, ICounterTransitioner counterTransitioner, UnitCountService unitCountService, MicroTaskData microTaskData, FrameToTimeConverter frameToTimeConverter) 
-            : base(buildOptions, macroData, activeUnitData, attackData, chatService, chronoData, counterTransitioner, unitCountService, microTaskData, frameToTimeConverter)
         {
         }
 

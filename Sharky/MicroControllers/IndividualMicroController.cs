@@ -1,5 +1,6 @@
 ﻿using SC2APIProtocol;
 using Sharky.DefaultBot;
+using Sharky.MicroTasks.Attack;
 using Sharky.Pathing;
 using Sharky.S2ClientTypeEnums;
 using System;
@@ -21,6 +22,7 @@ namespace Sharky.MicroControllers
         protected DamageService DamageService;
         protected UnitDataService UnitDataService;
         protected TargetingData TargetingData;
+        protected TargetingService TargetingService;
 
         public MicroPriority MicroPriority { get; set; }
 
@@ -30,8 +32,9 @@ namespace Sharky.MicroControllers
         protected float GroupUpDistanceMax;
         protected float AvoidDamageDistance;
         protected float LooseFormationDistance;
+        protected float GroupUpStateDistanceSquared;
 
-        public IndividualMicroController(MapDataService mapDataService, SharkyUnitData unitDataManager, ActiveUnitData activeUnitData, DebugService debugService, IPathFinder sharkyPathFinder, BaseData baseData, SharkyOptions sharkyOptions, DamageService damageService, UnitDataService unitDataService, TargetingData targetingData, MicroPriority microPriority, bool groupUpEnabled, float avoidDamageDistance = .5f)
+        public IndividualMicroController(MapDataService mapDataService, SharkyUnitData unitDataManager, ActiveUnitData activeUnitData, DebugService debugService, IPathFinder sharkyPathFinder, BaseData baseData, SharkyOptions sharkyOptions, DamageService damageService, UnitDataService unitDataService, TargetingData targetingData, TargetingService targetingService, MicroPriority microPriority, bool groupUpEnabled, float avoidDamageDistance = .5f)
         {
             MapDataService = mapDataService;
             SharkyUnitData = unitDataManager;
@@ -45,12 +48,14 @@ namespace Sharky.MicroControllers
             DamageService = damageService;
             UnitDataService = unitDataService;
             TargetingData = targetingData;
+            TargetingService = targetingService;
 
             GroupUpDistanceSmall = 5;
             GroupUpDistance = 10;
             GroupUpDistanceMax = 50;
             AvoidDamageDistance = avoidDamageDistance;
             LooseFormationDistance = 1.75f;
+            GroupUpStateDistanceSquared = 25f;
         }
 
         public IndividualMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder pathFinder, MicroPriority microPriority, bool groupUpEnabled, float avoidDamageDistance = .5f)
@@ -60,6 +65,8 @@ namespace Sharky.MicroControllers
             ActiveUnitData = defaultSharkyBot.ActiveUnitData;
             DebugService = defaultSharkyBot.DebugService;
             BaseData = defaultSharkyBot.BaseData;
+            TargetingData = defaultSharkyBot.TargetingData;
+
             SharkyOptions = defaultSharkyBot.SharkyOptions;
 
             SharkyPathFinder = pathFinder;
@@ -68,13 +75,14 @@ namespace Sharky.MicroControllers
 
             DamageService = defaultSharkyBot.DamageService;
             UnitDataService = defaultSharkyBot.UnitDataService;
-            TargetingData = defaultSharkyBot.TargetingData;
+            TargetingService = defaultSharkyBot.TargetingService;
 
             GroupUpDistanceSmall = 5;
             GroupUpDistance = 10;
             GroupUpDistanceMax = 50;
             AvoidDamageDistance = avoidDamageDistance;
             LooseFormationDistance = 1.75f;
+            GroupUpStateDistanceSquared = 100f;
         }
 
         public virtual List<SC2APIProtocol.Action> Attack(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
@@ -91,6 +99,8 @@ namespace Sharky.MicroControllers
 
             UpdateState(commander, target, defensivePoint, groupCenter, bestTarget, formation, frame);
 
+            if (GroupUpBasedOnState(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
+
             if (SpecialCaseMove(commander, target, defensivePoint, groupCenter, bestTarget, formation, frame, out action)) { return action; }
 
             if (PreOffenseOrder(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
@@ -101,7 +111,7 @@ namespace Sharky.MicroControllers
 
             if (MicroPriority == MicroPriority.StayOutOfRange)
             {
-                if (SpecialCaseMove(commander, target, defensivePoint, groupCenter, bestTarget, formation, frame, out action)) { return action; }
+                if (SpecialCaseRetreat(commander, target, defensivePoint, frame, out action)) { return action; }
                 if (MoveAway(commander, target, defensivePoint, frame, out action)) { return action; }
             }
 
@@ -182,10 +192,13 @@ namespace Sharky.MicroControllers
         public virtual List<SC2APIProtocol.Action> Retreat(UnitCommander commander, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
             UpdateState(commander, defensivePoint, defensivePoint, groupCenter, null, Formation.Normal, frame);
+
+            if (GroupUpBasedOnState(commander, defensivePoint, defensivePoint, groupCenter, null, frame, out List<SC2APIProtocol.Action> action)) { return action; }
+
             // TODO: setup a concave above the ramp if there is a ramp, get earch grid point on high ground, make sure at least one unit on each point
             if (Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(defensivePoint.X, defensivePoint.Y)) > 25 || MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos) < MapDataService.MapHeight(defensivePoint))
             {
-                if (Retreat(commander, defensivePoint, defensivePoint, frame, out List<SC2APIProtocol.Action> action)) { return action; }
+                if (Retreat(commander, defensivePoint, defensivePoint, frame, out action)) { return action; }
                 return commander.Order(frame, Abilities.MOVE, defensivePoint);
             }
             else
@@ -245,21 +258,6 @@ namespace Sharky.MicroControllers
             return NavigateToTarget(commander, target, groupCenter, bestTarget, formation, frame, out action);
         }
 
-        protected virtual bool SupportMove(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, Formation formation, int frame, out List<SC2APIProtocol.Action> action)
-        {
-            action = null;
-            if (!commander.UnitCalculation.TargetPriorityCalculation.Overwhelm && MicroPriority != MicroPriority.AttackForward && (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.Retreat || commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.FullRetreat))
-            {
-                if (Retreat(commander, target, defensivePoint, frame, out action)) { return true; }
-            }
-
-            if (SpecialCaseMove(commander, target, defensivePoint, groupCenter, bestTarget, formation, frame, out action)) { return true; }
-
-            if (MoveAway(commander, target, defensivePoint, frame, out action)) { return true; }
-
-            return SupportNavigateToTarget(commander, target, groupCenter, bestTarget, formation, frame, out action);
-        }
-
         protected virtual bool SpecialCaseMove(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, Formation formation, int frame, out List<SC2APIProtocol.Action> action)
         {
             if (AvoidPurificationNovas(commander, target, defensivePoint, frame, out action)) { return true; }
@@ -291,6 +289,21 @@ namespace Sharky.MicroControllers
             //{
             //    return true;
             //}
+
+            return false;
+        }
+
+        protected virtual bool SpecialCaseRetreat(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            if (AvoidPurificationNovas(commander, target, defensivePoint, frame, out action)) { return true; }
+
+            if (AvoidRavagerShots(commander, target, defensivePoint, frame, out action)) { return true; }
+
+            if (AvoidStorms(commander, target, defensivePoint, frame, out action)) { return true; }
+
+            if (AvoidReaperCharges(commander, target, defensivePoint, frame, out action)) { return true; }
+
+            if (RechargeShieldsAtBattery(commander, target, defensivePoint, frame, out action)) { return true; }
 
             return false;
         }
@@ -394,42 +407,6 @@ namespace Sharky.MicroControllers
                 }
             }
             return false;
-        }
-
-        public virtual bool SupportNavigateToTarget(UnitCommander commander, Point2D target, Point2D groupCenter, UnitCalculation bestTarget, Formation formation, int frame, out List<SC2APIProtocol.Action> action)
-        {
-            action = null;
-
-            if (GetInFormation(commander, formation, frame, out action))
-            {
-                return true;
-            }
-
-            if (bestTarget != null && commander.UnitCalculation.NearbyEnemies.Any(enemy => enemy.Unit.Tag == bestTarget.Unit.Tag))
-            {
-                if ((MicroPriority == MicroPriority.NavigateToLocation) && !commander.UnitCalculation.EnemiesInRange.Any(enemy => enemy.Unit.Tag == bestTarget.Unit.Tag))
-                {
-
-                }
-                else
-                {
-                    return MoveToAttackTarget(commander, bestTarget, frame, out action);
-                }
-            }
-
-            if (GroupUpEnabled && GroupUp(commander, target, groupCenter, false, frame, out action)) { return true; }
-
-            if (bestTarget != null && MicroPriority != MicroPriority.NavigateToLocation && MapDataService.SelfVisible(bestTarget.Unit.Pos))
-            {
-                return MoveToAttackTarget(commander, bestTarget, frame, out action);
-            }
-
-            if (Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(target.X, target.Y)) > 9)
-            {
-                action = commander.Order(frame, Abilities.MOVE, target);
-            }
-
-            return true;
         }
 
         protected virtual bool MoveToAttackTarget(UnitCommander commander, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
@@ -664,6 +641,11 @@ namespace Sharky.MicroControllers
             action = null;
 
             if (MicroPriority == MicroPriority.JustLive)
+            {
+                return false;
+            }
+
+            if (commander.UnitCalculation.Unit.ShieldMax > 0 && commander.UnitCalculation.Unit.Shield < 1)
             {
                 return false;
             }
@@ -1036,6 +1018,28 @@ namespace Sharky.MicroControllers
                 }
 
                 return true;
+            }
+
+            return false;
+        }
+
+        protected virtual bool GroupUpBasedOnState(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
+            if (commander.CommanderState == CommanderState.Grouping && groupCenter != null) // TODO: maybe not group if in range of enemies
+            {
+                if (SpecialCaseRetreat(commander, groupCenter, defensivePoint, frame, out action)) { return true; }
+
+                if (WeaponReady(commander, frame))
+                {
+                    if (AttackBestTargetInRange(commander, groupCenter, bestTarget, frame, out action)) { return true; }
+                }
+                if ((!commander.UnitCalculation.Unit.IsFlying && MapDataService.PathWalkable(groupCenter)) || 
+                    (commander.UnitCalculation.Unit.IsFlying && MapDataService.PathFlyable(commander.UnitCalculation.Unit.Pos, groupCenter)))
+                {
+                    action = commander.Order(frame, Abilities.MOVE, groupCenter);
+                    return true;
+                }
             }
 
             return false;
@@ -1808,7 +1812,7 @@ namespace Sharky.MicroControllers
 
             if (MicroPriority == MicroPriority.StayOutOfRange)
             {
-                if (SpecialCaseMove(commander, supportPoint, defensivePoint, groupCenter, bestTarget, formation, frame, out action)) { return action; }
+                if (SpecialCaseRetreat(commander, supportPoint, defensivePoint, frame, out action)) { return action; }
                 if (MoveAway(commander, supportPoint, defensivePoint, frame, out action)) { return action; }
             }
 
@@ -1821,9 +1825,9 @@ namespace Sharky.MicroControllers
                 }
             }
 
-            if (SupportMove(commander, supportPoint, defensivePoint, groupCenter, bestTarget, formation, frame, out action)) { return action; }
+            if (Move(commander, supportPoint, defensivePoint, groupCenter, bestTarget, formation, frame, out action)) { return action; }
 
-            return commander.Order(frame, Abilities.ATTACK, target);
+            return commander.Order(frame, Abilities.ATTACK, supportPoint);
         }
 
         protected virtual UnitCommander GetSupportTarget(UnitCommander commander, IEnumerable<UnitCommander> supportTargets, Point2D target, Point2D defensivePoint)
@@ -1881,7 +1885,14 @@ namespace Sharky.MicroControllers
             var angle = Math.Atan2(unitToSupport.UnitCalculation.Position.Y - defensivePoint.Y, defensivePoint.X - unitToSupport.UnitCalculation.Position.X);
             var x = commander.UnitCalculation.Range * Math.Cos(angle);
             var y = commander.UnitCalculation.Range * Math.Sin(angle);
-            return new Point2D { X = unitToSupport.UnitCalculation.Position.X + (float)x, Y = unitToSupport.UnitCalculation.Position.Y - (float)y };
+
+            var supportPoint = new Point2D { X = unitToSupport.UnitCalculation.Position.X + (float)x, Y = unitToSupport.UnitCalculation.Position.Y - (float)y };
+            if (MapDataService.MapHeight(supportPoint) != MapDataService.MapHeight(unitToSupport.UnitCalculation.Unit.Pos))
+            {
+                supportPoint = new Point2D { X = unitToSupport.UnitCalculation.Position.X, Y = unitToSupport.UnitCalculation.Position.Y };
+            }
+
+            return supportPoint;
         }
 
         protected virtual UnitCalculation GetBestTarget(UnitCommander commander, UnitCommander unitToSupport, Point2D target, int frame)
@@ -2141,6 +2152,7 @@ namespace Sharky.MicroControllers
 
         protected virtual void UpdateState(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, Formation formation, int frame)
         {
+
         }
     }
 }

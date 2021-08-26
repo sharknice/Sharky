@@ -8,10 +8,12 @@ namespace Sharky.MicroTasks
     public class DefenseService
     {
         ActiveUnitData ActiveUnitData;
+        TargetPriorityService TargetPriorityService;
 
-        public DefenseService(ActiveUnitData activeUnitData)
+        public DefenseService(ActiveUnitData activeUnitData, TargetPriorityService targetPriorityService)
         {
             ActiveUnitData = activeUnitData;
+            TargetPriorityService = targetPriorityService;
         }
 
         public List<UnitCommander> GetDefenseGroup(List<UnitCalculation> enemyGroup, List<UnitCommander> unitCommanders)
@@ -31,12 +33,12 @@ namespace Sharky.MicroTasks
 
             foreach (var commander in unitCommanders)
             {
-                if ((hasGround && commander.UnitCalculation.DamageGround) || (hasAir && commander.UnitCalculation.DamageAir) || (cloakable && (commander.UnitCalculation.UnitClassifications.Contains(UnitClassification.Detector) || commander.UnitCalculation.UnitClassifications.Contains(UnitClassification.DetectionCaster))))
+                if ((hasGround && commander.UnitCalculation.DamageGround) || (hasAir && commander.UnitCalculation.DamageAir) || (cloakable && (commander.UnitCalculation.UnitClassifications.Contains(UnitClassification.Detector) || commander.UnitCalculation.UnitClassifications.Contains(UnitClassification.DetectionCaster))) || commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PHOENIX)
                 {
                     counterGroup.Add(commander);
 
-                    var wwinnability = CalculateWinability(counterGroup, enemyAttributes, enemyHps, enemyHealth, enemyDps);
-                    if (wwinnability > 1)
+                    var targetPriority = TargetPriorityService.CalculateTargetPriority(counterGroup.Select(c => c.UnitCalculation), enemyGroup);
+                    if (targetPriority.OverallWinnability > 1)
                     {
                         return counterGroup;
                     }
@@ -46,27 +48,6 @@ namespace Sharky.MicroTasks
             return new List<UnitCommander>();
         }
 
-        float CalculateWinability(List<UnitCommander> counterGroup, IEnumerable<Attribute> enemyAttributes, float enemyHps, float enemyHealth, float enemyDps)
-        {
-            var allyHealth = counterGroup.Sum(c => c.UnitCalculation.SimulatedHitpoints);
-            var allyDps = counterGroup.Sum(c => c.UnitCalculation.SimulatedDamagePerSecond(enemyAttributes, true, true));
-            var allyHps = counterGroup.Sum(c => c.UnitCalculation.SimulatedHealPerSecond);
-
-            var secondsToKillEnemies = 600f;
-            if (allyDps - enemyHps > 0)
-            {
-                secondsToKillEnemies = enemyHealth / (allyDps - enemyHps);
-            }
-
-            var secondsToKillAllies = 600f;
-            if (enemyDps - allyHps > 0)
-            {
-                secondsToKillAllies = allyHealth / (enemyDps - allyHps);
-            }
-
-            return secondsToKillAllies / secondsToKillEnemies;
-        }
-
         public List<List<UnitCalculation>> GetEnemyGroups(IEnumerable<UnitCalculation> enemies)
         {
             var enemyGroups = new List<List<UnitCalculation>>();
@@ -74,16 +55,19 @@ namespace Sharky.MicroTasks
             {
                 if (!enemyGroups.Any(g => g.Any(e => e.Unit.Tag == enemy.Unit.Tag)))
                 {
-                    var group = new List<UnitCalculation>();
-                    group.Add(enemy);
-                    foreach (var nearbyEnemy in ActiveUnitData.EnemyUnits[enemy.Unit.Tag].NearbyAllies)
+                    if (ActiveUnitData.EnemyUnits.ContainsKey(enemy.Unit.Tag))
                     {
-                        if (!enemyGroups.Any(g => g.Any(e => e.Unit.Tag == nearbyEnemy.Unit.Tag)))
+                        var group = new List<UnitCalculation>();
+                        group.Add(enemy);
+                        foreach (var nearbyEnemy in ActiveUnitData.EnemyUnits[enemy.Unit.Tag].NearbyAllies)
                         {
-                            group.Add(nearbyEnemy);
+                            if (!enemyGroups.Any(g => g.Any(e => e.Unit.Tag == nearbyEnemy.Unit.Tag)))
+                            {
+                                group.Add(nearbyEnemy);
+                            }
                         }
+                        enemyGroups.Add(group);
                     }
-                    enemyGroups.Add(group);
                 }
             }
             return enemyGroups;

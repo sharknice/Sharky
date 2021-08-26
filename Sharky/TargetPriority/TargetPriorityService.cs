@@ -61,6 +61,7 @@ namespace Sharky
             }
 
             calculation.OverallWinnability = secondsToKillAllies / secondsToKillEnemies; // higher the number the better
+
             if (secondsToKillEnemies == 0)
             {
                 calculation.OverallWinnability = 1000f;
@@ -107,6 +108,15 @@ namespace Sharky
             if (!enemies.Any(e => e.DamageGround) && allies.Any(a => !a.Unit.IsFlying))
             {
                 calculation.GroundWinnability = 1000f;
+            }
+
+            if (allies.All(a => a.Unit.IsFlying))
+            {
+                calculation.OverallWinnability = calculation.AirWinnability;
+            }
+            else if (allies.All(a => !a.Unit.IsFlying))
+            {
+                calculation.OverallWinnability = calculation.GroundWinnability;
             }
 
             if (calculation.OverallWinnability < 1 && calculation.AirWinnability < 1 && calculation.GroundWinnability < 1)

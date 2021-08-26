@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using Sharky.MicroTasks.Attack;
 using Sharky.Pathing;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,8 +9,8 @@ namespace Sharky.MicroControllers
 {
     class WorkerScoutMicroController : IndividualMicroController
     {
-        public WorkerScoutMicroController(MapDataService mapDataService, SharkyUnitData sharkyUnitData, ActiveUnitData activeUnitData, DebugService debugService, IPathFinder sharkyPathFinder, BaseData baseData, SharkyOptions sharkyOptions, DamageService damageService, UnitDataService unitDataService, TargetingData targetingData, MicroPriority microPriority, bool groupUpEnabled)
-            : base(mapDataService, sharkyUnitData, activeUnitData, debugService, sharkyPathFinder, baseData, sharkyOptions, damageService, unitDataService, targetingData, microPriority, groupUpEnabled)
+        public WorkerScoutMicroController(MapDataService mapDataService, SharkyUnitData sharkyUnitData, ActiveUnitData activeUnitData, DebugService debugService, IPathFinder sharkyPathFinder, BaseData baseData, SharkyOptions sharkyOptions, DamageService damageService, UnitDataService unitDataService, TargetingData targetingData, TargetingService targetingService, MicroPriority microPriority, bool groupUpEnabled)
+            : base(mapDataService, sharkyUnitData, activeUnitData, debugService, sharkyPathFinder, baseData, sharkyOptions, damageService, unitDataService, targetingData, targetingService, microPriority, groupUpEnabled)
         {
         }
 

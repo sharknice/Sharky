@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using Sharky.DefaultBot;
 using Sharky.Pathing;
 using System;
 using System.Collections.Generic;
@@ -9,9 +10,10 @@ namespace Sharky.MicroControllers.Protoss
 {
     public class PhoenixMicroController : IndividualMicroController
     {
-        public PhoenixMicroController(MapDataService mapDataService, SharkyUnitData sharkyUnitData, ActiveUnitData activeUnitData, DebugService debugService, IPathFinder sharkyPathFinder, BaseData baseData, SharkyOptions sharkyOptions, DamageService damageService, UnitDataService unitDataService, TargetingData targetingData, MicroPriority microPriority, bool groupUpEnabled)
-            : base(mapDataService, sharkyUnitData, activeUnitData, debugService, sharkyPathFinder, baseData, sharkyOptions, damageService, unitDataService, targetingData, microPriority, groupUpEnabled)
+        public PhoenixMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled)
+            : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled)
         {
+
         }
 
         protected override bool AttackBestTarget(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
@@ -64,7 +66,18 @@ namespace Sharky.MicroControllers.Protoss
         {
             action = null;
 
-            if (commander.UnitCalculation.Unit.Energy < 50)
+            if (commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.EFFECT_GRAVITONBEAM))
+            {
+                if (commander.UnitCalculation.NearbyAllies.Count() == 0)
+                {
+                    action = commander.Order(frame, Abilities.CANCEL_GRAVITONBEAM);
+                    return true;
+                }
+
+                return false;
+            }
+
+            if (commander.UnitCalculation.Unit.Energy < 50 || commander.UnitCalculation.NearbyAllies.Count() == 0)
             {
                 return false;
             }

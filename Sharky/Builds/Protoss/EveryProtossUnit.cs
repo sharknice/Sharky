@@ -1,6 +1,5 @@
 ﻿using SC2APIProtocol;
 using Sharky.Builds.BuildChoosing;
-using Sharky.Chat;
 using Sharky.DefaultBot;
 using System.Collections.Generic;
 
@@ -10,11 +9,6 @@ namespace Sharky.Builds.Protoss
     {
         public EveryProtossUnit(DefaultSharkyBot defaultSharkyBot, ICounterTransitioner counterTransitioner)
             : base(defaultSharkyBot, counterTransitioner)
-        {
-        }
-
-        public EveryProtossUnit(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, ChronoData chronoData, ICounterTransitioner counterTransitioner, UnitCountService unitCountService, MicroTaskData microTaskData, FrameToTimeConverter frameToTimeConverter) 
-            : base(buildOptions, macroData, activeUnitData, attackData, chatService, chronoData, counterTransitioner, unitCountService, microTaskData, frameToTimeConverter)
         {
         }
 

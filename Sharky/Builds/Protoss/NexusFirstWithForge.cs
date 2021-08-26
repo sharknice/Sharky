@@ -1,25 +1,21 @@
 ﻿using SC2APIProtocol;
 using Sharky.Builds.BuildChoosing;
-using Sharky.Chat;
 using Sharky.DefaultBot;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Sharky.Builds.Protoss
 {
     public class NexusFirstWithForge : ProtossSharkyBuild
     {
         TargetingData TargetingData;
+        BaseData BaseData;
 
         public NexusFirstWithForge(DefaultSharkyBot defaultSharkyBot, ICounterTransitioner counterTransitioner)
             : base(defaultSharkyBot, counterTransitioner)
         {
             TargetingData = defaultSharkyBot.TargetingData;
-        }
-
-        public NexusFirstWithForge(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, ChronoData chronoData, ICounterTransitioner counterTransitioner, UnitCountService unitCountService, MicroTaskData microTaskData, FrameToTimeConverter frameToTimeConverter, TargetingData targetingData) 
-            : base(buildOptions, macroData, activeUnitData, attackData, chatService, chronoData, counterTransitioner, unitCountService, microTaskData, frameToTimeConverter)
-        {
-            TargetingData = targetingData;
+            BaseData = defaultSharkyBot.BaseData;
         }
 
         public override void StartBuild(int frame)
@@ -45,6 +41,13 @@ namespace Sharky.Builds.Protoss
 
         public override void OnFrame(ResponseObservation observation)
         {
+            var frame = (int)observation.Observation.GameLoop;
+
+            SendProbeToNaturalForFirstPylon(frame);
+            SendProbeForNexus(frame);
+            ScoutThird(frame);
+            SendProbeForGateway(frame);
+
             if (MacroData.FoodUsed>= 17)
             {
                 if (MacroData.DesiredProductionCounts[UnitTypes.PROTOSS_NEXUS] < 2)
@@ -85,6 +88,34 @@ namespace Sharky.Builds.Protoss
         public override bool Transition(int frame)
         {
             return UnitCountService.Count(UnitTypes.PROTOSS_NEXUS) > 1 && UnitCountService.Count(UnitTypes.PROTOSS_CYBERNETICSCORE) > 0;
+        }
+
+        protected void SendProbeForNexus(int frame)
+        {
+            if (UnitCountService.Count(UnitTypes.PROTOSS_NEXUS) == 1 && MacroData.Minerals > 325)
+            {
+                PrePositionBuilderTask.SendBuilder(TargetingData.NaturalBasePoint, frame);
+            }
+        }
+
+        protected void ScoutThird(int frame)
+        {
+            if (UnitCountService.Count(UnitTypes.PROTOSS_NEXUS) == 2 && UnitCountService.EquivalentTypeCount(UnitTypes.PROTOSS_GATEWAY) == 0 && ActiveUnitData.SelfUnits.Any(u => u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS && u.Value.Unit.BuildProgress < .1f))
+            {
+                var third = BaseData.BaseLocations.Skip(2).FirstOrDefault();
+                if (third != null)
+                {
+                    PrePositionBuilderTask.SendBuilder(third.MineralLineLocation, frame);
+                }
+            }
+        }
+
+        protected void SendProbeForGateway(int frame)
+        {
+            if (UnitCountService.Count(UnitTypes.PROTOSS_NEXUS) == 2 && UnitCountService.EquivalentTypeCount(UnitTypes.PROTOSS_GATEWAY) == 0 && MacroData.Minerals > 150)
+            {
+                PrePositionBuilderTask.SendBuilder(TargetingData.NaturalBasePoint, frame);
+            }
         }
     }
 }

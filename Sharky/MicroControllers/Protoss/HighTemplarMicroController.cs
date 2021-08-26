@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using Sharky.DefaultBot;
 using Sharky.Pathing;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,11 +14,12 @@ namespace Sharky.MicroControllers.Protoss
         private double FeedbackRangeSquared = 121; // actually range 10, but give an extra 1 range to get first feedback in
         private int lastStormFrame = 0;
 
-        public HighTemplarMicroController(MapDataService mapDataService, SharkyUnitData sharkyUnitData, ActiveUnitData activeUnitData, DebugService debugService, IPathFinder sharkyPathFinder, BaseData baseData, SharkyOptions sharkyOptions, DamageService damageService, UnitDataService unitDataService, TargetingData targetingData, MicroPriority microPriority, bool groupUpEnabled) 
-            : base(mapDataService, sharkyUnitData, activeUnitData, debugService, sharkyPathFinder, baseData, sharkyOptions, damageService, unitDataService, targetingData, microPriority, groupUpEnabled)
+        public HighTemplarMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled)
+            : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled)
         {
 
         }
+
         protected override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
@@ -188,27 +190,27 @@ namespace Sharky.MicroControllers.Protoss
             var killCounts = new Dictionary<Point, float>();
             foreach (var enemyAttack in enemies)
             {
-                int killCount = 0;
+                int hitCount = 0;
                 foreach (var splashedEnemy in enemyAttack.NearbyAllies.Where(a => !a.Attributes.Contains(Attribute.Structure) && !a.Unit.BuffIds.Contains((uint)Buffs.PSISTORM)))
                 {
                     if (Vector2.DistanceSquared(splashedEnemy.Position, enemyAttack.Position) < (splashedEnemy.Unit.Radius + StormRadius) * (splashedEnemy.Unit.Radius + StormRadius))
                     {
-                        killCount++;
+                        hitCount++;
                     }
                 }
                 foreach (var splashedAlly in potentialAttack.NearbyAllies.Where(a => !a.Attributes.Contains(Attribute.Structure)))
                 {
                     if (Vector2.DistanceSquared(splashedAlly.Position, enemyAttack.Position) < (splashedAlly.Unit.Radius + StormRadius) * (splashedAlly.Unit.Radius + StormRadius))
                     {
-                        killCount-=3;
+                        hitCount-=3;
                     }
                 }
-                killCounts[enemyAttack.Unit.Pos] = killCount;
+                killCounts[enemyAttack.Unit.Pos] = hitCount;
             }
 
             var best = killCounts.OrderByDescending(x => x.Value).FirstOrDefault();
 
-            if (best.Value < 3) // only attack if going to kill >= 3 units
+            if (best.Value < 3) // only attack if going to hit >= 3 units
             {
                 return null;
             }

@@ -71,7 +71,7 @@ namespace Sharky
                     {
                         unitOrder = UnitCalculation.Unit.Orders.FirstOrDefault();
                     }
-                    if (unitOrder != null && EquivalentAbility(ability, unitOrder.AbilityId) && targetTag == unitOrder.TargetUnitTag && ((targetLocation == null && unitOrder.TargetWorldSpacePos == null) || (Math.Abs(targetLocation.X - unitOrder.TargetWorldSpacePos.X) < .01 && Math.Abs(targetLocation.Y - unitOrder.TargetWorldSpacePos.Y) < .01)))
+                    if (unitOrder != null && EquivalentAbility(ability, unitOrder.AbilityId) && targetTag == unitOrder.TargetUnitTag && ((targetLocation == null && unitOrder.TargetWorldSpacePos == null) || (targetLocation != null && Math.Abs(targetLocation.X - unitOrder.TargetWorldSpacePos.X) < .01 && Math.Abs(targetLocation.Y - unitOrder.TargetWorldSpacePos.Y) < .01)))
                     {
                         return new List<SC2APIProtocol.Action>(); // if new action is exactly the same, don't do anything to prevent apm spam
                     }

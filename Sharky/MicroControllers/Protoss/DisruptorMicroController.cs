@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using Sharky.DefaultBot;
 using Sharky.Pathing;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,9 +12,10 @@ namespace Sharky.MicroControllers.Protoss
         int PurificationNovaRange = 13;
         private int lastPurificationFrame = 0;
 
-        public DisruptorMicroController(MapDataService mapDataService, SharkyUnitData sharkyUnitData, ActiveUnitData activeUnitData, DebugService debugService, IPathFinder sharkyPathFinder, BaseData baseData, SharkyOptions sharkyOptions, DamageService damageService, UnitDataService unitDataService, TargetingData targetingData, MicroPriority microPriority, bool groupUpEnabled)
-            : base(mapDataService, sharkyUnitData, activeUnitData, debugService, sharkyPathFinder, baseData, sharkyOptions, damageService, unitDataService, targetingData, microPriority, groupUpEnabled)
+        public DisruptorMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled)
+            : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled)
         {
+
         }
 
         protected override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
@@ -52,7 +54,8 @@ namespace Sharky.MicroControllers.Protoss
 
             foreach (var enemyAttack in commander.UnitCalculation.NearbyEnemies)
             {
-                if (!enemyAttack.Unit.IsFlying && InRange(enemyAttack.Position, commander.UnitCalculation.Position, PurificationNovaRange + enemyAttack.Unit.Radius + commander.UnitCalculation.Unit.Radius)) // TODO: do actual pathing to see if the shot can make it there, if a wall is in the way it can't
+                if (!enemyAttack.Unit.IsFlying && enemyAttack.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELING && enemyAttack.Unit.UnitType != (uint)UnitTypes.ZERG_CREEPTUMORBURROWED && 
+                    InRange(enemyAttack.Position, commander.UnitCalculation.Position, PurificationNovaRange + enemyAttack.Unit.Radius + commander.UnitCalculation.Unit.Radius)) // TODO: do actual pathing to see if the shot can make it there, if a wall is in the way it can't
                 {
                     attacks.Add(enemyAttack);
                 }
@@ -164,6 +167,7 @@ namespace Sharky.MicroControllers.Protoss
         public override List<SC2APIProtocol.Action> Retreat(UnitCommander commander, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
             List<Action> actions = null;
+
             if (OffensiveAbility(commander, defensivePoint, defensivePoint, groupCenter, null, frame, out actions))
             {
                 return actions;

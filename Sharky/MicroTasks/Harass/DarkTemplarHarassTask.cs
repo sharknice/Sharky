@@ -1,4 +1,4 @@
-﻿using Sharky.MicroControllers.Protoss;
+﻿using Sharky.MicroControllers;
 using Sharky.Pathing;
 using System;
 using System.Collections.Concurrent;
@@ -13,13 +13,13 @@ namespace Sharky.MicroTasks.Harass
         BaseData BaseData;
         TargetingData TargetingData;
         MapDataService MapDataService;
-        DarkTemplarMicroController DarkTemplarMicroController;
+        IIndividualMicroController DarkTemplarMicroController;
 
         int DesiredCount { get; set; }
         List<HarassInfo> HarassInfos { get; set; }
 
         // TODO: if 5 dts have died, end the task
-        public DarkTemplarHarassTask(BaseData baseData, TargetingData targetingData, MapDataService mapDataService, DarkTemplarMicroController darkTemplarMicroController, int desiredCount = 5, bool enabled = true, float priority = -1f)
+        public DarkTemplarHarassTask(BaseData baseData, TargetingData targetingData, MapDataService mapDataService, IIndividualMicroController darkTemplarMicroController, int desiredCount = 5, bool enabled = true, float priority = -1f)
         {
             BaseData = baseData;
             TargetingData = targetingData;

@@ -49,6 +49,11 @@ namespace Sharky
         /// </summary>
         public List<UnitCalculation> EnemiesInRangeOf { get; set; }
 
+        /// <summary>
+        /// enemies that that can almost hit this unit
+        /// </summary>
+        public List<UnitCalculation> EnemiesInRangeOfAvoid { get; set; }
+
         public List<UnitCalculation> NearbyAllies { get; set; }
         public List<UnitCalculation> NearbyEnemies { get; set; }
 
@@ -218,6 +223,7 @@ namespace Sharky
 
             EnemiesInRange = new List<UnitCalculation>();
             EnemiesInRangeOf = new List<UnitCalculation>();
+            EnemiesInRangeOfAvoid = new List<UnitCalculation>();
             NearbyAllies = new List<UnitCalculation>();
             NearbyEnemies = new List<UnitCalculation>();
             Attackers = new List<UnitCalculation>();

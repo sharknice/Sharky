@@ -76,7 +76,6 @@ namespace Sharky
                         DebugService.DrawText($"{manager.GetType().Name}: skipped");
                         continue;
                     }
-                    //ManagerStopwatch.Restart();
                     var beginManager = DateTime.UtcNow;
                     var actions = manager.OnFrame(observation);
                     if (actions != null)
@@ -88,19 +87,8 @@ namespace Sharky
                     var managerTime = (endManager - beginManager).TotalMilliseconds;
                     DebugService.DrawText($"{manager.GetType().Name}: {managerTime}");
 
-                    //DebugService.DrawText($"{manager.GetType().Name}: {ManagerStopwatch.ElapsedMilliseconds}");
-                    //ManagerStopwatch.Stop();
-                    //if (manager.GetType().Name == "UnitManager")
-                    //    Debug.WriteLine($"{manager.GetType().Name} {ManagerStopwatch.ElapsedMilliseconds}");
-
                     if (managerTime > 1)
-                    //if (ManagerStopwatch.ElapsedMilliseconds > 1)
                     {
-                        //if (managerStopwatch.ElapsedMilliseconds > 10)
-                        //{
-                        //    Debug.WriteLine($"{manager.GetType().Name} {ManagerStopwatch.ElapsedMilliseconds}");
-                        //    var lol = true;
-                        //}
                         manager.SkipFrame = true;
                     }
                 }
