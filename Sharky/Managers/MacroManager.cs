@@ -223,7 +223,12 @@ namespace Sharky.Managers
                             }
                             else
                             {
-                                var action = building.First().Value.Order(MacroData.Frame, unitData.Ability);
+                                var allowSpam = false;
+                                if (building.First().Value.UnitCalculation.Unit.HasAddOnTag && SharkyUnitData.ReactorTypes.Contains((UnitTypes)ActiveUnitData.SelfUnits[building.First().Value.UnitCalculation.Unit.AddOnTag].Unit.UnitType))
+                                {
+                                    allowSpam = true;
+                                }
+                                var action = building.First().Value.Order(MacroData.Frame, unitData.Ability, allowSpam: allowSpam);
                                 if (action != null)
                                 {
                                     commands.AddRange(action);

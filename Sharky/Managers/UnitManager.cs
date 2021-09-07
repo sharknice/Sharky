@@ -58,12 +58,6 @@ namespace Sharky.Managers
 
         public override IEnumerable<Action> OnFrame(ResponseObservation observation)
         {
-            //var total = new Stopwatch();
-            //total.Start();
-
-            //var stopwatch = new Stopwatch();
-            //stopwatch.Start();
-
             var frame = (int)observation.Observation.GameLoop;
 
             if (observation.Observation.RawData.Event != null && observation.Observation.RawData.Event.DeadUnits != null)
@@ -125,9 +119,6 @@ namespace Sharky.Managers
             {
                 ActiveUnitData.NeutralUnits.TryRemove(unit.Key, out UnitCalculation removed);
             }
-
-            //Debug.WriteLine($"removal {stopwatch.ElapsedMilliseconds}");
-            //stopwatch.Restart();
 
             var repairers = observation.Observation.RawData.Units.Where(u => u.UnitType == (uint)UnitTypes.TERRAN_SCV || u.UnitType == (uint)UnitTypes.TERRAN_MULE);
 
@@ -200,9 +191,6 @@ namespace Sharky.Managers
                 ActiveUnitData.EnemyUnits.TryRemove(unit.Key, out UnitCalculation removed);
             }
 
-            //Debug.WriteLine($"parallel {stopwatch.ElapsedMilliseconds}");
-            //stopwatch.Restart();
-
             foreach (var enemy in ActiveUnitData.EnemyUnits.Select(e => e.Value).ToList()) // if we can see this area of the map and the unit isn't there anymore remove it (we just remove it because visible units will get re-added below)
             {
                 if (enemy.FrameLastSeen != frame && MapDataService.SelfVisible(enemy.Unit.Pos))
@@ -210,9 +198,6 @@ namespace Sharky.Managers
                     ActiveUnitData.EnemyUnits.TryRemove(enemy.Unit.Tag, out UnitCalculation removed);
                 }
             }
-
-            //Debug.WriteLine($"remove vision {stopwatch.ElapsedMilliseconds}");
-            //stopwatch.Restart();
 
             foreach (var allyAttack in ActiveUnitData.SelfUnits)
             {
@@ -253,18 +238,13 @@ namespace Sharky.Managers
                     commander.UnitCalculation = allyAttack.Value;
                     return commander;
                 });
+                ActiveUnitData.Commanders[allyAttack.Value.Unit.Tag].ParentUnitCalculation = GetParentUnitCalculation(ActiveUnitData.Commanders[allyAttack.Value.Unit.Tag]);
             }
-
-            //Debug.WriteLine($"allyattack {stopwatch.ElapsedMilliseconds}");
-            //stopwatch.Restart();
 
             foreach (var enemyAttack in ActiveUnitData.EnemyUnits)
             {
                 enemyAttack.Value.NearbyAllies = ActiveUnitData.EnemyUnits.Where(a => a.Key != enemyAttack.Key && Vector2.DistanceSquared(enemyAttack.Value.Position, a.Value.Position) <= NearbyDistance * NearbyDistance).Select(a => a.Value).ToList();
             }
-
-            //Debug.WriteLine($"enemyunits {stopwatch.ElapsedMilliseconds}");
-            //stopwatch.Restart();
 
             if (TargetPriorityCalculationFrame + 10 < frame)
             {            
@@ -284,23 +264,6 @@ namespace Sharky.Managers
                 }
                 TargetPriorityCalculationFrame = frame;
             }
-            //foreach (var selfUnit in ActiveUnitData.SelfUnits)
-            //{
-            //    if (selfUnit.Value.TargetPriorityCalculation == null || selfUnit.Value.TargetPriorityCalculation.FrameCalculated + 10 < frame)
-            //    {
-            //        var priorityCalculation = TargetPriorityService.CalculateTargetPriority(selfUnit.Value, frame);
-            //        selfUnit.Value.TargetPriorityCalculation = priorityCalculation;
-            //        foreach (var nearbyUnit in selfUnit.Value.NearbyAllies)
-            //        {
-            //            nearbyUnit.TargetPriorityCalculation = priorityCalculation;
-            //        }
-            //    }
-
-            //    selfUnit.Value.Attackers = GetTargettedAttacks(selfUnit.Value).ToList();
-            //}
-
-            //Debug.WriteLine($"selfunits {stopwatch.ElapsedMilliseconds}");
-            //stopwatch.Restart();
 
             if (SharkyOptions.Debug)
             {
@@ -313,18 +276,6 @@ namespace Sharky.Managers
                     DebugService.DrawLine(enemyUnit.Value.Unit.Pos, new Point { X = enemyUnit.Value.End.X, Y = enemyUnit.Value.End.Y, Z = enemyUnit.Value.Unit.Pos.Z + 1f }, new SC2APIProtocol.Color { R = 255, B = 0, G = 0 });
                 }
             }
-
-            //stopwatch.Stop();
-            //Debug.WriteLine($"debug {stopwatch.ElapsedMilliseconds}");
-            //total.Stop();
-            //Debug.WriteLine($"total {total.ElapsedMilliseconds}");
-
-            //if (total.ElapsedMilliseconds > 15)
-            //{
-            //    var uhoh = true;
-            //}
-
-            //Debug.WriteLine($"");
 
             return null;
         }
@@ -342,6 +293,25 @@ namespace Sharky.Managers
             });
 
             return attacks;
+        }
+
+        UnitCalculation GetParentUnitCalculation(UnitCommander commander)
+        {
+            if (commander.ParentUnitCalculation != null)
+            {
+                return commander.ParentUnitCalculation;
+            }
+
+            if (commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_ADEPTPHASESHIFT)
+            {
+                var closestAdept = commander.UnitCalculation.NearbyAllies.Where(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_ADEPT).OrderBy(a => Vector2.DistanceSquared(a.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+                if (closestAdept != null)
+                {
+                    return closestAdept;
+                }
+            }
+
+            return null;
         }
     }
 }

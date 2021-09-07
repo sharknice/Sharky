@@ -1,8 +1,4 @@
-﻿using SC2APIProtocol;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Sharky
+﻿namespace Sharky
 {
     public class DamageService
     {

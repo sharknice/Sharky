@@ -1,6 +1,7 @@
 ﻿using Sharky.Builds.BuildChoosing;
 using Sharky.Chat;
 using Sharky.DefaultBot;
+using Sharky.Pathing;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -12,12 +13,14 @@ namespace Sharky.Builds
         protected ICounterTransitioner CounterTransitioner;
 
         TargetingData TargetingData;
+        MapDataService MapDataService;
 
         public ProtossSharkyBuild(DefaultSharkyBot defaultSharkyBot, ICounterTransitioner counterTransitioner)
             : base(defaultSharkyBot)
         {
             ChronoData = defaultSharkyBot.ChronoData;
             TargetingData = defaultSharkyBot.TargetingData;
+            MapDataService = defaultSharkyBot.MapDataService;
             CounterTransitioner = counterTransitioner;
         }
 
@@ -69,6 +72,19 @@ namespace Sharky.Builds
         {
             if (MacroData.FoodUsed == 13 && MacroData.Minerals > 15 && UnitCountService.Count(UnitTypes.PROTOSS_PYLON) == 0)
             {
+                if (MapDataService != null)
+                {
+                    var wallData = MapDataService.MapData.PartialWallData.FirstOrDefault(b => b.BasePosition.X == TargetingData.NaturalBasePoint.X && b.BasePosition.Y == TargetingData.NaturalBasePoint.Y);
+                    if (wallData != null)
+                    {
+                        var point = wallData.Pylons.FirstOrDefault();
+                        if (point != null)
+                        {
+                            PrePositionBuilderTask.SendBuilder(point, frame);
+                            return;
+                        }
+                    }
+                }
                 PrePositionBuilderTask.SendBuilder(TargetingData.NaturalBasePoint, frame);
             }
         }
@@ -77,6 +93,19 @@ namespace Sharky.Builds
         {
             if (MacroData.FoodUsed >= 14 && UnitCountService.Completed(UnitTypes.PROTOSS_PYLON) == 0 && ActiveUnitData.SelfUnits.Any(u => u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && u.Value.Unit.BuildProgress > .5f))
             {
+                if (MapDataService != null)
+                {
+                    var wallData = MapDataService.MapData.PartialWallData.FirstOrDefault(b => b.BasePosition.X == TargetingData.NaturalBasePoint.X && b.BasePosition.Y == TargetingData.NaturalBasePoint.Y);
+                    if (wallData != null)
+                    {
+                        var point = wallData.WallSegments.FirstOrDefault();
+                        if (point != null)
+                        {
+                            PrePositionBuilderTask.SendBuilder(point.Position, frame);
+                            return;
+                        }
+                    }
+                }
                 PrePositionBuilderTask.SendBuilder(TargetingData.NaturalBasePoint, frame);
             }
         }
@@ -85,6 +114,19 @@ namespace Sharky.Builds
         {
             if (UnitCountService.EquivalentTypeCompleted(UnitTypes.PROTOSS_GATEWAY) == 0 && ActiveUnitData.SelfUnits.Any(u => u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_GATEWAY && u.Value.Unit.BuildProgress > .7f))
             {
+                if (MapDataService != null)
+                {
+                    var wallData = MapDataService.MapData.PartialWallData.FirstOrDefault(b => b.BasePosition.X == TargetingData.NaturalBasePoint.X && b.BasePosition.Y == TargetingData.NaturalBasePoint.Y);
+                    if (wallData != null)
+                    {
+                        var point = wallData.WallSegments.FirstOrDefault();
+                        if (point != null)
+                        {
+                            PrePositionBuilderTask.SendBuilder(point.Position, frame);
+                            return;
+                        }
+                    }
+                }
                 PrePositionBuilderTask.SendBuilder(TargetingData.NaturalBasePoint, frame);
             }
         }

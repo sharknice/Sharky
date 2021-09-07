@@ -70,6 +70,18 @@ namespace Sharky.MicroTasks.Macro
                 }
                 else
                 {
+                    var enemyWorker = commander.UnitCalculation.NearbyEnemies.FirstOrDefault(e => e.UnitClassifications.Contains(UnitClassification.Worker));
+                    if (enemyWorker != null)
+                    {
+                        var attack = commander.Order(frame, Abilities.ATTACK, targetTag: enemyWorker.Unit.Tag);
+                        if (attack != null)
+                        {
+                            actions.AddRange(attack);
+                            commander.UnitRole = UnitRole.Attack;
+                            continue;
+                        }
+                    }
+
                     var action = commander.Order(frame, Abilities.MOVE, BuildPosition);
                     if (action != null)
                     {

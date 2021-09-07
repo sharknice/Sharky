@@ -64,6 +64,10 @@ namespace Sharky
             {
                 return new Weapon { Attacks = 1, Damage = 6, Range = 6, Type = Weapon.Types.TargetType.Any, Speed = 0.15f };
             }
+            if (unitType == UnitTypes.PROTOSS_ADEPTPHASESHIFT)
+            {
+                return SharkyUnitData.UnitData[UnitTypes.PROTOSS_ADEPT].Weapons[0];
+            }
 
             return null;
         }
@@ -124,7 +128,7 @@ namespace Sharky
             if (unitType == UnitTypes.TERRAN_LIBERATORAG || unitType == UnitTypes.PROTOSS_DISRUPTOR || unitType == UnitTypes.PROTOSS_ORACLE
                 || unitType == UnitTypes.PROTOSS_CARRIER || unitType == UnitTypes.TERRAN_WIDOWMINE || unitType == UnitTypes.TERRAN_WIDOWMINEBURROWED
                 || unitType == UnitTypes.TERRAN_CYCLONE || unitType == UnitTypes.ZERG_INFESTOR || unitType == UnitTypes.TERRAN_BATTLECRUISER
-                || unitType == UnitTypes.TERRAN_BUNKER || unitType == UnitTypes.PROTOSS_SENTRY || unitType == UnitTypes.PROTOSS_VOIDRAY)
+                || unitType == UnitTypes.TERRAN_BUNKER || unitType == UnitTypes.PROTOSS_SENTRY || unitType == UnitTypes.PROTOSS_VOIDRAY || unitType == UnitTypes.PROTOSS_ADEPTPHASESHIFT)
             {
                 return true;
             }

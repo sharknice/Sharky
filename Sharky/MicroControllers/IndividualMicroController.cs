@@ -992,7 +992,7 @@ namespace Sharky.MicroControllers
             {
                 return false; // stop grouping up when searching for the last enemy units to finish the game
             }
-
+            // TOOD: don't just group up in the center, line up to form a concave or perpendicular line to target
             // if not near the center of all the units attacking
             // move toward the center
             var groupUpSmall = false;
@@ -1026,7 +1026,7 @@ namespace Sharky.MicroControllers
         protected virtual bool GroupUpBasedOnState(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
-            if (commander.CommanderState == CommanderState.Grouping && groupCenter != null) // TODO: maybe not group if in range of enemies
+            if (commander.CommanderState == CommanderState.Grouping && groupCenter != null)
             {
                 if (SpecialCaseRetreat(commander, groupCenter, defensivePoint, frame, out action)) { return true; }
 

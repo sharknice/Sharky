@@ -27,6 +27,11 @@ namespace Sharky
         public int LastInRangeAttackFrame { get; set; }
         public CommanderState CommanderState { get; set; }
 
+        /// <summary>
+        /// The adept for an adept shade, etc.
+        /// </summary>
+        public UnitCalculation ParentUnitCalculation { get; set; }
+
         Dictionary<Abilities, int> AbilityOrderTimes;
         public Dictionary<ulong, int> LoadTimes;
 
@@ -36,6 +41,7 @@ namespace Sharky
         {
             UnitCalculation = unitCalculation;
 
+            ParentUnitCalculation = null;
             BestTarget = null;
             Claimed = false;
 
