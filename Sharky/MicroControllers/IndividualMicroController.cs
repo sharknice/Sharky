@@ -411,18 +411,31 @@ namespace Sharky.MicroControllers
 
         protected virtual bool MoveToAttackTarget(UnitCommander commander, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
-            if (commander.UnitCalculation.Unit.IsFlying && bestTarget.Attributes.Contains(SC2APIProtocol.Attribute.Structure) || commander.UnitCalculation.Unit.Shield < commander.UnitCalculation.Unit.ShieldMax ||
+            if (commander.UnitCalculation.Unit.IsFlying && bestTarget.Attributes.Contains(SC2APIProtocol.Attribute.Structure) || 
+                commander.UnitCalculation.Unit.Shield < commander.UnitCalculation.Unit.ShieldMax || commander.UnitCalculation.Unit.Health < commander.UnitCalculation.Unit.HealthMax ||
+                bestTarget.EnemiesInRangeOf.Count() < 5 ||
                 (!commander.UnitCalculation.TargetPriorityCalculation.Overwhelm && MicroPriority != MicroPriority.AttackForward && 
                 (commander.UnitCalculation.Unit.IsFlying || commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_REAPER || commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_COLOSSUS || MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos) == MapDataService.MapHeight(bestTarget.Unit.Pos))))
             {
-                if (SharkyUnitData.NoWeaponCooldownTypes.Contains((UnitTypes)commander.UnitCalculation.Unit.UnitType))
+                if (SharkyUnitData.NoWeaponCooldownTypes.Contains((UnitTypes)commander.UnitCalculation.Unit.UnitType) ||
+                    (commander.UnitCalculation.EnemiesThreateningDamage.Count() == 0 && !DamageService.CanDamage(bestTarget, commander.UnitCalculation)))
                 {
                     var point = new Point2D { X = bestTarget.Position.X, Y = bestTarget.Position.Y };
+                    if (AvoidDeceleration(commander, point, frame, out action)) { return true; }
                     action = commander.Order(frame, Abilities.MOVE, point);
                     return true;
                 }
 
-                var attackPoint = GetPositionFromRange(commander, bestTarget.Unit.Pos, commander.UnitCalculation.Unit.Pos, commander.UnitCalculation.Range + bestTarget.Unit.Radius + commander.UnitCalculation.Unit.Radius);
+                Point2D attackPoint;
+                if (commander.UnitCalculation.Range - 2 > bestTarget.Range && commander.UnitCalculation.UnitTypeData.MovementSpeed >= bestTarget.UnitTypeData.MovementSpeed)
+                {
+                    attackPoint = GetPositionFromRange(commander, bestTarget.Unit.Pos, commander.UnitCalculation.Unit.Pos, commander.UnitCalculation.Range - 2 + bestTarget.Unit.Radius + commander.UnitCalculation.Unit.Radius);
+                }
+                else
+                {
+                    attackPoint = GetPositionFromRange(commander, bestTarget.Unit.Pos, commander.UnitCalculation.Unit.Pos, commander.UnitCalculation.Range + bestTarget.Unit.Radius + commander.UnitCalculation.Unit.Radius);
+                }
+
                 if (commander.UnitCalculation.Unit.IsFlying)
                 {
                     if (!commander.UnitCalculation.NearbyEnemies.Any(e => e.DamageAir))
@@ -583,15 +596,7 @@ namespace Sharky.MicroControllers
         {
             action = null;
 
-            var attacks = new List<UnitCalculation>();
-
-            foreach (var enemyAttack in commander.UnitCalculation.NearbyEnemies)
-            {
-                if (DamageService.CanDamage(enemyAttack, commander.UnitCalculation) && InRange(commander.UnitCalculation.Position, enemyAttack.Position, UnitDataService.GetRange(enemyAttack.Unit) + commander.UnitCalculation.Unit.Radius + enemyAttack.Unit.Radius + AvoidDamageDistance))
-                {
-                    attacks.Add(enemyAttack);
-                }
-            }
+            var attacks = commander.UnitCalculation.EnemiesThreateningDamage;
 
             if (attacks.Count > 0)
             {
@@ -1485,17 +1490,42 @@ namespace Sharky.MicroControllers
         {
             action = null;
             var attack = commander.UnitCalculation.Attackers.Where(a => a.Damage > commander.UnitCalculation.Unit.Health + commander.UnitCalculation.Unit.Shield).OrderBy(e => (e.Range * e.Range) - Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position)).FirstOrDefault();
+            if (attack == null)
+            {
+                attack = commander.UnitCalculation.EnemiesThreateningDamage.Where(a => a.Damage > commander.UnitCalculation.Unit.Health + commander.UnitCalculation.Unit.Shield).OrderBy(e => (e.Range * e.Range) - Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position)).FirstOrDefault();
+            }
             if (attack != null)
             {
+                if (WeaponReady(commander, frame) && attack.EnemiesInRangeOf.Any(e => e.Unit.Tag == commander.UnitCalculation.Unit.Tag) && GetDamage(commander.UnitCalculation.Weapons, attack.Unit, attack.UnitTypeData) >= attack.Unit.Health + attack.Unit.Shield)
+                {
+                    return false; // just kill it before it kills you
+                }
+                if (commander.RetreatPathFrame + 20 < frame)
+                {
+                    if (commander.UnitCalculation.Unit.IsFlying)
+                    {
+                        commander.RetreatPath = SharkyPathFinder.GetSafeAirPath(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y, defensivePoint.X, defensivePoint.Y, frame);
+                    }
+                    else
+                    {
+                        commander.RetreatPath = SharkyPathFinder.GetSafeGroundPath(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y, defensivePoint.X, defensivePoint.Y, frame);
+                    }
+                    commander.RetreatPathFrame = frame;
+                    commander.RetreatPathIndex = 1;
+                }
+                if (FollowPath(commander, frame, out action))
+                {
+                    return true;
+                }
                 if (commander.UnitCalculation.Unit.IsFlying)
                 {
-                    var avoidPoint = GetAirAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, attack.Unit.Pos, target, defensivePoint, attack.Range + attack.Unit.Radius + commander.UnitCalculation.Unit.Radius + AvoidDamageDistance);
+                    var avoidPoint = GetAirAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, attack.Unit.Pos, target, defensivePoint, attack.Range + attack.Unit.Radius + commander.UnitCalculation.Unit.Radius + 4);
                     action = commander.Order(frame, Abilities.MOVE, avoidPoint);
                     return true;
                 }
                 else
                 {
-                    var avoidPoint = GetGroundAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, attack.Unit.Pos, target, defensivePoint, attack.Range + attack.Unit.Radius + commander.UnitCalculation.Unit.Radius + AvoidDamageDistance);
+                    var avoidPoint = GetGroundAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, attack.Unit.Pos, target, defensivePoint, attack.Range + attack.Unit.Radius + commander.UnitCalculation.Unit.Radius + 4);
                     action = commander.Order(frame, Abilities.MOVE, avoidPoint);
                     return true;
                 }
@@ -1704,6 +1734,7 @@ namespace Sharky.MicroControllers
             var avoidPoint = GetPositionFromRange(commander, avoid, start, range);
             if (!MapDataService.PathWalkable(start, avoidPoint))
             {
+                // TODO: use retreatpath
                 if (Vector2.DistanceSquared(new Vector2(avoidPoint.X, avoidPoint.Y), new Vector2(target.X, target.Y)) < Vector2.DistanceSquared(new Vector2(avoidPoint.X, avoidPoint.Y), new Vector2(defensivePoint.X, defensivePoint.Y)))
                 {
                     avoidPoint = target;

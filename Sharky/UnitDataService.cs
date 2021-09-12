@@ -77,7 +77,7 @@ namespace Sharky
             Weapon weaponUsed = GetWeapon(unit);
             if (weaponUsed == null)
                 return 0;
-            return weaponUsed.Damage;
+            return weaponUsed.Damage * weaponUsed.Attacks;
         }
 
         public float GetRange(Unit unit)

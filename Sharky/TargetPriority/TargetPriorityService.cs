@@ -44,7 +44,18 @@ namespace Sharky
 
             var allyDps = allies.Sum(e => e.SimulatedDamagePerSecond(enemyAttributes, true, true));
             var enemyDps = enemies.Sum(e => e.SimulatedDamagePerSecond(allyAttributes, true, true));
-           
+
+            var rangedAllies = allies.Where(e => e.Range > 2);
+            if (rangedAllies.Count() > 0)
+            {
+                var rangedEnemies = enemies.Where(e => e.Range > 2);
+                var fastestEnemy = rangedEnemies.OrderByDescending(e => e.UnitTypeData.MovementSpeed).FirstOrDefault();
+                if (fastestEnemy == null || rangedAllies.Any(a => a.UnitTypeData.MovementSpeed >= fastestEnemy.UnitTypeData.MovementSpeed))
+                {
+                    enemyDps = enemyDps / 2f;
+                }
+            }
+
             var allyHps = allies.Sum(e => e.SimulatedHealPerSecond);
             var enemyHps = enemies.Sum(e => e.SimulatedHealPerSecond);
 
@@ -201,30 +212,58 @@ namespace Sharky
             var secondsToKillAirGroundAttackingEnemies = 600f;
             if (airAttackDps - airHps > 0)
             {
-                secondsToKillAirGroundAttackingEnemies = airHealth / (airAttackDps - airHps);
+                if (airHealth == 0)
+                {
+                    secondsToKillAirGroundAttackingEnemies = 0;
+                }
+                else
+                {
+                    secondsToKillAirGroundAttackingEnemies = airHealth / (airAttackDps - airHps);
+                }
             }
             var secondsToKillGroundGroundAttackingEnemies = 600f;
             if (groundAttackDps - groundHps > 0)
             {
-                secondsToKillGroundGroundAttackingEnemies = groundHealth / (groundAttackDps - groundHps);
+                if (groundHealth == 0)
+                {
+                    secondsToKillGroundGroundAttackingEnemies = 0;
+                }
+                else
+                {
+                    secondsToKillGroundGroundAttackingEnemies = groundHealth / (groundAttackDps - groundHps);
+                }
             }
 
             var secondsBothToKillAirGroundAttackingEnemies = 600f;
             if (bothAttackingDps - airHps > 0)
             {
-                secondsBothToKillAirGroundAttackingEnemies = airHealth / (bothAttackingDps - airHps);
+                if (airHealth == 0)
+                {
+                    secondsBothToKillAirGroundAttackingEnemies = 0;
+                }
+                else
+                {
+                    secondsBothToKillAirGroundAttackingEnemies = airHealth / (bothAttackingDps - airHps);
+                }
             }
             var secondsBothToKillGroundGroundAttackingEnemies = 600f;
             if (bothAttackingDps - groundHps > 0)
             {
-                secondsBothToKillGroundGroundAttackingEnemies = groundHealth / (bothAttackingDps - groundHps);
+                if (groundHealth == 0)
+                {
+                    secondsBothToKillGroundGroundAttackingEnemies = 0;
+                }
+                else
+                {
+                    secondsBothToKillGroundGroundAttackingEnemies = groundHealth / (bothAttackingDps - groundHps);
+                }
             }
 
             var airSeconds = secondsToKillAirGroundAttackingEnemies - secondsBothToKillGroundGroundAttackingEnemies;
             var groundSeconds = secondsToKillGroundGroundAttackingEnemies - secondsBothToKillAirGroundAttackingEnemies;
 
             var groundKillSeconds = airSeconds;
-            if (groundSeconds > airSeconds)
+            if (groundSeconds > airSeconds || airHealth == 0)
             {
                 groundKillSeconds = groundSeconds;
             }

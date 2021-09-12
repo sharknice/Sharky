@@ -35,7 +35,7 @@ namespace Sharky.MicroControllers.Terran
             return false;
         }
 
-        public List<SC2APIProtocol.Action> NavigateToPoint(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
+        public override List<SC2APIProtocol.Action> NavigateToPoint(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
             List<SC2APIProtocol.Action> action = null;
 
@@ -70,7 +70,7 @@ namespace Sharky.MicroControllers.Terran
             return action;
         }
 
-        public List<SC2APIProtocol.Action> HarassWorkers(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame)
+        public override List<SC2APIProtocol.Action> HarassWorkers(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame)
         {
             List<SC2APIProtocol.Action> action = null;
 
@@ -86,7 +86,7 @@ namespace Sharky.MicroControllers.Terran
             return NavigateToPoint(commander, target, defensivePoint, null, frame);
         }
 
-        UnitCalculation GetBestHarassTarget(UnitCommander commander, Point2D target)
+        protected override UnitCalculation GetBestHarassTarget(UnitCommander commander, Point2D target)
         {
             var existingAttackOrder = commander.UnitCalculation.Unit.Orders.Where(o => o.AbilityId == (uint)Abilities.ATTACK || o.AbilityId == (uint)Abilities.ATTACK_ATTACK).FirstOrDefault();
 

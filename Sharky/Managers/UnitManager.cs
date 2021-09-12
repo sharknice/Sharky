@@ -1,5 +1,6 @@
 ﻿using SC2APIProtocol;
 using Sharky.Pathing;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -56,7 +57,14 @@ namespace Sharky.Managers
 
         public override bool NeverSkip { get { return true; } }
 
-        public override IEnumerable<Action> OnFrame(ResponseObservation observation)
+        public override void OnEnd(ResponseObservation observation, Result result)
+        {
+            Console.WriteLine($"Enemy Deaths: {ActiveUnitData.EnemyDeaths}");
+            Console.WriteLine($"Self Deaths: {ActiveUnitData.SelfDeaths}");
+            Console.WriteLine($"Neutral Deaths: {ActiveUnitData.NeutralDeaths}");
+        }
+
+        public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
         {
             var frame = (int)observation.Observation.GameLoop;
 
@@ -239,6 +247,10 @@ namespace Sharky.Managers
                     return commander;
                 });
                 ActiveUnitData.Commanders[allyAttack.Value.Unit.Tag].ParentUnitCalculation = GetParentUnitCalculation(ActiveUnitData.Commanders[allyAttack.Value.Unit.Tag]);
+
+
+                allyAttack.Value.Attackers = GetTargettedAttacks(allyAttack.Value).ToList();
+                allyAttack.Value.EnemiesThreateningDamage = GetEnemiesThreateningDamage(allyAttack.Value);
             }
 
             foreach (var enemyAttack in ActiveUnitData.EnemyUnits)
@@ -260,7 +272,8 @@ namespace Sharky.Managers
                         }
                     }
 
-                    selfUnit.Value.Attackers = GetTargettedAttacks(selfUnit.Value).ToList();
+                    //selfUnit.Value.Attackers = GetTargettedAttacks(selfUnit.Value).ToList();
+                    //selfUnit.Value.EnemiesThreateningDamage = GetEnemiesThreateningDamage(selfUnit.Value);
                 }
                 TargetPriorityCalculationFrame = frame;
             }
@@ -284,13 +297,43 @@ namespace Sharky.Managers
         {
             var attacks = new ConcurrentBag<UnitCalculation>();
 
-            Parallel.ForEach(unitCalculation.EnemiesInRangeOf, (enemyAttack) =>
+            Parallel.ForEach(unitCalculation.EnemiesInRangeOfAvoid, (enemyAttack) =>
             {
                 if (DamageService.CanDamage(enemyAttack, unitCalculation) && CollisionCalculator.Collides(unitCalculation.Position, unitCalculation.Unit.Radius, enemyAttack.Start, enemyAttack.End))
                 {
                     attacks.Add(enemyAttack);
                 }
             });
+
+            return attacks;
+        }
+
+        List<UnitCalculation> GetEnemiesThreateningDamage(UnitCalculation unitCalculation)
+        {
+            var attacks = new List<UnitCalculation>();
+
+            foreach (var enemyAttack in unitCalculation.NearbyEnemies)
+            {
+                if (DamageService.CanDamage(enemyAttack, unitCalculation))
+                {
+                    // TODO: add any enemy in enemiesinrangeofavoid, do not need to calculate them for this
+
+                    var fireTime = 0.25f; // TODO: use real weapon fire times
+                    var weapon = unitCalculation.UnitTypeData.Weapons.FirstOrDefault();
+                    if (weapon != null && weapon.HasSpeed)
+                    {
+                        fireTime = weapon.Speed;
+                    }
+                    var distance = Vector2.Distance(unitCalculation.Position, enemyAttack.Position);
+                    var avoidDistance = AvoidRange + enemyAttack.Range + unitCalculation.Unit.Radius + enemyAttack.Unit.Radius;
+                    var distanceToInRange = distance - avoidDistance;
+                    var timeToGetInRange = distanceToInRange / unitCalculation.UnitTypeData.MovementSpeed;
+                    if (timeToGetInRange < fireTime)
+                    {
+                        attacks.Add(enemyAttack);
+                    }
+                }
+            }
 
             return attacks;
         }

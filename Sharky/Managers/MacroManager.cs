@@ -1,40 +1,31 @@
 ﻿using SC2APIProtocol;
 using Sharky.Builds;
-using Sharky.Builds.BuildingPlacement;
 using Sharky.Builds.MacroServices;
+using Sharky.DefaultBot;
+using Sharky.Macro;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Numerics;
 
 namespace Sharky.Managers
 {
     public class MacroManager : SharkyManager
     {
         MacroSetup MacroSetup;
-        ActiveUnitData ActiveUnitData;
-        SharkyUnitData SharkyUnitData;
-        IBuildingBuilder BuildingBuilder;
-        SharkyOptions SharkyOptions;
-        BaseData BaseData;
-        TargetingData TargetingData;
-        AttackData AttackData;
-        IBuildingPlacement WarpInPlacement;
         MacroData MacroData;
-        Morpher Morpher;
-        BuildOptions BuildOptions;
 
         BuildPylonService BuildPylonService;
         BuildDefenseService BuildDefenseService;
         BuildProxyService BuildProxyService;
-        UnitCountService UnitCountService;
         BuildingCancelService BuildingCancelService;
 
-        bool SkipFrame;
-        bool SkipSupply;
-        bool SkipProduction;
-        bool SkipTech;
-        bool SkipAddons;
+        VespeneGasBuilder VespeneGasBuilder;
+        UnitBuilder UnitBuilder;
+        UpgradeResearcher UpgradeResearcher;
+        SupplyBuilder SupplyBuilder;
+        ProductionBuilder ProductionBuilder;
+        TechBuilder TechBuilder;
+        AddOnBuilder AddOnBuilder;
+        BuildingMorpher BuildingMorpher;
+        UnfinishedBuildingCompleter UnfinishedBuildingCompleter;
 
         int LastRunFrame;
 
@@ -42,28 +33,25 @@ namespace Sharky.Managers
 
         public override bool NeverSkip { get => true; }
 
-        public MacroManager(MacroSetup macroSetup, ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, IBuildingBuilder buildingBuilder, SharkyOptions sharkyOptions, BaseData baseData, TargetingData targetingData, AttackData attackData, IBuildingPlacement warpInPlacement, MacroData macroData, Morpher morpher, BuildOptions buildOptions,
-            BuildPylonService buildPylonService, BuildDefenseService buildDefenseService, BuildProxyService buildProxyService, UnitCountService unitCountService, BuildingCancelService buildingCancelService)
+        public MacroManager(DefaultSharkyBot defaultSharkyBot)
         {
-            MacroSetup = macroSetup;
-            ActiveUnitData = activeUnitData;
-            SharkyUnitData = sharkyUnitData;
-            BuildingBuilder = buildingBuilder;
-            SharkyOptions = sharkyOptions;
-            BaseData = baseData;
-            TargetingData = targetingData;
-            AttackData = attackData;
-            WarpInPlacement = warpInPlacement;
+            MacroSetup = defaultSharkyBot.MacroSetup;
+            MacroData = defaultSharkyBot.MacroData;
 
-            MacroData = macroData;
-            Morpher = morpher;
-            BuildOptions = buildOptions;
+            BuildPylonService = defaultSharkyBot.BuildPylonService;
+            BuildDefenseService = defaultSharkyBot.BuildDefenseService;
+            BuildProxyService = defaultSharkyBot.BuildProxyService;
+            BuildingCancelService = defaultSharkyBot.BuildingCancelService;
 
-            BuildPylonService = buildPylonService;
-            BuildDefenseService = buildDefenseService;
-            BuildProxyService = buildProxyService;
-            UnitCountService = unitCountService;
-            BuildingCancelService = buildingCancelService;
+            VespeneGasBuilder = defaultSharkyBot.VespeneGasBuilder;
+            UnitBuilder = defaultSharkyBot.UnitBuilder;
+            UpgradeResearcher = defaultSharkyBot.UpgradeResearcher;
+            SupplyBuilder = defaultSharkyBot.SupplyBuilder;
+            ProductionBuilder = defaultSharkyBot.ProductionBuilder;
+            TechBuilder = defaultSharkyBot.TechBuilder;
+            AddOnBuilder = defaultSharkyBot.AddOnBuilder;
+            BuildingMorpher = defaultSharkyBot.BuildingMorpher;
+            UnfinishedBuildingCompleter = defaultSharkyBot.UnfinishedBuildingCompleter;
 
             MacroData.DesiredUpgrades = new Dictionary<Upgrades, bool>();
 
@@ -107,371 +95,33 @@ namespace Sharky.Managers
             actions.AddRange(BuildProxyService.BuildDefensiveBuildings());
             actions.AddRange(BuildProxyService.BuildProductionBuildings());    
             actions.AddRange(BuildProxyService.BuildTechBuildings());
+            // TODO: send new SCVs to any incomplete proxy building without one
 
             actions.AddRange(BuildPylonService.BuildPylonsAtEveryMineralLine());
             actions.AddRange(BuildPylonService.BuildPylonsAtDefensivePoint());
             actions.AddRange(BuildPylonService.BuildPylonsAtEveryBase());
             actions.AddRange(BuildPylonService.BuildPylonsAtNextBase());
-            actions.AddRange(BuildSupply());
+            actions.AddRange(SupplyBuilder.BuildSupply());
 
             actions.AddRange(BuildDefenseService.BuildDefensiveBuildingsAtEveryMineralLine());
             actions.AddRange(BuildDefenseService.BuildDefensiveBuildingsAtDefensivePoint());
             actions.AddRange(BuildDefenseService.BuildDefensiveBuildingsAtEveryBase());
             actions.AddRange(BuildDefenseService.BuildDefensiveBuildings());
 
-            actions.AddRange(BuildVespeneGas());
+            actions.AddRange(VespeneGasBuilder.BuildVespeneGas());
 
-            actions.AddRange(MorphBuildings());
-            actions.AddRange(BuildAddOns());
-            actions.AddRange(BuildProductionBuildings());
-            actions.AddRange(BuildTechBuildings());
+            actions.AddRange(BuildingMorpher.MorphBuildings());
+            actions.AddRange(AddOnBuilder.BuildAddOns());
+            actions.AddRange(ProductionBuilder.BuildProductionBuildings());
+            actions.AddRange(TechBuilder.BuildTechBuildings());
+            actions.AddRange(UnfinishedBuildingCompleter.SendScvToFinishIncompleteBuildings());
 
-            actions.AddRange(ResearchUpgrades());
-            actions.AddRange(ProduceUnits());
+            actions.AddRange(UpgradeResearcher.ResearchUpgrades());
+            actions.AddRange(UnitBuilder.ProduceUnits());
 
             actions.AddRange(BuildingCancelService.CancelBuildings());
 
             return actions;
-        }
-
-        private List<Action> ResearchUpgrades()
-        {
-            var commands = new List<Action>();
-
-            foreach (var upgrade in MacroData.DesiredUpgrades)
-            {
-                if (upgrade.Value && !SharkyUnitData.ResearchedUpgrades.Contains((uint)upgrade.Key))
-                {
-                    var upgradeData = SharkyUnitData.UpgradeData[upgrade.Key];
-
-                    if (!ActiveUnitData.Commanders.Any(c => upgradeData.ProducingUnits.Contains((UnitTypes)c.Value.UnitCalculation.Unit.UnitType) && c.Value.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (int)upgradeData.Ability)))
-                    {
-                        var building = ActiveUnitData.Commanders.Where(c => upgradeData.ProducingUnits.Contains((UnitTypes)c.Value.UnitCalculation.Unit.UnitType) && !c.Value.UnitCalculation.Unit.IsActive && c.Value.UnitCalculation.Unit.BuildProgress == 1 && c.Value.LastOrderFrame != MacroData.Frame);
-                        if (building.Count() > 0)
-                        {
-                            if (upgradeData.Minerals <= MacroData.Minerals && upgradeData.Gas <= MacroData.VespeneGas)
-                            {
-                                commands.AddRange(building.First().Value.Order(MacroData.Frame, upgradeData.Ability));
-                            }
-                        }
-                    }
-                }
-            }
-
-            return commands;
-        }
-
-        private List<Action> ProduceUnits()
-        {
-            var commands = new List<Action>();
-            foreach (var unit in MacroData.BuildUnits)
-            {
-                if (unit.Value && unit.Key != UnitTypes.PROTOSS_ARCHON)
-                {
-                    var unitData = SharkyUnitData.TrainingData[unit.Key];
-                    if ((unitData.Food == 0 || unitData.Food <= MacroData.FoodLeft) && unitData.Minerals <= MacroData.Minerals && unitData.Gas <= MacroData.VespeneGas)
-                    {
-                        var building = ActiveUnitData.Commanders.Where(c => unitData.ProducingUnits.Contains((UnitTypes)c.Value.UnitCalculation.Unit.UnitType) && !c.Value.UnitCalculation.Unit.IsActive && c.Value.UnitCalculation.Unit.BuildProgress == 1 && c.Value.WarpInOffCooldown(MacroData.Frame, SharkyOptions.FramesPerSecond, SharkyUnitData));
-                        
-                        if (unitData.RequiresTechLab)
-                        {
-                            building = building.Where(b => b.Value.UnitCalculation.Unit.HasAddOnTag && SharkyUnitData.TechLabTypes.Contains((UnitTypes)ActiveUnitData.SelfUnits[b.Value.UnitCalculation.Unit.AddOnTag].Unit.UnitType));
-                        }
-                        else if (building.Count() == 0)
-                        {
-                            if (unitData.ProducingUnits.Contains(UnitTypes.TERRAN_BARRACKS) || unitData.ProducingUnits.Contains(UnitTypes.TERRAN_FACTORY) || unitData.ProducingUnits.Contains(UnitTypes.TERRAN_STARPORT))
-                            {
-                                building = ActiveUnitData.Commanders.Where(c => unitData.ProducingUnits.Contains((UnitTypes)c.Value.UnitCalculation.Unit.UnitType) && c.Value.UnitCalculation.Unit.IsActive && c.Value.UnitCalculation.Unit.BuildProgress == 1 && c.Value.UnitCalculation.Unit.HasAddOnTag && 
-                                    SharkyUnitData.ReactorTypes.Contains((UnitTypes)ActiveUnitData.SelfUnits[c.Value.UnitCalculation.Unit.AddOnTag].Unit.UnitType) && c.Value.UnitCalculation.Unit.Orders.Count() == 1);
-                            }
-                        }
-
-                        if (building.Count() > 0)
-                        {
-                            if (building.First().Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_GATEWAY && SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.WARPGATERESEARCH))
-                            {
-                                var action = building.First().Value.Order(MacroData.Frame, Abilities.RESEARCH_WARPGATE);
-                                if (action != null)
-                                {
-                                    commands.AddRange(action);
-                                    return commands;
-                                }
-                            }
-                            else if (building.First().Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPGATE)
-                            {
-                                var targetLocation = TargetingData.ForwardDefensePoint;
-                                var undefendedNexus = ActiveUnitData.SelfUnits.FirstOrDefault(u => u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS && u.Value.NearbyEnemies.Any(a => a.UnitClassifications.Contains(UnitClassification.ArmyUnit)) && !u.Value.NearbyAllies.Any(a => a.UnitClassifications.Contains(UnitClassification.ArmyUnit))).Value;
-                                if (undefendedNexus != null)
-                                {
-                                    targetLocation = new Point2D { X = undefendedNexus.Position.X, Y = undefendedNexus.Position.Y };
-                                }
-                                else if (AttackData.Attacking)
-                                {
-                                    targetLocation = AttackData.ArmyPoint;
-                                }
-
-                                var location = WarpInPlacement.FindPlacement(targetLocation, unit.Key, 1);
-                                if (location != null)
-                                {
-                                    var action = building.First().Value.Order(MacroData.Frame, unitData.WarpInAbility, location);
-                                    if (action != null)
-                                    {
-                                        commands.AddRange(action);
-                                        return commands;
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                var allowSpam = false;
-                                if (building.First().Value.UnitCalculation.Unit.HasAddOnTag && SharkyUnitData.ReactorTypes.Contains((UnitTypes)ActiveUnitData.SelfUnits[building.First().Value.UnitCalculation.Unit.AddOnTag].Unit.UnitType))
-                                {
-                                    allowSpam = true;
-                                }
-                                var action = building.First().Value.Order(MacroData.Frame, unitData.Ability, allowSpam: allowSpam);
-                                if (action != null)
-                                {
-                                    commands.AddRange(action);
-                                    return commands;
-                                }
-                            }
-                        }
-                    }
-                }
-                else if (unit.Value && unit.Key == UnitTypes.PROTOSS_ARCHON)
-                {
-                    var templar = ActiveUnitData.Commanders.Where(c => c.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_HIGHTEMPLAR || c.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_DARKTEMPLAR);
-                    var merges = templar.Count(a => a.Value.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.MORPH_ARCHON));
-                    if (merges + UnitCountService.Count(UnitTypes.PROTOSS_ARCHON) < MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_ARCHON])
-                    {
-                        var mergables = templar.Where(c => !c.Value.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.MORPH_ARCHON || o.AbilityId == (uint)Abilities.MORPH_ARCHON + 1));
-                        if (mergables.Count() >= 2)
-                        {
-                            var commanders = mergables.OrderBy(c => c.Value.UnitCalculation.Unit.Energy).Take(2);
-                            var action = commanders.First().Value.Merge(commanders.Last().Value.UnitCalculation.Unit.Tag);
-                            if (action != null)
-                            {
-                                commands.Add(action);
-                                return commands;
-                            }
-                        }
-                    }
-                }
-            }
-
-            return commands;
-        }
-
-        private List<Action> BuildVespeneGas()
-        {
-            var commands = new List<Action>();
-            if (MacroData.BuildGas && MacroData.Minerals >= 75)
-            {
-                var unitData = GetGasTypeData();
-                var takenGases = ActiveUnitData.SelfUnits.Where(u => SharkyUnitData.GasGeyserRefineryTypes.Contains((UnitTypes)u.Value.Unit.UnitType)).Concat(ActiveUnitData.EnemyUnits.Where(u => SharkyUnitData.GasGeyserRefineryTypes.Contains((UnitTypes)u.Value.Unit.UnitType)));
-                var orderedGases = ActiveUnitData.SelfUnits.Where(u => u.Value.UnitClassifications.Contains(UnitClassification.Worker) && u.Value.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.BUILD_ASSIMILATOR || o.AbilityId == (uint)Abilities.BUILD_EXTRACTOR || o.AbilityId == (uint)Abilities.BUILD_REFINERY)).Select(u => u.Value.Unit.Orders.FirstOrDefault(o => o.AbilityId == (uint)Abilities.BUILD_ASSIMILATOR || o.AbilityId == (uint)Abilities.BUILD_EXTRACTOR || o.AbilityId == (uint)Abilities.BUILD_REFINERY));
-                var openGeysers = BaseData.BaseLocations.Where(b => b.ResourceCenter != null && b.ResourceCenter.BuildProgress > .9f && b.ResourceCenter.Alliance == Alliance.Self).SelectMany(b => b.VespeneGeysers).Where(g => g.VespeneContents > 0 && !takenGases.Any(t => t.Value.Unit.Pos.X == g.Pos.X && t.Value.Unit.Pos.Y == g.Pos.Y) && !orderedGases.Any(o => o.TargetUnitTag == g.Tag));
-                if (openGeysers.Count() > 0)
-                {
-                    var baseLocation = BuildingBuilder.GetReferenceLocation(TargetingData.SelfMainBasePoint);
-                    var closestGyeser = openGeysers.OrderBy(o => Vector2.DistanceSquared(new Vector2(baseLocation.X, baseLocation.Y), new Vector2(o.Pos.X, o.Pos.Y))).FirstOrDefault();
-                    if (closestGyeser != null)
-                    {
-                        var command = BuildingBuilder.BuildGas(MacroData, unitData, closestGyeser);
-                        if (command != null)
-                        {
-                            commands.AddRange(command);
-                            return commands;
-                        }
-                    }
-                    
-                }
-            }
-
-            return commands;
-        }
-
-        private BuildingTypeData GetGasTypeData()
-        {
-            if (MacroData.Race == Race.Protoss)
-            {
-                return SharkyUnitData.BuildingData[UnitTypes.PROTOSS_ASSIMILATOR];
-            }
-            else if (MacroData.Race == Race.Terran)
-            {
-                return SharkyUnitData.BuildingData[UnitTypes.TERRAN_REFINERY];
-            }
-            else
-            {
-                return SharkyUnitData.BuildingData[UnitTypes.ZERG_EXTRACTOR];
-            }
-        }
-
-        private List<Action> BuildSupply()
-        {
-            var commands = new List<Action>();
-            if (SkipSupply)
-            {
-                SkipSupply = false;
-                return commands;
-            }
-
-            var begin = System.DateTime.UtcNow;
-
-            if (MacroData.BuildPylon)
-            {
-                var unitData = SharkyUnitData.BuildingData[UnitTypes.PROTOSS_PYLON];
-                var command = BuildingBuilder.BuildBuilding(MacroData, UnitTypes.PROTOSS_PYLON, unitData, wallOffType: BuildOptions.WallOffType);
-                if (command != null)
-                {
-                    commands.AddRange(command);
-                    return commands;
-                }
-            }
-
-            if (MacroData.BuildSupplyDepot)
-            {
-                var unitData = SharkyUnitData.BuildingData[UnitTypes.TERRAN_SUPPLYDEPOT];
-                var command = BuildingBuilder.BuildBuilding(MacroData, UnitTypes.TERRAN_SUPPLYDEPOT, unitData, wallOffType: BuildOptions.WallOffType);
-                if (command != null)
-                {
-                    commands.AddRange(command);
-                    return commands;
-                }
-            }
-
-            if (MacroData.BuildOverlord)
-            {
-                MacroData.BuildUnits[UnitTypes.ZERG_OVERLORD] = true;
-            }
-
-            var endTime = (System.DateTime.UtcNow - begin).TotalMilliseconds;
-            if (endTime > 1)
-            {
-                SkipSupply = true;
-            }    
-
-            return commands;
-        }
-
-        private List<Action> BuildProductionBuildings()
-        {
-            var commands = new List<Action>();
-            if (SkipProduction)
-            {
-                SkipProduction = false;
-                return commands;
-            }
-            var begin = System.DateTime.UtcNow;
-
-            foreach (var unit in MacroData.BuildProduction)
-            {
-                if (unit.Value)
-                {
-                    var unitData = SharkyUnitData.BuildingData[unit.Key];
-                    var command = BuildingBuilder.BuildBuilding(MacroData, unit.Key, unitData, wallOffType: BuildOptions.WallOffType);
-                    if (command != null)
-                    {
-                        commands.AddRange(command);
-                        return commands;
-                    }
-                }
-            }
-
-            var endTime = (System.DateTime.UtcNow - begin).TotalMilliseconds;
-            if (endTime > 1)
-            {
-                SkipProduction = true;
-            }
-
-            return commands;
-        }
-
-        private List<Action> MorphBuildings()
-        {
-            var commands = new List<Action>();
-
-            foreach (var unit in MacroData.Morph)
-            {
-                if (unit.Value)
-                {
-                    var unitData = SharkyUnitData.MorphData[unit.Key];
-                    var command = Morpher.MorphBuilding(MacroData, unitData);
-                    if (command != null)
-                    {
-                        commands.AddRange(command);
-                        return commands;
-                    }
-                }
-            }
-
-            return commands;
-        }
-
-        private List<Action> BuildTechBuildings()
-        {
-            var commands = new List<Action>();
-            if (SkipTech)
-            {
-                SkipTech = false;
-                return commands;
-            }
-            var begin = System.DateTime.UtcNow;
-
-            foreach (var unit in MacroData.BuildTech)
-            {
-                if (unit.Value)
-                {
-                    var unitData = SharkyUnitData.BuildingData[unit.Key];
-                    var command = BuildingBuilder.BuildBuilding(MacroData, unit.Key, unitData, wallOffType: BuildOptions.WallOffType);
-                    if (command != null)
-                    {
-                        commands.AddRange(command);
-                        return commands;
-                    }
-                }
-            }
-
-            var endTime = (System.DateTime.UtcNow - begin).TotalMilliseconds;
-            if (endTime > 1)
-            {
-                SkipTech = true;
-            }
-
-            return commands;
-        }
-
-        private List<Action> BuildAddOns()
-        {
-            var commands = new List<Action>();
-            if (SkipAddons)
-            {
-                SkipAddons = false;
-                return commands;
-            }
-            var begin = System.DateTime.UtcNow;
-
-            foreach (var unit in MacroData.BuildAddOns)
-            {
-                if (unit.Value)
-                {
-                    var unitData = SharkyUnitData.AddOnData[unit.Key];
-                    var command = BuildingBuilder.BuildAddOn(MacroData, unitData);
-                    if (command != null)
-                    {
-                        commands.AddRange(command);
-                        continue;
-                    }
-                }
-            }
-
-            var endTime = (System.DateTime.UtcNow - begin).TotalMilliseconds;
-            if (endTime > 1)
-            {
-                SkipAddons = true;
-            }
-
-            return commands;
         }
     }
 }

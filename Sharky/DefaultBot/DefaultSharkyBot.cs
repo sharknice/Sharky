@@ -12,6 +12,7 @@ using Sharky.EnemyStrategies;
 using Sharky.EnemyStrategies.Protoss;
 using Sharky.EnemyStrategies.Terran;
 using Sharky.EnemyStrategies.Zerg;
+using Sharky.Macro;
 using Sharky.Managers;
 using Sharky.Managers.Protoss;
 using Sharky.MicroControllers;
@@ -57,6 +58,15 @@ namespace Sharky.DefaultBot
         public BuildManager BuildManager { get; set; }
         public AttackDataManager AttackDataManager { get; set; }
 
+        public VespeneGasBuilder VespeneGasBuilder { get; set; }
+        public UnitBuilder UnitBuilder { get; set; }
+        public UpgradeResearcher UpgradeResearcher { get; set; }
+        public SupplyBuilder SupplyBuilder { get; set; }
+        public ProductionBuilder ProductionBuilder { get; set; }
+        public TechBuilder TechBuilder { get; set; }
+        public AddOnBuilder AddOnBuilder { get; set; }
+        public BuildingMorpher BuildingMorpher { get; set; }
+        public UnfinishedBuildingCompleter UnfinishedBuildingCompleter { get; set; }
         public CollisionCalculator CollisionCalculator { get; set; }
         public UpgradeDataService UpgradeDataService { get; set; }
         public BuildingDataService BuildingDataService { get; set; }
@@ -259,6 +269,7 @@ namespace Sharky.DefaultBot
             var zerglingMicroController = new ZerglingMicroController(this, SharkyAdvancedPathFinder, MicroPriority.AttackForward, false);
 
             var marineMicroController = new MarineMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
+            var marauderMicroController = new MarauderMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
             var reaperMicroController = new ReaperMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
             var bansheeMicroController = new BansheeMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
 
@@ -295,7 +306,7 @@ namespace Sharky.DefaultBot
                 { UnitTypes.ZERG_ZERGLING, zerglingMicroController },
 
                 { UnitTypes.TERRAN_MARINE, marineMicroController },
-                { UnitTypes.TERRAN_MARAUDER, marineMicroController },
+                { UnitTypes.TERRAN_MARAUDER, marauderMicroController },
                 { UnitTypes.TERRAN_REAPER, reaperMicroController },
                 { UnitTypes.TERRAN_BANSHEE, bansheeMicroController }
             };
@@ -350,7 +361,16 @@ namespace Sharky.DefaultBot
 
             BuildProxyService = new BuildProxyService(MacroData, BuildingBuilder, SharkyUnitData, ActiveUnitData, Morpher, MicroTaskData);
             BuildingCancelService = new BuildingCancelService(ActiveUnitData, MacroData);
-            MacroManager = new MacroManager(MacroSetup, ActiveUnitData, SharkyUnitData, BuildingBuilder, SharkyOptions, BaseData, TargetingData, AttackData, WarpInPlacement, MacroData, Morpher, BuildOptions, BuildPylonService, BuildDefenseService, BuildProxyService, UnitCountService, BuildingCancelService);
+            VespeneGasBuilder = new VespeneGasBuilder(this, BuildingBuilder);
+            UnitBuilder = new UnitBuilder(this, WarpInPlacement);
+            UpgradeResearcher = new UpgradeResearcher(this);
+            SupplyBuilder = new SupplyBuilder(this, BuildingBuilder);
+            ProductionBuilder = new ProductionBuilder(this, BuildingBuilder);
+            TechBuilder = new TechBuilder(this, BuildingBuilder);
+            AddOnBuilder = new AddOnBuilder(this, BuildingBuilder);
+            BuildingMorpher = new BuildingMorpher(this);
+            UnfinishedBuildingCompleter = new UnfinishedBuildingCompleter(this);
+            MacroManager = new MacroManager(this);
             Managers.Add(MacroManager);
 
             EnemyStrategyHistory = new EnemyStrategyHistory();

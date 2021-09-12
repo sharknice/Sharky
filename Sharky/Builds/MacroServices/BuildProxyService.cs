@@ -223,8 +223,6 @@ namespace Sharky.Builds.MacroServices
 
             }
 
-
-
             return commands;
         }
     }
