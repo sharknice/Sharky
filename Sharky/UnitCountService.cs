@@ -164,6 +164,10 @@ namespace Sharky
                 completed += Completed(UnitTypes.TERRAN_ORBITALCOMMANDFLYING);
                 completed += Completed(UnitTypes.TERRAN_PLANETARYFORTRESS);
             }
+            else if (unitType == UnitTypes.TERRAN_ORBITALCOMMAND)
+            {
+                completed += Completed(UnitTypes.TERRAN_ORBITALCOMMANDFLYING);
+            }
             else if (unitType == UnitTypes.TERRAN_SUPPLYDEPOT)
             {
                 completed += Completed(UnitTypes.TERRAN_SUPPLYDEPOTLOWERED);

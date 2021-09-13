@@ -1496,10 +1496,18 @@ namespace Sharky.MicroControllers
             }
             if (attack != null)
             {
-                if (WeaponReady(commander, frame) && attack.EnemiesInRangeOf.Any(e => e.Unit.Tag == commander.UnitCalculation.Unit.Tag) && GetDamage(commander.UnitCalculation.Weapons, attack.Unit, attack.UnitTypeData) >= attack.Unit.Health + attack.Unit.Shield)
+                if (WeaponReady(commander, frame))
                 {
-                    return false; // just kill it before it kills you
+                    if (attack.EnemiesInRangeOf.Any(e => e.Unit.Tag == commander.UnitCalculation.Unit.Tag) && GetDamage(commander.UnitCalculation.Weapons, attack.Unit, attack.UnitTypeData) >= attack.Unit.Health + attack.Unit.Shield)
+                    {
+                        return false; // just kill it before it kills you
+                    }
+                    if (attack.EnemiesInRange.Count() > 0)
+                    {
+                        return false; // other units are in range, it is probably attacking them so get some extra damage in
+                    }
                 }
+
                 if (commander.RetreatPathFrame + 20 < frame)
                 {
                     if (commander.UnitCalculation.Unit.IsFlying)
