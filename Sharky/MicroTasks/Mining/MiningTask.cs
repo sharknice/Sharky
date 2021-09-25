@@ -251,7 +251,7 @@ namespace Sharky.MicroTasks
             foreach (var worker in GetIdleWorkers())
             {
                 var saturationCount = 2;
-                var unsaturated = BaseData.SelfBases.Where(b => b.ResourceCenter.BuildProgress == 1 && b.MineralMiningInfo.Any(m => m.Workers.Count() < saturationCount));
+                var unsaturated = BaseData.SelfBases.Where(b => b.ResourceCenter.BuildProgress > .99 && b.MineralMiningInfo.Any(m => m.Workers.Count() < saturationCount));
                 //if (unsaturated.Count() == 0)
                 //{
                 //    saturationCount++;
@@ -433,12 +433,12 @@ namespace Sharky.MicroTasks
                 var attackTask = MicroTaskData.MicroTasks["AttackTask"];
                 if (attackTask.Enabled)
                 {
-                    foreach (var worker in attackTask.UnitCommanders.Where(u => u.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && u.UnitCalculation.NearbyEnemies.Count() == 0 && u.UnitRole != UnitRole.Harass))
+                    foreach (var worker in attackTask.UnitCommanders.Where(u => u.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && u.UnitCalculation.NearbyEnemies.Count() == 0 && u.UnitRole != UnitRole.Harass && u.UnitRole != UnitRole.Support))
                     {
                         worker.UnitRole = UnitRole.None;
                         worker.Claimed = false;
                     }
-                    attackTask.UnitCommanders.RemoveAll(u => u.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && u.UnitCalculation.NearbyEnemies.Count() == 0 && u.UnitRole != UnitRole.Harass);
+                    attackTask.UnitCommanders.RemoveAll(u => u.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && u.UnitCalculation.NearbyEnemies.Count() == 0 && u.UnitRole != UnitRole.Harass && u.UnitRole != UnitRole.Support);
                 }
             }
         }

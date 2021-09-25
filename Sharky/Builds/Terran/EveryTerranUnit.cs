@@ -1,5 +1,4 @@
 ﻿using SC2APIProtocol;
-using Sharky.Chat;
 using Sharky.DefaultBot;
 using Sharky.MicroTasks;
 
@@ -12,12 +11,6 @@ namespace Sharky.Builds.Terran
         bool Scouted;
 
         public EveryTerranUnit(DefaultSharkyBot defaultSharkyBot) : base(defaultSharkyBot)
-        {
-            Scouted = false;
-        }
-
-        public EveryTerranUnit(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, MicroTaskData microTaskData, UnitCountService unitCountService, FrameToTimeConverter frameToTimeConverter) 
-            : base(buildOptions, macroData, activeUnitData, attackData, microTaskData, chatService, unitCountService, frameToTimeConverter)
         {
             Scouted = false;
         }

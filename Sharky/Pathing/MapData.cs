@@ -11,5 +11,6 @@ namespace Sharky.Pathing
         public string MapName { get; set; }
         public List<WallData> PartialWallData { get; set; }
         public List<WallData> BlockWallData { get; set; }
+        public List<WallData> TerranWallData { get; set; }
     }
 }

@@ -176,7 +176,8 @@ namespace Sharky.Managers
                 }
                 else if (unit.Alliance == Alliance.Self)
                 {
-                    var attack = new UnitCalculation(unit, 0, SharkyUnitData, SharkyOptions, UnitDataService, frame);
+                    var repairingUnitCount = repairers.Where(u => u.Alliance == Alliance.Self && Vector2.DistanceSquared(new Vector2(u.Pos.X, u.Pos.Y), new Vector2(unit.Pos.X, unit.Pos.Y)) < (1.0 + u.Radius + unit.Radius) * (0.1 + u.Radius + unit.Radius)).Count();
+                    var attack = new UnitCalculation(unit, repairingUnitCount, SharkyUnitData, SharkyOptions, UnitDataService, frame);
                     if (ActiveUnitData.SelfUnits.TryGetValue(unit.Tag, out UnitCalculation existing))
                     {
                         attack.SetPreviousUnit(existing, existing.FrameLastSeen);

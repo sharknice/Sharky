@@ -1,5 +1,4 @@
 ﻿using SC2APIProtocol;
-using Sharky.Chat;
 using Sharky.DefaultBot;
 
 namespace Sharky.Builds.Terran
@@ -8,15 +7,6 @@ namespace Sharky.Builds.Terran
     {
         public BattleCruisers(DefaultSharkyBot defaultSharkyBot) : base(defaultSharkyBot)
         {
-        }
-
-        public BattleCruisers(BuildOptions buildOptions, 
-            MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, MicroTaskData microTaskData, 
-            ChatService chatService, UnitCountService unitCountService,
-            FrameToTimeConverter frameToTimeConverter) 
-            : base(buildOptions, macroData, activeUnitData, attackData, microTaskData, chatService, unitCountService, frameToTimeConverter)
-        {
-
         }
 
         public override void StartBuild(int frame)

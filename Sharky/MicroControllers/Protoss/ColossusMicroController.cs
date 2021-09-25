@@ -59,10 +59,4 @@ namespace Sharky.MicroControllers.Protoss
             return new LineSegment { Start = attackStart, End = attackEnd };
         }
     }
-
-    public class LineSegment
-    {
-        public Vector2 Start { get; set; }
-        public Vector2 End { get; set; }
-    }
 }

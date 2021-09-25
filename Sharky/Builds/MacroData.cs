@@ -63,8 +63,10 @@ namespace Sharky
         public int DesiredSupplyDepots;
         public bool BuildOverlord;
         public int DesiredOverlords;
+        public int DesiredMacroCommandCenters;
 
         public Dictionary<string, ProxyData> Proxies { get; set; }
+        public Dictionary<string, AddOnSwap> AddOnSwaps { get; set; }
 
         public int FoodUsed { get; set; }
         public int FoodLeft { get; set; }

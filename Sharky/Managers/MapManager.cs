@@ -61,6 +61,7 @@ namespace Sharky.Managers
             }
             MapData.PartialWallData = WallDataService.GetPartialWallData(gameInfo.MapName);
             MapData.BlockWallData = WallDataService.GetBlockWallData(gameInfo.MapName);
+            MapData.TerranWallData = WallDataService.GetTerranWallData(gameInfo.MapName);
             MapData.MapName = gameInfo.MapName;
         }
 

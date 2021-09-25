@@ -1,6 +1,5 @@
 ﻿using SC2APIProtocol;
 using System.Linq;
-using System.Numerics;
 
 namespace Sharky.Builds.BuildingPlacement
 {
@@ -9,27 +8,36 @@ namespace Sharky.Builds.BuildingPlacement
         IBuildingPlacement ProtossBuildingPlacement;
         IBuildingPlacement TerranBuildingPlacement;
         IBuildingPlacement ZergBuildingPlacement;
+        ResourceCenterLocator ResourceCenterLocator;
         BaseData BaseData;
-        ActiveUnitData ActiveUnitData;
-        BuildingService BuildingService;
         SharkyUnitData SharkyUnitData;
+        MacroData MacroData;
+        UnitCountService UnitCountService;
 
-        public BuildingPlacement(IBuildingPlacement protossBuildingPlacement, IBuildingPlacement terranBuildingPlacement, IBuildingPlacement zergBuildingPlacement, BaseData baseData, ActiveUnitData activeUnitData, BuildingService buildingService, SharkyUnitData sharkyUnitData)
+        public BuildingPlacement(IBuildingPlacement protossBuildingPlacement, IBuildingPlacement terranBuildingPlacement, IBuildingPlacement zergBuildingPlacement, ResourceCenterLocator resourceCenterLocator, BaseData baseData, SharkyUnitData sharkyUnitData, MacroData macroData, UnitCountService unitCountService)
         {
             ProtossBuildingPlacement = protossBuildingPlacement;
             TerranBuildingPlacement = terranBuildingPlacement;
             ZergBuildingPlacement = zergBuildingPlacement;
+            ResourceCenterLocator = resourceCenterLocator;
             BaseData = baseData;
-            ActiveUnitData = activeUnitData;
-            BuildingService = buildingService;
             SharkyUnitData = sharkyUnitData;
+            MacroData = macroData;
+            UnitCountService = unitCountService;
         }
 
         public Point2D FindPlacement(Point2D target, UnitTypes unitType, int size, bool ignoreResourceProximity = false, float maxDistance = 50, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.None)
         {
             if (unitType == UnitTypes.PROTOSS_NEXUS || unitType == UnitTypes.TERRAN_COMMANDCENTER || unitType == UnitTypes.ZERG_HATCHERY)
             {
-                return GetResourceCenterLocation();
+                if (unitType == UnitTypes.TERRAN_COMMANDCENTER && MacroData.DesiredMacroCommandCenters > 0)
+                {
+                    if (UnitCountService.EquivalentTypeCount(UnitTypes.TERRAN_COMMANDCENTER) - BaseData.SelfBases.Count() < MacroData.DesiredMacroCommandCenters)
+                    {
+                        return TerranBuildingPlacement.FindPlacement(target, unitType, size, ignoreResourceProximity, maxDistance, requireSameHeight, wallOffType);
+                    }
+                }
+                return ResourceCenterLocator.GetResourceCenterLocation();
             }
 
             if (SharkyUnitData.TerranTypes.Contains(unitType))
@@ -44,22 +52,6 @@ namespace Sharky.Builds.BuildingPlacement
             {
                 return ZergBuildingPlacement.FindPlacement(target, unitType, size, ignoreResourceProximity, maxDistance, requireSameHeight, wallOffType);
             }          
-        }
-
-        private Point2D GetResourceCenterLocation()
-        {
-            var resourceCenters = ActiveUnitData.SelfUnits.Values.Where(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter));
-            var openBases = BaseData.BaseLocations.Where(b => !resourceCenters.Any(r => Vector2.DistanceSquared(r.Position, new Vector2(b.Location.X, b.Location.Y)) < 25));
-
-            foreach (var openBase in openBases)
-            {
-                if (BuildingService.AreaBuildable(openBase.Location.X, openBase.Location.Y, 2) && !BuildingService.Blocked(openBase.Location.X, openBase.Location.Y, 2))
-                {
-                    return openBase.Location;
-                }
-              
-            }
-            return null;
         }
     }
 }

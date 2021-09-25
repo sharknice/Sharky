@@ -44,18 +44,27 @@ namespace Sharky.Macro
                     {
                         var building = ActiveUnitData.Commanders.Where(c => unitData.ProducingUnits.Contains((UnitTypes)c.Value.UnitCalculation.Unit.UnitType) && !c.Value.UnitCalculation.Unit.IsActive && c.Value.UnitCalculation.Unit.BuildProgress == 1 && c.Value.WarpInOffCooldown(MacroData.Frame, SharkyOptions.FramesPerSecond, SharkyUnitData));
 
-                        if (unitData.RequiresTechLab)
+                        if (unitData.ProducingUnits.Contains(UnitTypes.TERRAN_BARRACKS) || unitData.ProducingUnits.Contains(UnitTypes.TERRAN_FACTORY) || unitData.ProducingUnits.Contains(UnitTypes.TERRAN_STARPORT))
                         {
-                            building = building.Where(b => b.Value.UnitCalculation.Unit.HasAddOnTag && SharkyUnitData.TechLabTypes.Contains((UnitTypes)ActiveUnitData.SelfUnits[b.Value.UnitCalculation.Unit.AddOnTag].Unit.UnitType));
-                        }
-                        else if (building.Count() == 0)
-                        {
-                            if (unitData.ProducingUnits.Contains(UnitTypes.TERRAN_BARRACKS) || unitData.ProducingUnits.Contains(UnitTypes.TERRAN_FACTORY) || unitData.ProducingUnits.Contains(UnitTypes.TERRAN_STARPORT))
+                            if (unitData.RequiresTechLab)
                             {
-                                building = ActiveUnitData.Commanders.Where(c => unitData.ProducingUnits.Contains((UnitTypes)c.Value.UnitCalculation.Unit.UnitType) && c.Value.UnitCalculation.Unit.IsActive && c.Value.UnitCalculation.Unit.BuildProgress == 1 && c.Value.UnitCalculation.Unit.HasAddOnTag &&
-                                    SharkyUnitData.ReactorTypes.Contains((UnitTypes)ActiveUnitData.SelfUnits[c.Value.UnitCalculation.Unit.AddOnTag].Unit.UnitType) && c.Value.UnitCalculation.Unit.Orders.Count() == 1);
+                                building = building.Where(b => b.Value.UnitCalculation.Unit.HasAddOnTag && SharkyUnitData.TechLabTypes.Contains((UnitTypes)ActiveUnitData.SelfUnits[b.Value.UnitCalculation.Unit.AddOnTag].Unit.UnitType));
+                            }
+                            else
+                            {
+                                building = ActiveUnitData.Commanders.Where(c => unitData.ProducingUnits.Contains((UnitTypes)c.Value.UnitCalculation.Unit.UnitType) && c.Value.UnitCalculation.Unit.BuildProgress == 1 && c.Value.UnitCalculation.Unit.HasAddOnTag && // reactors first
+                                        SharkyUnitData.ReactorTypes.Contains((UnitTypes)ActiveUnitData.SelfUnits[c.Value.UnitCalculation.Unit.AddOnTag].Unit.UnitType) && c.Value.UnitCalculation.Unit.Orders.Count() <= 1);
+                                if (building.Count() == 0)
+                                {
+                                    building = ActiveUnitData.Commanders.Where(c => unitData.ProducingUnits.Contains((UnitTypes)c.Value.UnitCalculation.Unit.UnitType) && !c.Value.UnitCalculation.Unit.IsActive && c.Value.UnitCalculation.Unit.BuildProgress == 1 && !c.Value.UnitCalculation.Unit.HasAddOnTag); // no add on second
+                                    if (building.Count() == 0)
+                                    {
+                                        building = ActiveUnitData.Commanders.Where(c => unitData.ProducingUnits.Contains((UnitTypes)c.Value.UnitCalculation.Unit.UnitType) && !c.Value.UnitCalculation.Unit.IsActive && c.Value.UnitCalculation.Unit.BuildProgress == 1); // tech lab last
+                                    }
+                                }
                             }
                         }
+
 
                         if (building.Count() > 0)
                         {

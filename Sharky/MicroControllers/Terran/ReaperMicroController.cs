@@ -52,7 +52,7 @@ namespace Sharky.MicroControllers.Terran
 
             if (commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.EFFECT_KD8CHARGE)) { return true; }
 
-            if (commander.UnitCalculation.NearbyAllies.Any(a => a.Unit.UnitType == (uint)UnitTypes.TERRAN_KD8CHARGE)) { return false;  } // don't spam them all at once
+            if (commander.UnitCalculation.NearbyAllies.Any(a => a.Unit.UnitType == (uint)UnitTypes.TERRAN_KD8CHARGE)) { return false; } // don't spam them all at once
 
             if (bestTarget != null && bestTarget.Unit.Tag != commander.UnitCalculation.Unit.Tag && bestTarget.FrameLastSeen == frame && !bestTarget.Attributes.Contains(Attribute.Structure) && commander.AbilityOffCooldown(Abilities.EFFECT_KD8CHARGE, frame, SharkyOptions.FramesPerSecond, SharkyUnitData))
             {
@@ -87,6 +87,32 @@ namespace Sharky.MicroControllers.Terran
         {
             action = null;
             return false;
+        }
+
+        public override List<Action> Scout(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, bool prioritizeVision = false)
+        {
+            List<SC2APIProtocol.Action> action = null;
+
+            var bestTarget = GetBestTarget(commander, target, frame);
+
+            UpdateState(commander, target, defensivePoint, null, bestTarget, Formation.Normal, frame);
+
+            if (SpecialCaseMove(commander, target, defensivePoint, null, bestTarget, Formation.Normal, frame, out action)) { return action; }
+
+            if (PreOffenseOrder(commander, target, defensivePoint, null, bestTarget, frame, out action)) { return action; }
+
+            if (AvoidTargettedOneHitKills(commander, target, defensivePoint, frame, out action)) { return action; }
+
+            if (OffensiveAbility(commander, target, defensivePoint, null, bestTarget, frame, out action)) { return action; }
+
+            if (WeaponReady(commander, frame))
+            {
+                if (AttackBestTargetInRange(commander, target, bestTarget, frame, out action)) { return action; }
+            }
+
+            if (SpecialCaseMove(commander, target, defensivePoint, null, bestTarget, Formation.Normal, frame, out action)) { return action; }
+
+            return commander.Order(frame, Abilities.MOVE, target);
         }
     }
 }

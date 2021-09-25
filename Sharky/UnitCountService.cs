@@ -41,6 +41,7 @@ namespace Sharky
             {
                 count += Count(UnitTypes.PROTOSS_WARPGATE);
             }
+
             else if (unitType == UnitTypes.ZERG_HATCHERY)
             {
                 count += Count(UnitTypes.ZERG_HIVE);
@@ -50,6 +51,11 @@ namespace Sharky
             {
                 count += Count(UnitTypes.ZERG_HIVE);
             }
+            else if (unitType == UnitTypes.ZERG_SPIRE)
+            {
+                count += Count(UnitTypes.ZERG_GREATERSPIRE);
+            }
+
             else if (unitType == UnitTypes.TERRAN_COMMANDCENTER)
             {
                 count += Count(UnitTypes.TERRAN_COMMANDCENTERFLYING);
@@ -77,9 +83,30 @@ namespace Sharky
             {
                 count += Count(UnitTypes.TERRAN_STARPORTFLYING);
             }
-            else if (unitType == UnitTypes.ZERG_SPIRE)
+
+            else if (unitType == UnitTypes.TERRAN_HELLION)
             {
-                count += Count(UnitTypes.ZERG_GREATERSPIRE);
+                count += Count(UnitTypes.TERRAN_HELLIONTANK);
+            }
+            else if (unitType == UnitTypes.TERRAN_HELLIONTANK)
+            {
+                count += Count(UnitTypes.TERRAN_HELLION);
+            }
+            else if (unitType == UnitTypes.TERRAN_SIEGETANK)
+            {
+                count += Count(UnitTypes.TERRAN_SIEGETANKSIEGED);
+            }
+            else if (unitType == UnitTypes.TERRAN_SIEGETANKSIEGED)
+            {
+                count += Count(UnitTypes.TERRAN_SIEGETANK);
+            }
+            else if (unitType == UnitTypes.TERRAN_THOR)
+            {
+                count += Count(UnitTypes.TERRAN_THORAP);
+            }
+            else if (unitType == UnitTypes.TERRAN_THORAP)
+            {
+                count += Count(UnitTypes.TERRAN_THOR);
             }
 
             return count;
@@ -133,12 +160,37 @@ namespace Sharky
                 count += EnemyCount(UnitTypes.ZERG_GREATERSPIRE);
             }
 
+            else if (unitType == UnitTypes.TERRAN_HELLION)
+            {
+                count += EnemyCount(UnitTypes.TERRAN_HELLIONTANK);
+            }
+            else if (unitType == UnitTypes.TERRAN_HELLIONTANK)
+            {
+                count += EnemyCount(UnitTypes.TERRAN_HELLION);
+            }
+            else if (unitType == UnitTypes.TERRAN_SIEGETANK)
+            {
+                count += EnemyCount(UnitTypes.TERRAN_SIEGETANKSIEGED);
+            }
+            else if (unitType == UnitTypes.TERRAN_SIEGETANKSIEGED)
+            {
+                count += EnemyCount(UnitTypes.TERRAN_SIEGETANK);
+            }
+            else if (unitType == UnitTypes.TERRAN_THOR)
+            {
+                count += EnemyCount(UnitTypes.TERRAN_THORAP);
+            }
+            else if (unitType == UnitTypes.TERRAN_THORAP)
+            {
+                count += EnemyCount(UnitTypes.TERRAN_THOR);
+            }
+
             return count;
         }
 
         public int Completed(UnitTypes unitType)
         {
-            return ActiveUnitData.SelfUnits.Count(u => u.Value.Unit.UnitType == (uint)unitType && u.Value.Unit.BuildProgress == 1 && !u.Value.Unit.IsHallucination);
+            return ActiveUnitData.SelfUnits.Count(u => u.Value.Unit.UnitType == (uint)unitType && u.Value.Unit.BuildProgress > .99f && !u.Value.Unit.IsHallucination);
         }
 
         public int EquivalentTypeCompleted(UnitTypes unitType)

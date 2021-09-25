@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using Sharky.Pathing;
 using System;
 using System.Linq;
 using System.Numerics;
@@ -9,15 +10,23 @@ namespace Sharky.Builds.BuildingPlacement
     {
         ActiveUnitData ActiveUnitData;
         SharkyUnitData SharkyUnitData;
+        MapData MapData;
+        TargetingData TargetingData;
         DebugService DebugService;
         BuildingService BuildingService;
+        IBuildingPlacement WallOffPlacement;
+        WallService WallService;
 
-        public TerranBuildingPlacement(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, DebugService debugService, BuildingService buildingService)
+        public TerranBuildingPlacement(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, MapData mapData, TargetingData targetingData, DebugService debugService, BuildingService buildingService, IBuildingPlacement wallOffPlacement, WallService wallService)
         {
             ActiveUnitData = activeUnitData;
             SharkyUnitData = sharkyUnitData;
+            MapData = mapData;
+            TargetingData = targetingData;
             DebugService = debugService;
             BuildingService = buildingService;
+            WallOffPlacement = wallOffPlacement;
+            WallService = wallService;
         }
 
         public Point2D FindPlacement(Point2D target, UnitTypes unitType, int size, bool ignoreResourceProximity = false, float maxDistance = 50, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.None)
@@ -25,11 +34,44 @@ namespace Sharky.Builds.BuildingPlacement
             var mineralProximity = 2;
             if (ignoreResourceProximity) { mineralProximity = 0; };
 
+            if (wallOffType == WallOffType.Terran)
+            {
+                var point = WallOffPlacement.FindPlacement(target, unitType, size, ignoreResourceProximity, maxDistance, requireSameHeight, wallOffType);
+                if (point != null)
+                {
+                    return point;
+                }
+            }
             if (unitType == UnitTypes.TERRAN_BARRACKS || unitType == UnitTypes.TERRAN_FACTORY || unitType == UnitTypes.TERRAN_STARPORT)
             {
                 return FindProductionPlacement(target, size, maxDistance, mineralProximity);
             }
+            if (unitType == UnitTypes.TERRAN_SUPPLYDEPOT)
+            {
+                return FindSupplyDepotPlacement(target, size, maxDistance, mineralProximity);
+            }
             return FindTechPlacement(target, size, maxDistance, mineralProximity);
+        }
+
+        Point2D FindSupplyDepotPlacement(Point2D target, float size, float maxDistance, float minimumMineralProximinity)
+        {
+            if (MapData != null && MapData.TerranWallData != null)
+            {
+                var wallData = MapData.TerranWallData.FirstOrDefault(b => b.BasePosition.X == TargetingData.NaturalBasePoint.X && b.BasePosition.Y == TargetingData.NaturalBasePoint.Y);
+                if (wallData != null && wallData.Depots != null)
+                {
+                    var existingDepots = ActiveUnitData.SelfUnits.Values.Where(u => u.Unit.UnitType == (uint)UnitTypes.TERRAN_SUPPLYDEPOT || u.Unit.UnitType == (uint)UnitTypes.TERRAN_SUPPLYDEPOTLOWERED);
+                    foreach (var spot in wallData.Depots)
+                    {
+                        if (!existingDepots.Any(e => e.Position.X == spot.X && e.Position.Y == spot.Y) && WallService.Buildable(spot, .5f))
+                        {
+                            return spot;
+                        }
+                    }
+                }
+            }
+
+            return FindTechPlacement(target, size, maxDistance, minimumMineralProximinity);
         }
 
         public Point2D FindTechPlacement(Point2D reference, float size, float maxDistance, float minimumMineralProximinity = 2)

@@ -150,7 +150,7 @@ namespace Sharky.MicroControllers.Protoss
                     return true;
                 }
 
-                if (AvoidDeceleration(commander, moveTo, frame, out action))
+                if (AvoidDeceleration(commander, moveTo, false, frame, out action))
                 {
                     return true;
                 }

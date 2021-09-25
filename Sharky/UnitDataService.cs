@@ -153,7 +153,7 @@ namespace Sharky
             {
                 return 1;
             }
-            if (unitType == UnitTypes.TERRAN_SCV || unitType == UnitTypes.TERRAN_MULE)
+            if (unitType == UnitTypes.TERRAN_SCV || unitType == UnitTypes.TERRAN_MULE || unitType == UnitTypes.TERRAN_MARINE)
             {
                 return 1;
             }
@@ -166,7 +166,7 @@ namespace Sharky
             {
                 return 2;
             }
-            if (unitType == UnitTypes.TERRAN_MARINE || unitType == UnitTypes.TERRAN_MARAUDER || unitType == UnitTypes.TERRAN_GHOST)
+            if (unitType == UnitTypes.TERRAN_MARAUDER || unitType == UnitTypes.TERRAN_GHOST || unitType == UnitTypes.TERRAN_VIKINGASSAULT || unitType == UnitTypes.TERRAN_HELLION || unitType == UnitTypes.TERRAN_HELLIONTANK || unitType == UnitTypes.TERRAN_CYCLONE)
             {
                 return 2;
             }
@@ -179,7 +179,7 @@ namespace Sharky
             {
                 return 4;
             }
-            if (unitType == UnitTypes.TERRAN_HELLION || unitType == UnitTypes.TERRAN_HELLIONTANK || unitType == UnitTypes.TERRAN_CYCLONE || unitType == UnitTypes.TERRAN_SIEGETANK)
+            if (unitType == UnitTypes.TERRAN_SIEGETANK)
             {
                 return 4;
             }

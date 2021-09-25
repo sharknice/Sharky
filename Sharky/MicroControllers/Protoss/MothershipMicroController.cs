@@ -145,10 +145,7 @@ namespace Sharky.MicroControllers.Protoss
 
             var moveTo = GetSupportSpot(commander, unitToSupport, target, defensivePoint);
 
-            if (AvoidDeceleration(commander, moveTo, frame, out action))
-            {
-                return true;
-            }
+            if (AvoidDeceleration(commander, moveTo, false, frame, out action)) { return true; }
 
             action = commander.Order(frame, Abilities.MOVE, moveTo);
             return true;

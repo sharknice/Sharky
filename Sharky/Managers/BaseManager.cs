@@ -121,7 +121,7 @@ namespace Sharky.Managers
         {
             if (BaseData.SelfBases.Count() != UnitCountService.EquivalentTypeCount(UnitTypes.PROTOSS_NEXUS) + UnitCountService.EquivalentTypeCount(UnitTypes.TERRAN_COMMANDCENTER) + UnitCountService.EquivalentTypeCount(UnitTypes.ZERG_HATCHERY))
             {
-                var resourceCenters = ActiveUnitData.SelfUnits.Values.Where(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter));
+                var resourceCenters = ActiveUnitData.SelfUnits.Values.Where(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter) && !u.Unit.IsFlying);
                 BaseData.SelfBases = BaseData.BaseLocations.Where(b => resourceCenters.Any(r => Vector2.DistanceSquared(r.Position, new Vector2(b.Location.X, b.Location.Y)) < 25)).ToList();
                 foreach (var selfBase in BaseData.SelfBases)
                 {

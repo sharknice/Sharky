@@ -4,6 +4,7 @@
     {
         None,
         Partial,
-        Full
+        Full,
+        Terran
     }
 }

@@ -122,6 +122,7 @@ namespace Sharky.MicroControllers
 
             if (Move(commander, target, defensivePoint, groupCenter, bestTarget, formation, frame, out action)) { return action; }
 
+            if (AvoidDeceleration(commander, target, true, frame, out action)) { return action; }
             return commander.Order(frame, Abilities.ATTACK, target);
         }
 
@@ -130,6 +131,7 @@ namespace Sharky.MicroControllers
             List<SC2APIProtocol.Action> action = null;
             UpdateState(commander, defensivePoint, defensivePoint, null, null, Formation.Normal, frame);
             if (RechargeShieldsAtBattery(commander, defensivePoint, defensivePoint, frame, out action)) { return action; }
+            if (HoldStillForRepair(commander, frame, out action)) { return action; }
             return action;
         }
 
@@ -240,6 +242,8 @@ namespace Sharky.MicroControllers
                 return action;
             }
 
+            if (AvoidDeceleration(commander, target, true, frame, out action)) { return action; }
+
             return commander.Order(frame, Abilities.ATTACK, target);
         }
 
@@ -273,6 +277,8 @@ namespace Sharky.MicroControllers
             if (AvoidReaperCharges(commander, target, defensivePoint, frame, out action)) { return true; }
 
             if (RechargeShieldsAtBattery(commander, target, defensivePoint, frame, out action)) { return true; }
+
+            if (HoldStillForRepair(commander, frame, out action)) { return true; }
 
             // TODO: special case movement
             //if (ChargeBlindly(commander, target))
@@ -349,6 +355,17 @@ namespace Sharky.MicroControllers
             return false;
         }
 
+        protected virtual bool HoldStillForRepair(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
+            if (commander.UnitCalculation.Repairers > 0 && commander.UnitCalculation.Unit.Health < commander.UnitCalculation.Unit.HealthMax && commander.UnitCalculation.PreviousUnit.Health < commander.UnitCalculation.Unit.Health)
+            {               
+                action = commander.Order(frame, Abilities.STOP);
+                return true;
+            }
+            return false;
+        }
+
         public virtual bool NavigateToTarget(UnitCommander commander, Point2D target, Point2D groupCenter, UnitCalculation bestTarget, Formation formation, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
@@ -372,7 +389,7 @@ namespace Sharky.MicroControllers
 
             if (GroupUpEnabled && GroupUp(commander, target, groupCenter, false, frame, out action)) { return true; }
 
-            if (AvoidDeceleration(commander, target, frame, out action)) { return true; }
+            if (AvoidDeceleration(commander, target, false, frame, out action)) { return true; }
 
             if (bestTarget != null && MicroPriority != MicroPriority.NavigateToLocation && MapDataService.SelfVisible(bestTarget.Unit.Pos))
             {
@@ -383,7 +400,7 @@ namespace Sharky.MicroControllers
             return true;
         }
 
-        public virtual bool AvoidDeceleration(UnitCommander commander, Point2D target, int frame, out List<SC2APIProtocol.Action> action)
+        public virtual bool AvoidDeceleration(UnitCommander commander, Point2D target, bool attackMove, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -402,7 +419,14 @@ namespace Sharky.MicroControllers
                     {
                         point.Y = target.Y;
                     }
-                    action = commander.Order(frame, Abilities.MOVE, point);
+                    if (attackMove)
+                    {
+                        action = commander.Order(frame, Abilities.ATTACK, point);
+                    }
+                    else
+                    {
+                        action = commander.Order(frame, Abilities.MOVE, point);
+                    }
                     return true;
                 }
             }
@@ -421,7 +445,7 @@ namespace Sharky.MicroControllers
                     (commander.UnitCalculation.EnemiesThreateningDamage.Count() == 0 && !DamageService.CanDamage(bestTarget, commander.UnitCalculation)))
                 {
                     var point = new Point2D { X = bestTarget.Position.X, Y = bestTarget.Position.Y };
-                    if (AvoidDeceleration(commander, point, frame, out action)) { return true; }
+                    if (AvoidDeceleration(commander, point, false, frame, out action)) { return true; }
                     action = commander.Order(frame, Abilities.MOVE, point);
                     return true;
                 }
@@ -442,7 +466,7 @@ namespace Sharky.MicroControllers
                     {
                         attackPoint = new Point2D { X = bestTarget.Unit.Pos.X, Y = bestTarget.Unit.Pos.Y };
                     }
-                    if (AvoidDeceleration(commander, attackPoint, frame, out action)) { return true; }
+                    if (AvoidDeceleration(commander, attackPoint, false, frame, out action)) { return true; }
                 }
 
                 action = commander.Order(frame, Abilities.MOVE, attackPoint);
@@ -631,7 +655,7 @@ namespace Sharky.MicroControllers
                 }
 
                 var avoidPoint = GetGroundAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, attack.Unit.Pos, target, defensivePoint, attack.Range + attack.Unit.Radius + commander.UnitCalculation.Unit.Radius + AvoidDamageDistance);
-                if (AvoidDeceleration(commander, avoidPoint, frame, out action)) { return true; }
+                if (AvoidDeceleration(commander, avoidPoint, false, frame, out action)) { return true; }
                 action = commander.Order(frame, Abilities.MOVE, avoidPoint);
                 return true;
             }
@@ -945,6 +969,7 @@ namespace Sharky.MicroControllers
 
             if (!commander.UnitCalculation.TargetPriorityCalculation.Overwhelm && MicroPriority != MicroPriority.AttackForward && commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.Retreat)
             {
+                if (AvoidDeceleration(commander, defensivePoint, true, frame, out action)) { return true; }
                 action = commander.Order(frame, Abilities.ATTACK, defensivePoint); // no damaging targets in range, retreat towards the defense point
                 return true;
             }
@@ -960,6 +985,7 @@ namespace Sharky.MicroControllers
                     return true;
                 }
 
+                if (AvoidDeceleration(commander, enemyPosition, true, frame, out action)) { return true; }
                 action = commander.Order(frame, Abilities.ATTACK, enemyPosition);
                 return true;
             }
@@ -977,10 +1003,12 @@ namespace Sharky.MicroControllers
                     action = commander.Order(frame, Abilities.MOVE, enemyPosition);
                     return true;
                 }
+                if (AvoidDeceleration(commander, enemyPosition, true, frame, out action)) { return true; }
                 action = commander.Order(frame, Abilities.ATTACK, enemyPosition);
                 return true;
             }
 
+            if (AvoidDeceleration(commander, target, true, frame, out action)) { return true; }
             action = commander.Order(frame, Abilities.ATTACK, target); // no damaging targets in range, attack towards the main target
             return true;
         }
@@ -1014,11 +1042,12 @@ namespace Sharky.MicroControllers
 
                 if (attack)
                 {
-                    //DebugService.DrawSphere(new Point { X = groupCenter.X, Y = groupCenter.Y, Z = 10 });
+                    if (AvoidDeceleration(commander, groupCenter, true, frame, out action)) { return true; }
                     action = commander.Order(frame, Abilities.ATTACK, groupCenter);
                 }
                 else
                 {
+                    if (AvoidDeceleration(commander, groupCenter, false, frame, out action)) { return true; }
                     action = commander.Order(frame, Abilities.MOVE, groupCenter);
                 }
 
@@ -1866,6 +1895,7 @@ namespace Sharky.MicroControllers
 
             if (Move(commander, supportPoint, defensivePoint, groupCenter, bestTarget, formation, frame, out action)) { return action; }
 
+            if (AvoidDeceleration(commander, supportPoint, true, frame, out action)) { return action; }
             return commander.Order(frame, Abilities.ATTACK, supportPoint);
         }
 

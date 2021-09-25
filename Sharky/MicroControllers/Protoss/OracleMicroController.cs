@@ -178,7 +178,7 @@ namespace Sharky.MicroControllers.Protoss
             }
 
             var avoidPoint = GetPositionFromRange(commander, closestEnemy.Unit.Pos, commander.UnitCalculation.Unit.Pos, range + commander.UnitCalculation.Unit.Radius + closestEnemy.Unit.Radius);
-            if (AvoidDeceleration(commander, avoidPoint, frame, out action)) { return true; }
+            if (AvoidDeceleration(commander, avoidPoint, false, frame, out action)) { return true; }
             action = commander.Order(frame, Abilities.MOVE, avoidPoint);
             return true;
         }
@@ -373,7 +373,7 @@ namespace Sharky.MicroControllers.Protoss
             }
 
             var attackPoint = GetPositionFromRange(commander, bestTarget.Unit.Pos, commander.UnitCalculation.Unit.Pos, commander.UnitCalculation.Range + bestTarget.Unit.Radius + commander.UnitCalculation.Unit.Radius);
-            if (AvoidDeceleration(commander, attackPoint, frame, out action)) { return true; }
+            if (AvoidDeceleration(commander, attackPoint, false, frame, out action)) { return true; }
             action = commander.Order(frame, Abilities.MOVE, attackPoint);
             return true;
         }

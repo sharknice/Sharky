@@ -15,6 +15,7 @@ namespace Sharky.Managers
         BuildPylonService BuildPylonService;
         BuildDefenseService BuildDefenseService;
         BuildProxyService BuildProxyService;
+        BuildAddOnSwapService BuildAddOnSwapService;
         BuildingCancelService BuildingCancelService;
 
         VespeneGasBuilder VespeneGasBuilder;
@@ -41,6 +42,7 @@ namespace Sharky.Managers
             BuildPylonService = defaultSharkyBot.BuildPylonService;
             BuildDefenseService = defaultSharkyBot.BuildDefenseService;
             BuildProxyService = defaultSharkyBot.BuildProxyService;
+            BuildAddOnSwapService = defaultSharkyBot.BuildAddOnSwapService;
             BuildingCancelService = defaultSharkyBot.BuildingCancelService;
 
             VespeneGasBuilder = defaultSharkyBot.VespeneGasBuilder;
@@ -93,9 +95,11 @@ namespace Sharky.Managers
             actions.AddRange(BuildProxyService.MorphBuildings());
             actions.AddRange(BuildProxyService.BuildAddOns());
             actions.AddRange(BuildProxyService.BuildDefensiveBuildings());
-            actions.AddRange(BuildProxyService.BuildProductionBuildings());    
+            actions.AddRange(BuildProxyService.BuildProductionBuildings());
             actions.AddRange(BuildProxyService.BuildTechBuildings());
             // TODO: send new SCVs to any incomplete proxy building without one
+
+            actions.AddRange(BuildAddOnSwapService.BuildAndSwapAddons());
 
             actions.AddRange(BuildPylonService.BuildPylonsAtEveryMineralLine());
             actions.AddRange(BuildPylonService.BuildPylonsAtDefensivePoint());

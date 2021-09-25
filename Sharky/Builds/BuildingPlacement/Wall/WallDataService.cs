@@ -9,11 +9,13 @@ namespace Sharky.Builds.BuildingPlacement
     {
         List<MapWallData> PartialMapWallData;
         List<MapWallData> BlockMapWallData;
+        List<MapWallData> TerranMapWallData;
 
         public WallDataService()
         {
             PartialMapWallData = LoadMapWallData("partial");
             BlockMapWallData = LoadMapWallData("block");
+            TerranMapWallData = LoadMapWallData("terran");
         }
 
         List<MapWallData> LoadMapWallData(string folder)
@@ -49,6 +51,16 @@ namespace Sharky.Builds.BuildingPlacement
         public List<WallData> GetBlockWallData(string map)
         {
             var data = BlockMapWallData.FirstOrDefault(m => map.Replace(" ", "").ToLower().Contains(m.MapName.ToLower()));
+            if (data != null)
+            {
+                return data.WallData;
+            }
+            return null;
+        }
+
+        public List<WallData> GetTerranWallData(string map)
+        {
+            var data = TerranMapWallData.FirstOrDefault(m => map.Replace(" ", "").ToLower().Contains(m.MapName.ToLower()));
             if (data != null)
             {
                 return data.WallData;
