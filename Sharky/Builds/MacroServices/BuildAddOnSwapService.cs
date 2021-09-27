@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using Sharky.Builds.BuildingPlacement;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -8,11 +9,17 @@ namespace Sharky.Builds.MacroServices
     {
         MacroData MacroData;
         ActiveUnitData ActiveUnitData;
+        SharkyUnitData SharkyUnitData;
+        BuildingService BuildingService;
+        IBuildingPlacement BuildingPlacement;
 
-        public BuildAddOnSwapService(MacroData macroData, ActiveUnitData activeUnitData)
+        public BuildAddOnSwapService(MacroData macroData, ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, BuildingService buildingService, IBuildingPlacement buildingPlacement)
         {
             MacroData = macroData;
             ActiveUnitData = activeUnitData;
+            SharkyUnitData = sharkyUnitData;
+            BuildingService = buildingService;
+            BuildingPlacement = buildingPlacement;
         }
 
         public IEnumerable<Action> BuildAndSwapAddons()
@@ -61,6 +68,11 @@ namespace Sharky.Builds.MacroServices
                     if (addOnSwap.AddOnTaker != null &&
                         (addOnSwap.AddOnTaker.UnitCalculation.UnitTypeData.Name.Contains("Flying") || addOnSwap.AddOnTaker.UnitCalculation.Position.X != addOnSwap.TakerLocation.X || addOnSwap.AddOnTaker.UnitCalculation.Position.Y != addOnSwap.TakerLocation.Y))
                     {
+                        if (BuildingService.Blocked(addOnSwap.TakerLocation.X, addOnSwap.TakerLocation.Y, 1.5f, -.5f, addOnSwap.AddOnBuilder.UnitCalculation.Unit.Tag))
+                        {
+                            var unitData = SharkyUnitData.BuildingData[addOnSwap.DesiredAddOnBuilder];
+                            addOnSwap.TakerLocation = BuildingPlacement.FindPlacement(addOnSwap.TakerLocation, addOnSwap.DesiredAddOnBuilder, unitData.Size);
+                        }
                         command = addOnSwap.AddOnBuilder.Order(MacroData.Frame, Abilities.LAND, addOnSwap.TakerLocation);
                     }
                     else

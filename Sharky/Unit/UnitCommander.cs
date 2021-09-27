@@ -62,7 +62,7 @@ namespace Sharky
         {
             if (!allowSpam)
             {
-                if (ability == LastAbility && targetTag == LastTargetTag && ((targetLocation == null && LastTargetLocation == null) || (targetLocation.X == LastTargetLocation.X && targetLocation.Y == LastTargetLocation.Y)) && AbilityOrderTimes[ability] > frame - SpamFrames)
+                if (ability == LastAbility && targetTag == LastTargetTag && ((targetLocation == null && LastTargetLocation == null) || (LastTargetLocation != null && targetLocation.X == LastTargetLocation.X && targetLocation.Y == LastTargetLocation.Y)) && AbilityOrderTimes[ability] > frame - SpamFrames)
                 {
                     return new List<SC2APIProtocol.Action>(); // if new action is exactly the same, don't do anything to prevent apm spam
                 }

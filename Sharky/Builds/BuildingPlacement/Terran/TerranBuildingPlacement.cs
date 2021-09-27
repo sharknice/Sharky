@@ -1,5 +1,4 @@
 ﻿using SC2APIProtocol;
-using Sharky.Pathing;
 using System;
 using System.Linq;
 using System.Numerics;
@@ -10,23 +9,23 @@ namespace Sharky.Builds.BuildingPlacement
     {
         ActiveUnitData ActiveUnitData;
         SharkyUnitData SharkyUnitData;
-        MapData MapData;
-        TargetingData TargetingData;
         DebugService DebugService;
         BuildingService BuildingService;
         IBuildingPlacement WallOffPlacement;
-        WallService WallService;
+        TerranWallService TerranWallService;
+        TerranSupplyDepotGridPlacement TerranBuildingGridPlacement;
+        TerranProductionGridPlacement TerranProductionGridPlacement;
 
-        public TerranBuildingPlacement(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, MapData mapData, TargetingData targetingData, DebugService debugService, BuildingService buildingService, IBuildingPlacement wallOffPlacement, WallService wallService)
+        public TerranBuildingPlacement(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, DebugService debugService, BuildingService buildingService, IBuildingPlacement wallOffPlacement, TerranWallService terranWallService, TerranSupplyDepotGridPlacement terranBuildingGridPlacement, TerranProductionGridPlacement terranProductionGridPlacement)
         {
             ActiveUnitData = activeUnitData;
             SharkyUnitData = sharkyUnitData;
-            MapData = mapData;
-            TargetingData = targetingData;
             DebugService = debugService;
             BuildingService = buildingService;
             WallOffPlacement = wallOffPlacement;
-            WallService = wallService;
+            TerranWallService = terranWallService;
+            TerranBuildingGridPlacement = terranBuildingGridPlacement;
+            TerranProductionGridPlacement = terranProductionGridPlacement;
         }
 
         public Point2D FindPlacement(Point2D target, UnitTypes unitType, int size, bool ignoreResourceProximity = false, float maxDistance = 50, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.None)
@@ -50,28 +49,26 @@ namespace Sharky.Builds.BuildingPlacement
             {
                 return FindSupplyDepotPlacement(target, size, maxDistance, mineralProximity);
             }
-            return FindTechPlacement(target, size, maxDistance, mineralProximity);
+            return FindProductionPlacement(target, size, maxDistance, mineralProximity);
         }
 
         Point2D FindSupplyDepotPlacement(Point2D target, float size, float maxDistance, float minimumMineralProximinity)
         {
-            if (MapData != null && MapData.TerranWallData != null)
-            {
-                var wallData = MapData.TerranWallData.FirstOrDefault(b => b.BasePosition.X == TargetingData.NaturalBasePoint.X && b.BasePosition.Y == TargetingData.NaturalBasePoint.Y);
-                if (wallData != null && wallData.Depots != null)
-                {
-                    var existingDepots = ActiveUnitData.SelfUnits.Values.Where(u => u.Unit.UnitType == (uint)UnitTypes.TERRAN_SUPPLYDEPOT || u.Unit.UnitType == (uint)UnitTypes.TERRAN_SUPPLYDEPOTLOWERED);
-                    foreach (var spot in wallData.Depots)
-                    {
-                        if (!existingDepots.Any(e => e.Position.X == spot.X && e.Position.Y == spot.Y) && WallService.Buildable(spot, .5f))
-                        {
-                            return spot;
-                        }
-                    }
-                }
-            }
+            var spot = TerranWallService.FindSupplyDepotWallPlacement(target, size, maxDistance, minimumMineralProximinity);
+            if (spot != null) { return spot; }
+
+            spot = TerranBuildingGridPlacement.FindPlacement(target, size, maxDistance, minimumMineralProximinity);
+            if (spot != null) { return spot; }
 
             return FindTechPlacement(target, size, maxDistance, minimumMineralProximinity);
+        }
+
+        public Point2D FindProductionPlacement(Point2D reference, float size, float maxDistance, float minimumMineralProximinity = 5)
+        {
+            var spot = TerranProductionGridPlacement.FindPlacement(reference, size, maxDistance, minimumMineralProximinity);
+            if (spot != null) { return spot; }
+
+            return FindTechPlacement(reference, size + 4f, maxDistance, minimumMineralProximinity); // add to the radius to make room for the addon and completed units to exist
         }
 
         public Point2D FindTechPlacement(Point2D reference, float size, float maxDistance, float minimumMineralProximinity = 2)
@@ -115,11 +112,6 @@ namespace Sharky.Builds.BuildingPlacement
             }
 
             return null;
-        }
-
-        public Point2D FindProductionPlacement(Point2D reference, float size, float maxDistance, float minimumMineralProximinity = 5)
-        {
-            return FindTechPlacement(reference, size + 4f, maxDistance, minimumMineralProximinity); // add to the radius to make room for the addon and completed units to exist
         }
     }
 }

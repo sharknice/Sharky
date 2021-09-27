@@ -45,7 +45,7 @@ namespace Sharky.Builds.BuildingPlacement
                && (height == MapData.Map[(int)x - (int)radius][(int)y].TerrainHeight) && (height == MapData.Map[(int)x - (int)radius][(int)y + (int)radius].TerrainHeight) && (height == MapData.Map[(int)x - (int)radius][(int)y - (int)radius].TerrainHeight);
         }
 
-        public bool Blocked(float x, float y, float radius, float padding = .5f)
+        public bool Blocked(float x, float y, float radius, float padding = .5f, ulong tag = 0)
         {
             if (ActiveUnitData.NeutralUnits.Any(u => Vector2.DistanceSquared(new Vector2(x, y), u.Value.Position) < (u.Value.Unit.Radius + padding + radius) * (u.Value.Unit.Radius + padding + radius)))
             {
@@ -57,7 +57,7 @@ namespace Sharky.Builds.BuildingPlacement
                 return true;
             }
 
-            if (ActiveUnitData.Commanders.Any(c => (c.Value.UnitCalculation.Attributes.Contains(SC2APIProtocol.Attribute.Structure) || c.Value.UnitCalculation.Unit.BuildProgress < 1) && Vector2.DistanceSquared(new Vector2(x, y), c.Value.UnitCalculation.Position) < (c.Value.UnitCalculation.Unit.Radius + padding + radius) * (c.Value.UnitCalculation.Unit.Radius + padding + radius)))
+            if (ActiveUnitData.Commanders.Any(c => c.Key != tag && ((c.Value.UnitCalculation.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && !c.Value.UnitCalculation.Unit.IsFlying) || c.Value.UnitCalculation.Unit.BuildProgress < 1) && Vector2.DistanceSquared(new Vector2(x, y), c.Value.UnitCalculation.Position) < (c.Value.UnitCalculation.Unit.Radius + padding + radius) * (c.Value.UnitCalculation.Unit.Radius + padding + radius)))
             {
                 return true;
             }
