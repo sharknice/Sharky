@@ -352,7 +352,7 @@ namespace Sharky.DefaultBot
 
             MicroTaskData = new MicroTaskData { MicroTasks = new Dictionary<string, IMicroTask>() };
 
-            var defenseSquadTask = new DefenseSquadTask(ActiveUnitData, TargetingData, DefenseService, MicroController, new ArmySplitter(AttackData, TargetingData, ActiveUnitData, DefenseService, TargetingService, MicroController), new List<DesiredUnitsClaim>(), 0, false);
+            var defenseSquadTask = new DefenseSquadTask(ActiveUnitData, TargetingData, DefenseService, MicroController, new ArmySplitter(AttackData, TargetingData, ActiveUnitData, DefenseService, TargetingService, TerranWallService, MicroController), new List<DesiredUnitsClaim>(), 0, false);
             var workerScoutTask = new WorkerScoutTask(this, false, 0.5f);
             var workerScoutGasStealTask = new WorkerScoutGasStealTask(this, false, 0.5f);
             var reaperScoutTask = new ReaperScoutTask(this, false, 0.5f);
@@ -361,7 +361,7 @@ namespace Sharky.DefaultBot
             var miningDefenseService = new MiningDefenseService(BaseData, ActiveUnitData, workerDefenseMicroController, DebugService);
             var miningTask = new MiningTask(SharkyUnitData, BaseData, ActiveUnitData, 1, miningDefenseService, MacroData, BuildOptions, MicroTaskData, new MineralMiner(this), new GasMiner(BaseData, SharkyUnitData));
             var queenInjectTask = new QueenInjectsTask(ActiveUnitData, 1.1f, UnitCountService);
-            var attackTask = new AttackTask(MicroController, TargetingData, ActiveUnitData, DefenseService, MacroData, AttackData, TargetingService, MicroTaskData, new ArmySplitter(AttackData, TargetingData, ActiveUnitData, DefenseService, TargetingService, MicroController), new EnemyCleanupService(MicroController), 2);
+            var attackTask = new AttackTask(MicroController, TargetingData, ActiveUnitData, DefenseService, MacroData, AttackData, TargetingService, MicroTaskData, new ArmySplitter(AttackData, TargetingData, ActiveUnitData, DefenseService, TargetingService, TerranWallService, MicroController), new EnemyCleanupService(MicroController), 2);
             var adeptWorkerHarassTask = new AdeptWorkerHarassTask(BaseData, TargetingData, adeptMicroController, 2, false);
             var oracleWorkerHarassTask = new OracleWorkerHarassTask(TargetingData, BaseData, ChatService, MapDataService, MapData, oracleHarassMicroController, 1, false);
             var lateGameOracleHarassTask = new LateGameOracleHarassTask(BaseData, TargetingData, MapDataService, oracleHarassMicroController, 1, false);

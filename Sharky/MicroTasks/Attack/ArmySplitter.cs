@@ -41,7 +41,7 @@ namespace Sharky.MicroTasks.Attack
         }
 
         public ArmySplitter(AttackData attackData, TargetingData targetingData, ActiveUnitData activeUnitData,
-            DefenseService defenseService, TargetingService targetingService, IMicroController microController)
+            DefenseService defenseService, TargetingService targetingService, TerranWallService terranWallService, IMicroController microController)
         {
             AttackData = attackData;
             TargetingData = targetingData;
@@ -49,6 +49,7 @@ namespace Sharky.MicroTasks.Attack
 
             DefenseService = defenseService;
             TargetingService = targetingService;
+            TerranWallService = terranWallService;
 
             MicroController = microController;
 
@@ -102,7 +103,7 @@ namespace Sharky.MicroTasks.Attack
                         }
                         else
                         {
-                            if (TerranWallService.MainWallComplete())
+                            if (TerranWallService != null && TerranWallService.MainWallComplete())
                             {
                                 actions.AddRange(MicroController.Retreat(AvailableCommanders, TargetingData.ForwardDefensePoint, groupPoint, frame));
                             }
