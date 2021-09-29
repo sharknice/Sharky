@@ -10,16 +10,18 @@ namespace Sharky.Builds.BuildingPlacement
         ActiveUnitData ActiveUnitData;
         SharkyUnitData SharkyUnitData;
         MapData MapData;
+        BaseData BaseData;
 
         WallService WallService;
         TerranWallService TerranWallService;
         ProtossWallService ProtossWallService;
 
-        public HardCodedWallOffPlacement(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, MapData mapData, WallService wallService, TerranWallService terranWallService, ProtossWallService protossWallService)
+        public HardCodedWallOffPlacement(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, MapData mapData, BaseData baseData, WallService wallService, TerranWallService terranWallService, ProtossWallService protossWallService)
         {
             ActiveUnitData = activeUnitData;
             SharkyUnitData = sharkyUnitData;
             MapData = mapData;
+            BaseData = baseData;
 
             WallService = wallService;
             TerranWallService = terranWallService;
@@ -46,6 +48,14 @@ namespace Sharky.Builds.BuildingPlacement
             else if (wallOffType == WallOffType.Terran)
             {
                 wallData = MapData.TerranWallData.FirstOrDefault(b => b.BasePosition.X == baseLocation.X && b.BasePosition.Y == baseLocation.Y);
+                if (wallData == null)
+                {
+                    var firstBase = BaseData.SelfBases.FirstOrDefault();
+                    if (firstBase != null)
+                    {
+                        wallData = MapData.TerranWallData.FirstOrDefault(b => b.BasePosition.X == firstBase.Location.X && b.BasePosition.Y == firstBase.Location.Y);
+                    }
+                }
                 if (wallData == null) { return null; }
             }
 
