@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using Sharky.Builds.BuildingPlacement;
 using Sharky.DefaultBot;
 using Sharky.MicroControllers;
 using System.Collections.Generic;
@@ -15,6 +16,7 @@ namespace Sharky.MicroTasks.Attack
 
         DefenseService DefenseService;
         TargetingService TargetingService;
+        TerranWallService TerranWallService;
 
         IMicroController MicroController;
 
@@ -31,6 +33,7 @@ namespace Sharky.MicroTasks.Attack
 
             DefenseService = defaultSharkyBot.DefenseService;
             TargetingService = defaultSharkyBot.TargetingService;
+            TerranWallService = defaultSharkyBot.TerranWallService;
 
             MicroController = defaultSharkyBot.MicroController;
 
@@ -99,7 +102,14 @@ namespace Sharky.MicroTasks.Attack
                         }
                         else
                         {
-                            actions.AddRange(MicroController.Retreat(AvailableCommanders, TargetingData.MainDefensePoint, groupPoint, frame));
+                            if (TerranWallService.MainWallComplete())
+                            {
+                                actions.AddRange(MicroController.Retreat(AvailableCommanders, TargetingData.ForwardDefensePoint, groupPoint, frame));
+                            }
+                            else
+                            {
+                                actions.AddRange(MicroController.Retreat(AvailableCommanders, TargetingData.MainDefensePoint, groupPoint, frame));
+                            }
                         }
                     }
                 }

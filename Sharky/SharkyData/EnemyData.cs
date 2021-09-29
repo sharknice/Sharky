@@ -9,5 +9,6 @@ namespace Sharky
     {
         public Race EnemyRace { get; set; }
         public Dictionary<string, IEnemyStrategy> EnemyStrategies { get; set; }
+        public Race SelfRace { get; set; }
     }
 }

@@ -17,6 +17,7 @@
         Wall,
         Door,
         Harass,
-        Support
+        Support,
+        Repair
     }
 }

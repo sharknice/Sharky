@@ -135,6 +135,11 @@ namespace Sharky.Managers
                     if (updatedUnit != null)
                     {
                         selfBase.ResourceCenter = updatedUnit.Unit;
+                        if (Vector2.DistanceSquared(new Vector2(selfBase.ResourceCenter.Pos.X, selfBase.ResourceCenter.Pos.Y), new Vector2(selfBase.Location.X, selfBase.Location.Y)) > 25)
+                        {
+                            selfBase.ResourceCenter = null;
+                            continue;
+                        }
                     }
                 }
                 else
@@ -258,6 +263,7 @@ namespace Sharky.Managers
                     }
                 }
             }
+            BaseData.SelfBases.RemoveAll(b => b.ResourceCenter == null);
         }
 
         void UpdateEnemyBases()

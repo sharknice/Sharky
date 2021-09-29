@@ -5,6 +5,7 @@
         None,
         Attacking,
         RegeneratingShields,
-        Grouping
+        Grouping,
+        MaintainLockon
     }
 }

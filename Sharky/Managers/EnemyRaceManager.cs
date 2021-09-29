@@ -32,6 +32,10 @@ namespace Sharky.Managers
                 {
                     EnemyData.EnemyRace = playerInfo.RaceRequested;
                 }
+                else
+                {
+                    EnemyData.SelfRace = playerInfo.RaceActual;
+                }
             }
         }
 

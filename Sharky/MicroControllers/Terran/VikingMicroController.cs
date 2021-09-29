@@ -32,9 +32,14 @@ namespace Sharky.MicroControllers.Terran
 
         protected override Point2D GetSupportSpot(UnitCommander commander, UnitCommander unitToSupport, Point2D target, Point2D defensivePoint)
         {
-            var angle = Math.Atan2(unitToSupport.UnitCalculation.Position.Y - defensivePoint.Y, defensivePoint.X - unitToSupport.UnitCalculation.Position.X);
-            var x = -3f * Math.Cos(angle);
-            var y = -3f * Math.Sin(angle);
+            var angle = Math.Atan2(unitToSupport.UnitCalculation.Position.Y - target.Y, target.X - unitToSupport.UnitCalculation.Position.X);
+            var nearestEnemy = unitToSupport.UnitCalculation.EnemiesInRange.FirstOrDefault();
+            if (nearestEnemy != null)
+            {
+                angle = Math.Atan2(unitToSupport.UnitCalculation.Position.Y - nearestEnemy.Position.Y, nearestEnemy.Position.X - unitToSupport.UnitCalculation.Position.X);
+            }
+            var x = 5f * Math.Cos(angle);
+            var y = 5f * Math.Sin(angle);
 
             var supportPoint = new Point2D { X = unitToSupport.UnitCalculation.Position.X + (float)x, Y = unitToSupport.UnitCalculation.Position.Y - (float)y };
 

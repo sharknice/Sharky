@@ -1,5 +1,6 @@
 ﻿using SC2APIProtocol;
 using Sharky.Builds.BuildingPlacement;
+using Sharky.Pathing;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -14,13 +15,19 @@ namespace Sharky.Builds
         SharkyUnitData SharkyUnitData;
         BaseData BaseData;
 
-        public BuildingBuilder(ActiveUnitData activeUnitData, TargetingData targetingData, IBuildingPlacement buildingPlacement, SharkyUnitData sharkyUnitData, BaseData baseData)
+        BuildingService BuildingService;
+        MapDataService MapDataService;
+
+        public BuildingBuilder(ActiveUnitData activeUnitData, TargetingData targetingData, IBuildingPlacement buildingPlacement, SharkyUnitData sharkyUnitData, BaseData baseData, BuildingService buildingService, MapDataService mapDataService)
         {
             ActiveUnitData = activeUnitData;
             TargetingData = targetingData;
             BuildingPlacement = buildingPlacement;
             SharkyUnitData = sharkyUnitData;
             BaseData = baseData;
+
+            BuildingService = buildingService;
+            MapDataService = mapDataService;
         }
 
         public List<Action> BuildBuilding(MacroData macroData, UnitTypes unitType, BuildingTypeData unitData, Point2D generalLocation = null, bool ignoreMineralProximity = false, float maxDistance = 50, List<UnitCommander> workerPool = null, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.None)
@@ -82,16 +89,60 @@ namespace Sharky.Builds
                     }
                     if (building.Count() > 0)
                     {
-                        var action = building.First().Value.Order(macroData.Frame, unitData.Ability);
-                        if (action != null)
+                        // is there room to build the addon?
+                        var buildingWithRoom = building.FirstOrDefault(b => HasRoomForAddon(b.Value)).Value;
+                        if (buildingWithRoom != null)
                         {
-                            return action;
+                            var action = building.First().Value.Order(macroData.Frame, unitData.Ability);
+                            if (action != null) { return action; }
+                        }
+                        else
+                        {
+                            var action = building.First().Value.Order(macroData.Frame, Abilities.LIFT);
+                            if (action != null) { return action; }
+                        }
+                    }
+                }
+                else
+                {
+                    var flyingType = UnitTypes.TERRAN_BARRACKSFLYING;
+                    if (unitData.ProducingUnits.Contains(UnitTypes.TERRAN_FACTORY)) { flyingType = UnitTypes.TERRAN_FACTORYFLYING; }
+                    else if (unitData.ProducingUnits.Contains(UnitTypes.TERRAN_STARPORT)) { flyingType = UnitTypes.TERRAN_STARPORTFLYING; }
+                    building = ActiveUnitData.Commanders.Where(c => flyingType == (UnitTypes)c.Value.UnitCalculation.Unit.UnitType);
+
+                    if (location != null)
+                    {
+                        building = building.Where(b => Vector2.DistanceSquared(new Vector2(location.X, location.Y), b.Value.UnitCalculation.Position) <= maxDistance * maxDistance);
+                    }
+                    if (building.Count() > 0)
+                    {
+                        if (location == null)
+                        {
+                            location = new Point2D { X = building.First().Value.UnitCalculation.Position.X, Y = building.First().Value.UnitCalculation.Position.Y };
+                        }
+                        var placementLocation = BuildingPlacement.FindPlacement(location, UnitTypes.TERRAN_BARRACKSTECHLAB, 1, true, maxDistance, false, WallOffType.Terran);
+                        if (placementLocation != null)
+                        {
+                            var action = building.First().Value.Order(macroData.Frame, unitData.Ability, placementLocation);
+                            if (action != null) { return action; }
                         }
                     }
                 }
             }
 
             return null;
+        }
+
+        bool HasRoomForAddon(UnitCommander building)
+        {
+            var addonY = building.UnitCalculation.Unit.Pos.Y - .5f;
+            var addonX = building.UnitCalculation.Unit.Pos.X + 2.5f;
+            if (addonX >= 0 && addonY >= 0 && addonX < MapDataService.MapData.MapWidth && addonY < MapDataService.MapData.MapHeight &&
+                BuildingService.AreaBuildable(addonX, addonY, .5f) && !BuildingService.Blocked(addonX, addonY, .5f, -.5f))
+            {
+                return true;
+            }
+            return false;
         }
 
         public List<Action> BuildGas(MacroData macroData, BuildingTypeData unitData, Unit geyser)

@@ -15,8 +15,9 @@ namespace Sharky.Builds.BuildingPlacement
         TerranWallService TerranWallService;
         TerranSupplyDepotGridPlacement TerranBuildingGridPlacement;
         TerranProductionGridPlacement TerranProductionGridPlacement;
+        TerranTechGridPlacement TerranTechGridPlacement;
 
-        public TerranBuildingPlacement(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, DebugService debugService, BuildingService buildingService, IBuildingPlacement wallOffPlacement, TerranWallService terranWallService, TerranSupplyDepotGridPlacement terranBuildingGridPlacement, TerranProductionGridPlacement terranProductionGridPlacement)
+        public TerranBuildingPlacement(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, DebugService debugService, BuildingService buildingService, IBuildingPlacement wallOffPlacement, TerranWallService terranWallService, TerranSupplyDepotGridPlacement terranBuildingGridPlacement, TerranProductionGridPlacement terranProductionGridPlacement, TerranTechGridPlacement terranTechGridPlacement)
         {
             ActiveUnitData = activeUnitData;
             SharkyUnitData = sharkyUnitData;
@@ -26,6 +27,7 @@ namespace Sharky.Builds.BuildingPlacement
             TerranWallService = terranWallService;
             TerranBuildingGridPlacement = terranBuildingGridPlacement;
             TerranProductionGridPlacement = terranProductionGridPlacement;
+            TerranTechGridPlacement = terranTechGridPlacement;
         }
 
         public Point2D FindPlacement(Point2D target, UnitTypes unitType, int size, bool ignoreResourceProximity = false, float maxDistance = 50, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.None)
@@ -43,13 +45,22 @@ namespace Sharky.Builds.BuildingPlacement
             }
             if (unitType == UnitTypes.TERRAN_BARRACKS || unitType == UnitTypes.TERRAN_FACTORY || unitType == UnitTypes.TERRAN_STARPORT)
             {
-                return FindProductionPlacement(target, size, maxDistance, mineralProximity);
+                return FindProductionPlacement(target, unitType, size, maxDistance, mineralProximity);
             }
             if (unitType == UnitTypes.TERRAN_SUPPLYDEPOT)
             {
                 return FindSupplyDepotPlacement(target, size, maxDistance, mineralProximity);
             }
-            return FindProductionPlacement(target, size, maxDistance, mineralProximity);
+            else
+            {
+                var spot = TerranTechGridPlacement.FindPlacement(target, unitType, size, maxDistance, mineralProximity);
+                if (spot != null) { return spot; }
+            }
+            if (unitType == UnitTypes.TERRAN_COMMANDCENTER)
+            {
+                return null;
+            }
+            return FindTechPlacement(target, size, maxDistance, mineralProximity);
         }
 
         Point2D FindSupplyDepotPlacement(Point2D target, float size, float maxDistance, float minimumMineralProximinity)
@@ -63,9 +74,9 @@ namespace Sharky.Builds.BuildingPlacement
             return FindTechPlacement(target, size, maxDistance, minimumMineralProximinity);
         }
 
-        public Point2D FindProductionPlacement(Point2D reference, float size, float maxDistance, float minimumMineralProximinity = 5)
+        public Point2D FindProductionPlacement(Point2D reference, UnitTypes unitType, float size, float maxDistance, float minimumMineralProximinity = 5)
         {
-            var spot = TerranProductionGridPlacement.FindPlacement(reference, size, maxDistance, minimumMineralProximinity);
+            var spot = TerranProductionGridPlacement.FindPlacement(reference, unitType, size, maxDistance, minimumMineralProximinity);
             if (spot != null) { return spot; }
 
             return FindTechPlacement(reference, size + 4f, maxDistance, minimumMineralProximinity); // add to the radius to make room for the addon and completed units to exist

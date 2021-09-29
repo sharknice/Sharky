@@ -114,6 +114,7 @@ namespace Sharky.DefaultBot
         public IBuildingBuilder BuildingBuilder { get; set; }
         public TerranSupplyDepotGridPlacement TerranSupplyDepotGridPlacement { get; set; }
         public TerranProductionGridPlacement TerranProductionGridPlacement { get; set; }
+        public TerranTechGridPlacement TerranTechGridPlacement { get; set; }
         public ResourceCenterLocator ResourceCenterLocator { get; set; }
         public AttackData AttackData { get; set; }
         public IBuildingPlacement WarpInPlacement { get; set; }
@@ -227,12 +228,13 @@ namespace Sharky.DefaultBot
             //WallOffPlacement = new WallOffPlacement(ActiveUnitData, SharkyUnitData, DebugService, MapData, BuildingService, TargetingData);
             ProtossBuildingPlacement = new ProtossBuildingPlacement(ActiveUnitData, SharkyUnitData, DebugService, MapDataService, BuildingService, WallOffPlacement);
             TerranProductionGridPlacement = new TerranProductionGridPlacement(BaseData, MapDataService, DebugService, BuildingService);
+            TerranTechGridPlacement = new TerranTechGridPlacement(BaseData, MapDataService, DebugService, BuildingService, TerranProductionGridPlacement);
             TerranSupplyDepotGridPlacement = new TerranSupplyDepotGridPlacement(BaseData, MapDataService, DebugService, BuildingService);
-            TerranBuildingPlacement = new TerranBuildingPlacement(ActiveUnitData, SharkyUnitData, DebugService, BuildingService, WallOffPlacement, TerranWallService, TerranSupplyDepotGridPlacement, TerranProductionGridPlacement);
+            TerranBuildingPlacement = new TerranBuildingPlacement(ActiveUnitData, SharkyUnitData, DebugService, BuildingService, WallOffPlacement, TerranWallService, TerranSupplyDepotGridPlacement, TerranProductionGridPlacement, TerranTechGridPlacement);
             ZergBuildingPlacement = new ZergBuildingPlacement(ActiveUnitData, SharkyUnitData, DebugService, BuildingService);
             ResourceCenterLocator = new ResourceCenterLocator(ActiveUnitData, BaseData, BuildingService);
             BuildingPlacement = new BuildingPlacement(ProtossBuildingPlacement, TerranBuildingPlacement, ZergBuildingPlacement, ResourceCenterLocator, BaseData, SharkyUnitData, MacroData, UnitCountService);
-            BuildingBuilder = new BuildingBuilder(ActiveUnitData, TargetingData, BuildingPlacement, SharkyUnitData, BaseData);
+            BuildingBuilder = new BuildingBuilder(ActiveUnitData, TargetingData, BuildingPlacement, SharkyUnitData, BaseData, BuildingService, MapDataService);
 
             WarpInPlacement = new WarpInPlacement(ActiveUnitData, DebugService, MapData);
             
@@ -289,6 +291,7 @@ namespace Sharky.DefaultBot
             var marineMicroController = new MarineMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
             var marauderMicroController = new MarauderMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
             var hellionMicroController = new HellionMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
+            var cycloneMicroController = new CycloneMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
             var siegeTankMicroController = new SiegeTankMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
             var siegeTankSiegedMicroController = new SiegeTankSiegedMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
             var vikingMicroController = new VikingMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
@@ -333,6 +336,7 @@ namespace Sharky.DefaultBot
                 { UnitTypes.TERRAN_MARINE, marineMicroController },
                 { UnitTypes.TERRAN_MARAUDER, marauderMicroController },
                 { UnitTypes.TERRAN_HELLION, hellionMicroController },
+                { UnitTypes.TERRAN_CYCLONE, cycloneMicroController },
                 { UnitTypes.TERRAN_SIEGETANK, siegeTankMicroController },
                 { UnitTypes.TERRAN_SIEGETANKSIEGED, siegeTankSiegedMicroController },
                 { UnitTypes.TERRAN_VIKINGFIGHTER, vikingMicroController },
@@ -366,6 +370,8 @@ namespace Sharky.DefaultBot
             var wallOffTask = new WallOffTask(SharkyUnitData, TargetingData, ActiveUnitData, MacroData, WallOffPlacement, false, .25f);
             var destroyWallOffTask = new DestroyWallOffTask(ActiveUnitData, false, .25f);
             var prePositionBuilderTask = new PrePositionBuilderTask(this, .25f);
+            var repairTask = new RepairTask(this, .6f, true);
+            var saveLiftableBuildingTask = new SaveLiftableBuildingTask(this, BuildingPlacement, .6f, true);
 
             MicroTaskData.MicroTasks[defenseSquadTask.GetType().Name] = defenseSquadTask;
             MicroTaskData.MicroTasks[workerScoutGasStealTask.GetType().Name] = workerScoutGasStealTask;
@@ -384,6 +390,8 @@ namespace Sharky.DefaultBot
             MicroTaskData.MicroTasks[wallOffTask.GetType().Name] = wallOffTask;
             MicroTaskData.MicroTasks[destroyWallOffTask.GetType().Name] = destroyWallOffTask;
             MicroTaskData.MicroTasks[prePositionBuilderTask.GetType().Name] = prePositionBuilderTask;
+            MicroTaskData.MicroTasks[repairTask.GetType().Name] = repairTask;
+            MicroTaskData.MicroTasks[saveLiftableBuildingTask.GetType().Name] = saveLiftableBuildingTask;
 
             MicroManager = new MicroManager(ActiveUnitData, MicroTaskData);
             Managers.Add(MicroManager);

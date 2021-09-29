@@ -26,6 +26,7 @@ namespace Sharky
         public ulong LastTargetTag { get; private set; }
         public int LastInRangeAttackFrame { get; set; }
         public CommanderState CommanderState { get; set; }
+        public LockOnData LastLockOn { get; set; }
 
         /// <summary>
         /// The adept for an adept shade, etc.
@@ -62,7 +63,7 @@ namespace Sharky
         {
             if (!allowSpam)
             {
-                if (ability == LastAbility && targetTag == LastTargetTag && ((targetLocation == null && LastTargetLocation == null) || (LastTargetLocation != null && targetLocation.X == LastTargetLocation.X && targetLocation.Y == LastTargetLocation.Y)) && AbilityOrderTimes[ability] > frame - SpamFrames)
+                if (ability == LastAbility && targetTag == LastTargetTag && ((targetLocation == null && LastTargetLocation == null) || (LastTargetLocation != null && targetLocation != null && targetLocation.X == LastTargetLocation.X && targetLocation.Y == LastTargetLocation.Y)) && AbilityOrderTimes[ability] > frame - SpamFrames)
                 {
                     return new List<SC2APIProtocol.Action>(); // if new action is exactly the same, don't do anything to prevent apm spam
                 }

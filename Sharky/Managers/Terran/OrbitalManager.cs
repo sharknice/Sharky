@@ -72,7 +72,7 @@ namespace Sharky.Managers.Protoss
             var excess = UnitCountService.EquivalentTypeCount(UnitTypes.TERRAN_COMMANDCENTER) - BaseData.SelfBases.Count() - MacroData.DesiredMacroCommandCenters;
             if (excess > 0)
             {
-                var flyingOrbitals = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_ORBITALCOMMANDFLYING);
+                var flyingOrbitals = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_ORBITALCOMMANDFLYING && c.UnitRole != UnitRole.Repair);
                 var macroOrbitals = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_ORBITALCOMMAND && !BaseData.SelfBases.Any(b => b.ResourceCenter != null && b.ResourceCenter.Tag == c.UnitCalculation.Unit.Tag));
                 if (excess > flyingOrbitals.Count() && macroOrbitals.Count() > 0)
                 {
