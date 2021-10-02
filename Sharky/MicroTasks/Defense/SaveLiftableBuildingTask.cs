@@ -103,6 +103,7 @@ namespace Sharky.MicroTasks
                 commander.UnitRole = UnitRole.None;
                 commander.Claimed = false;
                 UnitCommanders.Remove(commander);
+                break;
             }
         }
     }

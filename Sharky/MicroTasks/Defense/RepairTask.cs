@@ -101,6 +101,7 @@ namespace Sharky.MicroTasks
                 else
                 {
                     RepairData[building.Unit.Tag].UnitToRepair = building;
+                    RepairData[building.Unit.Tag].Repairers.RemoveAll(s => s.UnitCalculation.FrameLastSeen != frame);
                 }
             }
 

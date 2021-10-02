@@ -48,8 +48,7 @@ namespace Sharky
             var rangedAllies = allies.Where(e => e.Range > 2);
             if (rangedAllies.Count() > 0)
             {
-                var rangedEnemies = enemies.Where(e => e.Range > 2);
-                var fastestEnemy = rangedEnemies.OrderByDescending(e => e.UnitTypeData.MovementSpeed).FirstOrDefault();
+                var fastestEnemy = enemies.OrderByDescending(e => e.UnitTypeData.MovementSpeed).FirstOrDefault();
                 if (fastestEnemy == null || rangedAllies.Any(a => a.UnitTypeData.MovementSpeed >= fastestEnemy.UnitTypeData.MovementSpeed))
                 {
                     enemyDps = enemyDps / 2f;

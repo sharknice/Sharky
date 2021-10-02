@@ -120,6 +120,14 @@ namespace Sharky.Builds.BuildingPlacement
                 }
                 else
                 {
+                    if (unitType == UnitTypes.TERRAN_COMMANDCENTER)
+                    {
+                        if ((mineralFields == null || mineralFields.Any(m => Vector2.DistanceSquared(new Vector2(m.Pos.X, m.Pos.Y), vector) < 36)) &&
+                            (vespeneGeysers == null || vespeneGeysers.Any(m => Vector2.DistanceSquared(new Vector2(m.Pos.X, m.Pos.Y), vector) < 36)))
+                        {
+                            return null;
+                        }
+                    }
                     return new Point2D { X = x, Y = y };
                 }
             }

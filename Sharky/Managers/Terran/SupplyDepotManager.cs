@@ -21,9 +21,9 @@ namespace Sharky.Managers.Protoss
 
             // TODO: need to improve the supply depot lower/raise logic
 
-            foreach (var raisedDepot in ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_SUPPLYDEPOT))
+            foreach (var raisedDepot in ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_SUPPLYDEPOT && c.UnitCalculation.Unit.BuildProgress == 1))
             {
-                if (!raisedDepot.UnitCalculation.NearbyEnemies.Any(e => !e.Unit.IsFlying) || WinningGround(raisedDepot))
+                if (!raisedDepot.UnitCalculation.NearbyEnemies.Any(e => !e.Unit.IsFlying && e.FrameLastSeen == frame) || WinningGround(raisedDepot))
                 {
                     var action = raisedDepot.Order(frame, Abilities.MORPH_SUPPLYDEPOT_LOWER);
                     if (action != null)
@@ -35,7 +35,7 @@ namespace Sharky.Managers.Protoss
 
             foreach (var loweredDepot in ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_SUPPLYDEPOTLOWERED))
             {
-                if (loweredDepot.UnitCalculation.NearbyEnemies.Any(enemy => !enemy.Unit.IsFlying) && LosingGround(loweredDepot))
+                if (loweredDepot.UnitCalculation.NearbyEnemies.Any(enemy => !enemy.Unit.IsFlying && enemy.FrameLastSeen == frame) && LosingGround(loweredDepot))
                 {
                     var action = loweredDepot.Order(frame, Abilities.MORPH_SUPPLYDEPOT_RAISE);
                     if (action != null)
@@ -50,7 +50,7 @@ namespace Sharky.Managers.Protoss
 
         bool WinningGround(UnitCommander unitCommander)
         {
-            if (unitCommander.UnitCalculation.NearbyAllies.All(a => a.TargetPriorityCalculation.GroundWinnability > 1))
+            if (unitCommander.UnitCalculation.NearbyAllies.All(a => a.TargetPriorityCalculation.GroundWinnability > 1) && unitCommander.UnitCalculation.NearbyAllies.Any(a => a.UnitClassifications.Contains(UnitClassification.ArmyUnit) && a.NearbyEnemies.Count() == unitCommander.UnitCalculation.NearbyEnemies.Count()))
             {
                 return true;
             }

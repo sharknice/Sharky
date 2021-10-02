@@ -19,7 +19,8 @@ namespace Sharky.MicroControllers.Terran
         {
             action = null;
 
-            var enemiesInSiegeRange = commander.UnitCalculation.NearbyEnemies.Where(e => Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position) <= (13 + e.Unit.Radius + commander.UnitCalculation.Unit.Radius) * (13 + e.Unit.Radius + commander.UnitCalculation.Unit.Radius));
+            var enemiesInSiegeRange = commander.UnitCalculation.NearbyEnemies.Where(e => (e.Damage > 0 || Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position) < 12 * 12) && // get a little bit closer to buildings
+            Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position) <= (13 + e.Unit.Radius + commander.UnitCalculation.Unit.Radius) * (13 + e.Unit.Radius + commander.UnitCalculation.Unit.Radius));
             if (enemiesInSiegeRange.Any(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED) || enemiesInSiegeRange.Sum(e => e.Unit.Health + e.Unit.Shield) > 50)
             {
                 action = commander.Order(frame, Abilities.MORPH_SIEGEMODE);

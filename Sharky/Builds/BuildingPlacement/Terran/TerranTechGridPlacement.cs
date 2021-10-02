@@ -112,9 +112,13 @@ namespace Sharky.Builds.BuildingPlacement
                 var addonY = y - .5f;
                 var addonX = x + 2.5f;
                 var addonVector = new Vector2(addonX, addonY);
-                if (RoomForExitingUnits(x, y, size) || ((vespeneGeysers == null || vespeneGeysers.Any(m => Vector2.DistanceSquared(new Vector2(m.Pos.X, m.Pos.Y), vector) < 25)) || (mineralFields == null || mineralFields.Any(m => Vector2.DistanceSquared(new Vector2(m.Pos.X, m.Pos.Y), vector) < 16))) && Vector2.DistanceSquared(vector, baseVector) > 16)
+                var distanceToBase = Vector2.DistanceSquared(vector, baseVector);
+                if (RoomForExitingUnits(x, y, size) || ((vespeneGeysers == null || vespeneGeysers.Any(m => Vector2.DistanceSquared(new Vector2(m.Pos.X, m.Pos.Y), vector) < 25)) || (mineralFields == null || mineralFields.Any(m => Vector2.DistanceSquared(new Vector2(m.Pos.X, m.Pos.Y), vector) < 16))) && distanceToBase > 16)
                 {
-                    return new Point2D { X = x, Y = y };
+                    if (!vespeneGeysers.Any(m => Vector2.DistanceSquared(new Vector2(m.Pos.X, m.Pos.Y), baseVector) > distanceToBase))
+                    {
+                        return new Point2D { X = x, Y = y };
+                    }
                 }
                 if (addonX >= 0 && addonY >= 0 && addonX < MapDataService.MapData.MapWidth && addonY < MapDataService.MapData.MapHeight &&
                     MapDataService.MapHeight((int)addonX, (int)addonY) == baseHeight &&

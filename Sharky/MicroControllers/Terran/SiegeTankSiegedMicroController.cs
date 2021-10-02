@@ -40,7 +40,7 @@ namespace Sharky.MicroControllers.Terran
         {
             action = null;
 
-            if (commander.UnitCalculation.EnemiesInRange.Count() == 0)
+            if (commander.UnitCalculation.EnemiesInRange.Count(e => e.Damage > 0 || Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position) < commander.UnitCalculation.Range * commander.UnitCalculation.Range) == 0) // get a little bit closer to buildings
             {
                 action = commander.Order(frame, Abilities.MORPH_UNSIEGE);
                 return true;

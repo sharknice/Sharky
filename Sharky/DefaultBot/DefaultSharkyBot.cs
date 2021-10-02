@@ -222,7 +222,7 @@ namespace Sharky.DefaultBot
             BuildOptions = new BuildOptions { StrictGasCount = false, StrictSupplyCount = false, StrictWorkerCount = false };
             MacroSetup = new MacroSetup();
             WallService = new WallService(this);
-            TerranWallService = new TerranWallService(ActiveUnitData, MapData, TargetingData, WallService);
+            TerranWallService = new TerranWallService(ActiveUnitData, MapData, BaseData, WallService);
             ProtossWallService = new ProtossWallService(SharkyUnitData, ActiveUnitData, WallService);
             WallOffPlacement = new HardCodedWallOffPlacement(ActiveUnitData, SharkyUnitData, MapData, BaseData, WallService, TerranWallService, ProtossWallService);
             ProtossBuildingPlacement = new ProtossBuildingPlacement(ActiveUnitData, SharkyUnitData, DebugService, MapDataService, BuildingService, WallOffPlacement);
