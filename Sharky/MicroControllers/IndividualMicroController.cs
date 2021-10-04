@@ -598,7 +598,7 @@ namespace Sharky.MicroControllers
                     return true;
                 }
             }
-            else if (MicroPriority == MicroPriority.LiveAndAttack)
+            else if (MicroPriority == MicroPriority.LiveAndAttack || MicroPriority == MicroPriority.StayOutOfRange)
             {
                 if (WorkerEscapeSurround(commander, target, defensivePoint, frame, out action)) { return true; }
 

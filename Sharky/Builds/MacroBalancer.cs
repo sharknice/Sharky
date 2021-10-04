@@ -305,7 +305,7 @@ namespace Sharky.Builds
             {
                 var desiredRatio = MacroData.DesiredUnitCounts[u] / (double)desiredTotal;
 
-                var count = UnitCountService.Count(u) + UnitCountService.UnitsInProgressCount(u);
+                var count = UnitCountService.EquivalentTypeCount(u) + UnitCountService.UnitsInProgressCount(u);
                 if (u == UnitTypes.PROTOSS_ARCHON)
                 {
                     MacroData.BuildUnits[u] = count < MacroData.DesiredUnitCounts[u];

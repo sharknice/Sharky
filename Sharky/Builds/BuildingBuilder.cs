@@ -39,7 +39,15 @@ namespace Sharky.Builds
                 if (location == null)
                 {
                     anyBase = true;
-                    location = GetReferenceLocation(TargetingData.SelfMainBasePoint);
+                    var addOnSwap = macroData.AddOnSwaps.Values.FirstOrDefault(a => a.Started && !a.Completed && a.AddOnBuilder != null && a.AddOnTaker == null && a.DesiredAddOnTaker == unitType);
+                    if (addOnSwap != null)
+                    {
+                        location = new Point2D { X = addOnSwap.AddOnBuilder.UnitCalculation.Position.X, Y = addOnSwap.AddOnBuilder.UnitCalculation.Position.Y };
+                    }
+                    else
+                    {
+                        location = GetReferenceLocation(TargetingData.SelfMainBasePoint);
+                    }
                 }
                 var placementLocation = BuildingPlacement.FindPlacement(location, unitType, unitData.Size, ignoreMineralProximity, maxDistance, requireSameHeight, wallOffType);
                 

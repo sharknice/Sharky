@@ -290,7 +290,7 @@ namespace Sharky.DefaultBot
             var marineMicroController = new MarineMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
             var marauderMicroController = new MarauderMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
             var hellionMicroController = new HellionMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
-            var cycloneMicroController = new CycloneMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
+            var cycloneMicroController = new CycloneMicroController(this, SharkyAdvancedPathFinder, MicroPriority.StayOutOfRange, false);
             var siegeTankMicroController = new SiegeTankMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
             var siegeTankSiegedMicroController = new SiegeTankSiegedMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
             var vikingMicroController = new VikingMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
