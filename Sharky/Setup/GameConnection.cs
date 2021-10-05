@@ -137,6 +137,7 @@ namespace Sharky
             joinGame.Options.Raw = true;
             joinGame.Options.Score = true;
             joinGame.Options.ShowCloaked = true;
+            joinGame.Options.ShowBurrowedShadows = true;
             joinGame.Options.RawCropToPlayableArea = true;
             joinGame.Options.RawAffectsSelection = true;
 
