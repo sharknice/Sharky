@@ -112,6 +112,14 @@ namespace Sharky.MicroControllers.Terran
 
             if (SpecialCaseMove(commander, target, defensivePoint, null, bestTarget, Formation.Normal, frame, out action)) { return action; }
 
+            if (commander.UnitCalculation.Unit.Health < commander.UnitCalculation.Unit.HealthMax)
+            {
+                if (AvoidDamage(commander, target, defensivePoint, frame, out action))
+                {
+                    return action;
+                }
+            }
+
             return commander.Order(frame, Abilities.MOVE, target);
         }
     }
