@@ -23,4 +23,25 @@
     <ProjectReference Include="..\S2ClientProtocol\S2ClientProtocol.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="StaticData\wall\terran\2000atmospheres.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="StaticData\wall\terran\blackburn.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="StaticData\wall\terran\jagannatha.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="StaticData\wall\terran\lightshade.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="StaticData\wall\terran\oxide.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="StaticData\wall\terran\romanticide.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

@@ -10,7 +10,7 @@ namespace Sharky.Managers
     {
         AttackData AttackData;
         ActiveUnitData ActiveUnitData;
-        AttackTask AttackTask;
+        public IMicroTask AttackTask { get; set; }
         TargetPriorityService TargetPriorityService;
         TargetingData TargetingData;
         MacroData MacroData;
@@ -18,7 +18,7 @@ namespace Sharky.Managers
 
         DebugService DebugService;
 
-        public AttackDataManager(AttackData attackData, ActiveUnitData activeUnitData, AttackTask attackTask, TargetPriorityService targetPriorityService, TargetingData targetingData, MacroData macroData, BaseData baseData, DebugService debugService)
+        public AttackDataManager(AttackData attackData, ActiveUnitData activeUnitData, IMicroTask attackTask, TargetPriorityService targetPriorityService, TargetingData targetingData, MacroData macroData, BaseData baseData, DebugService debugService)
         {
             AttackData = attackData;
             ActiveUnitData = activeUnitData;

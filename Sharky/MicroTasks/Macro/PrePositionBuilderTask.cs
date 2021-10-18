@@ -45,7 +45,7 @@ namespace Sharky.MicroTasks.Macro
             {
                 foreach (var commander in commanders.OrderBy(c => c.Value.Claimed).ThenBy(c => c.Value.UnitCalculation.Unit.BuffIds.Count()).ThenBy(c => DistanceToResourceCenter(c)))
                 {
-                    if ((!commander.Value.Claimed || commander.Value.UnitRole == UnitRole.Minerals) && commander.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && !commander.Value.UnitCalculation.Unit.BuffIds.Any(b => SharkyUnitData.CarryingResourceBuffs.Contains((Buffs)b)) && commander.Value.UnitRole != UnitRole.Build)
+                    if (commander.Value.UnitRole != UnitRole.Gas && (!commander.Value.Claimed || commander.Value.UnitRole == UnitRole.Minerals) && commander.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && !commander.Value.UnitCalculation.Unit.BuffIds.Any(b => SharkyUnitData.CarryingResourceBuffs.Contains((Buffs)b)) && commander.Value.UnitRole != UnitRole.Build)
                     {
                         commander.Value.UnitRole = UnitRole.PreBuild;
                         commander.Value.Claimed = true;
@@ -70,7 +70,13 @@ namespace Sharky.MicroTasks.Macro
                 }
                 else
                 {
-                    var enemyWorker = commander.UnitCalculation.NearbyEnemies.FirstOrDefault(e => e.UnitClassifications.Contains(UnitClassification.Worker));
+                    if (commander.UnitCalculation.Unit.Orders.Any(o => (o.AbilityId == (uint)Abilities.HARVEST_GATHER_DRONE || o.AbilityId == (uint)Abilities.HARVEST_GATHER_PROBE || o.AbilityId == (uint)Abilities.HARVEST_GATHER_SCV) && commander.UnitCalculation.Unit.Orders.Count() > 1))
+                    {
+                        actions.AddRange(commander.Order(frame, Abilities.STOP));
+                        continue;
+                    }
+
+                    var enemyWorker = commander.UnitCalculation.NearbyEnemies.FirstOrDefault(e => e.UnitClassifications.Contains(UnitClassification.Worker) && e.FrameLastSeen == frame);
                     if (enemyWorker != null)
                     {
                         var attack = commander.Order(frame, Abilities.ATTACK, targetTag: enemyWorker.Unit.Tag);

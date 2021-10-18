@@ -208,22 +208,32 @@ namespace Sharky.Managers
                 }
             }
 
+            foreach (var unit in ActiveUnitData.SelfUnits.Where(u => u.Value.FrameLastSeen != frame && u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_DRONE)) // structures get replaced by snapshots if we can't see them, so just remove them and let them get readded
+            {
+                if (unit.Value.Unit.Orders.Any(o => SharkyUnitData.BuildingData.Values.Any(b => (uint)b.Ability == o.AbilityId)))
+                {
+                    ActiveUnitData.SelfUnits.TryRemove(unit.Key, out UnitCalculation removed);
+                }
+            }
+
             foreach (var allyAttack in ActiveUnitData.SelfUnits)
             {
                 foreach (var enemyAttack in ActiveUnitData.EnemyUnits)
                 {
-                    if (DamageService.CanDamage(allyAttack.Value, enemyAttack.Value) && Vector2.DistanceSquared(allyAttack.Value.Position, enemyAttack.Value.Position) <= (allyAttack.Value.Range + allyAttack.Value.Unit.Radius + enemyAttack.Value.Unit.Radius) * (allyAttack.Value.Range + allyAttack.Value.Unit.Radius + enemyAttack.Value.Unit.Radius))
+                    var range = GetRange(allyAttack, enemyAttack);
+                    if (DamageService.CanDamage(allyAttack.Value, enemyAttack.Value) && Vector2.DistanceSquared(allyAttack.Value.Position, enemyAttack.Value.Position) <= (range + allyAttack.Value.Unit.Radius + enemyAttack.Value.Unit.Radius) * (range + allyAttack.Value.Unit.Radius + enemyAttack.Value.Unit.Radius))
                     {
                         allyAttack.Value.EnemiesInRange.Add(enemyAttack.Value);
                         enemyAttack.Value.EnemiesInRangeOf.Add(allyAttack.Value);
                     }
                     if (DamageService.CanDamage(enemyAttack.Value, allyAttack.Value))
                     {
+                        range = GetRange(enemyAttack, allyAttack);
                         var distanceSquared = Vector2.DistanceSquared(allyAttack.Value.Position, enemyAttack.Value.Position);
-                        if (distanceSquared <= (AvoidRange + enemyAttack.Value.Range + allyAttack.Value.Unit.Radius + enemyAttack.Value.Unit.Radius) * (AvoidRange + enemyAttack.Value.Range + allyAttack.Value.Unit.Radius + enemyAttack.Value.Unit.Radius))
+                        if (distanceSquared <= (AvoidRange + range + allyAttack.Value.Unit.Radius + enemyAttack.Value.Unit.Radius) * (AvoidRange + range + allyAttack.Value.Unit.Radius + enemyAttack.Value.Unit.Radius))
                         {
                             allyAttack.Value.EnemiesInRangeOfAvoid.Add(enemyAttack.Value);
-                            if (distanceSquared <= (enemyAttack.Value.Range + allyAttack.Value.Unit.Radius + enemyAttack.Value.Unit.Radius) * (enemyAttack.Value.Range + allyAttack.Value.Unit.Radius + enemyAttack.Value.Unit.Radius))
+                            if (distanceSquared <= (range + allyAttack.Value.Unit.Radius + enemyAttack.Value.Unit.Radius) * (range + allyAttack.Value.Unit.Radius + enemyAttack.Value.Unit.Radius))
                             {
                                 enemyAttack.Value.EnemiesInRange.Add(allyAttack.Value);
                                 allyAttack.Value.EnemiesInRangeOf.Add(enemyAttack.Value);
@@ -292,6 +302,32 @@ namespace Sharky.Managers
             }
 
             return null;
+        }
+
+        float GetRange(KeyValuePair<ulong, UnitCalculation> allyAttack, KeyValuePair<ulong, UnitCalculation> enemyAttack)
+        {
+            var range = allyAttack.Value.Range;
+
+            if (allyAttack.Value.Weapons.Count() > 0)
+            {
+                var weapons = allyAttack.Value.Weapons;
+                var unit = enemyAttack.Value.Unit;
+                Weapon weapon;
+                if (unit.IsFlying || unit.UnitType == (uint)UnitTypes.PROTOSS_COLOSSUS || unit.BuffIds.Contains((uint)Buffs.GRAVITONBEAM))
+                {
+                    weapon = weapons.FirstOrDefault(w => w.Type == Weapon.Types.TargetType.Air || w.Type == Weapon.Types.TargetType.Any);
+                }
+                else
+                {
+                    weapon = weapons.FirstOrDefault(w => w.Type == Weapon.Types.TargetType.Ground || w.Type == Weapon.Types.TargetType.Any);
+                }
+                if (weapon != null)
+                {
+                    return weapon.Range;
+                }
+            }
+
+            return range;
         }
 
         ConcurrentBag<UnitCalculation> GetTargettedAttacks(UnitCalculation unitCalculation)

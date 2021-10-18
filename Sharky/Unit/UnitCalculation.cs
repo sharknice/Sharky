@@ -273,7 +273,7 @@ namespace Sharky
 
             if (Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED)
             {
-                damage *= 2;
+                damage *= 5;
             }
             if (Unit.UnitType == (uint)UnitTypes.TERRAN_PLANETARYFORTRESS)
             {

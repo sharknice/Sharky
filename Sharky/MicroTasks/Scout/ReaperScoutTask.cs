@@ -76,20 +76,23 @@ namespace Sharky.MicroTasks
 
             if (ScoutPoints == null)
             {
-                ScoutPoints = AreaService.GetTargetArea(TargetingData.EnemyMainBasePoint);
+                var points = AreaService.GetTargetArea(TargetingData.EnemyMainBasePoint);
+                ScoutPoints = new List<Point2D>();
+                ScoutPoints.Add(BaseData.EnemyBaseLocations.First().Location);
                 ScoutPoints.Add(BaseData.EnemyBaseLocations.Skip(1).First().Location);
                 var ramp = TargetingData.ChokePoints.Bad.FirstOrDefault();
                 if (ramp != null)
                 {
                     ScoutPoints.Add(new Point2D { X = ramp.Center.X, Y = ramp.Center.Y });
                 }
+
+                var mainVector = new Vector2(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y);
+                ScoutPoints.AddRange(points.OrderBy(p => Vector2.DistanceSquared(mainVector, new Vector2(p.X, p.Y))));            
             }
 
-            var mainVector = new Vector2(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y);
             ScoutPoints.RemoveAll(p => MapDataService.LastFrameVisibility(p) > StartFrame);
-            var points = ScoutPoints.OrderBy(p => Vector2.DistanceSquared(mainVector, new Vector2(p.X, p.Y)));
 
-            foreach (var point in points)
+            foreach (var point in ScoutPoints)
             {
                 //DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
             }
@@ -103,9 +106,9 @@ namespace Sharky.MicroTasks
                 }
                 else
                 {
-                    if (points.Count() > 0)
+                    if (ScoutPoints.Count() > 0)
                     {
-                        action = ReaperController.Scout(commander, points.FirstOrDefault(), TargetingData.MainDefensePoint, frame);
+                        action = ReaperController.Scout(commander, ScoutPoints.FirstOrDefault(), TargetingData.MainDefensePoint, frame);
                     }
                     else
                     {                    

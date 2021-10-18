@@ -18,6 +18,7 @@ namespace Sharky
         public List<Vector2> RetreatPath { get; set; }
         public int RetreatPathIndex { get; set; }
         public int LastOrderFrame { get; private set; }
+        public int FrameFirstSeen { get; private set; }
 
         public bool SkipFrame { get; set; }
 
@@ -27,6 +28,7 @@ namespace Sharky
         public int LastInRangeAttackFrame { get; set; }
         public CommanderState CommanderState { get; set; }
         public LockOnData LastLockOn { get; set; }
+        public bool AutoCastOff { get; set; }
 
         /// <summary>
         /// The adept for an adept shade, etc.
@@ -57,6 +59,8 @@ namespace Sharky
 
             LastInRangeAttackFrame = -100;
             LastOrderFrame = -100;
+            FrameFirstSeen = unitCalculation.FrameLastSeen;
+            AutoCastOff = false;
         }
 
         public List<SC2APIProtocol.Action> Order(int frame, Abilities ability, Point2D targetLocation = null, ulong targetTag = 0, bool allowSpam = false, bool queue = false)
@@ -116,6 +120,23 @@ namespace Sharky
             }
 
             LastOrderFrame = frame;
+
+            return new List<SC2APIProtocol.Action> { action };
+        }
+
+        public List<SC2APIProtocol.Action> ToggleAutoCast(Abilities ability)
+        {
+            var command = new ActionRawToggleAutocast();
+            command.UnitTags.Add(UnitCalculation.Unit.Tag);
+            command.AbilityId = (int)ability;
+
+            var action = new SC2APIProtocol.Action
+            {
+                ActionRaw = new ActionRaw
+                {
+                    ToggleAutocast = command
+                }
+            };
 
             return new List<SC2APIProtocol.Action> { action };
         }

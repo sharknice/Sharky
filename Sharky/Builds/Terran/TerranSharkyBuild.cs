@@ -54,5 +54,21 @@ namespace Sharky.Builds.Terran
                 PrePositionBuilderTask.SendBuilder(TargetingData.ForwardDefensePoint, frame);
             }
         }
+
+        protected bool CommandCenterScvKilled()
+        {
+            var building = ActiveUnitData.Commanders.FirstOrDefault(c => c.Value.UnitCalculation.Unit.BuildProgress < 1 && c.Value.UnitCalculation.Unit.BuildProgress > 0 && c.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_COMMANDCENTER && c.Value.UnitCalculation.Unit.BuildProgress == c.Value.UnitCalculation.PreviousUnit.BuildProgress);
+            if (building.Value != null)
+            {
+                var scvs = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_SCV);
+                var buildingScv = scvs.FirstOrDefault(c => c.UnitCalculation.Unit.Orders.Any(o => o.TargetUnitTag == building.Key || (o.TargetWorldSpacePos != null && o.TargetWorldSpacePos.X == building.Value.UnitCalculation.Position.X && o.TargetWorldSpacePos.Y == building.Value.UnitCalculation.Position.Y)));
+                if (buildingScv == null)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 }

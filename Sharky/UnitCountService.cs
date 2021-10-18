@@ -28,10 +28,20 @@ namespace Sharky
             return ActiveUnitData.EnemyUnits.Count(u => u.Value.Unit.UnitType == (uint)unitType && u.Value.Unit.BuildProgress == 1 && !u.Value.Unit.IsHallucination);
         }
 
+        public int UnitsDoneAndInProgressCount(UnitTypes unitType)
+        {
+            return EquivalentTypeCount(unitType) + UnitsInProgressCount(unitType);
+        }
+
         public int UnitsInProgressCount(UnitTypes unitType)
         {
             var unitData = SharkyUnitData.TrainingData[unitType];
-            return ActiveUnitData.SelfUnits.Count(u => (unitData.ProducingUnits.Contains((UnitTypes)u.Value.Unit.UnitType) || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_EGG || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_OVERLORDCOCOON || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_TRANSPORTOVERLORDCOCOON) && u.Value.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
+            var inProgress = ActiveUnitData.SelfUnits.Count(u => (unitData.ProducingUnits.Contains((UnitTypes)u.Value.Unit.UnitType) || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_EGG || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_OVERLORDCOCOON || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_TRANSPORTOVERLORDCOCOON) && u.Value.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
+            if (unitType == UnitTypes.ZERG_ZERGLING)
+            {
+                return inProgress * 2;
+            }
+            return inProgress;
         }
 
         public int EquivalentTypeCount(UnitTypes unitType)
@@ -190,7 +200,9 @@ namespace Sharky
 
         public int Completed(UnitTypes unitType)
         {
-            return ActiveUnitData.SelfUnits.Count(u => u.Value.Unit.UnitType == (uint)unitType && u.Value.Unit.BuildProgress > .99f && !u.Value.Unit.IsHallucination);
+            return ActiveUnitData.SelfUnits.Count(u => !u.Value.Unit.IsHallucination && u.Value.Unit.UnitType == (uint)unitType && 
+                (u.Value.Unit.BuildProgress == 1 ||
+                (u.Value.Unit.BuildProgress > .99f && (u.Value.Unit.UnitType == (uint)UnitTypes.TERRAN_ORBITALCOMMAND || u.Value.Unit.UnitType == (uint)UnitTypes.TERRAN_PLANETARYFORTRESS))));
         }
 
         public int EquivalentTypeCompleted(UnitTypes unitType)

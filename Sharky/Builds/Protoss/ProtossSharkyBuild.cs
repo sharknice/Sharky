@@ -12,8 +12,8 @@ namespace Sharky.Builds
         protected ChronoData ChronoData;
         protected ICounterTransitioner CounterTransitioner;
 
-        TargetingData TargetingData;
-        MapDataService MapDataService;
+        protected TargetingData TargetingData;
+        protected MapDataService MapDataService;
 
         public ProtossSharkyBuild(DefaultSharkyBot defaultSharkyBot, ICounterTransitioner counterTransitioner)
             : base(defaultSharkyBot)
@@ -46,7 +46,7 @@ namespace Sharky.Builds
 
         protected void SendProbeForFirstPylon(int frame)
         {
-            if (MacroData.FoodUsed == 13 && MacroData.Minerals > 80 && UnitCountService.Count(UnitTypes.PROTOSS_PYLON) == 0)
+            if (MacroData.FoodUsed == 13 && MacroData.Minerals > 50 && UnitCountService.Count(UnitTypes.PROTOSS_PYLON) == 0)
             {
                 PrePositionBuilderTask.SendBuilder(TargetingData.ForwardDefensePoint, frame);
             }

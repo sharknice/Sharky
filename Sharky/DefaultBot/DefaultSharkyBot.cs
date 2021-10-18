@@ -284,6 +284,7 @@ namespace Sharky.DefaultBot
             var zealotMicroController = new ZealotMicroController(this, SharkyAdvancedPathFinder, MicroPriority.AttackForward, false);
 
             var zerglingMicroController = new ZerglingMicroController(this, SharkyAdvancedPathFinder, MicroPriority.AttackForward, false);
+            var banelingMicroController = new BanelingMicroController(this, SharkyAdvancedPathFinder, MicroPriority.AttackForward, false);
 
             var scvMicroController = new ScvMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
             var reaperMicroController = new ReaperMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
@@ -293,6 +294,7 @@ namespace Sharky.DefaultBot
             var cycloneMicroController = new CycloneMicroController(this, SharkyAdvancedPathFinder, MicroPriority.StayOutOfRange, false);
             var siegeTankMicroController = new SiegeTankMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
             var siegeTankSiegedMicroController = new SiegeTankSiegedMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
+            var thorMicroController = new ThorMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
             var vikingMicroController = new VikingMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
             var vikingLandedMicroController = new VikingLandedMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
             var bansheeMicroController = new BansheeMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
@@ -329,6 +331,7 @@ namespace Sharky.DefaultBot
                 { UnitTypes.PROTOSS_OBSERVER, observerMicroController },
 
                 { UnitTypes.ZERG_ZERGLING, zerglingMicroController },
+                { UnitTypes.ZERG_BANELING, banelingMicroController },
 
                 { UnitTypes.TERRAN_SCV, scvMicroController },
                 { UnitTypes.TERRAN_REAPER, reaperMicroController },
@@ -338,6 +341,7 @@ namespace Sharky.DefaultBot
                 { UnitTypes.TERRAN_CYCLONE, cycloneMicroController },
                 { UnitTypes.TERRAN_SIEGETANK, siegeTankMicroController },
                 { UnitTypes.TERRAN_SIEGETANKSIEGED, siegeTankSiegedMicroController },
+                { UnitTypes.TERRAN_THOR, thorMicroController },
                 { UnitTypes.TERRAN_VIKINGFIGHTER, vikingMicroController },
                 { UnitTypes.TERRAN_VIKINGASSAULT, vikingLandedMicroController },
                 { UnitTypes.TERRAN_BANSHEE, bansheeMicroController },
@@ -422,6 +426,7 @@ namespace Sharky.DefaultBot
 
                 ["AdeptRush"] = new AdeptRush(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, DebugService, UnitCountService, FrameToTimeConverter),
                 ["CannonRush"] = new CannonRush(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, TargetingData, DebugService, UnitCountService, FrameToTimeConverter),
+                ["FourGate"] = new EnemyStrategies.Protoss.FourGate(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, DebugService, UnitCountService, FrameToTimeConverter),
                 ["ProtossFastExpand"] = new ProtossFastExpand(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, DebugService, UnitCountService, TargetingData, FrameToTimeConverter),
                 ["ProxyRobo"] = new ProxyRobo(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, DebugService, UnitCountService, TargetingData, FrameToTimeConverter),
                 ["ProxyStargate"] = new ProxyStargate(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, DebugService, UnitCountService, TargetingData, FrameToTimeConverter),
@@ -442,7 +447,7 @@ namespace Sharky.DefaultBot
             EmptyCounterTransitioner = new EmptyCounterTransitioner(EnemyData, SharkyOptions);
 
             var antiMassMarine = new AntiMassMarine(this, EmptyCounterTransitioner);
-            var fourGate = new FourGate(this, EmptyCounterTransitioner);
+            var fourGate = new Builds.Protoss.FourGate(this, EmptyCounterTransitioner);
             var nexusFirst = new NexusFirst(this, EmptyCounterTransitioner);
             var robo = new Robo(this, EmptyCounterTransitioner);
             var protossRobo = new ProtossRobo(this, EmptyCounterTransitioner);

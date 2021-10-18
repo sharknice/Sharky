@@ -114,6 +114,10 @@ namespace Sharky.MicroTasks
         private void RemoveFinishedData(int frame)
         {
             var doneList = RepairData.Where(d => d.Value.UnitToRepair.FrameLastSeen != frame).Select(d => d.Key);
+            if (MacroData.Minerals == 0)
+            {
+                doneList = RepairData.Keys;
+            }
             foreach (var key in doneList)
             {
                 foreach (var scv in RepairData[key].Repairers)

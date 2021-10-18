@@ -38,8 +38,8 @@ namespace Sharky.MicroControllers.Terran
             {
                 angle = Math.Atan2(unitToSupport.UnitCalculation.Position.Y - nearestEnemy.Position.Y, nearestEnemy.Position.X - unitToSupport.UnitCalculation.Position.X);
             }
-            var x = 5f * Math.Cos(angle);
-            var y = 5f * Math.Sin(angle);
+            var x = 10f * Math.Cos(angle);
+            var y = 10f * Math.Sin(angle);
 
             var supportPoint = new Point2D { X = unitToSupport.UnitCalculation.Position.X + (float)x, Y = unitToSupport.UnitCalculation.Position.Y - (float)y };
 

@@ -193,9 +193,16 @@ namespace Sharky.MicroControllers
 
         public virtual List<SC2APIProtocol.Action> Retreat(UnitCommander commander, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
+            List<SC2APIProtocol.Action> action = null;
             UpdateState(commander, defensivePoint, defensivePoint, groupCenter, null, Formation.Normal, frame);
 
-            if (GroupUpBasedOnState(commander, defensivePoint, defensivePoint, groupCenter, null, frame, out List<SC2APIProtocol.Action> action)) { return action; }
+            var bestTarget = GetBestTarget(commander, defensivePoint, frame);
+
+            if (PreOffenseOrder(commander, defensivePoint, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
+
+            if (AvoidTargettedOneHitKills(commander, defensivePoint, defensivePoint, frame, out action)) { return action; }
+
+            if (OffensiveAbility(commander, defensivePoint, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
 
             // TODO: setup a concave above the ramp if there is a ramp, get earch grid point on high ground, make sure at least one unit on each point
             if (Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(defensivePoint.X, defensivePoint.Y)) > 25 || MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos) < MapDataService.MapHeight(defensivePoint))
@@ -636,6 +643,14 @@ namespace Sharky.MicroControllers
                     return false; // if we can't get out of range before we attack again don't bother running away
                 }
 
+                var avoidPoint = GetGroundAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, attack.Unit.Pos, target, defensivePoint, attack.Range + attack.Unit.Radius + commander.UnitCalculation.Unit.Radius + AvoidDamageDistance);
+                if (avoidPoint != defensivePoint && avoidPoint != target)
+                {
+                    if (AvoidDeceleration(commander, avoidPoint, false, frame, out action)) { return true; }
+                    action = commander.Order(frame, Abilities.MOVE, avoidPoint);
+                    return true;
+                }
+
                 if (commander.RetreatPathFrame + 20 < frame)
                 {
                     if (commander.UnitCalculation.Unit.IsFlying)
@@ -649,15 +664,11 @@ namespace Sharky.MicroControllers
                     commander.RetreatPathFrame = frame;
                     commander.RetreatPathIndex = 1;
                 }
+
                 if (FollowPath(commander, frame, out action))
                 {
                     return true;
                 }
-
-                var avoidPoint = GetGroundAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, attack.Unit.Pos, target, defensivePoint, attack.Range + attack.Unit.Radius + commander.UnitCalculation.Unit.Radius + AvoidDamageDistance);
-                if (AvoidDeceleration(commander, avoidPoint, false, frame, out action)) { return true; }
-                action = commander.Order(frame, Abilities.MOVE, avoidPoint);
-                return true;
             }
 
             if (MaintainRange(commander, frame, out action)) { return true; }
@@ -1727,9 +1738,18 @@ namespace Sharky.MicroControllers
         protected virtual bool DealWithSiegedTanks(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
-            if (commander.UnitCalculation.Unit.IsFlying || commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.FullRetreat || commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.Retreat || !MapDataService.InEnemyVision(commander.UnitCalculation.Unit.Pos))
+            if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.FullRetreat || commander.UnitCalculation.Unit.IsFlying || !MapDataService.InEnemyVision(commander.UnitCalculation.Unit.Pos))
             {
                 return false;
+            }
+
+            if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.Retreat)
+            {
+                // if only siege tanks, just go on them
+                if (commander.UnitCalculation.NearbyEnemies.Any(e => e.Damage > 0 && e.Unit.UnitType != (uint)UnitTypes.TERRAN_SIEGETANKSIEGED))
+                {
+                    return false;
+                }
             }
 
             if (WeaponReady(commander, frame)) { return false; }

@@ -72,7 +72,10 @@ namespace Sharky.Managers
             {
                 foreach (var buildSequence in EnemyPlayerService.Tournament.BuildSequences)
                 {
-                    BuildChoices[ActualRace].BuildSequences[buildSequence.Key] = buildSequence.Value;
+                    foreach (var sequence in buildSequence.Value)
+                    {
+                        BuildChoices[(Race)Enum.Parse(typeof(Race), buildSequence.Key)].BuildSequences[sequence.Key] = sequence.Value;
+                    }
                 }
             }
 

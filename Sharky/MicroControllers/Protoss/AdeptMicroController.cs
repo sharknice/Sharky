@@ -2,6 +2,7 @@
 using Sharky.DefaultBot;
 using Sharky.Pathing;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Sharky.MicroControllers.Protoss
 {
@@ -15,6 +16,11 @@ namespace Sharky.MicroControllers.Protoss
         protected override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
+
+            if (target == defensivePoint && commander.UnitCalculation.NearbyEnemies.Count() == 0) 
+            { 
+                return false; 
+            }
 
             if (commander.AbilityOffCooldown(Abilities.EFFECT_ADEPTPHASESHIFT, frame, SharkyOptions.FramesPerSecond, SharkyUnitData))
             {

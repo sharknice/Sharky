@@ -9,10 +9,12 @@ namespace Sharky.MicroControllers.Terran
 {
     public class SiegeTankSiegedMicroController : IndividualMicroController
     {
+        int LastUnseigeFrame;
+
         public SiegeTankSiegedMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled)
             : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled)
         {
-
+            LastUnseigeFrame = 0;
         }
 
         public override List<SC2APIProtocol.Action> Attack(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
@@ -40,8 +42,26 @@ namespace Sharky.MicroControllers.Terran
         {
             action = null;
 
+            if (LastUnseigeFrame == frame)
+            {
+                return false; // don't unseige more than one tank at a time
+            }
+
+            // if there are nearby enemies keep some tanks seieged to cover as the others move forward
+            if (commander.UnitCalculation.NearbyEnemies.Count(e => !e.Unit.IsFlying) > 0) 
+            {
+                var unseiged = commander.UnitCalculation.NearbyAllies.Count(u => u.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANK);
+                var seiged = commander.UnitCalculation.NearbyAllies.Count(u => u.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED);
+
+                if (unseiged > 0 && seiged <= unseiged) // keep more tanks sieged than unseiged
+                {
+                    return false;
+                }
+            }
+
             if (commander.UnitCalculation.EnemiesInRange.Count(e => e.Damage > 0 || Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position) < commander.UnitCalculation.Range * commander.UnitCalculation.Range) == 0) // get a little bit closer to buildings
             {
+                LastUnseigeFrame = frame;
                 action = commander.Order(frame, Abilities.MORPH_UNSIEGE);
                 return true;
             }
@@ -146,7 +166,14 @@ namespace Sharky.MicroControllers.Terran
         {
             List<SC2APIProtocol.Action> action = null;
 
-            if (OffensiveAbility(commander, null, defensivePoint, groupCenter, null, frame, out action)) { return action; }
+            if (Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(defensivePoint.X, defensivePoint.Y)) > 36 || MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos) < MapDataService.MapHeight(defensivePoint))
+            {
+                if (OffensiveAbility(commander, null, defensivePoint, groupCenter, null, frame, out action)) { return action; }
+            }
+            else
+            {
+                return Idle(commander, defensivePoint, frame);
+            }
 
             return action;
         }
