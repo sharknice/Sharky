@@ -18,7 +18,10 @@ namespace Sharky.MicroControllers.Zerg
             SplashRadius = 2.2f;
         }
 
-        // TODO: maximize splash damage, don't target individual units, manually detonate if nearest target would not be an better, if no targets left follow enemy drones in case they gorup together, if no enemy drones left go to group center or nearest friendly unit that isn't a baneling
+        // TODO: banelings went dumb when there was a wall, tried to attack units on high ground instead of going to ramp and busting it first, make sure the best target is at the same height
+        // TODO: if below certain number of units regroup and wait for more, or use the attackdatamanager to determine if should attack or not
+        // TODO: while retreating if nearby enemies just attack
+        // TODO: if no targets left follow enemy drones in case they gorup together, if no enemy drones left go to group center or nearest friendly unit that isn't a baneling
 
         protected override bool AttackBestTarget(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {

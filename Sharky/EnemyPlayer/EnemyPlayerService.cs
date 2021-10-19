@@ -94,7 +94,7 @@ namespace Sharky.EnemyPlayer
         private Tournament LoadTournament()
         {
             var tournament = new Tournament { Enabled = false };
-            var tournamentFile = DataFolder + "Tournament.json";
+            var tournamentFile = Directory.GetCurrentDirectory() + "/StaticData/Tournament.json";
             if (File.Exists(tournamentFile))
             {
                 using (StreamReader file = File.OpenText(tournamentFile))

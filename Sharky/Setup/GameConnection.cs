@@ -259,14 +259,13 @@ namespace Sharky
             }
         }
         
-        public async Task RunSinglePlayer(ISharkyBot bot, string map, Race myRace, Race opponentRace, Difficulty opponentDifficulty, AIBuild aIBuild, int randomSeed = -1)
+        public async Task RunSinglePlayer(ISharkyBot bot, string map, Race myRace, Race opponentRace, Difficulty opponentDifficulty, AIBuild aIBuild, int randomSeed = -1, string opponentID = "test")
         {
             readSettings();
             StartSC2Instance(5678);
             await Connect(5678);
             await CreateGame(map, opponentRace, opponentDifficulty, aIBuild, randomSeed);
             var playerId = await JoinGame(myRace);
-            var opponentID = "test";
             await Run(bot, playerId, opponentID);
         }
 
