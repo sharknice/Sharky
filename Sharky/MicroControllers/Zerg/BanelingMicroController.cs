@@ -64,10 +64,10 @@ namespace Sharky.MicroControllers.Zerg
                 // if do just as much or more damage by exploding in spot just explode
                 List<UnitCalculation> hitUnits;
                 List<UnitCalculation> hitSelfUnits;
-                var targetDamage = SplashDamage(commander, commander.UnitCalculation.NearbyEnemies.Where(u => !u.Unit.IsFlying && AttackersFilter(commander, u)), bestTarget, out hitUnits);
-                var selfDamage = SplashDamage(commander, commander.UnitCalculation.NearbyEnemies.Where(u => !u.Unit.IsFlying && AttackersFilter(commander, u)), commander.UnitCalculation, out hitSelfUnits);
+                var targetDamage = SplashDamage(commander, commander.UnitCalculation.NearbyEnemies.Where(u => AttackersFilter(commander, u)), bestTarget, out hitUnits);
+                var selfDamage = SplashDamage(commander, commander.UnitCalculation.NearbyEnemies.Where(u => AttackersFilter(commander, u)), commander.UnitCalculation, out hitSelfUnits);
 
-                if (targetDamage > 35 || selfDamage > 35)
+                if (targetDamage > 35 || selfDamage > 35 || bestTarget.UnitClassifications.Contains(UnitClassification.DefensiveStructure) && MapDataService.MapHeight(bestTarget.Unit.Pos) == MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos))
                 {
                     if (selfDamage >= targetDamage)
                     {
@@ -112,7 +112,7 @@ namespace Sharky.MicroControllers.Zerg
 
             var range = commander.UnitCalculation.Range;
 
-            var attacks = commander.UnitCalculation.NearbyEnemies.Where(u => !u.Unit.IsFlying && AttackersFilter(commander, u));
+            var attacks = commander.UnitCalculation.NearbyEnemies.Where(u => AttackersFilter(commander, u));
 
             if (attacks.Count() > 0)
             {
@@ -133,11 +133,21 @@ namespace Sharky.MicroControllers.Zerg
             return null;
         }
 
+        protected override bool AttackersFilter(UnitCommander commander, UnitCalculation enemyAttack)
+        {
+            if (enemyAttack.Unit.IsFlying || enemyAttack.Unit.UnitType == (uint)UnitTypes.ZERG_EGG)
+            { 
+                return false; 
+            }
+
+            return base.AttackersFilter(commander, enemyAttack);
+        }
+
         private float SplashDamage(UnitCommander commander, IEnumerable<UnitCalculation> attacks, UnitCalculation enemyAttack, out List<UnitCalculation> hitUnits)
         {
             hitUnits = new List<UnitCalculation>();
             float totalDamage = 0;
-            foreach (var splashedEnemy in attacks.Where(e => !e.Unit.IsFlying && AttackersFilter(commander, e)))
+            foreach (var splashedEnemy in attacks.Where(e => AttackersFilter(commander, e)))
             {
                 if (Vector2.DistanceSquared(splashedEnemy.Position, enemyAttack.Position) < (splashedEnemy.Unit.Radius + SplashRadius) * (splashedEnemy.Unit.Radius + SplashRadius))
                 {
