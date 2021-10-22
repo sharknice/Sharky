@@ -132,9 +132,12 @@ namespace Sharky.Builds.BuildingPlacement
                 var existingDepots = ActiveUnitData.SelfUnits.Values.Where(u => u.Unit.UnitType == (uint)UnitTypes.TERRAN_SUPPLYDEPOT || u.Unit.UnitType == (uint)UnitTypes.TERRAN_SUPPLYDEPOTLOWERED);
                 foreach (var spot in wallData.Depots)
                 {
-                    if (!existingDepots.Any(e => e.Position.X == spot.X && e.Position.Y == spot.Y) && WallService.Buildable(spot, .5f))
+                    if (!existingDepots.Any(e => e.Position.X == spot.X && e.Position.Y == spot.Y))
                     {
-                        return spot;
+                        if (WallService.Buildable(spot, .9f))
+                        {
+                            return spot;
+                        }
                     }
                 }
             }

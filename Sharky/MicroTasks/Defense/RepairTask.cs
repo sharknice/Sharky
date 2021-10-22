@@ -40,23 +40,10 @@ namespace Sharky.MicroTasks
                     var needed = repair.Value.DesiredRepairers - repair.Value.Repairers.Count();
                     if (needed > 0)
                     {
-                        var closest = commanders.Where(commander => !commander.Value.Claimed && commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_SCV)
-                            .OrderBy(c => Vector2.DistanceSquared(c.Value.UnitCalculation.Position, repair.Value.UnitToRepair.Position)).Take(needed);
-                        foreach(var scv in closest)
-                        {
-                            scv.Value.Claimed = true;
-                            scv.Value.UnitRole = UnitRole.Repair;
-                            UnitCommanders.Add(scv.Value);
-                            repair.Value.Repairers.Add(scv.Value);
-                        }
-                    }
-                    needed = repair.Value.DesiredRepairers - repair.Value.Repairers.Count();
-                    if (needed > 0)
-                    {
                         var closest = commanders.Where(commander => commander.Value.Claimed && commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_SCV && 
                             (commander.Value.UnitRole == UnitRole.Minerals || commander.Value.UnitRole == UnitRole.None) && commander.Value.UnitCalculation.Unit.BuffIds.Count() == 0)
                                 .OrderBy(c => Vector2.DistanceSquared(c.Value.UnitCalculation.Position, repair.Value.UnitToRepair.Position)).Take(needed);
-                        foreach (var scv in closest)
+                        foreach (var scv in closest.Where(c => Vector2.DistanceSquared(c.Value.UnitCalculation.Position, repair.Value.UnitToRepair.Position) < 400)) // limit it to scvs within 20 range
                         {
                             scv.Value.Claimed = true;
                             scv.Value.UnitRole = UnitRole.Repair;
@@ -81,8 +68,16 @@ namespace Sharky.MicroTasks
                 {
                     foreach (var scv in repair.Value.Repairers)
                     {
-                        var action = scv.Order(frame, Abilities.EFFECT_REPAIR, targetTag: repair.Key);
-                        if (action != null) { actions.AddRange(action); }
+                        if (scv.UnitCalculation.Unit.Orders.Count() > 1)
+                        {
+                            var stop = scv.Order(frame, Abilities.STOP);
+                            if (stop != null) { actions.AddRange(stop); }
+                        }
+                        else
+                        {
+                            var action = scv.Order(frame, Abilities.EFFECT_REPAIR, targetTag: repair.Key);
+                            if (action != null) { actions.AddRange(action); }
+                        }
                     }
                 }
             }
@@ -102,6 +97,23 @@ namespace Sharky.MicroTasks
                 {
                     RepairData[building.Unit.Tag].UnitToRepair = building;
                     RepairData[building.Unit.Tag].Repairers.RemoveAll(s => s.UnitCalculation.FrameLastSeen != frame);
+                }
+            }
+
+
+            foreach (var unit in ActiveUnitData.SelfUnits.Values.Where(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter)))
+            {
+                foreach (var armyUnit in unit.NearbyAllies.Where(u => u.Unit.BuildProgress == 1 && u.Unit.Health < u.Unit.HealthMax && u.UnitClassifications.Contains(UnitClassification.ArmyUnit) && u.Attributes.Contains(SC2APIProtocol.Attribute.Mechanical)))
+                {
+                    if (!RepairData.ContainsKey(armyUnit.Unit.Tag))
+                    {
+                        RepairData[armyUnit.Unit.Tag] = new RepairData(armyUnit);
+                    }
+                    else
+                    {
+                        RepairData[armyUnit.Unit.Tag].UnitToRepair = armyUnit;
+                        RepairData[armyUnit.Unit.Tag].Repairers.RemoveAll(s => s.UnitCalculation.FrameLastSeen != frame);
+                    }
                 }
             }
 
@@ -140,6 +152,22 @@ namespace Sharky.MicroTasks
                 if (repair.Value.DesiredRepairers == 0)
                 {
                     repair.Value.DesiredRepairers = 1;
+                }
+                if (repair.Value.UnitToRepair.UnitClassifications.Contains(UnitClassification.DefensiveStructure))
+                {
+                    repair.Value.DesiredRepairers++;
+                }
+                if (repair.Value.UnitToRepair.Unit.Health < repair.Value.UnitToRepair.Unit.HealthMax / 2)
+                {
+                    repair.Value.DesiredRepairers++;
+
+                    if (repair.Value.UnitToRepair.Unit.UnitType == (uint)UnitTypes.TERRAN_PLANETARYFORTRESS)
+                    {
+                        if (repair.Value.DesiredRepairers < 12)
+                        {
+                            repair.Value.DesiredRepairers = 12;
+                        }
+                    }
                 }
             }
         }

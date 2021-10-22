@@ -15,6 +15,7 @@ namespace Sharky.Managers
         MacroData MacroData;
         TargetingData TargetingData;
         MapData MapData;
+        ActiveUnitData ActiveUnitData;
 
         ChokePointService ChokePointService;
         ChokePointsService ChokePointsService;
@@ -27,13 +28,14 @@ namespace Sharky.Managers
         int LastUpdateFrame;
 
         public TargetingManager(SharkyUnitData sharkyUnitData, BaseData baseData, MacroData macroData, TargetingData targetingData, MapData mapData,
-            ChokePointService chokePointService, ChokePointsService chokePointsService, DebugService debugService)
+            ChokePointService chokePointService, ChokePointsService chokePointsService, DebugService debugService, ActiveUnitData activeUnitData)
         {
             SharkyUnitData = sharkyUnitData;
             BaseData = baseData;
             MacroData = macroData;
             TargetingData = targetingData;
             MapData = mapData;
+            ActiveUnitData = activeUnitData;
 
             ChokePointService = chokePointService;
             ChokePointsService = chokePointsService;
@@ -142,7 +144,8 @@ namespace Sharky.Managers
         {
             if (baseCount != BaseData.SelfBases.Count())
             {
-                var ordered = BaseData.SelfBases.OrderBy(b => Vector2.DistanceSquared(new Vector2(b.Location.X, b.Location.Y), new Vector2(TargetingData.AttackPoint.X, TargetingData.AttackPoint.Y)));
+                var resourceCenters = ActiveUnitData.SelfUnits.Values.Where(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter) && !u.Unit.IsFlying);
+                var ordered = BaseData.BaseLocations.Where(b => resourceCenters.Any(r => Vector2.DistanceSquared(r.Position, new Vector2(b.Location.X, b.Location.Y)) < 25)).OrderBy(b => Vector2.DistanceSquared(new Vector2(b.Location.X, b.Location.Y), new Vector2(TargetingData.AttackPoint.X, TargetingData.AttackPoint.Y)));
                 var closestBase = ordered.FirstOrDefault();
                 if (closestBase != null)
                 {

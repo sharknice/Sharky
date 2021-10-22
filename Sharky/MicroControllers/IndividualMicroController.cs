@@ -287,6 +287,8 @@ namespace Sharky.MicroControllers
 
             if (HoldStillForRepair(commander, frame, out action)) { return true; }
 
+            if (GetInBunker(commander, frame, out action)) { return true; }
+
             // TODO: special case movement
             //if (ChargeBlindly(commander, target))
             //{
@@ -370,6 +372,12 @@ namespace Sharky.MicroControllers
                 action = commander.Order(frame, Abilities.STOP);
                 return true;
             }
+            return false;
+        }
+
+        protected virtual bool GetInBunker(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
             return false;
         }
 
@@ -716,9 +724,6 @@ namespace Sharky.MicroControllers
         {
             action = null;
 
-            // TODO: if this unit is low health and the enemies will catch up if it shoots, don't shoot, just keep running, for example stalker running away from roach, if distancetoroach - (roachspeed * stalkerfiretime) < roachrange , do not fire, just run
-            // but also if the unit is just going to die because it's in range of enemies already, fire away because it's going to die anyways
-
             if (commander.UnitCalculation.EnemiesInRange.Any() && WeaponReady(commander, frame) && !SharkyUnitData.NoWeaponCooldownTypes.Contains((UnitTypes)commander.UnitCalculation.Unit.UnitType)) // keep shooting as you retreat
             {
                 var bestTarget = GetBestTarget(commander, target, frame);
@@ -728,6 +733,8 @@ namespace Sharky.MicroControllers
                     return true;
                 }               
             }
+
+            if (GetInBunker(commander, frame, out action)) { return true; }
 
             var closestEnemy = commander.UnitCalculation.NearbyEnemies.OrderBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position)).FirstOrDefault();
 
@@ -1229,6 +1236,10 @@ namespace Sharky.MicroControllers
                         if (existingReduction != null)
                         {
                             var existing = existingReduction.Dps / TimeToKill(weapon, existingReduction.Unit, existingReduction.UnitTypeData);
+                            if (bestDpsReduction == null)
+                            {
+                                return null;
+                            }
                             var best = bestDpsReduction.Dps / TimeToKill(weapon, bestDpsReduction.Unit, bestDpsReduction.UnitTypeData);
                             if (existing * 1.25 > best)
                             {
@@ -1415,7 +1426,7 @@ namespace Sharky.MicroControllers
 
         protected virtual float GetDamage(Weapon weapon, Unit unit, UnitTypeData unitTypeData)
         {
-            if (weapon == null || weapon.Damage == 0)
+            if (weapon == null || weapon.Damage == 0 || unitTypeData == null)
             {
                 return 0;
             }

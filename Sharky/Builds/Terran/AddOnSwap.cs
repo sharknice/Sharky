@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using System;
 
 namespace Sharky.Builds
 {
@@ -25,5 +26,6 @@ namespace Sharky.Builds
         public UnitTypes AddOnType { get; set; }
         public bool Started { get; set; }
         public bool Completed { get; set; }
+        public bool Cancel { get; set; }
     }
 }

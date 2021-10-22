@@ -60,6 +60,15 @@ namespace Sharky.Builds.MacroServices
         {
             var commands = new List<Action>();
 
+            if (addOnSwap.Cancel)
+            {
+                if (addOnSwap.AddOnBuilder.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.BUILD_REACTOR_BARRACKS || o.AbilityId == (uint)Abilities.BUILD_TECHLAB_BARRACKS || o.AbilityId == (uint)Abilities.BUILD_REACTOR_FACTORY || o.AbilityId == (uint)Abilities.BUILD_TECHLAB_FACTORY || o.AbilityId == (uint)Abilities.BUILD_REACTOR_STARPORT || o.AbilityId == (uint)Abilities.BUILD_TECHLAB_STARPORT))
+                {
+                    commands.AddRange(addOnSwap.AddOnBuilder.Order(MacroData.Frame, Abilities.CANCEL));
+                }
+                addOnSwap.Started = false;
+            }
+
             if (addOnSwap.AddOnBuilder != null && addOnSwap.AddOn != null && addOnSwap.AddOn.UnitCalculation.Unit.BuildProgress == 1)
             {
                 List<Action> command;

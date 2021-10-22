@@ -34,5 +34,22 @@ namespace Sharky.MicroControllers.Terran
 
             return false;
         }
+
+        protected override bool GetInBunker(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
+
+            var nearbyBunkers = commander.UnitCalculation.NearbyAllies.Where(u => u.Unit.UnitType == (uint)UnitTypes.TERRAN_BUNKER && u.Unit.BuildProgress == 1);
+            foreach (var bunker in nearbyBunkers)
+            {
+                if (bunker.Unit.CargoSpaceMax - bunker.Unit.CargoSpaceTaken >= UnitDataService.CargoSize((UnitTypes)commander.UnitCalculation.Unit.UnitType))
+                {
+                    action = commander.Order(frame, Abilities.SMART, targetTag: bunker.Unit.Tag);
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 }

@@ -34,7 +34,7 @@ namespace Sharky.MicroControllers.Terran
 
             if (commander.UnitCalculation.Unit.Health < 10 && commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit)))
             {
-                action = Retreat(commander, defensivePoint, groupCenter, frame);
+                if (Retreat(commander, defensivePoint, defensivePoint, frame, out action)) { return true; }
                 return true;
             }
 

@@ -129,14 +129,14 @@ namespace Sharky.MicroTasks
 
         private List<Action> DefendWithWorkers(IEnumerable<UnitCalculation> attackingEnemies, int frame)
         {
-            var bunkersInProgress = attackingEnemies.Where(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_BUNKER && e.Unit.BuildProgress < 1);
+            var bunkersInProgress = attackingEnemies.Where(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_BUNKER && (e.Unit.BuildProgress < 1 || e.Unit.Health < 100));
             if (bunkersInProgress.Count() > 0)
             {
                 var bunker = bunkersInProgress.OrderByDescending(u => u.Unit.BuildProgress).FirstOrDefault();
-                // attack with 8 woerkers
+                // attack with 8 workers
                 if (WorkerDefenders.Count() == 0)
                 {
-                    var closestWokrers = ActiveUnitData.Commanders.Where(u => u.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && u.Value.UnitRole == UnitRole.Minerals).OrderBy(d => Vector2.DistanceSquared(d.Value.UnitCalculation.Position, bunker.Position)).Take(8);
+                    var closestWokrers = ActiveUnitData.Commanders.Where(u => u.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && u.Value.UnitRole == UnitRole.Minerals).OrderBy(d => Vector2.DistanceSquared(d.Value.UnitCalculation.Position, bunker.Position)).Take(7 + bunker.NearbyAllies.Count());
                     WorkerDefenders.AddRange(closestWokrers.Select(c => c.Value));
                     foreach (var worker in WorkerDefenders)
                     {
