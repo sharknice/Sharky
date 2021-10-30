@@ -119,6 +119,11 @@ namespace Sharky
                 count += Count(UnitTypes.TERRAN_THOR);
             }
 
+            else if (unitType == UnitTypes.PROTOSS_WARPPRISM)
+            {
+                count += Count(UnitTypes.PROTOSS_WARPPRISMPHASING);
+            }
+
             return count;
         }
 
@@ -193,6 +198,11 @@ namespace Sharky
             else if (unitType == UnitTypes.TERRAN_THORAP)
             {
                 count += EnemyCount(UnitTypes.TERRAN_THOR);
+            }
+
+            else if (unitType == UnitTypes.PROTOSS_WARPPRISM)
+            {
+                count += EnemyCount(UnitTypes.PROTOSS_WARPPRISMPHASING);
             }
 
             return count;

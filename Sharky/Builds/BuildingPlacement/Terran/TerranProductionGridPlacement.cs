@@ -98,7 +98,7 @@ namespace Sharky.Builds.BuildingPlacement
                 (Vector2.DistanceSquared(vector, target) < (maxDistance * maxDistance)) &&
                 MapDataService.MapHeight((int)x, (int)y) == baseHeight &&
                 RoomForExitingUnits(x, y, size, unitType) &&
-                !BuildingService.Blocked(x, y, size / 2.0f, -.5f) && !BuildingService.HasCreep(x, y, size / 2.0f) &&
+                !BuildingService.Blocked(x, y, size / 2.0f, -.5f) && !BuildingService.HasAnyCreep(x, y, size / 2f) &&
                 (mineralFields == null || !mineralFields.Any(m => Vector2.DistanceSquared(new Vector2(m.Pos.X, m.Pos.Y), vector) < 16)) &&
                 (vespeneGeysers == null || !vespeneGeysers.Any(m => Vector2.DistanceSquared(new Vector2(m.Pos.X, m.Pos.Y), vector) < 25)) &&
                 BuildingService.RoomBelowAndAbove(x, y, size))
@@ -112,7 +112,7 @@ namespace Sharky.Builds.BuildingPlacement
                     if (addonX >= 0 && addonY >= 0 && addonX < MapDataService.MapData.MapWidth && addonY < MapDataService.MapData.MapHeight &&
                         MapDataService.MapHeight((int)addonX, (int)addonY) == baseHeight &&
                         BuildingService.AreaBuildable(addonX, addonY, size / 2.0f) &&
-                        !BuildingService.Blocked(addonX, addonY, size / 2.0f, -.5f) && !BuildingService.HasCreep(addonX, addonY, size / 2.0f) &&
+                        !BuildingService.Blocked(addonX, addonY, size / 2.0f, -.5f) && !BuildingService.HasAnyCreep(addonX, addonY, size / 2f) &&
                         (vespeneGeysers == null || !vespeneGeysers.Any(m => Vector2.DistanceSquared(new Vector2(m.Pos.X, m.Pos.Y), addonVector) < 25)))
                     {
                         return new Point2D { X = x, Y = y };

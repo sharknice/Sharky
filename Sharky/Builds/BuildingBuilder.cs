@@ -146,7 +146,7 @@ namespace Sharky.Builds
             var addonY = building.UnitCalculation.Unit.Pos.Y - .5f;
             var addonX = building.UnitCalculation.Unit.Pos.X + 2.5f;
             if (addonX >= 0 && addonY >= 0 && addonX < MapDataService.MapData.MapWidth && addonY < MapDataService.MapData.MapHeight &&
-                BuildingService.AreaBuildable(addonX, addonY, .5f) && !BuildingService.Blocked(addonX, addonY, .5f, -.5f))
+                BuildingService.AreaBuildable(addonX, addonY, .5f) && !BuildingService.Blocked(addonX, addonY, .5f, -.5f) && !BuildingService.HasAnyCreep(addonX, addonY, .5f))
             {
                 return true;
             }

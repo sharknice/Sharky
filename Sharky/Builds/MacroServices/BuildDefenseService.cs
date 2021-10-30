@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using Sharky.Builds.BuildingPlacement;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -14,10 +15,11 @@ namespace Sharky.Builds.MacroServices
         BaseData BaseData;
         TargetingData TargetingData;
         BuildOptions BuildOptions;
+        BuildingService BuildingService;
 
         int defensivePointLastFailFrame;
 
-        public BuildDefenseService(MacroData macroData, IBuildingBuilder buildingBuilder, SharkyUnitData sharkyUnitData, ActiveUnitData activeUnitData, BaseData baseData, TargetingData targetingData, BuildOptions buildOptions)
+        public BuildDefenseService(MacroData macroData, IBuildingBuilder buildingBuilder, SharkyUnitData sharkyUnitData, ActiveUnitData activeUnitData, BaseData baseData, TargetingData targetingData, BuildOptions buildOptions, BuildingService buildingService)
         {
             MacroData = macroData;
             BuildingBuilder = buildingBuilder;
@@ -26,6 +28,7 @@ namespace Sharky.Builds.MacroServices
             BaseData = baseData;
             TargetingData = targetingData;
             BuildOptions = buildOptions;
+            BuildingService = buildingService;
 
             defensivePointLastFailFrame = 0;
         }
@@ -94,6 +97,45 @@ namespace Sharky.Builds.MacroServices
 
                     var orderedBuildings = ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
                     foreach (var baseLocation in BaseData.SelfBases)
+                    {
+                        if (baseLocation.MineralLineDefenseUnbuildableFrame < MacroData.Frame - 100)
+                        {
+                            if (ActiveUnitData.SelfUnits.Count(u => u.Value.Unit.UnitType == (uint)unit.Key && Vector2.DistanceSquared(u.Value.Position, new Vector2(baseLocation.Location.X, baseLocation.Location.Y)) < MacroData.DefensiveBuildingMaximumDistance * MacroData.DefensiveBuildingMaximumDistance) + orderedBuildings < unit.Value)
+                            {
+                                var command = BuildingBuilder.BuildBuilding(MacroData, unit.Key, unitData, baseLocation.Location, false, MacroData.DefensiveBuildingMaximumDistance, wallOffType: BuildOptions.WallOffType);
+                                if (command != null)
+                                {
+                                    commands.AddRange(command);
+                                    return commands;
+                                }
+                                else
+                                {
+                                    baseLocation.MineralLineDefenseUnbuildableFrame = MacroData.Frame;
+                                }
+                            }
+                        }
+                    }
+
+                }
+            }
+
+            return commands;
+        }
+
+        public List<Action> BuildDefensiveBuildingsAtNextBase()
+        {
+            var commands = new List<Action>();
+
+            foreach (var unit in MacroData.DesiredDefensiveBuildingsAtNextBase)
+            {
+                if (unit.Value > 0)
+                {
+                    var unitData = SharkyUnitData.BuildingData[unit.Key];
+
+                    var orderedBuildings = ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
+                    var baseLocation = BuildingService.GetNextBaseLocation();
+
+                    if (baseLocation != null && baseLocation.MineralLineDefenseUnbuildableFrame < MacroData.Frame - 100)
                     {
                         if (baseLocation.MineralLineDefenseUnbuildableFrame < MacroData.Frame - 100)
                         {

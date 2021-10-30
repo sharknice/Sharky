@@ -1,4 +1,5 @@
 ﻿using Sharky.DefaultBot;
+using Sharky.MicroControllers;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -13,7 +14,10 @@ namespace Sharky.MicroTasks
         MacroData MacroData;
         SharkyUnitData SharkyUnitData;
         EnemyData EnemyData;
+        TargetingData TargetingData;
         SharkyOptions SharkyOptions;
+
+        IIndividualMicroController IndividiualMicroController;
 
         Dictionary<ulong, RepairData> RepairData;
 
@@ -23,7 +27,16 @@ namespace Sharky.MicroTasks
             MacroData = defaultSharkyBot.MacroData;
             SharkyUnitData = defaultSharkyBot.SharkyUnitData;
             EnemyData = defaultSharkyBot.EnemyData;
+            TargetingData = defaultSharkyBot.TargetingData;
             SharkyOptions = defaultSharkyBot.SharkyOptions;
+            if (defaultSharkyBot.MicroData.IndividualMicroControllers.ContainsKey(UnitTypes.TERRAN_SCV))
+            {
+                IndividiualMicroController = defaultSharkyBot.MicroData.IndividualMicroControllers[UnitTypes.TERRAN_SCV];
+            }
+            else
+            {
+                IndividiualMicroController = defaultSharkyBot.MicroData.IndividualMicroController;
+            }
 
             Priority = priority;
             Enabled = enabled;
@@ -40,8 +53,8 @@ namespace Sharky.MicroTasks
                     var needed = repair.Value.DesiredRepairers - repair.Value.Repairers.Count();
                     if (needed > 0)
                     {
-                        var closest = commanders.Where(commander => commander.Value.Claimed && commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_SCV && 
-                            (commander.Value.UnitRole == UnitRole.Minerals || commander.Value.UnitRole == UnitRole.None) && commander.Value.UnitCalculation.Unit.BuffIds.Count() == 0)
+                        var closest = commanders.Where(commander => commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_SCV && 
+                            (commander.Value.UnitRole == UnitRole.Minerals || commander.Value.UnitRole == UnitRole.None || !commander.Value.Claimed) && commander.Value.UnitCalculation.Unit.BuffIds.Count() == 0)
                                 .OrderBy(c => Vector2.DistanceSquared(c.Value.UnitCalculation.Position, repair.Value.UnitToRepair.Position)).Take(needed);
                         foreach (var scv in closest.Where(c => Vector2.DistanceSquared(c.Value.UnitCalculation.Position, repair.Value.UnitToRepair.Position) < 400)) // limit it to scvs within 20 range
                         {
@@ -75,8 +88,12 @@ namespace Sharky.MicroTasks
                         }
                         else
                         {
-                            var action = scv.Order(frame, Abilities.EFFECT_REPAIR, targetTag: repair.Key);
-                            if (action != null) { actions.AddRange(action); }
+                            if (ActiveUnitData.Commanders.ContainsKey(repair.Key))
+                            {
+                                var commander = ActiveUnitData.Commanders[repair.Key];
+                                var action = IndividiualMicroController.Support(scv, new List<UnitCommander> { commander }, new SC2APIProtocol.Point2D { X = repair.Value.UnitToRepair.Position.X, Y = repair.Value.UnitToRepair.Position.Y }, TargetingData.MainDefensePoint, null, frame);
+                                if (action != null) { actions.AddRange(action); }
+                            }
                         }
                     }
                 }

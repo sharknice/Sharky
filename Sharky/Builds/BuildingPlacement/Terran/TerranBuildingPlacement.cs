@@ -9,6 +9,7 @@ namespace Sharky.Builds.BuildingPlacement
     {
         ActiveUnitData ActiveUnitData;
         SharkyUnitData SharkyUnitData;
+        BaseData BaseData;
         DebugService DebugService;
         BuildingService BuildingService;
         IBuildingPlacement WallOffPlacement;
@@ -16,11 +17,13 @@ namespace Sharky.Builds.BuildingPlacement
         TerranSupplyDepotGridPlacement TerranBuildingGridPlacement;
         TerranProductionGridPlacement TerranProductionGridPlacement;
         TerranTechGridPlacement TerranTechGridPlacement;
+        IBuildingPlacement MissileTurretPlacement;
 
-        public TerranBuildingPlacement(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, DebugService debugService, BuildingService buildingService, IBuildingPlacement wallOffPlacement, TerranWallService terranWallService, TerranSupplyDepotGridPlacement terranBuildingGridPlacement, TerranProductionGridPlacement terranProductionGridPlacement, TerranTechGridPlacement terranTechGridPlacement)
+        public TerranBuildingPlacement(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, BaseData baseData, DebugService debugService, BuildingService buildingService, IBuildingPlacement wallOffPlacement, TerranWallService terranWallService, TerranSupplyDepotGridPlacement terranBuildingGridPlacement, TerranProductionGridPlacement terranProductionGridPlacement, TerranTechGridPlacement terranTechGridPlacement, IBuildingPlacement missileTurretPlacement)
         {
             ActiveUnitData = activeUnitData;
             SharkyUnitData = sharkyUnitData;
+            BaseData = baseData;
             DebugService = debugService;
             BuildingService = buildingService;
             WallOffPlacement = wallOffPlacement;
@@ -28,6 +31,7 @@ namespace Sharky.Builds.BuildingPlacement
             TerranBuildingGridPlacement = terranBuildingGridPlacement;
             TerranProductionGridPlacement = terranProductionGridPlacement;
             TerranTechGridPlacement = terranTechGridPlacement;
+            MissileTurretPlacement = missileTurretPlacement;
         }
 
         public Point2D FindPlacement(Point2D target, UnitTypes unitType, int size, bool ignoreResourceProximity = false, float maxDistance = 50, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.None)
@@ -42,6 +46,11 @@ namespace Sharky.Builds.BuildingPlacement
             if (unitType == UnitTypes.TERRAN_SUPPLYDEPOT)
             {
                 return FindSupplyDepotPlacement(target, size, maxDistance, wallOffType, mineralProximity);
+            }
+            else if (unitType == UnitTypes.TERRAN_MISSILETURRET)
+            {
+                var spot = MissileTurretPlacement.FindPlacement(target, unitType, size, ignoreResourceProximity, maxDistance, requireSameHeight, wallOffType);
+                if (spot != null) { return spot; }
             }
             else
             {
@@ -79,6 +88,11 @@ namespace Sharky.Builds.BuildingPlacement
                 if (spot != null) { return spot; }
             }
 
+            if (unitType == UnitTypes.TERRAN_BARRACKSTECHLAB || unitType == UnitTypes.TERRAN_BARRACKSREACTOR || unitType == UnitTypes.TERRAN_FACTORYTECHLAB || unitType == UnitTypes.TERRAN_FACTORYREACTOR || unitType == UnitTypes.TERRAN_STARPORTTECHLAB || unitType == UnitTypes.TERRAN_STARPORTREACTOR)
+            {
+                size += 2;
+            }
+
             spot = TerranProductionGridPlacement.FindPlacement(reference, unitType, size, maxDistance, minimumMineralProximinity);
             if (spot != null) { return spot; }
 
@@ -100,13 +114,22 @@ namespace Sharky.Builds.BuildingPlacement
                 while (angle + (sliceSize / 2) < fullCircle)
                 {
                     var point = new Point2D { X = x + (float)(radius * Math.Cos(angle)), Y = y + (float)(radius * Math.Sin(angle)) };
-                    if (BuildingService.AreaBuildable(point.X, point.Y, size / 2.0f) && !BuildingService.Blocked(point.X, point.Y, size / 2.0f) && !BuildingService.HasCreep(point.X, point.Y, size / 2.0f))
+                    if (BuildingService.AreaBuildable(point.X, point.Y, size / 2.0f) && !BuildingService.Blocked(point.X, point.Y, size / 2.0f) && !BuildingService.HasAnyCreep(point.X, point.Y, size / 2.0f))
                     {
                         var mineralFields = ActiveUnitData.NeutralUnits.Where(u => SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType));
                         var squared = (1 + minimumMineralProximinity + (size/2f)) * (1 + minimumMineralProximinity + (size / 2f));
-                        var clashes = mineralFields.Where(u => Vector2.DistanceSquared(u.Value.Position, new Vector2(point.X, point.Y)) < squared);
+                        var vector = new Vector2(point.X, point.Y);
+                        var clashes = mineralFields.Where(u => Vector2.DistanceSquared(u.Value.Position, vector) < squared);
+                        bool blocksBase = false;
+                        if (minimumMineralProximinity != 0)
+                        {
+                            if (BaseData.BaseLocations.Any(b => Vector2.DistanceSquared(new Vector2(b.Location.X, b.Location.Y), vector) < 16))
+                            {
+                                blocksBase = true;
+                            }
+                        }
 
-                        if (clashes.Count() == 0)
+                        if (!blocksBase && clashes.Count() == 0)
                         {
                             var productionStructures = ActiveUnitData.SelfUnits.Where(u => u.Value.Unit.UnitType == (uint)UnitTypes.TERRAN_BARRACKS || u.Value.Unit.UnitType == (uint)UnitTypes.TERRAN_FACTORY || u.Value.Unit.UnitType == (uint)UnitTypes.TERRAN_STARPORT);
                             if (!productionStructures.Any(u => Vector2.DistanceSquared(u.Value.Position, new Vector2(point.X, point.Y)) < 16))

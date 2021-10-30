@@ -110,6 +110,7 @@ namespace Sharky.Managers
             actions.AddRange(BuildDefenseService.BuildDefensiveBuildingsAtEveryMineralLine());
             actions.AddRange(BuildDefenseService.BuildDefensiveBuildingsAtDefensivePoint());
             actions.AddRange(BuildDefenseService.BuildDefensiveBuildingsAtEveryBase());
+            actions.AddRange(BuildDefenseService.BuildDefensiveBuildingsAtNextBase());
             actions.AddRange(BuildDefenseService.BuildDefensiveBuildings());
 
             actions.AddRange(VespeneGasBuilder.BuildVespeneGas());

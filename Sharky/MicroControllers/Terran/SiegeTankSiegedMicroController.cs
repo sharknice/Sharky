@@ -1,6 +1,7 @@
 ﻿using SC2APIProtocol;
 using Sharky.DefaultBot;
 using Sharky.Pathing;
+using Sharky.S2ClientTypeEnums;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -35,7 +36,33 @@ namespace Sharky.MicroControllers.Terran
                 if (AttackBestTarget(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
             }
 
+            if (AvoidLiberationZones(commander, target, defensivePoint, frame, out action)) { return action; }
+
             return action;
+        }
+
+        protected override bool AvoidLiberationZones(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
+
+            if (commander.UnitCalculation.EnemiesInRange.Count(e => !e.Attributes.Contains(Attribute.Structure) && e.EnemiesInRange.Any(u => u.Unit.Tag == commander.UnitCalculation.Unit.Tag)) > 0)
+            {
+                return false;
+            }
+
+            foreach (var effect in SharkyUnitData.Effects)
+            {
+                if (effect.EffectId == (uint)Effects.LIBERATIONZONE)
+                {
+                    if (Vector2.DistanceSquared(new Vector2(effect.Pos[0].X, effect.Pos[0].Y), commander.UnitCalculation.Position) <= (effect.Radius + commander.UnitCalculation.Unit.Radius) * (effect.Radius + commander.UnitCalculation.Unit.Radius))
+                    {
+                        action = commander.Order(frame, Abilities.MORPH_UNSIEGE);
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         protected override bool OffensiveAbility(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)

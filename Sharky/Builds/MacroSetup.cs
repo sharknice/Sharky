@@ -202,6 +202,7 @@ namespace Sharky.Builds
             macroData.BuildDefensiveBuildings = new Dictionary<UnitTypes, bool>();
             macroData.DesiredDefensiveBuildingsAtDefensivePoint = new Dictionary<UnitTypes, int>();
             macroData.DesiredDefensiveBuildingsAtEveryBase = new Dictionary<UnitTypes, int>();
+            macroData.DesiredDefensiveBuildingsAtNextBase = new Dictionary<UnitTypes, int>();
             macroData.DesiredDefensiveBuildingsAtEveryMineralLine = new Dictionary<UnitTypes, int>();
             macroData.DefensiveBuildingMaximumDistance = 15;
             macroData.DefensiveBuildingMineralLineMaximumDistance = 10;
@@ -232,6 +233,7 @@ namespace Sharky.Builds
                 macroData.DesiredDefensiveBuildingsAtDefensivePoint[defensiveBuildingsType] = 0;
                 macroData.DesiredDefensiveBuildingsAtEveryBase[defensiveBuildingsType] = 0;
                 macroData.DesiredDefensiveBuildingsAtEveryMineralLine[defensiveBuildingsType] = 0;
+                macroData.DesiredDefensiveBuildingsAtNextBase[defensiveBuildingsType] = 0;
             }
         }
     }

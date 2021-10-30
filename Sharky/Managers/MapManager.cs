@@ -13,7 +13,6 @@ namespace Sharky.Managers
     {
         ActiveUnitData ActiveUnitData;
         MapData MapData;
-        SharkyOptions SharkyOptions;
         SharkyUnitData SharkyUnitData;
         DebugService DebugService;
         WallDataService WallDataService;
@@ -28,7 +27,6 @@ namespace Sharky.Managers
         {
             MapData = mapData;
             ActiveUnitData = activeUnitData;
-            SharkyOptions = sharkyOptions;
             SharkyUnitData = sharkyUnitData;
             DebugService = debugService;
             WallDataService = wallDataService;
@@ -168,17 +166,39 @@ namespace Sharky.Managers
                 if (enemy.Value.DamageAir)
                 {
                     var nodes = GetNodesInRange(enemy.Value.Unit.Pos, enemy.Value.Range + 2, MapData.MapWidth, MapData.MapHeight);
+                    var splash = SharkyUnitData.AirSplashDamagers.Contains((UnitTypes)enemy.Value.Unit.UnitType);
                     foreach (var node in nodes)
                     {
                         MapData.Map[(int)node.X][(int)node.Y].EnemyAirDpsInRange += enemy.Value.Dps;
+                        if (splash)
+                        {
+                            MapData.Map[(int)node.X][(int)node.Y].EnemyAirSplashDpsInRange += enemy.Value.Dps;
+                        }
                     }
                 }
                 if (enemy.Value.DamageGround)
                 {
                     var nodes = GetNodesInRange(enemy.Value.Unit.Pos, enemy.Value.Range + 2, MapData.MapWidth, MapData.MapHeight);
+                    var splash = SharkyUnitData.GroundSplashDamagers.Contains((UnitTypes)enemy.Value.Unit.UnitType);
                     foreach (var node in nodes)
                     {
                         MapData.Map[(int)node.X][(int)node.Y].EnemyGroundDpsInRange += enemy.Value.Dps;
+                        if (splash)
+                        {
+                            MapData.Map[(int)node.X][(int)node.Y].EnemyGroundSplashDpsInRange += enemy.Value.Dps;
+                        }
+                    }
+                }
+                if (enemy.Value.Unit.UnitType == (uint)UnitTypes.ZERG_INFESTOR || enemy.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_HIGHTEMPLAR)
+                {                
+                    if (enemy.Value.Unit.Energy > 70)
+                    {
+                        var nodes = GetNodesInRange(enemy.Value.Unit.Pos, 12, MapData.MapWidth, MapData.MapHeight);
+                        foreach (var node in nodes)
+                        {
+                            MapData.Map[(int)node.X][(int)node.Y].EnemyAirSplashDpsInRange += 50;
+                            MapData.Map[(int)node.X][(int)node.Y].EnemyGroundSplashDpsInRange += 50;
+                        }
                     }
                 }
             }
@@ -241,7 +261,7 @@ namespace Sharky.Managers
                 }
             }
 
-            foreach (var scan in SharkyUnitData.Effects.Where(e => e.EffectId == (uint)Effects.SCAN))
+            foreach (var scan in SharkyUnitData.Effects.Where(e => e.EffectId == (uint)Effects.SCAN && e.Alliance == Alliance.Enemy))
             {
                 var nodes = GetNodesInRange(new Point { X = scan.Pos[0].X, Y = scan.Pos[0].Y, Z = 1 }, scan.Radius + 2, MapData.MapWidth, MapData.MapHeight);
                 foreach (var node in nodes)
@@ -270,7 +290,7 @@ namespace Sharky.Managers
                 }
             }
 
-            foreach (var scan in SharkyUnitData.Effects.Where(e => e.EffectId == (uint)Effects.SCAN))
+            foreach (var scan in SharkyUnitData.Effects.Where(e => e.EffectId == (uint)Effects.SCAN && e.Alliance == Alliance.Enemy))
             {
                 var nodes = GetNodesInRange(new Point { X = scan.Pos[0].X, Y = scan.Pos[0].Y, Z = 1 }, scan.Radius + 2, MapData.MapWidth, MapData.MapHeight);
                 foreach (var node in nodes)

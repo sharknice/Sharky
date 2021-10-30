@@ -1,7 +1,9 @@
-﻿using Sharky.Builds.BuildingPlacement;
-using Sharky.Chat;
+﻿using SC2APIProtocol;
+using Sharky.Builds.BuildingPlacement;
 using Sharky.DefaultBot;
+using Sharky.Managers.Terran;
 using Sharky.Pathing;
+using Sharky.S2ClientTypeEnums;
 using System.Linq;
 
 namespace Sharky.Builds.Terran
@@ -10,20 +12,26 @@ namespace Sharky.Builds.Terran
     {
         TargetingData TargetingData;
         MapDataService MapDataService;
+        SharkyOptions SharkyOptions;
+        OrbitalManager OrbitalManager;
+        SharkyUnitData SharkyUnitData;
+        BaseData BaseData;
+
+        protected float ScanAttackPointTime { get; set; }
+        protected float ScanNextEnemyBaseTime { get; set; }
 
         public TerranSharkyBuild(DefaultSharkyBot defaultSharkyBot)
             : base(defaultSharkyBot)
         {
             TargetingData = defaultSharkyBot.TargetingData;
             MapDataService = defaultSharkyBot.MapDataService;
-        }
+            SharkyOptions = defaultSharkyBot.SharkyOptions;
+            OrbitalManager = defaultSharkyBot.OrbitalManager;
+            SharkyUnitData = defaultSharkyBot.SharkyUnitData;
+            BaseData = defaultSharkyBot.BaseData;
 
-        public TerranSharkyBuild(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, MicroTaskData microTaskData, TargetingData targetingData,
-            ChatService chatService, UnitCountService unitCountService, 
-            FrameToTimeConverter frameToTimeConverter) 
-            : base(buildOptions, macroData, activeUnitData, attackData, microTaskData, chatService, unitCountService, frameToTimeConverter)
-        {
-            TargetingData = targetingData;
+            ScanAttackPointTime = 120f;
+            ScanNextEnemyBaseTime = 120f;
         }
 
         public override void StartBuild(int frame)
@@ -69,6 +77,32 @@ namespace Sharky.Builds.Terran
             }
 
             return false;
+        }
+
+        protected void ScanAttackPoint()
+        {
+            if (SharkyOptions != null && MapDataService.LastFrameVisibility(TargetingData.AttackPoint) < MacroData.Frame - (ScanAttackPointTime * SharkyOptions.FramesPerSecond))
+            {
+                if (OrbitalManager.ScanQueue.Count == 0 && OrbitalManager.LastScanFrame < MacroData.Frame - 10 && !SharkyUnitData.Effects.Any(e => e.EffectId == (uint)Effects.SCAN && e.Alliance == Alliance.Self))
+                {
+                    OrbitalManager.ScanQueue.Push(TargetingData.AttackPoint);
+                }
+            }
+        }
+
+        protected void ScanNextEnemyBase()
+        {
+            if (OrbitalManager.ScanQueue.Count == 0 && OrbitalManager.LastScanFrame < MacroData.Frame - 10 && !SharkyUnitData.Effects.Any(e => e.EffectId == (uint)Effects.SCAN && e.Alliance == Alliance.Self))
+            {
+                var nextEnemyExpansion = BaseData.EnemyBaseLocations.FirstOrDefault(b => !BaseData.EnemyBases.Any(e => b.Location == e.Location));
+                if (nextEnemyExpansion != null)
+                {
+                    if (SharkyOptions != null && MapDataService.LastFrameVisibility(nextEnemyExpansion.Location) < MacroData.Frame - (ScanNextEnemyBaseTime * SharkyOptions.FramesPerSecond))
+                    {
+                        OrbitalManager.ScanQueue.Push(nextEnemyExpansion.Location);
+                    }
+                }
+            }
         }
     }
 }

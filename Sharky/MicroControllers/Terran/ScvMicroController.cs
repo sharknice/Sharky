@@ -23,7 +23,15 @@ namespace Sharky.MicroControllers.Terran
 
             if (MacroData.Minerals < 5) { return false; }
 
-            var repairTargets = commander.UnitCalculation.NearbyAllies.Where(a => a.Attributes.Contains(Attribute.Mechanical) && a.Unit.BuildProgress == 1 && a.Unit.Health < a.Unit.HealthMax).OrderByDescending(a => a.Unit.HealthMax - a.Unit.Health);
+            IOrderedEnumerable<UnitCalculation> repairTargets = null;
+            if (supportTargets != null)
+            {
+                repairTargets = supportTargets.Select(c => c.UnitCalculation).Where(a => a.Attributes.Contains(Attribute.Mechanical) && a.Unit.BuildProgress == 1 && a.Unit.Health < a.Unit.HealthMax).OrderByDescending(a => a.Unit.HealthMax - a.Unit.Health);
+            }
+            if (repairTargets == null || repairTargets.Count() == 0)
+            {
+                repairTargets = commander.UnitCalculation.NearbyAllies.Where(a => a.Attributes.Contains(Attribute.Mechanical) && a.Unit.BuildProgress == 1 && a.Unit.Health < a.Unit.HealthMax).OrderByDescending(a => a.Unit.HealthMax - a.Unit.Health);
+            }
 
             var repairTarget = repairTargets.FirstOrDefault(a => Vector2.DistanceSquared(a.Position, commander.UnitCalculation.Position) <= (a.Unit.Radius + commander.UnitCalculation.Unit.Radius + commander.UnitCalculation.Range) * (a.Unit.Radius + commander.UnitCalculation.Unit.Radius + commander.UnitCalculation.Range));
             if (repairTarget == null)
@@ -55,6 +63,12 @@ namespace Sharky.MicroControllers.Terran
         public override List<SC2APIProtocol.Action> Support(UnitCommander commander, IEnumerable<UnitCommander> supportTargets, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
             List<SC2APIProtocol.Action> action = null;
+
+            if ((commander.UnitCalculation.Unit.Health < commander.UnitCalculation.Unit.HealthMax / 4) ||
+                (commander.UnitCalculation.Unit.Health < commander.UnitCalculation.Unit.HealthMax && commander.UnitCalculation.EnemiesInRangeOfAvoid.Count(e => e.EnemiesInRangeOf.Count() == 0) > 0))
+            {
+                return Retreat(commander, defensivePoint, groupCenter, frame);
+            }
 
             if (Repair(commander, supportTargets, frame, out action)) { return action; }
 

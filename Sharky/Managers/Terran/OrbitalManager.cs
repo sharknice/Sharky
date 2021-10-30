@@ -1,11 +1,12 @@
 ﻿using SC2APIProtocol;
 using Sharky.Builds.BuildingPlacement;
 using Sharky.Chat;
+using Sharky.Pathing;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
-namespace Sharky.Managers.Protoss
+namespace Sharky.Managers.Terran
 {
     public class OrbitalManager : SharkyManager
     {
@@ -16,10 +17,14 @@ namespace Sharky.Managers.Protoss
         UnitCountService UnitCountService;
         ChatService ChatService;
         ResourceCenterLocator ResourceCenterLocator;
+        MapDataService MapDataService;
+
+        public Stack<Point2D> ScanQueue { get; set; }
+        public int LastScanFrame { get; private set; }
 
         bool MulesUnderAttackChatSent;
 
-        public OrbitalManager(ActiveUnitData activeUnitData, BaseData baseData, EnemyData enemyData, MacroData macroData, UnitCountService unitCountService, ChatService chatService, ResourceCenterLocator resourceCenterLocator)
+        public OrbitalManager(ActiveUnitData activeUnitData, BaseData baseData, EnemyData enemyData, MacroData macroData, UnitCountService unitCountService, ChatService chatService, ResourceCenterLocator resourceCenterLocator, MapDataService mapDataService)
         {
             ActiveUnitData = activeUnitData;
             BaseData = baseData;
@@ -28,8 +33,12 @@ namespace Sharky.Managers.Protoss
             UnitCountService = unitCountService;
             ChatService = chatService;
             ResourceCenterLocator = resourceCenterLocator;
+            MapDataService = mapDataService;
 
             MulesUnderAttackChatSent = false;
+
+            ScanQueue = new Stack<Point2D>();
+            LastScanFrame = 0;
         }
 
         public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
@@ -107,7 +116,24 @@ namespace Sharky.Managers.Protoss
                 var undetectedEnemy = ActiveUnitData.EnemyUnits.Where(e => e.Value.Unit.DisplayType == DisplayType.Hidden).OrderByDescending(e => e.Value.EnemiesInRangeOf.Count()).FirstOrDefault();
                 if (undetectedEnemy.Value != null && undetectedEnemy.Value.EnemiesInRangeOf.Count() > 0)
                 {
+                    LastScanFrame = frame;
                     return orbital.Order(frame, Abilities.EFFECT_SCAN, new Point2D { X = undetectedEnemy.Value.Position.X, Y = undetectedEnemy.Value.Position.Y });
+                }
+
+                foreach (var siegedTank in ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED))
+                {
+                    if (siegedTank.BestTarget != null && siegedTank.UnitCalculation.Unit.WeaponCooldown < 0.1f && siegedTank.UnitCalculation.EnemiesInRange.Any(e => e.Unit.Tag == siegedTank.BestTarget.Unit.Tag) && frame - siegedTank.BestTarget.FrameLastSeen > 10 && !MapDataService.SelfVisible(siegedTank.BestTarget.Unit.Pos))
+                    {
+                        LastScanFrame = frame;
+                        return orbital.Order(frame, Abilities.EFFECT_SCAN, new Point2D { X = siegedTank.BestTarget.Position.X, Y = siegedTank.BestTarget.Position.Y });
+                    }
+                }
+
+                if (ScanQueue.Count() > 0)
+                {
+                    var scanPoint = ScanQueue.Pop();
+                    LastScanFrame = frame;
+                    return orbital.Order(frame, Abilities.EFFECT_SCAN, scanPoint);
                 }
             }
 

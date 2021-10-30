@@ -187,7 +187,7 @@ namespace Sharky.Builds.BuildingPlacement
 
         private bool Buildable(Point2D point, float radius)
         {
-            if (BuildingService.AreaBuildable(point.X, point.Y, radius) && !BuildingService.Blocked(point.X, point.Y, radius, 0) && !BuildingService.HasCreep(point.X, point.Y, radius))
+            if (BuildingService.AreaBuildable(point.X, point.Y, radius) && !BuildingService.Blocked(point.X, point.Y, radius, 0) && !BuildingService.HasAnyCreep(point.X, point.Y, radius))
             {
                 var mineralFields = ActiveUnitData.NeutralUnits.Where(u => SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType) || SharkyUnitData.GasGeyserTypes.Contains((UnitTypes)u.Value.Unit.UnitType));
                 var squared = (1 + .5) * (1 + .5);

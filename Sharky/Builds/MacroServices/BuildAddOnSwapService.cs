@@ -77,7 +77,7 @@ namespace Sharky.Builds.MacroServices
                     if (addOnSwap.AddOnTaker != null &&
                         (addOnSwap.AddOnTaker.UnitCalculation.UnitTypeData.Name.Contains("Flying") || addOnSwap.AddOnTaker.UnitCalculation.Position.X != addOnSwap.TakerLocation.X || addOnSwap.AddOnTaker.UnitCalculation.Position.Y != addOnSwap.TakerLocation.Y))
                     {
-                        if (BuildingService.Blocked(addOnSwap.TakerLocation.X, addOnSwap.TakerLocation.Y, 1.5f, -.5f, addOnSwap.AddOnBuilder.UnitCalculation.Unit.Tag))
+                        if (BuildingService.Blocked(addOnSwap.TakerLocation.X, addOnSwap.TakerLocation.Y, 1.5f, -.5f, addOnSwap.AddOnBuilder.UnitCalculation.Unit.Tag) || BuildingService.HasAnyCreep(addOnSwap.TakerLocation.X, addOnSwap.TakerLocation.Y, 1.5f))
                         {
                             var unitData = SharkyUnitData.BuildingData[addOnSwap.DesiredAddOnBuilder];
                             addOnSwap.TakerLocation = BuildingPlacement.FindPlacement(addOnSwap.TakerLocation, addOnSwap.DesiredAddOnBuilder, unitData.Size);

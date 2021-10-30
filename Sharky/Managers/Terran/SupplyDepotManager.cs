@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Sharky.Managers.Protoss
+namespace Sharky.Managers.Terran
 {
     public class SupplyDepotManager : SharkyManager
     {

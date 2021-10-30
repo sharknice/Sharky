@@ -74,7 +74,7 @@ namespace Sharky.Builds.MacroServices
             var unitData = SharkyUnitData.BuildingData[UnitTypes.PROTOSS_PYLON];
 
             var orderedBuildings = ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
-            var baseLocation = GetNextBaseLocation();
+            var baseLocation = BuildingService.GetNextBaseLocation();
 
             if (baseLocation != null && baseLocation.MineralLineDefenseUnbuildableFrame < MacroData.Frame - 100)
             {
@@ -149,22 +149,6 @@ namespace Sharky.Builds.MacroServices
             }
 
             return commands;
-        }
-
-        private BaseLocation GetNextBaseLocation()
-        {
-            var resourceCenters = ActiveUnitData.SelfUnits.Values.Where(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter));
-            var openBases = BaseData.BaseLocations.Where(b => !resourceCenters.Any(r => Vector2.DistanceSquared(r.Position, new Vector2(b.Location.X, b.Location.Y)) < 25));
-
-            foreach (var openBase in openBases)
-            {
-                if (BuildingService.AreaBuildable(openBase.Location.X, openBase.Location.Y, 2) && !BuildingService.Blocked(openBase.Location.X, openBase.Location.Y, 2))
-                {
-                    return openBase;
-                }
-
-            }
-            return null;
         }
     }
 }

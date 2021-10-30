@@ -24,11 +24,10 @@ namespace Sharky.Builds.BuildingPlacement
 
             foreach (var openBase in openBases)
             {
-                if (BuildingService.AreaBuildable(openBase.Location.X, openBase.Location.Y, 2) && !BuildingService.Blocked(openBase.Location.X, openBase.Location.Y, 2))
+                if (BuildingService.AreaBuildable(openBase.Location.X, openBase.Location.Y, 2) && !BuildingService.Blocked(openBase.Location.X, openBase.Location.Y, 2, 0))
                 {
                     return openBase.Location;
                 }
-
             }
             return null;
         }

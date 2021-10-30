@@ -298,7 +298,7 @@ namespace Sharky.Builds
         public void BalanceProduction(List<UnitTypes> unitTypes)
         {
             var desiredTotal = unitTypes.Sum(u => MacroData.DesiredUnitCounts[u]);
-            var currentTotal = unitTypes.Sum(u => UnitCountService.Count(u) + UnitCountService.UnitsInProgressCount(u));
+            var currentTotal = unitTypes.Sum(u => UnitCountService.EquivalentTypeCount(u) + UnitCountService.UnitsInProgressCount(u));
             var numberOfTypes = unitTypes.Count();
 
             foreach (var u in unitTypes)
@@ -313,7 +313,6 @@ namespace Sharky.Builds
                 }
 
                 var trainingData = SharkyUnitData.TrainingData[u];
-                if (u == UnitTypes.PROTOSS_WARPPRISM) { count += UnitCountService.Count(UnitTypes.PROTOSS_WARPPRISMPHASING); }
 
                 var actualRatio = count / (double)currentTotal;
 

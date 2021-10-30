@@ -21,7 +21,7 @@ namespace Sharky.MicroControllers.Terran
 
             if (commander.UnitCalculation.NearbyEnemies.Count() > 0 &&
                 !commander.UnitCalculation.NearbyEnemies.Any(e => e.Unit.IsFlying) && 
-                !commander.UnitCalculation.NearbyEnemies.Any(e => e.DamageGround && e.UnitClassifications.Any(c => c == UnitClassification.ArmyUnit || c == UnitClassification.DefensiveStructure)))
+                !commander.UnitCalculation.NearbyEnemies.Any(e => e.DamageGround && e.UnitClassifications.Any(c => c == UnitClassification.ArmyUnit || c == UnitClassification.DefensiveStructure) || MapDataService.MapHeight(e.Unit.Pos) != MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos)))
             {
                 action = commander.Order(frame, Abilities.MORPH_VIKINGASSAULTMODE);
                 return true;

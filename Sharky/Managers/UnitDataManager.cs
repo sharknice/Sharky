@@ -158,7 +158,8 @@ namespace Sharky.Managers
                 UnitTypes.ZERG_BANELINGBURROWED,
                 UnitTypes.ZERG_INFESTOR,
                 UnitTypes.ZERG_INFESTORBURROWED,
-                UnitTypes.ZERG_LURKERMPBURROWED
+                UnitTypes.ZERG_LURKERMPBURROWED,
+                UnitTypes.ZERG_RAVAGER
             };
 
             SharkyUnitData.AirSplashDamagers = new HashSet<UnitTypes>
@@ -170,6 +171,7 @@ namespace Sharky.Managers
                 UnitTypes.PROTOSS_HIGHTEMPLAR,
                 UnitTypes.ZERG_INFESTOR,
                 UnitTypes.ZERG_INFESTORBURROWED,
+                UnitTypes.ZERG_RAVAGER
             };
 
             SharkyUnitData.CloakableAttackers = new HashSet<UnitTypes>

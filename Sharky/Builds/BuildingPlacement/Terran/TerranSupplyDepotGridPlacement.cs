@@ -78,7 +78,7 @@ namespace Sharky.Builds.BuildingPlacement
                 if (x >= 0 && y >= 0 && x < MapDataService.MapData.MapWidth && y < MapDataService.MapData.MapHeight &&
                     MapDataService.MapHeight((int)x, (int)y) == baseHeight &&
                     BuildingService.AreaBuildable(x, y, size / 2.0f) &&
-                    !BuildingService.Blocked(x, y, size / 2.0f, -.5f) && !BuildingService.HasCreep(x, y, size / 2.0f))
+                    !BuildingService.Blocked(x, y, size / 2.0f, -.5f) && !BuildingService.HasAnyCreep(x, y, size / 2.0f))
                 {
                     return new Point2D { X = x, Y = y };
                 }

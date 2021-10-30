@@ -213,6 +213,11 @@ namespace Sharky
                 UnitClassifications.Add(UnitClassification.ArmyUnit);
             }
 
+            if (unit.UnitType == (uint)UnitTypes.ZERG_QUEEN && unit.Alliance == Alliance.Enemy)
+            {
+                UnitClassifications.Add(UnitClassification.ArmyUnit);
+            }
+
             if (sharkyUnitData.DetectionTypes.Contains((UnitTypes)unit.UnitType))
             {
                 UnitClassifications.Add(UnitClassification.Detector);

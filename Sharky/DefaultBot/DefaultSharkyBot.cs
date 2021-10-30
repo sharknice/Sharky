@@ -15,6 +15,7 @@ using Sharky.EnemyStrategies.Zerg;
 using Sharky.Macro;
 using Sharky.Managers;
 using Sharky.Managers.Protoss;
+using Sharky.Managers.Terran;
 using Sharky.MicroControllers;
 using Sharky.MicroControllers.Protoss;
 using Sharky.MicroControllers.Terran;
@@ -109,6 +110,7 @@ namespace Sharky.DefaultBot
         public IBuildingPlacement ProtossBuildingPlacement { get; set; }
         public IBuildingPlacement WallOffPlacement { get; set; }
         public IBuildingPlacement TerranBuildingPlacement { get; set; }
+        public IBuildingPlacement MissileTurretPlacement { get; set; }
         public IBuildingPlacement ZergBuildingPlacement { get; set; }
         public IBuildingPlacement BuildingPlacement { get; set; }
         public IBuildingBuilder BuildingBuilder { get; set; }
@@ -190,7 +192,8 @@ namespace Sharky.DefaultBot
             ActiveUnitData = new ActiveUnitData();
             UnitCountService = new UnitCountService(ActiveUnitData, SharkyUnitData);
             DamageService = new DamageService();
-            
+            BuildingService = new BuildingService(MapData, ActiveUnitData, TargetingData, BaseData);
+
             UnitManager = new UnitManager(ActiveUnitData, SharkyUnitData, SharkyOptions, TargetPriorityService, CollisionCalculator, MapDataService, DebugService, DamageService, UnitDataService);
             MapManager = new MapManager(MapData, ActiveUnitData, SharkyOptions, SharkyUnitData, DebugService, WallDataService);
             Managers.Add(MapManager);
@@ -209,7 +212,7 @@ namespace Sharky.DefaultBot
             SharkySimplePathFinder = new SharkySimplePathFinder(MapDataService);
             SharkyAdvancedPathFinder = new SharkyAdvancedPathFinder(new Roy_T.AStar.Paths.PathFinder(), MapData, MapDataService, DebugService);
             NoPathFinder = new SharkyNoPathFinder();
-            BuildingService = new BuildingService(MapData, ActiveUnitData, TargetingData, BaseData);
+            
             ChokePointService = new ChokePointService(SharkyPathFinder, MapDataService, BuildingService);
             ChokePointsService = new ChokePointsService(SharkyPathFinder, ChokePointService);
 
@@ -229,7 +232,8 @@ namespace Sharky.DefaultBot
             TerranProductionGridPlacement = new TerranProductionGridPlacement(BaseData, MapDataService, DebugService, BuildingService);
             TerranTechGridPlacement = new TerranTechGridPlacement(BaseData, MapDataService, DebugService, BuildingService, TerranProductionGridPlacement);
             TerranSupplyDepotGridPlacement = new TerranSupplyDepotGridPlacement(BaseData, MapDataService, DebugService, BuildingService);
-            TerranBuildingPlacement = new TerranBuildingPlacement(ActiveUnitData, SharkyUnitData, DebugService, BuildingService, WallOffPlacement, TerranWallService, TerranSupplyDepotGridPlacement, TerranProductionGridPlacement, TerranTechGridPlacement);
+            MissileTurretPlacement = new MissileTurretPlacement(this);
+            TerranBuildingPlacement = new TerranBuildingPlacement(ActiveUnitData, SharkyUnitData, BaseData, DebugService, BuildingService, WallOffPlacement, TerranWallService, TerranSupplyDepotGridPlacement, TerranProductionGridPlacement, TerranTechGridPlacement, MissileTurretPlacement);
             ZergBuildingPlacement = new ZergBuildingPlacement(ActiveUnitData, SharkyUnitData, DebugService, BuildingService);
             ResourceCenterLocator = new ResourceCenterLocator(ActiveUnitData, BaseData, BuildingService);
             BuildingPlacement = new BuildingPlacement(ProtossBuildingPlacement, TerranBuildingPlacement, ZergBuildingPlacement, ResourceCenterLocator, BaseData, SharkyUnitData, MacroData, UnitCountService);
@@ -239,7 +243,7 @@ namespace Sharky.DefaultBot
             
             Morpher = new Morpher(ActiveUnitData);
             BuildPylonService = new BuildPylonService(MacroData, BuildingBuilder, SharkyUnitData, ActiveUnitData, BaseData, TargetingData, BuildingService);
-            BuildDefenseService = new BuildDefenseService(MacroData, BuildingBuilder, SharkyUnitData, ActiveUnitData, BaseData, TargetingData, BuildOptions);
+            BuildDefenseService = new BuildDefenseService(MacroData, BuildingBuilder, SharkyUnitData, ActiveUnitData, BaseData, TargetingData, BuildOptions, BuildingService);
 
             ChronoData = new ChronoData();
             NexusManager = new NexusManager(ActiveUnitData, SharkyUnitData, ChronoData);
@@ -249,7 +253,7 @@ namespace Sharky.DefaultBot
             PhotonCannonManager = new PhotonCannonManager(ActiveUnitData);
             Managers.Add(PhotonCannonManager);
 
-            OrbitalManager = new OrbitalManager(ActiveUnitData, BaseData, EnemyData, MacroData, UnitCountService, ChatService, ResourceCenterLocator);
+            OrbitalManager = new OrbitalManager(ActiveUnitData, BaseData, EnemyData, MacroData, UnitCountService, ChatService, ResourceCenterLocator, MapDataService);
             Managers.Add(OrbitalManager);
             SupplyDepotManager = new SupplyDepotManager(ActiveUnitData);
             Managers.Add(SupplyDepotManager);

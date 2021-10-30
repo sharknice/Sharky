@@ -111,6 +111,17 @@ namespace Sharky.Builds.BuildingPlacement
                 && MapData.Map[(int)x - (int)radius][(int)y].HasCreep && MapData.Map[(int)x - (int)radius][(int)y + (int)radius].HasCreep && MapData.Map[(int)x - (int)radius][(int)y - (int)radius].HasCreep;
         }
 
+        public bool HasAnyCreep(float x, float y, float radius)
+        {
+            if (x - radius < 0 || y - radius < 0 || x + radius >= MapData.MapWidth || y + radius >= MapData.MapHeight)
+            {
+                return false;
+            }
+            return MapData.Map[(int)x][(int)y].HasCreep || MapData.Map[(int)x][(int)y + (int)radius].HasCreep || MapData.Map[(int)x][(int)y - (int)radius].HasCreep
+                || MapData.Map[(int)x + (int)radius][(int)y].HasCreep && MapData.Map[(int)x + (int)radius][(int)y + (int)radius].HasCreep || MapData.Map[(int)x + (int)radius][(int)y - (int)radius].HasCreep
+                || MapData.Map[(int)x - (int)radius][(int)y].HasCreep && MapData.Map[(int)x - (int)radius][(int)y + (int)radius].HasCreep || MapData.Map[(int)x - (int)radius][(int)y - (int)radius].HasCreep;
+        }
+
         public bool FullyWalled()
         {
             if (TargetingData.ForwardDefenseWallOffPoints == null) { return true; }
@@ -174,6 +185,22 @@ namespace Sharky.Builds.BuildingPlacement
                 return true;
             }
             return false;
+        }
+
+        public BaseLocation GetNextBaseLocation()
+        {
+            var resourceCenters = ActiveUnitData.SelfUnits.Values.Where(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter));
+            var openBases = BaseData.BaseLocations.Where(b => !resourceCenters.Any(r => Vector2.DistanceSquared(r.Position, new Vector2(b.Location.X, b.Location.Y)) < 25));
+
+            foreach (var openBase in openBases)
+            {
+                if (AreaBuildable(openBase.Location.X, openBase.Location.Y, 2) && !Blocked(openBase.Location.X, openBase.Location.Y, 2))
+                {
+                    return openBase;
+                }
+
+            }
+            return null;
         }
     }
 }
