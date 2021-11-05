@@ -253,7 +253,7 @@ namespace Sharky.DefaultBot
             PhotonCannonManager = new PhotonCannonManager(ActiveUnitData);
             Managers.Add(PhotonCannonManager);
 
-            OrbitalManager = new OrbitalManager(ActiveUnitData, BaseData, EnemyData, MacroData, UnitCountService, ChatService, ResourceCenterLocator, MapDataService);
+            OrbitalManager = new OrbitalManager(ActiveUnitData, BaseData, EnemyData, MacroData, UnitCountService, ChatService, ResourceCenterLocator, MapDataService, SharkyUnitData);
             Managers.Add(OrbitalManager);
             SupplyDepotManager = new SupplyDepotManager(ActiveUnitData);
             Managers.Add(SupplyDepotManager);

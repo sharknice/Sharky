@@ -18,13 +18,14 @@ namespace Sharky.Managers.Terran
         ChatService ChatService;
         ResourceCenterLocator ResourceCenterLocator;
         MapDataService MapDataService;
+        SharkyUnitData SharkyUnitData;
 
         public Stack<Point2D> ScanQueue { get; set; }
         public int LastScanFrame { get; private set; }
 
         bool MulesUnderAttackChatSent;
 
-        public OrbitalManager(ActiveUnitData activeUnitData, BaseData baseData, EnemyData enemyData, MacroData macroData, UnitCountService unitCountService, ChatService chatService, ResourceCenterLocator resourceCenterLocator, MapDataService mapDataService)
+        public OrbitalManager(ActiveUnitData activeUnitData, BaseData baseData, EnemyData enemyData, MacroData macroData, UnitCountService unitCountService, ChatService chatService, ResourceCenterLocator resourceCenterLocator, MapDataService mapDataService, SharkyUnitData sharkyUnitData)
         {
             ActiveUnitData = activeUnitData;
             BaseData = baseData;
@@ -34,6 +35,7 @@ namespace Sharky.Managers.Terran
             ChatService = chatService;
             ResourceCenterLocator = resourceCenterLocator;
             MapDataService = mapDataService;
+            SharkyUnitData = sharkyUnitData;
 
             MulesUnderAttackChatSent = false;
 
@@ -163,6 +165,12 @@ namespace Sharky.Managers.Terran
                         }
                         return orbital.Order(frame, Abilities.EFFECT_CALLDOWNMULE, targetTag: mineralPatch.Tag);
                     }
+                }
+
+                var visibleMineral = ActiveUnitData.NeutralUnits.FirstOrDefault(u => SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType) && u.Value.Unit.DisplayType == DisplayType.Visible).Value;
+                if (visibleMineral != null)
+                {
+                    return orbital.Order(frame, Abilities.EFFECT_CALLDOWNMULE, targetTag: visibleMineral.Unit.Tag);
                 }
             }
 

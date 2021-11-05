@@ -40,10 +40,6 @@ namespace Sharky
             {
                 return new Weapon { Attacks = 1, Damage = 6, Range = 5, Type = Weapon.Types.TargetType.Any, Speed = 1 };
             }
-            if (unitType == UnitTypes.ZERG_QUEEN)
-            {
-                return new Weapon { Attacks = 1, Damage = 4, Range = 5, Type = Weapon.Types.TargetType.Any, Speed = 0.71f };
-            }
             if (unitType == UnitTypes.PROTOSS_VOIDRAY)
             {
                 return new Weapon { Attacks = 1, Damage = 6, Range = 6, Type = Weapon.Types.TargetType.Any, Speed = 0.36f };
@@ -63,6 +59,10 @@ namespace Sharky
             if (unitType == UnitTypes.TERRAN_BUNKER)
             {
                 return new Weapon { Attacks = 1, Damage = 6, Range = 6, Type = Weapon.Types.TargetType.Any, Speed = 0.15f };
+            }
+            if (unitType == UnitTypes.TERRAN_BATTLECRUISER)
+            {
+                return new Weapon { Attacks = 1, Damage = 8, Range = 6, Type = Weapon.Types.TargetType.Any, Speed = 0.16f };
             }
             if (unitType == UnitTypes.PROTOSS_ADEPTPHASESHIFT)
             {

@@ -115,10 +115,14 @@ namespace Sharky.MicroControllers
                 if (MoveAway(commander, target, defensivePoint, frame, out action)) { return action; }
             }
 
+            if (AvoidPointlessDamage(commander, target, defensivePoint, frame, out action)) { return action; }
+
             if (WeaponReady(commander, frame))
             {
                 if (AttackBestTarget(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
             }
+
+            if (DoFreeDamage(commander, defensivePoint, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
 
             if (Move(commander, target, defensivePoint, groupCenter, bestTarget, formation, frame, out action)) { return action; }
 
@@ -222,13 +226,16 @@ namespace Sharky.MicroControllers
         {
             action = null;
 
-            if (!commander.UnitCalculation.NearbyEnemies.Any(e => DamageService.CanDamage(e, commander.UnitCalculation)))
+            if (commander.UnitCalculation.EnemiesThreateningDamage.Count() == 0)
             {
-                if (commander.UnitCalculation.NearbyEnemies.Any(e => DamageService.CanDamage(commander.UnitCalculation, e) && e.FrameLastSeen == frame && e.Unit.DisplayType == DisplayType.Visible))
+                if (!commander.UnitCalculation.NearbyEnemies.Any(e => DamageService.CanDamage(e, commander.UnitCalculation) && (e.UnitTypeData.MovementSpeed > commander.UnitCalculation.UnitTypeData.MovementSpeed || e.Range > commander.UnitCalculation.Range)))
                 {
-                    if (AttackBestTarget(commander, target, defensivePoint, target, bestTarget, frame, out action))
+                    if (commander.UnitCalculation.NearbyEnemies.Any(e => DamageService.CanDamage(commander.UnitCalculation, e) && e.Unit.DisplayType == DisplayType.Visible))
                     {
-                        return true;
+                        if (AttackBestTarget(commander, target, defensivePoint, target, bestTarget, frame, out action))
+                        {
+                            return true;
+                        }
                     }
                 }
             }
@@ -653,6 +660,71 @@ namespace Sharky.MicroControllers
             return false;
         }
 
+        /// <summary>
+        /// if unit has more range and greater or equal range than nearest enemy do not attack unless no units threatening damage, make sure unitsthreateneingdamage is correctly calculated
+        /// </summary>
+        protected virtual bool AvoidPointlessDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
+
+            if (commander.UnitCalculation.Range < 3) { return false; }
+
+            if (commander.UnitCalculation.EnemiesThreateningDamage.Count(e => e.EnemiesInRange.Count() <= 1) > 0) // if ally is already in range of the enemy shoot it because it's going to shoot ally
+            {
+                var speed = commander.UnitCalculation.UnitTypeData.MovementSpeed;
+                if (commander.UnitCalculation.EnemiesThreateningDamage.Any(e => e.Range >= commander.UnitCalculation.Range || e.UnitTypeData.MovementSpeed >= speed)) // TODO: factor in creep and other speed buffs
+                {
+                    return false;
+                }
+
+                var attack = commander.UnitCalculation.EnemiesThreateningDamage.OrderBy(e => (e.Range * e.Range) - Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position)).FirstOrDefault();
+
+                if (WeaponReady(commander, frame) && GetDamage(commander.UnitCalculation.Weapons, attack.Unit, attack.UnitTypeData) > attack.Unit.Health + attack.Unit.Shield)
+                {
+                    return false;
+                }
+
+                var distanceToEnemy = Vector2.Distance(attack.Position, commander.UnitCalculation.Position);
+
+                Point2D avoidPoint;
+                if (commander.UnitCalculation.Unit.IsFlying)
+                {
+                    avoidPoint = GetAirAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, attack.Unit.Pos, target, defensivePoint, distanceToEnemy + 2);
+                }
+                else
+                {
+                    avoidPoint = GetGroundAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, attack.Unit.Pos, target, defensivePoint, distanceToEnemy + 2);
+                }
+
+                if (avoidPoint != defensivePoint && avoidPoint != target)
+                {
+                    action = commander.Order(frame, Abilities.MOVE, avoidPoint);
+                    return true;
+                }
+
+                if (commander.RetreatPathFrame + 20 < frame)
+                {
+                    if (commander.UnitCalculation.Unit.IsFlying)
+                    {
+                        commander.RetreatPath = SharkyPathFinder.GetSafeAirPath(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y, defensivePoint.X, defensivePoint.Y, frame);
+                    }
+                    else
+                    {
+                        commander.RetreatPath = SharkyPathFinder.GetSafeGroundPath(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y, defensivePoint.X, defensivePoint.Y, frame);
+                    }
+                    commander.RetreatPathFrame = frame;
+                    commander.RetreatPathIndex = 1;
+                }
+
+                if (FollowPath(commander, frame, out action))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         protected virtual bool AvoidDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action) // TODO: use unit speed to dynamically adjust AvoidDamageDistance
         {
             action = null;
@@ -968,7 +1040,7 @@ namespace Sharky.MicroControllers
         {
             var enemyPosition = new Point2D { X = bestTarget.Unit.Pos.X, Y = bestTarget.Unit.Pos.Y };
             // TODO: make sure this is working correctly, not sure if Vector is accurate, or this function is accurate
-            if (bestTarget.Velocity > 0)
+            if (bestTarget.Velocity > 0 && false)
             {
                 var interceptionPoint = CalculateInterceptionPoint(bestTarget.Position, bestTarget.AverageVector, commander.UnitCalculation.End, commander.UnitCalculation.Velocity);
                 var point = new Point2D { X = interceptionPoint.X, Y = interceptionPoint.Y };
@@ -1007,7 +1079,7 @@ namespace Sharky.MicroControllers
                 return true;
             }
 
-            if (!commander.UnitCalculation.TargetPriorityCalculation.Overwhelm && MicroPriority != MicroPriority.AttackForward && commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.Retreat)
+            if (commander.UnitCalculation.EnemiesThreateningDamage.Count() > 0 && !commander.UnitCalculation.TargetPriorityCalculation.Overwhelm && MicroPriority != MicroPriority.AttackForward && commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.Retreat)
             {
                 if (AvoidDeceleration(commander, defensivePoint, true, frame, out action)) { return true; }
                 action = commander.Order(frame, Abilities.ATTACK, defensivePoint); // no damaging targets in range, retreat towards the defense point
@@ -1129,6 +1201,15 @@ namespace Sharky.MicroControllers
                     bestTarget.IncomingDamage += GetDamage(commander.UnitCalculation.Weapons, bestTarget.Unit, bestTarget.UnitTypeData);
                     action = commander.Order(frame, Abilities.ATTACK, null, bestTarget.Unit.Tag);
                     return true;
+                }
+                if (commander.UnitCalculation.EnemiesInRange.Count() == 0 && bestTarget.FrameLastSeen == frame)
+                {
+                    var closestEnemy = commander.UnitCalculation.NearbyEnemies.OrderBy(e => Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+                    if (closestEnemy != null && closestEnemy.Unit.Tag == bestTarget.Unit.Tag)
+                    {
+                        action = commander.Order(frame, Abilities.ATTACK, null, bestTarget.Unit.Tag);
+                        return true;
+                    }
                 }
             }
 

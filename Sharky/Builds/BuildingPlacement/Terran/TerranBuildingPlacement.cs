@@ -47,6 +47,11 @@ namespace Sharky.Builds.BuildingPlacement
             {
                 return FindSupplyDepotPlacement(target, size, maxDistance, wallOffType, mineralProximity);
             }
+            else if (unitType == UnitTypes.TERRAN_BUNKER)
+            {
+                var spot = FindBunkerPlacement(target, size, maxDistance, wallOffType, mineralProximity);
+                if (spot != null) { return spot; }
+            }
             else if (unitType == UnitTypes.TERRAN_MISSILETURRET)
             {
                 var spot = MissileTurretPlacement.FindPlacement(target, unitType, size, ignoreResourceProximity, maxDistance, requireSameHeight, wallOffType);
@@ -75,6 +80,18 @@ namespace Sharky.Builds.BuildingPlacement
 
             spot = TerranBuildingGridPlacement.FindPlacement(target, size, maxDistance, minimumMineralProximinity);
             if (spot != null) { return spot; }
+
+            return FindTechPlacement(target, size, maxDistance, minimumMineralProximinity);
+        }
+
+        Point2D FindBunkerPlacement(Point2D target, float size, float maxDistance, WallOffType wallOffType, float minimumMineralProximinity)
+        {
+            Point2D spot;
+            if (wallOffType == WallOffType.Terran)
+            {
+                spot = TerranWallService.FindBunkerPlacement(target, size, maxDistance, minimumMineralProximinity);
+                if (spot != null) { return spot; }
+            }
 
             return FindTechPlacement(target, size, maxDistance, minimumMineralProximinity);
         }
@@ -123,7 +140,7 @@ namespace Sharky.Builds.BuildingPlacement
                         bool blocksBase = false;
                         if (minimumMineralProximinity != 0)
                         {
-                            if (BaseData.BaseLocations.Any(b => Vector2.DistanceSquared(new Vector2(b.Location.X, b.Location.Y), vector) < 16))
+                            if (BaseData.BaseLocations.Any(b => Vector2.DistanceSquared(new Vector2(b.Location.X, b.Location.Y), vector) < 25))
                             {
                                 blocksBase = true;
                             }

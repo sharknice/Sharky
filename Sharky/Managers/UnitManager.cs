@@ -359,12 +359,12 @@ namespace Sharky.Managers
                     var weapon = unitCalculation.UnitTypeData.Weapons.FirstOrDefault();
                     if (weapon != null && weapon.HasSpeed)
                     {
-                        fireTime = weapon.Speed;
+                        fireTime = weapon.Speed/10f; // TODO: need to get the actual fire times for weapons
                     }
                     var distance = Vector2.Distance(unitCalculation.Position, enemyAttack.Position);
                     var avoidDistance = AvoidRange + enemyAttack.Range + unitCalculation.Unit.Radius + enemyAttack.Unit.Radius;
                     var distanceToInRange = distance - avoidDistance;
-                    var timeToGetInRange = distanceToInRange / unitCalculation.UnitTypeData.MovementSpeed;
+                    var timeToGetInRange = distanceToInRange / unitCalculation.UnitTypeData.MovementSpeed; // TODO: factor in speed buffs like creep
                     if (timeToGetInRange < fireTime)
                     {
                         attacks.Add(enemyAttack);

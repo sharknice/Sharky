@@ -11,6 +11,7 @@ namespace Sharky.MicroTasks
     {
         EnemyData EnemyData;
         BaseData BaseData;
+        UnitCountService UnitCountService;
 
         IBuildingPlacement BuildingPlacement;
 
@@ -18,6 +19,7 @@ namespace Sharky.MicroTasks
         {
             EnemyData = defaultSharkyBot.EnemyData;
             BaseData = defaultSharkyBot.BaseData;
+            UnitCountService = defaultSharkyBot.UnitCountService;
 
             BuildingPlacement = buildingPlacement;
 
@@ -57,6 +59,11 @@ namespace Sharky.MicroTasks
                     {
                         if (!commander.UnitCalculation.Unit.IsFlying)
                         {
+                            if (commander.UnitCalculation.NearbyEnemies.Count() == 0 && commander.UnitCalculation.Unit.Health >= commander.UnitCalculation.PreviousUnit.Health)
+                            {
+                                continue;
+                            }
+
                             var action = commander.Order(frame, Abilities.CANCEL_LAST);
                             if (action != null) { actions.AddRange(action); }
 
@@ -65,6 +72,19 @@ namespace Sharky.MicroTasks
                         }
                         else
                         {
+                            if (UnitCountService.Count(UnitTypes.TERRAN_SCV) == 0 && commander.UnitCalculation.UnitClassifications.Contains(UnitClassification.ResourceCenter) && commander.UnitCalculation.EnemiesInRangeOfAvoid.Count() == 0)
+                            {
+                                if (!commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId > 0 && o.AbilityId != (uint)Abilities.MOVE))
+                                {
+                                    var location = BuildingPlacement.FindPlacement(new Point2D { X = commander.UnitCalculation.Position.X, Y = commander.UnitCalculation.Position.Y }, (UnitTypes)commander.UnitCalculation.Unit.UnitType, (int)(commander.UnitCalculation.Unit.Radius * 2));
+
+                                    if (location != null)
+                                    {
+                                        var action = commander.Order(frame, Abilities.LAND, location);
+                                        if (action != null) { actions.AddRange(action); }
+                                    }
+                                }
+                            }
                             var safeBase = BaseData.SelfBases.Where(b => b.ResourceCenter != null && b.ResourceCenter.Health == b.ResourceCenter.HealthMax).FirstOrDefault();
                             if (safeBase != null)
                             {

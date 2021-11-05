@@ -68,7 +68,10 @@ namespace Sharky.Builds.BuildingPlacement
                 return true;
             }
 
-            if (ActiveUnitData.Commanders.Any(c => c.Key != tag && ((c.Value.UnitCalculation.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && !c.Value.UnitCalculation.Unit.IsFlying) || c.Value.UnitCalculation.Unit.BuildProgress < 1) && Vector2.DistanceSquared(new Vector2(x, y), c.Value.UnitCalculation.Position) < (c.Value.UnitCalculation.Unit.Radius + padding + radius) * (c.Value.UnitCalculation.Unit.Radius + padding + radius)))
+            if (ActiveUnitData.Commanders.Any(c => c.Key != tag && ((c.Value.UnitCalculation.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && !c.Value.UnitCalculation.Unit.IsFlying) || 
+                c.Value.UnitCalculation.Unit.BuildProgress < 1 || 
+                c.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED) && 
+                Vector2.DistanceSquared(new Vector2(x, y), c.Value.UnitCalculation.Position) < (c.Value.UnitCalculation.Unit.Radius + padding + radius) * (c.Value.UnitCalculation.Unit.Radius + padding + radius)))
             {
                 return true;
             }

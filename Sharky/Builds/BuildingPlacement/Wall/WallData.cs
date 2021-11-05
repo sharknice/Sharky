@@ -12,5 +12,6 @@ namespace Sharky.Builds.BuildingPlacement
         public List<Point2D> Production { get; set; }
         public List<Point2D> ProductionWithAddon { get; set; }
         public List<Point2D> Depots { get; set; }
+        public List<Point2D> Bunkers { get; set; }
     }
 }

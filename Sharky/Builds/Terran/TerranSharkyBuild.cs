@@ -81,7 +81,7 @@ namespace Sharky.Builds.Terran
 
         protected void ScanAttackPoint()
         {
-            if (SharkyOptions != null && MapDataService.LastFrameVisibility(TargetingData.AttackPoint) < MacroData.Frame - (ScanAttackPointTime * SharkyOptions.FramesPerSecond))
+            if (MacroData.Minerals >= 50 && MapDataService.LastFrameVisibility(TargetingData.AttackPoint) < MacroData.Frame - (ScanAttackPointTime * SharkyOptions.FramesPerSecond))
             {
                 if (OrbitalManager.ScanQueue.Count == 0 && OrbitalManager.LastScanFrame < MacroData.Frame - 10 && !SharkyUnitData.Effects.Any(e => e.EffectId == (uint)Effects.SCAN && e.Alliance == Alliance.Self))
                 {
@@ -92,7 +92,7 @@ namespace Sharky.Builds.Terran
 
         protected void ScanNextEnemyBase()
         {
-            if (OrbitalManager.ScanQueue.Count == 0 && OrbitalManager.LastScanFrame < MacroData.Frame - 10 && !SharkyUnitData.Effects.Any(e => e.EffectId == (uint)Effects.SCAN && e.Alliance == Alliance.Self))
+            if (MacroData.Minerals >= 50 && OrbitalManager.ScanQueue.Count == 0 && OrbitalManager.LastScanFrame < MacroData.Frame - 10 && !SharkyUnitData.Effects.Any(e => e.EffectId == (uint)Effects.SCAN && e.Alliance == Alliance.Self))
             {
                 var nextEnemyExpansion = BaseData.EnemyBaseLocations.FirstOrDefault(b => !BaseData.EnemyBases.Any(e => b.Location == e.Location));
                 if (nextEnemyExpansion != null)

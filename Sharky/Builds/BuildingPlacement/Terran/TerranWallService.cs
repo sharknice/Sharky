@@ -34,6 +34,19 @@ namespace Sharky.Builds.BuildingPlacement
                 }
                 return null;
             }
+            if (unitType == UnitTypes.TERRAN_BUNKER)
+            {
+                if (wallData.Bunkers == null) { return null; }
+                var existingBunkers = ActiveUnitData.SelfUnits.Values.Where(u => u.Unit.UnitType == (uint)UnitTypes.TERRAN_BUNKER);
+                foreach (var spot in wallData.Bunkers)
+                {
+                    if (!existingBunkers.Any(e => e.Position.X == spot.X && e.Position.Y == spot.Y) && WallService.Buildable(spot, .5f))
+                    {
+                        return spot;
+                    }
+                }
+                return null;
+            }
             if (wallData.Production == null) { return null; }
             if (unitType == UnitTypes.TERRAN_BARRACKSTECHLAB && wallData.ProductionWithAddon != null)
             {
@@ -133,6 +146,40 @@ namespace Sharky.Builds.BuildingPlacement
                 foreach (var spot in wallData.Depots)
                 {
                     if (!existingDepots.Any(e => e.Position.X == spot.X && e.Position.Y == spot.Y))
+                    {
+                        if (WallService.Buildable(spot, .9f))
+                        {
+                            return spot;
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
+        public Point2D FindBunkerPlacement(Point2D target, float size, float maxDistance, float minimumMineralProximinity)
+        {
+            if (MapData != null && MapData.TerranWallData != null)
+            {
+                foreach (var selfBase in BaseData.SelfBases)
+                {
+                    var wallData = MapData.TerranWallData.FirstOrDefault(b => b.BasePosition.X == selfBase.Location.X && b.BasePosition.Y == selfBase.Location.Y);
+                    var spot = GetOpenBunkerPlacement(wallData);
+                    if (spot != null) { return spot; }
+                }
+            }
+
+            return null;
+        }
+
+        Point2D GetOpenBunkerPlacement(WallData wallData)
+        {
+            if (wallData != null && wallData.Bunkers != null)
+            {
+                var existing = ActiveUnitData.SelfUnits.Values.Where(u => u.Unit.UnitType == (uint)UnitTypes.TERRAN_BUNKER);
+                foreach (var spot in wallData.Bunkers)
+                {
+                    if (!existing.Any(e => e.Position.X == spot.X && e.Position.Y == spot.Y))
                     {
                         if (WallService.Buildable(spot, .9f))
                         {

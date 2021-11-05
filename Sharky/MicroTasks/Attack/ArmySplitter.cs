@@ -73,6 +73,10 @@ namespace Sharky.MicroTasks.Attack
                 if (split.SelfGroup.Count() > 0)
                 {
                     var groupPoint = TargetingService.GetArmyPoint(AvailableCommanders);
+                    if (AvailableCommanders.Count() == 0)
+                    {
+                        groupPoint = null;
+                    }
                     var defensePoint = new Point2D { X = split.EnemyGroup.FirstOrDefault().Unit.Pos.X, Y = split.EnemyGroup.FirstOrDefault().Unit.Pos.Y };
                     actions.AddRange(MicroController.Attack(split.SelfGroup, defensePoint, TargetingData.ForwardDefensePoint, groupPoint, frame));
 
