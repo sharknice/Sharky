@@ -26,7 +26,7 @@ namespace Sharky.Builds.BuildingPlacement
             UnitCountService = unitCountService;
         }
 
-        public Point2D FindPlacement(Point2D target, UnitTypes unitType, int size, bool ignoreResourceProximity = false, float maxDistance = 50, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.None)
+        public Point2D FindPlacement(Point2D target, UnitTypes unitType, int size, bool ignoreResourceProximity = false, float maxDistance = 50, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.None, bool requireVision = false)
         {
             if (unitType == UnitTypes.PROTOSS_NEXUS || unitType == UnitTypes.TERRAN_COMMANDCENTER || unitType == UnitTypes.ZERG_HATCHERY || unitType == UnitTypes.TERRAN_ORBITALCOMMANDFLYING || unitType == UnitTypes.TERRAN_COMMANDCENTERFLYING)
             {

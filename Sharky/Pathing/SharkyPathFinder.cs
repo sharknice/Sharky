@@ -305,7 +305,7 @@ namespace Sharky.Pathing
                 var path = PathFinder.FindPath(new GridPosition((int)startX, (int)startY), new GridPosition((int)endX, (int)endY), grid);
                 return path.Edges.Select(e => new Vector2(e.End.Position.X, e.End.Position.Y)).ToList();
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return new List<Vector2>();
             }

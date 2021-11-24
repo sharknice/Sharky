@@ -71,6 +71,7 @@ namespace Sharky
         public TargetPriorityCalculation TargetPriorityCalculation { get; set; }
         public UnitTypeData UnitTypeData { get; set; }
         public int FrameLastSeen { get; set; }
+        public int FrameFirstSeen { get; internal set; }
 
         /// <summary>
         /// amount of damage this unit will take from the next frame of attacks
@@ -101,6 +102,7 @@ namespace Sharky
             Position = new Vector2(unit.Pos.X, unit.Pos.Y);
 
             FrameLastSeen = frame;
+            FrameFirstSeen = frame;
 
             Range = unitDataService.GetRange(unit);
 
@@ -208,7 +210,7 @@ namespace Sharky
             {
 
             }
-            else
+            else if (Damage > 0 || unit.EnergyMax > 0 || unit.UnitType == (uint)UnitTypes.ZERG_SWARMHOSTBURROWEDMP || unit.UnitType == (uint)UnitTypes.ZERG_SWARMHOSTMP)
             {
                 UnitClassifications.Add(UnitClassification.ArmyUnit);
             }
@@ -343,6 +345,7 @@ namespace Sharky
             AverageVector = Vector;
             Velocity = Vector.LengthSquared();
             AverageVelocity = Velocity;
+            FrameFirstSeen = previous.FrameFirstSeen;
 
             //PreviousUnits = previous.PreviousUnits;
             //PreviousUnits[frame] = Unit;

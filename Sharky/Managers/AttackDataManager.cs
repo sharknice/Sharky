@@ -76,6 +76,10 @@ namespace Sharky.Managers
             if (AttackTask.UnitCommanders.Count() < 1)
             {
                 AttackData.Attacking = false;
+                if (AttackData.TargetPriorityCalculation != null)
+                {
+                    AttackData.TargetPriorityCalculation.OverallWinnability = 0;
+                }
                 DebugService.DrawText("Not Attacking: no attacking army");
                 return null;
             }
@@ -86,8 +90,10 @@ namespace Sharky.Managers
 
             if (enemyUnits.Count() < 1)
             {
+                var priority = TargetPriorityService.CalculateTargetPriority(AttackTask.UnitCommanders.Select(c => c.UnitCalculation), ActiveUnitData.EnemyUnits.Values.Where(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit)));
+                AttackData.TargetPriorityCalculation = priority;
                 AttackData.Attacking = true;
-                DebugService.DrawText("Attacking: no enemy army");
+                DebugService.DrawText("Attacking: no enemy army defending");
                 return null;
             }
 

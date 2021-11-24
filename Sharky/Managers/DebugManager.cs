@@ -31,7 +31,7 @@ namespace Sharky.Managers
                 }
                 catch(System.Exception e)
                 {
-
+                    System.Console.WriteLine($"{e.Message}");
                 }
             }
 

@@ -22,6 +22,8 @@ namespace Sharky.MicroTasks
 
         float lastFrameTime;
 
+        public bool OnlyDefendMain { get; set; }
+
         List<UnitCommander> WorkerDefenders { get; set; }
 
         public List<DesiredUnitsClaim> DesiredUnitsClaims { get; set; }
@@ -46,6 +48,8 @@ namespace Sharky.MicroTasks
             Enabled = enabled;
             UnitCommanders = new List<UnitCommander>();
             WorkerDefenders = new List<UnitCommander>();
+
+            OnlyDefendMain = false;
 
             Enabled = true;
         }
@@ -81,7 +85,13 @@ namespace Sharky.MicroTasks
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            var attackingEnemies = ActiveUnitData.SelfUnits.Where(u => u.Value.Attributes.Contains(Attribute.Structure)).SelectMany(u => u.Value.NearbyEnemies).Distinct().Where(e => ActiveUnitData.EnemyUnits.ContainsKey(e.Unit.Tag));
+            var structures = ActiveUnitData.SelfUnits.Where(u => u.Value.Attributes.Contains(Attribute.Structure));
+            if (OnlyDefendMain)
+            {
+                var vector = new Vector2(TargetingData.MainDefensePoint.X, TargetingData.MainDefensePoint.Y);
+                structures = structures.Where(u => Vector2.DistanceSquared(u.Value.Position, vector) < 400);
+            }
+            var attackingEnemies = structures.SelectMany(u => u.Value.NearbyEnemies).Distinct().Where(e => ActiveUnitData.EnemyUnits.ContainsKey(e.Unit.Tag));
             if (attackingEnemies.Count() > 0)
             {
                 if (UnitCommanders.Count() == 0)
@@ -107,7 +117,12 @@ namespace Sharky.MicroTasks
             }
             else
             {
-                actions = MicroController.Retreat(UnitCommanders, TargetingData.ForwardDefensePoint, null, frame);
+                var defensePoint = TargetingData.ForwardDefensePoint;
+                if (OnlyDefendMain)
+                {
+                    defensePoint = TargetingData.MainDefensePoint;
+                }
+                actions = MicroController.Retreat(UnitCommanders, defensePoint, null, frame);
             }
             StopDefendingWithWorkers();
             stopwatch.Stop();

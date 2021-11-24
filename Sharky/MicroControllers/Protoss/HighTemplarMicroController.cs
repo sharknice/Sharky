@@ -9,7 +9,6 @@ namespace Sharky.MicroControllers.Protoss
 {
     public class HighTemplarMicroController : IndividualMicroController
     {
-        private int StormRange = 9;
         private double StormRadius = 1.5;
         private double FeedbackRangeSquared = 121; // actually range 10, but give an extra 1 range to get first feedback in
         private int lastStormFrame = 0;

@@ -20,7 +20,7 @@ namespace Sharky.Managers
         DamageService DamageService;
         UnitDataService UnitDataService;
 
-        float NearbyDistance = 16;
+        float NearbyDistance = 18;
         float AvoidRange = 1;
 
         ActiveUnitData ActiveUnitData;

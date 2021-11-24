@@ -26,6 +26,7 @@ using Sharky.MicroTasks.Harass;
 using Sharky.MicroTasks.Macro;
 using Sharky.MicroTasks.Mining;
 using Sharky.MicroTasks.Scout;
+using Sharky.MicroTasks.Zerg;
 using Sharky.Pathing;
 using Sharky.Proxy;
 using Sharky.TypeData;
@@ -102,6 +103,7 @@ namespace Sharky.DefaultBot
         public BuildingCancelService BuildingCancelService { get; set; }
         public AreaService AreaService { get; set; }
         public WallDataService WallDataService { get; set; }
+        public CreepTumorPlacementFinder CreepTumorPlacementFinder { get; set; }
 
         public ActiveUnitData ActiveUnitData { get; set; }
         public MapData MapData { get; set; }
@@ -263,6 +265,7 @@ namespace Sharky.DefaultBot
 
             ProxyLocationService = new ProxyLocationService(BaseData, TargetingData, SharkyPathFinder, MapDataService, AreaService);
             TargetingService = new TargetingService(ActiveUnitData, MapDataService, BaseData, TargetingData);
+            CreepTumorPlacementFinder = new CreepTumorPlacementFinder(this, SharkyPathFinder);
 
             var individualMicroController = new IndividualMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
 
@@ -289,6 +292,11 @@ namespace Sharky.DefaultBot
 
             var zerglingMicroController = new ZerglingMicroController(this, SharkyAdvancedPathFinder, MicroPriority.AttackForward, false);
             var banelingMicroController = new BanelingMicroController(this, SharkyAdvancedPathFinder, MicroPriority.AttackForward, false);
+            var overseerMicroController = new OverseerMicroController(this, SharkyAdvancedPathFinder, MicroPriority.StayOutOfRange, false);
+            var infestorMicroController = new InfestorMicroController(this, SharkyAdvancedPathFinder, MicroPriority.StayOutOfRange, false);
+            var ultraliskMicroController = new UltraliskMicroController(this, SharkyAdvancedPathFinder, MicroPriority.AttackForward, false);
+            var swarmHostMicroController = new SwarmHostMicroController(this, SharkyAdvancedPathFinder, MicroPriority.StayOutOfRange, false);
+            var locustMicroController = new LocustMicroController(this, SharkyAdvancedPathFinder, MicroPriority.AttackForward, false);
 
             var scvMicroController = new ScvMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
             var reaperMicroController = new ReaperMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
@@ -336,6 +344,11 @@ namespace Sharky.DefaultBot
 
                 { UnitTypes.ZERG_ZERGLING, zerglingMicroController },
                 { UnitTypes.ZERG_BANELING, banelingMicroController },
+                { UnitTypes.ZERG_OVERSEER, overseerMicroController },
+                { UnitTypes.ZERG_INFESTOR, infestorMicroController },
+                { UnitTypes.ZERG_ULTRALISK, ultraliskMicroController },
+                { UnitTypes.ZERG_SWARMHOSTMP, swarmHostMicroController },
+                { UnitTypes.ZERG_LOCUSTMP, locustMicroController },
 
                 { UnitTypes.TERRAN_SCV, scvMicroController },
                 { UnitTypes.TERRAN_REAPER, reaperMicroController },
@@ -365,9 +378,10 @@ namespace Sharky.DefaultBot
             var reaperScoutTask = new ReaperScoutTask(this, false, 0.5f);
             var findHiddenBaseTask = new FindHiddenBaseTask(BaseData, TargetingData, MapDataService, individualMicroController, 15, false, 0.5f);
             var proxyScoutTask = new ProxyScoutTask(SharkyUnitData, TargetingData, BaseData, SharkyOptions, false, 0.5f, workerProxyScoutMicroController);
-            var miningDefenseService = new MiningDefenseService(BaseData, ActiveUnitData, workerDefenseMicroController, DebugService);
+            var miningDefenseService = new MiningDefenseService(BaseData, ActiveUnitData, workerDefenseMicroController, DebugService, DamageService);
             var miningTask = new MiningTask(SharkyUnitData, BaseData, ActiveUnitData, 1, miningDefenseService, MacroData, BuildOptions, MicroTaskData, new MineralMiner(this), new GasMiner(BaseData, SharkyUnitData));
-            var queenInjectTask = new QueenInjectsTask(ActiveUnitData, 1.1f, UnitCountService);
+            var queenMacroTask = new QueenMacroTask(this, 1, 1.1f);
+            var creepTumorTask = new CreepTumorTask(this, 1, 1.11f);
             var attackTask = new AttackTask(MicroController, TargetingData, ActiveUnitData, DefenseService, MacroData, AttackData, TargetingService, MicroTaskData, new ArmySplitter(AttackData, TargetingData, ActiveUnitData, DefenseService, TargetingService, TerranWallService, MicroController), new EnemyCleanupService(MicroController), 2);
             var adeptWorkerHarassTask = new AdeptWorkerHarassTask(BaseData, TargetingData, adeptMicroController, 2, false);
             var oracleWorkerHarassTask = new OracleWorkerHarassTask(TargetingData, BaseData, ChatService, MapDataService, MapData, oracleHarassMicroController, 1, false);
@@ -387,7 +401,8 @@ namespace Sharky.DefaultBot
             MicroTaskData.MicroTasks[findHiddenBaseTask.GetType().Name] = findHiddenBaseTask;
             MicroTaskData.MicroTasks[proxyScoutTask.GetType().Name] = proxyScoutTask;
             MicroTaskData.MicroTasks[miningTask.GetType().Name] = miningTask;
-            MicroTaskData.MicroTasks[queenInjectTask.GetType().Name] = queenInjectTask;
+            MicroTaskData.MicroTasks[queenMacroTask.GetType().Name] = queenMacroTask;
+            MicroTaskData.MicroTasks[creepTumorTask.GetType().Name] = creepTumorTask;
             MicroTaskData.MicroTasks[attackTask.GetType().Name] = attackTask;
             MicroTaskData.MicroTasks[adeptWorkerHarassTask.GetType().Name] = adeptWorkerHarassTask;
             MicroTaskData.MicroTasks[oracleWorkerHarassTask.GetType().Name] = oracleWorkerHarassTask;

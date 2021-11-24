@@ -20,15 +20,15 @@ namespace Sharky.Builds.BuildingPlacement
             BuildingService = buildingService;
         }
 
-        public Point2D FindPlacement(Point2D target, UnitTypes unitType, int size, bool ignoreResourceProximity = false, float maxDistance = 50, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.None)
+        public Point2D FindPlacement(Point2D target, UnitTypes unitType, int size, bool ignoreResourceProximity = false, float maxDistance = 50, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.None, bool requireVision = false)
         {
             var mineralProximity = 2;
             if (ignoreResourceProximity) { mineralProximity = 0; };
 
-            return FindTechPlacement(target, size, maxDistance, mineralProximity);
+            return FindTechPlacement(target, size, maxDistance, mineralProximity, requireVision);
         }
 
-        public Point2D FindTechPlacement(Point2D reference, float size, float maxDistance, float minimumMineralProximinity = 2)
+        public Point2D FindTechPlacement(Point2D reference, float size, float maxDistance, float minimumMineralProximinity = 2, bool requireVision = false)
         {
             var x = reference.X;
             var y = reference.Y;
@@ -43,21 +43,24 @@ namespace Sharky.Builds.BuildingPlacement
                 while (angle + (sliceSize / 2) < fullCircle)
                 {
                     var point = new Point2D { X = x + (float)(radius * Math.Cos(angle)), Y = y + (float)(radius * Math.Sin(angle)) };
-                    if (BuildingService.HasCreep(point.X, point.Y, size / 2.0f) && BuildingService.AreaBuildable(point.X, point.Y, size / 2.0f) && !BuildingService.Blocked(point.X, point.Y, size / 2.0f))
+                    if (!requireVision || (requireVision && BuildingService.AreaVisible(point.X, point.Y, size / 2f)))
                     {
-                        var mineralFields = ActiveUnitData.NeutralUnits.Where(u => SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType));
-                        var squared = (1 + minimumMineralProximinity + (size / 2f)) * (1 + minimumMineralProximinity + (size / 2f));
-                        var clashes = mineralFields.Where(u => Vector2.DistanceSquared(u.Value.Position, new Vector2(point.X, point.Y)) < squared);
-
-                        if (clashes.Count() == 0)
+                        if (BuildingService.HasCreep(point.X, point.Y, size / 2.0f) && BuildingService.AreaBuildable(point.X, point.Y, size / 2f) && !BuildingService.Blocked(point.X, point.Y, size / 2f) && !BuildingService.BlocksResourceCenter(point.X, point.Y, 1))
                         {
-                            var productionStructures = ActiveUnitData.SelfUnits.Where(u => u.Value.Unit.UnitType == (uint)UnitTypes.TERRAN_BARRACKS || u.Value.Unit.UnitType == (uint)UnitTypes.TERRAN_FACTORY || u.Value.Unit.UnitType == (uint)UnitTypes.TERRAN_STARPORT);
-                            if (!productionStructures.Any(u => Vector2.DistanceSquared(u.Value.Position, new Vector2(point.X, point.Y)) < 16))
+                            var mineralFields = ActiveUnitData.NeutralUnits.Where(u => SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType));
+                            var squared = (1 + minimumMineralProximinity + (size / 2f)) * (1 + minimumMineralProximinity + (size / 2f));
+                            var clashes = mineralFields.Where(u => Vector2.DistanceSquared(u.Value.Position, new Vector2(point.X, point.Y)) < squared);
+
+                            if (clashes.Count() == 0)
                             {
-                                if (Vector2.DistanceSquared(new Vector2(reference.X, reference.Y), new Vector2(point.X, point.Y)) <= maxDistance * maxDistance)
+                                var productionStructures = ActiveUnitData.SelfUnits.Where(u => u.Value.Unit.UnitType == (uint)UnitTypes.TERRAN_BARRACKS || u.Value.Unit.UnitType == (uint)UnitTypes.TERRAN_FACTORY || u.Value.Unit.UnitType == (uint)UnitTypes.TERRAN_STARPORT);
+                                if (!productionStructures.Any(u => Vector2.DistanceSquared(u.Value.Position, new Vector2(point.X, point.Y)) < 16))
                                 {
-                                    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
-                                    return point;
+                                    if (Vector2.DistanceSquared(new Vector2(reference.X, reference.Y), new Vector2(point.X, point.Y)) <= maxDistance * maxDistance)
+                                    {
+                                        DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
+                                        return point;
+                                    }
                                 }
                             }
                         }

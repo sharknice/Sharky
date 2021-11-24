@@ -104,6 +104,19 @@ namespace Sharky
             });
         }
 
+        public void SetEnergy(ulong unitTag, float value)
+        {
+            SpawnRequest.Debug.Debug.Add(new DebugCommand()
+            {
+                UnitValue = new DebugSetUnitValue()
+                {
+                    UnitTag = unitTag,
+                    UnitValue = DebugSetUnitValue.Types.UnitValue.Energy,
+                    Value = value
+                }
+            });
+        }
+
         public void SetCamera(Point location)
         {
             var action = new SC2APIProtocol.Action

@@ -33,6 +33,18 @@ namespace Sharky
             return EquivalentTypeCount(unitType) + UnitsInProgressCount(unitType);
         }
 
+        public int BuildingsDoneAndInProgressCount(UnitTypes unitType)
+        {
+            return EquivalentTypeCount(unitType) + BuildingsInProgressCount(unitType);
+        }
+
+        public int BuildingsInProgressCount(UnitTypes unitType)
+        {
+            var unitData = SharkyUnitData.BuildingData[unitType];
+            var inProgress = ActiveUnitData.SelfUnits.Count(u => u.Value.UnitClassifications.Contains(UnitClassification.Worker) && u.Value.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
+            return inProgress;
+        }
+
         public int UnitsInProgressCount(UnitTypes unitType)
         {
             var unitData = SharkyUnitData.TrainingData[unitType];

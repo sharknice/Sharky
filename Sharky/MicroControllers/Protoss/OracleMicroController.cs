@@ -13,8 +13,6 @@ namespace Sharky.MicroControllers.Protoss
         float RevelationRange = 9;
         float RevelationRadius = 6;
 
-        float WeaponCooldown = 0.61f;
-
         public OracleMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled)
             : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled)
         {

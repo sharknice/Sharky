@@ -9,7 +9,6 @@ namespace Sharky.MicroControllers.Protoss
 {
     public class DisruptorPhasedMicroController : IndividualMicroController
     {
-        int PurificationNovaRange = 13;
         float PurificationNovaSpeed = 5.95f;
 
         public DisruptorPhasedMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled)

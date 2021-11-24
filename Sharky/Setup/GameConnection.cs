@@ -16,6 +16,8 @@ namespace Sharky
         string starcraftExe;
         string starcraftDir;
 
+        // bool frameMismatchDetected = false;
+
         public GameConnection() { }
 
         public void StartSC2Instance(int port)
@@ -246,7 +248,15 @@ namespace Sharky
                 var actionRequest = new Request();
                 actionRequest.Action = new RequestAction();
                 actionRequest.Action.Actions.AddRange(actions);
-               
+
+                //if (!frameMismatchDetected && frames > 10 && observation.Observation.GameLoop != frames + 1)
+                //{
+                //    frameMismatchDetected = true;
+                //    var chat = new SC2APIProtocol.Action { ActionChat = new ActionChat { Message = $"DesyncDetected, GameLoop: {observation.Observation.GameLoop}, frames: {frames}", Channel = ActionChat.Types.Channel.Team } };
+                //    actionRequest.Action.Actions.Add(chat);
+                //    Console.WriteLine($"DesyncDetected, GameLoop: {observation.Observation.GameLoop}, frames: {frames}");
+                //}
+
                 if (actionRequest.Action.Actions.Count > 0)
                 {
                     await Proxy.SendRequest(actionRequest);

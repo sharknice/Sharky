@@ -49,7 +49,7 @@ namespace Sharky.TypeData
                 { UnitTypes.TERRAN_BANSHEE, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_STARPORT }, Minerals = 150, Gas = 100, Food = 3, Ability = Abilities.TRAIN_BANSHEE, RequiresTechLab = true } },
                 { UnitTypes.TERRAN_BATTLECRUISER, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_STARPORT }, Minerals = 400, Gas = 300, Food = 6, Ability = Abilities.TRAIN_BATTLECRUISER, RequiresTechLab = true } },
 
-                { UnitTypes.ZERG_QUEEN, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.ZERG_HATCHERY }, Minerals = 150, Food = 2, Ability = Abilities.TRAIN_QUEEN } },
+                { UnitTypes.ZERG_QUEEN, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.ZERG_HATCHERY, UnitTypes.ZERG_LAIR, UnitTypes.ZERG_HIVE }, Minerals = 150, Food = 2, Ability = Abilities.TRAIN_QUEEN } },
                 { UnitTypes.ZERG_OVERLORD, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.ZERG_LARVA }, Minerals = 100, Ability = Abilities.TRAIN_OVERLORD } },
                 { UnitTypes.ZERG_DRONE, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.ZERG_LARVA }, Minerals = 50, Food = 1, Ability = Abilities.TRAIN_DRONE } },
                 { UnitTypes.ZERG_ZERGLING, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.ZERG_LARVA }, Minerals = 50, Food = 1, Ability = Abilities.TRAIN_ZERGLING } },          

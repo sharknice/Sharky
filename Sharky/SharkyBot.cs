@@ -73,7 +73,7 @@ namespace Sharky
                     if (!manager.NeverSkip && manager.SkipFrame)
                     {
                         manager.SkipFrame = false;
-                        DebugService.DrawText($"{manager.GetType().Name}: skipped");
+                        //DebugService.DrawText($"{manager.GetType().Name}: skipped");
                         continue;
                     }
                     var beginManager = DateTime.UtcNow;
@@ -85,7 +85,7 @@ namespace Sharky
 
                     var endManager = DateTime.UtcNow;
                     var managerTime = (endManager - beginManager).TotalMilliseconds;
-                    DebugService.DrawText($"{manager.GetType().Name}: {managerTime}");
+                    //DebugService.DrawText($"{manager.GetType().Name}: {managerTime}");
 
                     if (managerTime > 1)
                     {

@@ -23,7 +23,7 @@ namespace Sharky.Proxy
             AreaService = areaService;
         }
 
-        public Point2D GetCliffProxyLocation()
+        public Point2D GetCliffProxyLocation(float offsetDistance = 0)
         {
             var numberOfCloseLocations = NumberOfCloseBaseLocations();
             var closeAirLocations = BaseData.EnemyBaseLocations.Take(5).OrderBy(b => Vector2.DistanceSquared(new Vector2(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y), new Vector2(b.Location.X, b.Location.Y))).Take(numberOfCloseLocations);
@@ -31,8 +31,8 @@ namespace Sharky.Proxy
             var baseLocation = closeAirLocations.OrderBy(b => PathFinder.GetGroundPath(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y, b.Location.X, b.Location.Y, 0).Count()).Last().Location;
 
             var angle = Math.Atan2(TargetingData.EnemyMainBasePoint.Y - baseLocation.Y, baseLocation.X - TargetingData.EnemyMainBasePoint.X);
-            var x = 0 * Math.Cos(angle);
-            var y = 0 * Math.Sin(angle);
+            var x = offsetDistance * Math.Cos(angle);
+            var y = offsetDistance * Math.Sin(angle);
             var location = new Point2D { X = baseLocation.X + (float)x, Y = baseLocation.Y - (float)y };
             if (MapDataService.PathWalkable(location))
             {
@@ -41,7 +41,7 @@ namespace Sharky.Proxy
             return baseLocation;
         }
 
-        public Point2D GetGroundProxyLocation()
+        public Point2D GetGroundProxyLocation(float offsetDistance = 6)
         {
             int proxyBase = NumberOfCloseBaseLocations() + 1;
             var orderedLocations = BaseData.BaseLocations.OrderBy(b => PathFinder.GetGroundPath(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y, b.Location.X, b.Location.Y, 0).Count());
@@ -53,8 +53,8 @@ namespace Sharky.Proxy
             }
 
             var angle = Math.Atan2(TargetingData.EnemyMainBasePoint.Y - baseLocation.Y, baseLocation.X - TargetingData.EnemyMainBasePoint.X);
-            var x = 6 * Math.Cos(angle);
-            var y = 6 * Math.Sin(angle);
+            var x = offsetDistance * Math.Cos(angle);
+            var y = offsetDistance * Math.Sin(angle);
             var location = new Point2D { X = baseLocation.X + (float)x, Y = baseLocation.Y - (float)y };
             if (MapDataService.PathWalkable(location))
             {
@@ -69,9 +69,9 @@ namespace Sharky.Proxy
             return BaseData.BaseLocations.Count(b => Vector2.DistanceSquared(new Vector2(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y), new Vector2(b.Location.X, b.Location.Y)) < 1200);
         }
 
-        public CliffProxyData GetCliffProxyData()
+        public CliffProxyData GetCliffProxyData(float offsetDistance = 0)
         {
-            var outsideProxyLocation = GetCliffProxyLocation();
+            var outsideProxyLocation = GetCliffProxyLocation(offsetDistance);
             var targetLocation = TargetingData.EnemyMainBasePoint;
 
             var angle = Math.Atan2(targetLocation.Y - outsideProxyLocation.Y, outsideProxyLocation.X - targetLocation.X);

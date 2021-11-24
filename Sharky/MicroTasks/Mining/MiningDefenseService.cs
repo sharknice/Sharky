@@ -12,13 +12,15 @@ namespace Sharky.MicroTasks.Mining
         ActiveUnitData ActiveUnitData;
         IIndividualMicroController WorkerMicroController;
         DebugService DebugService;
+        DamageService DamageService;
 
-        public MiningDefenseService(BaseData baseData, ActiveUnitData activeUnitData, IIndividualMicroController workerMicroController, DebugService debugService)
+        public MiningDefenseService(BaseData baseData, ActiveUnitData activeUnitData, IIndividualMicroController workerMicroController, DebugService debugService, DamageService damageService)
         {
             BaseData = baseData;
             ActiveUnitData = activeUnitData;
             WorkerMicroController = workerMicroController;
             DebugService = debugService;
+            DamageService = damageService;
         }
 
         public List<SC2APIProtocol.Action> DealWithEnemies(int frame, List<UnitCommander> unitCommanders)
@@ -264,13 +266,26 @@ namespace Sharky.MicroTasks.Mining
                 {
                     if (commander.UnitCalculation.EnemiesInRangeOf.Count() > 0 && (commander.UnitCalculation.Unit.Health < commander.UnitCalculation.Unit.HealthMax || commander.UnitCalculation.Unit.Shield < commander.UnitCalculation.Unit.ShieldMax))
                     {
-                        if (commander.UnitRole == UnitRole.Minerals || commander.UnitRole == UnitRole.Gas)
-                        {
-                            commander.UnitRole = UnitRole.Defend;
-                        }
-
                         if (commander.UnitCalculation.Unit.Health + commander.UnitCalculation.Unit.Shield < commander.UnitCalculation.EnemiesInRangeOf.First().Damage || commander.UnitCalculation.UnitTypeData.MovementSpeed < commander.UnitCalculation.EnemiesInRangeOf.First().UnitTypeData.MovementSpeed)
                         {
+                            var enemy = commander.UnitCalculation.EnemiesInRangeOf.FirstOrDefault();
+                            if (enemy != null)
+                            {
+                                var closestFriendlyArmy = commander.UnitCalculation.NearbyAllies.Where(u => DamageService.CanDamage(u, enemy)).OrderBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+                                if (closestFriendlyArmy != null)
+                                {
+                                    var saveAction = commander.Order(frame, Abilities.MOVE, targetTag: closestFriendlyArmy.Unit.Tag);
+                                    if (saveAction != null)
+                                    {
+                                        actions.AddRange(saveAction);
+                                    }
+                                    continue;
+                                }
+                            }
+                            if (commander.UnitRole == UnitRole.Minerals || commander.UnitRole == UnitRole.Gas)
+                            {
+                                commander.UnitRole = UnitRole.Defend;
+                            }
                             var action = WorkerMicroController.Retreat(commander, otherBase.MineralLineLocation, null, frame);
                             if (action != null)
                             {
@@ -279,6 +294,10 @@ namespace Sharky.MicroTasks.Mining
                         }
                         else
                         {
+                            if (commander.UnitRole == UnitRole.Minerals || commander.UnitRole == UnitRole.Gas)
+                            {
+                                commander.UnitRole = UnitRole.Defend;
+                            }
                             var action = WorkerMicroController.Bait(commander, BaseData.BaseLocations.Last().Location, BaseData.BaseLocations.First().Location, null, frame);
                             if (action != null)
                             {

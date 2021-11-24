@@ -53,7 +53,9 @@ namespace Sharky.Managers
             SharkyUnitData.AddOnData = addOnDataService.AddOnData();
             SharkyUnitData.MorphData = morphDataService.MorphData();
 
-            SharkyUnitData.AbilityCooldownTimes = new Dictionary<Abilities, float> { { Abilities.EFFECT_BLINK_STALKER, 10 }, { Abilities.EFFECT_SHADOWSTRIDE, 14 }, { Abilities.EFFECT_TIMEWARP, 7.1f }, { Abilities.EFFECT_PURIFICATIONNOVA, 21.4f }, { Abilities.EFFECT_PSISTORM, 1.43f }, { Abilities.EFFECT_VOIDRAYPRISMATICALIGNMENT, 42.9f }, { Abilities.EFFECT_ORACLEREVELATION, 10f }, { Abilities.BEHAVIOR_PULSARBEAMON, 4f }, { Abilities.EFFECT_KD8CHARGE, 14f }, { Abilities.EFFECT_ADEPTPHASESHIFT, 18f }, { Abilities.NEXUSMASSRECALL, 130f }, { Abilities.EFFECT_LOCKON, 4.3f } };
+            SharkyUnitData.AbilityCooldownTimes = new Dictionary<Abilities, float> { { Abilities.EFFECT_BLINK_STALKER, 10 }, { Abilities.EFFECT_SHADOWSTRIDE, 14 }, { Abilities.EFFECT_TIMEWARP, 7.1f }, { Abilities.EFFECT_PURIFICATIONNOVA, 21.4f }, { Abilities.EFFECT_PSISTORM, 1.43f }, { Abilities.EFFECT_VOIDRAYPRISMATICALIGNMENT, 42.9f }, { Abilities.EFFECT_ORACLEREVELATION, 10f }, { Abilities.BEHAVIOR_PULSARBEAMON, 4f }, { Abilities.NEXUSMASSRECALL, 130f }, { Abilities.EFFECT_ADEPTPHASESHIFT, 18f },
+                { Abilities.EFFECT_KD8CHARGE, 14f },  { Abilities.EFFECT_LOCKON, 4.3f },
+                { Abilities.EFFECT_SPAWNLOCUSTS, 43f }};
             SharkyUnitData.WarpInCooldownTimes = new Dictionary<Abilities, float> { { Abilities.TRAINWARP_ADEPT, 20f }, { Abilities.TRAINWARP_DARKTEMPLAR, 32f }, { Abilities.TRAINWARP_HIGHTEMPLAR, 32f }, { Abilities.TRAINWARP_SENTRY, 23f }, { Abilities.TRAINWARP_STALKER, 23f }, { Abilities.TRAINWARP_ZEALOT, 20f } };
 
 

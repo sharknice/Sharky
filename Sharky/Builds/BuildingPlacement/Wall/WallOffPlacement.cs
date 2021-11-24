@@ -25,7 +25,7 @@ namespace Sharky.Builds.BuildingPlacement
             TargetingData = targetingData;
         }
 
-        public Point2D FindPlacement(Point2D target, UnitTypes unitType, int size, bool ignoreResourceProximity = false, float maxDistance = 50, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.Full)
+        public Point2D FindPlacement(Point2D target, UnitTypes unitType, int size, bool ignoreResourceProximity = false, float maxDistance = 50, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.Full, bool requireVision = false)
         {
             var mineralProximity = 2;
             if (ignoreResourceProximity) { mineralProximity = 0; };

@@ -19,7 +19,7 @@ namespace Sharky.Builds.BuildingPlacement
             ActiveUnitData = defaultSharkyBot.ActiveUnitData;
         }
 
-        public Point2D FindPlacement(Point2D target, UnitTypes unitType, int size, bool ignoreResourceProximity = false, float maxDistance = 50, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.None)
+        public Point2D FindPlacement(Point2D target, UnitTypes unitType, int size, bool ignoreResourceProximity = false, float maxDistance = 50, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.None, bool requireVision = false)
         {
             var x = target.X;
             var y = target.Y;

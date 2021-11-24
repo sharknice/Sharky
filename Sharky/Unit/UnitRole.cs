@@ -18,6 +18,8 @@
         Door,
         Harass,
         Support,
-        Repair
+        Repair,
+        SpawnLarva,
+        SpreadCreep
     }
 }

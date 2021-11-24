@@ -12,12 +12,9 @@ namespace Sharky.MicroControllers.Protoss
     {
         int PickupRange = 5;
 
-        BaseData BaseData;
-
         public WarpPrismMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled)
             : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled)
         {
-            BaseData = defaultSharkyBot.BaseData;
         }
 
         protected override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)

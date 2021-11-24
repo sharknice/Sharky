@@ -33,6 +33,17 @@ namespace Sharky.Builds.BuildingPlacement
                 && MapData.Map[(int)x - (int)radius][(int)y].CurrentlyBuildable && MapData.Map[(int)x - (int)radius][(int)y + (int)radius].CurrentlyBuildable && MapData.Map[(int)x - (int)radius][(int)y - (int)radius].CurrentlyBuildable;
         }
 
+        public bool AreaVisible(float x, float y, float radius)
+        {
+            if (x - radius < 0 || y - radius < 0 || x + radius >= MapData.MapWidth || y + radius >= MapData.MapHeight)
+            {
+                return false;
+            }
+            return MapData.Map[(int)x][(int)y].InSelfVision && MapData.Map[(int)x][(int)y + (int)radius].InSelfVision && MapData.Map[(int)x][(int)y - (int)radius].InSelfVision
+                && MapData.Map[(int)x + (int)radius][(int)y].InSelfVision && MapData.Map[(int)x + (int)radius][(int)y + (int)radius].InSelfVision && MapData.Map[(int)x + (int)radius][(int)y - (int)radius].InSelfVision
+                && MapData.Map[(int)x - (int)radius][(int)y].InSelfVision && MapData.Map[(int)x - (int)radius][(int)y + (int)radius].InSelfVision && MapData.Map[(int)x - (int)radius][(int)y - (int)radius].InSelfVision;
+        }
+
         public bool RoomBelowAndAbove(float x, float y, float radius)
         {
             if (x - radius < 0 || y - radius < 0 || x + radius >= MapData.MapWidth || y + radius >= MapData.MapHeight)

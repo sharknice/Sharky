@@ -4,7 +4,7 @@ namespace Sharky.Proxy
 {
     interface IProxyLocationService
     {
-        Point2D GetCliffProxyLocation();
-        Point2D GetGroundProxyLocation();
+        Point2D GetCliffProxyLocation(float offsetDistance);
+        Point2D GetGroundProxyLocation(float offsetDistance);
     }
 }

@@ -7,12 +7,9 @@ namespace Sharky.Builds.Protoss
 {
     public class NexusFirst : ProtossSharkyBuild
     {
-        TargetingData TargetingData;
-
         public NexusFirst(DefaultSharkyBot defaultSharkyBot, ICounterTransitioner counterTransitioner)
             : base(defaultSharkyBot, counterTransitioner)
         {
-            TargetingData = defaultSharkyBot.TargetingData;
         }
 
         public override void StartBuild(int frame)

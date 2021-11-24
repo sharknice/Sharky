@@ -8,13 +8,11 @@ namespace Sharky.Builds.Protoss
 {
     public class NexusFirstWithForge : ProtossSharkyBuild
     {
-        TargetingData TargetingData;
         BaseData BaseData;
 
         public NexusFirstWithForge(DefaultSharkyBot defaultSharkyBot, ICounterTransitioner counterTransitioner)
             : base(defaultSharkyBot, counterTransitioner)
         {
-            TargetingData = defaultSharkyBot.TargetingData;
             BaseData = defaultSharkyBot.BaseData;
         }
 
