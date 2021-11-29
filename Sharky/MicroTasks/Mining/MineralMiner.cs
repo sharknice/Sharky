@@ -75,9 +75,15 @@ namespace Sharky.MicroTasks.Mining
         {
             var distanceSquared = Vector2.DistanceSquared(baseVector, workerVector);
 
-            if (distanceSquared > 20 || distanceSquared < 10)
+            if (distanceSquared > 20)
             {
                 return worker.Order(frame, Abilities.SMART, null, baseTag, true);
+            }
+            else if (distanceSquared < 10)
+            {
+                var actions = worker.Order(frame, Abilities.HARVEST_RETURN);
+                actions.AddRange(worker.Order(frame, Abilities.MOVE, miningInfo.HarvestPoint, 0, false, true));
+                return actions;
             }
             else
             {
