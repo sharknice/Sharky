@@ -1776,25 +1776,22 @@ namespace Sharky.MicroControllers
         {
             action = null;
 
-            foreach (var effect in SharkyUnitData.Effects)
+            foreach (var bile in SharkyUnitData.CorrosiveBiles)
             {
-                if (effect.EffectId == (uint)Effects.CORROSIVEBILE)
+                if (Vector2.DistanceSquared(new Vector2(bile.Key.X, bile.Key.Y), commander.UnitCalculation.Position) <= (.5f + commander.UnitCalculation.Unit.Radius) * (.5f + commander.UnitCalculation.Unit.Radius))
                 {
-                    if (Vector2.DistanceSquared(new Vector2(effect.Pos[0].X, effect.Pos[0].Y), commander.UnitCalculation.Position) < 4)
+                    Point2D avoidPoint;
+                    if (commander.UnitCalculation.Unit.IsFlying)
                     {
-                        Point2D avoidPoint;
-                        if (commander.UnitCalculation.Unit.IsFlying)
-                        {
-                            avoidPoint = GetAirAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, new Point { X = effect.Pos[0].X, Y = effect.Pos[0].Y, Z = 1 }, target, defensivePoint, 5);
-                        }
-                        else
-                        {
-                            avoidPoint = GetGroundAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, new Point { X = effect.Pos[0].X, Y = effect.Pos[0].Y, Z = 1 }, target, defensivePoint, 5);
-
-                        }
-                        action = commander.Order(frame, Abilities.MOVE, avoidPoint);
-                        return true;
+                        avoidPoint = GetAirAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, new Point { X = bile.Key.X, Y = bile.Key.Y, Z = 1 }, target, defensivePoint, 5);
                     }
+                    else
+                    {
+                        avoidPoint = GetGroundAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, new Point { X = bile.Key.X, Y = bile.Key.Y, Z = 1 }, target, defensivePoint, 5);
+
+                    }
+                    action = commander.Order(frame, Abilities.MOVE, avoidPoint);
+                    return true;
                 }
             }
 

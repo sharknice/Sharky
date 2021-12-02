@@ -164,7 +164,7 @@ namespace Sharky.DefaultBot
             BaseData = new BaseData();
             ActiveChatData = new ActiveChatData();
             EnemyData = new EnemyData();
-            SharkyUnitData = new SharkyUnitData();
+            SharkyUnitData = new SharkyUnitData { CorrosiveBiles = new Dictionary<Point2D, uint>() };
 
             UnitDataService = new UnitDataService(SharkyUnitData);
 
@@ -292,6 +292,7 @@ namespace Sharky.DefaultBot
 
             var zerglingMicroController = new ZerglingMicroController(this, SharkyAdvancedPathFinder, MicroPriority.AttackForward, false);
             var banelingMicroController = new BanelingMicroController(this, SharkyAdvancedPathFinder, MicroPriority.AttackForward, false);
+            var ravagerMicroController = new RavagerMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
             var overseerMicroController = new OverseerMicroController(this, SharkyAdvancedPathFinder, MicroPriority.StayOutOfRange, false);
             var infestorMicroController = new InfestorMicroController(this, SharkyAdvancedPathFinder, MicroPriority.StayOutOfRange, false);
             var ultraliskMicroController = new UltraliskMicroController(this, SharkyAdvancedPathFinder, MicroPriority.AttackForward, false);
@@ -344,6 +345,7 @@ namespace Sharky.DefaultBot
 
                 { UnitTypes.ZERG_ZERGLING, zerglingMicroController },
                 { UnitTypes.ZERG_BANELING, banelingMicroController },
+                { UnitTypes.ZERG_RAVAGER, ravagerMicroController },
                 { UnitTypes.ZERG_OVERSEER, overseerMicroController },
                 { UnitTypes.ZERG_INFESTOR, infestorMicroController },
                 { UnitTypes.ZERG_ULTRALISK, ultraliskMicroController },

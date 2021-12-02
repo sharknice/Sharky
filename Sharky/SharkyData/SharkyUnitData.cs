@@ -20,6 +20,7 @@ namespace Sharky
         public RepeatedField<uint> ResearchedUpgrades;
 
         public RepeatedField<Effect> Effects;
+        public Dictionary<Point2D, uint> CorrosiveBiles { get; set; }
 
         public HashSet<UnitTypes> ZergTypes { get; set; }
         public HashSet<UnitTypes> ProtossTypes { get; set; }

@@ -13,6 +13,17 @@ namespace Sharky.MicroControllers.Zerg
             AvoidDamageDistance = 5;
         }
 
+        public override List<SC2APIProtocol.Action> Attack(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
+        {
+            List<SC2APIProtocol.Action> action = null;
+
+            var bestTarget = GetBestTarget(commander, target, frame);
+
+            if (AttackBestTarget(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
+
+            return commander.Order(frame, Abilities.ATTACK, target);
+        }
+
         public override List<SC2APIProtocol.Action> Retreat(UnitCommander commander, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
             return Attack(commander, defensivePoint, defensivePoint, groupCenter, frame);

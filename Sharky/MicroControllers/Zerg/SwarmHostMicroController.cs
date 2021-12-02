@@ -61,5 +61,31 @@ namespace Sharky.MicroControllers.Zerg
 
             return base.Retreat(commander, defensivePoint, groupCenter, frame);
         }
+
+        protected override bool MaintainRange(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
+
+            var range = 20;
+            var enemiesInRange = new List<UnitCalculation>();
+
+            foreach (var enemyAttack in commander.UnitCalculation.NearbyEnemies)
+            {
+                if (DamageService.CanDamage(enemyAttack, commander.UnitCalculation) && InRange(commander.UnitCalculation.Position, enemyAttack.Position, range + commander.UnitCalculation.Unit.Radius + enemyAttack.Unit.Radius + AvoidDamageDistance))
+                {
+                    enemiesInRange.Add(enemyAttack);
+                }
+            }
+
+            var closestEnemy = enemiesInRange.OrderBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+            if (closestEnemy == null)
+            {
+                return false;
+            }
+
+            var avoidPoint = GetPositionFromRange(commander, closestEnemy.Unit.Pos, commander.UnitCalculation.Unit.Pos, range + commander.UnitCalculation.Unit.Radius + closestEnemy.Unit.Radius);
+            action = commander.Order(frame, Abilities.MOVE, avoidPoint);
+            return true;
+        }
     }
 }
