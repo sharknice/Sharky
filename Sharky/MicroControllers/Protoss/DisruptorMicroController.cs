@@ -145,7 +145,7 @@ namespace Sharky.MicroControllers.Protoss
                         killCount++;
                     }
                 }
-                foreach (var splashedAlly in unitCalculation.NearbyAllies.Where(a => !a.Unit.IsFlying && a.Unit.UnitType != (uint)UnitTypes.PROTOSS_DISRUPTOR && a.Unit.UnitType != (uint)UnitTypes.PROTOSS_DISRUPTORPHASED))
+                foreach (var splashedAlly in unitCalculation.NearbyAllies.Take(25).Where(a => !a.Unit.IsFlying && a.Unit.UnitType != (uint)UnitTypes.PROTOSS_DISRUPTOR && a.Unit.UnitType != (uint)UnitTypes.PROTOSS_DISRUPTORPHASED))
                 {
                     if (Vector2.DistanceSquared(splashedAlly.Position, enemyAttack.Position) < (splashedAlly.Unit.Radius + splashRadius) * (splashedAlly.Unit.Radius + splashRadius))
                     {
@@ -157,7 +157,7 @@ namespace Sharky.MicroControllers.Protoss
 
             var best = killCounts.OrderByDescending(x => x.Value).FirstOrDefault();
 
-            if (best.Value < 3 && unitCalculation.NearbyAllies.Any(u => u.UnitClassifications.Contains(UnitClassification.ArmyUnit) && u.Unit.UnitType != (uint)UnitTypes.PROTOSS_DISRUPTOR)) // only attack if going to kill 3+ units or no army to help defend
+            if (best.Value < 3 && unitCalculation.NearbyAllies.Take(25).Any(u => u.UnitClassifications.Contains(UnitClassification.ArmyUnit) && u.Unit.UnitType != (uint)UnitTypes.PROTOSS_DISRUPTOR)) // only attack if going to kill 3+ units or no army to help defend
             {
                 return null;
             }

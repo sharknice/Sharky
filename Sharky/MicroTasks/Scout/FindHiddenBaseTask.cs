@@ -69,7 +69,7 @@ namespace Sharky.MicroTasks.Scout
                             commands.AddRange(action);
                         }
 
-                        if (!commander.UnitCalculation.NearbyEnemies.Any(e => Vector2.DistanceSquared(new Vector2(scoutInfo.Location.X, scoutInfo.Location.Y), e.Position) < 100))
+                        if (!commander.UnitCalculation.NearbyEnemies.Take(25).Any(e => Vector2.DistanceSquared(new Vector2(scoutInfo.Location.X, scoutInfo.Location.Y), e.Position) < 100))
                         {
                             scoutInfo.LastClearedFrame = frame;
                             scoutInfo.Harassers.Remove(commander);
@@ -98,7 +98,7 @@ namespace Sharky.MicroTasks.Scout
                             commands.AddRange(action);
                         }
 
-                        if (!commander.UnitCalculation.NearbyEnemies.Any(e => Vector2.DistanceSquared(new Vector2(harassInfo.BaseLocation.MineralLineLocation.X, harassInfo.BaseLocation.MineralLineLocation.Y), e.Position) < 100))
+                        if (!commander.UnitCalculation.NearbyEnemies.Take(25).Any(e => Vector2.DistanceSquared(new Vector2(harassInfo.BaseLocation.MineralLineLocation.X, harassInfo.BaseLocation.MineralLineLocation.Y), e.Position) < 100))
                         {
                             harassInfo.LastClearedFrame = frame;
                             harassInfo.Harassers.Remove(commander);

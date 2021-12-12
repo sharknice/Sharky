@@ -70,7 +70,17 @@ namespace Sharky.MicroControllers.Protoss
                 return false;
             }
 
-            if (commander.UnitCalculation.NearbyEnemies.Count(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit)) > 3 && !commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Detector)))
+            var height = MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos);
+            if (!commander.UnitCalculation.NearbyAllies.Take(25).Any(a => a.Unit.IsFlying || a.Unit.UnitType == (uint)UnitTypes.PROTOSS_COLOSSUS))
+            {
+                if (commander.UnitCalculation.NearbyEnemies.Take(25).Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && MapDataService.MapHeight(e.Unit.Pos) > height))
+                {
+                    action = commander.Order(frame, Abilities.HALLUCINATION_COLOSSUS);
+                    return true;
+                }
+            }
+
+            if (commander.UnitCalculation.NearbyEnemies.Take(25).Count(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit)) > 3 && !commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Detector)))
             {
                 action = commander.Order(frame, Abilities.HALLUCINATION_ARCHON);
                 return true;

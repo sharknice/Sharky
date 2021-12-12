@@ -20,6 +20,15 @@ namespace Sharky.MicroControllers.Zerg
         {
             action = null;
 
+            if (SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.BURROW))
+            {
+                if (commander.UnitCalculation.NearbyEnemies.Any() && commander.UnitCalculation.Unit.Energy < 75)
+                {
+                    action = commander.Order(frame, Abilities.BURROWDOWN);
+                    return true;
+                }
+            }
+
             if (AvoidDamage(commander, target, defensivePoint, frame, out action))
             {
                 return true;
@@ -45,7 +54,7 @@ namespace Sharky.MicroControllers.Zerg
             var attacks = new List<UnitCalculation>();
             var center = commander.UnitCalculation.Position;
 
-            foreach (var enemyAttack in commander.UnitCalculation.NearbyEnemies)
+            foreach (var enemyAttack in commander.UnitCalculation.NearbyEnemies.Take(25))
             {
                 if (enemyAttack.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELING && !enemyAttack.Attributes.Contains(Attribute.Structure) && !enemyAttack.Unit.BuffIds.Contains((uint)Buffs.FUNGALGROWTH) &&
                     InRange(enemyAttack.Position, commander.UnitCalculation.Position, 10 + enemyAttack.Unit.Radius + commander.UnitCalculation.Unit.Radius))
@@ -132,7 +141,7 @@ namespace Sharky.MicroControllers.Zerg
 
             var best = killCounts.OrderByDescending(x => x.Value).FirstOrDefault();
 
-            if (best.Value < 3 && unitCalculation.NearbyAllies.Any(u => u.UnitClassifications.Contains(UnitClassification.ArmyUnit) && u.Unit.UnitType != (uint)UnitTypes.ZERG_INFESTOR) && unitCalculation.Unit.Health > 20) // only attack if going to kill 3+ units or no army to help defend
+            if (best.Value < 3 && unitCalculation.NearbyAllies.Take(25).Any(u => u.UnitClassifications.Contains(UnitClassification.ArmyUnit) && u.Unit.UnitType != (uint)UnitTypes.ZERG_INFESTOR) && unitCalculation.Unit.Health > 20) // only attack if going to kill 3+ units or no army to help defend
             {
                 return null;
             }

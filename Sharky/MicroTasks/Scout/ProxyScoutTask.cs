@@ -88,7 +88,7 @@ namespace Sharky.MicroTasks
             foreach (var commander in UnitCommanders)
             {
                 if (commander.UnitRole != UnitRole.Scout) { commander.UnitRole = UnitRole.Scout; }
-                if (commander.UnitCalculation.NearbyEnemies.Any(e => e.FrameLastSeen == frame && (e.UnitClassifications.Contains(UnitClassification.Worker) || e.Attributes.Contains(Attribute.Structure))) && commander.UnitCalculation.NearbyEnemies.Count() < 5)
+                if (commander.UnitCalculation.NearbyEnemies.Take(25).Any(e => e.FrameLastSeen == frame && (e.UnitClassifications.Contains(UnitClassification.Worker) || e.Attributes.Contains(Attribute.Structure))) && commander.UnitCalculation.NearbyEnemies.Count() < 5)
                 {
                     var enemy = commander.UnitCalculation.NearbyEnemies.FirstOrDefault();
                     var action = IndividualMicroController.Attack(commander, new Point2D { X = enemy.Unit.Pos.X, Y = enemy.Unit.Pos.Y }, TargetingData.ForwardDefensePoint, null, frame);

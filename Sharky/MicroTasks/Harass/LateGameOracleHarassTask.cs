@@ -71,13 +71,13 @@ namespace Sharky.MicroTasks.Harass
                                 commands.AddRange(action);
                             }
 
-                            if (commander.UnitCalculation.NearbyEnemies.Count(e => e.UnitClassifications.Contains(UnitClassification.Worker) && (Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position) <= 100)) < 1 && MapDataService.SelfVisible(harassInfo.BaseLocation.MineralLineLocation))
+                            if (MapDataService.SelfVisible(harassInfo.BaseLocation.MineralLineLocation) && !commander.UnitCalculation.NearbyEnemies.Take(25).Any(e => e.UnitClassifications.Contains(UnitClassification.Worker) && (Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position) <= 100)))
                             {
                                 harassInfo.LastClearedFrame = frame;
                                 harassInfo.Harassers.Remove(commander);
                                 return commands;
                             }
-                            else if (commander.UnitCalculation.NearbyEnemies.Any(e => e.DamageAir && Vector2.DistanceSquared(new Vector2(harassInfo.BaseLocation.MineralLineLocation.X, harassInfo.BaseLocation.MineralLineLocation.Y), e.Position) < 100))
+                            else if (commander.UnitCalculation.NearbyEnemies.Take(25).Any(e => e.DamageAir && Vector2.DistanceSquared(new Vector2(harassInfo.BaseLocation.MineralLineLocation.X, harassInfo.BaseLocation.MineralLineLocation.Y), e.Position) < 100))
                             {
                                 if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.FullRetreat || commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.Retreat || commander.UnitCalculation.Unit.Shield <= 5)
                                 {
@@ -87,7 +87,7 @@ namespace Sharky.MicroTasks.Harass
                                 }
                             }
                         }
-                        else if (!commander.UnitCalculation.NearbyEnemies.Any(e => e.DamageAir) && commander.UnitCalculation.NearbyEnemies.Count(e => e.UnitClassifications.Contains(UnitClassification.Worker)) > 2)  // if near woerkers and nothing can attack it just kill workers
+                        else if (!commander.UnitCalculation.NearbyEnemies.Take(25).Any(e => e.DamageAir) && commander.UnitCalculation.NearbyEnemies.Take(25).Count(e => e.UnitClassifications.Contains(UnitClassification.Worker)) > 2)  // if near woerkers and nothing can attack it just kill workers
                         {
                             var action = OracleMicroController.HarassWorkers(commander, harassInfo.BaseLocation.MineralLineLocation, TargetingData.ForwardDefensePoint, frame);
                             if (action != null)
@@ -131,7 +131,7 @@ namespace Sharky.MicroTasks.Harass
             {
                 return false;
             }
-            if (commander.UnitCalculation.NearbyEnemies.Count(e => e.UnitClassifications.Contains(UnitClassification.Worker) && (Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position) <= 100)) < 1 && MapDataService.SelfVisible(new Point2D { X = target.X, Y = target.Y, }))
+            if (MapDataService.SelfVisible(new Point2D { X = target.X, Y = target.Y, }) && !commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker) && (Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position) <= 100)))
             {
                 return false;
             }

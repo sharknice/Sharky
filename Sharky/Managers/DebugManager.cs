@@ -28,6 +28,10 @@ namespace Sharky.Managers
                 {
                     GameConnection.SendRequest(DebugService.DrawRequest).Wait();
                     GameConnection.SendRequest(DebugService.SpawnRequest).Wait();
+                    if (DebugService.Surrender)
+                    {
+                        GameConnection.SendRequest(new Request { LeaveGame = new RequestLeaveGame() }).Wait();
+                    }
                 }
                 catch(System.Exception e)
                 {

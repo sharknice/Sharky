@@ -267,53 +267,57 @@ namespace Sharky.DefaultBot
             TargetingService = new TargetingService(ActiveUnitData, MapDataService, BaseData, TargetingData);
             CreepTumorPlacementFinder = new CreepTumorPlacementFinder(this, SharkyPathFinder);
 
-            var individualMicroController = new IndividualMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
+            var individualMicroController = new IndividualMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
 
-            var adeptMicroController = new AdeptMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
-            var adeptShadeMicroController = new AdeptShadeMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
-            var archonMicroController = new ArchonMicroController(this, SharkyAdvancedPathFinder, MicroPriority.AttackForward, false);
-            var colossusMicroController = new ColossusMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
-            var darkTemplarMicroController = new DarkTemplarMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
-            var disruptorMicroController = new DisruptorMicroController(this, SharkyAdvancedPathFinder, MicroPriority.StayOutOfRange, false);
-            var disruptorPhasedMicroController = new DisruptorPhasedMicroController(this, SharkyAdvancedPathFinder, MicroPriority.AttackForward, false);
-            var highTemplarMicroController = new HighTemplarMicroController(this, SharkyAdvancedPathFinder, MicroPriority.StayOutOfRange, false);
-            var mothershipMicroController = new MothershipMicroController(this, SharkyAdvancedPathFinder, MicroPriority.StayOutOfRange, false);
-            var oracleMicroController = new OracleMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
-            var observerMicroController = new ObserverMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
-            var phoenixMicroController = new PhoenixMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, true);
-            var sentryMicroController = new SentryMicroController(this, SharkyAdvancedPathFinder, MicroPriority.StayOutOfRange, true);
-            var stalkerMicroController = new StalkerMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
-            var tempestMicroController = new TempestMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
-            var voidrayMicroController = new VoidRayMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
-            var carrierMicroController = new CarrierMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
-            var interceptorMicroController = new InterceptorMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
-            var warpPrismpMicroController = new WarpPrismMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
-            var zealotMicroController = new ZealotMicroController(this, SharkyAdvancedPathFinder, MicroPriority.AttackForward, false);
+            var adeptMicroController = new AdeptMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
+            var adeptShadeMicroController = new AdeptShadeMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
+            var archonMicroController = new ArchonMicroController(this, SharkySimplePathFinder, MicroPriority.AttackForward, false);
+            var colossusMicroController = new ColossusMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
+            var darkTemplarMicroController = new DarkTemplarMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
+            var disruptorMicroController = new DisruptorMicroController(this, SharkySimplePathFinder, MicroPriority.StayOutOfRange, false);
+            var disruptorPhasedMicroController = new DisruptorPhasedMicroController(this, SharkySimplePathFinder, MicroPriority.AttackForward, false);
+            var highTemplarMicroController = new HighTemplarMicroController(this, SharkySimplePathFinder, MicroPriority.StayOutOfRange, false);
+            var mothershipMicroController = new MothershipMicroController(this, SharkySimplePathFinder, MicroPriority.StayOutOfRange, false);
+            var oracleMicroController = new OracleMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
+            var observerMicroController = new ObserverMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
+            var phoenixMicroController = new PhoenixMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, true);
+            var sentryMicroController = new SentryMicroController(this, SharkySimplePathFinder, MicroPriority.StayOutOfRange, true);
+            var stalkerMicroController = new StalkerMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
+            var tempestMicroController = new TempestMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
+            var voidrayMicroController = new VoidRayMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
+            var carrierMicroController = new CarrierMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
+            var interceptorMicroController = new InterceptorMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
+            var warpPrismpMicroController = new WarpPrismMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
+            var zealotMicroController = new ZealotMicroController(this, SharkySimplePathFinder, MicroPriority.AttackForward, false);
 
-            var zerglingMicroController = new ZerglingMicroController(this, SharkyAdvancedPathFinder, MicroPriority.AttackForward, false);
-            var banelingMicroController = new BanelingMicroController(this, SharkyAdvancedPathFinder, MicroPriority.AttackForward, false);
-            var ravagerMicroController = new RavagerMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
-            var overseerMicroController = new OverseerMicroController(this, SharkyAdvancedPathFinder, MicroPriority.StayOutOfRange, false);
-            var infestorMicroController = new InfestorMicroController(this, SharkyAdvancedPathFinder, MicroPriority.StayOutOfRange, false);
-            var ultraliskMicroController = new UltraliskMicroController(this, SharkyAdvancedPathFinder, MicroPriority.AttackForward, false);
-            var swarmHostMicroController = new SwarmHostMicroController(this, SharkyAdvancedPathFinder, MicroPriority.StayOutOfRange, false);
-            var locustMicroController = new LocustMicroController(this, SharkyAdvancedPathFinder, MicroPriority.AttackForward, false);
+            var zerglingMicroController = new ZerglingMicroController(this, SharkySimplePathFinder, MicroPriority.AttackForward, false);
+            var banelingMicroController = new BanelingMicroController(this, SharkySimplePathFinder, MicroPriority.AttackForward, false);
+            var ravagerMicroController = new RavagerMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
+            var overseerMicroController = new OverseerMicroController(this, SharkySimplePathFinder, MicroPriority.StayOutOfRange, false);
+            var infestorMicroController = new InfestorMicroController(this, SharkySimplePathFinder, MicroPriority.StayOutOfRange, false);
+            var infestorBurrowedMicroController = new InfestorBurrowedMicroController(this, SharkySimplePathFinder, MicroPriority.JustLive, false);
+            var ultraliskMicroController = new UltraliskMicroController(this, SharkySimplePathFinder, MicroPriority.AttackForward, false);
+            var swarmHostMicroController = new SwarmHostMicroController(this, SharkySimplePathFinder, MicroPriority.StayOutOfRange, false);
+            var locustMicroController = new LocustMicroController(this, SharkySimplePathFinder, MicroPriority.AttackForward, false);
+            var corruptorMicroController = new CorruptorMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
+            var broodlordMicroController = new BroodlordMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
+            var viperMicroController = new ViperMicroController(this, SharkySimplePathFinder, MicroPriority.StayOutOfRange, false);
 
-            var scvMicroController = new ScvMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
-            var reaperMicroController = new ReaperMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
-            var marineMicroController = new MarineMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
-            var marauderMicroController = new MarauderMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
-            var hellionMicroController = new HellionMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
-            var cycloneMicroController = new CycloneMicroController(this, SharkyAdvancedPathFinder, MicroPriority.StayOutOfRange, false);
-            var siegeTankMicroController = new SiegeTankMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
-            var siegeTankSiegedMicroController = new SiegeTankSiegedMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
-            var thorMicroController = new ThorMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
-            var vikingMicroController = new VikingMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
-            var vikingLandedMicroController = new VikingLandedMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
-            var bansheeMicroController = new BansheeMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
-            var ravenMicroController = new RavenMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
+            var scvMicroController = new ScvMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
+            var reaperMicroController = new ReaperMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
+            var marineMicroController = new MarineMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
+            var marauderMicroController = new MarauderMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
+            var hellionMicroController = new HellionMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
+            var cycloneMicroController = new CycloneMicroController(this, SharkySimplePathFinder, MicroPriority.StayOutOfRange, false);
+            var siegeTankMicroController = new SiegeTankMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
+            var siegeTankSiegedMicroController = new SiegeTankSiegedMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
+            var thorMicroController = new ThorMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
+            var vikingMicroController = new VikingMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
+            var vikingLandedMicroController = new VikingLandedMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
+            var bansheeMicroController = new BansheeMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
+            var ravenMicroController = new RavenMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
 
-            var workerDefenseMicroController = new IndividualMicroController(MapDataService, SharkyUnitData, ActiveUnitData, DebugService, SharkyAdvancedPathFinder, BaseData, SharkyOptions, DamageService, UnitDataService, TargetingData, TargetingService, MicroPriority.LiveAndAttack, false, 3);
+            var workerDefenseMicroController = new IndividualMicroController(MapDataService, SharkyUnitData, ActiveUnitData, DebugService, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, UnitDataService, TargetingData, TargetingService, MicroPriority.LiveAndAttack, false, 3);
             var workerProxyScoutMicroController = new WorkerScoutMicroController(MapDataService, SharkyUnitData, ActiveUnitData, DebugService, SharkyAdvancedPathFinder, BaseData, SharkyOptions, DamageService, UnitDataService, TargetingData, TargetingService, MicroPriority.AttackForward, false);
 
             var oracleHarassMicroController = new OracleMicroController(this, SharkyAdvancedPathFinder, MicroPriority.LiveAndAttack, false);
@@ -348,9 +352,15 @@ namespace Sharky.DefaultBot
                 { UnitTypes.ZERG_RAVAGER, ravagerMicroController },
                 { UnitTypes.ZERG_OVERSEER, overseerMicroController },
                 { UnitTypes.ZERG_INFESTOR, infestorMicroController },
+                { UnitTypes.ZERG_INFESTORBURROWED, infestorBurrowedMicroController },
                 { UnitTypes.ZERG_ULTRALISK, ultraliskMicroController },
                 { UnitTypes.ZERG_SWARMHOSTMP, swarmHostMicroController },
                 { UnitTypes.ZERG_LOCUSTMP, locustMicroController },
+                { UnitTypes.ZERG_LOCUSTMPFLYING, locustMicroController },
+                { UnitTypes.ZERG_BROODLING, locustMicroController },
+                { UnitTypes.ZERG_CORRUPTOR, corruptorMicroController },
+                { UnitTypes.ZERG_BROODLORD, broodlordMicroController },
+                { UnitTypes.ZERG_VIPER, viperMicroController },
 
                 { UnitTypes.TERRAN_SCV, scvMicroController },
                 { UnitTypes.TERRAN_REAPER, reaperMicroController },
@@ -384,7 +394,7 @@ namespace Sharky.DefaultBot
             var miningTask = new MiningTask(SharkyUnitData, BaseData, ActiveUnitData, 1, miningDefenseService, MacroData, BuildOptions, MicroTaskData, new MineralMiner(this), new GasMiner(BaseData, SharkyUnitData));
             var queenMacroTask = new QueenMacroTask(this, 1, 1.1f);
             var creepTumorTask = new CreepTumorTask(this, 1, 1.11f);
-            var attackTask = new AttackTask(MicroController, TargetingData, ActiveUnitData, DefenseService, MacroData, AttackData, TargetingService, MicroTaskData, new ArmySplitter(AttackData, TargetingData, ActiveUnitData, DefenseService, TargetingService, TerranWallService, MicroController), new EnemyCleanupService(MicroController), 2);
+            var attackTask = new AttackTask(MicroController, TargetingData, ActiveUnitData, DefenseService, MacroData, AttackData, TargetingService, MicroTaskData, SharkyUnitData, new ArmySplitter(AttackData, TargetingData, ActiveUnitData, DefenseService, TargetingService, TerranWallService, MicroController), new EnemyCleanupService(MicroController), 2);
             var adeptWorkerHarassTask = new AdeptWorkerHarassTask(BaseData, TargetingData, adeptMicroController, 2, false);
             var oracleWorkerHarassTask = new OracleWorkerHarassTask(TargetingData, BaseData, ChatService, MapDataService, MapData, oracleHarassMicroController, 1, false);
             var lateGameOracleHarassTask = new LateGameOracleHarassTask(BaseData, TargetingData, MapDataService, oracleHarassMicroController, 1, false);

@@ -79,7 +79,7 @@ namespace Sharky.MicroControllers.Protoss
         {
             List<SC2APIProtocol.Action> action = null;
 
-            if (commander.UnitCalculation.NearbyEnemies.Count(e => e.UnitClassifications.Contains(UnitClassification.Detector)) > 0)
+            if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Detector)))
             {
                 if (commander.RetreatPathFrame + 20 < frame)
                 {

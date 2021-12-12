@@ -11,11 +11,14 @@ namespace Sharky.MicroControllers.Zerg
     {
         float SplashRadius;
 
+        int LastManualDetonationFrame;
+
         public BanelingMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled)
             : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled)
         {
             AvoidDamageDistance = 5;
             SplashRadius = 2.2f;
+            LastManualDetonationFrame = 0;
         }
 
         // TODO: banelings went dumb when there was a wall, tried to attack units on high ground instead of going to ramp and busting it first, make sure the best target is at the same height
@@ -30,7 +33,7 @@ namespace Sharky.MicroControllers.Zerg
                 return true;
             }
 
-            if (bestTarget != null && commander.UnitCalculation.NearbyEnemies.Any(e => e.Unit.Tag == bestTarget.Unit.Tag) && MicroPriority != MicroPriority.NavigateToLocation)
+            if (bestTarget != null && MicroPriority != MicroPriority.NavigateToLocation && commander.UnitCalculation.NearbyEnemies.Any(e => e.Unit.Tag == bestTarget.Unit.Tag))
             {
                 if (GetHighGroundVision(commander, target, defensivePoint, bestTarget, frame, out action)) { return true; }
 
@@ -64,22 +67,23 @@ namespace Sharky.MicroControllers.Zerg
                 // if do just as much or more damage by exploding in spot just explode
                 List<UnitCalculation> hitUnits;
                 List<UnitCalculation> hitSelfUnits;
-                var targetDamage = SplashDamage(commander, commander.UnitCalculation.NearbyEnemies.Where(u => AttackersFilter(commander, u)), bestTarget, out hitUnits);
-                var selfDamage = SplashDamage(commander, commander.UnitCalculation.NearbyEnemies.Where(u => AttackersFilter(commander, u)), commander.UnitCalculation, out hitSelfUnits);
+                var targetDamage = SplashDamage(commander, commander.UnitCalculation.NearbyEnemies.Take(25).Where(u => AttackersFilter(commander, u)), bestTarget, out hitUnits);
+                var selfDetonateDamage = SplashDamage(commander, commander.UnitCalculation.NearbyEnemies.Take(25).Where(u => AttackersFilter(commander, u)), commander.UnitCalculation, out hitSelfUnits);
 
-                if (targetDamage > 35 || selfDamage > 35 || bestTarget.UnitClassifications.Contains(UnitClassification.DefensiveStructure) && MapDataService.MapHeight(bestTarget.Unit.Pos) == MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos))
+                if (targetDamage > 35 || selfDetonateDamage > 35 || bestTarget.UnitClassifications.Contains(UnitClassification.DefensiveStructure))
                 {
-                    if (selfDamage >= targetDamage)
+                    if (selfDetonateDamage >= targetDamage && frame > LastManualDetonationFrame + 1)
                     {
                         foreach (var enemy in hitSelfUnits)
                         {
                             enemy.IncomingDamage += GetDamage(commander.UnitCalculation.Weapon, enemy.Unit, SharkyUnitData.UnitData[(UnitTypes)enemy.Unit.UnitType]);
                         }
                         action = commander.Order(frame, Abilities.EFFECT_EXPLODE);
+                        LastManualDetonationFrame = frame;
                         return true;
                     }
 
-                    if (commander.UnitCalculation.EnemiesInRange.Any(e => e.Unit.Tag == bestTarget.Unit.Tag) && MapDataService.SelfVisible(bestTarget.Unit.Pos))
+                    if (commander.UnitCalculation.EnemiesInRange.Any(e => e.Unit.Tag == bestTarget.Unit.Tag))
                     {
                         bestTarget.IncomingDamage += GetDamage(commander.UnitCalculation.Weapons, bestTarget.Unit, bestTarget.UnitTypeData);
                         if (bestTarget.Unit.DisplayType == DisplayType.Visible)
@@ -112,7 +116,7 @@ namespace Sharky.MicroControllers.Zerg
 
             var range = commander.UnitCalculation.Range;
 
-            var attacks = commander.UnitCalculation.NearbyEnemies.Where(u => AttackersFilter(commander, u));
+            var attacks = commander.UnitCalculation.NearbyEnemies.Take(25).Where(u => AttackersFilter(commander, u));
 
             if (attacks.Count() > 0)
             {
@@ -178,6 +182,26 @@ namespace Sharky.MicroControllers.Zerg
 
             var best = dpsReductions.OrderByDescending(x => x.Value).FirstOrDefault().Key;
             return primaryTargets.FirstOrDefault(t => t.Unit.Tag == best);
+        }
+
+        protected override bool AvoidDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
+            if (commander.UnitCalculation.EnemiesThreateningDamage.Count() > 1)
+            {
+                return false;
+            }
+            return base.AvoidDamage(commander, target, defensivePoint, frame, out action);
+        }
+
+        protected override bool Retreat(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            if (commander.UnitCalculation.EnemiesInRangeOf.Count(e => !e.Unit.IsFlying) > 3)
+            {
+                action = Attack(commander, target, defensivePoint, null, frame);
+                return true;
+            }
+            return base.Retreat(commander, target, defensivePoint, frame, out action);
         }
     }
 }

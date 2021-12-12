@@ -50,7 +50,7 @@ namespace Sharky.MicroTasks.Mining
 
         List<SC2APIProtocol.Action> GatherMinerals(int frame, MiningInfo miningInfo, Vector2 mineralVector, UnitCommander worker, Vector2 workerVector, List<SC2APIProtocol.Unit> mineralFields)
         {
-            var touchingWorker = worker.UnitCalculation.NearbyAllies.Any(w => Vector2.DistanceSquared(workerVector, w.Position) < .5f && !w.UnitClassifications.Contains(UnitClassification.Worker));
+            var touchingWorker = worker.UnitCalculation.NearbyAllies.Take(25).Any(w => Vector2.DistanceSquared(workerVector, w.Position) < .5f && !w.UnitClassifications.Contains(UnitClassification.Worker));
             var distanceSquared = Vector2.DistanceSquared(mineralVector, workerVector);
             var onPath = CollisionCalculator.Collides(worker.UnitCalculation.Position, 2, new Vector2(miningInfo.DropOffPoint.X, miningInfo.DropOffPoint.Y), new Vector2(miningInfo.HarvestPoint.X, miningInfo.HarvestPoint.Y));
             if (distanceSquared < 2 || distanceSquared > 6 || touchingWorker || !onPath)

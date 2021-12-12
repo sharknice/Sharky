@@ -57,7 +57,7 @@ namespace Sharky.Managers
 
             SharkyUnitData.AbilityCooldownTimes = new Dictionary<Abilities, float> { { Abilities.EFFECT_BLINK_STALKER, 11 }, { Abilities.EFFECT_SHADOWSTRIDE, 15 }, { Abilities.EFFECT_TIMEWARP, 7.1f }, { Abilities.EFFECT_PURIFICATIONNOVA, 21.4f }, { Abilities.EFFECT_PSISTORM, 1.43f }, { Abilities.EFFECT_VOIDRAYPRISMATICALIGNMENT, 42.9f }, { Abilities.EFFECT_ORACLEREVELATION, 10f }, { Abilities.BEHAVIOR_PULSARBEAMON, 4f }, { Abilities.NEXUSMASSRECALL, 130f }, { Abilities.EFFECT_ADEPTPHASESHIFT, 12f },
                 { Abilities.EFFECT_KD8CHARGE, 18f },  { Abilities.EFFECT_LOCKON, 4.3f },
-                { Abilities.EFFECT_CORROSIVEBILE, 10f }, { Abilities.EFFECT_SPAWNLOCUSTS, 43f }};
+                { Abilities.EFFECT_CORROSIVEBILE, 10f }, { Abilities.EFFECT_SPAWNLOCUSTS, 43f }, { Abilities.EFFECT_CAUSTICSPRAY, 5f }};
             SharkyUnitData.WarpInCooldownTimes = new Dictionary<Abilities, float> { { Abilities.TRAINWARP_ADEPT, 20.5f }, { Abilities.TRAINWARP_DARKTEMPLAR, 32.5f }, { Abilities.TRAINWARP_HIGHTEMPLAR, 32.5f }, { Abilities.TRAINWARP_SENTRY, 23.5f }, { Abilities.TRAINWARP_STALKER, 23f }, { Abilities.TRAINWARP_ZEALOT, 20.5f } };
 
 
@@ -243,6 +243,8 @@ namespace Sharky.Managers
                 UnitTypes.TERRAN_MISSILETURRET,
                 UnitTypes.TERRAN_BUNKER
             };
+
+            SharkyUnitData.UndeadTypes = new HashSet<UnitTypes> { UnitTypes.ZERG_BROODLING, UnitTypes.ZERG_EGG, UnitTypes.ZERG_LARVA, UnitTypes.TERRAN_KD8CHARGE, UnitTypes.ZERG_OVERLORD, UnitTypes.ZERG_OVERLORDCOCOON, UnitTypes.ZERG_OVERLORDTRANSPORT, UnitTypes.ZERG_TRANSPORTOVERLORDCOCOON };
         }
 
         public override void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)

@@ -14,5 +14,6 @@ namespace Sharky.MicroTasks
         void Enable();
         void Disable();
         bool Enabled { get; }
+        void RemoveDeadUnits(List<ulong> deadUnits);
     }
 }

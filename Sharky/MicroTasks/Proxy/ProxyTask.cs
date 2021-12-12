@@ -1,5 +1,5 @@
-﻿using Sharky.MicroControllers;
-using System;
+﻿using SC2APIProtocol;
+using Sharky.MicroControllers;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +13,7 @@ namespace Sharky.MicroTasks
         MacroData MacroData;
         MicroTaskData MicroTaskData;
         DebugService DebugService;
+        ActiveUnitData ActiveUnitData;
         IIndividualMicroController IndividualMicroController;
 
         public int DesiredWorkers { get; set; }
@@ -21,13 +22,14 @@ namespace Sharky.MicroTasks
 
         bool started { get; set; }
 
-        public ProxyTask(SharkyUnitData sharkyUnitData, bool enabled, float priority, MacroData macroData, string proxyName, MicroTaskData microTaskData, DebugService debugService, IIndividualMicroController individualMicroController, int desiredWorkers = 1)
+        public ProxyTask(SharkyUnitData sharkyUnitData, bool enabled, float priority, MacroData macroData, string proxyName, MicroTaskData microTaskData, DebugService debugService, ActiveUnitData activeUnitData, IIndividualMicroController individualMicroController, int desiredWorkers = 1)
         {
             SharkyUnitData = sharkyUnitData;
             Priority = priority;
             MacroData = macroData;
             ProxyName = proxyName;
             MicroTaskData = microTaskData;
+            ActiveUnitData = activeUnitData;
             DebugService = debugService;
             IndividualMicroController = individualMicroController;
 
@@ -72,23 +74,24 @@ namespace Sharky.MicroTasks
                     return;
                 }
 
-                foreach (var commander in commanders.OrderBy(c => c.Value.Claimed).ThenBy(c => c.Value.UnitCalculation.Unit.BuffIds.Count()).ThenBy(c => DistanceToResourceCenter(c)))
+                var commander = ActiveUnitData.Commanders.Values.Where(c => c.UnitRole == UnitRole.Build && c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_SCV && c.UnitCalculation.Unit.Orders.Any(o => ActiveUnitData.SelfUnits.Values.Any(s => s.Attributes.Contains(Attribute.Structure) && s.Unit.BuildProgress == 1 && o.TargetWorldSpacePos != null && s.Position.X == o.TargetWorldSpacePos.X && s.Position.Y == o.TargetWorldSpacePos.Y))).Concat(
+                    ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && !c.UnitCalculation.Unit.BuffIds.Any(b => SharkyUnitData.CarryingResourceBuffs.Contains((Buffs)b))).Where(c => (c.UnitRole == UnitRole.PreBuild || c.UnitRole == UnitRole.None || c.UnitRole == UnitRole.Minerals) && !c.UnitCalculation.Unit.Orders.Any(o => SharkyUnitData.BuildingData.Values.Any(b => (uint)b.Ability == o.AbilityId))))
+                    .OrderBy(p => Vector2.DistanceSquared(p.UnitCalculation.Position, new Vector2(MacroData.Proxies[ProxyName].Location.X, MacroData.Proxies[ProxyName].Location.Y))).FirstOrDefault();
+
+                if (commander != null)
                 {
-                    if ((!commander.Value.Claimed || commander.Value.UnitRole == UnitRole.Minerals) && commander.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && !commander.Value.UnitCalculation.Unit.BuffIds.Any(b => SharkyUnitData.CarryingResourceBuffs.Contains((Buffs)b)))
-                    {
-                        commander.Value.UnitRole = UnitRole.Proxy;
-                        commander.Value.Claimed = true;
-                        UnitCommanders.Add(commander.Value);
-                        started = true;
-                        return;
-                    }
+                    commander.UnitRole = UnitRole.Proxy;
+                    commander.Claimed = true;
+                    UnitCommanders.Add(commander);
+                    started = true;
+                    return;
                 }
             }
         }
 
         float DistanceToResourceCenter(KeyValuePair<ulong, UnitCommander> commander)
         {
-            var resourceCenter = commander.Value.UnitCalculation.NearbyAllies.FirstOrDefault(a => a.UnitClassifications.Contains(UnitClassification.ResourceCenter));
+            var resourceCenter = commander.Value.UnitCalculation.NearbyAllies.Take(25).FirstOrDefault(a => a.UnitClassifications.Contains(UnitClassification.ResourceCenter));
             if (resourceCenter != null)
             {
                 return Vector2.DistanceSquared(commander.Value.UnitCalculation.Position, resourceCenter.Position);

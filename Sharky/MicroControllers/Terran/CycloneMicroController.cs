@@ -170,7 +170,7 @@ namespace Sharky.MicroControllers.Terran
             var existingAttackOrder = commander.UnitCalculation.Unit.Orders.Where(o => o.AbilityId == (uint)Abilities.ATTACK || o.AbilityId == (uint)Abilities.ATTACK_ATTACK).FirstOrDefault();
 
 
-            var attacks = commander.UnitCalculation.NearbyEnemies.Where(u => u.Unit.DisplayType == DisplayType.Visible && AttackersFilter(commander, u) && Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position) <= 7 * 7 && !u.Unit.BuffIds.Contains((uint)Buffs.LOCKON)); // units that are in range right now
+            var attacks = commander.UnitCalculation.NearbyEnemies.Take(25).Where(u => u.Unit.DisplayType == DisplayType.Visible && AttackersFilter(commander, u) && Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position) <= 7 * 7 && !u.Unit.BuffIds.Contains((uint)Buffs.LOCKON)); // units that are in range right now
 
             UnitCalculation bestAttack = null;
             if (attacks.Count() > 0)
@@ -184,7 +184,7 @@ namespace Sharky.MicroControllers.Terran
             }
 
             // TODO: don't go attack units super far away if there are still units that can't attack this unit, but are close
-            var outOfRangeAttacks = commander.UnitCalculation.NearbyEnemies.Where(enemyAttack => Vector2.DistanceSquared(enemyAttack.Position, commander.UnitCalculation.Position) > 7 * 7 && !enemyAttack.Unit.BuffIds.Contains((uint)Buffs.LOCKON)
+            var outOfRangeAttacks = commander.UnitCalculation.NearbyEnemies.Take(25).Where(enemyAttack => Vector2.DistanceSquared(enemyAttack.Position, commander.UnitCalculation.Position) > 7 * 7 && !enemyAttack.Unit.BuffIds.Contains((uint)Buffs.LOCKON)
                 && enemyAttack.Unit.DisplayType == DisplayType.Visible && DamageService.CanDamage(commander.UnitCalculation, enemyAttack) && AttackersFilter(commander, enemyAttack));
 
             attacks = outOfRangeAttacks.Where(enemyAttack => enemyAttack.EnemiesInRange.Count() > 0);
@@ -222,7 +222,7 @@ namespace Sharky.MicroControllers.Terran
 
             if (bestAttack == null)
             {
-                attacks = commander.UnitCalculation.NearbyEnemies.Where(u => u.Unit.DisplayType == DisplayType.Visible && AttackersFilter(commander, u)); 
+                attacks = commander.UnitCalculation.NearbyEnemies.Take(25).Where(u => u.Unit.DisplayType == DisplayType.Visible && AttackersFilter(commander, u)); 
                 if (attacks.Count() > 0)
                 {
                     bestAttack = GetBestTargetFromList(commander, attacks, existingAttackOrder);

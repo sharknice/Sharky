@@ -63,7 +63,7 @@ namespace Sharky.Pathing
         Grid GetGroundGrid(int frame)
         {
             Node [,] nodes = new Node[MapData.MapWidth, MapData.MapHeight];
-            if (GroundGridLastUpdate < frame)
+            if (GroundGridLastUpdate < frame - 2)
             {
                 for (var x = 0; x < MapData.MapWidth; x++)
                 {
@@ -123,7 +123,7 @@ namespace Sharky.Pathing
         Grid GetAirGrid(int frame)
         {
             Node[,] nodes = new Node[MapData.MapWidth, MapData.MapHeight];
-            if (AirGridLastUpdate < frame)
+            if (AirGridLastUpdate < frame - 2)
             {
                 for (var x = 0; x < MapData.MapWidth; x++)
                 {
@@ -177,7 +177,7 @@ namespace Sharky.Pathing
         Grid GetUndetectedGroundGrid(int frame)
         {
             Node[,] nodes = new Node[MapData.MapWidth, MapData.MapHeight];
-            if (UndetectedGroundGridLastUpdate < frame)
+            if (UndetectedGroundGridLastUpdate < frame - 2)
             {
                 for (var x = 0; x < MapData.MapWidth; x++)
                 {

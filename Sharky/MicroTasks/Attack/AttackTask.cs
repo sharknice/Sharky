@@ -19,12 +19,13 @@ namespace Sharky.MicroTasks
         TargetingService TargetingService;
         MicroTaskData MicroTaskData;
         EnemyCleanupService EnemyCleanupService;
+        SharkyUnitData SharkyUnitData;
 
         ArmySplitter ArmySplitter;
 
         float lastFrameTime;
 
-        public AttackTask(IMicroController microController, TargetingData targetingData, ActiveUnitData activeUnitData, DefenseService defenseService, MacroData macroData, AttackData attackData, TargetingService targetingService, MicroTaskData microTaskData, ArmySplitter armySplitter, EnemyCleanupService enemyCleanupService, float priority)
+        public AttackTask(IMicroController microController, TargetingData targetingData, ActiveUnitData activeUnitData, DefenseService defenseService, MacroData macroData, AttackData attackData, TargetingService targetingService, MicroTaskData microTaskData, SharkyUnitData sharkyUnitData, ArmySplitter armySplitter, EnemyCleanupService enemyCleanupService, float priority)
         {
             MicroController = microController;
             TargetingData = targetingData;
@@ -34,6 +35,7 @@ namespace Sharky.MicroTasks
             AttackData = attackData;
             TargetingService = targetingService;
             MicroTaskData = microTaskData;
+            SharkyUnitData = sharkyUnitData;
             ArmySplitter = armySplitter;
             EnemyCleanupService = enemyCleanupService;
             Priority = priority;
@@ -42,6 +44,11 @@ namespace Sharky.MicroTasks
 
             lastFrameTime = 0;
             Enabled = true;
+        }
+
+        private void RemoveTemporaryUnits()
+        {
+            UnitCommanders.RemoveAll(u => SharkyUnitData.UndeadTypes.Contains((UnitTypes)u.UnitCalculation.Unit.UnitType));
         }
 
         public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
@@ -102,6 +109,7 @@ namespace Sharky.MicroTasks
                     actions = ArmySplitter.SplitArmy(frame, closerEnemies, TargetingData.AttackPoint, UnitCommanders, false);
                     stopwatch.Stop();
                     lastFrameTime = stopwatch.ElapsedMilliseconds;
+                    RemoveTemporaryUnits();
                     return actions;
                 }
             }
@@ -127,6 +135,7 @@ namespace Sharky.MicroTasks
                 actions = MicroController.Attack(UnitCommanders, TargetingData.AttackPoint, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame);
                 stopwatch.Stop();
                 lastFrameTime = stopwatch.ElapsedMilliseconds;
+                RemoveTemporaryUnits();
                 return actions;
             }
             else
@@ -143,6 +152,7 @@ namespace Sharky.MicroTasks
 
                 stopwatch.Stop();
                 lastFrameTime = stopwatch.ElapsedMilliseconds;
+                RemoveTemporaryUnits();
                 return actions;
             }
         }

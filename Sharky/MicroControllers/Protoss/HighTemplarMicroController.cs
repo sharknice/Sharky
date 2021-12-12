@@ -69,7 +69,7 @@ namespace Sharky.MicroControllers.Protoss
                 return true;
             }
 
-            var otherHighTemplar = commander.UnitCalculation.NearbyAllies.Where(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_HIGHTEMPLAR && a.Unit.Energy <= 40);
+            var otherHighTemplar = commander.UnitCalculation.NearbyAllies.Take(25).Where(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_HIGHTEMPLAR && a.Unit.Energy <= 40);
 
             if (otherHighTemplar.Count() > 0)
             {
@@ -97,7 +97,7 @@ namespace Sharky.MicroControllers.Protoss
             }
 
             var vector = commander.UnitCalculation.Position;
-            var enemiesInRange = commander.UnitCalculation.NearbyEnemies.Where(e => e.Unit.Energy > 1 && e.Unit.DisplayType == DisplayType.Visible && Vector2.DistanceSquared(e.Position, vector) < FeedbackRangeSquared).OrderByDescending(e => e.Unit.Energy);
+            var enemiesInRange = commander.UnitCalculation.NearbyEnemies.Take(25).Where(e => e.Unit.Energy > 1 && e.Unit.DisplayType == DisplayType.Visible && Vector2.DistanceSquared(e.Position, vector) < FeedbackRangeSquared).OrderByDescending(e => e.Unit.Energy);
 
             var oneShotKill = enemiesInRange.Where(e => e.Unit.Energy * .5 > e.Unit.Health + e.Unit.Shield).FirstOrDefault();
             if (oneShotKill != null)
@@ -133,7 +133,7 @@ namespace Sharky.MicroControllers.Protoss
                 return false;
             }
 
-            var enemies = commander.UnitCalculation.NearbyEnemies.Where(a => !a.Attributes.Contains(Attribute.Structure) && !a.Unit.BuffIds.Contains((uint)Buffs.PSISTORM)).OrderBy(u => u.Unit.Health);
+            var enemies = commander.UnitCalculation.NearbyEnemies.Take(25).Where(a => !a.Attributes.Contains(Attribute.Structure) && !a.Unit.BuffIds.Contains((uint)Buffs.PSISTORM)).OrderBy(u => u.Unit.Health);
             if (enemies.Count() > 2)
             {
                 var bestAttack = GetBestAttack(commander.UnitCalculation, enemies);
@@ -190,14 +190,14 @@ namespace Sharky.MicroControllers.Protoss
             foreach (var enemyAttack in enemies)
             {
                 int hitCount = 0;
-                foreach (var splashedEnemy in enemyAttack.NearbyAllies.Where(a => !a.Attributes.Contains(Attribute.Structure) && !a.Unit.BuffIds.Contains((uint)Buffs.PSISTORM)))
+                foreach (var splashedEnemy in enemyAttack.NearbyAllies.Take(25).Where(a => !a.Attributes.Contains(Attribute.Structure) && !a.Unit.BuffIds.Contains((uint)Buffs.PSISTORM)))
                 {
                     if (Vector2.DistanceSquared(splashedEnemy.Position, enemyAttack.Position) < (splashedEnemy.Unit.Radius + StormRadius) * (splashedEnemy.Unit.Radius + StormRadius))
                     {
                         hitCount++;
                     }
                 }
-                foreach (var splashedAlly in potentialAttack.NearbyAllies.Where(a => !a.Attributes.Contains(Attribute.Structure)))
+                foreach (var splashedAlly in potentialAttack.NearbyAllies.Take(25).Where(a => !a.Attributes.Contains(Attribute.Structure)))
                 {
                     if (Vector2.DistanceSquared(splashedAlly.Position, enemyAttack.Position) < (splashedAlly.Unit.Radius + StormRadius) * (splashedAlly.Unit.Radius + StormRadius))
                     {

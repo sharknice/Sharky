@@ -3,6 +3,7 @@ using Sharky.Pathing;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
@@ -24,8 +25,6 @@ namespace Sharky.Managers
         float AvoidRange = 1;
 
         ActiveUnitData ActiveUnitData;
-
-        List<UnitTypes> UndeadTypes;
 
         int TargetPriorityCalculationFrame;
 
@@ -51,8 +50,6 @@ namespace Sharky.Managers
             ActiveUnitData.DeadUnits = new List<ulong>();
 
             TargetPriorityCalculationFrame = 0;
-
-            UndeadTypes = new List<UnitTypes> { UnitTypes.ZERG_BROODLING, UnitTypes.ZERG_EGG, UnitTypes.ZERG_LARVA, UnitTypes.TERRAN_KD8CHARGE, UnitTypes.ZERG_OVERLORD, UnitTypes.ZERG_OVERLORDCOCOON, UnitTypes.ZERG_OVERLORDTRANSPORT, UnitTypes.ZERG_TRANSPORTOVERLORDCOCOON };
         }
 
         public override bool NeverSkip { get { return true; } }
@@ -110,15 +107,15 @@ namespace Sharky.Managers
                 ActiveUnitData.Commanders.TryRemove(tag, out UnitCommander removedCommander);
             }
 
-            foreach (var unit in ActiveUnitData.EnemyUnits.Where(u => UndeadTypes.Contains((UnitTypes)u.Value.Unit.UnitType)))
+            foreach (var unit in ActiveUnitData.EnemyUnits.Where(u => SharkyUnitData.UndeadTypes.Contains((UnitTypes)u.Value.Unit.UnitType)))
             {
                 ActiveUnitData.EnemyUnits.TryRemove(unit.Key, out UnitCalculation removed);
             }
-            foreach (var unit in ActiveUnitData.SelfUnits.Where(u => UndeadTypes.Contains((UnitTypes)u.Value.Unit.UnitType)))
+            foreach (var unit in ActiveUnitData.SelfUnits.Where(u => SharkyUnitData.UndeadTypes.Contains((UnitTypes)u.Value.Unit.UnitType)))
             {
                 ActiveUnitData.SelfUnits.TryRemove(unit.Key, out UnitCalculation removed);
             }
-            foreach (var unit in ActiveUnitData.Commanders.Where(u => UndeadTypes.Contains((UnitTypes)u.Value.UnitCalculation.Unit.UnitType)))
+            foreach (var unit in ActiveUnitData.Commanders.Where(u => SharkyUnitData.UndeadTypes.Contains((UnitTypes)u.Value.UnitCalculation.Unit.UnitType)))
             {
                 ActiveUnitData.Commanders.TryRemove(unit.Key, out UnitCommander removed);
             }

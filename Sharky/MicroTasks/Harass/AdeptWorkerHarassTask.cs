@@ -82,13 +82,13 @@ namespace Sharky.MicroTasks
                             commands.AddRange(action);
                         }
 
-                        if (!commander.UnitCalculation.NearbyEnemies.Any(e => Vector2.DistanceSquared(new Vector2(harassInfo.BaseLocation.MineralLineLocation.X, harassInfo.BaseLocation.MineralLineLocation.Y), e.Position) < 100))
+                        if (!commander.UnitCalculation.NearbyEnemies.Take(25).Any(e => Vector2.DistanceSquared(new Vector2(harassInfo.BaseLocation.MineralLineLocation.X, harassInfo.BaseLocation.MineralLineLocation.Y), e.Position) < 100))
                         {
                             harassInfo.LastClearedFrame = frame;
                             changeBases = true;
                             return commands;
                         }
-                        else if (commander.UnitCalculation.NearbyEnemies.Any(e => Vector2.DistanceSquared(new Vector2(harassInfo.BaseLocation.MineralLineLocation.X, harassInfo.BaseLocation.MineralLineLocation.Y), e.Position) < 100))
+                        else if (commander.UnitCalculation.NearbyEnemies.Take(25).Any(e => Vector2.DistanceSquared(new Vector2(harassInfo.BaseLocation.MineralLineLocation.X, harassInfo.BaseLocation.MineralLineLocation.Y), e.Position) < 100))
                         {                       
                             if (commander.UnitCalculation.TargetPriorityCalculation.GroundWinnability < 1 && commander.UnitCalculation.Unit.Shield < commander.UnitCalculation.Unit.ShieldMax)
                             {
@@ -99,7 +99,7 @@ namespace Sharky.MicroTasks
                             }
                         }
                     }
-                    else if (commander.UnitCalculation.NearbyEnemies.Any(e => !e.Unit.IsFlying && (e.Unit.Health + e.Unit.Shield < commander.UnitCalculation.Damage) && Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position) < 8))  // if undetected and near one hit kills just kill them
+                    else if (commander.UnitCalculation.NearbyEnemies.Take(25).Any(e => !e.Unit.IsFlying && (e.Unit.Health + e.Unit.Shield < commander.UnitCalculation.Damage) && Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position) < 8))  // if undetected and near one hit kills just kill them
                     {
                         var action = AdeptMicroController.HarassWorkers(commander, harassInfo.BaseLocation.MineralLineLocation, TargetingData.ForwardDefensePoint, frame);
                         if (action != null)
@@ -113,16 +113,6 @@ namespace Sharky.MicroTasks
                         if (action != null)
                         {
                             commands.AddRange(action);
-                        }
-
-                        if (commander.RetreatPath.Count() == 0)
-                        {
-                            if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Detector) && Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position) < 120))
-                            {
-                                harassInfo.LastPathFailedFrame = frame;
-                                harassInfo.Harassers.Remove(commander);
-                                return commands;
-                            }
                         }
                     }
                 }

@@ -23,7 +23,7 @@ namespace SharkyExampleBot.Builds
             ProxyLocationService = defaultSharkyBot.ProxyLocationService;
 
             OpeningAttackChatSent = false;
-            ProxyTask = new ProxyTask(defaultSharkyBot.SharkyUnitData, false, 0.9f, MacroData, string.Empty, MicroTaskData, defaultSharkyBot.DebugService, scvMicroController);
+            ProxyTask = new ProxyTask(defaultSharkyBot.SharkyUnitData, false, 0.9f, MacroData, string.Empty, defaultSharkyBot.MicroTaskData, defaultSharkyBot.DebugService, defaultSharkyBot.ActiveUnitData, scvMicroController);
             ProxyTask.ProxyName = GetType().Name;
         }
 

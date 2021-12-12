@@ -78,7 +78,7 @@ namespace Sharky.MicroTasks.Mining
                         }
                         else
                         {
-                            var touchingWorker = worker.UnitCalculation.NearbyAllies.Any(w => Vector2.DistanceSquared(workerVector, w.Position) < .5);
+                            var touchingWorker = worker.UnitCalculation.NearbyAllies.Take(25).Any(w => Vector2.DistanceSquared(workerVector, w.Position) < .5);
                             if (touchingWorker || Vector2.DistanceSquared(mineralVector, workerVector) < 4)
                             {
                                 var action = worker.Order(frame, Abilities.HARVEST_GATHER, null, miningInfo.ResourceUnit.Tag, false);

@@ -44,7 +44,7 @@ namespace Sharky.MicroControllers.Terran
             {
                 if (commander.UnitCalculation.NearbyAllies.Count() >= 5)
                 {
-                    var target = commander.UnitCalculation.NearbyEnemies.Where(e => !e.Unit.BuffIds.Contains((uint)Buffs.INTERFERENCEMATRIX) &&
+                    var target = commander.UnitCalculation.NearbyEnemies.Take(25).Where(e => !e.Unit.BuffIds.Contains((uint)Buffs.INTERFERENCEMATRIX) &&
                         (e.Unit.UnitType == (uint)UnitTypes.ZERG_VIPER || e.Unit.UnitType == (uint)UnitTypes.ZERG_INFESTOR ||
                         e.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED || e.Unit.UnitType == (uint)UnitTypes.TERRAN_RAVEN ||
                         e.Unit.UnitType == (uint)UnitTypes.PROTOSS_IMMORTAL || e.Unit.UnitType == (uint)UnitTypes.PROTOSS_COLOSSUS || e.Unit.UnitType == (uint)UnitTypes.PROTOSS_CARRIER || e.Unit.UnitType == (uint)UnitTypes.PROTOSS_TEMPEST || e.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISM || e.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISMPHASING)

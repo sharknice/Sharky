@@ -34,7 +34,7 @@ namespace SharkyExampleBot.Builds
             OpeningAttackChatSent = false;
             CancelledProxyChatSent = false;
 
-            ProxyTask = new ProxyTask(SharkyUnitData, false, 0.9f, MacroData, string.Empty, MicroTaskData, defaultSharkyBot.DebugService, probeMicroController);
+            ProxyTask = new ProxyTask(SharkyUnitData, false, 0.9f, MacroData, string.Empty, MicroTaskData, defaultSharkyBot.DebugService, defaultSharkyBot.ActiveUnitData, probeMicroController);
             ProxyTask.ProxyName = GetType().Name;
         }
 

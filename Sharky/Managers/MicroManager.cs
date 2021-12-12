@@ -24,10 +24,7 @@ namespace Sharky.Managers
             var actions = new List<Action>();
             foreach (var microTask in MicroTaskData.MicroTasks.Values.Where(m => m.Enabled).OrderBy(m => m.Priority))
             {
-                foreach (var tag in ActiveUnitData.DeadUnits)
-                {
-                    microTask.UnitCommanders.RemoveAll(c => c.UnitCalculation.Unit.Tag == tag);
-                }
+                microTask.RemoveDeadUnits(ActiveUnitData.DeadUnits);
 
                 microTask.ClaimUnits(ActiveUnitData.Commanders);
                 if (!SkipFrame)

@@ -19,7 +19,7 @@ namespace Sharky.MicroTasks.Attack
         {
             if (commanders.Count() == 0) { return null; }
 
-            var winners = commanders.Where(u => u.UnitCalculation.TargetPriorityCalculation.Overwhelm && u.UnitCalculation.NearbyEnemies.Count() > 0 && !u.UnitCalculation.NearbyAllies.Any(a => !a.TargetPriorityCalculation.Overwhelm) && u.UnitCalculation.NearbyEnemies.All(e => e.FrameLastSeen == frame));
+            var winners = commanders.Where(u => u.UnitCalculation.TargetPriorityCalculation.Overwhelm && u.UnitCalculation.NearbyEnemies.Count() > 0 && !u.UnitCalculation.NearbyAllies.Take(25).Any(a => !a.TargetPriorityCalculation.Overwhelm) && u.UnitCalculation.NearbyEnemies.All(e => e.FrameLastSeen == frame));
             if (winners.Count() > 0)
             {
                 var defenseVector = new Vector2(defensivePoint.X, defensivePoint.Y);

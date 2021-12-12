@@ -43,6 +43,8 @@ namespace Sharky
         public HashSet<UnitTypes> ResourceCenterTypes { get; set; }
         public HashSet<UnitTypes> DefensiveStructureTypes { get; set; }
 
+        public HashSet<UnitTypes> UndeadTypes { get; set; }
+
         public Dictionary<Abilities, float> AbilityCooldownTimes { get; set; }
         public Dictionary<Abilities, float> WarpInCooldownTimes { get; set; }
 

@@ -94,7 +94,7 @@ namespace Sharky.Pathing
             //}
 
             stopwatch.Stop();
-            System.Console.WriteLine($"Generated Chokepoints in {stopwatch.ElapsedMilliseconds} ms");
+            //System.Console.WriteLine($"Generated Chokepoints in {stopwatch.ElapsedMilliseconds} ms");
 
             return chokePoints;
         }

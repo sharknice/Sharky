@@ -55,8 +55,13 @@ namespace Sharky
             }
 
             Console.WriteLine($"Result: {result}");
-            Console.WriteLine($"Total Frames: {observation.Observation.GameLoop} {FrameToTimeConverter.GetTime((int)observation.Observation.GameLoop)}");
-            Console.WriteLine($"Average Frame Time: {TotalFrameTime/ observation.Observation.GameLoop}");
+            var frames = 150;
+            if (observation != null)
+            {
+                frames = (int)observation.Observation.GameLoop;
+            }
+            Console.WriteLine($"Total Frames: {frames} {FrameToTimeConverter.GetTime(frames)}");
+            Console.WriteLine($"Average Frame Time: {TotalFrameTime/ frames}");
         }
 
         public IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
@@ -90,6 +95,11 @@ namespace Sharky
                     if (managerTime > 1)
                     {
                         manager.SkipFrame = true;
+                    }
+                    if (managerTime > 1000)
+                    {
+                        System.Console.WriteLine($"{observation.Observation.GameLoop} {manager.GetType().Name} {managerTime}");
+                        //DebugService.DrawText($"{manager.GetType().Name}: {managerTime}");
                     }
                 }
 

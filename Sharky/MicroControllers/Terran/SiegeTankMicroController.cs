@@ -32,12 +32,12 @@ namespace Sharky.MicroControllers.Terran
 
             if (bestTarget != null && WeaponReady(commander, frame) && commander.UnitCalculation.EnemiesInRange.Any(e => e.Unit.Tag == bestTarget.Unit.Tag)) { return false; }
 
-            var enemiesInSiegeRange = commander.UnitCalculation.NearbyEnemies.Where(e => !e.Unit.IsFlying && 
+            var enemiesInSiegeRange = commander.UnitCalculation.NearbyEnemies.Take(25).Where(e => !e.Unit.IsFlying && 
                 (e.Damage > 0 || Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position) < 12 * 12) && // get a little bit closer to buildings
                 Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position) <= (13 + e.Unit.Radius + commander.UnitCalculation.Unit.Radius) * (13 + e.Unit.Radius + commander.UnitCalculation.Unit.Radius));
             if (enemiesInSiegeRange.Any(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED) || enemiesInSiegeRange.Sum(e => e.Unit.Health + e.Unit.Shield) > 50)
             {
-                var enemiesTooClose = commander.UnitCalculation.NearbyEnemies.Where(e => !e.Unit.IsFlying && e.Damage > 0 &&
+                var enemiesTooClose = commander.UnitCalculation.NearbyEnemies.Take(25).Where(e => !e.Unit.IsFlying && e.Damage > 0 &&
                     Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position) <= (2 + e.Unit.Radius + commander.UnitCalculation.Unit.Radius) * (2 + e.Unit.Radius + commander.UnitCalculation.Unit.Radius));
 
                 if (enemiesTooClose.Count() > enemiesInSiegeRange.Count() - enemiesTooClose.Count()) { return false; }

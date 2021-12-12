@@ -39,7 +39,7 @@ namespace Sharky.MicroControllers.Terran
         {
             action = null;
 
-            var nearbyBunkers = commander.UnitCalculation.NearbyAllies.Where(u => u.Unit.UnitType == (uint)UnitTypes.TERRAN_BUNKER && u.Unit.BuildProgress == 1);
+            var nearbyBunkers = commander.UnitCalculation.NearbyAllies.Take(25).Where(u => u.Unit.UnitType == (uint)UnitTypes.TERRAN_BUNKER && u.Unit.BuildProgress == 1);
             foreach (var bunker in nearbyBunkers)
             {
                 if (bunker.Unit.CargoSpaceMax - bunker.Unit.CargoSpaceTaken >= UnitDataService.CargoSize((UnitTypes)commander.UnitCalculation.Unit.UnitType))

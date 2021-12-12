@@ -100,7 +100,7 @@ namespace Sharky.MicroTasks
 
                 if ((commander.UnitCalculation.Unit.Energy > 50 || commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.ORACLEWEAPON))
                     && commander.UnitCalculation.EnemiesInRangeOfAvoid.Count() == 0 &&
-                    (commander.UnitCalculation.EnemiesInRange.Count(e => e.UnitClassifications.Contains(UnitClassification.Worker)) > 1 || (commander.UnitCalculation.NearbyEnemies.Count(e => e.UnitClassifications.Contains(UnitClassification.Worker)) > 2 && commander.UnitCalculation.NearbyEnemies.Count(e => e.DamageAir && e.Unit.BuildProgress == 1) == 0)))
+                    (commander.UnitCalculation.EnemiesInRange.Take(25).Count(e => e.UnitClassifications.Contains(UnitClassification.Worker)) > 1 || (commander.UnitCalculation.NearbyEnemies.Take(25).Count(e => e.UnitClassifications.Contains(UnitClassification.Worker)) > 2 && !commander.UnitCalculation.NearbyEnemies.Take(25).Any(e => e.DamageAir && e.Unit.BuildProgress == 1))))
                 {
                     var action = OracleMicroController.HarassWorkers(commander, Target, defensivePoint, frame);
                     if (action != null)
@@ -200,11 +200,11 @@ namespace Sharky.MicroTasks
             {
                 return false;
             }
-            if (commander.UnitCalculation.NearbyEnemies.Count(e => e.UnitClassifications.Contains(UnitClassification.Worker) && (Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position) <= 100)) < 1 && MapDataService.SelfVisible(new Point2D { X = target.X, Y = target.Y, }))
+            if (MapDataService.SelfVisible(new Point2D { X = target.X, Y = target.Y, }) && !commander.UnitCalculation.NearbyEnemies.Take(25).Any(e => e.UnitClassifications.Contains(UnitClassification.Worker) && (Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position) <= 100)))
             {
                 return false;
             }
-            if (commander.UnitCalculation.Unit.Shield <= 5 || (commander.UnitCalculation.Unit.Shield < commander.UnitCalculation.Unit.ShieldMax && commander.UnitCalculation.NearbyEnemies.Where(e => !e.Attributes.Contains(Attribute.Structure) && e.DamageAir).Sum(e => e.Damage) * 3 > commander.UnitCalculation.Unit.Shield))
+            if (commander.UnitCalculation.Unit.Shield <= 5 || (commander.UnitCalculation.Unit.Shield < commander.UnitCalculation.Unit.ShieldMax && commander.UnitCalculation.NearbyEnemies.Take(25).Where(e => !e.Attributes.Contains(Attribute.Structure) && e.DamageAir).Sum(e => e.Damage) * 3 > commander.UnitCalculation.Unit.Shield))
             {
                 return false;
             }

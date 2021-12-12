@@ -130,7 +130,7 @@ namespace Sharky.MicroControllers
         {
             if (supportableUnits == null)
             {
-                supportableUnits = ActiveUnitData.SelfUnits.Values.Where(u => u.Unit.UnitType != commander.UnitCalculation.Unit.UnitType && u.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !u.Unit.IsHallucination);
+                supportableUnits = ActiveUnitData.SelfUnits.Values.Where(u => u.Unit.UnitType != commander.UnitCalculation.Unit.UnitType && u.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !u.Unit.IsHallucination).Take(25);
             }
 
             // no allies that already have a friendly observer within 4 range

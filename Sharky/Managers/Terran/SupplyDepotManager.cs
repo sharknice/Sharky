@@ -50,7 +50,7 @@ namespace Sharky.Managers.Terran
 
         bool WinningGround(UnitCommander unitCommander)
         {
-            if (unitCommander.UnitCalculation.NearbyAllies.All(a => a.TargetPriorityCalculation.GroundWinnability > 1) && unitCommander.UnitCalculation.NearbyAllies.Any(a => a.UnitClassifications.Contains(UnitClassification.ArmyUnit) && a.NearbyEnemies.Count() == unitCommander.UnitCalculation.NearbyEnemies.Count()))
+            if (unitCommander.UnitCalculation.NearbyAllies.Take(25).All(a => a.TargetPriorityCalculation.GroundWinnability > 1) && unitCommander.UnitCalculation.NearbyAllies.Take(25).Any(a => a.UnitClassifications.Contains(UnitClassification.ArmyUnit) && a.NearbyEnemies.Count() == unitCommander.UnitCalculation.NearbyEnemies.Count()))
             {
                 return true;
             }
@@ -59,7 +59,7 @@ namespace Sharky.Managers.Terran
 
         bool LosingGround(UnitCommander unitCommander)
         {
-            if (!unitCommander.UnitCalculation.NearbyAllies.Any(a => a.UnitClassifications.Contains(UnitClassification.ArmyUnit)) || unitCommander.UnitCalculation.NearbyAllies.Any(a => a.TargetPriorityCalculation.GroundWinnability < 1))
+            if (!unitCommander.UnitCalculation.NearbyAllies.Take(25).Any(a => a.UnitClassifications.Contains(UnitClassification.ArmyUnit)) || unitCommander.UnitCalculation.NearbyAllies.Take(25).Any(a => a.TargetPriorityCalculation.GroundWinnability < 1))
             {
                 return true;
             }

@@ -75,7 +75,7 @@ namespace Sharky.MicroControllers.Terran
             }
 
             // if there are nearby enemies keep some tanks seieged to cover as the others move forward
-            if (commander.UnitCalculation.NearbyEnemies.Count(e => !e.Unit.IsFlying) > 0) 
+            if (commander.UnitCalculation.NearbyEnemies.Any(e => !e.Unit.IsFlying)) 
             {
                 var unseiged = commander.UnitCalculation.NearbyAllies.Count(u => u.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANK);
                 var seiged = commander.UnitCalculation.NearbyAllies.Count(u => u.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED);
@@ -120,7 +120,7 @@ namespace Sharky.MicroControllers.Terran
                         dpsReduction += splashedEnemy.Dps / (GetDamage(weapon, splashedEnemy.Unit, SharkyUnitData.UnitData[(UnitTypes)splashedEnemy.Unit.UnitType]) * .25f);
                     }
                 }
-                foreach (var splashedFriendly in commander.UnitCalculation.NearbyAllies.Where(e => !e.Unit.IsFlying))
+                foreach (var splashedFriendly in commander.UnitCalculation.NearbyAllies.Take(25).Where(e => !e.Unit.IsFlying))
                 {
                     if (Vector2.DistanceSquared(splashedFriendly.Position, enemyAttack.Position) < (splashedFriendly.Unit.Radius + innerSplashRadius) * (splashedFriendly.Unit.Radius + innerSplashRadius))
                     {

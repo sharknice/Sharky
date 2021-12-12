@@ -46,5 +46,13 @@ namespace Sharky.MicroTasks
 
             Enabled = false;
         }
+
+        public virtual void RemoveDeadUnits(List<ulong> deadUnits)
+        {
+            foreach (var tag in deadUnits)
+            {
+                UnitCommanders.RemoveAll(c => c.UnitCalculation.Unit.Tag == tag);
+            }
+        }
     }
 }

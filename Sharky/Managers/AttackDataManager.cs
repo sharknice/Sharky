@@ -66,7 +66,7 @@ namespace Sharky.Managers
             }
 
             // attack if no workers mining minerals or if no bases
-            if (!BaseData.SelfBases.Any(b => b.GasMiningInfo.Any(m => m.Workers.Count() > 0)))
+            if (!BaseData.SelfBases.Any(b => b.MineralMiningInfo.Any(m => m.Workers.Count() > 0)))
             {
                 AttackData.Attacking = true;
                 DebugService.DrawText("Attacking: no base");

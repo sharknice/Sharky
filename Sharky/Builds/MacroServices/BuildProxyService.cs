@@ -32,7 +32,7 @@ namespace Sharky.Builds.MacroServices
         {
             var commands = new List<Action>();
 
-            if (lastFailFrame < MacroData.Frame - 100)
+            if (MacroData.Minerals >= 100 && lastFailFrame < MacroData.Frame - 100)
             {
                 var unitData = SharkyUnitData.BuildingData[UnitTypes.PROTOSS_PYLON];
                 var orderedBuildings = ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));

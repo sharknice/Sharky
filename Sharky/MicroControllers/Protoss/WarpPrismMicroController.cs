@@ -179,7 +179,7 @@ namespace Sharky.MicroControllers.Protoss
             {
                 return false;
             }
-            if (commander.UnitCalculation.Unit.Shield > 25 && !commander.UnitCalculation.NearbyAllies.Any(v => (v.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON || v.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISMPHASING) && DistanceSquared(commander.UnitCalculation, v) < 400)) // not near any pylons or other warping prisms
+            if (commander.UnitCalculation.Unit.Shield > 25 && !commander.UnitCalculation.NearbyAllies.Take(25).Any(v => (v.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON || v.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISMPHASING) && DistanceSquared(commander.UnitCalculation, v) < 400)) // not near any pylons or other warping prisms
             {
                 if (commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISM)
                 {
@@ -196,7 +196,7 @@ namespace Sharky.MicroControllers.Protoss
 
             if (commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISMPHASING)
             {
-                if (commander.UnitCalculation.NearbyAllies.Any(v => v.Unit.BuildProgress < 1 && Vector2.DistanceSquared(v.Position, commander.UnitCalculation.Position) < 49)) // and not warping any units in
+                if (commander.UnitCalculation.NearbyAllies.Take(25).Any(v => v.Unit.BuildProgress < 1 && Vector2.DistanceSquared(v.Position, commander.UnitCalculation.Position) < 49)) // and not warping any units in
                 {
                     return false;
                 }
@@ -218,7 +218,7 @@ namespace Sharky.MicroControllers.Protoss
 
             if (friendly.Unit.UnitType == (uint)UnitTypes.PROTOSS_DISRUPTOR)
             {
-                if (friendly.Unit.Shield != friendly.Unit.ShieldMax && ActiveUnitData.Commanders.ContainsKey(friendly.Unit.Tag) && (!friendly.NearbyAllies.Any(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_DISRUPTORPHASED) || ActiveUnitData.Commanders[friendly.Unit.Tag].AbilityOffCooldown(Abilities.EFFECT_PURIFICATIONNOVA, frame, SharkyOptions.FramesPerSecond, SharkyUnitData)))
+                if (friendly.Unit.Shield != friendly.Unit.ShieldMax && ActiveUnitData.Commanders.ContainsKey(friendly.Unit.Tag) && (!friendly.NearbyAllies.Take(25).Any(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_DISRUPTORPHASED) || ActiveUnitData.Commanders[friendly.Unit.Tag].AbilityOffCooldown(Abilities.EFFECT_PURIFICATIONNOVA, frame, SharkyOptions.FramesPerSecond, SharkyUnitData)))
                 {
                     return true;
                 }
@@ -227,11 +227,11 @@ namespace Sharky.MicroControllers.Protoss
             {
                 return true;
             }
-            else if (friendly.NearbyAllies.Any(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_DISRUPTORPHASED && Vector2.DistanceSquared(friendly.Position, e.Position) < 10))
+            else if (friendly.NearbyAllies.Take(25).Any(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_DISRUPTORPHASED && Vector2.DistanceSquared(friendly.Position, e.Position) < 10))
             {
                 return true;
             }
-            else if (friendly.NearbyEnemies.Any(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_DISRUPTORPHASED && Vector2.DistanceSquared(friendly.Position, e.Position) < 10))
+            else if (friendly.NearbyEnemies.Take(25).Any(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_DISRUPTORPHASED && Vector2.DistanceSquared(friendly.Position, e.Position) < 10))
             {
                 return true;
             }
@@ -423,7 +423,7 @@ namespace Sharky.MicroControllers.Protoss
 
             if (commander.UnitCalculation.Unit.CargoSpaceMax > commander.UnitCalculation.Unit.CargoSpaceTaken && commander.UnitCalculation.Unit.Shield + commander.UnitCalculation.Unit.Health > 50) // find more units to load
             {
-                var friendly = commander.UnitCalculation.NearbyAllies.Where(u => !u.Unit.IsFlying && u.Unit.BuildProgress == 1 && u.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !commander.UnitCalculation.Unit.Passengers.Any(p => p.Tag == u.Unit.Tag) && commander.UnitCalculation.Unit.CargoSpaceMax - commander.UnitCalculation.Unit.CargoSpaceTaken >= UnitDataService.CargoSize((UnitTypes)u.Unit.UnitType) && u.EnemiesInRange.Count == 0 && u.EnemiesInRangeOf.Count == 0).OrderBy(u => Vector2.DistanceSquared(commander.UnitCalculation.Position, u.Position)).FirstOrDefault();
+                var friendly = commander.UnitCalculation.NearbyAllies.Take(25).Where(u => !u.Unit.IsFlying && u.Unit.BuildProgress == 1 && u.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !commander.UnitCalculation.Unit.Passengers.Any(p => p.Tag == u.Unit.Tag) && commander.UnitCalculation.Unit.CargoSpaceMax - commander.UnitCalculation.Unit.CargoSpaceTaken >= UnitDataService.CargoSize((UnitTypes)u.Unit.UnitType) && u.EnemiesInRange.Count == 0 && u.EnemiesInRangeOf.Count == 0).OrderBy(u => Vector2.DistanceSquared(commander.UnitCalculation.Position, u.Position)).FirstOrDefault();
 
                 if (friendly != null)
                 {

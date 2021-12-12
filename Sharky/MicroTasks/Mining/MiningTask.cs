@@ -384,7 +384,7 @@ namespace Sharky.MicroTasks
                         actions.AddRange(action);
                     }
                 }
-                else if (worker.UnitCalculation.NearbyEnemies.Any() && worker.UnitCalculation.NearbyAllies.Any(a => a.Attributes.Contains(SC2APIProtocol.Attribute.Structure)))
+                else if (worker.UnitCalculation.NearbyEnemies.Any() && worker.UnitCalculation.NearbyAllies.Take(25).Any(a => a.Attributes.Contains(SC2APIProtocol.Attribute.Structure)))
                 {
                     var attackTask = MicroTaskData.MicroTasks["AttackTask"];
                     if (attackTask.Enabled)
@@ -434,7 +434,7 @@ namespace Sharky.MicroTasks
                 if (attackTask.Enabled)
                 {
                     var tags = new List<ulong>();
-                    foreach (var worker in attackTask.UnitCommanders.Where(u => u.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && (u.UnitCalculation.NearbyEnemies.Count() == 0 || !u.UnitCalculation.NearbyAllies.Any(a => a.Attributes.Contains(SC2APIProtocol.Attribute.Structure))) && u.UnitRole == UnitRole.Attack))
+                    foreach (var worker in attackTask.UnitCommanders.Where(u => u.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && (u.UnitCalculation.NearbyEnemies.Count() == 0 || !u.UnitCalculation.NearbyAllies.Take(25).Any(a => a.Attributes.Contains(SC2APIProtocol.Attribute.Structure))) && u.UnitRole == UnitRole.Attack))
                     {
                         worker.UnitRole = UnitRole.None;
                         worker.Claimed = false;

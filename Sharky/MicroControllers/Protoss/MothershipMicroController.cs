@@ -64,7 +64,7 @@ namespace Sharky.MicroControllers.Protoss
 
         Point2D GetTimeWarpLocation(UnitCommander commander)
         {
-            var enemiesInRange = commander.UnitCalculation.NearbyEnemies.Where(e => !e.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position) < TimeWarpRange * TimeWarpRange);
+            var enemiesInRange = commander.UnitCalculation.NearbyEnemies.Take(25).Where(e => !e.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position) < TimeWarpRange * TimeWarpRange);
 
             var damageCounts = new Dictionary<Point, float>();
             foreach (var enemyAttack in commander.UnitCalculation.NearbyEnemies)

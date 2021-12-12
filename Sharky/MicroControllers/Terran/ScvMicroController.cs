@@ -30,7 +30,7 @@ namespace Sharky.MicroControllers.Terran
             }
             if (repairTargets == null || repairTargets.Count() == 0)
             {
-                repairTargets = commander.UnitCalculation.NearbyAllies.Where(a => a.Attributes.Contains(Attribute.Mechanical) && a.Unit.BuildProgress == 1 && a.Unit.Health < a.Unit.HealthMax).OrderByDescending(a => a.Unit.HealthMax - a.Unit.Health);
+                repairTargets = commander.UnitCalculation.NearbyAllies.Take(25).Where(a => a.Attributes.Contains(Attribute.Mechanical) && a.Unit.BuildProgress == 1 && a.Unit.Health < a.Unit.HealthMax).OrderByDescending(a => a.Unit.HealthMax - a.Unit.Health);
             }
 
             var repairTarget = repairTargets.FirstOrDefault(a => Vector2.DistanceSquared(a.Position, commander.UnitCalculation.Position) <= (a.Unit.Radius + commander.UnitCalculation.Unit.Radius + commander.UnitCalculation.Range) * (a.Unit.Radius + commander.UnitCalculation.Unit.Radius + commander.UnitCalculation.Range));

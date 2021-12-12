@@ -46,7 +46,7 @@ namespace Sharky.Builds
 
         protected void SendProbeForFirstPylon(int frame)
         {
-            if (MacroData.FoodUsed == 13 && MacroData.Minerals > 50 && UnitCountService.Count(UnitTypes.PROTOSS_PYLON) == 0)
+            if (MacroData.FoodUsed == 14 && MacroData.Minerals > 24 && UnitCountService.Count(UnitTypes.PROTOSS_PYLON) == 0)
             {
                 PrePositionBuilderTask.SendBuilder(TargetingData.ForwardDefensePoint, frame);
             }

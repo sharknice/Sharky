@@ -76,7 +76,7 @@ namespace Sharky.MicroTasks.Macro
                         continue;
                     }
 
-                    var enemyWorker = commander.UnitCalculation.NearbyEnemies.FirstOrDefault(e => e.UnitClassifications.Contains(UnitClassification.Worker) && e.FrameLastSeen == frame);
+                    var enemyWorker = commander.UnitCalculation.NearbyEnemies.Take(25).FirstOrDefault(e => e.UnitClassifications.Contains(UnitClassification.Worker) && e.FrameLastSeen == frame);
                     if (enemyWorker != null)
                     {
                         var attack = commander.Order(frame, Abilities.ATTACK, targetTag: enemyWorker.Unit.Tag);

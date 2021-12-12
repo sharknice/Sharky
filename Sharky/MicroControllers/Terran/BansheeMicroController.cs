@@ -43,7 +43,7 @@ namespace Sharky.MicroControllers.Terran
 
             if (MapDataService.InEnemyDetection(commander.UnitCalculation.Unit.Pos))
             {
-                if (commander.UnitCalculation.NearbyEnemies.Count(e => e.DamageAir) > 0)
+                if (commander.UnitCalculation.NearbyEnemies.Any(e => e.DamageAir))
                 {
                     if (commander.RetreatPathFrame + 20 < frame)
                     {

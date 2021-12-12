@@ -2,6 +2,7 @@
 using Sharky.DefaultBot;
 using Sharky.Pathing;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Sharky.MicroControllers.Zerg
 {
@@ -17,6 +18,11 @@ namespace Sharky.MicroControllers.Zerg
         {
             List<SC2APIProtocol.Action> action = null;
 
+            if (commander.UnitCalculation.Unit.Orders.Any(o => o.HasTargetUnitTag))
+            {
+                return action;
+            }
+
             var bestTarget = GetBestTarget(commander, target, frame);
 
             if (AttackBestTarget(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
@@ -31,7 +37,7 @@ namespace Sharky.MicroControllers.Zerg
 
         public override List<Action> Support(UnitCommander commander, IEnumerable<UnitCommander> supportTargets, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
-            return Attack(commander, defensivePoint, defensivePoint, groupCenter, frame);
+            return Attack(commander, target, defensivePoint, groupCenter, frame);
         }
 
         public override List<Action> Idle(UnitCommander commander, Point2D defensivePoint, int frame)

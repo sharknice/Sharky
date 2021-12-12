@@ -111,11 +111,11 @@ namespace Sharky.MicroControllers.Protoss
 
         Point2D GetBestRevelationLocation(UnitCommander commander)
         {
-            var enemiesInRange = commander.UnitCalculation.NearbyEnemies.Where(e => !e.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position) < RevelationRange * RevelationRange);
+            var enemiesInRange = commander.UnitCalculation.NearbyEnemies.Take(25).Where(e => !e.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position) < RevelationRange * RevelationRange);
 
             if (enemiesInRange.Count() == 0)
             {
-                enemiesInRange = commander.UnitCalculation.NearbyEnemies.Where(e => !e.Attributes.Contains(SC2APIProtocol.Attribute.Structure));
+                enemiesInRange = commander.UnitCalculation.NearbyEnemies.Take(25).Where(e => !e.Attributes.Contains(SC2APIProtocol.Attribute.Structure));
                 if (enemiesInRange.Count() == 0)
                 {
                     return null;
@@ -123,7 +123,7 @@ namespace Sharky.MicroControllers.Protoss
             }
 
             var hitCounts = new Dictionary<Point, float>();
-            foreach (var enemyAttack in commander.UnitCalculation.NearbyEnemies)
+            foreach (var enemyAttack in commander.UnitCalculation.NearbyEnemies.Take(25))
             {
                 float hits = 0;
                 foreach (var hitEnemy in enemiesInRange)

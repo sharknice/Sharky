@@ -31,7 +31,7 @@ namespace Sharky.MicroControllers
                 var enemyWorker = enemyWorkers.OrderBy(e => e.Unit.Health).First();
                 return commander.Order(frame, Abilities.ATTACK, null, enemyWorker.Unit.Tag);
             }
-            var enemyBuildings = commander.UnitCalculation.NearbyEnemies.Where(u => u.Attributes.Contains(Attribute.Structure)).OrderBy(b => b.Unit.Health);
+            var enemyBuildings = commander.UnitCalculation.NearbyEnemies.Take(25).Where(u => u.Attributes.Contains(Attribute.Structure)).OrderBy(b => b.Unit.Health);
             if (enemyBuildings.Count() > 0)
             {
                 var pylon = enemyBuildings.Where(b => b.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON).FirstOrDefault();

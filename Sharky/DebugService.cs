@@ -11,6 +11,7 @@ namespace Sharky
 
         public Request DrawRequest { get; set; }
         public Request SpawnRequest { get; set; }
+        public bool Surrender { get; private set; }
 
         public DebugService(SharkyOptions sharkyOptions)
         {
@@ -131,6 +132,11 @@ namespace Sharky
             };
             SpawnRequest.Action = new RequestAction();
             SpawnRequest.Action.Actions.Add(action);
+        }
+
+        public void Quit()
+        {
+            Surrender = true;
         }
     }
 }
