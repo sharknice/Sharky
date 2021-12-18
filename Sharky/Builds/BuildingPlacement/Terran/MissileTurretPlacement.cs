@@ -33,6 +33,11 @@ namespace Sharky.Builds.BuildingPlacement
                 var right = nearestBase.MineralFields.OrderByDescending(m => GetAngle(nearestBase.Location.X, nearestBase.Location.Y, m.Pos.X, m.Pos.Y)).FirstOrDefault();
                 var left = nearestBase.MineralFields.OrderBy(m => GetAngle(nearestBase.Location.X, nearestBase.Location.Y, m.Pos.X, m.Pos.Y)).FirstOrDefault();
 
+                if (right == null || left == null)
+                {
+                    return null;
+                }
+
                 if (Vector2.DistanceSquared(new Vector2(left.Pos.X, left.Pos.Y), new Vector2(right.Pos.X, right.Pos.Y)) < 9)
                 {
                     var rights = nearestBase.MineralFields.Where(m => CrossProduct(m.Pos.X, m.Pos.Y, nearestBase.MineralLineLocation.X, nearestBase.MineralLineLocation.Y) > 0);

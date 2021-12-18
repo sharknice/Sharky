@@ -17,9 +17,6 @@ namespace Sharky.Managers
         DebugService DebugService;
         WallDataService WallDataService;
 
-        private int LastBuildingCount;
-        private int LastVisibleEnemyUnitCount;
-
         private int LastUpdateFrame;
         private readonly int FramesPerUpdate;
 
@@ -31,8 +28,6 @@ namespace Sharky.Managers
             DebugService = debugService;
             WallDataService = wallDataService;
 
-            LastBuildingCount = 0;
-            LastVisibleEnemyUnitCount = 0;
             FramesPerUpdate = 5;
             LastUpdateFrame = -100;
         }

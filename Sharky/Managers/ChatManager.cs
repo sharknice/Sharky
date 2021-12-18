@@ -105,7 +105,9 @@ namespace Sharky.Managers
             LastFrameTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
         }
 
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         private async void ObserveChatAsync(RepeatedField<ChatReceived> chatsReceived, int frame)
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
             foreach (var chatReceived in chatsReceived)
             {

@@ -8,8 +8,6 @@ namespace Sharky.MicroControllers.Zerg
 {
     public class InfestorBurrowedMicroController : IndividualMicroController
     {
-        private int lastFungalFrame = 0;
-
         public InfestorBurrowedMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled)
             : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled)
         {

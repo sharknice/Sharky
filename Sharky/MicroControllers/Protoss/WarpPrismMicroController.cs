@@ -17,6 +17,17 @@ namespace Sharky.MicroControllers.Protoss
         {
         }
 
+        public override List<SC2APIProtocol.Action> Attack(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
+        {
+            var action = new List<SC2APIProtocol.Action>();
+
+            if (SupportArmy(commander, target, defensivePoint, groupCenter, frame, out action))
+            {
+                return action;
+            }
+            return base.Attack(commander, target, defensivePoint, groupCenter, frame);
+        }
+
         protected override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;

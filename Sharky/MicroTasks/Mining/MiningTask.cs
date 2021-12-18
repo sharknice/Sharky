@@ -161,7 +161,7 @@ namespace Sharky.MicroTasks
                 {
                     foreach (var info in selfBase.GasMiningInfo)
                     {
-                        while (info.Workers.Count() > gasSaturationCount)
+                        while (info.Workers.Count() > gasSaturationCount && info.Workers.Count() > 0)
                         {
                             info.Workers.RemoveAt(0);
                         }

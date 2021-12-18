@@ -11,6 +11,7 @@ namespace Sharky.MicroControllers.Protoss
         public AdeptMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled)
             : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled)
         {
+            AvoidDamageDistance = 6;
         }
 
         protected override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
@@ -29,6 +30,27 @@ namespace Sharky.MicroControllers.Protoss
             }
 
             return false;
+        }
+
+        public override List<Action> NavigateToPoint(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
+        {
+            List<SC2APIProtocol.Action> action = null;
+
+            var bestTarget = GetBestHarassTarget(commander, target);
+
+            if (SpecialCaseMove(commander, target, defensivePoint, null, bestTarget, Formation.Normal, frame, out action)) { return action; }
+            if (PreOffenseOrder(commander, target, defensivePoint, null, bestTarget, frame, out action)) { return action; }
+            if (AvoidTargettedOneHitKills(commander, target, defensivePoint, frame, out action)) { return action; }
+            if (OffensiveAbility(commander, target, defensivePoint, null, bestTarget, frame, out action)) { return action; }
+
+            if (WeaponReady(commander, frame))
+            {
+                if (AttackBestTargetInRange(commander, target, bestTarget, frame, out action)) { return action; }
+            }
+
+            if (AvoidAllDamage(commander, target, defensivePoint, frame, out action)) { return action; }
+
+            return commander.Order(frame, Abilities.MOVE, target);
         }
     }
 }

@@ -46,7 +46,7 @@ namespace Sharky.Builds
 
         protected void SendProbeForFirstPylon(int frame)
         {
-            if (MacroData.FoodUsed == 14 && MacroData.Minerals > 24 && UnitCountService.Count(UnitTypes.PROTOSS_PYLON) == 0)
+            if (MacroData.FoodUsed == 13 && MacroData.Minerals > 94 && UnitCountService.Count(UnitTypes.PROTOSS_PYLON) == 0)
             {
                 PrePositionBuilderTask.SendBuilder(TargetingData.ForwardDefensePoint, frame);
             }
@@ -55,6 +55,14 @@ namespace Sharky.Builds
         protected void SendProbeForFirstGateway(int frame)
         {
             if (MacroData.FoodUsed >= 14 && UnitCountService.Completed(UnitTypes.PROTOSS_PYLON) == 0 && ActiveUnitData.SelfUnits.Any(u => u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && u.Value.Unit.BuildProgress > .75f))
+            {
+                PrePositionBuilderTask.SendBuilder(TargetingData.ForwardDefensePoint, frame);
+            }
+        }
+
+        protected void SendProbeForSecondGateway(int frame)
+        {
+            if (UnitCountService.EquivalentTypeCount(UnitTypes.PROTOSS_GATEWAY) == 1 && MacroData.Minerals > 90)
             {
                 PrePositionBuilderTask.SendBuilder(TargetingData.ForwardDefensePoint, frame);
             }

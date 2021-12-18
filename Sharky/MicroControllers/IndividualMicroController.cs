@@ -123,8 +123,6 @@ namespace Sharky.MicroControllers
                 if (AttackBestTarget(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
             }
 
-            if (DoFreeDamage(commander, defensivePoint, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
-
             if (Move(commander, target, defensivePoint, groupCenter, bestTarget, formation, frame, out action)) { return action; }
 
             if (AvoidDeceleration(commander, target, true, frame, out action)) { return action; }
@@ -357,6 +355,7 @@ namespace Sharky.MicroControllers
         protected virtual bool GetHighGroundVision(UnitCommander commander, Point2D target, Point2D defensivePoint, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
+            if (MicroPriority == MicroPriority.StayOutOfRange || MicroPriority == MicroPriority.JustLive) { return false; }
             if (!commander.UnitCalculation.Unit.IsFlying && commander.UnitCalculation.Unit.UnitType != (uint)UnitTypes.PROTOSS_COLOSSUS)
             {
                 if (bestTarget != null && !MapDataService.SelfVisible(bestTarget.Unit.Pos) && MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos) != MapDataService.MapHeight(bestTarget.Unit.Pos))
@@ -497,7 +496,11 @@ namespace Sharky.MicroControllers
                 }
 
                 Point2D attackPoint;
-                if (commander.UnitCalculation.Range - 2 > bestTarget.Range && commander.UnitCalculation.UnitTypeData.MovementSpeed >= bestTarget.UnitTypeData.MovementSpeed)
+                if (MicroPriority == MicroPriority.AttackForward || commander.UnitCalculation.Unit.IsHallucination)
+                {
+                    attackPoint = new Point2D { X = bestTarget.Position.X, Y = bestTarget.Position.Y };
+                }
+                else if (commander.UnitCalculation.Range - 2 > bestTarget.Range && commander.UnitCalculation.UnitTypeData.MovementSpeed >= bestTarget.UnitTypeData.MovementSpeed)
                 {
                     attackPoint = GetPositionFromRange(commander, bestTarget.Unit.Pos, commander.UnitCalculation.Unit.Pos, commander.UnitCalculation.Range - 2 + bestTarget.Unit.Radius + commander.UnitCalculation.Unit.Radius);
                 }
@@ -635,7 +638,7 @@ namespace Sharky.MicroControllers
         {
             action = null;
 
-            if (commander.UnitCalculation.TargetPriorityCalculation.Overwhelm || MicroPriority == MicroPriority.AttackForward)
+            if (commander.UnitCalculation.TargetPriorityCalculation.Overwhelm || MicroPriority == MicroPriority.AttackForward || commander.UnitCalculation.Unit.IsHallucination)
             {
                 if (AvoidTargettedDamage(commander, target, defensivePoint, frame, out action)) { return true; }
 
@@ -669,7 +672,7 @@ namespace Sharky.MicroControllers
         {
             action = null;
 
-            if (commander.UnitCalculation.Range < 3) { return false; }
+            if (commander.UnitCalculation.Range < 3 || MicroPriority == MicroPriority.AttackForward) { return false; }
 
             if (commander.UnitCalculation.Unit.IsHallucination) { return false; }
             if (commander.UnitCalculation.Unit.Shield > 75 && commander.UnitCalculation.Unit.Health > 75) { return false; }
@@ -732,13 +735,34 @@ namespace Sharky.MicroControllers
             return false;
         }
 
+        protected virtual bool AvoidAllDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action) // TODO: use unit speed to dynamically adjust AvoidDamageDistance
+        {
+            action = null;
+
+            if (AvoidEnemiesThreateningDamage(commander, target, defensivePoint, frame, true, out action)) { return true; }
+            if (AvoidArmyEnemies(commander, target, defensivePoint, frame, true, out action)) { return true; }
+            if (AvoidNearbyEnemies(commander, target, defensivePoint, frame, true, out action)) { return true; }
+
+            return false;
+        }
+
         protected virtual bool AvoidDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action) // TODO: use unit speed to dynamically adjust AvoidDamageDistance
         {
             action = null;
 
-            var attacks = commander.UnitCalculation.EnemiesThreateningDamage;
+            if (AvoidEnemiesThreateningDamage(commander, target, defensivePoint, frame, false, out action)) { return true; }
 
-            if (attacks.Count > 0)
+            if (MaintainRange(commander, frame, out action)) { return true; }
+
+            return false;
+        }
+
+
+        protected virtual bool AvoidDamageList(UnitCommander commander, Point2D target, Point2D defensivePoint, IEnumerable<UnitCalculation> attacks, int frame, bool alwaysRun, out List<SC2APIProtocol.Action> action) // TODO: use unit speed to dynamically adjust AvoidDamageDistance
+        {
+            action = null;
+
+            if (attacks.Count() > 0)
             {
                 var attack = attacks.OrderBy(e => (e.Range * e.Range) - Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position)).FirstOrDefault();  // enemies that are closest to being outranged
                 var range = UnitDataService.GetRange(attack.Unit);
@@ -747,7 +771,7 @@ namespace Sharky.MicroControllers
                     range = attack.Range;
                 }
 
-                if (commander.UnitCalculation.Range < range && commander.UnitCalculation.UnitTypeData.MovementSpeed <= attack.UnitTypeData.MovementSpeed)
+                if (!alwaysRun && commander.UnitCalculation.Range < range && commander.UnitCalculation.UnitTypeData.MovementSpeed <= attack.UnitTypeData.MovementSpeed)
                 {
                     return false; // if we can't get out of range before we attack again don't bother running away
                 }
@@ -780,7 +804,35 @@ namespace Sharky.MicroControllers
                 }
             }
 
-            if (MaintainRange(commander, frame, out action)) { return true; }
+            return false;
+        }
+
+        protected virtual bool AvoidEnemiesThreateningDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, bool alwaysRun, out List<SC2APIProtocol.Action> action) // TODO: use unit speed to dynamically adjust AvoidDamageDistance
+        {
+            action = null;
+
+            var attacks = commander.UnitCalculation.EnemiesThreateningDamage;
+            if (AvoidDamageList(commander, target, defensivePoint, attacks, frame, alwaysRun, out action)) { return true; }
+
+            return false;
+        }
+
+        protected virtual bool AvoidArmyEnemies(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, bool alwaysRun, out List<SC2APIProtocol.Action> action) // TODO: use unit speed to dynamically adjust AvoidDamageDistance
+        {
+            action = null;
+
+            var attacks = commander.UnitCalculation.NearbyEnemies.Take(25).Where(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && DamageService.CanDamage(e, commander.UnitCalculation));
+            if (AvoidDamageList(commander, target, defensivePoint, attacks, frame, alwaysRun, out action)) { return true; }
+
+            return false;
+        }
+
+        protected virtual bool AvoidNearbyEnemies(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, bool alwaysRun, out List<SC2APIProtocol.Action> action) // TODO: use unit speed to dynamically adjust AvoidDamageDistance
+        {
+            action = null;
+
+            var attacks = commander.UnitCalculation.NearbyEnemies.Take(25).Where(e => DamageService.CanDamage(e, commander.UnitCalculation));
+            if (AvoidDamageList(commander, target, defensivePoint, attacks, frame, alwaysRun, out action)) { return true; }
 
             return false;
         }
@@ -789,7 +841,7 @@ namespace Sharky.MicroControllers
         {
             action = null;
 
-            if (MicroPriority == MicroPriority.JustLive)
+            if (MicroPriority == MicroPriority.JustLive || MicroPriority == MicroPriority.AttackForward || commander.UnitCalculation.Unit.IsHallucination)
             {
                 return false;
             }
@@ -1088,9 +1140,7 @@ namespace Sharky.MicroControllers
 
             if (commander.UnitCalculation.EnemiesThreateningDamage.Count() > 0 && !commander.UnitCalculation.TargetPriorityCalculation.Overwhelm && MicroPriority != MicroPriority.AttackForward && commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.Retreat)
             {
-                if (AvoidDeceleration(commander, defensivePoint, true, frame, out action)) { return true; }
-                action = commander.Order(frame, Abilities.ATTACK, defensivePoint); // no damaging targets in range, retreat towards the defense point
-                return true;
+                return false;
             }
 
             if (bestTarget != null && commander.UnitCalculation.NearbyEnemies.Any(e => e.Unit.Tag == bestTarget.Unit.Tag) && MicroPriority != MicroPriority.NavigateToLocation)
@@ -1730,7 +1780,7 @@ namespace Sharky.MicroControllers
         protected virtual bool AvoidTargettedDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
-            if (MicroPriority == MicroPriority.AttackForward && commander.UnitCalculation.Unit.Health > commander.UnitCalculation.Unit.HealthMax / 4.0) { return false; }
+            if ((MicroPriority == MicroPriority.AttackForward || commander.UnitCalculation.Unit.IsHallucination) && commander.UnitCalculation.Unit.Health > commander.UnitCalculation.Unit.HealthMax / 4.0) { return false; }
             var attack = commander.UnitCalculation.Attackers.OrderBy(e => (e.Range * e.Range) - Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position)).FirstOrDefault();
             if (attack != null)
             {
@@ -2102,7 +2152,7 @@ namespace Sharky.MicroControllers
         {
             action = null;
 
-            if (commander.UnitCalculation.TargetPriorityCalculation.Overwhelm || MicroPriority == MicroPriority.AttackForward) { return false; }
+            if (commander.UnitCalculation.TargetPriorityCalculation.Overwhelm || MicroPriority == MicroPriority.AttackForward || commander.UnitCalculation.Unit.IsHallucination) { return false; }
 
             if (commander.UnitCalculation.EnemiesThreateningDamage.Count() > 0 || commander.UnitCalculation.EnemiesInRangeOfAvoid.Count() > 0)
             {
@@ -2287,8 +2337,16 @@ namespace Sharky.MicroControllers
 
             if (WeaponReady(commander, frame))
             {
-                if (AttackBestTarget(commander, target, defensivePoint, null, bestTarget, frame, out action)) { return action; }
+                if (AttackBestTargetInRange(commander, target, bestTarget, frame, out action)) { return action; }
+                if (bestTarget != null && bestTarget.UnitClassifications.Contains(UnitClassification.Worker))
+                {
+                    if (AvoidAllDamage(commander, target, defensivePoint, frame, out action)) { return action; }
+
+                    if (AttackBestTarget(commander, target, defensivePoint, null, bestTarget, frame, out action)) { return action; }
+                }
             }
+
+            if (AvoidAllDamage(commander, target, defensivePoint, frame, out action)) { return action; }
 
             var formation = GetDesiredFormation(commander);
             if (Move(commander, target, defensivePoint, null, bestTarget, formation, frame, out action)) { return action; }
@@ -2370,6 +2428,8 @@ namespace Sharky.MicroControllers
             List<SC2APIProtocol.Action> action = null;
 
             if (SpecialCaseMove(commander, target, defensivePoint, groupCenter, null, Formation.Normal, frame, out action)) { return action; }
+
+            if (PreOffenseOrder(commander, target, defensivePoint, groupCenter, null, frame, out action)) { return action; }
 
             if (commander.UnitCalculation.NearbyEnemies.Any(e => DamageService.CanDamage(e, commander.UnitCalculation)))
             {

@@ -17,7 +17,9 @@ namespace Sharky.Chat
             ActiveChatData = activeChatData;
         }
 
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public async void SendChatType(string chatType, bool instant = false)
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
             var data = ChatDataService.GetChatTypeData(chatType);
 
@@ -28,7 +30,9 @@ namespace Sharky.Chat
             }
         }
 
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public async void SendChatMessage(string message, bool instant = false)
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
             if (instant)
             {
@@ -40,7 +44,9 @@ namespace Sharky.Chat
             }
         }
 
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public async void SendAllyChatMessage(string message, bool instant = false)
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
             if (instant)
             {
@@ -69,7 +75,9 @@ namespace Sharky.Chat
             }
         }
 
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public async void SendDebugChatMessage(string message)
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
             SendDebugChatMessages(new List<string> { message });
         }

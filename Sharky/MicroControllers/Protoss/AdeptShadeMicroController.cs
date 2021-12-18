@@ -3,6 +3,7 @@ using Sharky.DefaultBot;
 using Sharky.Pathing;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace Sharky.MicroControllers.Protoss
 {
@@ -11,7 +12,7 @@ namespace Sharky.MicroControllers.Protoss
         public AdeptShadeMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled)
             : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled)
         {
-
+            AvoidDamageDistance = 5;
         }
 
         protected override bool WeaponReady(UnitCommander commander, int frame)
@@ -47,6 +48,21 @@ namespace Sharky.MicroControllers.Protoss
             if (SpecialCaseMove(commander, target, defensivePoint, groupCenter, bestTarget, formation, frame, out action)) { return true; }
 
             return NavigateToTarget(commander, target, groupCenter, bestTarget, formation, frame, out action);
+        }
+
+        public override List<Action> NavigateToPoint(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
+        {
+            List<SC2APIProtocol.Action> action = null;
+            var bestTarget = GetBestHarassTarget(commander, target);
+            if (PreOffenseOrder(commander, target, defensivePoint, null, bestTarget, frame, out action)) { return action; }
+
+            if (Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(target.X, target.Y)) < 16)
+            {
+                if (SpecialCaseMove(commander, target, defensivePoint, null, bestTarget, Formation.Normal, frame, out action)) { return action; }
+                if (AvoidAllDamage(commander, target, defensivePoint, frame, out action)) { return action; }
+            }
+
+            return commander.Order(frame, Abilities.MOVE, target);
         }
     }
 }
