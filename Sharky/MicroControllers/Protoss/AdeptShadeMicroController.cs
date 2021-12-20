@@ -64,5 +64,11 @@ namespace Sharky.MicroControllers.Protoss
 
             return commander.Order(frame, Abilities.MOVE, target);
         }
+
+        protected override bool SpecialCaseMove(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, Formation formation, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
+            return false;
+        }
     }
 }

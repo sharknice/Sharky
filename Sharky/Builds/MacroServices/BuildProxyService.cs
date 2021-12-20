@@ -108,6 +108,11 @@ namespace Sharky.Builds.MacroServices
                         {
                             var unitData = SharkyUnitData.BuildingData[unit.Key];
 
+                            if (unitData.Gas > MacroData.VespeneGas || unitData.Minerals > MacroData.Minerals)
+                            {
+                                continue;
+                            }
+
                             var orderedBuildings = 0;
                             if (MacroData.Race != Race.Terran)
                             {

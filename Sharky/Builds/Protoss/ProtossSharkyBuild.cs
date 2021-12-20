@@ -138,5 +138,13 @@ namespace Sharky.Builds
                 PrePositionBuilderTask.SendBuilder(TargetingData.NaturalBasePoint, frame);
             }
         }
+
+        protected void SendProbeForNexus(int frame)
+        {
+            if (UnitCountService.Count(UnitTypes.PROTOSS_NEXUS) == 1 && MacroData.Minerals > 275)
+            {
+                PrePositionBuilderTask.SendBuilder(TargetingData.NaturalBasePoint, frame);
+            }
+        }
     }
 }
