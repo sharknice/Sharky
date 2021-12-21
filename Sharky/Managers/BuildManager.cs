@@ -15,7 +15,7 @@ namespace Sharky.Managers
     {
         protected DebugService DebugService;
         protected Dictionary<Race, BuildChoices> BuildChoices;
-        protected IBuildDecisionService BuildDecisionService;
+        public IBuildDecisionService BuildDecisionService { get; set; }
         protected IEnemyPlayerService EnemyPlayerService;
         protected FrameToTimeConverter FrameToTimeConverter;
         protected SharkyOptions SharkyOptions;
@@ -86,7 +86,7 @@ namespace Sharky.Managers
             }
 
             MapName = gameInfo.MapName;
-            BuildSequence = BuildDecisionService.GetBestBuild(EnemyPlayer, buildSequences, MapName, EnemyPlayerService.Enemies, EnemyRace);
+            BuildSequence = BuildDecisionService.GetBestBuild(EnemyPlayer, buildSequences, MapName, EnemyPlayerService.Enemies, EnemyRace, ActualRace);
 
             BuildHistory = new Dictionary<int, string>();
             SwitchBuild(BuildSequence.First(), 0);

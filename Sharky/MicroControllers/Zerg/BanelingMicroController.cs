@@ -13,11 +13,14 @@ namespace Sharky.MicroControllers.Zerg
 
         int LastManualDetonationFrame;
 
+        EnemyData EnemyData;
+
         public BanelingMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled)
             : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled)
         {
+            EnemyData = defaultSharkyBot.EnemyData;
             AvoidDamageDistance = 5;
-            SplashRadius = 2.2f;
+            SplashRadius = 2.2f - 0.375f;
             LastManualDetonationFrame = 0;
         }
 
@@ -70,9 +73,27 @@ namespace Sharky.MicroControllers.Zerg
                 var targetDamage = SplashDamage(commander, commander.UnitCalculation.NearbyEnemies.Take(25).Where(u => AttackersFilter(commander, u)), bestTarget, out hitUnits);
                 var selfDetonateDamage = SplashDamage(commander, commander.UnitCalculation.NearbyEnemies.Take(25).Where(u => AttackersFilter(commander, u)), commander.UnitCalculation, out hitSelfUnits);
 
-                if (targetDamage > 35 || selfDetonateDamage > 35 || bestTarget.UnitClassifications.Contains(UnitClassification.DefensiveStructure))
+                var detonateChoke = hitSelfUnits.Any(s => s.Attributes.Contains(Attribute.Structure)) && hitSelfUnits.Count() > 1;
+                if (detonateChoke)
                 {
-                    if (selfDetonateDamage >= targetDamage && frame > LastManualDetonationFrame + 1)
+                    if (EnemyData.EnemyRace == Race.Zerg)
+                    {
+                        detonateChoke = false;
+                    }
+                    if (EnemyData.EnemyRace == Race.Protoss && !hitSelfUnits.Any(s => s.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON))
+                    {
+                        detonateChoke = false;
+                    }
+                }
+                if (detonateChoke && !TargetingData.ChokePoints.Bad.Any(b => Vector2.DistanceSquared(b.Center, commander.UnitCalculation.Position) < 9))
+                {
+                    detonateChoke = false;
+                }
+
+                if (targetDamage > 35 || selfDetonateDamage > 35 || detonateChoke || bestTarget.UnitClassifications.Contains(UnitClassification.DefensiveStructure))
+                {
+                    if (frame > LastManualDetonationFrame + 3 && 
+                        (selfDetonateDamage >= targetDamage || detonateChoke))
                     {
                         foreach (var enemy in hitSelfUnits)
                         {

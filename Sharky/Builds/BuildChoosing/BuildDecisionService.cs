@@ -67,7 +67,7 @@ namespace Sharky.Builds.BuildChoosing
             return false;
         }
 
-        public virtual List<string> GetBestBuild(EnemyPlayer.EnemyPlayer enemyBot, List<List<string>> buildSequences, string map, List<EnemyPlayer.EnemyPlayer> enemyBots, Race enemyRace)
+        public virtual List<string> GetBestBuild(EnemyPlayer.EnemyPlayer enemyBot, List<List<string>> buildSequences, string map, List<EnemyPlayer.EnemyPlayer> enemyBots, Race enemyRace, Race myRace)
         {
             List<string> debugMessage = new List<string>();
             debugMessage.Add($"Choosing build against {enemyBot.Name} - {enemyBot.Id} on {map}");
