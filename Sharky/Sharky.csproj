@@ -39,6 +39,9 @@
     <None Update="StaticData\wall\terran\oxide.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="StaticData\wall\terran\BerlingradAIE.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="StaticData\wall\terran\romanticide.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

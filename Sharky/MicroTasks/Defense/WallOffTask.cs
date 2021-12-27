@@ -99,7 +99,7 @@ namespace Sharky.MicroTasks
                         ChatService.SendChatType("WallOffTask-TaskCompleted");
                         BlockedChatSent = true;
                     }
-                    if (!shieldBattery.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && e.Unit.UnitType != (uint)UnitTypes.TERRAN_REAPER && !e.Unit.IsFlying && e.FrameLastSeen > frame - 50))
+                    if (!shieldBattery.UnitCalculation.NearbyEnemies.Any(e => (e.Unit.UnitType == (uint)UnitTypes.PROTOSS_ADEPT || e.Unit.UnitType == (uint)UnitTypes.PROTOSS_ADEPTPHASESHIFT || e.Unit.UnitType == (uint)UnitTypes.PROTOSS_ZEALOT || e.Unit.UnitType == (uint)UnitTypes.ZERG_ZERGLING) && e.FrameLastSeen > frame - 50))
                     {
                         if (shieldBattery.UnitCalculation.Unit.BuildProgress < 1)
                         {
@@ -137,7 +137,7 @@ namespace Sharky.MicroTasks
                     var pylon = ActiveUnitData.SelfUnits.FirstOrDefault(u => u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && u.Value.Unit.Pos.X == pylonPosition.X && u.Value.Unit.Pos.Y == pylonPosition.Y).Value;
                     if (pylon != null)
                     {
-                        if (MacroData.Minerals >= 100 && pylon.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && e.Unit.UnitType != (uint)UnitTypes.TERRAN_REAPER && !e.Unit.IsFlying && e.FrameLastSeen > frame - 50))
+                        if (MacroData.Minerals >= 100 && pylon.NearbyEnemies.Any(e => (e.Unit.UnitType == (uint)UnitTypes.PROTOSS_ADEPT || e.Unit.UnitType == (uint)UnitTypes.PROTOSS_ADEPTPHASESHIFT || e.Unit.UnitType == (uint)UnitTypes.PROTOSS_ZEALOT || e.Unit.UnitType == (uint)UnitTypes.ZERG_ZERGLING) && e.FrameLastSeen > frame - 50))
                         {
                             var probeCommand = probe.Order(frame, Abilities.BUILD_SHIELDBATTERY, WallData.Block);
                             if (probeCommand != null)

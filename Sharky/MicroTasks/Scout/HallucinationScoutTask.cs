@@ -89,13 +89,24 @@ namespace Sharky.MicroTasks
                             commands.AddRange(action);
                         }
                     }
+                    else
+                    {
+                        if (Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(TargetingData.ForwardDefensePoint.X, TargetingData.ForwardDefensePoint.Y)) > 25)
+                        {
+                            var action = commander.Order(frame, Abilities.MOVE, TargetingData.ForwardDefensePoint);
+                            if (action != null)
+                            {
+                                commands.AddRange(action);
+                            }
+                        }
+                    }
                 }
             }
             else
             {
                 foreach (var commander in UnitCommanders)
                 {
-                    if (commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PHOENIX)
+                    if (commander.UnitCalculation.Unit.IsHallucination)
                     {
                         if (Vector2.DistanceSquared(new Vector2(ScoutLocations[ScoutLocationIndex].X, ScoutLocations[ScoutLocationIndex].Y), commander.UnitCalculation.Position) < 2)
                         {
@@ -108,6 +119,17 @@ namespace Sharky.MicroTasks
                         else
                         {
                             var action = commander.Order(frame, Abilities.MOVE, ScoutLocations[ScoutLocationIndex]);
+                            if (action != null)
+                            {
+                                commands.AddRange(action);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(TargetingData.ForwardDefensePoint.X, TargetingData.ForwardDefensePoint.Y)) > 25)
+                        {
+                            var action = commander.Order(frame, Abilities.MOVE, TargetingData.ForwardDefensePoint);
                             if (action != null)
                             {
                                 commands.AddRange(action);

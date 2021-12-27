@@ -88,14 +88,6 @@ namespace Sharky.Builds.Protoss
             return UnitCountService.Count(UnitTypes.PROTOSS_NEXUS) > 1 && UnitCountService.Count(UnitTypes.PROTOSS_CYBERNETICSCORE) > 0;
         }
 
-        protected void SendProbeForNexus(int frame)
-        {
-            if (UnitCountService.Count(UnitTypes.PROTOSS_NEXUS) == 1 && MacroData.Minerals > 325)
-            {
-                PrePositionBuilderTask.SendBuilder(TargetingData.NaturalBasePoint, frame);
-            }
-        }
-
         protected void ScoutThird(int frame)
         {
             if (UnitCountService.Count(UnitTypes.PROTOSS_NEXUS) == 2 && UnitCountService.EquivalentTypeCount(UnitTypes.PROTOSS_GATEWAY) == 0 && ActiveUnitData.SelfUnits.Any(u => u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS && u.Value.Unit.BuildProgress < .1f))

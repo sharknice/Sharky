@@ -101,10 +101,14 @@ namespace Sharky.Managers
 
             actions.AddRange(BuildAddOnSwapService.BuildAndSwapAddons());
 
-            actions.AddRange(BuildPylonService.BuildPylonsAtEveryMineralLine());
-            actions.AddRange(BuildPylonService.BuildPylonsAtDefensivePoint());
-            actions.AddRange(BuildPylonService.BuildPylonsAtEveryBase());
-            actions.AddRange(BuildPylonService.BuildPylonsAtNextBase());
+            if (MacroData.Minerals >= 100)
+            {
+                actions.AddRange(BuildPylonService.BuildPylonsAtEveryMineralLine());
+                actions.AddRange(BuildPylonService.BuildPylonsAtDefensivePoint());
+                actions.AddRange(BuildPylonService.BuildPylonsAtEveryBase());
+                actions.AddRange(BuildPylonService.BuildPylonsAtNextBase());
+            }
+
             actions.AddRange(SupplyBuilder.BuildSupply());
 
             actions.AddRange(BuildDefenseService.BuildDefensiveBuildingsAtEveryMineralLine());
