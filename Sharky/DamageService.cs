@@ -4,7 +4,7 @@
     {
         public bool CanDamage(UnitCalculation attacker, UnitCalculation victim)
         {
-            if (attacker.Damage == 0)
+            if (attacker.Damage == 0 || attacker.Unit.BuildProgress < 1)
             {
                 return false;
             }

@@ -59,6 +59,10 @@ namespace Sharky.Builds.BuildingPlacement
                 {
                     return closest;
                 }
+                else if (unitType == UnitTypes.TERRAN_COMMANDCENTER)
+                {
+                    return null;
+                }
             }
 
             return null;
@@ -122,8 +126,8 @@ namespace Sharky.Builds.BuildingPlacement
                 {
                     if (unitType == UnitTypes.TERRAN_COMMANDCENTER)
                     {
-                        if ((mineralFields == null || mineralFields.Any(m => Vector2.DistanceSquared(new Vector2(m.Pos.X, m.Pos.Y), vector) < 100)) &&
-                            (vespeneGeysers == null || vespeneGeysers.Any(m => Vector2.DistanceSquared(new Vector2(m.Pos.X, m.Pos.Y), vector) < 100)))
+                        if ((mineralFields == null || mineralFields.Any(m => Vector2.DistanceSquared(new Vector2(m.Pos.X, m.Pos.Y), vector) < 64)) ||
+                            (vespeneGeysers == null || vespeneGeysers.Any(m => Vector2.DistanceSquared(new Vector2(m.Pos.X, m.Pos.Y), vector) < 64)))
                         {
                             return null;
                         }

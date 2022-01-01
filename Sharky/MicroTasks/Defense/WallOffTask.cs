@@ -99,21 +99,12 @@ namespace Sharky.MicroTasks
                         ChatService.SendChatType("WallOffTask-TaskCompleted");
                         BlockedChatSent = true;
                     }
-                    if (!shieldBattery.UnitCalculation.NearbyEnemies.Any(e => (e.Unit.UnitType == (uint)UnitTypes.PROTOSS_ADEPT || e.Unit.UnitType == (uint)UnitTypes.PROTOSS_ADEPTPHASESHIFT || e.Unit.UnitType == (uint)UnitTypes.PROTOSS_ZEALOT || e.Unit.UnitType == (uint)UnitTypes.ZERG_ZERGLING) && e.FrameLastSeen > frame - 50))
+                    if (shieldBattery.UnitCalculation.Unit.BuildProgress < 1 && shieldBattery.UnitCalculation.Unit.BuildProgress > .95f)
                     {
-                        if (shieldBattery.UnitCalculation.Unit.BuildProgress < 1)
+                        var cancelCommand = shieldBattery.Order(frame, Abilities.CANCEL);
+                        if (cancelCommand != null)
                         {
-                            var cancelCommand = shieldBattery.Order(frame, Abilities.CANCEL);
-                            if (cancelCommand != null)
-                            {
-                                commands.AddRange(cancelCommand);
-                            }
-                        }
-
-                        var probeCommand = probe.Order(frame, Abilities.MOVE, WallData.Block);
-                        if (probeCommand != null)
-                        {
-                            commands.AddRange(probeCommand);
+                            commands.AddRange(cancelCommand);
                         }
 
                         return commands;

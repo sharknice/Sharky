@@ -113,6 +113,11 @@ namespace Sharky.Builds.BuildingPlacement
             spot = TerranProductionGridPlacement.FindPlacement(reference, unitType, size, maxDistance, minimumMineralProximinity);
             if (spot != null) { return spot; }
 
+            if (unitType == UnitTypes.TERRAN_COMMANDCENTER)
+            {
+                minimumMineralProximinity = 3;
+            }
+
             return FindTechPlacement(reference, size + 4f, maxDistance, minimumMineralProximinity); // add to the radius to make room for the addon and completed units to exist
         }
 

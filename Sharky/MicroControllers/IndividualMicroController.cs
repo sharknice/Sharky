@@ -5,7 +5,6 @@ using Sharky.Pathing;
 using Sharky.S2ClientTypeEnums;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 
@@ -222,13 +221,54 @@ namespace Sharky.MicroControllers
             }
         }
 
+        protected virtual bool DefendBehindWall(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
+
+            // TODO: if behind defensive wall (any buildings exist on it) and wall is not full shields, if closer to natural base than the building with no shield is, attack enemy attacking wall
+            // find potential wall building (any building damaged with role set to wall.  If enemy is further away from self than the enemy is further away from wall, and wall is further away from defensivePoint than self is away from defensive point
+            // TODO: put a 
+            if (commander.UnitCalculation.Range < 3 || !commander.UnitCalculation.NearbyEnemies.Any() || !WeaponReady(commander, frame)) { return false; }
+
+            var closestWall = commander.UnitCalculation.NearbyAllies.Take(25).Where(a => TargetingData.WallBuildings.Any(w => w.Unit.Tag == a.Unit.Tag)).OrderBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+            if (closestWall != null)
+            {
+                var distanceToDefensivePoint = Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(defensivePoint.X, defensivePoint.Y));
+                var wallDistanceToDefensivePoint = Vector2.DistanceSquared(closestWall.Position, new Vector2(defensivePoint.X, defensivePoint.Y));
+                if (wallDistanceToDefensivePoint > distanceToDefensivePoint)
+                {
+                    var closestEnemy = commander.UnitCalculation.NearbyEnemies.Take(25).OrderBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+                    if (closestEnemy != null)
+                    {
+                        var distanceToEnemy = Vector2.DistanceSquared(commander.UnitCalculation.Position, closestEnemy.Position);
+                        var enemyDistanceToWall = Vector2.DistanceSquared(closestEnemy.Position, closestWall.Position);
+
+                        if (distanceToEnemy > enemyDistanceToWall)
+                        {
+                            var bestTarget = GetBestTarget(commander, defensivePoint, frame);
+                            if (AttackBestTarget(commander, target, defensivePoint, target, bestTarget, frame, out action))
+                            {
+                                return true;
+                            }
+                            else
+                            {
+                                action = commander.Order(frame, Abilities.ATTACK, new Point2D { X = closestWall.Position.X, Y = closestWall.Position.Y });
+                            }
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
         protected virtual bool DoFreeDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
             if (commander.UnitCalculation.EnemiesThreateningDamage.Count() == 0)
             {
-                if (!commander.UnitCalculation.NearbyEnemies.Any(e => DamageService.CanDamage(e, commander.UnitCalculation) && (e.UnitTypeData.MovementSpeed > commander.UnitCalculation.UnitTypeData.MovementSpeed || e.Range > commander.UnitCalculation.Range)))
+                if (!commander.UnitCalculation.NearbyEnemies.Any(e => DamageService.CanDamage(e, commander.UnitCalculation) && (e.UnitTypeData.MovementSpeed >= commander.UnitCalculation.UnitTypeData.MovementSpeed || e.Range >= commander.UnitCalculation.Range)))
                 {
                     if (commander.UnitCalculation.NearbyEnemies.Any(e => DamageService.CanDamage(commander.UnitCalculation, e) && e.Unit.DisplayType == DisplayType.Visible))
                     {
@@ -890,6 +930,8 @@ namespace Sharky.MicroControllers
 
             if (closestEnemy != null)
             {
+                if (DefendBehindWall(commander, defensivePoint, defensivePoint, frame, out action)) { return true; }
+
                 if (commander.UnitCalculation.NearbyEnemies.Take(25).All(e => e.Range < commander.UnitCalculation.Range && e.UnitTypeData.MovementSpeed < commander.UnitCalculation.UnitTypeData.MovementSpeed))
                 {
                     if (MapDataService.SelfVisible(closestEnemy.Unit.Pos))

@@ -16,6 +16,7 @@ namespace Sharky.Managers
         TargetingData TargetingData;
         MapData MapData;
         ActiveUnitData ActiveUnitData;
+        EnemyData EnemyData;
 
         ChokePointService ChokePointService;
         ChokePointsService ChokePointsService;
@@ -27,7 +28,7 @@ namespace Sharky.Managers
         Point2D PreviousDefensePoint;
         int LastUpdateFrame;
 
-        public TargetingManager(SharkyUnitData sharkyUnitData, BaseData baseData, MacroData macroData, TargetingData targetingData, MapData mapData,
+        public TargetingManager(SharkyUnitData sharkyUnitData, BaseData baseData, MacroData macroData, TargetingData targetingData, MapData mapData, EnemyData enemyData,
             ChokePointService chokePointService, ChokePointsService chokePointsService, DebugService debugService, ActiveUnitData activeUnitData)
         {
             SharkyUnitData = sharkyUnitData;
@@ -36,6 +37,7 @@ namespace Sharky.Managers
             TargetingData = targetingData;
             MapData = mapData;
             ActiveUnitData = activeUnitData;
+            EnemyData = enemyData;
 
             ChokePointService = chokePointService;
             ChokePointsService = chokePointsService;
@@ -45,6 +47,7 @@ namespace Sharky.Managers
             LastUpdateFrame = -10000;
             TargetingData.ChokePoints = new ChokePoints();
             TargetingData.WallOffBasePosition = WallOffBasePosition.Current;
+            TargetingData.WallBuildings = new List<UnitCalculation>();
         }
 
         public override void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)
@@ -100,6 +103,7 @@ namespace Sharky.Managers
         {
             UpdateDefensePoint((int)observation.Observation.GameLoop);
             UpdateChokePoints((int)observation.Observation.GameLoop);
+            UpdateWall((int)observation.Observation.GameLoop);
 
             DebugService.DrawSphere(new Point { X = TargetingData.MainDefensePoint.X, Y = TargetingData.MainDefensePoint.Y, Z = 12 }, 2, new Color { R = 0, G = 255, B = 0 });
             DebugService.DrawSphere(new Point { X = TargetingData.ForwardDefensePoint.X, Y = TargetingData.ForwardDefensePoint.Y, Z = 12 }, 2, new Color { R = 0, G = 0, B = 255 });
@@ -116,28 +120,87 @@ namespace Sharky.Managers
             return null;
         }
 
+        void UpdateWall(int frame)
+        {
+            if (frame > LastUpdateFrame + 50)
+            {
+                TargetingData.WallBuildings.Clear();
+
+                var buildings = ActiveUnitData.SelfUnits.Values.Where(u => u.Attributes.Contains(SC2APIProtocol.Attribute.Structure));
+
+                if (EnemyData.SelfRace == Race.Protoss && MapData.PartialWallData != null)
+                {
+                    var wallData = MapData.PartialWallData.FirstOrDefault(b => b.BasePosition.X == TargetingData.SelfMainBasePoint.X && b.BasePosition.Y == TargetingData.SelfMainBasePoint.Y);
+                    if (wallData != null)
+                    {
+                        AddWalls(buildings, wallData);
+                    }
+                    wallData = MapData.PartialWallData.FirstOrDefault(b => b.BasePosition.X == TargetingData.NaturalBasePoint.X && b.BasePosition.Y == TargetingData.NaturalBasePoint.Y);
+                    if (wallData != null)
+                    {
+                        AddWalls(buildings, wallData);
+                    }
+                }
+                else if (EnemyData.SelfRace == Race.Terran && MapData.TerranWallData != null)
+                {
+                    var wallData = MapData.TerranWallData.FirstOrDefault(b => b.BasePosition.X == TargetingData.SelfMainBasePoint.X && b.BasePosition.Y == TargetingData.SelfMainBasePoint.Y);
+                    if (wallData != null)
+                    {
+                        AddWalls(buildings, wallData);
+                    }
+                    wallData = MapData.TerranWallData.FirstOrDefault(b => b.BasePosition.X == TargetingData.NaturalBasePoint.X && b.BasePosition.Y == TargetingData.NaturalBasePoint.Y);
+                    if (wallData != null)
+                    {
+                        AddWalls(buildings, wallData);
+                    }
+                }
+
+                LastUpdateFrame = frame;
+            }
+        }
+
+        private void AddWalls(IEnumerable<UnitCalculation> buildings, WallData wallData)
+        {
+            if (EnemyData.SelfRace == Race.Protoss)
+            {
+                if (wallData.WallSegments != null)
+                {
+                    TargetingData.WallBuildings.AddRange(buildings.Where(b => wallData.WallSegments.Any(w => w.Position.X == b.Position.X && w.Position.Y == b.Position.Y)));
+                }
+                if (wallData.Pylons != null)
+                {
+                    TargetingData.WallBuildings.AddRange(buildings.Where(b => b.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && wallData.Pylons.Any(w => w.X == b.Position.X && w.Y == b.Position.Y)));
+                }
+            }
+            else if (EnemyData.SelfRace == Race.Terran)
+            {
+                if (wallData.Bunkers != null)
+                {
+                    TargetingData.WallBuildings.AddRange(buildings.Where(b => b.Unit.UnitType == (uint)UnitTypes.TERRAN_BUNKER && wallData.Bunkers.Any(w => w.X == b.Position.X && w.Y == b.Position.Y)));
+                }
+                if (wallData.Depots != null)
+                {
+                    TargetingData.WallBuildings.AddRange(buildings.Where(b => (b.Unit.UnitType == (uint)UnitTypes.TERRAN_SUPPLYDEPOT || b.Unit.UnitType == (uint)UnitTypes.TERRAN_SUPPLYDEPOTLOWERED) && wallData.Depots.Any(w => w.X == b.Position.X && w.Y == b.Position.Y)));
+                }
+                if (wallData.Production != null)
+                {
+                    TargetingData.WallBuildings.AddRange(buildings.Where(b => wallData.Production.Any(w => w.X == b.Position.X && w.Y == b.Position.Y)));
+                }
+                if (wallData.ProductionWithAddon != null)
+                {
+                    TargetingData.WallBuildings.AddRange(buildings.Where(b => wallData.ProductionWithAddon.Any(w => w.X == b.Position.X && w.Y == b.Position.Y)));
+                }
+            }
+        }
+
         void UpdateChokePoints(int frame)
         {
-            if (frame == 0) //if (frame - LastUpdateFrame > 1500 && (PreviousAttackPoint != TargetingData.AttackPoint || PreviousDefensePoint != TargetingData.ForwardDefensePoint))
+            if (frame == 0)
             {
                 PreviousAttackPoint = TargetingData.AttackPoint;
                 PreviousDefensePoint = TargetingData.ForwardDefensePoint;
                 TargetingData.ChokePoints = ChokePointsService.GetChokePoints(TargetingData.ForwardDefensePoint, TargetingData.AttackPoint, frame);
-                LastUpdateFrame = frame;
             }
-
-            //foreach (var chokePoint in TargetingData.ChokePoints.Good)
-            //{
-            //    DebugService.DrawSphere(new Point { X = chokePoint.Center.X, Y = chokePoint.Center.Y, Z = 12 }, 4, new Color { R = 0, G = 255, B = 0 });
-            //}
-            //foreach (var chokePoint in TargetingData.ChokePoints.Neutral)
-            //{
-            //    DebugService.DrawSphere(new Point { X = chokePoint.Center.X, Y = chokePoint.Center.Y, Z = 12 }, 4, new Color { R = 0, G = 0, B = 255 });
-            //}
-            //foreach (var chokePoint in TargetingData.ChokePoints.Bad)
-            //{
-            //    DebugService.DrawSphere(new Point { X = chokePoint.Center.X, Y = chokePoint.Center.Y, Z = 12 }, 4, new Color { R = 255, G = 0, B = 0 });
-            //}
         }
 
         void UpdateDefensePoint(int frame)

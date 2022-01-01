@@ -19,7 +19,7 @@ namespace Sharky.MicroControllers.Terran
 
         public override List<SC2APIProtocol.Action> Idle(UnitCommander commander, Point2D defensivePoint, int frame)
         {
-            if (MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos) == MapDataService.MapHeight(defensivePoint))
+            if (MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos) >= MapDataService.MapHeight(defensivePoint))
             {
                 return commander.Order(frame, Abilities.MORPH_SIEGEMODE);
             }

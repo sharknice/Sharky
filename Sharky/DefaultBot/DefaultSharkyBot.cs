@@ -221,7 +221,7 @@ namespace Sharky.DefaultBot
             BaseManager = new BaseManager(SharkyUnitData, ActiveUnitData, SharkyPathFinder, UnitCountService, BaseData);
             Managers.Add(BaseManager);
 
-            TargetingManager = new TargetingManager(SharkyUnitData, BaseData, MacroData, TargetingData, MapData, ChokePointService, ChokePointsService, DebugService, ActiveUnitData);
+            TargetingManager = new TargetingManager(SharkyUnitData, BaseData, MacroData, TargetingData, MapData, EnemyData, ChokePointService, ChokePointsService, DebugService, ActiveUnitData);
             Managers.Add(TargetingManager);
 
             BuildOptions = new BuildOptions { StrictGasCount = false, StrictSupplyCount = false, StrictWorkerCount = false };

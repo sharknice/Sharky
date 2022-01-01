@@ -102,9 +102,12 @@ namespace Sharky.Builds.BuildingPlacement
             foreach (var segment in wallData.WallSegments.Where(w => w.Size == size))
             {
                 var point = segment.Position;
-                if (!existingBuildings.Any(e => e.Position.X == point.X && e.Position.Y == point.Y) && WallService.Buildable(point, radius) && ProtossWallService.Powered(powerSources, point, radius))
+                if (!existingBuildings.Any(e => e.Position.X == point.X && e.Position.Y == point.Y))
                 {
-                    return point;
+                    if (WallService.Buildable(point, radius) && ProtossWallService.Powered(powerSources, point, radius))
+                    {
+                        return point;
+                    }
                 }
             }
             return null;

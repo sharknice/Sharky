@@ -30,6 +30,12 @@
     <None Update="StaticData\wall\terran\blackburn.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="StaticData\wall\terran\curiousminds.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="StaticData\wall\terran\glitteringashes.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="StaticData\wall\terran\jagannatha.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -37,9 +43,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="StaticData\wall\terran\oxide.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="StaticData\wall\terran\BerlingradAIE.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="StaticData\wall\terran\romanticide.json">

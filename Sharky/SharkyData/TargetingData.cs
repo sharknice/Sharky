@@ -19,5 +19,6 @@ namespace Sharky
         public ChokePoints ChokePoints { get; set; }
         public WallOffBasePosition WallOffBasePosition { get; set; }
         public AttackState AttackState { get; set; }
+        public List<UnitCalculation> WallBuildings { get; set; }
     }
 }
