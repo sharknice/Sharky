@@ -561,7 +561,7 @@ namespace Sharky.DefaultBot
                 { Race.Terran, new BuildChoices { Builds = terranBuilds, BuildSequences = terranBuildSequences } },
                 { Race.Zerg, new BuildChoices { Builds = zergBuilds, BuildSequences = zergBuildSequences } }
             };
-            BuildDecisionService = new BuildDecisionService(ChatService, EnemyPlayerService);
+            BuildDecisionService = new RecentBuildDecisionService(ChatService, EnemyPlayerService);
             BuildManager = new BuildManager(BuildChoices, DebugService, MacroBalancer, BuildDecisionService, EnemyPlayerService, ChatHistory, EnemyStrategyHistory, FrameToTimeConverter, SharkyOptions, ChatService);
             Managers.Add(BuildManager);
         }

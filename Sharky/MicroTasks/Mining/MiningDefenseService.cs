@@ -271,7 +271,7 @@ namespace Sharky.MicroTasks.Mining
                             var enemy = commander.UnitCalculation.EnemiesInRangeOf.FirstOrDefault();
                             if (enemy != null)
                             {
-                                var closestFriendlyArmy = commander.UnitCalculation.NearbyAllies.Take(25).Where(u => DamageService.CanDamage(u, enemy)).OrderBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+                                var closestFriendlyArmy = commander.UnitCalculation.NearbyAllies.Take(25).Where(u => u.UnitClassifications.Any(c => c == UnitClassification.ArmyUnit || c == UnitClassification.DefensiveStructure) && DamageService.CanDamage(u, enemy)).OrderBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position)).FirstOrDefault();
                                 if (closestFriendlyArmy != null)
                                 {
                                     var saveAction = commander.Order(frame, Abilities.MOVE, targetTag: closestFriendlyArmy.Unit.Tag);

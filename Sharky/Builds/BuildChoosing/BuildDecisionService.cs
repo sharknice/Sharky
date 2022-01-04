@@ -10,8 +10,8 @@ namespace Sharky.Builds.BuildChoosing
 {
     public class BuildDecisionService : IBuildDecisionService
     {
-        ChatService ChatService;
-        EnemyPlayerService EnemyPlayerService;
+        protected ChatService ChatService;
+        protected EnemyPlayerService EnemyPlayerService;
 
         public BuildDecisionService(ChatService chatService, EnemyPlayerService enemyPlayerService)
         {

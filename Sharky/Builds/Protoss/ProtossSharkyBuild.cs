@@ -70,7 +70,7 @@ namespace Sharky.Builds
 
         protected void SendProbeForCyberneticsCore(int frame)
         {
-            if (UnitCountService.EquivalentTypeCompleted(UnitTypes.PROTOSS_GATEWAY) == 0 && ActiveUnitData.SelfUnits.Any(u => u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_GATEWAY && u.Value.Unit.BuildProgress > .90f))
+            if (UnitCountService.EquivalentTypeCompleted(UnitTypes.PROTOSS_CYBERNETICSCORE) == 0 && UnitCountService.EquivalentTypeCompleted(UnitTypes.PROTOSS_GATEWAY) == 0 && ActiveUnitData.SelfUnits.Any(u => u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_GATEWAY && u.Value.Unit.BuildProgress > .90f))
             {
                 PrePositionBuilderTask.SendBuilder(TargetingData.ForwardDefensePoint, frame);
             }

@@ -151,17 +151,32 @@ namespace Sharky.MicroTasks
                 if (MacroData.Minerals >= 100 && commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE)
                 {
                     var enemyBase = BaseData.EnemyBaseLocations.FirstOrDefault();
-                    if (BlockWall && enemyBase != null && MapData.BlockWallData != null)
+                    if (BlockWall && enemyBase != null && MapData.TerranWallData != null)
                     {
-                        var wallData = MapData.BlockWallData.FirstOrDefault(b => b.BasePosition.X == enemyBase.Location.X && b.BasePosition.Y == enemyBase.Location.Y);
+                        var wallData = MapData.TerranWallData.FirstOrDefault(b => b.BasePosition.X == enemyBase.Location.X && b.BasePosition.Y == enemyBase.Location.Y);
                         if (wallData != null)
                         {
                             var vector = new Vector2(enemyBase.Location.X, enemyBase.Location.Y);
                             if (Vector2.DistanceSquared(vector, commander.UnitCalculation.Position) < 225)
                             {
-                                if (!ActiveUnitData.SelfUnits.Any(a => a.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && wallData.Pylons.Any(p => Vector2.DistanceSquared(new Vector2(p.X, p.Y), a.Value.Position) < 4)))
+                                if (wallData.Depots != null && !ActiveUnitData.SelfUnits.Any(a => a.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && wallData.Depots.Any(p => Vector2.DistanceSquared(new Vector2(p.X, p.Y), a.Value.Position) < 4)))
                                 {
-                                    foreach (var point in wallData.Pylons)
+                                    foreach (var point in wallData.Depots)
+                                    {
+                                        if (!BuildingService.Blocked(point.X, point.Y, 1, -.5f))
+                                        {
+                                            var wallBlock = commander.Order(frame, Abilities.BUILD_PYLON, point);
+                                            if (wallBlock != null)
+                                            {
+                                                commands.AddRange(wallBlock);
+                                                return commands;
+                                            }
+                                        }
+                                    }
+                                }
+                                if (wallData.Production != null && !ActiveUnitData.SelfUnits.Any(a => a.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && wallData.Production.Any(p => Vector2.DistanceSquared(new Vector2(p.X, p.Y), a.Value.Position) < 4)))
+                                { 
+                                    foreach (var point in wallData.Production)
                                     {
                                         if (!BuildingService.Blocked(point.X, point.Y, 1, -.5f))
                                         {
