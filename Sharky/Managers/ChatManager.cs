@@ -114,7 +114,7 @@ namespace Sharky.Managers
                 var chat = new Chat.Chat { botName = Self.PlayerName, message = chatReceived.Message, time = DateTimeOffset.Now.ToUnixTimeMilliseconds(), user = Enemy.PlayerName };
                 if (chatReceived.PlayerId == Self.PlayerId)
                 {
-                    Console.WriteLine($"{frame} {FrameToTimeConverter.GetTime(frame)} sharkbot chat: {chatReceived.Message}");
+                    Console.WriteLine($"{frame} {FrameToTimeConverter.GetTime(frame)} my chat: {chatReceived.Message}");
                     ChatHistory.MyChatHistory[frame] = chatReceived.Message;
                     if (ApiEnabled)
                     {

@@ -269,8 +269,8 @@ namespace Sharky.DefaultBot
 
             var individualMicroController = new IndividualMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
 
-            var adeptMicroController = new AdeptMicroController(this, SharkySimplePathFinder, MicroPriority.StayOutOfRange, false);
-            var adeptShadeMicroController = new AdeptShadeMicroController(this, SharkySimplePathFinder, MicroPriority.StayOutOfRange, false);
+            var adeptMicroController = new AdeptMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
+            var adeptShadeMicroController = new AdeptShadeMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
             var archonMicroController = new ArchonMicroController(this, SharkySimplePathFinder, MicroPriority.AttackForward, false);
             var colossusMicroController = new ColossusMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
             var darkTemplarMicroController = new DarkTemplarMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
@@ -405,6 +405,7 @@ namespace Sharky.DefaultBot
             var prePositionBuilderTask = new PrePositionBuilderTask(this, .25f);
             var repairTask = new RepairTask(this, .6f, true);
             var saveLiftableBuildingTask = new SaveLiftableBuildingTask(this, BuildingPlacement, .6f, true);
+            var hellbatMorphTask = new HellbatMorphTask(this, false, 0.5f);
 
             MicroTaskData.MicroTasks[defenseSquadTask.GetType().Name] = defenseSquadTask;
             MicroTaskData.MicroTasks[workerScoutGasStealTask.GetType().Name] = workerScoutGasStealTask;
@@ -426,6 +427,7 @@ namespace Sharky.DefaultBot
             MicroTaskData.MicroTasks[prePositionBuilderTask.GetType().Name] = prePositionBuilderTask;
             MicroTaskData.MicroTasks[repairTask.GetType().Name] = repairTask;
             MicroTaskData.MicroTasks[saveLiftableBuildingTask.GetType().Name] = saveLiftableBuildingTask;
+            MicroTaskData.MicroTasks[hellbatMorphTask.GetType().Name] = hellbatMorphTask;
 
             MicroManager = new MicroManager(ActiveUnitData, MicroTaskData);
             Managers.Add(MicroManager);

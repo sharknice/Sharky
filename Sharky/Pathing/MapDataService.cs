@@ -138,6 +138,10 @@ namespace Sharky.Pathing
 
         public int MapHeight(Point2D point)
         {
+            if (point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
+            {
+                return 0;
+            }
             return MapData.Map[(int)point.X][(int)point.Y].TerrainHeight;
         }
 

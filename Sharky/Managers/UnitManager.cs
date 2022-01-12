@@ -74,18 +74,20 @@ namespace Sharky.Managers
                 ActiveUnitData.DeadUnits = new List<ulong>();
             }
 
-            foreach (var unit in ActiveUnitData.SelfUnits.Where(u => u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_DISRUPTORPHASED || u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_INTERCEPTOR)) // remove things like purification novas that don't have dead unit events
+            foreach (var unit in ActiveUnitData.SelfUnits.Where(u => SharkyUnitData.UndeadTypes.Contains((UnitTypes)u.Value.Unit.UnitType))) // remove things like purification novas that don't have dead unit events
             {
                 if (!observation.Observation.RawData.Units.Any(u => u.Tag == unit.Key))
                 {
                     ActiveUnitData.DeadUnits.Add(unit.Key);
+                    ActiveUnitData.SelfDeaths--;
                 }
             }
-            foreach (var unit in ActiveUnitData.EnemyUnits.Where(u => u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_DISRUPTORPHASED || u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_INTERCEPTOR)) // remove things like purification novas that don't have dead unit events
+            foreach (var unit in ActiveUnitData.EnemyUnits.Where(u => SharkyUnitData.UndeadTypes.Contains((UnitTypes)u.Value.Unit.UnitType))) // remove things like purification novas that don't have dead unit events
             {
                 if (!observation.Observation.RawData.Units.Any(u => u.Tag == unit.Key))
                 {
-                    ActiveUnitData.DeadUnits.Add(unit.Key);
+                    ActiveUnitData.DeadUnits.Add(unit.Key); 
+                    ActiveUnitData.EnemyDeaths--;
                 }
             }
 
@@ -105,19 +107,6 @@ namespace Sharky.Managers
                 }
 
                 ActiveUnitData.Commanders.TryRemove(tag, out UnitCommander removedCommander);
-            }
-
-            foreach (var unit in ActiveUnitData.EnemyUnits.Where(u => SharkyUnitData.UndeadTypes.Contains((UnitTypes)u.Value.Unit.UnitType)))
-            {
-                ActiveUnitData.EnemyUnits.TryRemove(unit.Key, out UnitCalculation removed);
-            }
-            foreach (var unit in ActiveUnitData.SelfUnits.Where(u => SharkyUnitData.UndeadTypes.Contains((UnitTypes)u.Value.Unit.UnitType)))
-            {
-                ActiveUnitData.SelfUnits.TryRemove(unit.Key, out UnitCalculation removed);
-            }
-            foreach (var unit in ActiveUnitData.Commanders.Where(u => SharkyUnitData.UndeadTypes.Contains((UnitTypes)u.Value.UnitCalculation.Unit.UnitType)))
-            {
-                ActiveUnitData.Commanders.TryRemove(unit.Key, out UnitCommander removed);
             }
 
             foreach (var unit in ActiveUnitData.NeutralUnits.Where(u => u.Value.Unit.DisplayType == DisplayType.Snapshot))

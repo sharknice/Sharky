@@ -65,6 +65,10 @@ namespace Sharky
 
         public List<SC2APIProtocol.Action> Order(int frame, Abilities ability, Point2D targetLocation = null, ulong targetTag = 0, bool allowSpam = false, bool queue = false)
         {
+            if (!queue && LastOrderFrame == frame)
+            {
+                return new List<SC2APIProtocol.Action>(); // don't give a unit conflicting orders, only one order per frame
+            }
             if (!allowSpam)
             {
                 if (ability == LastAbility && targetTag == LastTargetTag && ((targetLocation == null && LastTargetLocation == null) || (LastTargetLocation != null && targetLocation != null && targetLocation.X == LastTargetLocation.X && targetLocation.Y == LastTargetLocation.Y)) && AbilityOrderTimes[ability] > frame - SpamFrames)

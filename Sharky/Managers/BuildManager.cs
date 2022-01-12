@@ -194,13 +194,22 @@ namespace Sharky.Managers
         protected void SwitchBuild(string buildName, int frame)
         {
             BuildHistory[frame] = buildName;
+            if (CurrentBuild != null)
+            {
+                CurrentBuild.EndBuild(frame);
+            }
             CurrentBuild = BuildChoices[ActualRace].Builds[buildName];
             CurrentBuild.StartBuild(frame);
         }
 
         protected void TransitionBuild(int frame)
         {
-            BuildSequence = BuildChoices[ActualRace].BuildSequences["Transition"][new Random().Next(BuildChoices[ActualRace].BuildSequences["Transition"].Count)];
+            var key = $"{EnemyRace}-Transition";
+            if (!BuildChoices[ActualRace].BuildSequences.ContainsKey(key))
+            {
+                key = "Transition";
+            }
+            BuildSequence = BuildChoices[ActualRace].BuildSequences[key][new Random().Next(BuildChoices[ActualRace].BuildSequences[key].Count)];
             SwitchBuild(BuildSequence[0], frame);
         }
     }

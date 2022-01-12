@@ -24,6 +24,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="StaticData\wall\terran\berlingrad.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="StaticData\wall\terran\2000atmospheres.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

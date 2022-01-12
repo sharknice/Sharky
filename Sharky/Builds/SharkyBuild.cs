@@ -112,6 +112,11 @@ namespace Sharky.Builds
             }
         }
 
+        public virtual void EndBuild(int frame)
+        {
+
+        }
+
         public virtual bool Transition(int frame)
         {
             return false;

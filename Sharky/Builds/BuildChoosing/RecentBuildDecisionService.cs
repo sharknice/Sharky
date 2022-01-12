@@ -57,7 +57,7 @@ namespace Sharky.Builds.BuildChoosing
                     }
                     else
                     {
-                        Console.WriteLine($"Lost with: {string.Join(" ", sequence)}");
+                        //Console.WriteLine($"Lost with: {string.Join(" ", sequence)}");
                     }
                 }
                 else
@@ -78,7 +78,7 @@ namespace Sharky.Builds.BuildChoosing
                 }
                 else
                 {
-                    Console.WriteLine($"Lost with: {string.Join(" ", sequence)}");
+                    //Console.WriteLine($"Lost with: {string.Join(" ", sequence)}");
                 }
             }
 

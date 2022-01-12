@@ -246,7 +246,7 @@ namespace Sharky.Managers
 
             SharkyUnitData.UndeadTypes = new HashSet<UnitTypes> { UnitTypes.ZERG_BROODLING, UnitTypes.ZERG_EGG, UnitTypes.ZERG_LARVA, UnitTypes.ZERG_OVERLORD, UnitTypes.ZERG_OVERLORDCOCOON, UnitTypes.ZERG_TRANSPORTOVERLORDCOCOON,
                 UnitTypes.TERRAN_KD8CHARGE,
-                UnitTypes.PROTOSS_INTERCEPTOR };
+                UnitTypes.PROTOSS_INTERCEPTOR, UnitTypes.PROTOSS_DISRUPTORPHASED, UnitTypes.PROTOSS_ADEPTPHASESHIFT };
         }
 
         public override void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)

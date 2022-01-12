@@ -63,6 +63,14 @@ namespace Sharky.Builds.Terran
             }
         }
 
+        protected void SendScvForCommandCenter(int frame)
+        {
+            if (UnitCountService.EquivalentTypeCount(UnitTypes.TERRAN_COMMANDCENTER) == 1 && MacroData.Minerals > 275)
+            {
+                PrePositionBuilderTask.SendBuilder(TargetingData.NaturalBasePoint, frame);
+            }
+        }
+
         protected bool CommandCenterScvKilled()
         {
             var building = ActiveUnitData.Commanders.FirstOrDefault(c => c.Value.UnitCalculation.Unit.BuildProgress < 1 && c.Value.UnitCalculation.Unit.BuildProgress > 0 && c.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_COMMANDCENTER && c.Value.UnitCalculation.Unit.BuildProgress == c.Value.UnitCalculation.PreviousUnit.BuildProgress);

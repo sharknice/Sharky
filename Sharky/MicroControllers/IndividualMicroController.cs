@@ -111,8 +111,7 @@ namespace Sharky.MicroControllers
 
             if (MicroPriority == MicroPriority.StayOutOfRange)
             {
-                if (SpecialCaseRetreat(commander, target, defensivePoint, frame, out action)) { return action; }
-                if (MoveAway(commander, target, defensivePoint, frame, out action)) { return action; }
+                return AttackStayOutOfRange(commander, target, defensivePoint, groupCenter, bestTarget, formation, frame);
             }
 
             if (AvoidPointlessDamage(commander, target, defensivePoint, frame, out action)) { return action; }
@@ -122,6 +121,38 @@ namespace Sharky.MicroControllers
                 if (AttackBestTarget(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
             }
 
+            if (Move(commander, target, defensivePoint, groupCenter, bestTarget, formation, frame, out action)) { return action; }
+
+            if (AvoidDeceleration(commander, target, true, frame, out action)) { return action; }
+            return commander.Order(frame, Abilities.ATTACK, target);
+        }
+
+        public virtual List<SC2APIProtocol.Action> AttackStayOutOfRange(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, Formation formation, int frame)
+        {
+            List<SC2APIProtocol.Action> action = null;
+
+            if (AttackBestTargetInRange(commander, target, bestTarget, frame, out action)) { return action; }
+
+            if (SpecialCaseRetreat(commander, target, defensivePoint, frame, out action)) { return action; }
+            if (MoveAway(commander, target, defensivePoint, frame, out action)) { return action; }
+
+            if (AvoidPointlessDamage(commander, target, defensivePoint, frame, out action)) { return action; }
+
+            if (WeaponReady(commander, frame) && !commander.UnitCalculation.EnemiesThreateningDamage.Any())
+            {
+                var safe = true;
+                var closestEnemy = commander.UnitCalculation.NearbyEnemies.Take(25).OrderBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+                if (closestEnemy != null && !closestEnemy.UnitClassifications.Contains(UnitClassification.Worker))
+                {
+                    if (DamageService.CanDamage(closestEnemy, commander.UnitCalculation) && (closestEnemy.Range >= commander.UnitCalculation.Range || closestEnemy.UnitTypeData.MovementSpeed > commander.UnitCalculation.UnitTypeData.MovementSpeed))
+                    {
+                        safe = false;
+                    }
+                }
+                if (safe && AttackBestTarget(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
+            }
+
+            if (AvoidAllDamage(commander, target, defensivePoint, frame, out action)) { return action; }
             if (Move(commander, target, defensivePoint, groupCenter, bestTarget, formation, frame, out action)) { return action; }
 
             if (AvoidDeceleration(commander, target, true, frame, out action)) { return action; }
@@ -1324,15 +1355,6 @@ namespace Sharky.MicroControllers
                         action = commander.Order(frame, Abilities.ATTACK, null, bestTarget.Unit.Tag);
                     }
                     return true;
-                }
-                if (commander.UnitCalculation.EnemiesInRange.Count() == 0 && bestTarget.FrameLastSeen == frame)
-                {
-                    var closestEnemy = commander.UnitCalculation.NearbyEnemies.Take(25).OrderBy(e => Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position)).FirstOrDefault();
-                    if (closestEnemy != null && closestEnemy.Unit.Tag == bestTarget.Unit.Tag)
-                    {
-                        action = commander.Order(frame, Abilities.ATTACK, null, bestTarget.Unit.Tag);
-                        return true;
-                    }
                 }
             }
 

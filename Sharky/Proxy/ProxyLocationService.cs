@@ -26,6 +26,14 @@ namespace Sharky.Proxy
         public Point2D GetCliffProxyLocation(float offsetDistance = 0)
         {
             var numberOfCloseLocations = NumberOfCloseBaseLocations();
+            if (MapDataService.MapData.MapName.ToLower().Contains("glittering") || MapDataService.MapData.MapName.ToLower().Contains("berlingrad"))
+            {
+                numberOfCloseLocations = 3;
+            }
+            if (MapDataService.MapData.MapName.ToLower().Contains("curious"))
+            {
+                numberOfCloseLocations = 5;
+            }
             var closeAirLocations = BaseData.EnemyBaseLocations.Take(5).OrderBy(b => Vector2.DistanceSquared(new Vector2(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y), new Vector2(b.Location.X, b.Location.Y))).Take(numberOfCloseLocations);
 
             var baseLocation = closeAirLocations.OrderBy(b => PathFinder.GetGroundPath(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y, b.Location.X, b.Location.Y, 0).Count()).Last().Location;
@@ -51,6 +59,10 @@ namespace Sharky.Proxy
             {
                 baseLocation = orderedLocations.Take(proxyBase).Skip(2).First().Location;
             }
+            if (MapDataService.MapData.MapName.ToLower().Contains("glittering") || MapDataService.MapData.MapName.ToLower().Contains("berlingrad"))
+            {
+                baseLocation = orderedLocations.Take(proxyBase).Skip(3).First().Location;
+            }
 
             var angle = Math.Atan2(TargetingData.EnemyMainBasePoint.Y - baseLocation.Y, baseLocation.X - TargetingData.EnemyMainBasePoint.X);
             var x = offsetDistance * Math.Cos(angle);
@@ -66,6 +78,7 @@ namespace Sharky.Proxy
         private int NumberOfCloseBaseLocations()
         {
             if (MapDataService.MapData.MapName.ToLower().Contains("blackburn")) { return 3; }
+            if (MapDataService.MapData.MapName.ToLower().Contains("glittering") || MapDataService.MapData.MapName.ToLower().Contains("berlingrad")) { return 4; }
             return BaseData.BaseLocations.Count(b => Vector2.DistanceSquared(new Vector2(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y), new Vector2(b.Location.X, b.Location.Y)) < 1200);
         }
 

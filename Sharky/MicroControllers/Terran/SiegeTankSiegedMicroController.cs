@@ -81,8 +81,11 @@ namespace Sharky.MicroControllers.Terran
                 var seiged = commander.UnitCalculation.NearbyAllies.Count(u => u.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED);
 
                 if (unseiged > 0 && seiged <= unseiged) // keep more tanks sieged than unseiged
-                {
-                    return false;
+                {               
+                    if (!TargetingData.ChokePoints.Bad.Any(b => Vector2.DistanceSquared(b.Center, commander.UnitCalculation.Position) < 9) && !TargetingData.ChokePoints.Good.Any(b => Vector2.DistanceSquared(b.Center, commander.UnitCalculation.Position) < 9))
+                    {
+                        return false; // don't return false if on a ramp
+                    }
                 }
             }
 
@@ -193,7 +196,9 @@ namespace Sharky.MicroControllers.Terran
         {
             List<SC2APIProtocol.Action> action = null;
 
-            if (Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(defensivePoint.X, defensivePoint.Y)) > 36 || MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos) < MapDataService.MapHeight(defensivePoint))
+            if (Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(defensivePoint.X, defensivePoint.Y)) > 36 || MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos) < MapDataService.MapHeight(defensivePoint) ||
+                (TargetingData.ChokePoints.Bad.Any(b => Vector2.DistanceSquared(b.Center, commander.UnitCalculation.Position) < 9) || TargetingData.ChokePoints.Good.Any(b => Vector2.DistanceSquared(b.Center, commander.UnitCalculation.Position) < 9)
+))
             {
                 if (OffensiveAbility(commander, null, defensivePoint, groupCenter, null, frame, out action)) { return action; }
             }
