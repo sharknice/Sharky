@@ -1890,18 +1890,19 @@ namespace Sharky.MicroControllers
         {
             action = null;
 
-            foreach (var bile in SharkyUnitData.CorrosiveBiles)
+            var bile = SharkyUnitData.CorrosiveBiles.OrderBy(bile => Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(bile.Key.X, bile.Key.Y))).FirstOrDefault();
+            if (bile.Key != null)
             {
-                if (Vector2.DistanceSquared(new Vector2(bile.Key.X, bile.Key.Y), commander.UnitCalculation.Position) <= (.5f + commander.UnitCalculation.Unit.Radius) * (.5f + commander.UnitCalculation.Unit.Radius))
+                if (Vector2.DistanceSquared(new Vector2(bile.Key.X, bile.Key.Y), commander.UnitCalculation.Position) <= (2f + commander.UnitCalculation.Unit.Radius) * (2f + commander.UnitCalculation.Unit.Radius))
                 {
                     Point2D avoidPoint;
                     if (commander.UnitCalculation.Unit.IsFlying)
                     {
-                        avoidPoint = GetAirAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, new Point { X = bile.Key.X, Y = bile.Key.Y, Z = 1 }, target, defensivePoint, 5);
+                        avoidPoint = GetAirAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, new Point { X = bile.Key.X, Y = bile.Key.Y, Z = 1 }, target, defensivePoint, 6);
                     }
                     else
                     {
-                        avoidPoint = GetGroundAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, new Point { X = bile.Key.X, Y = bile.Key.Y, Z = 1 }, target, defensivePoint, 5);
+                        avoidPoint = GetGroundAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, new Point { X = bile.Key.X, Y = bile.Key.Y, Z = 1 }, target, defensivePoint, 6);
 
                     }
                     action = commander.Order(frame, Abilities.MOVE, avoidPoint);

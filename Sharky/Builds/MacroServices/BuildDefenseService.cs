@@ -137,11 +137,11 @@ namespace Sharky.Builds.MacroServices
 
                     if (baseLocation != null && baseLocation.MineralLineDefenseUnbuildableFrame < MacroData.Frame - 100)
                     {
-                        if (baseLocation.MineralLineDefenseUnbuildableFrame < MacroData.Frame - 100)
+                        if (MacroData.Minerals >= unitData.Minerals && MacroData.VespeneGas >= unitData.Gas)
                         {
                             if (ActiveUnitData.SelfUnits.Count(u => u.Value.Unit.UnitType == (uint)unit.Key && Vector2.DistanceSquared(u.Value.Position, new Vector2(baseLocation.Location.X, baseLocation.Location.Y)) < MacroData.DefensiveBuildingMaximumDistance * MacroData.DefensiveBuildingMaximumDistance) + orderedBuildings < unit.Value)
                             {
-                                var command = BuildingBuilder.BuildBuilding(MacroData, unit.Key, unitData, baseLocation.Location, false, MacroData.DefensiveBuildingMaximumDistance, wallOffType: BuildOptions.WallOffType);
+                                var command = BuildingBuilder.BuildBuilding(MacroData, unit.Key, unitData, baseLocation.Location, false, MacroData.DefensiveBuildingMaximumDistance, wallOffType: BuildOptions.WallOffType, allowBlockBase: false);
                                 if (command != null)
                                 {
                                     commands.AddRange(command);

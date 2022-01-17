@@ -1,7 +1,5 @@
 ﻿using SC2APIProtocol;
 using Sharky.DefaultBot;
-using Sharky.MicroControllers;
-using Sharky.Pathing;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,7 +29,7 @@ namespace Sharky.MicroTasks
         {
             var commands = new List<SC2APIProtocol.Action>();
 
-            var hellions = ActiveUnitData.SelfUnits.Values.Where(u => u.Unit.UnitType == (uint)UnitTypes.TERRAN_HELLION);
+            var hellions = ActiveUnitData.SelfUnits.Values.Where(u => u.Unit.UnitType == (uint)UnitTypes.TERRAN_HELLION && (u.NearbyEnemies.Any() || u.NearbyAllies.Any(a => a.UnitClassifications.Contains(UnitClassification.ArmyUnit) && Vector2.DistanceSquared(a.Position, u.Position) < 9)));
             if (hellions.Count() > 0)
             {
                 var command = new ActionRawUnitCommand();

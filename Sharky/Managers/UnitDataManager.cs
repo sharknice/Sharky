@@ -290,7 +290,7 @@ namespace Sharky.Managers
                 }
             }
 
-            var removeBiles = SharkyUnitData.CorrosiveBiles.Where(b => frame - b.Value > 50).Select(b => b.Key);
+            var removeBiles = SharkyUnitData.CorrosiveBiles.Where(b => frame - b.Value > 55).Select(b => b.Key);
             foreach (var key in removeBiles)
             {
                 SharkyUnitData.CorrosiveBiles.Remove(key);

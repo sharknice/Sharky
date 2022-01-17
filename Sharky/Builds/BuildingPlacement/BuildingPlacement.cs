@@ -26,7 +26,7 @@ namespace Sharky.Builds.BuildingPlacement
             UnitCountService = unitCountService;
         }
 
-        public Point2D FindPlacement(Point2D target, UnitTypes unitType, int size, bool ignoreResourceProximity = false, float maxDistance = 50, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.None, bool requireVision = false)
+        public Point2D FindPlacement(Point2D target, UnitTypes unitType, int size, bool ignoreResourceProximity = false, float maxDistance = 50, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.None, bool requireVision = false, bool allowBlockBase = true)
         {
             if (unitType == UnitTypes.PROTOSS_NEXUS || unitType == UnitTypes.TERRAN_COMMANDCENTER || unitType == UnitTypes.ZERG_HATCHERY || unitType == UnitTypes.TERRAN_ORBITALCOMMANDFLYING || unitType == UnitTypes.TERRAN_COMMANDCENTERFLYING)
             {
@@ -34,7 +34,7 @@ namespace Sharky.Builds.BuildingPlacement
                 {
                     if (UnitCountService.EquivalentTypeCount(UnitTypes.TERRAN_COMMANDCENTER) - BaseData.SelfBases.Count() < MacroData.DesiredMacroCommandCenters)
                     {
-                        var placement = TerranBuildingPlacement.FindPlacement(target, unitType, size, ignoreResourceProximity, maxDistance, requireSameHeight, wallOffType);
+                        var placement = TerranBuildingPlacement.FindPlacement(target, unitType, size, ignoreResourceProximity, maxDistance, requireSameHeight, wallOffType, requireVision, allowBlockBase);
                         if (placement != null)
                         {
                             return placement;
@@ -46,15 +46,15 @@ namespace Sharky.Builds.BuildingPlacement
 
             if (SharkyUnitData.TerranTypes.Contains(unitType))
             {
-                return TerranBuildingPlacement.FindPlacement(target, unitType, size, ignoreResourceProximity, maxDistance, requireSameHeight, wallOffType);
+                return TerranBuildingPlacement.FindPlacement(target, unitType, size, ignoreResourceProximity, maxDistance, requireSameHeight, wallOffType, requireVision, allowBlockBase);
             }
             else if (SharkyUnitData.ProtossTypes.Contains(unitType))
             {
-                return ProtossBuildingPlacement.FindPlacement(target, unitType, size, ignoreResourceProximity, maxDistance, requireSameHeight, wallOffType);
+                return ProtossBuildingPlacement.FindPlacement(target, unitType, size, ignoreResourceProximity, maxDistance, requireSameHeight, wallOffType, requireVision, allowBlockBase);
             }
             else
             {
-                return ZergBuildingPlacement.FindPlacement(target, unitType, size, ignoreResourceProximity, maxDistance, requireSameHeight, wallOffType);
+                return ZergBuildingPlacement.FindPlacement(target, unitType, size, ignoreResourceProximity, maxDistance, requireSameHeight, wallOffType, requireVision, allowBlockBase);
             }          
         }
     }

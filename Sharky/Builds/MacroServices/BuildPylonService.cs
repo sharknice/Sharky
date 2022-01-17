@@ -31,10 +31,10 @@ namespace Sharky.Builds.MacroServices
             defensivePointLastFailFrame = 0;
         }
 
-        public List<SC2APIProtocol.Action> BuildPylon(Point2D location, bool ignoreMineralProximity = false, float maxDistance = 50)
+        public List<SC2APIProtocol.Action> BuildPylon(Point2D location, bool ignoreMineralProximity = false, float maxDistance = 50, bool allowBlockBase = true)
         {
             var unitData = SharkyUnitData.BuildingData[UnitTypes.PROTOSS_PYLON];
-            return BuildingBuilder.BuildBuilding(MacroData, UnitTypes.PROTOSS_PYLON, unitData, location, ignoreMineralProximity, maxDistance);
+            return BuildingBuilder.BuildBuilding(MacroData, UnitTypes.PROTOSS_PYLON, unitData, location, ignoreMineralProximity, maxDistance, allowBlockBase: allowBlockBase);
         }
 
         public IEnumerable<SC2APIProtocol.Action> BuildPylonsAtEveryBase()
@@ -80,7 +80,7 @@ namespace Sharky.Builds.MacroServices
             {
                 if (ActiveUnitData.SelfUnits.Count(u => u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && Vector2.DistanceSquared(u.Value.Position, new Vector2(baseLocation.Location.X, baseLocation.Location.Y)) < MacroData.DefensiveBuildingMaximumDistance * MacroData.DefensiveBuildingMaximumDistance) + orderedBuildings < MacroData.DesiredPylonsAtNextBase)
                 {
-                    var command = BuildPylon(baseLocation.Location, false, MacroData.DefensiveBuildingMaximumDistance);
+                    var command = BuildPylon(baseLocation.Location, false, MacroData.DefensiveBuildingMaximumDistance, false);
                     if (command != null)
                     {
                         commands.AddRange(command);

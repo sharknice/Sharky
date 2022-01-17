@@ -19,7 +19,7 @@ namespace Sharky.Builds.BuildingPlacement
             MapData = mapData;
         }
 
-        public Point2D FindPlacement(Point2D target, UnitTypes unitType, int size, bool ignoreMineralProximity = true, float maxDistance = 50, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.None, bool requireVision = false)
+        public Point2D FindPlacement(Point2D target, UnitTypes unitType, int size, bool ignoreMineralProximity = true, float maxDistance = 50, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.None, bool requireVision = false, bool allowBlockBase = true)
         {
             var powerSources = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON || c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISMPHASING && c.UnitCalculation.Unit.BuildProgress == 1).OrderBy(c => Vector2.DistanceSquared(c.UnitCalculation.Position, new Vector2(target.X, target.Y)));
             foreach (var powerSource in powerSources)

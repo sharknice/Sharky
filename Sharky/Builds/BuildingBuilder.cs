@@ -30,7 +30,7 @@ namespace Sharky.Builds
             MapDataService = mapDataService;
         }
 
-        public List<Action> BuildBuilding(MacroData macroData, UnitTypes unitType, BuildingTypeData unitData, Point2D generalLocation = null, bool ignoreMineralProximity = false, float maxDistance = 50, List<UnitCommander> workerPool = null, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.None)
+        public List<Action> BuildBuilding(MacroData macroData, UnitTypes unitType, BuildingTypeData unitData, Point2D generalLocation = null, bool ignoreMineralProximity = false, float maxDistance = 50, List<UnitCommander> workerPool = null, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.None, bool allowBlockBase = true)
         {
             if (unitData.Minerals <= macroData.Minerals && unitData.Gas <= macroData.VespeneGas)
             {
@@ -49,17 +49,17 @@ namespace Sharky.Builds
                         location = GetReferenceLocation(TargetingData.SelfMainBasePoint);
                     }
                 }
-                var placementLocation = BuildingPlacement.FindPlacement(location, unitType, unitData.Size, ignoreMineralProximity, maxDistance, requireSameHeight, wallOffType);
+                var placementLocation = BuildingPlacement.FindPlacement(location, unitType, unitData.Size, ignoreMineralProximity, maxDistance, requireSameHeight, wallOffType, allowBlockBase: allowBlockBase);
                 
                 if (placementLocation == null)
                 {
-                    placementLocation = BuildingPlacement.FindPlacement(location, unitType, unitData.Size, true, maxDistance, requireSameHeight, wallOffType);
+                    placementLocation = BuildingPlacement.FindPlacement(location, unitType, unitData.Size, true, maxDistance, requireSameHeight, wallOffType, allowBlockBase: allowBlockBase);
                 }
                 if (placementLocation == null && anyBase)
                 {
                     foreach (var selfBase in BaseData.SelfBases)
                     {
-                        placementLocation = BuildingPlacement.FindPlacement(selfBase.Location, unitType, unitData.Size, true, maxDistance, requireSameHeight, wallOffType);
+                        placementLocation = BuildingPlacement.FindPlacement(selfBase.Location, unitType, unitData.Size, true, maxDistance, requireSameHeight, wallOffType, allowBlockBase: allowBlockBase);
                         if (placementLocation != null)
                         {
                             break;

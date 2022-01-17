@@ -10,22 +10,24 @@ namespace Sharky.Builds.BuildingPlacement
     {
         ActiveUnitData ActiveUnitData;
         SharkyUnitData SharkyUnitData;
+        BaseData BaseData;
         DebugService DebugService;
         MapDataService MapDataService;
         BuildingService BuildingService;
         IBuildingPlacement WallOffPlacement;
 
-        public ProtossBuildingPlacement(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, DebugService debugService, MapDataService mapDataService, BuildingService buildingService, IBuildingPlacement wallOffPlacement)
+        public ProtossBuildingPlacement(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, BaseData baseData, DebugService debugService, MapDataService mapDataService, BuildingService buildingService, IBuildingPlacement wallOffPlacement)
         {
             ActiveUnitData = activeUnitData;
             SharkyUnitData = sharkyUnitData;
+            BaseData = baseData;
             DebugService = debugService;
             MapDataService = mapDataService;
             BuildingService = buildingService;
             WallOffPlacement = wallOffPlacement;
         }
 
-        public Point2D FindPlacement(Point2D target, UnitTypes unitType, int size, bool ignoreResourceProximity = false, float maxDistance = 50, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.None, bool requireVision = false)
+        public Point2D FindPlacement(Point2D target, UnitTypes unitType, int size, bool ignoreResourceProximity = false, float maxDistance = 50, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.None, bool requireVision = false, bool allowBlockBase = true)
         {
             var mineralProximity = 2;
             if (ignoreResourceProximity) { mineralProximity = 0; };
@@ -34,7 +36,7 @@ namespace Sharky.Builds.BuildingPlacement
             {
                 if (!BuildingService.FullyWalled())
                 {
-                    var point = WallOffPlacement.FindPlacement(target, unitType, size, ignoreResourceProximity, maxDistance, requireSameHeight, wallOffType);
+                    var point = WallOffPlacement.FindPlacement(target, unitType, size, ignoreResourceProximity, maxDistance, requireSameHeight, wallOffType, requireVision, allowBlockBase);
                     if (point != null)
                     {
                         return point;
@@ -45,7 +47,7 @@ namespace Sharky.Builds.BuildingPlacement
             {
                 if (!BuildingService.PartiallyWalled())
                 {
-                    var point = WallOffPlacement.FindPlacement(target, unitType, size, ignoreResourceProximity, maxDistance, requireSameHeight, wallOffType);
+                    var point = WallOffPlacement.FindPlacement(target, unitType, size, ignoreResourceProximity, maxDistance, requireSameHeight, wallOffType, requireVision, allowBlockBase);
                     if (point != null)
                     {
                         return point;
@@ -55,15 +57,15 @@ namespace Sharky.Builds.BuildingPlacement
 
             if (unitType == UnitTypes.PROTOSS_PYLON)
             {
-                return FindPylonPlacement(target, maxDistance, mineralProximity, requireSameHeight, wallOffType);
+                return FindPylonPlacement(target, maxDistance, mineralProximity, requireSameHeight, wallOffType, requireVision, allowBlockBase);
             }
             else
             {
-                return FindProductionPlacement(target, size, maxDistance, mineralProximity, wallOffType);
+                return FindProductionPlacement(target, size, maxDistance, mineralProximity, wallOffType, requireVision, allowBlockBase);
             }
         }
 
-        public Point2D FindPylonPlacement(Point2D reference, float maxDistance, float minimumMineralProximinity = 2, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.None)
+        public Point2D FindPylonPlacement(Point2D reference, float maxDistance, float minimumMineralProximinity = 2, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.None, bool requireVision = false, bool allowBlockBase = true)
         {
             var x = reference.X;
             var y = reference.Y;
@@ -107,16 +109,21 @@ namespace Sharky.Builds.BuildingPlacement
                         var squared = (1 + minimumMineralProximinity + .5) * (1 + minimumMineralProximinity + .5);
                         var nexusDistanceSquared = 16f;
                         if (minimumMineralProximinity == 0) { nexusDistanceSquared = 0; }
-                        var nexusClashes = ActiveUnitData.SelfUnits.Where(u => (u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS || u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON) && Vector2.DistanceSquared(u.Value.Position, new Vector2(point.X, point.Y)) < squared + nexusDistanceSquared);
-                        if (nexusClashes.Count() == 0)
+                        var vector = new Vector2(point.X, point.Y);
+
+                        if (allowBlockBase || !BaseData.BaseLocations.Any(b => Vector2.DistanceSquared(new Vector2(b.Location.X, b.Location.Y), vector) < 25))
                         {
-                            var clashes = mineralFields.Where(u => Vector2.DistanceSquared(u.Value.Position, new Vector2(point.X, point.Y)) < squared);
-                            if (clashes.Count() == 0)
+                            var nexusClashes = ActiveUnitData.SelfUnits.Where(u => (u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS || u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON) && Vector2.DistanceSquared(u.Value.Position, vector) < squared + nexusDistanceSquared);
+                            if (nexusClashes.Count() == 0)
                             {
-                                if (Vector2.DistanceSquared(new Vector2(reference.X, reference.Y), new Vector2(point.X, point.Y)) <= maxDistance * maxDistance)
+                                var clashes = mineralFields.Where(u => Vector2.DistanceSquared(u.Value.Position, new Vector2(point.X, point.Y)) < squared);
+                                if (clashes.Count() == 0)
                                 {
-                                    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
-                                    return point;
+                                    if (Vector2.DistanceSquared(new Vector2(reference.X, reference.Y), new Vector2(point.X, point.Y)) <= maxDistance * maxDistance)
+                                    {
+                                        DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
+                                        return point;
+                                    }
                                 }
                             }
                         }
@@ -129,7 +136,7 @@ namespace Sharky.Builds.BuildingPlacement
             return null;
         }
 
-        public Point2D FindProductionPlacement(Point2D target, float size, float maxDistance, float minimumMineralProximinity = 2, WallOffType wallOffType = WallOffType.None)
+        public Point2D FindProductionPlacement(Point2D target, float size, float maxDistance, float minimumMineralProximinity = 2, WallOffType wallOffType = WallOffType.None, bool requireVision = false, bool allowBlockBase = true)
         {
             var targetVector = new Vector2(target.X, target.Y);
             var powerSources = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && c.UnitCalculation.Unit.BuildProgress == 1).OrderBy(c => Vector2.DistanceSquared(c.UnitCalculation.Position, targetVector));
@@ -175,6 +182,11 @@ namespace Sharky.Builds.BuildingPlacement
                         var vector = new Vector2(point.X, point.Y);
                         var tooClose = false;
                         if (MapDataService.MapData.BlockWallData != null && MapDataService.MapData.BlockWallData.Any(d => d.Pylons.Any(p => Vector2.DistanceSquared(new Vector2(p.X, p.Y), vector) < 25)))
+                        {
+                            tooClose = true;
+                        }
+
+                        if (!allowBlockBase && BaseData.BaseLocations.Any(b => Vector2.DistanceSquared(new Vector2(b.Location.X, b.Location.Y), vector) < 25))
                         {
                             tooClose = true;
                         }

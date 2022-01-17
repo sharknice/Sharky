@@ -87,7 +87,16 @@ namespace Sharky.Builds
             var assimilator = SharkyUnitData.BuildingData[UnitTypes.PROTOSS_ASSIMILATOR];
             var extractor = SharkyUnitData.BuildingData[UnitTypes.ZERG_EXTRACTOR];
             var refinery = SharkyUnitData.BuildingData[UnitTypes.TERRAN_REFINERY];
-            MacroData.BuildGas = MacroData.DesiredGases > BaseData.SelfBases.Sum(b => b.GasMiningInfo.Count()) + ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)assimilator.Ability || o.AbilityId == (uint)extractor.Ability || o.AbilityId == (uint)refinery.Ability));
+            var workerOrders = ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)assimilator.Ability || o.AbilityId == (uint)extractor.Ability || o.AbilityId == (uint)refinery.Ability));
+            var gases = BaseData.SelfBases.Sum(b => b.GasMiningInfo.Count());
+            if (MacroData.Race == Race.Terran)
+            {
+                if (workerOrders > 0 && gases > 0)
+                {
+                    gases = BaseData.SelfBases.Sum(b => b.GasMiningInfo.Count(g => g.ResourceUnit.BuildProgress == 1));
+                }
+            }
+            MacroData.BuildGas = MacroData.DesiredGases > gases + workerOrders;
         }
 
         public void BalanceTech()
