@@ -66,6 +66,7 @@ namespace Sharky.MicroTasks
                         if ((uint)desiredUnitClaim.UnitType == unitType && !commander.Value.UnitCalculation.Unit.IsHallucination && UnitCommanders.Count(u => u.UnitCalculation.Unit.UnitType == (uint)desiredUnitClaim.UnitType) < desiredUnitClaim.Count)
                         {
                             commander.Value.Claimed = true;
+                            commander.Value.UnitRole = UnitRole.Defend;
                             UnitCommanders.Add(commander.Value);
                         }
                     }

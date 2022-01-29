@@ -91,6 +91,10 @@ namespace Sharky.MicroControllers.Terran
 
             if (commander.UnitCalculation.EnemiesInRange.Count(e => e.Damage > 0 || Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position) < commander.UnitCalculation.Range * commander.UnitCalculation.Range) == 0) // get a little bit closer to buildings
             {
+                if (commander.UnitCalculation.NearbyEnemies.Take(25).Any(e => Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position) < Vector2.DistanceSquared(new Vector2(e.PreviousUnit.Pos.X, e.PreviousUnit.Pos.Y), commander.UnitCalculation.Position)))
+                {
+                    return false;
+                }
                 LastUnseigeFrame = frame;
                 action = commander.Order(frame, Abilities.MORPH_UNSIEGE);
                 return true;

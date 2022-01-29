@@ -101,13 +101,17 @@ namespace Sharky.Builds
                         var buildingWithRoom = building.FirstOrDefault(b => HasRoomForAddon(b.Value)).Value;
                         if (buildingWithRoom != null)
                         {
-                            var action = building.First().Value.Order(macroData.Frame, unitData.Ability);
+                            var action = buildingWithRoom.Order(macroData.Frame, unitData.Ability);
                             if (action != null) { return action; }
                         }
                         else
                         {
-                            var action = building.First().Value.Order(macroData.Frame, Abilities.LIFT);
-                            if (action != null) { return action; }
+                            var buildingToLift = building.FirstOrDefault(b => b.Value.UnitCalculation.NearbyEnemies.Count(e => Vector2.DistanceSquared(e.Position, b.Value.UnitCalculation.Position) < 25) == 0).Value;
+                            if (buildingToLift != null)
+                            {
+                                var action = buildingToLift.Order(macroData.Frame, Abilities.LIFT);
+                                if (action != null) { return action; }
+                            }
                         }
                     }
                 }

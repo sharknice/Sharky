@@ -16,7 +16,7 @@ namespace Sharky.Builds.BuildChoosing
             var originalSequence = buildSequences.FirstOrDefault(b => MatchesBuildSequence(originalGame, b));
             if (originalSequence == null)
             {
-                Console.WriteLine($"Original game didn't match any existing build sequences: {string.Join(" ", originalGame.Builds)}");
+                //Console.WriteLine($"Original game didn't match any existing build sequences: {string.Join(" ", originalGame.Builds)}");
                 return false;
             }
             if (originalSequence == currentSequence)
@@ -48,7 +48,7 @@ namespace Sharky.Builds.BuildChoosing
                     var sequence = buildSequences.FirstOrDefault(b => MatchesBuildSequence(game, b));
                     if (sequence == null)
                     {
-                        Console.WriteLine($"Game didn't match any existing build sequences: {string.Join(" ", game.Builds)}");
+                        //Console.WriteLine($"Game didn't match any existing build sequences: {string.Join(" ", game.Builds.Select(g => g.Value))}");
                     }
                     else if (!losses.Any(loss => SameBuildSequence(buildSequences, loss, sequence)))
                     {
@@ -66,7 +66,7 @@ namespace Sharky.Builds.BuildChoosing
                 }
             }
 
-            Console.WriteLine($"No wins we haven't lost with");
+            //Console.WriteLine($"No wins we haven't lost with");
 
             // use a build we haven't lost with yet
             foreach (var sequence in buildSequences)
@@ -82,7 +82,7 @@ namespace Sharky.Builds.BuildChoosing
                 }
             }
 
-            Console.WriteLine($"Lost with every build");
+            //Console.WriteLine($"Lost with every build");
 
             // lost with every build
             // keep removing the last game from the list and try this whole thing over again

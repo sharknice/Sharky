@@ -11,18 +11,18 @@ namespace Sharky.MicroTasks
 {
     public class WallOffTask : MicroTask
     {
-        SharkyUnitData SharkyUnitData;
-        ActiveUnitData ActiveUnitData;
-        MacroData MacroData;
-        MapData MapData;
-        WallService WallService;
-        ChatService ChatService;
+        protected SharkyUnitData SharkyUnitData;
+        protected ActiveUnitData ActiveUnitData;
+        protected MacroData MacroData;
+        protected MapData MapData;
+        protected WallService WallService;
+        protected ChatService ChatService;
 
-        bool GotWallData;
-        WallData WallData;
-        Point2D ProbeSpot;
+        protected bool GotWallData;
+        protected WallData WallData;
+        protected Point2D ProbeSpot;
 
-        bool BlockedChatSent;
+        protected bool BlockedChatSent;
 
         public List<SC2APIProtocol.Point2D> PlacementPoints { get; private set; }
 
@@ -64,7 +64,7 @@ namespace Sharky.MicroTasks
             }
         }
 
-        float DistanceToResourceCenter(KeyValuePair<ulong, UnitCommander> commander)
+        protected float DistanceToResourceCenter(KeyValuePair<ulong, UnitCommander> commander)
         {
             var resourceCenter = commander.Value.UnitCalculation.NearbyAllies.FirstOrDefault(a => a.UnitClassifications.Contains(UnitClassification.ResourceCenter));
             if (resourceCenter != null)
@@ -158,7 +158,7 @@ namespace Sharky.MicroTasks
             return commands;
         }
 
-        private void GetWallData()
+        protected void GetWallData()
         {
             if (!GotWallData)
             {

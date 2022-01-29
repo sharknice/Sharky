@@ -9,7 +9,7 @@ namespace Sharky.MicroControllers.Terran
     class BansheeMicroController : IndividualMicroController
     {
         public BansheeMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled)
-            : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled)
+            : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled, 2)
         {
 
         }
@@ -41,7 +41,7 @@ namespace Sharky.MicroControllers.Terran
 
             if (PreOffenseOrder(commander, target, defensivePoint, null, null, frame, out action)) { return action; }
 
-            if (MapDataService.InEnemyDetection(commander.UnitCalculation.Unit.Pos))
+            if (!commander.UnitCalculation.Unit.BuffIds.Contains((int)Buffs.BANSHEECLOAK) || MapDataService.InEnemyDetection(commander.UnitCalculation.Unit.Pos))
             {
                 if (commander.UnitCalculation.NearbyEnemies.Any(e => e.DamageAir))
                 {

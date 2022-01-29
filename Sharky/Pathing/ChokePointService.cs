@@ -196,7 +196,7 @@ namespace Sharky.Pathing
                 }
             }
 
-            return wallPoints.Distinct().ToList();
+            return wallPoints.Distinct().OrderBy(p => p.X).ThenBy(p => p.Y).ToList();
         }
 
 

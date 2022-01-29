@@ -87,7 +87,7 @@ namespace Sharky.MicroControllers.Protoss
         {
             foreach (var location in locations)
             {
-                if (location.Value < 150)
+                if (location.Value < 50)
                 {
                     return null;
                 }

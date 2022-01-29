@@ -121,7 +121,14 @@ namespace Sharky.Builds
             foreach (var u in MacroData.DefensiveBuildings)
             {
                 var unitData = SharkyUnitData.BuildingData[u];
-                MacroData.BuildDefensiveBuildings[u] = UnitCountService.Count(u) + ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability)) < MacroData.DesiredDefensiveBuildingsCounts[u];
+                if (MacroData.Race == Race.Protoss)
+                {
+                    MacroData.BuildDefensiveBuildings[u] = UnitCountService.EquivalentTypeCount(u) + ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability)) < MacroData.DesiredDefensiveBuildingsCounts[u];
+                }
+                else
+                {
+                    MacroData.BuildDefensiveBuildings[u] = UnitCountService.EquivalentTypeCompleted(u) + ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability)) < MacroData.DesiredDefensiveBuildingsCounts[u];
+                }
             }
         }
 
@@ -130,13 +137,13 @@ namespace Sharky.Builds
             foreach (var u in MacroData.Production)
             {
                 var unitData = SharkyUnitData.BuildingData[u];
-                if (MacroData.Race == Race.Terran)
+                if (MacroData.Race == Race.Protoss)
                 {
-                    MacroData.BuildProduction[u] = UnitCountService.EquivalentTypeCompleted(u) + ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability)) < MacroData.DesiredProductionCounts[u];
+                    MacroData.BuildProduction[u] = UnitCountService.EquivalentTypeCount(u) + ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability)) < MacroData.DesiredProductionCounts[u];
                 }
                 else
                 {
-                    MacroData.BuildProduction[u] = UnitCountService.EquivalentTypeCount(u) + ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability)) < MacroData.DesiredProductionCounts[u];
+                    MacroData.BuildProduction[u] = UnitCountService.EquivalentTypeCompleted(u) + ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability)) < MacroData.DesiredProductionCounts[u];
                 }
             }
         }

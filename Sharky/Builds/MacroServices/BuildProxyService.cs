@@ -36,7 +36,7 @@ namespace Sharky.Builds.MacroServices
             {
                 var unitData = SharkyUnitData.BuildingData[UnitTypes.PROTOSS_PYLON];
                 var orderedBuildings = ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
-                foreach (var proxy in MacroData.Proxies)
+                foreach (var proxy in MacroData.Proxies.Where(p => p.Value.Enabled))
                 {
                     if (ActiveUnitData.SelfUnits.Count(u => u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && Vector2.DistanceSquared(u.Value.Position, new Vector2(proxy.Value.Location.X, proxy.Value.Location.Y)) < proxy.Value.MaximumBuildingDistance * proxy.Value.MaximumBuildingDistance) + orderedBuildings < proxy.Value.DesiredPylons)
                     {
@@ -63,7 +63,7 @@ namespace Sharky.Builds.MacroServices
 
             if (lastFailFrame < MacroData.Frame - 100)
             {
-                foreach (var proxy in MacroData.Proxies)
+                foreach (var proxy in MacroData.Proxies.Where(p => p.Value.Enabled))
                 {
                     foreach (var unit in proxy.Value.DesiredDefensiveBuildingsCounts)
                     {
@@ -71,19 +71,22 @@ namespace Sharky.Builds.MacroServices
                         {
                             var unitData = SharkyUnitData.BuildingData[unit.Key];
 
-                            var orderedBuildings = ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
-
-                            if (ActiveUnitData.SelfUnits.Count(u => u.Value.Unit.UnitType == (uint)unit.Key && Vector2.DistanceSquared(u.Value.Position, new Vector2(proxy.Value.Location.X, proxy.Value.Location.Y)) < proxy.Value.MaximumBuildingDistance * proxy.Value.MaximumBuildingDistance) + orderedBuildings < unit.Value)
+                            if (MacroData.Minerals >= unitData.Minerals && MacroData.VespeneGas >= unitData.Gas)
                             {
-                                var command = BuildingBuilder.BuildBuilding(MacroData, unit.Key, unitData, proxy.Value.Location, true, proxy.Value.MaximumBuildingDistance, MicroTaskData.MicroTasks[proxy.Key].UnitCommanders);
-                                if (command != null)
+                                var orderedBuildings = ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
+
+                                if (ActiveUnitData.SelfUnits.Count(u => u.Value.Unit.UnitType == (uint)unit.Key && Vector2.DistanceSquared(u.Value.Position, new Vector2(proxy.Value.Location.X, proxy.Value.Location.Y)) < proxy.Value.MaximumBuildingDistance * proxy.Value.MaximumBuildingDistance) + orderedBuildings < unit.Value)
                                 {
-                                    commands.AddRange(command);
-                                    return commands;
-                                }
-                                else
-                                {
-                                    lastFailFrame = MacroData.Frame;
+                                    var command = BuildingBuilder.BuildBuilding(MacroData, unit.Key, unitData, proxy.Value.Location, true, proxy.Value.MaximumBuildingDistance, MicroTaskData.MicroTasks[proxy.Key].UnitCommanders);
+                                    if (command != null)
+                                    {
+                                        commands.AddRange(command);
+                                        return commands;
+                                    }
+                                    else
+                                    {
+                                        lastFailFrame = MacroData.Frame;
+                                    }
                                 }
                             }
                         }
@@ -100,7 +103,7 @@ namespace Sharky.Builds.MacroServices
 
             if (lastFailFrame < MacroData.Frame - 100)
             {
-                foreach (var proxy in MacroData.Proxies)
+                foreach (var proxy in MacroData.Proxies.Where(p => p.Value.Enabled))
                 {
                     foreach (var unit in proxy.Value.DesiredProductionCounts)
                     {
@@ -126,15 +129,18 @@ namespace Sharky.Builds.MacroServices
 
                             if (ActiveUnitData.SelfUnits.Count(u => u.Value.Unit.UnitType == (uint)unit.Key && Vector2.DistanceSquared(u.Value.Position, new Vector2(proxy.Value.Location.X, proxy.Value.Location.Y)) < proxy.Value.MaximumBuildingDistance * proxy.Value.MaximumBuildingDistance) + orderedBuildings < unit.Value)
                             {
-                                var command = BuildingBuilder.BuildBuilding(MacroData, unit.Key, unitData, proxy.Value.Location, true, proxy.Value.MaximumBuildingDistance, MicroTaskData.MicroTasks[proxy.Key].UnitCommanders);
-                                if (command != null)
+                                if (MicroTaskData.MicroTasks[proxy.Key].UnitCommanders.Any(c => c.UnitCalculation.Unit.Orders.Count() == 0 || c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId != (uint)unitData.Ability)))
                                 {
-                                    commands.AddRange(command);
-                                    return commands;
-                                }
-                                else
-                                {
-                                    lastFailFrame = MacroData.Frame;
+                                    var command = BuildingBuilder.BuildBuilding(MacroData, unit.Key, unitData, proxy.Value.Location, true, proxy.Value.MaximumBuildingDistance, MicroTaskData.MicroTasks[proxy.Key].UnitCommanders);
+                                    if (command != null)
+                                    {
+                                        commands.AddRange(command);
+                                        return commands;
+                                    }
+                                    else
+                                    {
+                                        lastFailFrame = MacroData.Frame;
+                                    }
                                 }
                             }
                         }
@@ -172,7 +178,7 @@ namespace Sharky.Builds.MacroServices
 
             if (lastFailFrame < MacroData.Frame - 100)
             {
-                foreach (var proxy in MacroData.Proxies)
+                foreach (var proxy in MacroData.Proxies.Where(p => p.Value.Enabled))
                 {
                     foreach (var unit in proxy.Value.DesiredTechCounts)
                     {
@@ -209,7 +215,7 @@ namespace Sharky.Builds.MacroServices
 
             if (lastFailFrame < MacroData.Frame - 100)
             {
-                foreach (var proxy in MacroData.Proxies)
+                foreach (var proxy in MacroData.Proxies.Where(p => p.Value.Enabled))
                 {
                     foreach (var unit in proxy.Value.DesiredAddOnCounts)
                     {

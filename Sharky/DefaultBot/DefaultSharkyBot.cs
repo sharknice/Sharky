@@ -399,13 +399,16 @@ namespace Sharky.DefaultBot
             var oracleWorkerHarassTask = new OracleWorkerHarassTask(TargetingData, BaseData, ChatService, MapDataService, MapData, oracleHarassMicroController, 1, false);
             var lateGameOracleHarassTask = new LateGameOracleHarassTask(BaseData, TargetingData, MapDataService, oracleHarassMicroController, 1, false);
             var reaperWorkerHarassTask = new ReaperWorkerHarassTask(BaseData, TargetingData, reaperHarassMicroController, 2, false);
+            var bansheeHarassTask = new BansheeHarassTask(BaseData, TargetingData, MapDataService, bansheeMicroController, 2, false);
             var hallucinationScoutTask = new HallucinationScoutTask(TargetingData, BaseData, false, .5f);
             var wallOffTask = new WallOffTask(SharkyUnitData, ActiveUnitData, MacroData, MapData, WallService, ChatService, false, .25f);
+            var permanentWallOffTask = new PermanentWallOffTask(SharkyUnitData, ActiveUnitData, MacroData, MapData, WallService, ChatService, false, .25f);
             var destroyWallOffTask = new DestroyWallOffTask(ActiveUnitData, false, .25f);
             var prePositionBuilderTask = new PrePositionBuilderTask(this, .25f);
             var repairTask = new RepairTask(this, .6f, true);
             var saveLiftableBuildingTask = new SaveLiftableBuildingTask(this, BuildingPlacement, .6f, true);
             var hellbatMorphTask = new HellbatMorphTask(this, false, 0.5f);
+            var nexusRecallTask = new NexusRecallTask(this, false, 0.5f);
 
             MicroTaskData.MicroTasks[defenseSquadTask.GetType().Name] = defenseSquadTask;
             MicroTaskData.MicroTasks[workerScoutGasStealTask.GetType().Name] = workerScoutGasStealTask;
@@ -421,13 +424,16 @@ namespace Sharky.DefaultBot
             MicroTaskData.MicroTasks[oracleWorkerHarassTask.GetType().Name] = oracleWorkerHarassTask;
             MicroTaskData.MicroTasks[lateGameOracleHarassTask.GetType().Name] = lateGameOracleHarassTask;
             MicroTaskData.MicroTasks[reaperWorkerHarassTask.GetType().Name] = reaperWorkerHarassTask;
+            MicroTaskData.MicroTasks[bansheeHarassTask.GetType().Name] = bansheeHarassTask;
             MicroTaskData.MicroTasks[hallucinationScoutTask.GetType().Name] = hallucinationScoutTask;
             MicroTaskData.MicroTasks[wallOffTask.GetType().Name] = wallOffTask;
+            MicroTaskData.MicroTasks[permanentWallOffTask.GetType().Name] = permanentWallOffTask;
             MicroTaskData.MicroTasks[destroyWallOffTask.GetType().Name] = destroyWallOffTask;
             MicroTaskData.MicroTasks[prePositionBuilderTask.GetType().Name] = prePositionBuilderTask;
             MicroTaskData.MicroTasks[repairTask.GetType().Name] = repairTask;
             MicroTaskData.MicroTasks[saveLiftableBuildingTask.GetType().Name] = saveLiftableBuildingTask;
             MicroTaskData.MicroTasks[hellbatMorphTask.GetType().Name] = hellbatMorphTask;
+            MicroTaskData.MicroTasks[nexusRecallTask.GetType().Name] = nexusRecallTask;
 
             MicroManager = new MicroManager(ActiveUnitData, MicroTaskData);
             Managers.Add(MicroManager);

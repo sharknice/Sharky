@@ -58,7 +58,7 @@ namespace Sharky.MicroControllers.Protoss
                     return true;
                 }
 
-                if (commander.UnitCalculation.Unit.Shield < 1)
+                if (commander.UnitCalculation.Unit.Shield < 5)
                 {
                     if (Retreat(commander, target, defensivePoint, frame, out action))
                     {
@@ -107,7 +107,7 @@ namespace Sharky.MicroControllers.Protoss
                 //look at all units within pickup range, ordered by proximity to their closeest enemy
                 // get average hp + shields of back
                 // if unit is in front half weapon is off cooldown and (has below that hp + shields or could die in one hit) pick it up
-                var friendliesInRange = commander.UnitCalculation.NearbyAllies.Where(u => !commander.UnitCalculation.Unit.Passengers.Any(p => p.Tag == u.Unit.Tag) && InRange(u.Position, commander.UnitCalculation.Position, PickupRange)).OrderBy(u => ClosestEnemyDistance(u));
+                var friendliesInRange = commander.UnitCalculation.NearbyAllies.Take(25).Where(u => !commander.UnitCalculation.Unit.Passengers.Any(p => p.Tag == u.Unit.Tag) && InRange(u.Position, commander.UnitCalculation.Position, PickupRange)).OrderBy(u => ClosestEnemyDistance(u));
                 var frontHalf = friendliesInRange.Take(friendliesInRange.Count() / 2);
                 var backHalf = friendliesInRange.Skip(friendliesInRange.Count() / 2);
                 var backAverageHealth = backHalf.Sum(u => u.Unit.Health + u.Unit.Shield) / backHalf.Count();
@@ -171,6 +171,10 @@ namespace Sharky.MicroControllers.Protoss
                     return true;
                 }
 
+                if (AvoidDeceleration(commander, moveTo, false, frame, out action))
+                {
+                    return true;
+                }
                 action = commander.Order(frame, Abilities.MOVE, moveTo);
                 return true;
             }
@@ -182,7 +186,15 @@ namespace Sharky.MicroControllers.Protoss
         {
             action = null;
 
+            if (commander.UnitCalculation.Unit.Shield < commander.UnitCalculation.Unit.ShieldMax)
+            {
+                return false;
+            }
             if (!MapDataService.PathWalkable(commander.UnitCalculation.Unit.Pos))
+            {
+                return false;
+            }
+            if (commander.UnitCalculation.NearbyEnemies.Take(25).Any(e => e.UnitClassifications.Contains(UnitClassification.DefensiveStructure) || e.UnitClassifications.Contains(UnitClassification.ArmyUnit)))
             {
                 return false;
             }
@@ -190,7 +202,7 @@ namespace Sharky.MicroControllers.Protoss
             {
                 return false;
             }
-            if (commander.UnitCalculation.Unit.Shield > 25 && !commander.UnitCalculation.NearbyAllies.Take(25).Any(v => (v.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON || v.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISMPHASING) && DistanceSquared(commander.UnitCalculation, v) < 400)) // not near any pylons or other warping prisms
+            if (!commander.UnitCalculation.NearbyAllies.Take(25).Any(v => (v.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON || v.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISMPHASING))) // not near any pylons or other warping prisms
             {
                 if (commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISM)
                 {
@@ -207,7 +219,7 @@ namespace Sharky.MicroControllers.Protoss
 
             if (commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISMPHASING)
             {
-                if (commander.UnitCalculation.NearbyAllies.Take(25).Any(v => v.Unit.BuildProgress < 1 && Vector2.DistanceSquared(v.Position, commander.UnitCalculation.Position) < 49)) // and not warping any units in
+                if (commander.UnitCalculation.Unit.Shield > 75 && commander.UnitCalculation.NearbyAllies.Take(25).Any(v => v.Unit.BuildProgress < 1 && Vector2.DistanceSquared(v.Position, commander.UnitCalculation.Position) < 49)) // and not warping any units in
                 {
                     return false;
                 }

@@ -25,7 +25,7 @@ namespace Sharky.MicroTasks
 
             Priority = priority;
             Enabled = enabled;
-            UnitCommanders = new List<UnitCommander>(); // TODO: add this task to the defaultsharkybot
+            UnitCommanders = new List<UnitCommander>();
         }
 
         public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)

@@ -67,7 +67,7 @@ namespace Sharky.MicroTasks
 
         public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
         {
-            foreach (var commander in commanders)
+            foreach (var commander in commanders.Where(c => !c.Value.Claimed))
             {
                 if (commander.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && !UnitCommanders.Any(c => c.UnitCalculation.Unit.Tag == commander.Key))
                 {
@@ -395,7 +395,7 @@ namespace Sharky.MicroTasks
                 }
                 else if (worker.UnitCalculation.Unit.Orders.Count() == 0 || worker.UnitCalculation.Unit.Orders.Any(o => BaseData.SelfBases.Any(b => b.MineralMiningInfo.Any(m => m.ResourceUnit.Tag == o.TargetUnitTag))))
                 {
-                    var closestPatch = ActiveUnitData.NeutralUnits.Where(u => SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType) && !BaseData.SelfBases.Any(b => b.MineralFields.Any(m => m.Tag == u.Value.Unit.Tag))).OrderBy(m => Vector2.DistanceSquared(m.Value.Position, worker.UnitCalculation.Position)).FirstOrDefault().Value;
+                    var closestPatch = ActiveUnitData.NeutralUnits.Where(u => SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType) && !BaseData.SelfBases.Any(b => b.ResourceCenter != null && b.ResourceCenter.BuildProgress == 1 && b.MineralFields.Any(m => m.Tag == u.Value.Unit.Tag))).OrderBy(m => Vector2.DistanceSquared(m.Value.Position, worker.UnitCalculation.Position)).FirstOrDefault().Value;
                     if (closestPatch != null)
                     {
                         var action = worker.Order(frame, Abilities.HARVEST_GATHER, null, closestPatch.Unit.Tag);

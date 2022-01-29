@@ -146,7 +146,7 @@ namespace Sharky.Managers.Terran
         {
             if (orbital.UnitCalculation.Unit.Energy >= 50 && !EnemyData.EnemyStrategies["InvisibleAttacks"].Detected || orbital.UnitCalculation.Unit.Energy > 95)
             {
-                var highestMineralPatch = BaseData.SelfBases.Where(b => b.ResourceCenter.BuildProgress > .99 && b.MineralFields.Count() > 0 && ActiveUnitData.SelfUnits[b.ResourceCenter.Tag].NearbyEnemies.Count(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit)) < 2).SelectMany(m => m.MineralFields).OrderByDescending(m => m.MineralContents).FirstOrDefault();
+                var highestMineralPatch = BaseData.SelfBases.Where(b => b.ResourceCenter.BuildProgress > .99 && b.MineralFields.Count() > 0 && ActiveUnitData.SelfUnits.ContainsKey(b.ResourceCenter.Tag) && ActiveUnitData.SelfUnits[b.ResourceCenter.Tag].NearbyEnemies.Count(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit)) < 2).SelectMany(m => m.MineralFields).OrderByDescending(m => m.MineralContents).FirstOrDefault();
                 if (highestMineralPatch != null)
                 {
                     return orbital.Order(frame, Abilities.EFFECT_CALLDOWNMULE, targetTag: highestMineralPatch.Tag);

@@ -244,6 +244,7 @@ namespace Sharky.Managers
                     return commander;
                 });
                 ActiveUnitData.Commanders[allyAttack.Value.Unit.Tag].ParentUnitCalculation = GetParentUnitCalculation(ActiveUnitData.Commanders[allyAttack.Value.Unit.Tag]);
+                // TODO: set childunitcalculation and then set it back to null when it goes away
 
 
                 allyAttack.Value.Attackers = GetTargettedAttacks(allyAttack.Value).ToList();

@@ -35,6 +35,11 @@ namespace Sharky
         /// </summary>
         public UnitCalculation ParentUnitCalculation { get; set; }
 
+        /// <summary>
+        /// The shade for an adept, etc.
+        /// </summary>
+        public UnitCalculation ChildUnitCalculation { get; set; }
+
         Dictionary<Abilities, int> AbilityOrderTimes;
         public Dictionary<ulong, int> LoadTimes;
 

@@ -38,11 +38,17 @@ namespace Sharky.MicroTasks
                     counterGroup.Add(commander);
 
                     var targetPriority = TargetPriorityService.CalculateTargetPriority(counterGroup.Select(c => c.UnitCalculation), enemyGroup);
-                    if (targetPriority.OverallWinnability > 1)
+                    if (targetPriority.Overwhelm || (targetPriority.AirWinnability > 1 && targetPriority.GroundWinnability > 1))
                     {
                         return counterGroup;
                     }
                 }
+            }
+
+            var finalTargetPriority = TargetPriorityService.CalculateTargetPriority(counterGroup.Select(c => c.UnitCalculation), enemyGroup);
+            if (finalTargetPriority.OverallWinnability > 1)
+            {
+                return counterGroup;
             }
 
             return new List<UnitCommander>();

@@ -63,6 +63,8 @@ namespace Sharky.Managers.Protoss
 
         List<SC2APIProtocol.Action> ChronoBoost(UnitCommander nexus, int frame)
         {
+            if (nexus.UnitRole == UnitRole.Defend && nexus.UnitCalculation.Unit.Energy < 100) { return null; } // save for overcharge or recall
+
             if (nexus.UnitCalculation.Unit.Energy >= 50)
             {
                 foreach (var upgrade in ChronoData.ChronodUpgrades)

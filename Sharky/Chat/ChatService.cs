@@ -1,5 +1,6 @@
 ﻿using SC2APIProtocol;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Sharky.Chat
@@ -61,7 +62,7 @@ namespace Sharky.Chat
         public async void SendChatMessages(IEnumerable<string> messages, bool teamChannel = false)
         {
             var typeTime = 0;
-            foreach (var message in messages)
+            foreach (var message in messages.ToList())
             {
                 var chatAction = new Action { ActionChat = new ActionChat { Message = message } };
                 if (teamChannel)

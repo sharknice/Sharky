@@ -32,6 +32,12 @@ namespace Sharky.MicroControllers.Terran
 
             if (bestTarget != null && WeaponReady(commander, frame) && commander.UnitCalculation.EnemiesInRange.Any(e => e.Unit.Tag == bestTarget.Unit.Tag)) { return false; }
 
+            var friendlyDepots = commander.UnitCalculation.NearbyAllies.Take(25).Where(a => a.Unit.UnitType == (uint)UnitTypes.TERRAN_SUPPLYDEPOTLOWERED);
+            if (friendlyDepots.Any(depot => Vector2.DistanceSquared(depot.Position, commander.UnitCalculation.Position) < 4 )) 
+            { 
+                return false; 
+            }
+
             var enemiesInSiegeRange = commander.UnitCalculation.NearbyEnemies.Take(25).Where(e => !e.Unit.IsFlying && 
                 (e.Damage > 0 || Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position) < 12 * 12) && // get a little bit closer to buildings
                 Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position) <= (13 + e.Unit.Radius + commander.UnitCalculation.Unit.Radius) * (13 + e.Unit.Radius + commander.UnitCalculation.Unit.Radius));
