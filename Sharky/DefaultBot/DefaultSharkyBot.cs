@@ -52,6 +52,7 @@ namespace Sharky.DefaultBot
         public MacroManager MacroManager { get; set; }
         public NexusManager NexusManager { get; set; }
         public OrbitalManager OrbitalManager { get; set; }
+        public RallyPointManager RallyPointManager { get; set; }
         public SupplyDepotManager SupplyDepotManager { get; set; }
         public ShieldBatteryManager ShieldBatteryManager { get; set; }
         public PhotonCannonManager PhotonCannonManager { get; set; }
@@ -79,6 +80,7 @@ namespace Sharky.DefaultBot
         public MapDataService MapDataService { get; set; }
         public ChokePointService ChokePointService { get; set; }
         public ChokePointsService ChokePointsService { get; set; }
+        public PylonDepotFullWallService PylonDepotFullWallService { get; set; }
         public TargetPriorityService TargetPriorityService { get; set; }
         public BuildingService BuildingService { get; set; }
         public WallService WallService { get; set; }
@@ -119,6 +121,8 @@ namespace Sharky.DefaultBot
         public TerranSupplyDepotGridPlacement TerranSupplyDepotGridPlacement { get; set; }
         public TerranProductionGridPlacement TerranProductionGridPlacement { get; set; }
         public TerranTechGridPlacement TerranTechGridPlacement { get; set; }
+        public ProtossPylonGridPlacement ProtossPylonGridPlacement { get; set; }
+        public ProtossProductionGridPlacement ProtossProductionGridPlacement { get; set; }
         public ResourceCenterLocator ResourceCenterLocator { get; set; }
         public AttackData AttackData { get; set; }
         public IBuildingPlacement WarpInPlacement { get; set; }
@@ -217,11 +221,12 @@ namespace Sharky.DefaultBot
             
             ChokePointService = new ChokePointService(SharkyPathFinder, MapDataService, BuildingService);
             ChokePointsService = new ChokePointsService(SharkyPathFinder, ChokePointService);
+            PylonDepotFullWallService = new PylonDepotFullWallService(this);
 
             BaseManager = new BaseManager(SharkyUnitData, ActiveUnitData, SharkyPathFinder, UnitCountService, BaseData);
             Managers.Add(BaseManager);
 
-            TargetingManager = new TargetingManager(SharkyUnitData, BaseData, MacroData, TargetingData, MapData, EnemyData, ChokePointService, ChokePointsService, DebugService, ActiveUnitData);
+            TargetingManager = new TargetingManager(SharkyUnitData, BaseData, MacroData, TargetingData, MapData, EnemyData, ChokePointService, ChokePointsService, DebugService, ActiveUnitData, PylonDepotFullWallService);
             Managers.Add(TargetingManager);
 
             BuildOptions = new BuildOptions { StrictGasCount = false, StrictSupplyCount = false, StrictWorkerCount = false };
@@ -230,12 +235,14 @@ namespace Sharky.DefaultBot
             TerranWallService = new TerranWallService(ActiveUnitData, MapData, BaseData, WallService);
             ProtossWallService = new ProtossWallService(SharkyUnitData, ActiveUnitData, WallService);
             WallOffPlacement = new HardCodedWallOffPlacement(ActiveUnitData, SharkyUnitData, MapData, BaseData, WallService, TerranWallService, ProtossWallService);
-            ProtossBuildingPlacement = new ProtossBuildingPlacement(ActiveUnitData, SharkyUnitData, BaseData, DebugService, MapDataService, BuildingService, WallOffPlacement);
+            ProtossPylonGridPlacement = new ProtossPylonGridPlacement(BaseData, MapDataService, DebugService, BuildingService);
+            ProtossProductionGridPlacement = new ProtossProductionGridPlacement(BaseData, ActiveUnitData, MapDataService, DebugService, BuildingService);
             TerranProductionGridPlacement = new TerranProductionGridPlacement(BaseData, MapDataService, DebugService, BuildingService);
             TerranTechGridPlacement = new TerranTechGridPlacement(BaseData, MapDataService, DebugService, BuildingService, TerranProductionGridPlacement);
             TerranSupplyDepotGridPlacement = new TerranSupplyDepotGridPlacement(BaseData, MapDataService, DebugService, BuildingService);
             MissileTurretPlacement = new MissileTurretPlacement(this);
             TerranBuildingPlacement = new TerranBuildingPlacement(ActiveUnitData, SharkyUnitData, BaseData, DebugService, BuildingService, WallOffPlacement, TerranWallService, TerranSupplyDepotGridPlacement, TerranProductionGridPlacement, TerranTechGridPlacement, MissileTurretPlacement);
+            ProtossBuildingPlacement = new ProtossBuildingPlacement(ActiveUnitData, SharkyUnitData, BaseData, DebugService, MapDataService, BuildingService, WallOffPlacement, ProtossPylonGridPlacement, ProtossProductionGridPlacement);
             ZergBuildingPlacement = new ZergBuildingPlacement(ActiveUnitData, SharkyUnitData, DebugService, BuildingService);
             ResourceCenterLocator = new ResourceCenterLocator(ActiveUnitData, BaseData, BuildingService);
             BuildingPlacement = new BuildingPlacement(ProtossBuildingPlacement, TerranBuildingPlacement, ZergBuildingPlacement, ResourceCenterLocator, BaseData, SharkyUnitData, MacroData, UnitCountService);
@@ -254,6 +261,9 @@ namespace Sharky.DefaultBot
             Managers.Add(ShieldBatteryManager);
             PhotonCannonManager = new PhotonCannonManager(ActiveUnitData);
             Managers.Add(PhotonCannonManager);
+
+            RallyPointManager = new RallyPointManager(ActiveUnitData, TargetingData, MapData, WallService);
+            Managers.Add(RallyPointManager);
 
             OrbitalManager = new OrbitalManager(ActiveUnitData, BaseData, EnemyData, MacroData, UnitCountService, ChatService, ResourceCenterLocator, MapDataService, SharkyUnitData);
             Managers.Add(OrbitalManager);
@@ -403,12 +413,14 @@ namespace Sharky.DefaultBot
             var hallucinationScoutTask = new HallucinationScoutTask(TargetingData, BaseData, false, .5f);
             var wallOffTask = new WallOffTask(SharkyUnitData, ActiveUnitData, MacroData, MapData, WallService, ChatService, false, .25f);
             var permanentWallOffTask = new PermanentWallOffTask(SharkyUnitData, ActiveUnitData, MacroData, MapData, WallService, ChatService, false, .25f);
+            var fullPylonWallOffTask = new FullPylonWallOffTask(this, false, .25f);
             var destroyWallOffTask = new DestroyWallOffTask(ActiveUnitData, false, .25f);
             var prePositionBuilderTask = new PrePositionBuilderTask(this, .25f);
             var repairTask = new RepairTask(this, .6f, true);
             var saveLiftableBuildingTask = new SaveLiftableBuildingTask(this, BuildingPlacement, .6f, true);
             var hellbatMorphTask = new HellbatMorphTask(this, false, 0.5f);
             var nexusRecallTask = new NexusRecallTask(this, false, 0.5f);
+            var forceFieldRampTask = new ForceFieldRampTask(TargetingData, ActiveUnitData, MapData, WallService, MapDataService, false, 0.5f);
 
             MicroTaskData.MicroTasks[defenseSquadTask.GetType().Name] = defenseSquadTask;
             MicroTaskData.MicroTasks[workerScoutGasStealTask.GetType().Name] = workerScoutGasStealTask;
@@ -428,12 +440,14 @@ namespace Sharky.DefaultBot
             MicroTaskData.MicroTasks[hallucinationScoutTask.GetType().Name] = hallucinationScoutTask;
             MicroTaskData.MicroTasks[wallOffTask.GetType().Name] = wallOffTask;
             MicroTaskData.MicroTasks[permanentWallOffTask.GetType().Name] = permanentWallOffTask;
+            MicroTaskData.MicroTasks[fullPylonWallOffTask.GetType().Name] = fullPylonWallOffTask;
             MicroTaskData.MicroTasks[destroyWallOffTask.GetType().Name] = destroyWallOffTask;
             MicroTaskData.MicroTasks[prePositionBuilderTask.GetType().Name] = prePositionBuilderTask;
             MicroTaskData.MicroTasks[repairTask.GetType().Name] = repairTask;
             MicroTaskData.MicroTasks[saveLiftableBuildingTask.GetType().Name] = saveLiftableBuildingTask;
             MicroTaskData.MicroTasks[hellbatMorphTask.GetType().Name] = hellbatMorphTask;
             MicroTaskData.MicroTasks[nexusRecallTask.GetType().Name] = nexusRecallTask;
+            MicroTaskData.MicroTasks[forceFieldRampTask.GetType().Name] = forceFieldRampTask;
 
             MicroManager = new MicroManager(ActiveUnitData, MicroTaskData);
             Managers.Add(MicroManager);

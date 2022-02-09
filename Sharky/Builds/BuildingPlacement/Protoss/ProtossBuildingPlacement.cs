@@ -15,8 +15,10 @@ namespace Sharky.Builds.BuildingPlacement
         MapDataService MapDataService;
         BuildingService BuildingService;
         IBuildingPlacement WallOffPlacement;
+        ProtossPylonGridPlacement ProtossPylonGridPlacement;
+        ProtossProductionGridPlacement ProtossProductionGridPlacement;
 
-        public ProtossBuildingPlacement(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, BaseData baseData, DebugService debugService, MapDataService mapDataService, BuildingService buildingService, IBuildingPlacement wallOffPlacement)
+        public ProtossBuildingPlacement(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, BaseData baseData, DebugService debugService, MapDataService mapDataService, BuildingService buildingService, IBuildingPlacement wallOffPlacement, ProtossPylonGridPlacement protossPylonGridPlacement, ProtossProductionGridPlacement protossProductionGridPlacement)
         {
             ActiveUnitData = activeUnitData;
             SharkyUnitData = sharkyUnitData;
@@ -25,9 +27,11 @@ namespace Sharky.Builds.BuildingPlacement
             MapDataService = mapDataService;
             BuildingService = buildingService;
             WallOffPlacement = wallOffPlacement;
+            ProtossPylonGridPlacement = protossPylonGridPlacement;
+            ProtossProductionGridPlacement = protossProductionGridPlacement;
         }
 
-        public Point2D FindPlacement(Point2D target, UnitTypes unitType, int size, bool ignoreResourceProximity = false, float maxDistance = 50, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.None, bool requireVision = false, bool allowBlockBase = true)
+        public Point2D FindPlacement(Point2D target, UnitTypes unitType, int size, bool ignoreResourceProximity = false, float maxDistance = 50, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.None, bool requireVision = false, bool allowBlockBase = false)
         {
             var mineralProximity = 2;
             if (ignoreResourceProximity) { mineralProximity = 0; };
@@ -65,8 +69,14 @@ namespace Sharky.Builds.BuildingPlacement
             }
         }
 
-        public Point2D FindPylonPlacement(Point2D reference, float maxDistance, float minimumMineralProximinity = 2, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.None, bool requireVision = false, bool allowBlockBase = true)
+        public Point2D FindPylonPlacement(Point2D reference, float maxDistance, float minimumMineralProximinity = 2, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.None, bool requireVision = false, bool allowBlockBase = false)
         {
+            if (!allowBlockBase)
+            {
+                var spot = ProtossPylonGridPlacement.FindPlacement(reference, maxDistance, minimumMineralProximinity);
+                if (spot != null) { return spot; }
+            }
+
             var x = reference.X;
             var y = reference.Y;
             var radius = 1f;
@@ -138,6 +148,12 @@ namespace Sharky.Builds.BuildingPlacement
 
         public Point2D FindProductionPlacement(Point2D target, float size, float maxDistance, float minimumMineralProximinity = 2, WallOffType wallOffType = WallOffType.None, bool requireVision = false, bool allowBlockBase = true)
         {
+            if (!allowBlockBase && size == 3)
+            {
+                var spot = ProtossProductionGridPlacement.FindPlacement(target, size, maxDistance, minimumMineralProximinity);
+                if (spot != null) { return spot; }
+            }
+
             var targetVector = new Vector2(target.X, target.Y);
             var powerSources = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && c.UnitCalculation.Unit.BuildProgress == 1).OrderBy(c => Vector2.DistanceSquared(c.UnitCalculation.Position, targetVector));
             foreach (var powerSource in powerSources)

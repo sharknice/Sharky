@@ -12,7 +12,7 @@ namespace Sharky.MicroControllers.Protoss
         public VoidRayMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder pathFinder, MicroPriority microPriority, bool groupUpEnabled)
             :base(defaultSharkyBot, pathFinder, microPriority, groupUpEnabled)
         {
-
+            MaximumSupportDistanceSqaured = 25f;
         }
 
         protected override bool WeaponReady(UnitCommander commander, int frame)

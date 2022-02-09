@@ -40,9 +40,19 @@ namespace Sharky
 
         public int BuildingsInProgressCount(UnitTypes unitType)
         {
-            var unitData = SharkyUnitData.BuildingData[unitType];
-            var inProgress = ActiveUnitData.SelfUnits.Count(u => u.Value.UnitClassifications.Contains(UnitClassification.Worker) && u.Value.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
-            return inProgress;
+            if (SharkyUnitData.BuildingData.ContainsKey(unitType))
+            {
+                var unitData = SharkyUnitData.BuildingData[unitType];
+                var inProgress = ActiveUnitData.SelfUnits.Count(u => u.Value.UnitClassifications.Contains(UnitClassification.Worker) && u.Value.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
+                return inProgress;
+            }
+            else if (SharkyUnitData.MorphData.ContainsKey(unitType))
+            {
+                var unitData = SharkyUnitData.MorphData[unitType];
+                var inProgress = ActiveUnitData.SelfUnits.Count(u => unitData.ProducingUnits.Contains((UnitTypes)u.Value.Unit.UnitType) && u.Value.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
+                return inProgress;
+            }
+            return 0;
         }
 
         public int UnitsInProgressCount(UnitTypes unitType)

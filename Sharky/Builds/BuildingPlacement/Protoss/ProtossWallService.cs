@@ -18,7 +18,7 @@ namespace Sharky.Builds.BuildingPlacement
             WallService = wallService;
         }
 
-        public Point2D FindPylonPlacement(WallData wallData, float maxDistance, float minimumMineralProximinity = 0, WallOffType wallOffType = WallOffType.Full)
+        public Point2D FindPylonPlacement(WallData wallData, float maxDistance, float minimumMineralProximinity = 0, WallOffType wallOffType = WallOffType.None)
         {
             if (wallOffType == WallOffType.Partial)
             {

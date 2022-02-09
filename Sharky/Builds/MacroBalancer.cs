@@ -59,7 +59,7 @@ namespace Sharky.Builds
                 MacroData.DesiredSupplyDepots = (int)Math.Ceiling(((MacroData.FoodUsed - (UnitCountService.EquivalentTypeCount(UnitTypes.TERRAN_COMMANDCENTER) * 12)) / 8.0) + (productionCapacity / 8.0));
             }
 
-            MacroData.BuildSupplyDepot = MacroData.DesiredSupplyDepots > UnitCountService.EquivalentTypeCount(UnitTypes.TERRAN_SUPPLYDEPOT) + ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_SCV && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.BUILD_SUPPLYDEPOT));
+            MacroData.BuildSupplyDepot = UnitCountService.EquivalentTypeCompleted(UnitTypes.TERRAN_SUPPLYDEPOT) + ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.BUILD_SUPPLYDEPOT)) < MacroData.DesiredSupplyDepots;
         }
 
         void BalanceOverlords()

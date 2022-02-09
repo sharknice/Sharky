@@ -121,7 +121,7 @@ namespace Sharky.Builds.MacroServices
                 }
                 else
                 {
-                    if (addOnSwap.AddOnTaker.UnitCalculation.NearbyEnemies.Count(e => Vector2.DistanceSquared(e.Position, addOnSwap.AddOnTaker.UnitCalculation.Position) < 25) == 0)
+                    if (addOnSwap.AddOn != null && addOnSwap.AddOnTaker.UnitCalculation.NearbyEnemies.Count(e => Vector2.DistanceSquared(e.Position, addOnSwap.AddOnTaker.UnitCalculation.Position) < 25) == 0)
                     {
                         command = addOnSwap.AddOnTaker.Order(MacroData.Frame, Abilities.LIFT);
                     }

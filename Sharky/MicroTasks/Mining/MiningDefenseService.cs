@@ -14,6 +14,8 @@ namespace Sharky.MicroTasks.Mining
         DebugService DebugService;
         DamageService DamageService;
 
+        public bool Enabled { get; set; }
+
         public MiningDefenseService(BaseData baseData, ActiveUnitData activeUnitData, IIndividualMicroController workerMicroController, DebugService debugService, DamageService damageService)
         {
             BaseData = baseData;
@@ -21,11 +23,14 @@ namespace Sharky.MicroTasks.Mining
             WorkerMicroController = workerMicroController;
             DebugService = debugService;
             DamageService = damageService;
+            Enabled = true;
         }
 
         public List<SC2APIProtocol.Action> DealWithEnemies(int frame, List<UnitCommander> unitCommanders)
         {
             var actions = new List<SC2APIProtocol.Action>();
+            if (!Enabled) { return actions; }
+
             foreach (var selfBase in BaseData.SelfBases)
             {
                 bool preventGasSteal = false;

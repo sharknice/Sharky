@@ -28,7 +28,7 @@ namespace Sharky.Builds.BuildingPlacement
             ProtossWallService = protossWallService;
         }
 
-        public Point2D FindPlacement(Point2D target, UnitTypes unitType, int size, bool ignoreResourceProximity = false, float maxDistance = 50, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.Full, bool requireVision = false, bool allowBlockBase = true)
+        public Point2D FindPlacement(Point2D target, UnitTypes unitType, int size, bool ignoreResourceProximity = false, float maxDistance = 50, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.None, bool requireVision = false, bool allowBlockBase = true)
         {
             var mineralProximity = 2;
             if (ignoreResourceProximity) { mineralProximity = 0; };
@@ -68,7 +68,7 @@ namespace Sharky.Builds.BuildingPlacement
             }
             else if (SharkyUnitData.TerranTypes.Contains(unitType))
             {
-                var placement = TerranWallService.FindTerranPlacement(wallData, unitType);
+                var placement = TerranWallService.FindTerranPlacement(wallData, unitType, wallOffType);
                 if (placement == null) { return null; }
                 if (Vector2.DistanceSquared(new Vector2(placement.X, placement.Y), new Vector2(target.X, target.Y)) > maxDistance * maxDistance) { return null; }
                 return placement;
@@ -82,7 +82,7 @@ namespace Sharky.Builds.BuildingPlacement
             }
         }
 
-        Point2D FindProductionPlacement(WallData wallData, float size, float maxDistance, float minimumMineralProximinity = 2, WallOffType wallOffType = WallOffType.Full)
+        Point2D FindProductionPlacement(WallData wallData, float size, float maxDistance, float minimumMineralProximinity, WallOffType wallOffType)
         {
             if (wallOffType == WallOffType.Partial)
             {

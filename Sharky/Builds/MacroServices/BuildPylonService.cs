@@ -31,7 +31,7 @@ namespace Sharky.Builds.MacroServices
             defensivePointLastFailFrame = 0;
         }
 
-        public List<SC2APIProtocol.Action> BuildPylon(Point2D location, bool ignoreMineralProximity = false, float maxDistance = 50, bool allowBlockBase = true)
+        public List<SC2APIProtocol.Action> BuildPylon(Point2D location, bool ignoreMineralProximity = false, float maxDistance = 50, bool allowBlockBase = false)
         {
             var unitData = SharkyUnitData.BuildingData[UnitTypes.PROTOSS_PYLON];
             return BuildingBuilder.BuildBuilding(MacroData, UnitTypes.PROTOSS_PYLON, unitData, location, ignoreMineralProximity, maxDistance, allowBlockBase: allowBlockBase);

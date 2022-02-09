@@ -19,10 +19,25 @@ namespace Sharky.Builds.BuildingPlacement
             BaseData = baseData;
         }
 
-        public Point2D FindTerranPlacement(WallData wallData, UnitTypes unitType)
+        public Point2D FindTerranPlacement(WallData wallData, UnitTypes unitType, WallOffType wallOffType)
         {
             if (unitType == UnitTypes.TERRAN_SUPPLYDEPOT)
             {
+                if (wallOffType == WallOffType.Full)
+                {
+                    if (wallData.FullDepotWall != null) 
+                    {
+                        var depots = ActiveUnitData.SelfUnits.Values.Where(u => u.Unit.UnitType == (uint)UnitTypes.TERRAN_SUPPLYDEPOT || u.Unit.UnitType == (uint)UnitTypes.TERRAN_SUPPLYDEPOTLOWERED);
+                        foreach (var spot in wallData.FullDepotWall)
+                        {
+                            if (!depots.Any(e => e.Position.X == spot.X && e.Position.Y == spot.Y) && WallService.Buildable(spot, .5f))
+                            {
+                                return spot;
+                            }
+                        }
+                    }
+                }
+
                 if (wallData.Depots == null) { return null; }
                 var existingDepots = ActiveUnitData.SelfUnits.Values.Where(u => u.Unit.UnitType == (uint)UnitTypes.TERRAN_SUPPLYDEPOT || u.Unit.UnitType == (uint)UnitTypes.TERRAN_SUPPLYDEPOTLOWERED);
                 foreach (var spot in wallData.Depots)
@@ -123,14 +138,14 @@ namespace Sharky.Builds.BuildingPlacement
             return null;
         }
 
-        public Point2D FindSupplyDepotWallPlacement(Point2D target, float size, float maxDistance, float minimumMineralProximinity)
+        public Point2D FindSupplyDepotWallPlacement(Point2D target, float size, float maxDistance, float minimumMineralProximinity, WallOffType wallOffType)
         {
             if (MapData != null && MapData.TerranWallData != null)
             {
                 foreach (var selfBase in BaseData.SelfBases)
                 {
                     var wallData = MapData.TerranWallData.FirstOrDefault(b => b.BasePosition.X == selfBase.Location.X && b.BasePosition.Y == selfBase.Location.Y);
-                    var spot = GetOpenDepotPlacement(wallData);
+                    var spot = GetOpenDepotPlacement(wallData, wallOffType);
                     if (spot != null) { return spot; }
                 }
             }
@@ -138,18 +153,36 @@ namespace Sharky.Builds.BuildingPlacement
             return null;
         }
 
-        Point2D GetOpenDepotPlacement(WallData wallData)
+        Point2D GetOpenDepotPlacement(WallData wallData, WallOffType wallOffType)
         {
-            if(wallData != null && wallData.Depots != null)
+            if(wallData != null)
             {
                 var existingDepots = ActiveUnitData.SelfUnits.Values.Where(u => u.Unit.UnitType == (uint)UnitTypes.TERRAN_SUPPLYDEPOT || u.Unit.UnitType == (uint)UnitTypes.TERRAN_SUPPLYDEPOTLOWERED);
-                foreach (var spot in wallData.Depots)
+
+                if (wallOffType == WallOffType.Full && wallData.FullDepotWall != null)
                 {
-                    if (!existingDepots.Any(e => e.Position.X == spot.X && e.Position.Y == spot.Y))
+                    foreach (var spot in wallData.FullDepotWall)
                     {
-                        if (WallService.Buildable(spot, .9f))
+                        if (!existingDepots.Any(e => e.Position.X == spot.X && e.Position.Y == spot.Y))
                         {
-                            return spot;
+                            if (WallService.Buildable(spot, .9f))
+                            {
+                                return spot;
+                            }
+                        }
+                    }
+                }
+
+                if (wallData.Depots != null)
+                {
+                    foreach (var spot in wallData.Depots)
+                    {
+                        if (!existingDepots.Any(e => e.Position.X == spot.X && e.Position.Y == spot.Y))
+                        {
+                            if (WallService.Buildable(spot, .9f))
+                            {
+                                return spot;
+                            }
                         }
                     }
                 }

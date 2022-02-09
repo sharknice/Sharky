@@ -45,7 +45,19 @@ namespace Sharky.Pathing
                 if (chokePoint != null)
                 {
                     var entireChoke = ChokePointService.GetEntireChokePoint(chokePoint);
-                    var center = new Vector2(entireChoke.Sum(p => p.X) / entireChoke.Count(), entireChoke.Sum(p => p.Y) / entireChoke.Count());
+                    var wallCenter = new Vector2(entireChoke.Sum(p => p.X) / entireChoke.Count(), entireChoke.Sum(p => p.Y) / entireChoke.Count());
+                    var center = wallCenter;
+                    var index = path.IndexOf(new Vector2(chokePoint.X, chokePoint.Y));
+                    int current = 1;
+                    while (index + current < path.Count())
+                    {
+                        center = path[index + current];
+                        current++;
+                        if (entireChoke.All(wallPoint => Vector2.DistanceSquared(center, new Vector2(wallPoint.X, wallPoint.Y)) > 4))
+                        {
+                            break;
+                        }
+                    }
                     chokepoints.Add(new ChokePoint { Center = center, Points = entireChoke });
                     currentX = chokePoint.X;
                     currentY = chokePoint.Y;

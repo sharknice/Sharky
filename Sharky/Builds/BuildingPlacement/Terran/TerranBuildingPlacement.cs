@@ -72,9 +72,9 @@ namespace Sharky.Builds.BuildingPlacement
         Point2D FindSupplyDepotPlacement(Point2D target, float size, float maxDistance, WallOffType wallOffType, float minimumMineralProximinity)
         {
             Point2D spot;
-            if (wallOffType == WallOffType.Terran)
+            if (wallOffType == WallOffType.Terran || wallOffType == WallOffType.Full)
             {
-                spot = TerranWallService.FindSupplyDepotWallPlacement(target, size, maxDistance, minimumMineralProximinity);
+                spot = TerranWallService.FindSupplyDepotWallPlacement(target, size, maxDistance, minimumMineralProximinity, wallOffType);
                 if (spot != null) { return spot; }
             }
 

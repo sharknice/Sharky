@@ -90,6 +90,14 @@ namespace Sharky.Managers
                     ActiveUnitData.EnemyDeaths--;
                 }
             }
+            foreach (var unit in ActiveUnitData.NeutralUnits.Where(u => SharkyUnitData.UndeadTypes.Contains((UnitTypes)u.Value.Unit.UnitType))) // remove things like purification novas that don't have dead unit events
+            {
+                if (!observation.Observation.RawData.Units.Any(u => u.Tag == unit.Key))
+                {
+                    ActiveUnitData.DeadUnits.Add(unit.Key);
+                    ActiveUnitData.NeutralDeaths--;
+                }
+            }
 
             foreach (var tag in ActiveUnitData.DeadUnits)
             {

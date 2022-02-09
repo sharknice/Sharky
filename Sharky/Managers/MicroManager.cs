@@ -24,12 +24,20 @@ namespace Sharky.Managers
             var actions = new List<Action>();
             foreach (var microTask in MicroTaskData.MicroTasks.Values.Where(m => m.Enabled).OrderBy(m => m.Priority))
             {
+                var begin = System.DateTime.UtcNow;
                 microTask.RemoveDeadUnits(ActiveUnitData.DeadUnits);
 
                 microTask.ClaimUnits(ActiveUnitData.Commanders);
                 if (!SkipFrame)
                 {
                     actions.AddRange(microTask.PerformActions(frame));
+                }
+                var end = System.DateTime.UtcNow;
+                var time = (end - begin).TotalMilliseconds;
+
+                if (time > 100)
+                {
+                    System.Console.WriteLine($"{observation.Observation.GameLoop} {microTask.GetType().Name} {time}");
                 }
             }
             if (SkipFrame)

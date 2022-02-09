@@ -2196,6 +2196,10 @@ namespace Sharky.MicroControllers
 
             if (commander.UnitCalculation.NearbyEnemies.Count() == 0)
             {
+                if (commander.UnitCalculation.Unit.IsFlying)
+                {
+                    return commander.Order(frame, Abilities.MOVE, new Point2D { X = unitToSupport.UnitCalculation.Position.X, Y = unitToSupport.UnitCalculation.Position.Y });
+                }
                 return commander.Order(frame, Abilities.MOVE, targetTag: unitToSupport.UnitCalculation.Unit.Tag);
             }
 

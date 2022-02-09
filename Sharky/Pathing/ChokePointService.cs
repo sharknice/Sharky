@@ -168,7 +168,30 @@ namespace Sharky.Pathing
                 }
             }
 
-            return chokePoints;
+            return chokePoints.Distinct().OrderBy(p => p.X).ThenBy(p => p.Y).ToList();
+        }
+
+        public List<Point2D> GetEntireBottomOfRamp(Point2D chokePoint)
+        {
+            var chokePoints = new List<Point2D>();
+
+            var startHeight = MapDataService.MapHeight(chokePoint);
+            for (var x = -5; x < 10; x++)
+            {
+                for (var y = -5; y < 10; y++)
+                {
+                    if (MapDataService.MapHeight(x + (int)chokePoint.X, y + (int)chokePoint.Y) == startHeight && MapDataService.PathWalkable(x + (int)chokePoint.X, y + (int)chokePoint.Y))
+                    {
+                        // find if there is a touching point that is higher
+                        if (TouchingHigherPoint(x + (int)chokePoint.X, y + (int)chokePoint.Y, startHeight))
+                        {
+                            chokePoints.Add(new Point2D { X = x + (int)chokePoint.X, Y = y + (int)chokePoint.Y });
+                        }
+                    }
+                }
+            }
+
+            return chokePoints.Distinct().OrderBy(p => p.X).ThenBy(p => p.Y).ToList();
         }
 
         public List<Point2D> GetWallOffPoints(List<Point2D> chokePoints)
@@ -199,7 +222,26 @@ namespace Sharky.Pathing
             return wallPoints.Distinct().OrderBy(p => p.X).ThenBy(p => p.Y).ToList();
         }
 
-
+        private bool TouchingHigherPoint(int x, int y, int startHeight)
+        {
+            if (MapDataService.MapHeight(x, y + 1) > startHeight && MapDataService.PathWalkable(x, y + 1))
+            {
+                return true;
+            }
+            if (MapDataService.MapHeight(x, y - 1) > startHeight && MapDataService.PathWalkable(x, y - 1))
+            {
+                return true;
+            }
+            if (MapDataService.MapHeight(x + 1, y) > startHeight && MapDataService.PathWalkable(x + 1, y))
+            {
+                return true;
+            }
+            if (MapDataService.MapHeight(x - 1, y) > startHeight && MapDataService.PathWalkable(x - 1, y))
+            {
+                return true;
+            }
+            return false;
+        }
 
         private bool TouchingLowerPoint(int x, int y, int startHeight)
         {

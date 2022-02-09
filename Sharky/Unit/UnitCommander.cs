@@ -29,6 +29,7 @@ namespace Sharky
         public CommanderState CommanderState { get; set; }
         public LockOnData LastLockOn { get; set; }
         public bool AutoCastOff { get; set; }
+        public bool RallyPointSet { get; set; }
 
         /// <summary>
         /// The adept for an adept shade, etc.
@@ -66,6 +67,7 @@ namespace Sharky
             LastOrderFrame = -100;
             FrameFirstSeen = unitCalculation.FrameLastSeen;
             AutoCastOff = false;
+            RallyPointSet = false;
         }
 
         public List<SC2APIProtocol.Action> Order(int frame, Abilities ability, Point2D targetLocation = null, ulong targetTag = 0, bool allowSpam = false, bool queue = false)

@@ -29,7 +29,7 @@ namespace Sharky.MicroTasks
 
         public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
         {
-            if (NexusLocation != null)
+            if (NexusLocation != null && UnitCommanders.Count() == 0)
             {
                 var nexus = commanders.FirstOrDefault(c => c.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS && c.Value.UnitCalculation.Position.X == NexusLocation.X && c.Value.UnitCalculation.Position.Y == NexusLocation.Y).Value;
                 if (nexus != null)

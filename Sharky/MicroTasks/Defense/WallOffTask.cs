@@ -24,7 +24,7 @@ namespace Sharky.MicroTasks
 
         protected bool BlockedChatSent;
 
-        public List<SC2APIProtocol.Point2D> PlacementPoints { get; private set; }
+        public List<SC2APIProtocol.Point2D> PlacementPoints { get; protected set; }
 
         public WallOffTask(SharkyUnitData sharkyUnitData, ActiveUnitData activeUnitData, MacroData macroData, MapData mapData, WallService wallService, ChatService chatService, bool enabled, float priority)
         {
@@ -158,7 +158,7 @@ namespace Sharky.MicroTasks
             return commands;
         }
 
-        protected void GetWallData()
+        protected virtual void GetWallData()
         {
             if (!GotWallData)
             {

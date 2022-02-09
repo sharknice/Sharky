@@ -153,6 +153,8 @@ namespace Sharky.Managers
                 {
                     MapData.Map[x][y].EnemyAirDpsInRange = 0;
                     MapData.Map[x][y].EnemyGroundDpsInRange = 0;
+                    MapData.Map[x][y].EnemyAirSplashDpsInRange = 0;
+                    MapData.Map[x][y].EnemyGroundSplashDpsInRange = 0;
                 }
             }
 
