@@ -143,7 +143,7 @@ namespace Sharky.Builds
                 }
                 else
                 {
-                    MacroData.BuildProduction[u] = UnitCountService.EquivalentTypeCompleted(u) + ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability)) < MacroData.DesiredProductionCounts[u];
+                    MacroData.BuildProduction[u] = UnitCountService.EquivalentTypeCount(u) + ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability)) < MacroData.DesiredProductionCounts[u];
                 }
             }
         }
