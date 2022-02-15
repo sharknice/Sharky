@@ -87,7 +87,7 @@ namespace Sharky.MicroTasks
             var commands = new List<SC2APIProtocol.Action>();
 
             ReclaimBuilders(frame);
-            RemoveLostWorkers();
+            RemoveLostWorkers(frame);
             StopAttackingWithSafeWorkers();
 
             commands.AddRange(BalanceGasWorkers(frame));
@@ -114,20 +114,23 @@ namespace Sharky.MicroTasks
             }
         }
 
-        void RemoveLostWorkers()
+        void RemoveLostWorkers(int frame)
         {
-            foreach (var commander in UnitCommanders.Where(c => c.UnitRole == UnitRole.Minerals))
+            foreach (var commander in UnitCommanders)
             {
-                if (!BaseData.SelfBases.Any(selfBase => selfBase.MineralMiningInfo.Any(i => i.Workers.Any(w => w.UnitCalculation.Unit.Tag == commander.UnitCalculation.Unit.Tag))))
+                if (commander.UnitRole == UnitRole.Minerals)
                 {
-                    commander.UnitRole = UnitRole.None;
+                    if (!BaseData.SelfBases.Any(selfBase => selfBase.MineralMiningInfo.Any(i => i.Workers.Any(w => w.UnitCalculation.Unit.Tag == commander.UnitCalculation.Unit.Tag))))
+                    {
+                        commander.UnitRole = UnitRole.None;
+                    }
                 }
-            }
-            foreach (var commander in UnitCommanders.Where(c => c.UnitRole == UnitRole.Gas))
-            {
-                if (!BaseData.SelfBases.Any(selfBase => selfBase.GasMiningInfo.Any(i => i.Workers.Any(w => w.UnitCalculation.Unit.Tag == commander.UnitCalculation.Unit.Tag))))
+                else if (commander.UnitRole == UnitRole.Gas)
                 {
-                    commander.UnitRole = UnitRole.None;
+                    if (!BaseData.SelfBases.Any(selfBase => selfBase.GasMiningInfo.Any(i => i.Workers.Any(w => w.UnitCalculation.Unit.Tag == commander.UnitCalculation.Unit.Tag))))
+                    {
+                        commander.UnitRole = UnitRole.None;
+                    }
                 }
             }
 

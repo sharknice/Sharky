@@ -10,14 +10,6 @@ namespace Sharky.Builds.Zerg
         {
         }
 
-        public EveryZergUnit(BuildOptions buildOptions, 
-            MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, MicroTaskData microTaskData,
-            ChatService chatService, UnitCountService unitCountService,
-            FrameToTimeConverter frameToTimeConverter) 
-            : base(buildOptions, macroData, activeUnitData, attackData, microTaskData, chatService, unitCountService, frameToTimeConverter)
-        {
-        }
-
         public override void OnFrame(ResponseObservation observation)
         {
             if (MacroData.FoodUsed >= 15)

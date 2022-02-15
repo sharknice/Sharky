@@ -86,6 +86,20 @@ namespace Sharky
                     if (actions != null)
                     {
                         Actions.AddRange(actions);
+                        
+                        foreach (var action in actions)
+                        {
+                            if (action?.ActionRaw?.UnitCommand?.UnitTags != null)
+                            {
+                                foreach (var tag in action.ActionRaw.UnitCommand.UnitTags)
+                                {
+                                    if (!observation.Observation.RawData.Units.Any(u => u.Tag == tag))
+                                    {
+                                        Console.WriteLine($"{observation.Observation.GameLoop} {manager.GetType().Name}, order {action.ActionRaw.UnitCommand.AbilityId}");
+                                    }
+                                }
+                            }
+                        }
                     }
 
                     var endManager = DateTime.UtcNow;

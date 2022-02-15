@@ -22,6 +22,9 @@
         STIMPACK = 15,
         SHIELDWALL = 16,
         PUNISHERGRENADES = 17,
+        /// <summary>
+        /// Infernal Pre-Igniter hellion blue flame
+        /// </summary>
         HIGHCAPACITYBARRELS = 19,
         BANSHEECLOAK = 20,
         RAVENCORVIDREACTOR = 22,

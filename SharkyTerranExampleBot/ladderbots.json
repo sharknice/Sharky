@@ -1,0 +1,10 @@
+{
+  "Bots": {
+    "SharkyTerranExampleBot": {
+      "Race": "Terran",
+      "Type": "dotnetcore",
+      "RootPath": "./",
+      "FileName": "SharkyTerranExampleBot.dll"
+    }
+  }
+}

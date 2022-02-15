@@ -1,13 +1,19 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30523.141
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32126.317
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sharky", "Sharky\Sharky.csproj", "{954230C5-6DBB-4CC8-AFFE-98FECB891D61}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharkyExampleBot", "SharkyExampleBot\SharkyExampleBot.csproj", "{B6F2E737-3B59-4F06-A314-D56E15A1DB75}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "S2ClientProtocol", "S2ClientProtocol\S2ClientProtocol.csproj", "{4EEC7468-AE1B-4C79-B99B-067F21524A4B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharkyTerranExampleBot", "SharkyTerranExampleBot\SharkyTerranExampleBot.csproj", "{F9D25839-4FFE-4BCE-AE61-7E97FF74D30B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharkyZergExampleBot", "SharkyZergExampleBot\SharkyZergExampleBot.csproj", "{8259D16E-606E-457F-AE39-7F0A94ED9007}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharkyProtossExampleBot", "SharkyProtossExampleBot\SharkyProtossExampleBot.csproj", "{8218CD8E-0400-4A89-ABC8-90E4C5F7CBCE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharkyRandomExampleBot", "SharkyRandomExampleBot\SharkyRandomExampleBot.csproj", "{50BA5217-435D-4483-BA44-14652AF56DB8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,14 +25,26 @@ Global
 		{954230C5-6DBB-4CC8-AFFE-98FECB891D61}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{954230C5-6DBB-4CC8-AFFE-98FECB891D61}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{954230C5-6DBB-4CC8-AFFE-98FECB891D61}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B6F2E737-3B59-4F06-A314-D56E15A1DB75}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B6F2E737-3B59-4F06-A314-D56E15A1DB75}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B6F2E737-3B59-4F06-A314-D56E15A1DB75}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B6F2E737-3B59-4F06-A314-D56E15A1DB75}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4EEC7468-AE1B-4C79-B99B-067F21524A4B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4EEC7468-AE1B-4C79-B99B-067F21524A4B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4EEC7468-AE1B-4C79-B99B-067F21524A4B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4EEC7468-AE1B-4C79-B99B-067F21524A4B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F9D25839-4FFE-4BCE-AE61-7E97FF74D30B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F9D25839-4FFE-4BCE-AE61-7E97FF74D30B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F9D25839-4FFE-4BCE-AE61-7E97FF74D30B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F9D25839-4FFE-4BCE-AE61-7E97FF74D30B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8259D16E-606E-457F-AE39-7F0A94ED9007}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8259D16E-606E-457F-AE39-7F0A94ED9007}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8259D16E-606E-457F-AE39-7F0A94ED9007}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8259D16E-606E-457F-AE39-7F0A94ED9007}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8218CD8E-0400-4A89-ABC8-90E4C5F7CBCE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8218CD8E-0400-4A89-ABC8-90E4C5F7CBCE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8218CD8E-0400-4A89-ABC8-90E4C5F7CBCE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8218CD8E-0400-4A89-ABC8-90E4C5F7CBCE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{50BA5217-435D-4483-BA44-14652AF56DB8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{50BA5217-435D-4483-BA44-14652AF56DB8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{50BA5217-435D-4483-BA44-14652AF56DB8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{50BA5217-435D-4483-BA44-14652AF56DB8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

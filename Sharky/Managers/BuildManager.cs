@@ -104,7 +104,7 @@ namespace Sharky.Managers
                     SelectedRace = playerInfo.RaceRequested;
                     if (SharkyOptions.TagsEnabled && playerInfo.RaceRequested == Race.Random)
                     {
-                        ChatService.SendAllyChatMessage($"Tag:SelfRandomRace-{playerInfo.RaceActual}");
+                        ChatService.SendAllyChatMessage($"Tag:SelfRandomRace-{playerInfo.RaceActual}", true);
                     }
                 }
                 else
@@ -177,6 +177,8 @@ namespace Sharky.Managers
 
         public override void OnEnd(ResponseObservation observation, Result result)
         {
+            Console.WriteLine($"Build Sequence: {string.Join(" ", BuildHistory.Select(b => b.Value.ToString()))}");
+
             var game = GetGame(observation, result);
             EnemyPlayerService.SaveGame(game);
         }

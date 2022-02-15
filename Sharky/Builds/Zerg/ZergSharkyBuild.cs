@@ -13,10 +13,10 @@ namespace Sharky.Builds.Zerg
             TargetingData = defaultSharkyBot.TargetingData;
         }
 
-        public ZergSharkyBuild (BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, MicroTaskData microTaskData,
+        public ZergSharkyBuild (BuildOptions buildOptions, SharkyOptions sharkyOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, MicroTaskData microTaskData,
             ChatService chatService, UnitCountService unitCountService,
             FrameToTimeConverter frameToTimeConverter) 
-            : base(buildOptions, macroData, activeUnitData, attackData, microTaskData, chatService, unitCountService, frameToTimeConverter)
+            : base(buildOptions, sharkyOptions, macroData, activeUnitData, attackData, microTaskData, chatService, unitCountService, frameToTimeConverter)
         {
         }
 

@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -245,17 +247,41 @@ namespace Sharky
 
                 var actions = bot.OnFrame(observation);
 
+                var generatedActions = actions.Count();
+                actions = actions.Where(action => action?.ActionRaw?.UnitCommand?.UnitTags == null ||
+                    (action?.ActionRaw?.UnitCommand?.UnitTags != null && 
+                    !action.ActionRaw.UnitCommand.UnitTags.Any(tag => !observation.Observation.RawData.Units.Any(u => u.Tag == tag))));
+                var removedActions = generatedActions - actions.Count();
+                if (removedActions > 0)
+                {
+                    Console.WriteLine($"Removed {removedActions} actions for units that are not controllable");
+                }
+
+                var filteredActions = new List<SC2APIProtocol.Action>();
+                var tags = new List<ulong>();
+                foreach (var action in actions)
+                {
+                    if (action?.ActionRaw?.UnitCommand?.UnitTags != null && !action.ActionRaw.UnitCommand.QueueCommand)
+                    {
+                        if (!tags.Any(tag => action.ActionRaw.UnitCommand.UnitTags.Any(t => t == tag)))
+                        {
+                            filteredActions.Add(action);
+                            tags.AddRange(action.ActionRaw.UnitCommand.UnitTags);
+                        }
+                        else
+                        {
+                            Console.WriteLine($"{observation.Observation.GameLoop} Removed conflicting order {action.ActionRaw.UnitCommand.AbilityId} for tags {string.Join(" ", action.ActionRaw.UnitCommand.UnitTags)}");
+                        }
+                    }
+                    else
+                    {
+                        filteredActions.Add(action);
+                    }
+                }
+
                 var actionRequest = new Request();
                 actionRequest.Action = new RequestAction();
-                actionRequest.Action.Actions.AddRange(actions);
-
-                //if (!frameMismatchDetected && frames > 10 && observation.Observation.GameLoop != frames + 1)
-                //{
-                //    frameMismatchDetected = true;
-                //    var chat = new SC2APIProtocol.Action { ActionChat = new ActionChat { Message = $"DesyncDetected, GameLoop: {observation.Observation.GameLoop}, frames: {frames}", Channel = ActionChat.Types.Channel.Team } };
-                //    actionRequest.Action.Actions.Add(chat);
-                //    Console.WriteLine($"DesyncDetected, GameLoop: {observation.Observation.GameLoop}, frames: {frames}");
-                //}
+                actionRequest.Action.Actions.AddRange(filteredActions);
 
                 if (actionRequest.Action.Actions.Count > 0)
                 {

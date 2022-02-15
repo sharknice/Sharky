@@ -1,0 +1,10 @@
+{
+  "Bots": {
+    "SharkyRandomExampleBot": {
+      "Race": "Random",
+      "Type": "dotnetcore",
+      "RootPath": "./",
+      "FileName": "SharkyRandomExampleBot.dll"
+    }
+  }
+}

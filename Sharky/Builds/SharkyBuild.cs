@@ -10,6 +10,7 @@ namespace Sharky.Builds
     public abstract class SharkyBuild : ISharkyBuild
     {
         protected BuildOptions BuildOptions;
+        protected SharkyOptions SharkyOptions;
         protected MacroData MacroData;
         protected ActiveUnitData ActiveUnitData;
         protected AttackData AttackData;
@@ -23,10 +24,12 @@ namespace Sharky.Builds
         protected PrePositionBuilderTask PrePositionBuilderTask;
 
         protected int StartFrame;
+        protected bool Started;
 
         public SharkyBuild(DefaultSharkyBot defaultSharkyBot)
         {
             BuildOptions = defaultSharkyBot.BuildOptions;
+            SharkyOptions = defaultSharkyBot.SharkyOptions;
             MacroData = defaultSharkyBot.MacroData;
             ActiveUnitData = defaultSharkyBot.ActiveUnitData;
             AttackData = defaultSharkyBot.AttackData;
@@ -39,13 +42,16 @@ namespace Sharky.Builds
             {
                 PrePositionBuilderTask = (PrePositionBuilderTask)defaultSharkyBot.MicroTaskData.MicroTasks["PrePositionBuilderTask"];
             }
+
+            Started = false;
         }
 
-        public SharkyBuild(BuildOptions buildOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, MicroTaskData microTaskData,
+        public SharkyBuild(BuildOptions buildOptions, SharkyOptions sharkyOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, MicroTaskData microTaskData,
             ChatService chatService, UnitCountService unitCountService,
             FrameToTimeConverter frameToTimeConverter)
         {
             BuildOptions = buildOptions;
+            SharkyOptions = sharkyOptions;
             MacroData = macroData;
             ActiveUnitData = activeUnitData;
             AttackData = attackData;
@@ -73,6 +79,15 @@ namespace Sharky.Builds
         {
             Console.WriteLine($"{frame} {FrameToTimeConverter.GetTime(frame)} Build: {Name()}");
             StartFrame = frame;
+
+            if (!Started)
+            {
+                if (SharkyOptions.TagsEnabled && SharkyOptions.BuildTagsEnabled)
+                {
+                    ChatService.SendAllyChatMessage($"Tag:Build-{Name()}", true);
+                }
+                Started = true;
+            }
 
             BuildOptions.StrictGasCount = false;
             BuildOptions.StrictSupplyCount = false;

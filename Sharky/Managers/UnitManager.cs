@@ -99,6 +99,15 @@ namespace Sharky.Managers
                 }
             }
 
+            foreach (var unit in ActiveUnitData.Commanders.Where(commander => commander.Value.UnitRole == UnitRole.Build && commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.ZERG_DRONE)) // remove drones that morphed to a building
+            {
+                if (!observation.Observation.RawData.Units.Any(u => u.Tag == unit.Key))
+                {
+                    ActiveUnitData.DeadUnits.Add(unit.Key);
+                    ActiveUnitData.SelfDeaths--;
+                }
+            }
+
             foreach (var tag in ActiveUnitData.DeadUnits)
             {
                 if (ActiveUnitData.EnemyUnits.TryRemove(tag, out UnitCalculation removedEnemy))

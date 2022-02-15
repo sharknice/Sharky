@@ -80,7 +80,6 @@ namespace Sharky.DefaultBot
         public MapDataService MapDataService { get; set; }
         public ChokePointService ChokePointService { get; set; }
         public ChokePointsService ChokePointsService { get; set; }
-        public PylonDepotFullWallService PylonDepotFullWallService { get; set; }
         public TargetPriorityService TargetPriorityService { get; set; }
         public BuildingService BuildingService { get; set; }
         public WallService WallService { get; set; }
@@ -160,7 +159,7 @@ namespace Sharky.DefaultBot
 
             var framesPerSecond = 22.4f;
 
-            SharkyOptions = new SharkyOptions { Debug = debug, FramesPerSecond = framesPerSecond, TagsEnabled = true };
+            SharkyOptions = new SharkyOptions { Debug = debug, FramesPerSecond = framesPerSecond, TagsEnabled = true, BuildTagsEnabled = true };
             FrameToTimeConverter = new FrameToTimeConverter(SharkyOptions);
             MacroData = new MacroData();
             AttackData = new AttackData { ArmyFoodAttack = 30, ArmyFoodRetreat = 25, Attacking = false, UseAttackDataManager = true, CustomAttackFunction = true, RetreatTrigger = 1f, AttackTrigger = 1.5f };
@@ -221,12 +220,11 @@ namespace Sharky.DefaultBot
             
             ChokePointService = new ChokePointService(SharkyPathFinder, MapDataService, BuildingService);
             ChokePointsService = new ChokePointsService(SharkyPathFinder, ChokePointService);
-            PylonDepotFullWallService = new PylonDepotFullWallService(this);
 
             BaseManager = new BaseManager(SharkyUnitData, ActiveUnitData, SharkyPathFinder, UnitCountService, BaseData);
             Managers.Add(BaseManager);
 
-            TargetingManager = new TargetingManager(SharkyUnitData, BaseData, MacroData, TargetingData, MapData, EnemyData, ChokePointService, ChokePointsService, DebugService, ActiveUnitData, PylonDepotFullWallService);
+            TargetingManager = new TargetingManager(SharkyUnitData, BaseData, MacroData, TargetingData, MapData, EnemyData, ChokePointService, ChokePointsService, DebugService, ActiveUnitData);
             Managers.Add(TargetingManager);
 
             BuildOptions = new BuildOptions { StrictGasCount = false, StrictSupplyCount = false, StrictWorkerCount = false };
@@ -555,8 +553,8 @@ namespace Sharky.DefaultBot
                 ["Transition"] = terranSequences
             };
 
-            var basicZerglingRush = new BasicZerglingRush(BuildOptions, MacroData, ActiveUnitData, AttackData, ChatService, MicroTaskData, UnitCountService, FrameToTimeConverter);
-            var everyZergUnit = new EveryZergUnit(BuildOptions, MacroData, ActiveUnitData, AttackData, MicroTaskData, ChatService, UnitCountService, FrameToTimeConverter);
+            var basicZerglingRush = new BasicZerglingRush(this);
+            var everyZergUnit = new EveryZergUnit(this);
             var zergBuilds = new Dictionary<string, ISharkyBuild>
             {
                 [everyZergUnit.Name()] = everyZergUnit,

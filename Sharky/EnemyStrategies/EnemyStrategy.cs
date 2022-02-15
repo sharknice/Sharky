@@ -49,7 +49,7 @@ namespace Sharky.EnemyStrategies
             ChatService.SendChatType($"{Name()}-EnemyStrategy");
             if (SharkyOptions.TagsEnabled)
             {
-                ChatService.SendAllyChatMessage($"Tag:EnemyStrategy-{Name()}");
+                ChatService.SendAllyChatMessage($"Tag:EnemyStrategy-{Name()}", true);
             }
         }
 

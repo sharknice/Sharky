@@ -67,7 +67,7 @@ namespace Sharky.Managers
         {
             if (SharkyOptions.TagsEnabled)
             {
-                ChatService.SendAllyChatMessage($"Tag:EnemyRandomRace-{EnemyData.EnemyRace}");
+                ChatService.SendAllyChatMessage($"Tag:EnemyRandomRace-{EnemyData.EnemyRace}", true);
             }
         }
     }

@@ -21,7 +21,6 @@ namespace Sharky.Managers
         ChokePointService ChokePointService;
         ChokePointsService ChokePointsService;
         DebugService DebugService;
-        PylonDepotFullWallService PylonDepotFullWallService;
 
         int baseCount;
 
@@ -30,7 +29,7 @@ namespace Sharky.Managers
         int LastUpdateFrame;
 
         public TargetingManager(SharkyUnitData sharkyUnitData, BaseData baseData, MacroData macroData, TargetingData targetingData, MapData mapData, EnemyData enemyData,
-            ChokePointService chokePointService, ChokePointsService chokePointsService, DebugService debugService, ActiveUnitData activeUnitData, PylonDepotFullWallService pylonDepotFullWallService)
+            ChokePointService chokePointService, ChokePointsService chokePointsService, DebugService debugService, ActiveUnitData activeUnitData)
         {
             SharkyUnitData = sharkyUnitData;
             BaseData = baseData;
@@ -43,7 +42,6 @@ namespace Sharky.Managers
             ChokePointService = chokePointService;
             ChokePointsService = chokePointsService;
             DebugService = debugService;
-            PylonDepotFullWallService = pylonDepotFullWallService;
 
             baseCount = 0;
             LastUpdateFrame = -10000;
@@ -217,6 +215,31 @@ namespace Sharky.Managers
                             if (data.RampCenter == null)
                             {
                                 data.RampCenter = new Point2D { X = baseX + .5f, Y = baseY + 3.5f };
+                            }
+                            if (data.Depots == null)
+                            {
+                                data.Depots = new List<Point2D> { new Point2D { X = baseX + 1, Y = baseY }, new Point2D { X = baseX + 4, Y = baseY + 3 } };
+                            }
+                            if (data.Production == null)
+                            {
+                                data.Production = new List<Point2D> { new Point2D { X = baseX + 3.5f, Y = baseY + .5f } };
+                            }
+
+                            if (data.Pylons == null)
+                            {
+                                data.Pylons = new List<Point2D> { new Point2D { X = baseX + 4, Y = baseY - 2 } };
+                            }
+                            if (data.WallSegments == null)
+                            {
+                                data.WallSegments = new List<WallSegment>
+                                {
+                                    new WallSegment { Position = new Point2D { X = baseX + 1.5f, Y = baseY - .5f }, Size = 3 },
+                                    new WallSegment { Position = new Point2D { X = baseX + 4.5f, Y = baseY + .5f }, Size = 3 }
+                                };
+                            }
+                            if (data.Block == null)
+                            {
+                                data.Block = new Point2D { X = baseX, Y = baseY + 1 };
                             }
                         }
                     }
