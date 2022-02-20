@@ -4,6 +4,7 @@ using Sharky.Builds;
 using Sharky.DefaultBot;
 using Sharky.MicroControllers;
 using SharkyTerranExampleBot.Builds;
+using SharkyTerranExampleBot.MicroTasks;
 using System.Collections.Generic;
 
 namespace SharkyTerranExampleBot
@@ -18,6 +19,7 @@ namespace SharkyTerranExampleBot
             var massVikings = new MassVikings(defaultSharkyBot);
             var bansheesAndMarines = new BansheesAndMarines(defaultSharkyBot);
             var adaptiveOpening = new AdaptiveOpening(defaultSharkyBot);
+            var vikingDrops = new VikingDrops(defaultSharkyBot);
 
             var scvMicroController = new IndividualMicroController(defaultSharkyBot, defaultSharkyBot.SharkyAdvancedPathFinder, MicroPriority.JustLive, false);
             var reaperCheese = new ReaperCheese(defaultSharkyBot, scvMicroController);
@@ -28,20 +30,21 @@ namespace SharkyTerranExampleBot
                 [massVikings.Name()] = massVikings,
                 [bansheesAndMarines.Name()] = bansheesAndMarines,
                 [adaptiveOpening.Name()] = adaptiveOpening,
+                [vikingDrops.Name()] = vikingDrops,
                 [reaperCheese.Name()] = reaperCheese,
             };
 
             var versusTerran = new List<List<string>>
             {
                 new List<string> { hellionRush.Name() },
-                new List<string> { reaperCheese.Name() }
+                new List<string> { reaperCheese.Name() },
+                new List<string> { vikingDrops.Name() }
             };
             var versusEverything = new List<List<string>>
             {
                 new List<string> { adaptiveOpening.Name() },
                 new List<string> { hellionRush.Name() },
-                new List<string> { massVikings.Name() },
-
+                new List<string> { massVikings.Name() }
             };
             var transitions = new List<List<string>>
             {
@@ -58,6 +61,14 @@ namespace SharkyTerranExampleBot
             };
 
             BuildChoices = new BuildChoices { Builds = builds, BuildSequences = buildSequences };
+
+            AddTerranTasks(defaultSharkyBot);
+        }
+
+        void AddTerranTasks(DefaultSharkyBot defaultSharkyBot)
+        {
+            var vikingDropTask = new VikingDropTask(defaultSharkyBot, .5f, false);
+            defaultSharkyBot.MicroTaskData.MicroTasks[vikingDropTask.GetType().Name] = vikingDropTask;
         }
     }
 }

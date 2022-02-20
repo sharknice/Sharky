@@ -89,7 +89,7 @@ namespace Sharky.MicroTasks
                                     command.UnitTags.Add(commander.UnitCalculation.Unit.Tag);
                                 }
                                 command.AbilityId = (int)Abilities.ATTACK;
-                                command.TargetUnitTag = building.UnitCalculation.Unit.Tag;
+                                command.TargetUnitTag = building.UnitCalculation.Unit.Tag; // TODO: mark building for death so it doesn't get healed by shield batteries
 
                                 var action = new SC2APIProtocol.Action
                                 {

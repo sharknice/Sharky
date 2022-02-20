@@ -33,8 +33,8 @@ namespace Sharky.Builds.BuildingPlacement
             var mineralProximity = 2;
             if (ignoreResourceProximity) { mineralProximity = 0; };
 
-            if (wallOffType == WallOffType.Partial && MapData.PartialWallData == null) { return null; }
-            if (wallOffType == WallOffType.Terran && MapData.TerranWallData == null) { return null; }
+            if (wallOffType == WallOffType.Partial && MapData.WallData == null) { return null; }
+            if (wallOffType == WallOffType.Terran && MapData.WallData == null) { return null; }
 
             var baseLocation = WallService.GetBaseLocation();
             if (baseLocation == null) { return null; }
@@ -42,18 +42,18 @@ namespace Sharky.Builds.BuildingPlacement
             WallData wallData = null;
             if (wallOffType == WallOffType.Partial)
             {
-                wallData = MapData.PartialWallData.FirstOrDefault(b => b.BasePosition.X == baseLocation.X && b.BasePosition.Y == baseLocation.Y);
+                wallData = MapData.WallData.FirstOrDefault(b => b.BasePosition.X == baseLocation.X && b.BasePosition.Y == baseLocation.Y);
                 if (wallData == null) { return null; }
             }
             else if (wallOffType == WallOffType.Terran)
             {
-                wallData = MapData.TerranWallData.FirstOrDefault(b => b.BasePosition.X == baseLocation.X && b.BasePosition.Y == baseLocation.Y);
+                wallData = MapData.WallData.FirstOrDefault(b => b.BasePosition.X == baseLocation.X && b.BasePosition.Y == baseLocation.Y);
                 if (wallData == null)
                 {
                     var firstBase = BaseData.SelfBases.FirstOrDefault();
                     if (firstBase != null)
                     {
-                        wallData = MapData.TerranWallData.FirstOrDefault(b => b.BasePosition.X == firstBase.Location.X && b.BasePosition.Y == firstBase.Location.Y);
+                        wallData = MapData.WallData.FirstOrDefault(b => b.BasePosition.X == firstBase.Location.X && b.BasePosition.Y == firstBase.Location.Y);
                     }
                 }
                 if (wallData == null) { return null; }

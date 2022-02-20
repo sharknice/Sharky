@@ -80,9 +80,9 @@ namespace Sharky.Managers
                     TargetingData.ForwardDefensePoint = new Point2D { X = unit.Pos.X, Y = unit.Pos.Y };
                 }
 
-                if (MapData.PartialWallData != null)
+                if (MapData.WallData != null)
                 {
-                    var wallData = MapData.PartialWallData.FirstOrDefault(b => b.BasePosition.X == unit.Pos.X && b.BasePosition.Y == unit.Pos.Y);
+                    var wallData = MapData.WallData.FirstOrDefault(b => b.BasePosition.X == unit.Pos.X && b.BasePosition.Y == unit.Pos.Y);
                     if (wallData != null && wallData.Door != null)
                     {
                         TargetingData.ForwardDefensePoint = wallData.Door;
@@ -96,15 +96,6 @@ namespace Sharky.Managers
                     TargetingData.NaturalBasePoint = naturalBaseLocation.Location;
                 }
 
-                if (MapData.PartialWallData == null)
-                {
-                    MapData.PartialWallData = CalculateWallData();
-                    if (MapData.TerranWallData == null)
-                    {
-                        MapData.TerranWallData = MapData.PartialWallData;
-                    }
-                }
-
                 AddCalcultedWallData();
 
                 return;
@@ -113,9 +104,9 @@ namespace Sharky.Managers
 
         private void AddCalcultedWallData()
         {
-            if (MapData.TerranWallData == null)
+            if (MapData.WallData == null)
             {
-                MapData.TerranWallData = new List<WallData>();
+                MapData.WallData = new List<WallData>();
             }
 
             var oppositeBase = BaseData.EnemyBaseLocations.FirstOrDefault();
@@ -123,11 +114,11 @@ namespace Sharky.Managers
             var baseLocation = BaseData.BaseLocations.FirstOrDefault();
             if (baseLocation != null)
             {
-                var data = MapData.TerranWallData.FirstOrDefault(d => d.BasePosition.X == baseLocation.Location.X && d.BasePosition.Y == baseLocation.Location.Y);
-                MapData.TerranWallData.Remove(data);
-                if (data == null) { data = new WallData(); }
+                var data = MapData.WallData.FirstOrDefault(d => d.BasePosition.X == baseLocation.Location.X && d.BasePosition.Y == baseLocation.Location.Y);
+                MapData.WallData.Remove(data);
+                if (data == null) { data = new WallData { BasePosition = baseLocation.Location }; }
                 data = AddCalculatedWallDataForBase(baseLocation, oppositeLocation, data);
-                MapData.TerranWallData.Add(data);
+                MapData.WallData.Add(data);
             }
 
             oppositeBase = BaseData.BaseLocations.FirstOrDefault();
@@ -135,11 +126,11 @@ namespace Sharky.Managers
             baseLocation = BaseData.EnemyBaseLocations.FirstOrDefault();
             if (baseLocation != null)
             {
-                var data = MapData.TerranWallData.FirstOrDefault(d => d.BasePosition.X == baseLocation.Location.X && d.BasePosition.Y == baseLocation.Location.Y);
-                MapData.TerranWallData.Remove(data);
-                if (data == null) { data = new WallData(); }
+                var data = MapData.WallData.FirstOrDefault(d => d.BasePosition.X == baseLocation.Location.X && d.BasePosition.Y == baseLocation.Location.Y);
+                MapData.WallData.Remove(data);
+                if (data == null) { data = new WallData { BasePosition = baseLocation.Location }; }
                 data = AddCalculatedWallDataForBase(baseLocation, oppositeLocation, data);
-                MapData.TerranWallData.Add(data);
+                MapData.WallData.Add(data);
             }
         }
 
@@ -167,9 +158,42 @@ namespace Sharky.Managers
                             {
                                 data.FullDepotWall = new List<Point2D> { new Point2D { X = baseX, Y = baseY + 1 }, new Point2D { X = baseX - 2, Y = baseY }, new Point2D { X = baseX - 3, Y = baseY - 2 } };
                             }
+                            if (data.Depots == null)
+                            {
+                                data.Depots = new List<Point2D> { new Point2D { X = baseX - 3, Y = baseY - 2 }, new Point2D { X = baseX, Y = baseY + 1} };
+                            }
+                            if (data.Production == null)
+                            {
+                                data.Production = new List<Point2D> { new Point2D { X = baseX - 2.5f, Y = baseY + .5f } };
+                            }
+                            if (data.ProductionWithAddon == null)
+                            {
+                                data.ProductionWithAddon = new List<Point2D> { new Point2D { X = baseX - 4.5f, Y = baseY + .5f } };
+                            }
                             if (data.RampCenter == null)
                             {
                                 data.RampCenter = new Point2D { X = baseX + .5f, Y = baseY - 2.5f };
+                            }
+
+                            if (data.Pylons == null)
+                            {
+                                data.Pylons = new List<Point2D> { new Point2D { X = baseX - 3, Y = baseY + 3 } };
+                            }
+                            if (data.WallSegments == null)
+                            {
+                                data.WallSegments = new List<WallSegment>
+                                {
+                                    new WallSegment { Position = new Point2D { X = baseX - .5f, Y = baseY + 1.5f }, Size = 3 },
+                                    new WallSegment { Position = new Point2D { X = baseX - 3.5f, Y = baseY + .5f }, Size = 3 }
+                                };
+                            }
+                            if (data.Block == null)
+                            {
+                                data.Block = new Point2D { X = baseX - 3, Y = baseY - 2 };
+                            }
+                            if (data.Door == null)
+                            {
+                                data.Door = new Point2D { X = baseX - 3, Y = baseY - 2 };
                             }
                         }
                         else // bottom to top
@@ -181,9 +205,42 @@ namespace Sharky.Managers
                             {
                                 data.FullDepotWall = new List<Point2D> { new Point2D { X = baseX - 1, Y = baseY }, new Point2D { X = baseX, Y = baseY - 2 }, new Point2D { X = baseX + 2, Y = baseY - 3 } };
                             }
+                            if (data.Depots == null)
+                            {
+                                data.Depots = new List<Point2D> { new Point2D { X = baseX - 1, Y = baseY }, new Point2D { X = baseX + 2, Y = baseY - 3 } };
+                            }
+                            if (data.Production == null)
+                            {
+                                data.Production = new List<Point2D> { new Point2D { X = baseX - .5f, Y = baseY - 2.5f } };
+                            }
+                            if (data.ProductionWithAddon == null)
+                            {
+                                data.ProductionWithAddon = new List<Point2D> { new Point2D { X = baseX - 2.5f, Y = baseY - 2.5f } };
+                            }
                             if (data.RampCenter == null)
                             {
                                 data.RampCenter = new Point2D { X = baseX + 2f, Y = baseY };
+                            }
+
+                            if (data.Pylons == null)
+                            {
+                                data.Pylons = new List<Point2D> { new Point2D { X = baseX - 3, Y = baseY - 3 } };
+                            }
+                            if (data.WallSegments == null)
+                            {
+                                data.WallSegments = new List<WallSegment>
+                                {
+                                    new WallSegment { Position = new Point2D { X = baseX - 1.5f, Y = baseY - .5f }, Size = 3 },
+                                    new WallSegment { Position = new Point2D { X = baseX - .5f, Y = baseY - 3.5f }, Size = 3 }
+                                };
+                            }
+                            if (data.Block == null)
+                            {
+                                data.Block = new Point2D { X = baseX + 2, Y = baseY - 3 };
+                            }
+                            if (data.Door == null)
+                            {
+                                data.Door = new Point2D { X = baseX + 2, Y = baseY - 3 };
                             }
                         }
                     }
@@ -198,9 +255,38 @@ namespace Sharky.Managers
                             {
                                 data.FullDepotWall = new List<Point2D> { new Point2D { X = baseX, Y = baseY + 1 }, new Point2D { X = baseX - 1, Y = baseY + 3 }, new Point2D { X = baseX - 3, Y = baseY + 4 } };
                             }
+                            if (data.Depots == null)
+                            {
+                                data.Depots = new List<Point2D> { new Point2D { X = baseX, Y = baseY + 1 }, new Point2D { X = baseX - 3, Y = baseY + 4 } };
+                            }
+                            if (data.Production == null)
+                            {
+                                data.Production = new List<Point2D> { new Point2D { X = baseX - .5f, Y = baseY + 3.5f } };
+                            }
                             if (data.RampCenter == null)
                             {
                                 data.RampCenter = new Point2D { X = baseX - 3.5f, Y = baseY + .5f };
+                            }
+
+                            if (data.Pylons == null)
+                            {
+                                data.Pylons = new List<Point2D> { new Point2D { X = baseX + 2, Y = baseY + 5 } };
+                            }
+                            if (data.WallSegments == null)
+                            {
+                                data.WallSegments = new List<WallSegment>
+                                {
+                                    new WallSegment { Position = new Point2D { X = baseX + .5f, Y = baseY + 1.5f }, Size = 3 },
+                                    new WallSegment { Position = new Point2D { X = baseX - .5f, Y = baseY + 4.5f }, Size = 3 }
+                                };
+                            }
+                            if (data.Block == null)
+                            {
+                                data.Block = new Point2D { X = baseX - 3, Y = baseY + 4 };
+                            }
+                            if (data.Door == null)
+                            {
+                                data.Door = new Point2D { X = baseX - 3, Y = baseY + 4 };
                             }
                         }
                         else // bottom to top
@@ -239,7 +325,11 @@ namespace Sharky.Managers
                             }
                             if (data.Block == null)
                             {
-                                data.Block = new Point2D { X = baseX, Y = baseY + 1 };
+                                data.Block = new Point2D { X = baseX + 4, Y = baseY + 3 };
+                            }
+                            if (data.Door == null)
+                            {
+                                data.Door = new Point2D { X = baseX + 4, Y = baseY + 3 };
                             }
                         }
                     }
@@ -247,115 +337,6 @@ namespace Sharky.Managers
             }
 
             return data;
-        }
-
-        private List<WallData> CalculateWallData()
-        {
-            var wallData = new List<WallData>();
-
-            var oppositeBase = BaseData.EnemyBaseLocations.FirstOrDefault();
-            var oppositeLocation = new Point2D { X = oppositeBase.Location.X + 4, Y = oppositeBase.Location.Y + 4 };
-            var baseLocation = BaseData.BaseLocations.FirstOrDefault();
-            if (baseLocation != null)
-            {
-                var data = CalculateWallDataForBase(baseLocation, oppositeLocation);
-                if (data != null)
-                {
-                    wallData.Add(data);
-                }
-            }
-
-            oppositeBase = BaseData.BaseLocations.FirstOrDefault();
-            oppositeLocation = new Point2D { X = oppositeBase.Location.X + 4, Y = oppositeBase.Location.Y + 4 };
-            baseLocation = BaseData.EnemyBaseLocations.FirstOrDefault();
-            if (baseLocation != null)
-            {
-                var data = CalculateWallDataForBase(baseLocation, oppositeLocation);
-                if (data != null)
-                {
-                    wallData.Add(data);
-                }
-            }
-
-            return wallData;
-        }
-
-        private WallData CalculateWallDataForBase(BaseLocation baseLocation, Point2D oppositeLocation)
-        {
-            var location = new Point2D { X = baseLocation.Location.X + 4, Y = baseLocation.Location.Y + 4 };
-            var chokePoints = ChokePointsService.GetChokePoints(location, oppositeLocation, 0);
-            var chokePoint = chokePoints.Good.FirstOrDefault();
-            if (chokePoint != null && Vector2.DistanceSquared(chokePoint.Center, new Vector2(location.X, location.Y)) < 900)
-            {
-                var wallPoints = ChokePointService.GetWallOffPoints(chokePoint.Points);
-
-                if (wallPoints != null)
-                {
-                    var wallCenter = new Vector2(wallPoints.Sum(p => p.X) / wallPoints.Count(), wallPoints.Sum(p => p.Y) / wallPoints.Count());
-
-                    if (chokePoint.Center.X > wallCenter.X)
-                    {
-                        // left to right
-                        if (chokePoint.Center.Y < wallCenter.Y)
-                        {
-                            // top to bottom
-                            if (wallPoints.Count() == 4 || wallPoints.Count() == 7)
-                            {
-                                var baseX = wallPoints.First().X;
-                                var baseY = wallPoints.First().Y;
-
-                                if (wallPoints.Count() == 7) { baseX += 1; }
-
-                                var pylons = new List<Point2D> { new Point2D { X = baseX, Y = baseY + 6 } };
-                                var wallSegments = new List<WallSegment>();
-                                wallSegments.Add(new WallSegment { Position = new Point2D { X = baseX + 2.5f, Y = baseY + 4.5f }, Size = 3 });
-                                wallSegments.Add(new WallSegment { Position = new Point2D { X = baseX - .5f, Y = baseY + 3.5f }, Size = 3 });
-                                var block = new Point2D { X = baseX, Y = baseY + 1 };
-
-                                var depots = new List<Point2D> { new Point2D { X = baseX + 3, Y = baseY + 4 }, new Point2D { X = baseX, Y = baseY + 1 } };
-                                var production = new List<Point2D> { new Point2D { X = baseX + .5f, Y = baseY + 3.5f } };
-                                var productionWithAddon = new List<Point2D> { new Point2D { X = baseX - .5f, Y = baseY + 3.5f } };
-
-                                return new WallData { BasePosition = baseLocation.Location, Pylons = pylons, WallSegments = wallSegments, Block = block, Door = block, Depots = depots, Production = production, ProductionWithAddon = productionWithAddon };
-                            }
-                        }
-                        else
-                        {
-                            // bottom to top
-                        }
-                    }
-                    else
-                    {
-                        // righ to left
-                        if (chokePoint.Center.Y < wallCenter.Y)
-                        {
-                            // top to bottom
-                        }
-                        else
-                        {
-                            // bottom to top
-                            if (wallPoints.Count() == 6 || wallPoints.Count() == 7)
-                            {
-                                var baseX = wallPoints.First().X;
-                                var baseY = wallPoints.First().Y;
-
-                                var pylons = new List<Point2D> { new Point2D { X = baseX + 4, Y = baseY - 2 } };
-                                var wallSegments = new List<WallSegment>();
-                                wallSegments.Add(new WallSegment { Position = new Point2D { X = baseX + 1.5f, Y = baseY - .5f }, Size = 3 });
-                                wallSegments.Add(new WallSegment { Position = new Point2D { X = baseX + 4.5f, Y = baseY + .5f }, Size = 3 });
-                                var block = new Point2D { X = baseX + 4, Y = baseY + 3 };
-
-                                var depots = new List<Point2D> { new Point2D { X = baseX + 1, Y = baseY }, new Point2D { X = baseX + 4, Y = baseY + 3 } };
-                                var production = new List<Point2D> { new Point2D { X = baseX + 3.5f, Y = baseY + .5f } };
-
-                                return new WallData { BasePosition = baseLocation.Location, Pylons = pylons, WallSegments = wallSegments, Block = block, Door = block, Depots = depots, Production = production };
-                            }
-                        }
-                    }
-                }
-            }
-
-            return null;
         }
 
         public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
@@ -391,27 +372,27 @@ namespace Sharky.Managers
 
                 var buildings = ActiveUnitData.SelfUnits.Values.Where(u => u.Attributes.Contains(SC2APIProtocol.Attribute.Structure));
 
-                if (EnemyData.SelfRace == Race.Protoss && MapData.PartialWallData != null)
+                if (EnemyData.SelfRace == Race.Protoss && MapData.WallData != null)
                 {
-                    var wallData = MapData.PartialWallData.FirstOrDefault(b => b.BasePosition.X == TargetingData.SelfMainBasePoint.X && b.BasePosition.Y == TargetingData.SelfMainBasePoint.Y);
+                    var wallData = MapData.WallData.FirstOrDefault(b => b.BasePosition.X == TargetingData.SelfMainBasePoint.X && b.BasePosition.Y == TargetingData.SelfMainBasePoint.Y);
                     if (wallData != null)
                     {
                         AddWalls(buildings, wallData);
                     }
-                    wallData = MapData.PartialWallData.FirstOrDefault(b => b.BasePosition.X == TargetingData.NaturalBasePoint.X && b.BasePosition.Y == TargetingData.NaturalBasePoint.Y);
+                    wallData = MapData.WallData.FirstOrDefault(b => b.BasePosition.X == TargetingData.NaturalBasePoint.X && b.BasePosition.Y == TargetingData.NaturalBasePoint.Y);
                     if (wallData != null)
                     {
                         AddWalls(buildings, wallData);
                     }
                 }
-                else if (EnemyData.SelfRace == Race.Terran && MapData.TerranWallData != null)
+                else if (EnemyData.SelfRace == Race.Terran && MapData.WallData != null)
                 {
-                    var wallData = MapData.TerranWallData.FirstOrDefault(b => b.BasePosition.X == TargetingData.SelfMainBasePoint.X && b.BasePosition.Y == TargetingData.SelfMainBasePoint.Y);
+                    var wallData = MapData.WallData.FirstOrDefault(b => b.BasePosition.X == TargetingData.SelfMainBasePoint.X && b.BasePosition.Y == TargetingData.SelfMainBasePoint.Y);
                     if (wallData != null)
                     {
                         AddWalls(buildings, wallData);
                     }
-                    wallData = MapData.TerranWallData.FirstOrDefault(b => b.BasePosition.X == TargetingData.NaturalBasePoint.X && b.BasePosition.Y == TargetingData.NaturalBasePoint.Y);
+                    wallData = MapData.WallData.FirstOrDefault(b => b.BasePosition.X == TargetingData.NaturalBasePoint.X && b.BasePosition.Y == TargetingData.NaturalBasePoint.Y);
                     if (wallData != null)
                     {
                         AddWalls(buildings, wallData);
@@ -477,8 +458,7 @@ namespace Sharky.Managers
                 {
                     TargetingData.MainDefensePoint = closestBase.MineralLineLocation;
                     var chokePoint = ChokePointService.FindDefensiveChokePoint(new Point2D { X = closestBase.Location.X + 4, Y = closestBase.Location.Y + 4 }, TargetingData.AttackPoint, frame);
-                    // TODO: need to determine which type of ramnp this is,  SouthEast => slopes down southeast, etc.
-                    // need to save this information somewhere for wall generation
+
                     if (chokePoint != null)
                     {
                         TargetingData.ForwardDefensePoint = chokePoint;
@@ -498,9 +478,9 @@ namespace Sharky.Managers
                         TargetingData.ForwardDefensePoint = new Point2D { X = closestBase.Location.X + (float)(6 * Math.Cos(angle)), Y = closestBase.Location.Y - (float)(6 * Math.Sin(angle)) };
                     }
 
-                    if (MapData.PartialWallData != null)
+                    if (MapData.WallData != null)
                     {
-                        var wallData = MapData.PartialWallData.FirstOrDefault(b => b.BasePosition.X == closestBase.Location.X && b.BasePosition.Y == closestBase.Location.Y);
+                        var wallData = MapData.WallData.FirstOrDefault(b => b.BasePosition.X == closestBase.Location.X && b.BasePosition.Y == closestBase.Location.Y);
                         if (wallData != null && wallData.Door != null)
                         {
                             var angle = Math.Atan2(wallData.Door.Y - TargetingData.SelfMainBasePoint.Y, TargetingData.SelfMainBasePoint.X - wallData.Door.X);

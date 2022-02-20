@@ -93,6 +93,7 @@ namespace Sharky.Managers
 
         void LogMissingCommanders(ResponseObservation observation, MicroTasks.IMicroTask microTask)
         {
+            return;
             if (microTask.GetType().Name == "MiningTask") { return; }
             var missingCommanders = microTask.UnitCommanders.Where(c => !observation.Observation.RawData.Units.Any(u => u.Tag == c.UnitCalculation.Unit.Tag));
             foreach (var missingCommander in missingCommanders)

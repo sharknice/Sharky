@@ -35,9 +35,9 @@ namespace Sharky.Managers.Protoss
                 var baseLocation = WallService.GetBaseLocation();
                 if (baseLocation != null)
                 {
-                    if (MapData != null && MapData.TerranWallData != null)
+                    if (MapData != null && MapData.WallData != null)
                     {
-                        var data = MapData.TerranWallData.FirstOrDefault(d => d.BasePosition.X == baseLocation.X && d.BasePosition.Y == baseLocation.Y);
+                        var data = MapData.WallData.FirstOrDefault(d => d.BasePosition.X == baseLocation.X && d.BasePosition.Y == baseLocation.Y);
                         if (data != null && data.RampCenter != null)
                         {
                             var angle = Math.Atan2(rallyBuilding.UnitCalculation.Position.Y - data.RampCenter.Y, data.RampCenter.X - rallyBuilding.UnitCalculation.Position.X);

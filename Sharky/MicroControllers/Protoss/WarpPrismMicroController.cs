@@ -107,7 +107,7 @@ namespace Sharky.MicroControllers.Protoss
                 //look at all units within pickup range, ordered by proximity to their closeest enemy
                 // get average hp + shields of back
                 // if unit is in front half weapon is off cooldown and (has below that hp + shields or could die in one hit) pick it up
-                var friendliesInRange = commander.UnitCalculation.NearbyAllies.Take(25).Where(u => !commander.UnitCalculation.Unit.Passengers.Any(p => p.Tag == u.Unit.Tag) && InRange(u.Position, commander.UnitCalculation.Position, PickupRange)).OrderBy(u => ClosestEnemyDistance(u));
+                var friendliesInRange = commander.UnitCalculation.NearbyAllies.Take(25).Where(u => !u.Loaded && InRange(u.Position, commander.UnitCalculation.Position, PickupRange)).OrderBy(u => ClosestEnemyDistance(u));
                 var frontHalf = friendliesInRange.Take(friendliesInRange.Count() / 2);
                 var backHalf = friendliesInRange.Skip(friendliesInRange.Count() / 2);
                 var backAverageHealth = backHalf.Sum(u => u.Unit.Health + u.Unit.Shield) / backHalf.Count();
@@ -350,7 +350,7 @@ namespace Sharky.MicroControllers.Protoss
         {
             if (supportableUnits == null)
             {
-                supportableUnits = ActiveUnitData.SelfUnits.Values.Where(u => !commander.UnitCalculation.Unit.Passengers.Any(p => p.Tag == u.Unit.Tag));
+                supportableUnits = ActiveUnitData.SelfUnits.Values.Where(u => !u.Loaded);
             }
 
             // no allies that already have a friendly warp prism or warp prism phasing within 8 range
@@ -446,7 +446,7 @@ namespace Sharky.MicroControllers.Protoss
 
             if (commander.UnitCalculation.Unit.CargoSpaceMax > commander.UnitCalculation.Unit.CargoSpaceTaken && commander.UnitCalculation.Unit.Shield + commander.UnitCalculation.Unit.Health > 50) // find more units to load
             {
-                var friendly = commander.UnitCalculation.NearbyAllies.Take(25).Where(u => !u.Unit.IsFlying && u.Unit.BuildProgress == 1 && u.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !commander.UnitCalculation.Unit.Passengers.Any(p => p.Tag == u.Unit.Tag) && commander.UnitCalculation.Unit.CargoSpaceMax - commander.UnitCalculation.Unit.CargoSpaceTaken >= UnitDataService.CargoSize((UnitTypes)u.Unit.UnitType) && u.EnemiesInRange.Count == 0 && u.EnemiesInRangeOf.Count == 0).OrderBy(u => Vector2.DistanceSquared(commander.UnitCalculation.Position, u.Position)).FirstOrDefault();
+                var friendly = commander.UnitCalculation.NearbyAllies.Take(25).Where(u => !u.Unit.IsFlying && u.Unit.BuildProgress == 1 && u.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !u.Loaded && commander.UnitCalculation.Unit.CargoSpaceMax - commander.UnitCalculation.Unit.CargoSpaceTaken >= UnitDataService.CargoSize((UnitTypes)u.Unit.UnitType) && u.EnemiesInRange.Count == 0 && u.EnemiesInRangeOf.Count == 0).OrderBy(u => Vector2.DistanceSquared(commander.UnitCalculation.Position, u.Position)).FirstOrDefault();
 
                 if (friendly != null)
                 {

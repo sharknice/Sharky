@@ -151,9 +151,9 @@ namespace Sharky.MicroTasks
                 if (MacroData.Minerals >= 100 && commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE)
                 {
                     var enemyBase = BaseData.EnemyBaseLocations.FirstOrDefault();
-                    if (BlockWall && enemyBase != null && MapData.TerranWallData != null)
+                    if (BlockWall && enemyBase != null && MapData.WallData != null)
                     {
-                        var wallData = MapData.TerranWallData.FirstOrDefault(b => b.BasePosition.X == enemyBase.Location.X && b.BasePosition.Y == enemyBase.Location.Y);
+                        var wallData = MapData.WallData.FirstOrDefault(b => b.BasePosition.X == enemyBase.Location.X && b.BasePosition.Y == enemyBase.Location.Y);
                         if (wallData != null)
                         {
                             var vector = new Vector2(enemyBase.Location.X, enemyBase.Location.Y);

@@ -164,7 +164,7 @@ namespace Sharky.MicroTasks.Proxy
 
         private List<SC2APIProtocol.Action> OrderWarpPrism(UnitCommander warpPrism, IEnumerable<UnitCommander> droppedAttackers, IEnumerable<UnitCommander> unDroppedAttackers, int frame)
         {
-            var readyForPickup = unDroppedAttackers.Where(c => !warpPrism.UnitCalculation.Unit.Passengers.Any(p => p.Tag == c.UnitCalculation.Unit.Tag) && Vector2.DistanceSquared(c.UnitCalculation.Position, new Vector2(LoadingLocation.X, LoadingLocation.Y)) < 10);
+            var readyForPickup = unDroppedAttackers.Where(c => !c.UnitCalculation.Loaded && Vector2.DistanceSquared(c.UnitCalculation.Position, new Vector2(LoadingLocation.X, LoadingLocation.Y)) < 10);
             foreach (var pickup in readyForPickup)
             {
                 if (warpPrism.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISMPHASING)

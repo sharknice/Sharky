@@ -219,6 +219,7 @@ namespace Sharky.Managers
                 }
             }
 
+            var loadedTags = new List<ulong>();
             foreach (var allyAttack in ActiveUnitData.SelfUnits)
             {
                 foreach (var enemyAttack in ActiveUnitData.EnemyUnits)
@@ -252,6 +253,7 @@ namespace Sharky.Managers
                 }
 
                 allyAttack.Value.NearbyAllies = ActiveUnitData.SelfUnits.Where(a => a.Key != allyAttack.Key && Vector2.DistanceSquared(allyAttack.Value.Position, a.Value.Position) <= NearbyDistance * NearbyDistance).Select(a => a.Value).ToList();
+                allyAttack.Value.Loaded = false;
 
                 var commander = new UnitCommander(allyAttack.Value);
                 ActiveUnitData.Commanders.AddOrUpdate(allyAttack.Value.Unit.Tag, commander, (tag, existingCommander) =>
@@ -260,12 +262,22 @@ namespace Sharky.Managers
                     commander.UnitCalculation = allyAttack.Value;
                     return commander;
                 });
+
                 ActiveUnitData.Commanders[allyAttack.Value.Unit.Tag].ParentUnitCalculation = GetParentUnitCalculation(ActiveUnitData.Commanders[allyAttack.Value.Unit.Tag]);
                 // TODO: set childunitcalculation and then set it back to null when it goes away
 
-
                 allyAttack.Value.Attackers = GetTargettedAttacks(allyAttack.Value).ToList();
                 allyAttack.Value.EnemiesThreateningDamage = GetEnemiesThreateningDamage(allyAttack.Value);
+
+                if (allyAttack.Value.Unit.Passengers != null)
+                {
+                    loadedTags.AddRange(allyAttack.Value.Unit.Passengers.Select(p => p.Tag));
+                }
+            }
+
+            foreach (var tag in loadedTags)
+            {
+                ActiveUnitData.SelfUnits[tag].Loaded = true;
             }
 
             foreach (var enemyAttack in ActiveUnitData.EnemyUnits)

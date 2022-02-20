@@ -52,9 +52,13 @@ namespace Sharky.Managers
                 }
                 MapData.Map[x] = row;
             }
-            MapData.PartialWallData = WallDataService.GetPartialWallData(gameInfo.MapName);
-            MapData.BlockWallData = WallDataService.GetBlockWallData(gameInfo.MapName);
-            MapData.TerranWallData = WallDataService.GetTerranWallData(gameInfo.MapName);
+            MapData.WallData = new List<WallData>();
+
+            Console.WriteLine("Calculating wall data");
+            WallDataService.AddTerranWallData(gameInfo.MapName, MapData.WallData);
+            WallDataService.AddPartialWallData(gameInfo.MapName, MapData.WallData);
+            WallDataService.AddPartialWallData(gameInfo.MapName, MapData.WallData);
+            WallDataService.AddBlockWallData(gameInfo.MapName, MapData.WallData);
             MapData.MapName = gameInfo.MapName;
         }
 

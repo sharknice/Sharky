@@ -111,9 +111,9 @@ namespace Sharky.MicroTasks
                 var baseLocation = WallService.GetBaseLocation();
                 if (baseLocation == null) { return; }
 
-                if (MapData != null && MapData.TerranWallData != null)
+                if (MapData != null && MapData.WallData != null)
                 {
-                    var data = MapData.TerranWallData.FirstOrDefault(d => d.BasePosition.X == baseLocation.X && d.BasePosition.Y == baseLocation.Y);
+                    var data = MapData.WallData.FirstOrDefault(d => d.BasePosition.X == baseLocation.X && d.BasePosition.Y == baseLocation.Y);
                     if (data != null && data.FullDepotWall != null)
                     {
                         BuildingPoints = data.FullDepotWall;

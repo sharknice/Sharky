@@ -80,9 +80,9 @@ namespace Sharky.Builds
         {
             if (MacroData.FoodUsed == 13 && MacroData.Minerals > 15 && UnitCountService.Count(UnitTypes.PROTOSS_PYLON) == 0)
             {
-                if (MapDataService != null && MapDataService.MapData.PartialWallData != null)
+                if (MapDataService != null && MapDataService.MapData.WallData != null)
                 {
-                    var wallData = MapDataService.MapData.PartialWallData.FirstOrDefault(b => b.BasePosition.X == TargetingData.NaturalBasePoint.X && b.BasePosition.Y == TargetingData.NaturalBasePoint.Y);
+                    var wallData = MapDataService.MapData.WallData.FirstOrDefault(b => b.BasePosition.X == TargetingData.NaturalBasePoint.X && b.BasePosition.Y == TargetingData.NaturalBasePoint.Y);
                     if (wallData != null)
                     {
                         var point = wallData.Pylons.FirstOrDefault();
@@ -101,9 +101,9 @@ namespace Sharky.Builds
         {
             if (MacroData.FoodUsed >= 14 && UnitCountService.Completed(UnitTypes.PROTOSS_PYLON) == 0 && ActiveUnitData.SelfUnits.Any(u => u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && u.Value.Unit.BuildProgress > .5f))
             {
-                if (MapDataService != null && MapDataService.MapData.PartialWallData != null)
+                if (MapDataService != null && MapDataService.MapData.WallData != null)
                 {
-                    var wallData = MapDataService.MapData.PartialWallData.FirstOrDefault(b => b.BasePosition.X == TargetingData.NaturalBasePoint.X && b.BasePosition.Y == TargetingData.NaturalBasePoint.Y);
+                    var wallData = MapDataService.MapData.WallData.FirstOrDefault(b => b.BasePosition.X == TargetingData.NaturalBasePoint.X && b.BasePosition.Y == TargetingData.NaturalBasePoint.Y);
                     if (wallData != null)
                     {
                         var point = wallData.WallSegments.FirstOrDefault();
@@ -122,9 +122,9 @@ namespace Sharky.Builds
         {
             if (UnitCountService.EquivalentTypeCompleted(UnitTypes.PROTOSS_GATEWAY) == 0 && ActiveUnitData.SelfUnits.Any(u => u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_GATEWAY && u.Value.Unit.BuildProgress > .7f))
             {
-                if (MapDataService != null && MapDataService.MapData.PartialWallData != null)
+                if (MapDataService != null && MapDataService.MapData.WallData != null)
                 {
-                    var wallData = MapDataService.MapData.PartialWallData.FirstOrDefault(b => b.BasePosition.X == TargetingData.NaturalBasePoint.X && b.BasePosition.Y == TargetingData.NaturalBasePoint.Y);
+                    var wallData = MapDataService.MapData.WallData.FirstOrDefault(b => b.BasePosition.X == TargetingData.NaturalBasePoint.X && b.BasePosition.Y == TargetingData.NaturalBasePoint.Y);
                     if (wallData != null)
                     {
                         var point = wallData.WallSegments.FirstOrDefault();

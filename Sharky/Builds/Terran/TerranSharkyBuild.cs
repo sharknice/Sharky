@@ -46,9 +46,9 @@ namespace Sharky.Builds.Terran
         {
             if (MacroData.FoodUsed == 13 && MacroData.Minerals > 80 && UnitCountService.EquivalentTypeCount(UnitTypes.TERRAN_SUPPLYDEPOT) == 0)
             {
-                if (MapDataService != null && MapDataService.MapData.TerranWallData != null)
+                if (MapDataService != null && MapDataService.MapData.WallData != null)
                 {
-                    var wallData = MapDataService.MapData.TerranWallData.FirstOrDefault(b => b.BasePosition.X == TargetingData.SelfMainBasePoint.X && b.BasePosition.Y == TargetingData.SelfMainBasePoint.Y);
+                    var wallData = MapDataService.MapData.WallData.FirstOrDefault(b => b.BasePosition.X == TargetingData.SelfMainBasePoint.X && b.BasePosition.Y == TargetingData.SelfMainBasePoint.Y);
                     if (wallData != null && wallData.Depots != null)
                     {
                         var point = wallData.Depots.FirstOrDefault();

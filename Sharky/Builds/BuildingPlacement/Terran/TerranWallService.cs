@@ -85,11 +85,11 @@ namespace Sharky.Builds.BuildingPlacement
 
         public Point2D FindProductionWallPlacement(Point2D target, UnitTypes unitType, float size, float maxDistance, float minimumMineralProximinity)
         {
-            if (MapData != null && MapData.TerranWallData != null)
+            if (MapData != null && MapData.WallData != null)
             {
                 foreach (var selfBase in BaseData.SelfBases)
                 {
-                    var wallData = MapData.TerranWallData.FirstOrDefault(b => b.BasePosition.X == selfBase.Location.X && b.BasePosition.Y == selfBase.Location.Y);
+                    var wallData = MapData.WallData.FirstOrDefault(b => b.BasePosition.X == selfBase.Location.X && b.BasePosition.Y == selfBase.Location.Y);
                     if (unitType == UnitTypes.TERRAN_BARRACKSTECHLAB)
                     {
                         var spot = GetOpenProductionAddonPlacement(wallData);
@@ -140,11 +140,11 @@ namespace Sharky.Builds.BuildingPlacement
 
         public Point2D FindSupplyDepotWallPlacement(Point2D target, float size, float maxDistance, float minimumMineralProximinity, WallOffType wallOffType)
         {
-            if (MapData != null && MapData.TerranWallData != null)
+            if (MapData != null && MapData.WallData != null)
             {
                 foreach (var selfBase in BaseData.SelfBases)
                 {
-                    var wallData = MapData.TerranWallData.FirstOrDefault(b => b.BasePosition.X == selfBase.Location.X && b.BasePosition.Y == selfBase.Location.Y);
+                    var wallData = MapData.WallData.FirstOrDefault(b => b.BasePosition.X == selfBase.Location.X && b.BasePosition.Y == selfBase.Location.Y);
                     var spot = GetOpenDepotPlacement(wallData, wallOffType);
                     if (spot != null) { return spot; }
                 }
@@ -192,11 +192,11 @@ namespace Sharky.Builds.BuildingPlacement
 
         public Point2D FindBunkerPlacement(Point2D target, float size, float maxDistance, float minimumMineralProximinity)
         {
-            if (MapData != null && MapData.TerranWallData != null)
+            if (MapData != null && MapData.WallData != null)
             {
                 foreach (var selfBase in BaseData.SelfBases)
                 {
-                    var wallData = MapData.TerranWallData.FirstOrDefault(b => b.BasePosition.X == selfBase.Location.X && b.BasePosition.Y == selfBase.Location.Y);
+                    var wallData = MapData.WallData.FirstOrDefault(b => b.BasePosition.X == selfBase.Location.X && b.BasePosition.Y == selfBase.Location.Y);
                     var spot = GetOpenBunkerPlacement(wallData);
                     if (spot != null) { return spot; }
                 }
@@ -226,12 +226,12 @@ namespace Sharky.Builds.BuildingPlacement
 
         public bool MainWallComplete()
         {
-            if (MapData != null && MapData.TerranWallData != null)
+            if (MapData != null && MapData.WallData != null)
             {
                 var baseData = BaseData.SelfBases.FirstOrDefault();
                 if (baseData != null)
                 {
-                    var wallData = MapData.TerranWallData.FirstOrDefault(b => b.BasePosition.X == baseData.Location.X && b.BasePosition.Y == baseData.Location.Y);
+                    var wallData = MapData.WallData.FirstOrDefault(b => b.BasePosition.X == baseData.Location.X && b.BasePosition.Y == baseData.Location.Y);
                     if (wallData != null)
                     {
                         if (wallData.Depots != null)

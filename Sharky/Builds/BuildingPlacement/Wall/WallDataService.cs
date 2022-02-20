@@ -38,34 +38,86 @@ namespace Sharky.Builds.BuildingPlacement
             return mapWallData;
         }
 
-        public List<WallData> GetPartialWallData(string map)
+        public void AddPartialWallData(string map, List<WallData> wallData)
         {
-            var data = PartialMapWallData.FirstOrDefault(m => map.Replace(" ","").ToLower().Contains(m.MapName.ToLower()));
-            if (data != null)
-            {
-                return data.WallData;
-            }
-            return null;
+            var loadedData = PartialMapWallData.FirstOrDefault(m => map.Replace(" ","").ToLower().Contains(m.MapName.ToLower()));
+            AddWallData(loadedData, wallData);
         }
 
-        public List<WallData> GetBlockWallData(string map)
+        public void AddBlockWallData(string map, List<WallData> wallData)
         {
-            var data = BlockMapWallData.FirstOrDefault(m => map.Replace(" ", "").ToLower().Contains(m.MapName.ToLower()));
-            if (data != null)
-            {
-                return data.WallData;
-            }
-            return null;
+            var loadedData = BlockMapWallData.FirstOrDefault(m => map.Replace(" ", "").ToLower().Contains(m.MapName.ToLower()));
+            AddWallData(loadedData, wallData);
         }
 
-        public List<WallData> GetTerranWallData(string map)
+        public void AddTerranWallData(string map, List<WallData> wallData)
         {
-            var data = TerranMapWallData.FirstOrDefault(m => map.Replace(" ", "").ToLower().Contains(m.MapName.ToLower()));
-            if (data != null)
+            var loadedData = TerranMapWallData.FirstOrDefault(m => map.Replace(" ", "").ToLower().Contains(m.MapName.ToLower()));
+            AddWallData(loadedData, wallData);
+        }
+
+        void AddWallData(MapWallData loadedData, List<WallData> wallData)
+        {
+            if (loadedData?.WallData != null)
             {
-                return data.WallData;
+                foreach (var loaded in loadedData.WallData)
+                {
+                    var data = wallData.FirstOrDefault(d => d.BasePosition.X == loaded.BasePosition.X && d.BasePosition.Y == loaded.BasePosition.Y);
+                    if (data != null)
+                    {
+                        wallData.Remove(data);
+                    }
+                    else
+                    {
+                        data = new WallData { BasePosition = loaded.BasePosition };
+                    }
+
+                    if (loaded.Bunkers != null)
+                    {
+                        data.Bunkers = loaded.Bunkers;
+                    }
+                    if (loaded.Depots != null)
+                    {
+                        data.Depots = loaded.Depots;
+                    }
+                    if (loaded.FullDepotWall != null)
+                    {
+                        data.FullDepotWall = loaded.FullDepotWall;
+                    }
+                    if (loaded.Production != null)
+                    {
+                        data.Production = loaded.Production;
+                    }
+                    if (loaded.ProductionWithAddon != null)
+                    {
+                        data.ProductionWithAddon = loaded.ProductionWithAddon;
+                    }
+
+                    if (loaded.Block != null)
+                    {
+                        data.Block = loaded.Block;
+                    }
+                    if (loaded.Pylons != null)
+                    {
+                        data.Pylons = loaded.Pylons;
+                    }
+                    if (loaded.WallSegments != null)
+                    {
+                        data.WallSegments = loaded.WallSegments;
+                    }
+                    if (loaded.Door != null)
+                    {
+                        data.Door = loaded.Door;
+                    }
+
+                    if (loaded.RampCenter != null)
+                    {
+                        data.RampCenter = loaded.RampCenter;
+                    }
+
+                    wallData.Add(data);
+                }
             }
-            return null;
         }
     }
 }

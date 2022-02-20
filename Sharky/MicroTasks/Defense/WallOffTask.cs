@@ -167,7 +167,7 @@ namespace Sharky.MicroTasks
                 var baseLocation = WallService.GetBaseLocation();
                 if (baseLocation == null) { return; }
 
-                WallData = MapData.PartialWallData.FirstOrDefault(b => b.BasePosition.X == baseLocation.X && b.BasePosition.Y == baseLocation.Y);
+                WallData = MapData.WallData.FirstOrDefault(b => b.BasePosition.X == baseLocation.X && b.BasePosition.Y == baseLocation.Y);
                 if (WallData != null && WallData.Block != null)
                 {
                     PlacementPoints.Add(WallData.Block);

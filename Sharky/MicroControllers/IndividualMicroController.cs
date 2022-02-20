@@ -100,6 +100,7 @@ namespace Sharky.MicroControllers
             }
 
             List<SC2APIProtocol.Action> action = null;
+            if (commander.UnitCalculation.Loaded) { return action; }
 
             var formation = GetDesiredFormation(commander);
             var bestTarget = GetBestTarget(commander, target, frame);
@@ -137,6 +138,7 @@ namespace Sharky.MicroControllers
         public virtual List<SC2APIProtocol.Action> AttackStayOutOfRange(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, Formation formation, int frame)
         {
             List<SC2APIProtocol.Action> action = null;
+            if (commander.UnitCalculation.Loaded) { return action; }
 
             if (WeaponReady(commander, frame))
             {
@@ -172,6 +174,7 @@ namespace Sharky.MicroControllers
         public virtual List<SC2APIProtocol.Action> Idle(UnitCommander commander, Point2D defensivePoint, int frame)
         {
             List<SC2APIProtocol.Action> action = null;
+            if (commander.UnitCalculation.Loaded) { return action; }
             UpdateState(commander, defensivePoint, defensivePoint, null, null, Formation.Normal, frame);
             if (GetInBunker(commander, frame, out action)) { return action; }
             if (RechargeShieldsAtBattery(commander, defensivePoint, defensivePoint, frame, out action)) { return action; }
@@ -182,6 +185,7 @@ namespace Sharky.MicroControllers
         public virtual List<SC2APIProtocol.Action> Scout(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, bool prioritizeVision = false)
         {
             List<SC2APIProtocol.Action> action = null;
+            if (commander.UnitCalculation.Loaded) { return action; }
             UpdateState(commander, target, defensivePoint, null, null, Formation.Normal, frame);
 
             if (!prioritizeVision || MapDataService.SelfVisible(target))
@@ -238,6 +242,7 @@ namespace Sharky.MicroControllers
         public virtual List<SC2APIProtocol.Action> Retreat(UnitCommander commander, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
             List<SC2APIProtocol.Action> action = null;
+            if (commander.UnitCalculation.Loaded) { return action; }
             UpdateState(commander, defensivePoint, defensivePoint, groupCenter, null, Formation.Normal, frame);
 
             var bestTarget = GetBestTarget(commander, defensivePoint, frame);
@@ -324,6 +329,7 @@ namespace Sharky.MicroControllers
         public virtual List<SC2APIProtocol.Action> Bait(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
             List<SC2APIProtocol.Action> action = null;
+            if (commander.UnitCalculation.Loaded) { return action; }
             UpdateState(commander, target, defensivePoint, groupCenter, null, Formation.Normal, frame);
 
             var formation = GetDesiredFormation(commander);
@@ -492,7 +498,7 @@ namespace Sharky.MicroControllers
         public virtual bool NavigateToTarget(UnitCommander commander, Point2D target, Point2D groupCenter, UnitCalculation bestTarget, Formation formation, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
-
+            if (commander.UnitCalculation.Loaded) { return false; }
             if (GetInFormation(commander, formation, frame, out action))
             {
                 return true;
@@ -523,7 +529,7 @@ namespace Sharky.MicroControllers
             return true;
         }
 
-        public virtual bool AvoidDeceleration(UnitCommander commander, Point2D target, bool attackMove, int frame, out List<SC2APIProtocol.Action> action)
+        protected virtual bool AvoidDeceleration(UnitCommander commander, Point2D target, bool attackMove, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -2186,6 +2192,7 @@ namespace Sharky.MicroControllers
         public virtual List<SC2APIProtocol.Action> Support(UnitCommander commander, IEnumerable<UnitCommander> supportTargets, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
             List<SC2APIProtocol.Action> action = null;
+            if (commander.UnitCalculation.Loaded) { return action; }
 
             var unitToSupport = GetSupportTarget(commander, supportTargets, target, defensivePoint);
 
@@ -2429,6 +2436,7 @@ namespace Sharky.MicroControllers
         public virtual List<SC2APIProtocol.Action> HarassWorkers(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame)
         {
             List<SC2APIProtocol.Action> action = null;
+            if (commander.UnitCalculation.Loaded) { return action; }
 
             var bestTarget = GetBestHarassTarget(commander, target);
 
@@ -2528,6 +2536,7 @@ namespace Sharky.MicroControllers
         public virtual List<SC2APIProtocol.Action> NavigateToPoint(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
             List<SC2APIProtocol.Action> action = null;
+            if (commander.UnitCalculation.Loaded) { return action; }
 
             if (SpecialCaseMove(commander, target, defensivePoint, groupCenter, null, Formation.Normal, frame, out action)) { return action; }
 

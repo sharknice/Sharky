@@ -82,6 +82,8 @@ namespace Sharky
 
         float oneSecondInFrames;
 
+        public bool Loaded { get; set; }
+
         public UnitCalculation(Unit unit, int repairers, SharkyUnitData sharkyUnitData, SharkyOptions sharkyOptions, UnitDataService unitDataService, int frame)
         {
             TargetPriorityCalculation = new TargetPriorityCalculation();
@@ -242,6 +244,7 @@ namespace Sharky
             NearbyEnemies = new List<UnitCalculation>();
             Attackers = new List<UnitCalculation>();
             IncomingDamage = 0;
+            Loaded = false;
         }
 
         public float SimulatedDamagePerSecond(IEnumerable<SC2APIProtocol.Attribute> includedAttributes, bool air, bool ground)

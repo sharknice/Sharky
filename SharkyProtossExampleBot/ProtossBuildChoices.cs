@@ -24,6 +24,7 @@ namespace SharkyProtossExampleBot
             // We create all of our builds
             var proxyVoidRay = new ProxyVoidRay(defaultSharkyBot, protossCounterTransitioner, probeMicroController);
             var zealotRush = new ZealotRush(defaultSharkyBot, protossCounterTransitioner);
+            var oneBaseCarriers = new OneBaseCarriers(defaultSharkyBot, protossCounterTransitioner);
             var robo = new Robo(defaultSharkyBot, protossCounterTransitioner);
             var nexusFirst = new NexusFirst(defaultSharkyBot, protossCounterTransitioner);
             var protossRobo = new ProtossRobo(defaultSharkyBot, protossCounterTransitioner);
@@ -33,6 +34,7 @@ namespace SharkyProtossExampleBot
             {
                 [proxyVoidRay.Name()] = proxyVoidRay,
                 [zealotRush.Name()] = zealotRush,
+                [oneBaseCarriers.Name()] = oneBaseCarriers,
                 [robo.Name()] = robo,
                 [nexusFirst.Name()] = nexusFirst,
                 [protossRobo.Name()] = protossRobo,
@@ -41,6 +43,7 @@ namespace SharkyProtossExampleBot
             // we create build sequences to be used by each matchup
             var versusEverything = new List<List<string>>
             {
+                new List<string> { oneBaseCarriers.Name() },
                 new List<string> { nexusFirst.Name(), robo.Name(), protossRobo.Name() },
                 new List<string> { zealotRush.Name() },
                 new List<string> { proxyVoidRay.Name() },
