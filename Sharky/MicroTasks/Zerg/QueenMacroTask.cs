@@ -178,33 +178,30 @@ namespace Sharky.MicroTasks
                     }
                 }             
             }
-
-            RemoveDeadData(frame);
         }
 
-
-        private void RemoveDeadData(int frame)
+        public override void RemoveDeadUnits(List<ulong> deadUnits)
         {
-            foreach (var data in InjectData)
+            foreach (var tag in deadUnits)
             {
-                if (data.Queen != null && data.Queen.FrameFirstSeen != frame)
+                UnitCommanders.RemoveAll(c => c.UnitCalculation.Unit.Tag == tag);
+                CreepSpreaders.RemoveAll(c => c.UnitCalculation.Unit.Tag == tag);
+                
+                foreach (var data in InjectData.Where(d => d.Queen != null && d.Queen.UnitCalculation.Unit.Tag == tag))
                 {
-                    data.Queen = UnitCommanders.FirstOrDefault(u => u.UnitCalculation.Unit.Tag == data.Queen.UnitCalculation.Unit.Tag);
+                    data.Queen = null;
                 }
-            }
-
-            foreach (var data in InjectData.Where(d => d.Hatchery.FrameLastSeen != frame))
-            {
-                if (data.Queen != null)
+                foreach (var data in InjectData.Where(d => d.Hatchery != null && d.Hatchery.Unit.Tag == tag))
                 {
-                    data.Queen.UnitRole = UnitRole.None;
-                    data.Queen.Claimed = false;
-                    UnitCommanders.RemoveAll(u => u.UnitCalculation.Unit.Tag == data.Queen.UnitCalculation.Unit.Tag);
+                    if (data.Queen != null)
+                    {
+                        data.Queen.UnitRole = UnitRole.None;
+                        data.Queen.Claimed = false;
+                        UnitCommanders.RemoveAll(c => c.UnitCalculation.Unit.Tag == data.Queen.UnitCalculation.Unit.Tag);
+                    }
                 }
+                InjectData.RemoveAll(d => d.Hatchery.Unit.Tag == tag);
             }
-            InjectData.RemoveAll(d => d.Hatchery.FrameLastSeen != frame);
-            CreepSpreaders.RemoveAll(d => d.UnitCalculation.FrameLastSeen != frame);
-            UnitCommanders.RemoveAll(u => u.UnitCalculation.FrameLastSeen != frame);
         }
     }
 }

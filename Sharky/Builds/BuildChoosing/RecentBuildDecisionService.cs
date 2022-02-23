@@ -9,11 +9,17 @@ namespace Sharky.Builds.BuildChoosing
 {
     public class RecentBuildDecisionService : BuildDecisionService
     {
-        public RecentBuildDecisionService(ChatService chatService, EnemyPlayerService enemyPlayerService) : base(chatService, enemyPlayerService) { }
+        protected BuildMatcher BuildMatcher;
+
+        public RecentBuildDecisionService(ChatService chatService, EnemyPlayerService enemyPlayerService, RecordService recordService, BuildMatcher buildMatcher) 
+            : base(chatService, enemyPlayerService, recordService) 
+        { 
+            BuildMatcher = buildMatcher;
+        }
 
         private bool SameBuildSequence(List<List<string>> buildSequences, Game originalGame, List<string> currentSequence)
         {
-            var originalSequence = buildSequences.FirstOrDefault(b => MatchesBuildSequence(originalGame, b));
+            var originalSequence = buildSequences.FirstOrDefault(b => BuildMatcher.MatchesBuildSequence(originalGame, b));
             if (originalSequence == null)
             {
                 //Console.WriteLine($"Original game didn't match any existing build sequences: {string.Join(" ", originalGame.Builds)}");
@@ -45,7 +51,7 @@ namespace Sharky.Builds.BuildChoosing
             {
                 if (game.Result == (int)Result.Victory)
                 {
-                    var sequence = buildSequences.FirstOrDefault(b => MatchesBuildSequence(game, b));
+                    var sequence = buildSequences.FirstOrDefault(b => BuildMatcher.MatchesBuildSequence(game, b));
                     if (sequence == null)
                     {
                         //Console.WriteLine($"Game didn't match any existing build sequences: {string.Join(" ", game.Builds.Select(g => g.Value))}");

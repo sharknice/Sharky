@@ -93,6 +93,8 @@ namespace Sharky.DefaultBot
         public EnemyNameService EnemyNameService { get; set; }
         public EnemyPlayerService EnemyPlayerService { get; set; }
         public DefenseService DefenseService { get; set; }
+        public BuildMatcher BuildMatcher { get; set; }
+        public RecordService RecordService { get; set; }
         public IBuildDecisionService BuildDecisionService { get; set; }
         public ProxyLocationService ProxyLocationService { get; set; }
         public UnitCountService UnitCountService { get; set; }
@@ -581,7 +583,9 @@ namespace Sharky.DefaultBot
                 { Race.Terran, new BuildChoices { Builds = terranBuilds, BuildSequences = terranBuildSequences } },
                 { Race.Zerg, new BuildChoices { Builds = zergBuilds, BuildSequences = zergBuildSequences } }
             };
-            BuildDecisionService = new RecentBuildDecisionService(ChatService, EnemyPlayerService);
+            BuildMatcher = new BuildMatcher();
+            RecordService = new RecordService(BuildMatcher);
+            BuildDecisionService = new RecentBuildDecisionService(ChatService, EnemyPlayerService, RecordService, BuildMatcher);
             BuildManager = new BuildManager(BuildChoices, DebugService, MacroBalancer, BuildDecisionService, EnemyPlayerService, ChatHistory, EnemyStrategyHistory, FrameToTimeConverter, SharkyOptions, ChatService);
             Managers.Add(BuildManager);
         }

@@ -67,7 +67,7 @@ namespace Sharky.Managers
                 {
                     if (microTask.GetType().Name != "MiningTask") 
                     {
-                        System.Console.WriteLine($"{observation.Observation.GameLoop} {microTask.GetType().Name}, ignored uncontrollable unit order {action.ActionRaw.UnitCommand.AbilityId} for tags {string.Join(" ", action.ActionRaw.UnitCommand.UnitTags)}");
+                        // System.Console.WriteLine($"{observation.Observation.GameLoop} {microTask.GetType().Name}, ignored uncontrollable unit order {action.ActionRaw.UnitCommand.AbilityId} for tags {string.Join(" ", action.ActionRaw.UnitCommand.UnitTags)}");
                     }
                 }
                 else if (!action.ActionRaw.UnitCommand.QueueCommand)
@@ -79,7 +79,7 @@ namespace Sharky.Managers
                     }
                     else
                     {
-                        System.Console.WriteLine($"{observation.Observation.GameLoop} {microTask.GetType().Name}, ignored conflicting order {action.ActionRaw.UnitCommand.AbilityId} for tags {string.Join(" ", action.ActionRaw.UnitCommand.UnitTags)}");
+                        // System.Console.WriteLine($"{observation.Observation.GameLoop} {microTask.GetType().Name}, ignored conflicting order {action.ActionRaw.UnitCommand.AbilityId} for tags {string.Join(" ", action.ActionRaw.UnitCommand.UnitTags)}");
                     }
                 }
                 else

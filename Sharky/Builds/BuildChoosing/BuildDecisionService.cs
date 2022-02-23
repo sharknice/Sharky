@@ -12,11 +12,13 @@ namespace Sharky.Builds.BuildChoosing
     {
         protected ChatService ChatService;
         protected EnemyPlayerService EnemyPlayerService;
+        protected RecordService RecordService;
 
-        public BuildDecisionService(ChatService chatService, EnemyPlayerService enemyPlayerService)
+        public BuildDecisionService(ChatService chatService, EnemyPlayerService enemyPlayerService, RecordService recordService)
         {
             ChatService = chatService;
             EnemyPlayerService = enemyPlayerService;
+            RecordService = recordService;
         }
 
         protected bool BetterBuild(Record original, Record current)
@@ -78,7 +80,7 @@ namespace Sharky.Builds.BuildChoosing
             var mapGames = enemyBot.Games.Where(g => g.MapName == map).Where(g => g.EnemyRace == enemyRace); // it is possible a bot could be updated and change races on the ladder
             Record bestRecord = null;
 
-            var record = GetRecord(mapGames);
+            var record = RecordService.GetRecord(mapGames);
             Console.WriteLine($"Same enemy, same map: {record.Wins.Count()}-{record.Losses.Count()}-{record.Ties.Count()}");
             debugMessage.Add($"Same enemy, same map: {record.Wins.Count()}-{record.Losses.Count()}-{record.Ties.Count()}");
             if (mapGames.Count() > 0)
@@ -86,7 +88,7 @@ namespace Sharky.Builds.BuildChoosing
                 // check games on this map
                 foreach (var buildSequence in buildSequences)
                 {
-                    var buildRecord = GetSequenceRecord(mapGames, buildSequence);
+                    var buildRecord = RecordService.GetSequenceRecord(mapGames, buildSequence);
                     if (BetterBuild(bestRecord, buildRecord))
                     {
                         bestBuildSequence = buildSequence;
@@ -97,7 +99,7 @@ namespace Sharky.Builds.BuildChoosing
                 }
             }
 
-            record = GetRecord(enemyBot.Games.Where(g => g.EnemyRace == enemyRace));
+            record = RecordService.GetRecord(enemyBot.Games.Where(g => g.EnemyRace == enemyRace));
             Console.WriteLine($"Same enemy, all maps: {record.Wins.Count()}-{record.Losses.Count()}-{record.Ties.Count()}");
             debugMessage.Add($"Same enemy, all maps: {record.Wins.Count()}-{record.Losses.Count()}-{record.Ties.Count()}");
             if (bestRecord == null || bestRecord.Wins.Count() == 0)
@@ -105,8 +107,8 @@ namespace Sharky.Builds.BuildChoosing
                 // check games on other maps
                 foreach (var buildSequence in buildSequences)
                 {
-                    if (GetSequenceRecord(mapGames, buildSequence).Losses.Count() > 0) { continue; }
-                    var buildRecord = GetSequenceRecord(enemyBot.Games.Where(g => g.EnemyRace == enemyRace), buildSequence);
+                    if (RecordService.GetSequenceRecord(mapGames, buildSequence).Losses.Count() > 0) { continue; }
+                    var buildRecord = RecordService.GetSequenceRecord(enemyBot.Games.Where(g => g.EnemyRace == enemyRace), buildSequence);
                     Debug.WriteLine($"{string.Join(" ", buildSequence)} {buildRecord.Wins.Count()}-{buildRecord.Ties.Count()}-{buildRecord.Losses.Count()}");
                     if (BetterBuild(bestRecord, buildRecord))
                     {
@@ -118,7 +120,7 @@ namespace Sharky.Builds.BuildChoosing
                 }
             }
 
-            record = GetRecord(enemyBots.SelectMany(b => b.Games).Where(g => g.EnemyRace == enemyRace).Where(g => g.MapName == map));
+            record = RecordService.GetRecord(enemyBots.SelectMany(b => b.Games).Where(g => g.EnemyRace == enemyRace).Where(g => g.MapName == map));
             Console.WriteLine($"All enemies, same race, same map: {record.Wins.Count()}-{record.Losses.Count()}-{record.Ties.Count()}");
             debugMessage.Add($"All enemies, same race, same map: {record.Wins.Count()}-{record.Losses.Count()}-{record.Ties.Count()}");
             
@@ -129,8 +131,8 @@ namespace Sharky.Builds.BuildChoosing
                     // check games on this map from other bots of the same race
                     foreach (var buildSequence in buildSequences)
                     {
-                        if (GetSequenceRecord(mapGames, buildSequence).Losses.Count() > 0) { continue; }
-                        var buildRecord = GetSequenceRecord(enemyBots.SelectMany(b => b.Games).Where(g => g.EnemyRace == enemyRace).Where(g => g.MapName == map), buildSequence);
+                        if (RecordService.GetSequenceRecord(mapGames, buildSequence).Losses.Count() > 0) { continue; }
+                        var buildRecord = RecordService.GetSequenceRecord(enemyBots.SelectMany(b => b.Games).Where(g => g.EnemyRace == enemyRace).Where(g => g.MapName == map), buildSequence);
                         if (BetterBuild(bestRecord, buildRecord))
                         {
                             bestBuildSequence = buildSequence;
@@ -141,7 +143,7 @@ namespace Sharky.Builds.BuildChoosing
                     }
                 }
 
-                record = GetRecord(enemyBots.SelectMany(b => b.Games).Where(g => g.EnemyRace == enemyRace));
+                record = RecordService.GetRecord(enemyBots.SelectMany(b => b.Games).Where(g => g.EnemyRace == enemyRace));
                 Console.WriteLine($"All enemies, same race, all maps: {record.Wins.Count()}-{record.Losses.Count()}-{record.Ties.Count()}");
                 debugMessage.Add($"All enemies, same race, all maps: {record.Wins.Count()}-{record.Losses.Count()}-{record.Ties.Count()}");
                 if (bestRecord.Wins.Count() == 0)
@@ -149,8 +151,8 @@ namespace Sharky.Builds.BuildChoosing
                     // check games on other maps from other bots of the same race
                     foreach (var buildSequence in buildSequences)
                     {
-                        if (GetSequenceRecord(mapGames, buildSequence).Losses.Count() > 0) { continue; }
-                        var buildRecord = GetSequenceRecord(enemyBots.SelectMany(b => b.Games).Where(g => g.EnemyRace == enemyRace), buildSequence);
+                        if (RecordService.GetSequenceRecord(mapGames, buildSequence).Losses.Count() > 0) { continue; }
+                        var buildRecord = RecordService.GetSequenceRecord(enemyBots.SelectMany(b => b.Games).Where(g => g.EnemyRace == enemyRace), buildSequence);
                         if (BetterBuild(bestRecord, buildRecord))
                         {
                             bestBuildSequence = buildSequence;
@@ -169,70 +171,6 @@ namespace Sharky.Builds.BuildChoosing
             //ChatManager.SendDebugChatMessages(debugMessage);
 
             return bestBuildSequence;
-        }
-
-        protected Record GetSequenceRecord(IEnumerable<Game> games, List<string> sequence)
-        {
-            var record = new Record { Wins = new List<DateTime>(), Losses = new List<DateTime>(), Ties = new List<DateTime>() };
-            foreach (var game in games)
-            {
-                if (MatchesBuildSequence(game, sequence))
-                {
-                    if (game.Result == (int)Result.Victory)
-                    {
-                        record.Wins.Add(game.DateTime);
-                    }
-                    else if (game.Result == (int)Result.Defeat)
-                    {
-                        record.Losses.Add(game.DateTime);
-                    }
-                    else if (game.Result == (int)Result.Tie)
-                    {
-                        record.Ties.Add(game.DateTime);
-                    }
-                }
-            }
-            return record;
-        }
-
-        protected Record GetRecord(IEnumerable<Game> games)
-        {
-            var record = new Record { Wins = new List<DateTime>(), Losses = new List<DateTime>(), Ties = new List<DateTime>() };
-            foreach (var game in games)
-            {
-                if (game.Result == (int)Result.Victory)
-                {
-                    record.Wins.Add(game.DateTime);
-                }
-                else if (game.Result == (int)Result.Defeat)
-                {
-                    record.Losses.Add(game.DateTime);
-                }
-                else if (game.Result == (int)Result.Tie)
-                {
-                    record.Ties.Add(game.DateTime);
-                }
-            }
-            return record;
-        }
-
-        protected bool MatchesBuildSequence(Game game, List<string> sequence)
-        {
-            if (game.Builds.First().Value != sequence.First())
-            {
-                return false;
-            }
-
-            var builds = game.Builds.Select(d => d.Value).ToList();
-            for (int index = 0; index < sequence.Count() && index < builds.Count() && index < 3; index++) // if a game doesn't get through the full sequence it can still be a match, if it matches the first 3 we count it as a full match because of counter builds etc.  
-            {
-                if (builds[index] != sequence[index])
-                {
-                    return false;
-                }
-            }
-
-            return true;
         }
     }
 }
