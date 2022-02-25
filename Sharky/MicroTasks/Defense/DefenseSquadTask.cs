@@ -169,5 +169,14 @@ namespace Sharky.MicroTasks
 
             return new List<SC2APIProtocol.Action>();
         }
+
+        public override void RemoveDeadUnits(List<ulong> deadUnits)
+        {
+            foreach (var tag in deadUnits)
+            {
+                UnitCommanders.RemoveAll(c => c.UnitCalculation.Unit.Tag == tag);
+                WorkerDefenders.RemoveAll(c => c.UnitCalculation.Unit.Tag == tag);
+            }
+        }
     }
 }
