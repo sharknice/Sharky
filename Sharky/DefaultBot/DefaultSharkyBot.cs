@@ -421,6 +421,7 @@ namespace Sharky.DefaultBot
             var hellbatMorphTask = new HellbatMorphTask(this, false, 0.5f);
             var nexusRecallTask = new NexusRecallTask(this, false, 0.5f);
             var forceFieldRampTask = new ForceFieldRampTask(TargetingData, ActiveUnitData, MapData, WallService, MapDataService, false, 0.5f);
+            var denyExpansionsTask = new DenyExpansionsTask(this, false, 0.5f);
 
             MicroTaskData.MicroTasks[defenseSquadTask.GetType().Name] = defenseSquadTask;
             MicroTaskData.MicroTasks[workerScoutGasStealTask.GetType().Name] = workerScoutGasStealTask;
@@ -448,6 +449,7 @@ namespace Sharky.DefaultBot
             MicroTaskData.MicroTasks[hellbatMorphTask.GetType().Name] = hellbatMorphTask;
             MicroTaskData.MicroTasks[nexusRecallTask.GetType().Name] = nexusRecallTask;
             MicroTaskData.MicroTasks[forceFieldRampTask.GetType().Name] = forceFieldRampTask;
+            MicroTaskData.MicroTasks[denyExpansionsTask.GetType().Name] = denyExpansionsTask;
 
             MicroManager = new MicroManager(ActiveUnitData, MicroTaskData);
             Managers.Add(MicroManager);

@@ -41,7 +41,7 @@ namespace Sharky.Builds.BuildingPlacement
                         }
                     }
                 }
-                return ResourceCenterLocator.GetResourceCenterLocation();
+                return ResourceCenterLocator.GetResourceCenterLocation(unitType == UnitTypes.ZERG_HATCHERY);
             }
 
             if (SharkyUnitData.TerranTypes.Contains(unitType))

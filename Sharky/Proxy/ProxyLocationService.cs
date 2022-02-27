@@ -82,7 +82,8 @@ namespace Sharky.Proxy
         private int NumberOfCloseBaseLocations()
         {
             if (MapDataService.MapData.MapName.ToLower().Contains("blackburn")) { return 3; }
-            if (MapDataService.MapData.MapName.ToLower().Contains("glittering") || MapDataService.MapData.MapName.ToLower().Contains("berlingrad")) { return 4; }
+            if (MapDataService.MapData.MapName.ToLower().Contains("berlingrad")) { return 4; }
+            if (MapDataService.MapData.MapName.ToLower().Contains("glittering")) { return 4; }
             return BaseData.BaseLocations.Count(b => Vector2.DistanceSquared(new Vector2(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y), new Vector2(b.Location.X, b.Location.Y)) < 1200);
         }
 

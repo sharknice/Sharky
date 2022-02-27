@@ -97,7 +97,7 @@ namespace Sharky.Managers.Terran
                     {
                         if (!flyingOrbital.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.LAND || o.AbilityId == (uint)Abilities.LAND_ORBITALCOMMAND))
                         {
-                            var location = ResourceCenterLocator.GetResourceCenterLocation();
+                            var location = ResourceCenterLocator.GetResourceCenterLocation(false);
                             if (location != null)
                             {
                                 actions.AddRange(flyingOrbital.Order(frame, Abilities.LAND, location));

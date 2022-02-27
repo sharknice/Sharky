@@ -90,24 +90,6 @@ namespace Sharky.Builds.BuildingPlacement
                 while (angle + (sliceSize / 2) < fullCircle)
                 {
                     var point = new Point2D { X = x + (float)(radius * Math.Cos(angle)), Y = y + (float)(radius * Math.Sin(angle)) };
-                    //DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
-
-                    //if (!BuildingService.AreaBuildable(point.X, point.Y, 1.25f))
-                    //{
-                    //    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 }, 1, new Color { R = 255, G = 0, B = 0 });
-                    //}
-                    //else if (BuildingService.Blocked(point.X, point.Y, 1.25f, .1f))
-                    //{
-                    //    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 }, 1, new Color { R = 255, G = 255, B = 0 });
-                    //}
-                    //else if (BuildingService.HasCreep(point.X, point.Y, 1.5f))
-                    //{
-                    //    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 }, 1, new Color { R = 255, G = 255, B = 255 });
-                    //}
-                    //else
-                    //{
-                    //    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 }, 1, new Color { R = 0, G = 255, B = 0 });
-                    //}
 
                     if (BuildingService.AreaBuildable(point.X, point.Y, 1.25f) && 
                         (minimumMineralProximinity == 0 || !BuildingService.BlocksResourceCenter(point.X, point.Y, 1.25f)) && 
@@ -178,24 +160,7 @@ namespace Sharky.Builds.BuildingPlacement
                     {
                         var point = new Point2D { X = x + (float)(radius * Math.Cos(angle)), Y = y + (float)(radius * Math.Sin(angle)) };
                         point = new Point2D { X = (float)Math.Round(point.X * 2f) / 2f, Y = (float)(Math.Round(point.Y * 2f) / 2f) };
-                        //DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
 
-                        //if (!BuildingService.AreaBuildable(point.X, point.Y, 1.25f))
-                        //{
-                        //    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 10 }, 1, new Color { R = 255, G = 0, B = 0 });
-                        //}
-                        //else if (BuildingService.Blocked(point.X, point.Y, 1.25f))
-                        //{
-                        //    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 10 }, 1, new Color { R = 255, G = 255, B = 0 });
-                        //}
-                        //else if (BuildingService.HasCreep(point.X, point.Y, 1.5f))
-                        //{
-                        //    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 10 }, 1, new Color { R = 255, G = 255, B = 255 });
-                        //}
-                        //else
-                        //{
-                        //    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 10 }, 1, new Color { R = 0, G = 255, B = 0 });
-                        //}
                         var vector = new Vector2(point.X, point.Y);
                         var tooClose = false;
                         if (MapDataService.MapData?.WallData != null && MapDataService.MapData.WallData.Any(d => d.FullDepotWall != null && d.FullDepotWall.Any(p => Vector2.DistanceSquared(new Vector2(p.X, p.Y), vector) < 25)))
@@ -263,24 +228,6 @@ namespace Sharky.Builds.BuildingPlacement
                     {
                         var point = new Point2D { X = x + (float)(radius * Math.Cos(angle)), Y = y + (float)(radius * Math.Sin(angle)) };
                         point = new Point2D { X = (float)Math.Round(point.X * 2f) / 2f, Y = (float)(Math.Round(point.Y * 2f) / 2f) };
-                        //DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
-
-                        //if (!BuildingService.AreaBuildable(point.X, point.Y, size / 2.0f))
-                        //{
-                        //    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 10 }, 1, new Color { R = 255, G = 0, B = 0 });
-                        //}
-                        //else if (BuildingService.Blocked(point.X, point.Y, size / 2.0f, 0))
-                        //{
-                        //    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 10 }, 1, new Color { R = 255, G = 255, B = 0 });
-                        //}
-                        //else if (BuildingService.HasCreep(point.X, point.Y, size / 2.0f))
-                        //{
-                        //    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 10 }, 1, new Color { R = 255, G = 255, B = 255 });
-                        //}
-                        //else
-                        //{
-                        //    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 10 }, 1, new Color { R = 0, G = 255, B = 0 });
-                        //}
 
                         var vector = new Vector2(point.X, point.Y);
                         var tooClose = false;
