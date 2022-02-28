@@ -52,7 +52,7 @@ namespace Sharky.MicroTasks.Harass
                 }
             }
         }
-        // TODO: figure out why it set 2 of the locations to the same
+
         public override IEnumerable<SC2APIProtocol.Action> PerformActions(int frame)
         {
             var commands = new List<SC2APIProtocol.Action>();

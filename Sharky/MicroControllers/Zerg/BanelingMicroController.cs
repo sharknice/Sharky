@@ -219,8 +219,8 @@ namespace Sharky.MicroControllers.Zerg
         {
             if (commander.UnitCalculation.EnemiesInRangeOf.Count(e => !e.Unit.IsFlying) > 3)
             {
-                action = Attack(commander, target, defensivePoint, null, frame);
-                return true;
+                var bestTarget = GetBestTarget(commander, target, frame);
+                if (AttackBestTarget(commander, target, defensivePoint, target, bestTarget, frame, out action)) { return true; }
             }
             return base.Retreat(commander, target, defensivePoint, frame, out action);
         }
