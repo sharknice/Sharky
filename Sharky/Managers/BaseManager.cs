@@ -297,6 +297,21 @@ namespace Sharky.Managers
                         enemyBase.VespeneGeysers[index] = takenGas.Unit;
                     }
                 }
+                if (enemyBase.ResourceCenter != null)
+                {
+                    if (ActiveUnitData.EnemyUnits.ContainsKey(enemyBase.ResourceCenter.Tag))
+                    {
+                        enemyBase.ResourceCenter = ActiveUnitData.EnemyUnits[enemyBase.ResourceCenter.Tag].Unit;
+                    }
+                    else
+                    {
+                        enemyBase.ResourceCenter = null;
+                    }
+                }
+                else
+                {
+                    enemyBase.ResourceCenter = ActiveUnitData.EnemyUnits.Values.Where(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter)).FirstOrDefault(r => Vector2.DistanceSquared(r.Position, new Vector2(enemyBase.Location.X, enemyBase.Location.Y)) < 25).Unit;
+                }
             }
         }
 
