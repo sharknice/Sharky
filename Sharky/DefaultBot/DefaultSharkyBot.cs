@@ -489,6 +489,7 @@ namespace Sharky.DefaultBot
 
                 ["MarineRush"] = new MarineRush(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, DebugService, UnitCountService, FrameToTimeConverter),
                 ["BunkerRush"] = new BunkerRush(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, TargetingData, DebugService, UnitCountService, FrameToTimeConverter),
+                ["BunkerContain"] = new BunkerContain(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, TargetingData, DebugService, UnitCountService, FrameToTimeConverter),
                 ["MassVikings"] = new MassVikings(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, DebugService, UnitCountService, FrameToTimeConverter),
                 ["ThreeRax"] = new ThreeRax(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, DebugService, UnitCountService, FrameToTimeConverter),
 

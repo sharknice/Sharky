@@ -254,7 +254,7 @@ namespace Sharky
                 var removedActions = generatedActions - actions.Count();
                 if (removedActions > 0)
                 {
-                    Console.WriteLine($"Removed {removedActions} actions for units that are not controllable");
+                    // Console.WriteLine($"Removed {removedActions} actions for units that are not controllable");
                 }
 
                 var filteredActions = new List<SC2APIProtocol.Action>();
@@ -270,7 +270,7 @@ namespace Sharky
                         }
                         else
                         {
-                            Console.WriteLine($"{observation.Observation.GameLoop} Removed conflicting order {action.ActionRaw.UnitCommand.AbilityId} for tags {string.Join(" ", action.ActionRaw.UnitCommand.UnitTags)}");
+                            // Console.WriteLine($"{observation.Observation.GameLoop} Removed conflicting order {action.ActionRaw.UnitCommand.AbilityId} for tags {string.Join(" ", action.ActionRaw.UnitCommand.UnitTags)}");
                         }
                     }
                     else
