@@ -89,6 +89,11 @@ namespace Sharky.Managers
                 SetMineralLineLocation(location);
             }
 
+            if (gameInfo.MapName.ToLower().Contains("blackburn"))
+            {
+                BaseData.BaseLocations.RemoveAll(b => b.Location.X == 72.5f && b.Location.Y == 14.5f); // unreachable base unless rocks are destroyed
+            }
+
             var startingUnit = observation.Observation.RawData.Units.FirstOrDefault(u => u.Alliance == Alliance.Self && SharkyUnitData.ResourceCenterTypes.Contains((UnitTypes)u.UnitType));
             BaseData.BaseLocations = BaseData.BaseLocations.OrderBy(b => PathFinder.GetGroundPath(startingUnit.Pos.X + 4, startingUnit.Pos.Y + 4, b.Location.X, b.Location.Y, 0).Count()).ToList();
             BaseData.MainBase = BaseData.BaseLocations.FirstOrDefault();

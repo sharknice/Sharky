@@ -87,11 +87,6 @@ namespace Sharky.MicroTasks
             var mainVector = new Vector2(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y);
             var points = ScoutPoints.OrderBy(p => MapDataService.LastFrameVisibility(p)).ThenBy(p => Vector2.DistanceSquared(mainVector, new Vector2(p.X, p.Y)));
 
-            foreach (var point in points)
-            {
-                //DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
-            }
-
             foreach (var commander in UnitCommanders)
             {
                 if (commander.UnitCalculation.Unit.ShieldMax > 5 && (commander.UnitCalculation.Unit.Shield < 5 || (commander.UnitCalculation.Unit.Shield < commander.UnitCalculation.Unit.ShieldMax && commander.UnitCalculation.EnemiesInRangeOf.Count() > 0)))
@@ -99,6 +94,20 @@ namespace Sharky.MicroTasks
                     if (MineralWalker.MineralWalkHome(commander, frame, out List<Action> mineralWalk))
                     {
                         commands.AddRange(mineralWalk);
+                        return commands;
+                    }
+                }
+
+                if (commander.UnitCalculation.NearbyEnemies.Count() > 1 && (commander.UnitCalculation.Unit.Shield + commander.UnitCalculation.Unit.Health == commander.UnitCalculation.Unit.ShieldMax + commander.UnitCalculation.Unit.HealthMax) && !commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit)))
+                {
+                    var enemy = GetEnemyBuildingScv(commander.UnitCalculation.NearbyEnemies);
+                    if (enemy != null)
+                    {
+                        var attackAction = commander.Order(frame, Abilities.ATTACK, targetTag: enemy.Unit.Tag);
+                        if (attackAction != null)
+                        {
+                            commands.AddRange(attackAction);
+                        }
                         return commands;
                     }
                 }
@@ -111,6 +120,20 @@ namespace Sharky.MicroTasks
             }
 
             return commands;
+        }
+
+        UnitCalculation GetEnemyBuildingScv(List<UnitCalculation> enemies)
+        {
+            var unfinishedBuilding = enemies.FirstOrDefault(e => e.Unit.BuildProgress < 1);
+            if (unfinishedBuilding != null)
+            {
+                var scv = enemies.Where(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_SCV).OrderBy(e => Vector2.DistanceSquared(e.Position, unfinishedBuilding.Position)).FirstOrDefault();
+                if (scv != null)
+                {
+                    return scv;
+                }
+            }
+            return null;
         }
     }
 }
