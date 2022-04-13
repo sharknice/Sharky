@@ -17,8 +17,11 @@ namespace Sharky.Builds.BuildingPlacement
         IBuildingPlacement WallOffPlacement;
         ProtossPylonGridPlacement ProtossPylonGridPlacement;
         ProtossProductionGridPlacement ProtossProductionGridPlacement;
+        IBuildingPlacement ProtectNexusPylonPlacement;
+        TargetingData TargetingData;
+        IBuildingPlacement ProtectNexusCannonPlacement;
 
-        public ProtossBuildingPlacement(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, BaseData baseData, DebugService debugService, MapDataService mapDataService, BuildingService buildingService, IBuildingPlacement wallOffPlacement, ProtossPylonGridPlacement protossPylonGridPlacement, ProtossProductionGridPlacement protossProductionGridPlacement)
+        public ProtossBuildingPlacement(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, BaseData baseData, DebugService debugService, MapDataService mapDataService, BuildingService buildingService, IBuildingPlacement wallOffPlacement, ProtossPylonGridPlacement protossPylonGridPlacement, ProtossProductionGridPlacement protossProductionGridPlacement, IBuildingPlacement protectNexusPylonPlacement, TargetingData targetingData, IBuildingPlacement protectNexusCannonPlacement)
         {
             ActiveUnitData = activeUnitData;
             SharkyUnitData = sharkyUnitData;
@@ -29,6 +32,9 @@ namespace Sharky.Builds.BuildingPlacement
             WallOffPlacement = wallOffPlacement;
             ProtossPylonGridPlacement = protossPylonGridPlacement;
             ProtossProductionGridPlacement = protossProductionGridPlacement;
+            ProtectNexusPylonPlacement = protectNexusPylonPlacement;
+            TargetingData = targetingData;
+            ProtectNexusCannonPlacement = protectNexusCannonPlacement;
         }
 
         public Point2D FindPlacement(Point2D target, UnitTypes unitType, int size, bool ignoreResourceProximity = false, float maxDistance = 50, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.None, bool requireVision = false, bool allowBlockBase = false)
@@ -75,6 +81,16 @@ namespace Sharky.Builds.BuildingPlacement
             {
                 var spot = ProtossPylonGridPlacement.FindPlacement(reference, maxDistance, minimumMineralProximinity);
                 if (spot != null) { return spot; }
+            }
+
+            var selfBase = BaseData.BaseLocations.FirstOrDefault(b => (b.Location.X == reference.X && b.Location.Y == reference.Y) && !(b.Location.X == TargetingData.SelfMainBasePoint.X && b.Location.Y == TargetingData.SelfMainBasePoint.Y) && !(b.Location.X == TargetingData.NaturalBasePoint.X && b.Location.Y == TargetingData.NaturalBasePoint.Y));
+            if (selfBase != null)
+            {
+                var pylonLocation = ProtectNexusPylonPlacement.FindPlacement(reference, UnitTypes.PROTOSS_PYLON, 1);
+                if (pylonLocation != null)
+                {
+                    return pylonLocation;
+                }
             }
 
             var x = reference.X;
@@ -136,6 +152,19 @@ namespace Sharky.Builds.BuildingPlacement
                 if (spot != null) { return spot; }
             }
 
+            if (size == 2)
+            {
+                var selfBase = BaseData.BaseLocations.FirstOrDefault(b => (b.Location.X == target.X && b.Location.Y == target.Y) && !(b.Location.X == TargetingData.SelfMainBasePoint.X && b.Location.Y == TargetingData.SelfMainBasePoint.Y) && !(b.Location.X == TargetingData.NaturalBasePoint.X && b.Location.Y == TargetingData.NaturalBasePoint.Y));
+                if (selfBase != null)
+                {
+                    var location = ProtectNexusCannonPlacement.FindPlacement(target, UnitTypes.PROTOSS_PHOTONCANNON, 1);
+                    if (location != null)
+                    {
+                        return location;
+                    }
+                }
+            }
+
             var targetVector = new Vector2(target.X, target.Y);
             var powerSources = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && c.UnitCalculation.Unit.BuildProgress == 1).OrderBy(c => Vector2.DistanceSquared(c.UnitCalculation.Position, targetVector));
             foreach (var powerSource in powerSources)
@@ -165,11 +194,22 @@ namespace Sharky.Builds.BuildingPlacement
                         {
                             if (point.X % 1 != .5)
                             {
-                                point.X += .5f;
+                                point.X -= .5f;
                             }
                             if (point.Y % 1 != .5)
                             {
-                                point.Y += .5f;
+                                point.Y -= .5f;
+                            }
+                        }
+                        else if (size == 2)
+                        {
+                            if (point.X % 1 != 0)
+                            {
+                                point.X -= .5f;
+                            }
+                            if (point.Y % 1 != 0)
+                            {
+                                point.Y -= .5f;
                             }
                         }
 
@@ -211,10 +251,10 @@ namespace Sharky.Builds.BuildingPlacement
                     radius += 1;
                 }
             }
-            return FindProductionPlacementTryHarder(target, size, maxDistance, minimumMineralProximinity);
+            return FindProductionPlacementTryHarder(target, size, maxDistance, minimumMineralProximinity, allowBlockBase);
         }
 
-        Point2D FindProductionPlacementTryHarder(Point2D target, float size, float maxDistance, float minimumMineralProximinity)
+        Point2D FindProductionPlacementTryHarder(Point2D target, float size, float maxDistance, float minimumMineralProximinity, bool allowBlockBase)
         {
             var targetVector = new Vector2(target.X, target.Y);
             var powerSources = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && c.UnitCalculation.Unit.BuildProgress == 1).OrderBy(c => Vector2.DistanceSquared(c.UnitCalculation.Position, targetVector));
@@ -235,7 +275,7 @@ namespace Sharky.Builds.BuildingPlacement
                 while (radius <= powerRadius)
                 {
                     var fullCircle = Math.PI * 2;
-                    var sliceSize = fullCircle / 48.0;
+                    var sliceSize = fullCircle / 48f;
                     var angle = 0.0;
                     while (angle + (sliceSize / 2) < fullCircle)
                     {
@@ -246,11 +286,22 @@ namespace Sharky.Builds.BuildingPlacement
                         {
                             if (point.X % 1 != .5)
                             {
-                                point.X += .5f;
+                                point.X -= .5f;
                             }
                             if (point.Y % 1 != .5)
                             {
-                                point.Y += .5f;
+                                point.Y -= .5f;
+                            }
+                        }
+                        else if (size == 2)
+                        {
+                            if (point.X % 1 != 0)
+                            {
+                                point.X -= .5f;
+                            }
+                            if (point.Y % 1 != 0)
+                            {
+                                point.Y -= .5f;
                             }
                         }
 
@@ -261,15 +312,20 @@ namespace Sharky.Builds.BuildingPlacement
                             tooClose = true;
                         }
 
-                        if (!tooClose && (minimumMineralProximinity == 0 || !BuildingService.BlocksResourceCenter(point.X, point.Y, size + 1 / 2.0f)) && BuildingService.AreaBuildable(point.X, point.Y, size / 2.0f) && !BuildingService.Blocked(point.X, point.Y, size / 2.0f, 0) && !BuildingService.HasAnyCreep(point.X, point.Y, size / 2.0f) && !BuildingService.BlocksGas(point.X, point.Y, size / 2.0f))
+                        if (!allowBlockBase && BuildingService.BlocksResourceCenter(x, y, size/2f))
+                        {
+                            tooClose = true;
+                        }
+
+                        if (!tooClose && (minimumMineralProximinity == 0 || !BuildingService.BlocksResourceCenter(point.X, point.Y, (size - .5f) / 2.0f)) && !BuildingService.BlocksPath(point.X, point.Y, size / 2f) && BuildingService.AreaBuildable(point.X, point.Y, size / 2.0f) && !BuildingService.Blocked(point.X, point.Y, size / 2.0f, 0) && !BuildingService.HasAnyCreep(point.X, point.Y, size / 2.0f) && !BuildingService.BlocksGas(point.X, point.Y, size / 2.0f))
                         {
                             var mineralFields = ActiveUnitData.NeutralUnits.Where(u => SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType));
-                            var squared = (1 + minimumMineralProximinity + (size / 2f)) * (1 + minimumMineralProximinity + (size / 2f));
+                            var squared = (minimumMineralProximinity + (size / 2f)) * (minimumMineralProximinity + (size / 2f));
                             var clashes = mineralFields.Where(u => Vector2.DistanceSquared(u.Value.Position, new Vector2(point.X, point.Y)) < squared);
 
                             if (clashes.Count() == 0)
                             {
-                                if (Vector2.DistanceSquared(new Vector2(target.X, target.Y), new Vector2(point.X, point.Y)) <= maxDistance * maxDistance && Vector2.DistanceSquared(vector, powerSource.UnitCalculation.Position) <= 36)
+                                if (Vector2.DistanceSquared(new Vector2(target.X, target.Y), new Vector2(point.X, point.Y)) <= maxDistance * maxDistance && Vector2.DistanceSquared(vector, powerSource.UnitCalculation.Position) <= (6.5 - size/2f) * (6.5 - size/2f))
                                 {
                                     DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
                                     return point;

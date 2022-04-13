@@ -131,6 +131,16 @@ namespace Sharky.Pathing
             return MapData.Map[(int)point.X][(int)point.Y].InEnemyDetection;
         }
 
+        public bool InSelfDetection(Point point)
+        {
+            return MapData.Map[(int)point.X][(int)point.Y].InSelfDetection;
+        }
+
+        public bool InSelfDetection(Point2D point)
+        {
+            return MapData.Map[(int)point.X][(int)point.Y].InSelfDetection;
+        }
+
         public int MapHeight(Point point)
         {
             return MapData.Map[(int)point.X][(int)point.Y].TerrainHeight;

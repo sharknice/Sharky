@@ -106,6 +106,8 @@ namespace Sharky.DefaultBot
         public BuildingCancelService BuildingCancelService { get; set; }
         public AreaService AreaService { get; set; }
         public WallDataService WallDataService { get; set; }
+        public SimCityService SimCityService { get; set; }
+        public WorkerBuilderService WorkerBuilderService { get; set; }
         public CreepTumorPlacementFinder CreepTumorPlacementFinder { get; set; }
 
         public ActiveUnitData ActiveUnitData { get; set; }
@@ -115,9 +117,13 @@ namespace Sharky.DefaultBot
         public IBuildingPlacement ProtossBuildingPlacement { get; set; }
         public IBuildingPlacement WallOffPlacement { get; set; }
         public IBuildingPlacement TerranBuildingPlacement { get; set; }
+        public IBuildingPlacement ProtectNexusPylonPlacement { get; set; }
+        public IBuildingPlacement ProtectNexusCannonPlacement { get; set; }
+        public IBuildingPlacement ProtectNexusBatteryPlacement { get; set; }
         public IBuildingPlacement MissileTurretPlacement { get; set; }
         public IBuildingPlacement ZergBuildingPlacement { get; set; }
         public IBuildingPlacement BuildingPlacement { get; set; }
+        public StasisWardPlacement StasisWardPlacement { get; set; }
         public IBuildingBuilder BuildingBuilder { get; set; }
         public TerranSupplyDepotGridPlacement TerranSupplyDepotGridPlacement { get; set; }
         public TerranProductionGridPlacement TerranProductionGridPlacement { get; set; }
@@ -171,7 +177,7 @@ namespace Sharky.DefaultBot
             EnemyData = new EnemyData();
             SharkyUnitData = new SharkyUnitData { CorrosiveBiles = new Dictionary<Point2D, uint>() };
 
-            UnitDataService = new UnitDataService(SharkyUnitData);
+            UnitDataService = new UnitDataService(SharkyUnitData, SharkyOptions, MacroData);
 
             MineralWalker = new MineralWalker(BaseData);
 
@@ -238,15 +244,21 @@ namespace Sharky.DefaultBot
             ProtossPylonGridPlacement = new ProtossPylonGridPlacement(BaseData, MapDataService, DebugService, BuildingService);
             ProtossProductionGridPlacement = new ProtossProductionGridPlacement(BaseData, ActiveUnitData, MapDataService, DebugService, BuildingService);
             TerranProductionGridPlacement = new TerranProductionGridPlacement(BaseData, MapDataService, DebugService, BuildingService);
+            ProtectNexusPylonPlacement = new ProtectNexusPylonPlacement(this);
+            ProtectNexusCannonPlacement = new ProtectNexusCannonPlacement(this);
+            ProtectNexusBatteryPlacement = new ProtectNexusBatteryPlacement(this);
             TerranTechGridPlacement = new TerranTechGridPlacement(BaseData, MapDataService, DebugService, BuildingService, TerranProductionGridPlacement);
             TerranSupplyDepotGridPlacement = new TerranSupplyDepotGridPlacement(BaseData, MapDataService, DebugService, BuildingService);
             MissileTurretPlacement = new MissileTurretPlacement(this);
             TerranBuildingPlacement = new TerranBuildingPlacement(ActiveUnitData, SharkyUnitData, BaseData, DebugService, BuildingService, WallOffPlacement, TerranWallService, TerranSupplyDepotGridPlacement, TerranProductionGridPlacement, TerranTechGridPlacement, MissileTurretPlacement);
-            ProtossBuildingPlacement = new ProtossBuildingPlacement(ActiveUnitData, SharkyUnitData, BaseData, DebugService, MapDataService, BuildingService, WallOffPlacement, ProtossPylonGridPlacement, ProtossProductionGridPlacement);
+            ProtossBuildingPlacement = new ProtossBuildingPlacement(ActiveUnitData, SharkyUnitData, BaseData, DebugService, MapDataService, BuildingService, WallOffPlacement, ProtossPylonGridPlacement, ProtossProductionGridPlacement, ProtectNexusPylonPlacement, TargetingData, ProtectNexusCannonPlacement);
             ZergBuildingPlacement = new ZergBuildingPlacement(ActiveUnitData, SharkyUnitData, DebugService, BuildingService);
-            ResourceCenterLocator = new ResourceCenterLocator(ActiveUnitData, BaseData, BuildingService);
+            ResourceCenterLocator = new ResourceCenterLocator(this);
             BuildingPlacement = new BuildingPlacement(ProtossBuildingPlacement, TerranBuildingPlacement, ZergBuildingPlacement, ResourceCenterLocator, BaseData, SharkyUnitData, MacroData, UnitCountService);
-            BuildingBuilder = new BuildingBuilder(ActiveUnitData, TargetingData, BuildingPlacement, SharkyUnitData, BaseData, BuildingService, MapDataService);
+            StasisWardPlacement = new StasisWardPlacement(DebugService, BuildingService);
+            WorkerBuilderService = new WorkerBuilderService(this);
+            SimCityService = new SimCityService(this);
+            BuildingBuilder = new BuildingBuilder(ActiveUnitData, TargetingData, BuildingPlacement, SharkyUnitData, BaseData, BuildingService, MapDataService, WorkerBuilderService);
 
             WarpInPlacement = new WarpInPlacement(ActiveUnitData, DebugService, MapData);
             
@@ -271,7 +283,7 @@ namespace Sharky.DefaultBot
             Managers.Add(SupplyDepotManager);
 
             ChatManager = new ChatManager(HttpClient, ChatHistory, SharkyOptions, ChatDataService, EnemyPlayerService, EnemyNameService, ChatService, ActiveChatData, FrameToTimeConverter);
-            Managers.Add((IManager)ChatManager);
+            Managers.Add(ChatManager);
 
             ProxyLocationService = new ProxyLocationService(BaseData, TargetingData, SharkyPathFinder, MapDataService, AreaService);
             TargetingService = new TargetingService(ActiveUnitData, MapDataService, BaseData, TargetingData);
@@ -401,7 +413,7 @@ namespace Sharky.DefaultBot
             var findHiddenBaseTask = new FindHiddenBaseTask(BaseData, TargetingData, MapDataService, individualMicroController, 15, false, 0.5f);
             var proxyScoutTask = new ProxyScoutTask(SharkyUnitData, TargetingData, BaseData, SharkyOptions, false, 0.5f, workerProxyScoutMicroController);
             var miningDefenseService = new MiningDefenseService(BaseData, ActiveUnitData, workerDefenseMicroController, DebugService, DamageService);
-            var miningTask = new MiningTask(SharkyUnitData, BaseData, ActiveUnitData, 1, miningDefenseService, MacroData, BuildOptions, MicroTaskData, new MineralMiner(this), new GasMiner(BaseData, SharkyUnitData));
+            var miningTask = new MiningTask(SharkyUnitData, BaseData, ActiveUnitData, 1, miningDefenseService, MacroData, BuildOptions, MicroTaskData, new MineralMiner(this), new GasMiner(this));
             var queenMacroTask = new QueenMacroTask(this, 1, 1.1f);
             var creepTumorTask = new CreepTumorTask(this, 1, 1.11f);
             var attackTask = new AttackTask(MicroController, TargetingData, ActiveUnitData, DefenseService, MacroData, AttackData, TargetingService, MicroTaskData, SharkyUnitData, new ArmySplitter(AttackData, TargetingData, ActiveUnitData, DefenseService, TargetingService, TerranWallService, MicroController), new EnemyCleanupService(MicroController, DamageService), 2);
@@ -421,7 +433,10 @@ namespace Sharky.DefaultBot
             var hellbatMorphTask = new HellbatMorphTask(this, false, 0.5f);
             var nexusRecallTask = new NexusRecallTask(this, false, 0.5f);
             var forceFieldRampTask = new ForceFieldRampTask(TargetingData, ActiveUnitData, MapData, WallService, MapDataService, false, 0.5f);
-            var denyExpansionsTask = new DenyExpansionsTask(this, false, 0.5f);
+            var denyExpansionsTask = new DenyExpansionsTask(this, false, 1.1f);
+            var darkTemplarHarassTask = new DarkTemplarHarassTask(BaseData, TargetingData, MapDataService, darkTemplarMicroController, 2, false);
+            var defensiveZealotWarpInTask = new DefensiveZealotWarpInTask(this, false, .5f);
+
 
             MicroTaskData.MicroTasks[defenseSquadTask.GetType().Name] = defenseSquadTask;
             MicroTaskData.MicroTasks[workerScoutGasStealTask.GetType().Name] = workerScoutGasStealTask;
@@ -450,6 +465,8 @@ namespace Sharky.DefaultBot
             MicroTaskData.MicroTasks[nexusRecallTask.GetType().Name] = nexusRecallTask;
             MicroTaskData.MicroTasks[forceFieldRampTask.GetType().Name] = forceFieldRampTask;
             MicroTaskData.MicroTasks[denyExpansionsTask.GetType().Name] = denyExpansionsTask;
+            MicroTaskData.MicroTasks[darkTemplarHarassTask.GetType().Name] = darkTemplarHarassTask;
+            MicroTaskData.MicroTasks[defensiveZealotWarpInTask.GetType().Name] = defensiveZealotWarpInTask;
 
             MicroManager = new MicroManager(ActiveUnitData, MicroTaskData);
             Managers.Add(MicroManager);
@@ -589,7 +606,7 @@ namespace Sharky.DefaultBot
             BuildMatcher = new BuildMatcher();
             RecordService = new RecordService(BuildMatcher);
             BuildDecisionService = new RecentBuildDecisionService(ChatService, EnemyPlayerService, RecordService, BuildMatcher);
-            BuildManager = new BuildManager(BuildChoices, DebugService, MacroBalancer, BuildDecisionService, EnemyPlayerService, ChatHistory, EnemyStrategyHistory, FrameToTimeConverter, SharkyOptions, ChatService);
+            BuildManager = new BuildManager(BuildChoices, DebugService, MacroBalancer, BuildDecisionService, EnemyPlayerService, ChatHistory, EnemyStrategyHistory, FrameToTimeConverter, SharkyOptions, ChatService, SimCityService);
             Managers.Add(BuildManager);
         }
         public SharkyBot CreateBot(List<IManager> managers, DebugService debugService)

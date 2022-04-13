@@ -22,6 +22,7 @@
         public bool InEnemyVision { get; set; }
         public bool InSelfVision { get; set; }
         public bool InEnemyDetection { get; set; }
+        public bool InSelfDetection { get; set; }
         public int Visibility { get; set; }
         public int LastFrameVisibility { get; set; }
         public int LastFrameAlliesTouched { get; set; }

@@ -1,5 +1,6 @@
 ﻿using SC2APIProtocol;
 using Sharky.Builds.BuildingPlacement;
+using Sharky.Builds.MacroServices;
 using Sharky.Pathing;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,11 +15,12 @@ namespace Sharky.Builds
         IBuildingPlacement BuildingPlacement;
         SharkyUnitData SharkyUnitData;
         BaseData BaseData;
+        WorkerBuilderService WorkerBuilderService;
 
         BuildingService BuildingService;
         MapDataService MapDataService;
 
-        public BuildingBuilder(ActiveUnitData activeUnitData, TargetingData targetingData, IBuildingPlacement buildingPlacement, SharkyUnitData sharkyUnitData, BaseData baseData, BuildingService buildingService, MapDataService mapDataService)
+        public BuildingBuilder(ActiveUnitData activeUnitData, TargetingData targetingData, IBuildingPlacement buildingPlacement, SharkyUnitData sharkyUnitData, BaseData baseData, BuildingService buildingService, MapDataService mapDataService, WorkerBuilderService workerBuilderService)
         {
             ActiveUnitData = activeUnitData;
             TargetingData = targetingData;
@@ -28,6 +30,7 @@ namespace Sharky.Builds
 
             BuildingService = buildingService;
             MapDataService = mapDataService;
+            WorkerBuilderService = workerBuilderService;
         }
 
         public List<Action> BuildBuilding(MacroData macroData, UnitTypes unitType, BuildingTypeData unitData, Point2D generalLocation = null, bool ignoreMineralProximity = false, float maxDistance = 50, List<UnitCommander> workerPool = null, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.None, bool allowBlockBase = false)
@@ -68,7 +71,7 @@ namespace Sharky.Builds
                 }
                 if (placementLocation != null)
                 {
-                    var worker = GetWorker(placementLocation, workerPool);
+                    var worker = WorkerBuilderService.GetWorker(placementLocation, workerPool);
                     if (worker != null)
                     {
                         if (workerPool == null)
@@ -161,7 +164,7 @@ namespace Sharky.Builds
         {
             if (unitData.Minerals <= macroData.Minerals && unitData.Gas <= macroData.VespeneGas)
             {
-                var worker = GetWorker(new Point2D { X = geyser.Pos.X, Y = geyser.Pos.Y });
+                var worker = WorkerBuilderService.GetWorker(new Point2D { X = geyser.Pos.X, Y = geyser.Pos.Y });
                 if (worker != null)
                 {
                     worker.UnitRole = UnitRole.Build;
@@ -189,46 +192,6 @@ namespace Sharky.Builds
             }
 
             return buildLocation;
-        }
-
-        private UnitCommander GetWorker(Point2D location, IEnumerable<UnitCommander> workers = null)
-        {
-            IEnumerable<UnitCommander> availableWorkers;
-            if (workers == null)
-            {
-                availableWorkers = ActiveUnitData.Commanders.Values.Where(c => c.UnitRole == UnitRole.Build && c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_SCV && c.UnitCalculation.Unit.Orders.Any(o => ActiveUnitData.SelfUnits.Values.Any(s => s.Attributes.Contains(Attribute.Structure) && s.Unit.BuildProgress == 1 && o.TargetWorldSpacePos != null && s.Position.X == o.TargetWorldSpacePos.X && s.Position.Y == o.TargetWorldSpacePos.Y))).Concat(
-                    ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && !c.UnitCalculation.Unit.BuffIds.Any(b => SharkyUnitData.CarryingResourceBuffs.Contains((Buffs)b))).Where(c => (c.UnitRole == UnitRole.PreBuild || c.UnitRole == UnitRole.None || c.UnitRole == UnitRole.Minerals) && !c.UnitCalculation.Unit.Orders.Any(o => SharkyUnitData.BuildingData.Values.Any(b => (uint)b.Ability == o.AbilityId))))
-                    .OrderBy(p => Vector2.DistanceSquared(p.UnitCalculation.Position, new Vector2(location.X, location.Y)));
-            }
-            else
-            {
-                availableWorkers = workers.Where(c => !c.UnitCalculation.Unit.Orders.Any(o => SharkyUnitData.BuildingData.Values.Any(b => (uint)b.Ability == o.AbilityId))).OrderBy(p => Vector2.DistanceSquared(p.UnitCalculation.Position, new Vector2(location.X, location.Y)));
-            }
-
-            if (availableWorkers.Count() == 0)
-            {
-                return null;
-            }
-            else
-            {
-                var closest = availableWorkers.First();
-                var pos = closest.UnitCalculation.Position;
-                var distanceSquared = Vector2.DistanceSquared(pos, new Vector2(location.X, location.Y));
-                if (distanceSquared > 1000)
-                {
-                    pos = availableWorkers.First().UnitCalculation.Position;
-
-                    if (Vector2.DistanceSquared(new Vector2(pos.X, pos.Y), new Vector2(location.X, location.Y)) > distanceSquared)
-                    {
-                        return closest;
-                    }
-                    else
-                    {
-                        return availableWorkers.First();
-                    }
-                }
-            }
-            return availableWorkers.First();
         }
     }
 }

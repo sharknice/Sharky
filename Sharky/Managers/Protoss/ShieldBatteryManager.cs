@@ -9,18 +9,18 @@ namespace Sharky.Managers.Protoss
     {
         ActiveUnitData ActiveUnitData;
 
-        float RestoreRangeSquared;
+        float RestoreRange;
 
         public ShieldBatteryManager(ActiveUnitData activeUnitData)
         {
             ActiveUnitData = activeUnitData;
-            RestoreRangeSquared = (6 * 6) + (1.125f * 1.125f); // 6 range and 1.125 radius
+            RestoreRange = 6f + 1.125f; // 6 range and 1.125 radius
         }
 
         public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
         {
             var actions = new List<SC2APIProtocol.Action>();
-            var shieldBatteries = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_SHIELDBATTERY && c.UnitCalculation.Unit.BuildProgress == 1 && c.UnitCalculation.Unit.Energy > 0);
+            var shieldBatteries = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_SHIELDBATTERY && c.UnitCalculation.Unit.BuildProgress == 1 && c.UnitCalculation.Unit.Energy > 0 && c.UnitCalculation.Unit.IsPowered);
             var unitsBeingRestored = shieldBatteries.SelectMany(s => s.UnitCalculation.Unit.Orders);
             foreach (var shieldBattery in shieldBatteries)
             {
@@ -36,7 +36,8 @@ namespace Sharky.Managers.Protoss
 
         List<SC2APIProtocol.Action> Restore(UnitCommander shieldBattery, IEnumerable<UnitOrder> unitsBeingRestored, uint frame)
         {
-            var target = shieldBattery.UnitCalculation.NearbyAllies.Where(a => a.Unit.BuildProgress == 1 && a.Unit.Shield < a.Unit.ShieldMax - 5 && (!a.Attributes.Contains(Attribute.Structure) || (a.Attributes.Contains(Attribute.Structure) && a.Unit.Shield < 10)) && !unitsBeingRestored.Any(o => o.TargetUnitTag == a.Unit.Tag) && Vector2.DistanceSquared(a.Position, shieldBattery.UnitCalculation.Position) <= RestoreRangeSquared + (a.Unit.Radius * a.Unit.Radius)).OrderByDescending(a => a.Dps).ThenBy(a => a.Unit.Shield).FirstOrDefault(); 
+            var targets = shieldBattery.UnitCalculation.NearbyAllies.Where(a => a.Unit.BuildProgress == 1 && a.Unit.Shield < a.Unit.ShieldMax - 5 && (!a.Attributes.Contains(Attribute.Structure) || a.Unit.Shield < 10));
+            var target = targets.Where(a => !unitsBeingRestored.Any(o => o.TargetUnitTag == a.Unit.Tag) && Vector2.DistanceSquared(a.Position, shieldBattery.UnitCalculation.Position) <= (RestoreRange + a.Unit.Radius) * (RestoreRange + a.Unit.Radius)).OrderByDescending(a => a.Dps).ThenBy(a => a.Unit.Shield).FirstOrDefault(); 
             if (target != null)
             {
                 var order = shieldBattery.UnitCalculation.Unit.Orders.FirstOrDefault();
@@ -48,7 +49,7 @@ namespace Sharky.Managers.Protoss
                         return null;
                     }
                 }
-                return shieldBattery.Order((int)frame, Abilities.SMART, null, target.Unit.Tag);
+                return shieldBattery.Order((int)frame, Abilities.SMART, null, target.Unit.Tag, true);
             }
 
             return null;

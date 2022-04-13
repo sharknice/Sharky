@@ -12,6 +12,7 @@ namespace Sharky.MicroControllers
         public FlyingDetectorMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled)
             : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled)
         {
+            LooseFormationDistance = 10;
         }
 
         protected override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
@@ -40,10 +41,20 @@ namespace Sharky.MicroControllers
         {
             var pos = commander.UnitCalculation.Position;
 
-            var hiddenUnits = ActiveUnitData.EnemyUnits.Where(e => e.Value.Unit.DisplayType == DisplayType.Hidden).OrderBy(e => Vector2.DistanceSquared(pos, e.Value.Position));
-            if (hiddenUnits.Count() > 0)
+            if (commander.UnitRole != UnitRole.Defend)
             {
-                return new Point2D { X = hiddenUnits.FirstOrDefault().Value.Unit.Pos.X, Y = hiddenUnits.FirstOrDefault().Value.Unit.Pos.Y };
+                var hiddenUnits = ActiveUnitData.EnemyUnits.Values.Where(e => e.Unit.DisplayType == DisplayType.Hidden).OrderBy(e => Vector2.DistanceSquared(pos, e.Position));
+                var hiddenByAllies = hiddenUnits.FirstOrDefault(e => e.NearbyEnemies.Any());
+                if (hiddenByAllies != null)
+                {
+                    return new Point2D { X = hiddenByAllies.Unit.Pos.X, Y = hiddenByAllies.Unit.Pos.Y };
+                }
+            }
+
+            var unit = ActiveUnitData.SelfUnits.Values.Where(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS).SelectMany(a => a.NearbyEnemies).Where(e => SharkyUnitData.CloakableAttackers.Contains((UnitTypes)e.Unit.UnitType) && !e.Unit.BuffIds.Contains((uint)Buffs.ORACLEREVELATION)).OrderBy(e => Vector2.DistanceSquared(pos, e.Position)).FirstOrDefault();
+            if (unit != null)
+            {
+                return new Point2D { X = unit.Unit.Pos.X, Y = unit.Unit.Pos.Y };
             }
 
             return null;
@@ -63,6 +74,23 @@ namespace Sharky.MicroControllers
             if (Retreat(commander, defensivePoint, defensivePoint, frame, out action)) { return action; }
 
             return Idle(commander, defensivePoint, frame);
+        }
+
+        protected bool StayAwayFromSameUnitTypes(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
+
+            var otherDetector = commander.UnitCalculation.NearbyAllies.Take(25).Where(a => a.Unit.UnitType == commander.UnitCalculation.Unit.UnitType).OrderBy(a => Vector2.DistanceSquared(commander.UnitCalculation.Position, a.Position)).FirstOrDefault();
+            if (otherDetector != null)
+            {
+                if (Vector2.DistanceSquared(commander.UnitCalculation.Position, otherDetector.Position) < LooseFormationDistance * LooseFormationDistance)
+                {
+                    var avoidPoint = GetPositionFromRange(commander, otherDetector.Unit.Pos, commander.UnitCalculation.Unit.Pos, LooseFormationDistance + 2);
+                    action = commander.Order(frame, Abilities.MOVE, avoidPoint);
+                    return true;
+                }
+            }
+            return false;
         }
 
         public bool SupportArmy(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame, out List<SC2APIProtocol.Action> action, IEnumerable<UnitCalculation> supportableUnits = null)
@@ -88,6 +116,11 @@ namespace Sharky.MicroControllers
                         return true;
                     }
                 }
+            }
+
+            if (StayAwayFromSameUnitTypes(commander, frame, out action))
+            {
+                return true;
             }
 
             var unitToSupport = GetSupportTarget(commander, target, defensivePoint, supportableUnits);

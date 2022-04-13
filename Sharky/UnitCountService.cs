@@ -124,6 +124,14 @@ namespace Sharky
             {
                 count += Count(UnitTypes.TERRAN_HELLION);
             }
+            else if (unitType == UnitTypes.TERRAN_WIDOWMINE)
+            {
+                count += Count(UnitTypes.TERRAN_WIDOWMINEBURROWED);
+            }
+            else if (unitType == UnitTypes.TERRAN_WIDOWMINEBURROWED)
+            {
+                count += Count(UnitTypes.TERRAN_WIDOWMINE);
+            }
             else if (unitType == UnitTypes.TERRAN_SIEGETANK)
             {
                 count += Count(UnitTypes.TERRAN_SIEGETANKSIEGED);
@@ -204,6 +212,14 @@ namespace Sharky
             else if (unitType == UnitTypes.TERRAN_HELLIONTANK)
             {
                 count += EnemyCount(UnitTypes.TERRAN_HELLION);
+            }
+            else if (unitType == UnitTypes.TERRAN_WIDOWMINE)
+            {
+                count += EnemyCount(UnitTypes.TERRAN_WIDOWMINEBURROWED);
+            }
+            else if (unitType == UnitTypes.TERRAN_WIDOWMINEBURROWED)
+            {
+                count += EnemyCount(UnitTypes.TERRAN_WIDOWMINE);
             }
             else if (unitType == UnitTypes.TERRAN_SIEGETANK)
             {
@@ -286,6 +302,14 @@ namespace Sharky
             }
 
             return completed;
+        }
+
+        public bool UpgradeDoneOrInProgress(Upgrades upgrade)
+        {
+            if (SharkyUnitData.ResearchedUpgrades.Contains((uint)upgrade)) { return true; }
+            var unitData = SharkyUnitData.UpgradeData[upgrade];
+            var inProgress = ActiveUnitData.SelfUnits.Any(u => (unitData.ProducingUnits.Contains((UnitTypes)u.Value.Unit.UnitType)) && u.Value.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
+            return inProgress;
         }
     }
 }

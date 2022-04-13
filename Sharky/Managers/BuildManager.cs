@@ -25,6 +25,8 @@ namespace Sharky.Managers
         protected ISharkyBuild CurrentBuild;
         protected List<string> BuildSequence;
 
+        protected SimCityService SimCityService;
+
         protected Dictionary<int, string> BuildHistory { get; set; }
 
         protected Race SelectedRace;
@@ -48,9 +50,10 @@ namespace Sharky.Managers
             FrameToTimeConverter = defaultSharkyBot.FrameToTimeConverter;
             SharkyOptions = defaultSharkyBot.SharkyOptions;
             ChatService = defaultSharkyBot.ChatService;
+            SimCityService = defaultSharkyBot.SimCityService;
         }
 
-        public BuildManager(Dictionary<Race, BuildChoices> buildChoices, DebugService debugService, IMacroBalancer macroBalancer, IBuildDecisionService buildDecisionService, IEnemyPlayerService enemyPlayerService, ChatHistory chatHistory, EnemyStrategyHistory enemyStrategyHistory, FrameToTimeConverter frameToTimeConverter, SharkyOptions sharkyOptions, ChatService chatService)
+        public BuildManager(Dictionary<Race, BuildChoices> buildChoices, DebugService debugService, IMacroBalancer macroBalancer, IBuildDecisionService buildDecisionService, IEnemyPlayerService enemyPlayerService, ChatHistory chatHistory, EnemyStrategyHistory enemyStrategyHistory, FrameToTimeConverter frameToTimeConverter, SharkyOptions sharkyOptions, ChatService chatService, SimCityService simCityService)
         {
             BuildChoices = buildChoices;
             DebugService = debugService;
@@ -62,6 +65,7 @@ namespace Sharky.Managers
             FrameToTimeConverter = frameToTimeConverter;
             SharkyOptions = sharkyOptions;
             ChatService = chatService;
+            SimCityService = simCityService;
         }
 
         public override void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)
@@ -157,9 +161,10 @@ namespace Sharky.Managers
 
             CurrentBuild.OnFrame(observation);
 
+            var actions = SimCityService.OnFrame();
             MacroBalance();
 
-            return null;
+            return actions;
         }
 
         protected void MacroBalance()

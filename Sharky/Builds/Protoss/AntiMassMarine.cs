@@ -54,7 +54,6 @@ namespace Sharky.Builds.Protoss
                 {
                     MacroData.DesiredGases = 2;
                 }
-                BuildOptions.StrictGasCount = false;
             }
             if (UnitCountService.EquivalentTypeCount(UnitTypes.PROTOSS_GATEWAY) > 0)
             {

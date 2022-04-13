@@ -74,26 +74,43 @@ namespace Sharky.Builds.BuildingPlacement
                 return true;
             }
 
-            if (ActiveUnitData.EnemyUnits.Any(u => !u.Value.Unit.IsFlying && Vector2.DistanceSquared(new Vector2(x, y), u.Value.Position) < (u.Value.Unit.Radius + padding + radius) * (u.Value.Unit.Radius + padding + radius)))
+            if (ActiveUnitData.NeutralUnits.Where(u => u.Value.Unit.Health == 400).Any(u => Vector2.DistanceSquared(new Vector2(x, y), u.Value.Position) < (u.Value.Unit.Radius + padding + radius + 1.5) * (u.Value.Unit.Radius + padding + radius + 1.5)))
+            {
+                return true;
+            }
+
+            if (ActiveUnitData.EnemyUnits.Any(u => !u.Value.Unit.IsFlying && BuildingBlocks(x, y, radius, u.Value.Unit)))
             {
                 return true;
             }
 
             if (ActiveUnitData.Commanders.Any(c => c.Key != tag && !c.Value.UnitCalculation.Attributes.Contains(SC2APIProtocol.Attribute.Structure) &&
-                (c.Value.UnitCalculation.Unit.BuildProgress < 1 || c.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED) && 
-                Vector2.DistanceSquared(new Vector2(x, y), c.Value.UnitCalculation.Position) < (c.Value.UnitCalculation.Unit.Radius + padding + radius) * (c.Value.UnitCalculation.Unit.Radius + padding + radius)))
+                (c.Value.UnitCalculation.Unit.BuildProgress < 1 || c.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED) &&
+                BuildingBlocks(x, y, radius, c.Value.UnitCalculation.Unit)))
             {
                 return true;
             }
 
-
-            if (ActiveUnitData.Commanders.Any(c => c.Key != tag && (c.Value.UnitCalculation.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && !c.Value.UnitCalculation.Unit.IsFlying) &&
-                Vector2.DistanceSquared(new Vector2(x, y), c.Value.UnitCalculation.Position) < BuildingPlacementRadius(c.Value.UnitCalculation.Unit.Radius + radius) * BuildingPlacementRadius(c.Value.UnitCalculation.Unit.Radius + radius)))
+            if (ActiveUnitData.Commanders.Any(c => c.Key != tag && 
+                (c.Value.UnitCalculation.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && !c.Value.UnitCalculation.Unit.IsFlying && BuildingBlocks(x, y, radius, c.Value.UnitCalculation.Unit))))
             {
                 return true;
             }
 
             return false;
+        }
+
+        bool BuildingBlocks(float x, float y, float radius, Unit building)
+        {
+            var rectangle = new System.Drawing.RectangleF(x - radius, y - radius, (radius * 2), (radius * 2));
+            var buildingRadius = BuildingPlacementRadius(building.Radius);
+            var existing = new System.Drawing.RectangleF(building.Pos.X - buildingRadius, building.Pos.Y - buildingRadius, buildingRadius * 2, buildingRadius * 2);
+            var intersection = System.Drawing.RectangleF.Intersect(rectangle, existing);
+            if (intersection.Width == 0 || intersection.Height == 0)
+            {
+                return false;
+            }
+            return true;
         }
 
         float BuildingPlacementRadius(float radius)
@@ -104,7 +121,7 @@ namespace Sharky.Builds.BuildingPlacement
 
         public bool BlocksResourceCenter(float x, float y, float radius)
         {
-            if (BaseData.BaseLocations.Any(b => Vector2.DistanceSquared(new Vector2(x, y), new Vector2(b.Location.X, b.Location.Y)) < (4  + radius) * (4 + radius)))
+            if (BaseData.BaseLocations.Any(b => System.Drawing.RectangleF.Intersect(new System.Drawing.RectangleF(x, y, radius * 2, radius * 2), new System.Drawing.RectangleF(b.Location.X, b.Location.Y, 5, 5)) != System.Drawing.RectangleF.Empty))
             {
                 return true;
             }
@@ -113,7 +130,7 @@ namespace Sharky.Builds.BuildingPlacement
 
         public bool BlocksPath(float x, float y, float unitRadius)
         {
-            var radius = unitRadius + 2f;
+            var radius = unitRadius + 4.5f;
             if (x - radius < 0 || y - radius < 0 || x + radius >= MapData.MapWidth || y + radius >= MapData.MapHeight)
             {
                 return true;
@@ -220,7 +237,7 @@ namespace Sharky.Builds.BuildingPlacement
 
             foreach (var openBase in openBases)
             {
-                if (AreaBuildable(openBase.Location.X, openBase.Location.Y, 2) && !Blocked(openBase.Location.X, openBase.Location.Y, 2))
+                if (AreaBuildable(openBase.Location.X, openBase.Location.Y, 2) && !Blocked(openBase.Location.X, openBase.Location.Y, 2.5f))
                 {
                     return openBase;
                 }

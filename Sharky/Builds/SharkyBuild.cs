@@ -94,6 +94,7 @@ namespace Sharky.Builds
             BuildOptions.StrictWorkerCount = false;
             BuildOptions.StrictWorkersPerGas = false;
             BuildOptions.StrictWorkersPerGasCount = 3;
+            BuildOptions.MaxActiveGasCount = 8;
 
             AttackData.UseAttackDataManager = true;
             AttackData.AttackTrigger = 1.5f;
@@ -106,6 +107,18 @@ namespace Sharky.Builds
             foreach (var u in MacroData.Production)
             {
                 MacroData.DesiredProductionCounts[u] = 0;
+            }
+            foreach (var u in MacroData.Tech)
+            {
+                MacroData.DesiredTechCounts[u] = 0;
+            }
+            foreach (var u in MacroData.DefensiveBuildings)
+            {
+                MacroData.DesiredDefensiveBuildingsCounts[u] = 0;
+                MacroData.DesiredDefensiveBuildingsAtDefensivePoint[u] = 0;
+                MacroData.DesiredDefensiveBuildingsAtEveryBase[u] = 0;
+                MacroData.DesiredDefensiveBuildingsAtNextBase[u] = 0;
+                MacroData.DesiredDefensiveBuildingsAtEveryMineralLine[u] = 0;
             }
 
             if (MacroData.Race == SC2APIProtocol.Race.Protoss)

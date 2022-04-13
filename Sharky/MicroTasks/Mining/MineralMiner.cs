@@ -74,8 +74,9 @@ namespace Sharky.MicroTasks.Mining
         List<SC2APIProtocol.Action> ReturnMinerals(int frame, Vector2 baseVector, MiningInfo miningInfo, UnitCommander worker, Vector2 workerVector, ulong baseTag)
         {
             var distanceSquared = Vector2.DistanceSquared(baseVector, workerVector);
+            var onPath = CollisionCalculator.Collides(worker.UnitCalculation.Position, 2, new Vector2(miningInfo.DropOffPoint.X, miningInfo.DropOffPoint.Y), new Vector2(miningInfo.HarvestPoint.X, miningInfo.HarvestPoint.Y));
 
-            if (distanceSquared > 20)
+            if (distanceSquared > 20 || !onPath)
             {
                 return worker.Order(frame, Abilities.SMART, null, baseTag, true);
             }

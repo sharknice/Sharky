@@ -209,7 +209,7 @@ namespace Sharky.Pathing
                             //}
                             if (MapData.Map[x][y].InEnemyDetection)
                             {
-                                speed = 0;
+                                speed += EnemyDetectionSpeed;
                             }
                             if (speed < MinimumSpeed)
                             {

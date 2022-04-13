@@ -58,6 +58,10 @@ namespace Sharky.MicroTasks
             if (WallPoints != null)
             {
                 var buildings = ActiveUnitData.Commanders.Where(u => u.Value.UnitCalculation.Attributes.Contains(Attribute.Structure) && WallPoints.Any(point => Vector2.DistanceSquared(new Vector2(point.X, point.Y), u.Value.UnitCalculation.Position) < 1)).Select(b => b.Value);
+                foreach (var building in buildings)
+                {
+                    building.UnitRole = UnitRole.Die;
+                }
 
                 if (buildings.Count() == 0)
                 {

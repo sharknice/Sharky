@@ -17,6 +17,10 @@ namespace Sharky.MicroTasks.Harass
 
         List<HarassGroupInfo> HarassGroupInfo { get; set; }
 
+        public bool DisableAfterFailure { get; set; }
+
+        bool Started;
+
         public DenyExpansionsTask(DefaultSharkyBot defaultSharkyBot, bool enabled = true, float priority = -1f)
         {
             BaseData = defaultSharkyBot.BaseData;
@@ -29,6 +33,8 @@ namespace Sharky.MicroTasks.Harass
             UnitCommanders = new List<UnitCommander>();
 
             DesiredUnitsClaims = new List<DesiredUnitsClaim>();
+            Started = false;
+            DisableAfterFailure = true;
         }
 
         public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
@@ -39,13 +45,14 @@ namespace Sharky.MicroTasks.Harass
                 if (!commander.Value.Claimed)
                 {
                     var unitType = commander.Value.UnitCalculation.Unit.UnitType;
-                    foreach (var info in HarassGroupInfo)
-                    {         
-                        if ((uint)info.DesiredHarassers.UnitType == unitType && !commander.Value.UnitCalculation.Unit.IsHallucination && info.HarassInfo.Harassers.Count(u => u.UnitCalculation.Unit.UnitType == (uint)info.DesiredHarassers.UnitType) < info.DesiredHarassers.Count)
+                    foreach (var desiredUnitClaim in DesiredUnitsClaims)
+                    {
+                        if ((uint)desiredUnitClaim.UnitType == unitType && !commander.Value.UnitCalculation.Unit.IsHallucination && UnitCommanders.Count(u => u.UnitCalculation.Unit.UnitType == (uint)desiredUnitClaim.UnitType) < DesiredUnitsClaims.Where(c => (uint)c.UnitType == unitType).Sum(c => c.Count))
                         {
                             commander.Value.Claimed = true;
                             commander.Value.UnitRole = UnitRole.None;
                             UnitCommanders.Add(commander.Value);
+                            Started = true;
                             break;
                         }
                     }
@@ -72,6 +79,16 @@ namespace Sharky.MicroTasks.Harass
                     {
                         if (commander.UnitCalculation.EnemiesThreateningDamage.Count() > 0)
                         {
+                            if (Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(TargetingData.ForwardDefensePoint.X, TargetingData.ForwardDefensePoint.Y)) < 225)
+                            {
+                                var defendAction = microController.Attack(commander, harassGroupInfo.HarassInfo.BaseLocation.Location, TargetingData.ForwardDefensePoint, null, frame);
+                                if (defendAction != null)
+                                {
+                                    commands.AddRange(defendAction);
+                                    continue;
+                                }
+                            }
+
                             var action = microController.NavigateToPoint(commander, harassGroupInfo.HarassInfo.BaseLocation.Location, TargetingData.ForwardDefensePoint, null, frame);
                             if (action != null)
                             {
@@ -89,13 +106,25 @@ namespace Sharky.MicroTasks.Harass
                     }
                     else
                     {
-                        if (distanceSquared > 9 && commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ResourceCenter) || e.UnitClassifications.Contains(UnitClassification.Worker)))
+                        if (distanceSquared > 4 && commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ResourceCenter) || e.UnitClassifications.Contains(UnitClassification.Worker)))
                         {
-                            // if worker or floating CC / OC is nearby, body block the spot
-                            var action = commander.Order(frame, Abilities.MOVE, harassGroupInfo.HarassInfo.BaseLocation.Location);
-                            if (action != null)
+                            var enemy = GetEnemyBuildingScv(commander.UnitCalculation.NearbyEnemies);
+                            if (enemy != null)
                             {
-                                commands.AddRange(action);
+                                var attackAction = commander.Order(frame, Abilities.ATTACK, targetTag: enemy.Unit.Tag);
+                                if (attackAction != null)
+                                {
+                                    commands.AddRange(attackAction);
+                                }
+                            }
+                            else
+                            {
+                                // if worker or floating CC / OC is nearby, body block the spot
+                                var action = commander.Order(frame, Abilities.MOVE, harassGroupInfo.HarassInfo.BaseLocation.Location);
+                                if (action != null)
+                                {
+                                    commands.AddRange(action);
+                                }
                             }
                         }
                         else
@@ -144,7 +173,7 @@ namespace Sharky.MicroTasks.Harass
             {
                 HarassGroupInfo.RemoveAll(h => h.HarassInfo.BaseLocation.Location.X == baseLocation.Location.X && h.HarassInfo.BaseLocation.Location.Y == baseLocation.Location.Y);
             }
-            foreach (var baseLocation in BaseData.EnemyBases.Where(b => b.ResourceCenter != null && b.ResourceCenter.BuildProgress >= 1))
+            foreach (var baseLocation in BaseData.EnemyBases.Where(b => b.ResourceCenter != null && b.ResourceCenter.BuildProgress >= 1 && !b.ResourceCenter.IsFlying))
             {
                 HarassGroupInfo.RemoveAll(h => h.HarassInfo.BaseLocation.Location.X == baseLocation.Location.X && h.HarassInfo.BaseLocation.Location.Y == baseLocation.Location.Y);
             }
@@ -176,6 +205,20 @@ namespace Sharky.MicroTasks.Harass
             }
         }
 
+        UnitCalculation GetEnemyBuildingScv(List<UnitCalculation> enemies)
+        {
+            var unfinishedBuilding = enemies.FirstOrDefault(e => e.Unit.BuildProgress < 1);
+            if (unfinishedBuilding != null)
+            {
+                var scv = enemies.Where(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_SCV).OrderBy(e => Vector2.DistanceSquared(e.Position, unfinishedBuilding.Position)).FirstOrDefault();
+                if (scv != null)
+                {
+                    return scv;
+                }
+            }
+            return null;
+        }
+
         public override void RemoveDeadUnits(List<ulong> deadUnits)
         {
             foreach (var tag in deadUnits)
@@ -188,6 +231,10 @@ namespace Sharky.MicroTasks.Harass
                         harassInfo.HarassInfo.Harassers.RemoveAll(h => h.UnitCalculation.Unit.Tag == tag);
                     }
                 }
+            }
+            if (DisableAfterFailure && Started && UnitCommanders.Count == 0)
+            {
+                Disable();
             }
         }
     }

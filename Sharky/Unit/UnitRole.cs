@@ -20,6 +20,8 @@
         Support,
         Repair,
         SpawnLarva,
-        SpreadCreep
+        SpreadCreep,
+        Morph,
+        Die
     }
 }

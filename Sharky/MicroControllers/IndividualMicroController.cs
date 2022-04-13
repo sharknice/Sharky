@@ -382,6 +382,7 @@ namespace Sharky.MicroControllers
 
         protected virtual bool SpecialCaseMove(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, Formation formation, int frame, out List<SC2APIProtocol.Action> action)
         {
+            if (DealWithParasiticBomb(commander, target, defensivePoint, frame, out action)) { return true; }
             if (AvoidPurificationNovas(commander, target, defensivePoint, frame, out action)) { return true; }
 
             if (AvoidRavagerShots(commander, target, defensivePoint, frame, out action)) { return true; }
@@ -451,8 +452,11 @@ namespace Sharky.MicroControllers
                         var distanceToBestTarget = Vector2.DistanceSquared(bestTarget.Position, commander.UnitCalculation.Position);
                         if (distanceToBestTarget < 121 || distanceToBestTarget > Vector2.DistanceSquared(chokePoint.Center, commander.UnitCalculation.Position))
                         {
-                            action = commander.Order(frame, Abilities.MOVE, new Point2D { X = chokePoint.Center.X, Y = chokePoint.Center.Y });
-                            return true;
+                            if (MapDataService.MapHeight(new Point2D { X = chokePoint.Center.X, Y = chokePoint.Center.Y }) > MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos))
+                            {
+                                action = commander.Order(frame, Abilities.MOVE, new Point2D { X = chokePoint.Center.X, Y = chokePoint.Center.Y });
+                                return true;
+                            }
                         }
                     }
                 }
@@ -1897,6 +1901,25 @@ namespace Sharky.MicroControllers
             return false;
         }
 
+        protected virtual bool DealWithParasiticBomb(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
+            if (!commander.UnitCalculation.Unit.IsFlying || !commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.PARASITICBOMB)) { return false; }
+
+            var closestAlly = commander.UnitCalculation.NearbyAllies.Take(25).Where(a => a.Unit.IsFlying).OrderBy(a => Vector2.DistanceSquared(commander.UnitCalculation.Position, a.Position)).FirstOrDefault();
+            if (closestAlly != null)
+            {
+                if (Vector2.DistanceSquared(commander.UnitCalculation.Position, closestAlly.Position) < (3f + commander.UnitCalculation.Unit.Radius + closestAlly.Unit.Radius) * (3f + commander.UnitCalculation.Unit.Radius + closestAlly.Unit.Radius))
+                {
+                    var avoidPoint = GetPositionFromRange(commander, closestAlly.Unit.Pos, commander.UnitCalculation.Unit.Pos, commander.UnitCalculation.Unit.Radius + closestAlly.Unit.Radius + 3.5f);
+                    action = commander.Order(frame, Abilities.MOVE, avoidPoint);
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         protected virtual bool AvoidPurificationNovas(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
@@ -2042,6 +2065,12 @@ namespace Sharky.MicroControllers
 
             if (commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.LOCKON))
             {
+                var cyclone = commander.UnitCalculation.EnemiesInRange.FirstOrDefault(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_CYCLONE && e.Unit.Health < 25);
+                if (cyclone != null)
+                {
+                    action = commander.Order(frame, Abilities.ATTACK, null, cyclone.Unit.Tag);
+                    return true;
+                }
                 if (Retreat(commander, defensivePoint, defensivePoint, frame, out action)) { return true; }
             }
 
@@ -2238,10 +2267,9 @@ namespace Sharky.MicroControllers
 
             if (DoNotSuicide(commander, supportPoint, defensivePoint, frame, out action)) { return action; }
 
-
             var distanceSquredToSupportUnit = Vector2.DistanceSquared(unitToSupport.UnitCalculation.Position, commander.UnitCalculation.Position);
             // don't initiate the attack, just defend yourself and the support target
-            if (weaponReady && distanceSquredToSupportUnit < MaximumSupportDistanceSqaured && (commander.UnitCalculation.EnemiesInRangeOf.Count() > 0 || unitToSupport.UnitCalculation.EnemiesInRangeOf.Count() > 0))
+            if (weaponReady && distanceSquredToSupportUnit < MaximumSupportDistanceSqaured && unitToSupport.UnitCalculation.EnemiesInRangeOf.Count() > 0)
             {
                 if (AttackBestTarget(commander, supportPoint, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
             }

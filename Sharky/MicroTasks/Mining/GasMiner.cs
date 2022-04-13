@@ -9,17 +9,13 @@ namespace Sharky.MicroTasks.Mining
     {
         BaseData BaseData;
         SharkyUnitData SharkyUnitData;
+        CollisionCalculator CollisionCalculator;
 
         public GasMiner(DefaultSharkyBot defaultSharkyBot)
         {
             BaseData = defaultSharkyBot.BaseData;
             SharkyUnitData = defaultSharkyBot.SharkyUnitData;
-        }
-
-        public GasMiner(BaseData baseData, SharkyUnitData sharkyUnitData)
-        {
-            BaseData = baseData;
-            SharkyUnitData = sharkyUnitData;
+            CollisionCalculator = defaultSharkyBot.CollisionCalculator;
         }
 
         public List<SC2APIProtocol.Action> MineGas(int frame)
@@ -59,7 +55,9 @@ namespace Sharky.MicroTasks.Mining
                         if (worker.UnitCalculation.Unit.BuffIds.Any(b => SharkyUnitData.CarryingResourceBuffs.Contains((Buffs)b)))
                         {
                             var distanceSquared = Vector2.DistanceSquared(baseVector, workerVector);
-                            if (distanceSquared > 25 || distanceSquared < 10)
+                            var onPath = CollisionCalculator.Collides(worker.UnitCalculation.Position, 2, new Vector2(miningInfo.DropOffPoint.X, miningInfo.DropOffPoint.Y), new Vector2(miningInfo.HarvestPoint.X, miningInfo.HarvestPoint.Y));
+
+                            if (distanceSquared > 25 || distanceSquared < 10 || !onPath)
                             {
                                 var action = worker.Order(frame, Abilities.HARVEST_RETURN, null, 0, true);
                                 if (action != null)
@@ -78,8 +76,9 @@ namespace Sharky.MicroTasks.Mining
                         }
                         else
                         {
+                            var onPath = CollisionCalculator.Collides(worker.UnitCalculation.Position, 2, new Vector2(miningInfo.DropOffPoint.X, miningInfo.DropOffPoint.Y), new Vector2(miningInfo.HarvestPoint.X, miningInfo.HarvestPoint.Y));
                             var touchingWorker = worker.UnitCalculation.NearbyAllies.Take(25).Any(w => Vector2.DistanceSquared(workerVector, w.Position) < .5);
-                            if (touchingWorker || Vector2.DistanceSquared(mineralVector, workerVector) < 4)
+                            if (!onPath || touchingWorker || Vector2.DistanceSquared(mineralVector, workerVector) < 4)
                             {
                                 var action = worker.Order(frame, Abilities.HARVEST_GATHER, null, miningInfo.ResourceUnit.Tag, false);
                                 if (action != null)

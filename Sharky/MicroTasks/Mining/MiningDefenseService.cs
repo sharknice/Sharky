@@ -35,7 +35,7 @@ namespace Sharky.MicroTasks.Mining
             {
                 bool preventGasSteal = false;
                 bool preventBuildingLanding = false;
-                if (ActiveUnitData.Commanders.ContainsKey(selfBase.ResourceCenter.Tag) && ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Count() > 0)
+                if (selfBase.ResourceCenter != null && ActiveUnitData.Commanders.ContainsKey(selfBase.ResourceCenter.Tag) && ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Count() > 0)
                 {
                     var flyingBuildings = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Take(25).Where(u => u.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && u.Unit.IsFlying);
                     if (flyingBuildings.Count() > 0)
@@ -234,7 +234,7 @@ namespace Sharky.MicroTasks.Mining
                 }
             }
 
-            var safeWorkers = ActiveUnitData.Commanders.Where(c => c.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && (c.Value.UnitRole == UnitRole.Defend || c.Value.UnitRole == UnitRole.Bait) && c.Value.UnitCalculation.Unit.Orders.Count() == 0);
+            var safeWorkers = ActiveUnitData.Commanders.Where(c => c.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && (c.Value.UnitRole == UnitRole.Defend || c.Value.UnitRole == UnitRole.Bait) && (c.Value.UnitCalculation.Unit.Orders.Count(o => o.AbilityId != (uint)Abilities.MOVE) == 0));
             foreach (var safeWorker in safeWorkers)
             {
                 if (safeWorker.Value.UnitRole == UnitRole.Bait && safeWorker.Value.UnitCalculation.NearbyEnemies.Count() > 0)
@@ -245,7 +245,7 @@ namespace Sharky.MicroTasks.Mining
             }
 
             // only defend near the base, don't chase too far
-            foreach (var commander in unitCommanders.Where(u => u.UnitRole == UnitRole.Defend))
+            foreach (var commander in unitCommanders.Where(u => u.UnitRole == UnitRole.Defend || u.UnitRole == UnitRole.None))
             {
                 if (commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.ATTACK_ATTACK) && (!commander.UnitCalculation.NearbyAllies.Take(25).Any(a => a.UnitClassifications.Contains(UnitClassification.ResourceCenter)) || commander.UnitCalculation.NearbyAllies.Take(25).Any(a => a.UnitClassifications.Contains(UnitClassification.ArmyUnit))))
                 {
@@ -280,6 +280,7 @@ namespace Sharky.MicroTasks.Mining
                                 if (closestFriendlyArmy != null)
                                 {
                                     var saveAction = commander.Order(frame, Abilities.MOVE, targetTag: closestFriendlyArmy.Unit.Tag);
+                                    commander.UnitRole = UnitRole.Defend;
                                     if (saveAction != null)
                                     {
                                         actions.AddRange(saveAction);

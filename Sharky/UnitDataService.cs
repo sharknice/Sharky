@@ -5,10 +5,14 @@ namespace Sharky
     public class UnitDataService
     {
         SharkyUnitData SharkyUnitData;
+        SharkyOptions SharkyOptions;
+        MacroData MacroData;
 
-        public UnitDataService(SharkyUnitData sharkyUnitData)
+        public UnitDataService(SharkyUnitData sharkyUnitData, SharkyOptions sharkyOptions, MacroData macroData)
         {
             SharkyUnitData = sharkyUnitData;
+            SharkyOptions = sharkyOptions;
+            MacroData = macroData;
         }
 
         public Weapon GetWeapon(Unit unit)
@@ -33,6 +37,14 @@ namespace Sharky
                     {
                         weapon.Range = 9;
                     }
+                }
+                if (unitType == UnitTypes.TERRAN_MISSILETURRET && MacroData.Frame > SharkyOptions.FramesPerSecond * 10 * 60)
+                {
+                    weapon.Range = 8;
+                }
+                if (unitType == UnitTypes.TERRAN_PLANETARYFORTRESS && MacroData.Frame > SharkyOptions.FramesPerSecond * 10 * 60)
+                {
+                    weapon.Range = 7;
                 }
                 return weapon;
             }

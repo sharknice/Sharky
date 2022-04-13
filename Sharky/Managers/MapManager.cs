@@ -48,7 +48,7 @@ namespace Sharky.Managers
                     var walkable = GetDataValueBit(pathingGrid, x, y);
                     var height = GetDataValueByte(heightGrid, x, y);
                     var placeable = GetDataValueBit(placementGrid, x, y);
-                    row[y] = new MapCell { X = x, Y = y, Walkable = walkable, TerrainHeight = height, Buildable = placeable, HasCreep = false, CurrentlyBuildable = placeable, EnemyAirDpsInRange = 0, EnemyGroundDpsInRange = 0, InEnemyVision = false, InSelfVision = false, InEnemyDetection = false, Visibility = 0, LastFrameVisibility = 0, NumberOfAllies = 0, NumberOfEnemies = 0, PoweredBySelfPylon = false, SelfAirDpsInRange = 0, SelfGroundDpsInRange = 0, LastFrameAlliesTouched = 0, PathBlocked = false };
+                    row[y] = new MapCell { X = x, Y = y, Walkable = walkable, TerrainHeight = height, Buildable = placeable, HasCreep = false, CurrentlyBuildable = placeable, EnemyAirDpsInRange = 0, EnemyGroundDpsInRange = 0, InEnemyVision = false, InSelfVision = false, InEnemyDetection = false, InSelfDetection = false, Visibility = 0, LastFrameVisibility = 0, NumberOfAllies = 0, NumberOfEnemies = 0, PoweredBySelfPylon = false, SelfAirDpsInRange = 0, SelfGroundDpsInRange = 0, LastFrameAlliesTouched = 0, PathBlocked = false };
                 }
                 MapData.Map[x] = row;
             }
@@ -73,6 +73,7 @@ namespace Sharky.Managers
             UpdateCreep(observation.Observation.RawData.MapState.Creep);
             UpdateEnemyDpsInRange();
             UpdateInEnemyDetection();
+            UpdateInSelfDetection();
             UpdateInEnemyVision();
             UpdateNumberOfAllies((int)observation.Observation.GameLoop);
             UpdatePathBlocked();
@@ -239,6 +240,35 @@ namespace Sharky.Managers
                 foreach (var node in nodes)
                 {
                     MapData.Map[(int)node.X][(int)node.Y].PathBlocked = true;
+                }
+            }
+        }
+
+        void UpdateInSelfDetection()
+        {
+            for (var x = 0; x < MapData.MapWidth; x++)
+            {
+                for (var y = 0; y < MapData.MapHeight; y++)
+                {
+                    MapData.Map[x][y].InSelfDetection = false;
+                }
+            }
+
+            foreach (var unitCalculation in ActiveUnitData.SelfUnits.Where(e => e.Value.UnitClassifications.Contains(UnitClassification.Detector) && e.Value.Unit.BuildProgress == 1))
+            {
+                var nodes = GetNodesInRange(unitCalculation.Value.Unit.Pos, unitCalculation.Value.Unit.DetectRange + 1, MapData.MapWidth, MapData.MapHeight);
+                foreach (var node in nodes)
+                {
+                    MapData.Map[(int)node.X][(int)node.Y].InSelfDetection = true;
+                }
+            }
+
+            foreach (var scan in SharkyUnitData.Effects.Where(e => e.EffectId == (uint)Effects.SCAN && e.Alliance == Alliance.Self))
+            {
+                var nodes = GetNodesInRange(new Point { X = scan.Pos[0].X, Y = scan.Pos[0].Y, Z = 1 }, scan.Radius + 2, MapData.MapWidth, MapData.MapHeight);
+                foreach (var node in nodes)
+                {
+                    MapData.Map[(int)node.X][(int)node.Y].InSelfDetection = true;
                 }
             }
         }

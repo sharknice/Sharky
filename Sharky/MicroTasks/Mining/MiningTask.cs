@@ -174,7 +174,9 @@ namespace Sharky.MicroTasks
 
             var refinereries = ActiveUnitData.SelfUnits.Where(u => SharkyUnitData.GasGeyserRefineryTypes.Contains((UnitTypes)u.Value.Unit.UnitType) && u.Value.Unit.BuildProgress >= .99 && BaseData.SelfBases.Any(b => b.GasMiningInfo.Any(g => g.ResourceUnit.Tag == u.Value.Unit.Tag)));
             var unsaturatedRefineries = refinereries.Where(u => BaseData.SelfBases.Any(b => b.GasMiningInfo.Any(g => g.ResourceUnit.VespeneContents > 0 && g.ResourceUnit.Tag == u.Value.Unit.Tag && g.Workers.Count() < gasSaturationCount)));
+            var saturatedRefineries = refinereries.Where(u => BaseData.SelfBases.Any(b => b.GasMiningInfo.Any(g => g.ResourceUnit.VespeneContents > 0 && g.ResourceUnit.Tag == u.Value.Unit.Tag && g.Workers.Count() >= gasSaturationCount)));
             var unsaturatedMinerals = BaseData.SelfBases.Any(b => b.ResourceCenter.BuildProgress == 1 && b.MineralMiningInfo.Any(m => m.Workers.Count() < 2));
+            var saturatedMinerals = BaseData.SelfBases.Any(b => b.ResourceCenter.BuildProgress == 1 && b.MineralMiningInfo.Any(m => m.Workers.Count() >= 2));
 
             if (LowMineralsHighGas)
             {
@@ -197,22 +199,33 @@ namespace Sharky.MicroTasks
 
             if (LowMineralsHighGas && unsaturatedMinerals)
             {
-                foreach (var selfBase in BaseData.SelfBases.Where(b => b.MineralMiningInfo.Any(m => m.Workers.Count() < 2)))
+                foreach (var selfBase in BaseData.SelfBases.Where(b => b.ResourceCenter != null && b.MineralMiningInfo.Any(m => m.Workers.Count() < 2)))
                 {
-                    foreach (var info in selfBase.GasMiningInfo)
+                    foreach (var info in selfBase.MineralMiningInfo.Where(m => m.Workers.Count() < 2))
                     {
-                        if (info.Workers.Count() > 0)
+                        var idleWorkers = GetIdleWorkers();
+                        if (idleWorkers.Count() == 0)
                         {
-                            foreach (var worker in info.Workers)
+                            var vector = new Vector2(info.ResourceUnit.Pos.X, info.ResourceUnit.Pos.Y);
+                            if (ActiveUnitData.SelfUnits.ContainsKey(selfBase.ResourceCenter.Tag))
                             {
-                                worker.UnitRole = UnitRole.None;
+                                var unitCalculation = ActiveUnitData.SelfUnits[selfBase.ResourceCenter.Tag];
+                                var workers = unitCalculation.NearbyAllies.Where(c => c.UnitClassifications.Contains(UnitClassification.Worker) && !c.Unit.BuffIds.Any(b => SharkyUnitData.CarryingMineralBuffs.Contains((Buffs)b)));
+                                idleWorkers = UnitCommanders.Where(c => c.UnitRole == UnitRole.Gas && workers.Any(w => w.Unit.Tag == c.UnitCalculation.Unit.Tag)).OrderBy(c => Vector2.DistanceSquared(vector, c.UnitCalculation.Position));
                             }
-                            info.Workers.Clear();
+                        }
+                        if (idleWorkers.Count() > 0)
+                        {
+                            var worker = idleWorkers.FirstOrDefault();
+                            worker.UnitRole = UnitRole.Minerals;
+                            info.Workers.Add(worker);
+
+                            return actions;
                         }
                     }
                 }
             }
-            else if (unsaturatedRefineries.Count() > 0)
+            else if (unsaturatedRefineries.Count() > 0 && saturatedRefineries.Count() < BuildOptions.MaxActiveGasCount)
             {
                 foreach (var selfBase in BaseData.SelfBases)
                 {
@@ -279,8 +292,8 @@ namespace Sharky.MicroTasks
         {
             var actions = new List<SC2APIProtocol.Action>();
 
-            var unsaturated = BaseData.SelfBases.Where(b => b.ResourceCenter.BuildProgress == 1 && b.MineralMiningInfo.Any(m => m.Workers.Count() < 2));
-            var overSaturated = BaseData.SelfBases.Where(b => b.ResourceCenter.BuildProgress == 1 && b.MineralMiningInfo.Any(m => m.Workers.Count() > 2));
+            var unsaturated = BaseData.SelfBases.Where(b => b.ResourceCenter != null && b.ResourceCenter.BuildProgress == 1 && b.MineralMiningInfo.Any(m => m.Workers.Count() < 2));
+            var overSaturated = BaseData.SelfBases.Where(b => b.ResourceCenter != null && b.ResourceCenter.BuildProgress == 1 && b.MineralMiningInfo.Any(m => m.Workers.Count() > 2));
 
             if (unsaturated.Count() > 0 && overSaturated.Count() > 0)
             {

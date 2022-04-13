@@ -22,6 +22,14 @@ namespace Sharky.MicroControllers.Protoss
 
         protected override bool AttackBestTarget(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
+            if (commander.UnitCalculation.Unit.Shield < commander.UnitCalculation.Unit.ShieldMax && commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.BUILD_INTERCEPTORS))
+            {
+                if (commander.UnitCalculation.EnemiesInRangeOf.Any())
+                {
+                    return Retreat(commander, target, defensivePoint, frame, out action);
+                }
+            }
+
             var interceptorCount = commander.UnitCalculation.NearbyAllies.Count(u => u.Unit.UnitType == (uint)UnitTypes.PROTOSS_INTERCEPTOR);
             var carrierCount = commander.UnitCalculation.NearbyAllies.Count(u => u.Unit.UnitType == (uint)UnitTypes.PROTOSS_CARRIER) + 1;
 

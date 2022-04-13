@@ -108,6 +108,15 @@ namespace Sharky.Managers
                 }
             }
 
+            foreach (var unit in ActiveUnitData.Commanders.Where(commander => (commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_HIGHTEMPLAR || commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_DARKTEMPLAR) && (commander.Value.UnitRole == UnitRole.Morph || commander.Value.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.MORPH_ARCHON || o.AbilityId == (uint)Abilities.MORPH_ARCHON2)))) // remove templars that morphed to archons
+            {
+                if (!observation.Observation.RawData.Units.Any(u => u.Tag == unit.Key))
+                {
+                    ActiveUnitData.DeadUnits.Add(unit.Key);
+                    ActiveUnitData.SelfDeaths--;
+                }
+            }
+
             foreach (var tag in ActiveUnitData.DeadUnits)
             {
                 if (ActiveUnitData.EnemyUnits.TryRemove(tag, out UnitCalculation removedEnemy))
@@ -207,6 +216,11 @@ namespace Sharky.Managers
             {
                 if (enemy.FrameLastSeen != frame && MapDataService.SelfVisible(enemy.Unit.Pos))
                 {
+                    if (((UnitTypes)enemy.Unit.UnitType).ToString().Contains("BURROWED") && !MapDataService.InSelfDetection(enemy.Unit.Pos))
+                    {
+                        enemy.Unit.DisplayType = DisplayType.Hidden;
+                        continue; // it's still there but it's burrowed so we can't see it
+                    }
                     ActiveUnitData.EnemyUnits.TryRemove(enemy.Unit.Tag, out UnitCalculation removed);
                 }
             }
@@ -263,8 +277,11 @@ namespace Sharky.Managers
                     return commander;
                 });
 
-                ActiveUnitData.Commanders[allyAttack.Value.Unit.Tag].ParentUnitCalculation = GetParentUnitCalculation(ActiveUnitData.Commanders[allyAttack.Value.Unit.Tag]);
-                // TODO: set childunitcalculation and then set it back to null when it goes away
+                if (ActiveUnitData.Commanders.ContainsKey(allyAttack.Value.Unit.Tag))
+                {
+                    ActiveUnitData.Commanders[allyAttack.Value.Unit.Tag].ParentUnitCalculation = GetParentUnitCalculation(ActiveUnitData.Commanders[allyAttack.Value.Unit.Tag]);
+                    // TODO: set childunitcalculation and then set it back to null when it goes away
+                }
 
                 allyAttack.Value.Attackers = GetTargettedAttacks(allyAttack.Value).ToList();
                 allyAttack.Value.EnemiesThreateningDamage = GetEnemiesThreateningDamage(allyAttack.Value);
@@ -277,7 +294,10 @@ namespace Sharky.Managers
 
             foreach (var tag in loadedTags)
             {
-                ActiveUnitData.SelfUnits[tag].Loaded = true;
+                if (ActiveUnitData.SelfUnits.ContainsKey(tag))
+                {
+                    ActiveUnitData.SelfUnits[tag].Loaded = true;
+                }
             }
 
             foreach (var enemyAttack in ActiveUnitData.EnemyUnits)

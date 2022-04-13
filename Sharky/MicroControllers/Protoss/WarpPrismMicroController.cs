@@ -417,23 +417,26 @@ namespace Sharky.MicroControllers.Protoss
 
                 foreach (var passenger in commander.UnitCalculation.Unit.Passengers)
                 {
-                    var passengerUnit = ActiveUnitData.Commanders[passenger.Tag].UnitCalculation.Unit;
-                    var unit = ActiveUnitData.Commanders[passenger.Tag].UnitCalculation;
-
-                    foreach (var enemyAttack in commander.UnitCalculation.NearbyEnemies)
+                    if (ActiveUnitData.Commanders.ContainsKey(passenger.Tag))
                     {
-                        if (DamageService.CanDamage(unit, enemyAttack) && InRange(commander.UnitCalculation.Position, enemyAttack.Position, unit.Range + passengerUnit.Radius + enemyAttack.Unit.Radius) && MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos) == MapDataService.MapHeight(enemyAttack.Unit.Pos))
+                        var passengerUnit = ActiveUnitData.Commanders[passenger.Tag].UnitCalculation.Unit;
+                        var unit = ActiveUnitData.Commanders[passenger.Tag].UnitCalculation;
+
+                        foreach (var enemyAttack in commander.UnitCalculation.NearbyEnemies)
                         {
-                            if (!enemyAttack.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !InRange(commander.UnitCalculation.Position, enemyAttack.Position, 2 + passengerUnit.Radius + enemyAttack.Unit.Radius))
+                            if (DamageService.CanDamage(unit, enemyAttack) && InRange(commander.UnitCalculation.Position, enemyAttack.Position, unit.Range + passengerUnit.Radius + enemyAttack.Unit.Radius) && MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos) == MapDataService.MapHeight(enemyAttack.Unit.Pos))
                             {
-                                continue;
+                                if (!enemyAttack.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !InRange(commander.UnitCalculation.Position, enemyAttack.Position, 2 + passengerUnit.Radius + enemyAttack.Unit.Radius))
+                                {
+                                    continue;
+                                }
+                                // if an enemy is in range drop the unit
+                                //action = commander.Order(frame, Abilities.UNLOADALLAT_WARPPRISM, null, commander.UnitCalculation.Unit.Tag); // TODO: dropping a specific unit not working, can only drop all, change it if they ever fix the api
+                                action = commander.UnloadSpecificUnit(frame, Abilities.UNLOADUNIT_WARPPRISM, passenger.Tag);
+                                return true;
                             }
-                            // if an enemy is in range drop the unit
-                            //action = commander.Order(frame, Abilities.UNLOADALLAT_WARPPRISM, null, commander.UnitCalculation.Unit.Tag); // TODO: dropping a specific unit not working, can only drop all, change it if they ever fix the api
-                            action = commander.UnloadSpecificUnit(frame, Abilities.UNLOADUNIT_WARPPRISM, passenger.Tag);
-                            return true;
                         }
-                    }
+                    } 
                 }
 
                 if (InRange(new Vector2(target.X, target.Y), commander.UnitCalculation.Position, 3)) // if made it to the target just drop

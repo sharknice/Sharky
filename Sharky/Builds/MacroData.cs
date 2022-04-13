@@ -66,6 +66,10 @@ namespace Sharky
         public int DesiredOverlords;
         public int DesiredMacroCommandCenters;
 
+        public int DesiredExtraBaseSimCityPylons;
+        public int DesiredExtraBaseSimCityCannons;
+        public int DesiredExtraBaseSimCityBatteries;
+
         public Dictionary<string, ProxyData> Proxies { get; set; }
         public Dictionary<string, AddOnSwap> AddOnSwaps { get; set; }
 

@@ -124,13 +124,15 @@ namespace Sharky.Macro
                     var merges = templar.Count(a => a.Value.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.MORPH_ARCHON));
                     if (merges + UnitCountService.Count(UnitTypes.PROTOSS_ARCHON) < MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_ARCHON])
                     {
-                        var mergables = templar.Where(c => !c.Value.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.MORPH_ARCHON || o.AbilityId == (uint)Abilities.MORPH_ARCHON + 1));
+                        var mergables = templar.Where(c => !c.Value.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.MORPH_ARCHON || o.AbilityId == (uint)Abilities.MORPH_ARCHON2));
                         if (mergables.Count() >= 2)
                         {
                             var commanders = mergables.OrderBy(c => c.Value.UnitCalculation.Unit.Energy).Take(2);
                             var action = commanders.First().Value.Merge(commanders.Last().Value.UnitCalculation.Unit.Tag);
                             if (action != null)
                             {
+                                commanders.First().Value.UnitRole = UnitRole.Morph;
+                                commanders.Last().Value.UnitRole = UnitRole.Morph;
                                 commands.Add(action);
                                 return commands;
                             }

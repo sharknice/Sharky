@@ -9,8 +9,9 @@ namespace Sharky.MicroControllers.Protoss
 {
     public class HighTemplarMicroController : IndividualMicroController
     {
+        private int StormRangeSquared = 82;
         private double StormRadius = 1.5;
-        private double FeedbackRangeSquared = 121; // actually range 10, but give an extra 1 range to get first feedback in
+        private int FeedbackRangeSquared = 121; // actually range 10, but give an extra 1 range to get first feedback in
         private int lastStormFrame = 0;
 
         public HighTemplarMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled)
@@ -31,6 +32,13 @@ namespace Sharky.MicroControllers.Protoss
                 {
                     return true;
                 }
+            }
+
+            if (commander.UnitCalculation.Unit.Energy < 40 ||
+                (!SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.PSISTORMTECH) && !commander.UnitCalculation.NearbyEnemies.Any(e => e.Unit.Energy > 10) && // stay in the back if can't use spells on anything
+                commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit)) && commander.UnitCalculation.NearbyAllies.Count(a => a.UnitClassifications.Contains(UnitClassification.ArmyUnit)) > 2))
+            {
+                if (Retreat(commander, target, defensivePoint, frame, out action)) { return true; }
             }
 
             return false;
@@ -64,7 +72,7 @@ namespace Sharky.MicroControllers.Protoss
                 return false;
             }
 
-            if (commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.MORPH_ARCHON))
+            if (commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.MORPH_ARCHON || o.AbilityId == (uint)Abilities.MORPH_ARCHON2))
             {
                 return true;
             }
@@ -79,6 +87,7 @@ namespace Sharky.MicroControllers.Protoss
                     var merge = commander.Merge(target.Unit.Tag);
                     if (merge != null)
                     {
+                        commander.UnitRole = UnitRole.Morph;
                         action = new List<Action> { merge };
                     }
                     return true;
@@ -105,7 +114,16 @@ namespace Sharky.MicroControllers.Protoss
                 action = commander.Order(frame, Abilities.EFFECT_FEEDBACK, null, oneShotKill.Unit.Tag);
                 return true;
             }
-            var target = enemiesInRange.FirstOrDefault();
+            var target = enemiesInRange.FirstOrDefault(e => e.Unit.UnitType != (uint)UnitTypes.ZERG_OVERSEER && e.Unit.Energy > 50);
+            if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.KillDetection)
+            {
+                var detector = enemiesInRange.FirstOrDefault(e => e.UnitClassifications.Contains(UnitClassification.Detector));
+                if (detector != null)
+                {
+                    target = detector;
+                }
+            }
+
             if (target != null && target.Unit.Energy > 50)
             {
                 action = commander.Order(frame, Abilities.EFFECT_FEEDBACK, null, target.Unit.Tag);
@@ -118,22 +136,25 @@ namespace Sharky.MicroControllers.Protoss
         bool Storm(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
-            if (!commander.AbilityOffCooldown(Abilities.EFFECT_PSISTORM, frame, SharkyOptions.FramesPerSecond, SharkyUnitData))
-            {
-                return true; // don't do anything until it storms
-            }
-
             if (commander.UnitCalculation.Unit.Energy < 75 || !SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.PSISTORMTECH))
             {
                 return false;
             }
 
-            if (lastStormFrame >= frame - 5)
+            if (!commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.EFFECT_PSISTORM))
             {
-                return false;
+                if (!commander.AbilityOffCooldown(Abilities.EFFECT_PSISTORM, frame, SharkyOptions.FramesPerSecond, SharkyUnitData))
+                {
+                    return false;
+                }
+
+                if (lastStormFrame >= frame - 5)
+                {
+                    return false;
+                }
             }
 
-            var enemies = commander.UnitCalculation.NearbyEnemies.Take(25).Where(a => !a.Attributes.Contains(Attribute.Structure) && !a.Unit.BuffIds.Contains((uint)Buffs.PSISTORM)).OrderBy(u => u.Unit.Health);
+            var enemies = commander.UnitCalculation.NearbyEnemies.Take(25).Where(a => !a.Attributes.Contains(Attribute.Structure) && !a.Unit.BuffIds.Contains((uint)Buffs.PSISTORM) && !a.Unit.BuffIds.Contains((uint)Buffs.ORACLESTASISTRAPTARGET)).OrderBy(u => u.Unit.Health);
             if (enemies.Count() > 2)
             {
                 var bestAttack = GetBestAttack(commander.UnitCalculation, enemies);

@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using Sharky.DefaultBot;
 using System.Linq;
 using System.Numerics;
 
@@ -9,12 +10,16 @@ namespace Sharky.Builds.BuildingPlacement
         ActiveUnitData ActiveUnitData;
         BaseData BaseData;
         BuildingService BuildingService;
+        BuildOptions BuildOptions;
+        TargetingData TargetingData;
 
-        public ResourceCenterLocator(ActiveUnitData activeUnitData, BaseData baseData, BuildingService buildingService)
+        public ResourceCenterLocator(DefaultSharkyBot defaultSharkyBot)
         {
-            ActiveUnitData = activeUnitData;
-            BaseData = baseData;
-            BuildingService = buildingService;
+            ActiveUnitData = defaultSharkyBot.ActiveUnitData;
+            BaseData = defaultSharkyBot.BaseData;
+            BuildingService = defaultSharkyBot.BuildingService;
+            BuildOptions = defaultSharkyBot.BuildOptions;
+            TargetingData = defaultSharkyBot.TargetingData;
         }
 
         public Point2D GetResourceCenterLocation(bool canHaveCreep)
@@ -24,8 +29,18 @@ namespace Sharky.Builds.BuildingPlacement
 
             foreach (var openBase in openBases)
             {
-                if (BuildingService.AreaBuildable(openBase.Location.X, openBase.Location.Y, 2) && !BuildingService.Blocked(openBase.Location.X, openBase.Location.Y, 2, 0))
+                if (BuildingService.AreaBuildable(openBase.Location.X, openBase.Location.Y, 2) && !BuildingService.Blocked(openBase.Location.X, openBase.Location.Y, 2.5f, 0))
                 {
+                    // TODO: check if area safe
+                    if (!BuildOptions.EncroachEnemyMainWithExpansions)
+                    {
+                        var vector = new Vector2(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y);
+                        if (Vector2.DistanceSquared(vector, new Vector2(openBase.Location.X, openBase.Location.Y)) < 900)
+                        {
+                            continue;
+                        }
+                    }
+
                     if (!canHaveCreep && BuildingService.HasAnyCreep(openBase.Location.X, openBase.Location.Y, 2.5f / 2.0f))
                     {
                         continue;

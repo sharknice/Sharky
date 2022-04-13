@@ -1,6 +1,5 @@
 ﻿using SC2APIProtocol;
 using Sharky.Chat;
-using Sharky.Managers;
 using Sharky.MicroControllers.Protoss;
 using Sharky.Pathing;
 using System.Collections.Concurrent;
@@ -183,6 +182,16 @@ namespace Sharky.MicroTasks
                     }
                 }
 
+                if (commander.UnitCalculation.EnemiesInRangeOfAvoid.Any() && Vector2.DistanceSquared(new Vector2(StagingPoint.X, StagingPoint.Y), commanderVector) < 10)
+                {
+                    var action = OracleMicroController.Retreat(commander, defensivePoint, null, frame);
+                    if (action != null)
+                    {
+                        commands.AddRange(action);
+                    }
+                    GetNextTarget();
+                    continue;
+                }
                 var navigateAction = OracleMicroController.NavigateToPoint(commander, StagingPoint, defensivePoint, StagingPoint, frame);
                 if (navigateAction != null)
                 {
@@ -196,6 +205,10 @@ namespace Sharky.MicroTasks
 
         bool CanHarass(UnitCommander commander, Point2D target)
         {
+            if (commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.LOCKON))
+            {
+                return false;
+            }
             if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.FullRetreat || commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.Retreat)
             {
                 return false;

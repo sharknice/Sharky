@@ -13,8 +13,8 @@ namespace Sharky.MicroControllers.Protoss
         float RevelationRange = 9;
         float RevelationRadius = 6;
 
-        public OracleMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled)
-            : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled)
+        public OracleMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled, float avoidDamageDistance = .5f)
+            : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled, avoidDamageDistance)
         {
 
         }
@@ -65,10 +65,11 @@ namespace Sharky.MicroControllers.Protoss
 
             if (commander.UnitRole != UnitRole.Defend)
             {
-                var hiddenUnits = ActiveUnitData.EnemyUnits.Where(e => e.Value.Unit.DisplayType == DisplayType.Hidden).OrderBy(e => Vector2.DistanceSquared(pos, e.Value.Position));
-                if (hiddenUnits.Count() > 0)
+                var hiddenUnits = ActiveUnitData.EnemyUnits.Values.Where(e => e.Unit.DisplayType == DisplayType.Hidden).OrderBy(e => Vector2.DistanceSquared(pos, e.Position));
+                var hiddenByAllies = hiddenUnits.FirstOrDefault(e => e.NearbyEnemies.Any());
+                if (hiddenByAllies != null)
                 {
-                    return new Point2D { X = hiddenUnits.FirstOrDefault().Value.Unit.Pos.X, Y = hiddenUnits.FirstOrDefault().Value.Unit.Pos.Y };
+                    return new Point2D { X = hiddenByAllies.Unit.Pos.X, Y = hiddenByAllies.Unit.Pos.Y };
                 }
             }
 
@@ -258,6 +259,13 @@ namespace Sharky.MicroControllers.Protoss
             if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker)))
             {
                 commander.UnitCalculation.TargetPriorityCalculation.TargetPriority = TargetPriority.KillWorkers;
+
+                var quickKill = commander.UnitCalculation.NearbyEnemies.Where(e => e.UnitClassifications.Contains(UnitClassification.Worker) && e.SimulatedHitpoints <= 5).OrderBy(e => Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+                if (quickKill != null && Vector2.DistanceSquared(quickKill.Position, commander.UnitCalculation.Position) < (commander.UnitCalculation.Range + 2) * (commander.UnitCalculation.Range + 2))
+                {
+                    action = commander.Order(frame, Abilities.ATTACK, targetTag: quickKill.Unit.Tag);
+                    return true;
+                }
             }
 
             if (AttackBestTargetInRange(commander, target, bestTarget, frame, out action))
@@ -335,6 +343,21 @@ namespace Sharky.MicroControllers.Protoss
             NavigateToTarget(commander, target, groupCenter, null, Formation.Normal, frame, out action);
 
             return action;
+        }
+
+        protected override bool DealWithCyclones(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
+
+            var lockOnRange = 7;
+            var enemyCyclones = commander.UnitCalculation.NearbyEnemies.Where(u => u.Unit.UnitType == (uint)UnitTypes.TERRAN_CYCLONE && InRange(commander.UnitCalculation.Position, u.Position, commander.UnitCalculation.Unit.Radius + lockOnRange + 4));
+
+            if (commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.LOCKON) || enemyCyclones.Any(c => c.EnemiesInRange.Count() < 2))
+            {
+                if (Retreat(commander, defensivePoint, defensivePoint, frame, out action)) { return true; }
+            }
+
+            return base.DealWithCyclones(commander, target, defensivePoint, frame, out action);
         }
 
         public override List<SC2APIProtocol.Action> HarassWorkers(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame)

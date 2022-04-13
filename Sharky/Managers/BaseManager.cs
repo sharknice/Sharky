@@ -135,7 +135,7 @@ namespace Sharky.Managers
             }
             foreach (var selfBase in BaseData.SelfBases)
             {
-                if (ActiveUnitData.SelfUnits.TryGetValue(selfBase.ResourceCenter.Tag, out UnitCalculation updatedUnit))
+                if (selfBase.ResourceCenter != null && ActiveUnitData.SelfUnits.TryGetValue(selfBase.ResourceCenter.Tag, out UnitCalculation updatedUnit))
                 {
                     if (updatedUnit != null)
                     {
@@ -315,7 +315,18 @@ namespace Sharky.Managers
                 }
                 else
                 {
-                    enemyBase.ResourceCenter = ActiveUnitData.EnemyUnits.Values.Where(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter)).FirstOrDefault(r => Vector2.DistanceSquared(r.Position, new Vector2(enemyBase.Location.X, enemyBase.Location.Y)) < 25).Unit;
+                    var enemyBases = ActiveUnitData.EnemyUnits.Values.Where(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter));
+                    if (enemyBases.Any() && enemyBase?.Location != null)
+                    {
+                        var eb = enemyBases.FirstOrDefault(r => Vector2.DistanceSquared(r.Position, new Vector2(enemyBase.Location.X, enemyBase.Location.Y)) < 25);
+                        if (eb?.Unit != null)
+                        {
+                            enemyBase.ResourceCenter = eb.Unit;
+                            continue;
+                        }
+                    }
+
+                    enemyBase.ResourceCenter = null;
                 }
             }
         }

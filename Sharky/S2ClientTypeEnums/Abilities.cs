@@ -494,5 +494,9 @@
         ANTIARMORMISSILE = 3753,
         AUTOTURRET = 349,
         INTERFERENCEMATRIX = 3747,
+        /// <summary>
+        /// shows up on units that were ordered to morph into an archon
+        /// </summary>
+        MORPH_ARCHON2 = 1767
     }
 }

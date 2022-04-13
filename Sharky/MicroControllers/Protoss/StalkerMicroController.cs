@@ -9,6 +9,7 @@ namespace Sharky.MicroControllers.Protoss
 {
     public class StalkerMicroController : IndividualMicroController
     {
+        // TODO: use get blink avoid point, 8 distance from current position opposite direction of enemy, make sure it's in vision
         public StalkerMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled)
             : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled)
         {
@@ -26,11 +27,21 @@ namespace Sharky.MicroControllers.Protoss
                     return true;
                 }
 
-                var blinkReady = SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.BLINKTECH) && commander.AbilityOffCooldown(Abilities.EFFECT_BLINK_STALKER, frame, SharkyOptions.FramesPerSecond, SharkyUnitData);
-                if (blinkReady)
+                if (commander.UnitCalculation.TargetPriorityCalculation.Overwhelm)
                 {
-                    action = commander.Order(frame, Abilities.EFFECT_BLINK_STALKER, new Point2D { X = bestTarget.Unit.Pos.X, Y = bestTarget.Unit.Pos.Y });
-                    return true;
+                    var blinkReady = SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.BLINKTECH) && commander.AbilityOffCooldown(Abilities.EFFECT_BLINK_STALKER, frame, SharkyOptions.FramesPerSecond, SharkyUnitData);
+                    if (blinkReady && bestTarget.FrameLastSeen == frame)
+                    {
+                        // only blink if can see all around unit, don't blink when entire army is hidden behind first unit
+                        var point = new Point2D { X = bestTarget.Unit.Pos.X, Y = bestTarget.Unit.Pos.Y };
+                        if (MapDataService.SelfVisible(point) && 
+                            MapDataService.SelfVisible(new Point2D { X = bestTarget.Unit.Pos.X + 7, Y = bestTarget.Unit.Pos.Y }) && MapDataService.SelfVisible(new Point2D { X = bestTarget.Unit.Pos.X - 7, Y = bestTarget.Unit.Pos.Y }) && 
+                            MapDataService.SelfVisible(new Point2D { X = bestTarget.Unit.Pos.X, Y = bestTarget.Unit.Pos.Y + 7 }) && MapDataService.SelfVisible(new Point2D { X = bestTarget.Unit.Pos.X, Y = bestTarget.Unit.Pos.Y - 7 }))
+                        {
+                            action = commander.Order(frame, Abilities.EFFECT_BLINK_STALKER, point);
+                            return true;
+                        }
+                    }
                 }
             }
 
@@ -47,7 +58,7 @@ namespace Sharky.MicroControllers.Protoss
                 var attack = commander.UnitCalculation.Attackers.OrderBy(e => (e.Range * e.Range) - Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position)).FirstOrDefault();
                 if (attack != null)
                 {
-                    var avoidPoint = GetGroundAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, attack.Unit.Pos, target, defensivePoint, attack.Range + attack.Unit.Radius + commander.UnitCalculation.Unit.Radius + AvoidDamageDistance);
+                    var avoidPoint = GetGroundAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, attack.Unit.Pos, target, defensivePoint, attack.Range + attack.Unit.Radius + commander.UnitCalculation.Unit.Radius + AvoidDamageDistance + 4);
                     action = commander.Order(frame, Abilities.EFFECT_BLINK_STALKER, avoidPoint);
                     return true;
                 }
@@ -83,7 +94,7 @@ namespace Sharky.MicroControllers.Protoss
                         range = attack.Range;
                     }
 
-                    var avoidPoint = GetGroundAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, attack.Unit.Pos, target, defensivePoint, attack.Range + attack.Unit.Radius + commander.UnitCalculation.Unit.Radius + AvoidDamageDistance);
+                    var avoidPoint = GetGroundAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, attack.Unit.Pos, target, defensivePoint, attack.Range + attack.Unit.Radius + commander.UnitCalculation.Unit.Radius + AvoidDamageDistance + 4);
                     action = commander.Order(frame, Abilities.EFFECT_BLINK_STALKER, avoidPoint);
                     return true;
                 }
