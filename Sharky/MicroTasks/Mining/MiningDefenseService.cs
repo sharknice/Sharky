@@ -35,7 +35,7 @@ namespace Sharky.MicroTasks.Mining
             {
                 bool preventGasSteal = false;
                 bool preventBuildingLanding = false;
-                if (selfBase.ResourceCenter != null && ActiveUnitData.Commanders.ContainsKey(selfBase.ResourceCenter.Tag) && ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Count() > 0)
+                if (selfBase.ResourceCenter != null && ActiveUnitData.Commanders.ContainsKey(selfBase.ResourceCenter.Tag) && ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Count(e => e.Unit.UnitType != (uint)UnitTypes.TERRAN_REAPER) > 0) // reapers are handled by the ReaperMiningDefenseTask
                 {
                     var flyingBuildings = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Take(25).Where(u => u.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && u.Unit.IsFlying);
                     if (flyingBuildings.Count() > 0)

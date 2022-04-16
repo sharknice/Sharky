@@ -20,8 +20,10 @@ namespace Sharky.Builds.BuildingPlacement
         IBuildingPlacement ProtectNexusPylonPlacement;
         TargetingData TargetingData;
         IBuildingPlacement ProtectNexusCannonPlacement;
+        BuildOptions BuildOptions;
+        IBuildingPlacement ProtossDefensiveGridPlacement;
 
-        public ProtossBuildingPlacement(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, BaseData baseData, DebugService debugService, MapDataService mapDataService, BuildingService buildingService, IBuildingPlacement wallOffPlacement, ProtossPylonGridPlacement protossPylonGridPlacement, ProtossProductionGridPlacement protossProductionGridPlacement, IBuildingPlacement protectNexusPylonPlacement, TargetingData targetingData, IBuildingPlacement protectNexusCannonPlacement)
+        public ProtossBuildingPlacement(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, BaseData baseData, DebugService debugService, MapDataService mapDataService, BuildingService buildingService, IBuildingPlacement wallOffPlacement, ProtossPylonGridPlacement protossPylonGridPlacement, ProtossProductionGridPlacement protossProductionGridPlacement, IBuildingPlacement protectNexusPylonPlacement, TargetingData targetingData, IBuildingPlacement protectNexusCannonPlacement, BuildOptions buildOptions, IBuildingPlacement protossDefensiveGridPlacement)
         {
             ActiveUnitData = activeUnitData;
             SharkyUnitData = sharkyUnitData;
@@ -35,6 +37,8 @@ namespace Sharky.Builds.BuildingPlacement
             ProtectNexusPylonPlacement = protectNexusPylonPlacement;
             TargetingData = targetingData;
             ProtectNexusCannonPlacement = protectNexusCannonPlacement;
+            BuildOptions = buildOptions;
+            ProtossDefensiveGridPlacement = protossDefensiveGridPlacement;
         }
 
         public Point2D FindPlacement(Point2D target, UnitTypes unitType, int size, bool ignoreResourceProximity = false, float maxDistance = 50, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.None, bool requireVision = false, bool allowBlockBase = false)
@@ -163,6 +167,11 @@ namespace Sharky.Builds.BuildingPlacement
                         return location;
                     }
                 }
+                var gridPlacement = ProtossDefensiveGridPlacement.FindPlacement(target, UnitTypes.PROTOSS_PHOTONCANNON, (int)size, minimumMineralProximinity == 0, maxDistance, true, wallOffType, requireVision, allowBlockBase);
+                if (gridPlacement != null)
+                {
+                    return gridPlacement;
+                }
             }
 
             var targetVector = new Vector2(target.X, target.Y);
@@ -216,7 +225,7 @@ namespace Sharky.Builds.BuildingPlacement
                         var vector = new Vector2(point.X, point.Y);
                         var tooClose = false;
 
-                        if (MapDataService.MapData?.WallData != null && MapDataService.MapData.WallData.Any(d => d.FullDepotWall != null && d.FullDepotWall.Any(p => Vector2.DistanceSquared(new Vector2(p.X, p.Y), vector) < 25)))
+                        if (!BuildOptions.AllowBlockWall && MapDataService.MapData?.WallData != null && MapDataService.MapData.WallData.Any(d => d.FullDepotWall != null && d.FullDepotWall.Any(p => Vector2.DistanceSquared(new Vector2(p.X, p.Y), vector) < 25)))
                         {
                             tooClose = true;
                         }
@@ -261,7 +270,7 @@ namespace Sharky.Builds.BuildingPlacement
 
             foreach (var powerSource in powerSources)
             {
-                if (Vector2.DistanceSquared(new Vector2(target.X, target.Y), powerSource.UnitCalculation.Position) > (maxDistance + 8) * (maxDistance + 8))
+                if (Vector2.DistanceSquared(new Vector2(target.X, target.Y), powerSource.UnitCalculation.Position) > (maxDistance + 16) * (maxDistance + 16))
                 {
                     break;
                 }
@@ -307,7 +316,7 @@ namespace Sharky.Builds.BuildingPlacement
 
                         var vector = new Vector2(point.X, point.Y);
                         var tooClose = false;
-                        if (MapDataService.MapData?.WallData != null && MapDataService.MapData.WallData.Any(d => d.FullDepotWall != null && d.FullDepotWall.Any(p => Vector2.DistanceSquared(new Vector2(p.X, p.Y), vector) < 16)))
+                        if (!BuildOptions.AllowBlockWall && MapDataService.MapData?.WallData != null && MapDataService.MapData.WallData.Any(d => d.FullDepotWall != null && d.FullDepotWall.Any(p => Vector2.DistanceSquared(new Vector2(p.X, p.Y), vector) < 16)))
                         {
                             tooClose = true;
                         }

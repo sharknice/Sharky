@@ -34,6 +34,7 @@ namespace Sharky.MicroTasks
                     foreach (var commander in commanders.Where(c => !c.Value.Claimed && c.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.ArmyUnit)).OrderBy(c => Vector2.DistanceSquared(vector, c.Value.UnitCalculation.Position)))
                     {
                         commander.Value.Claimed = true;
+                        commander.Value.UnitRole = UnitRole.WallOff;
                         UnitCommanders.Add(commander.Value);
 
                         if (UnitCommanders.Count() >= 10)

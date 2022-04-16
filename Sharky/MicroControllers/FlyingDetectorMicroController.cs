@@ -44,7 +44,7 @@ namespace Sharky.MicroControllers
             if (commander.UnitRole != UnitRole.Defend)
             {
                 var hiddenUnits = ActiveUnitData.EnemyUnits.Values.Where(e => e.Unit.DisplayType == DisplayType.Hidden).OrderBy(e => Vector2.DistanceSquared(pos, e.Position));
-                var hiddenByAllies = hiddenUnits.FirstOrDefault(e => e.NearbyEnemies.Any());
+                var hiddenByAllies = hiddenUnits.FirstOrDefault(e => e.NearbyEnemies.Any(e => !e.Unit.IsHallucination));
                 if (hiddenByAllies != null)
                 {
                     return new Point2D { X = hiddenByAllies.Unit.Pos.X, Y = hiddenByAllies.Unit.Pos.Y };

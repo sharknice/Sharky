@@ -22,6 +22,8 @@
         SpawnLarva,
         SpreadCreep,
         Morph,
-        Die
+        Die,
+        ChaseReaper,
+        WallOff
     }
 }

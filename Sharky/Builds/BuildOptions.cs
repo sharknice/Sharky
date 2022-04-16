@@ -13,6 +13,11 @@ namespace Sharky.Builds
         public int MaxActiveGasCount { get; set; }
         public ProtossBuildOptions ProtossBuildOptions { get; set; }
         public WallOffType WallOffType { get; set; }
+        
+        /// <summary>
+        /// allows buildings that are not part of the wall to be built next to the wall and potentially interfere with it
+        /// </summary>
+        public bool AllowBlockWall { get; set; }
 
         public BuildOptions()
         {
@@ -21,6 +26,7 @@ namespace Sharky.Builds
             StrictGasCount = false;
             StrictWorkersPerGas = false;
             EncroachEnemyMainWithExpansions = false;
+            AllowBlockWall = false;
             MaxActiveGasCount = 8;
             StrictWorkersPerGasCount = 3;
             ProtossBuildOptions = new ProtossBuildOptions { PylonsAtDefensivePoint = 0, ShieldsAtDefensivePoint = 0 };

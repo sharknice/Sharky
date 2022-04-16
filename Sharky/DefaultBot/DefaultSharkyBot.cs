@@ -117,6 +117,7 @@ namespace Sharky.DefaultBot
         public IBuildingPlacement ProtossBuildingPlacement { get; set; }
         public IBuildingPlacement WallOffPlacement { get; set; }
         public IBuildingPlacement TerranBuildingPlacement { get; set; }
+        public IBuildingPlacement ProtossDefensiveGridPlacement { get; set; }
         public IBuildingPlacement ProtectNexusPylonPlacement { get; set; }
         public IBuildingPlacement ProtectNexusCannonPlacement { get; set; }
         public IBuildingPlacement ProtectNexusBatteryPlacement { get; set; }
@@ -251,7 +252,8 @@ namespace Sharky.DefaultBot
             TerranSupplyDepotGridPlacement = new TerranSupplyDepotGridPlacement(BaseData, MapDataService, DebugService, BuildingService);
             MissileTurretPlacement = new MissileTurretPlacement(this);
             TerranBuildingPlacement = new TerranBuildingPlacement(ActiveUnitData, SharkyUnitData, BaseData, DebugService, BuildingService, WallOffPlacement, TerranWallService, TerranSupplyDepotGridPlacement, TerranProductionGridPlacement, TerranTechGridPlacement, MissileTurretPlacement);
-            ProtossBuildingPlacement = new ProtossBuildingPlacement(ActiveUnitData, SharkyUnitData, BaseData, DebugService, MapDataService, BuildingService, WallOffPlacement, ProtossPylonGridPlacement, ProtossProductionGridPlacement, ProtectNexusPylonPlacement, TargetingData, ProtectNexusCannonPlacement);
+            ProtossDefensiveGridPlacement = new ProtossDefensiveGridPlacement(this);
+            ProtossBuildingPlacement = new ProtossBuildingPlacement(ActiveUnitData, SharkyUnitData, BaseData, DebugService, MapDataService, BuildingService, WallOffPlacement, ProtossPylonGridPlacement, ProtossProductionGridPlacement, ProtectNexusPylonPlacement, TargetingData, ProtectNexusCannonPlacement, BuildOptions, ProtossDefensiveGridPlacement);
             ZergBuildingPlacement = new ZergBuildingPlacement(ActiveUnitData, SharkyUnitData, DebugService, BuildingService);
             ResourceCenterLocator = new ResourceCenterLocator(this);
             BuildingPlacement = new BuildingPlacement(ProtossBuildingPlacement, TerranBuildingPlacement, ZergBuildingPlacement, ResourceCenterLocator, BaseData, SharkyUnitData, MacroData, UnitCountService);
@@ -436,6 +438,7 @@ namespace Sharky.DefaultBot
             var denyExpansionsTask = new DenyExpansionsTask(this, false, 1.1f);
             var darkTemplarHarassTask = new DarkTemplarHarassTask(BaseData, TargetingData, MapDataService, darkTemplarMicroController, 2, false);
             var defensiveZealotWarpInTask = new DefensiveZealotWarpInTask(this, false, .5f);
+            var reaperMiningDefenseTask = new ReaperMiningDefenseTask(this, true, .5f);
 
 
             MicroTaskData.MicroTasks[defenseSquadTask.GetType().Name] = defenseSquadTask;
@@ -467,6 +470,7 @@ namespace Sharky.DefaultBot
             MicroTaskData.MicroTasks[denyExpansionsTask.GetType().Name] = denyExpansionsTask;
             MicroTaskData.MicroTasks[darkTemplarHarassTask.GetType().Name] = darkTemplarHarassTask;
             MicroTaskData.MicroTasks[defensiveZealotWarpInTask.GetType().Name] = defensiveZealotWarpInTask;
+            MicroTaskData.MicroTasks[reaperMiningDefenseTask.GetType().Name] = reaperMiningDefenseTask;
 
             MicroManager = new MicroManager(ActiveUnitData, MicroTaskData);
             Managers.Add(MicroManager);

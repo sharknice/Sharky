@@ -89,6 +89,7 @@ namespace Sharky.Builds
                 Started = true;
             }
 
+            BuildOptions.AllowBlockWall = false;
             BuildOptions.StrictGasCount = false;
             BuildOptions.StrictSupplyCount = false;
             BuildOptions.StrictWorkerCount = false;

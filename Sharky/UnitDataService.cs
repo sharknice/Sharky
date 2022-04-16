@@ -46,6 +46,10 @@ namespace Sharky
                 {
                     weapon.Range = 7;
                 }
+                if (unitType == UnitTypes.TERRAN_AUTOTURRET && MacroData.Frame > SharkyOptions.FramesPerSecond * 10 * 60)
+                {
+                    weapon.Range = 7;
+                }
                 return weapon;
             }
             if (unitType == UnitTypes.PROTOSS_SENTRY)
