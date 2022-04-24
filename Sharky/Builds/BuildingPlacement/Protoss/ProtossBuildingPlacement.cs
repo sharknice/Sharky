@@ -22,8 +22,9 @@ namespace Sharky.Builds.BuildingPlacement
         IBuildingPlacement ProtectNexusCannonPlacement;
         BuildOptions BuildOptions;
         IBuildingPlacement ProtossDefensiveGridPlacement;
+        IBuildingPlacement ProtossProxyGridPlacement;
 
-        public ProtossBuildingPlacement(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, BaseData baseData, DebugService debugService, MapDataService mapDataService, BuildingService buildingService, IBuildingPlacement wallOffPlacement, ProtossPylonGridPlacement protossPylonGridPlacement, ProtossProductionGridPlacement protossProductionGridPlacement, IBuildingPlacement protectNexusPylonPlacement, TargetingData targetingData, IBuildingPlacement protectNexusCannonPlacement, BuildOptions buildOptions, IBuildingPlacement protossDefensiveGridPlacement)
+        public ProtossBuildingPlacement(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, BaseData baseData, DebugService debugService, MapDataService mapDataService, BuildingService buildingService, IBuildingPlacement wallOffPlacement, ProtossPylonGridPlacement protossPylonGridPlacement, ProtossProductionGridPlacement protossProductionGridPlacement, IBuildingPlacement protectNexusPylonPlacement, TargetingData targetingData, IBuildingPlacement protectNexusCannonPlacement, BuildOptions buildOptions, IBuildingPlacement protossDefensiveGridPlacement, IBuildingPlacement protossProxyGridPlacement)
         {
             ActiveUnitData = activeUnitData;
             SharkyUnitData = sharkyUnitData;
@@ -39,6 +40,7 @@ namespace Sharky.Builds.BuildingPlacement
             ProtectNexusCannonPlacement = protectNexusCannonPlacement;
             BuildOptions = buildOptions;
             ProtossDefensiveGridPlacement = protossDefensiveGridPlacement;
+            ProtossProxyGridPlacement = protossProxyGridPlacement;
         }
 
         public Point2D FindPlacement(Point2D target, UnitTypes unitType, int size, bool ignoreResourceProximity = false, float maxDistance = 50, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.None, bool requireVision = false, bool allowBlockBase = false)
@@ -168,6 +170,15 @@ namespace Sharky.Builds.BuildingPlacement
                     }
                 }
                 var gridPlacement = ProtossDefensiveGridPlacement.FindPlacement(target, UnitTypes.PROTOSS_PHOTONCANNON, (int)size, minimumMineralProximinity == 0, maxDistance, true, wallOffType, requireVision, allowBlockBase);
+                if (gridPlacement != null)
+                {
+                    return gridPlacement;
+                }
+            }
+
+            if (size == 3 && allowBlockBase)
+            {
+                var gridPlacement = ProtossProxyGridPlacement.FindPlacement(target, UnitTypes.PROTOSS_GATEWAY, (int)size, minimumMineralProximinity == 0, maxDistance, true, wallOffType, requireVision, allowBlockBase);
                 if (gridPlacement != null)
                 {
                     return gridPlacement;

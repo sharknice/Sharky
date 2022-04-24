@@ -118,6 +118,7 @@ namespace Sharky.DefaultBot
         public IBuildingPlacement WallOffPlacement { get; set; }
         public IBuildingPlacement TerranBuildingPlacement { get; set; }
         public IBuildingPlacement ProtossDefensiveGridPlacement { get; set; }
+        public IBuildingPlacement ProtossProxyGridPlacement { get; set; }
         public IBuildingPlacement ProtectNexusPylonPlacement { get; set; }
         public IBuildingPlacement ProtectNexusCannonPlacement { get; set; }
         public IBuildingPlacement ProtectNexusBatteryPlacement { get; set; }
@@ -253,7 +254,8 @@ namespace Sharky.DefaultBot
             MissileTurretPlacement = new MissileTurretPlacement(this);
             TerranBuildingPlacement = new TerranBuildingPlacement(ActiveUnitData, SharkyUnitData, BaseData, DebugService, BuildingService, WallOffPlacement, TerranWallService, TerranSupplyDepotGridPlacement, TerranProductionGridPlacement, TerranTechGridPlacement, MissileTurretPlacement);
             ProtossDefensiveGridPlacement = new ProtossDefensiveGridPlacement(this);
-            ProtossBuildingPlacement = new ProtossBuildingPlacement(ActiveUnitData, SharkyUnitData, BaseData, DebugService, MapDataService, BuildingService, WallOffPlacement, ProtossPylonGridPlacement, ProtossProductionGridPlacement, ProtectNexusPylonPlacement, TargetingData, ProtectNexusCannonPlacement, BuildOptions, ProtossDefensiveGridPlacement);
+            ProtossProxyGridPlacement = new ProtossProxyGridPlacement(this);
+            ProtossBuildingPlacement = new ProtossBuildingPlacement(ActiveUnitData, SharkyUnitData, BaseData, DebugService, MapDataService, BuildingService, WallOffPlacement, ProtossPylonGridPlacement, ProtossProductionGridPlacement, ProtectNexusPylonPlacement, TargetingData, ProtectNexusCannonPlacement, BuildOptions, ProtossDefensiveGridPlacement, ProtossProxyGridPlacement);
             ZergBuildingPlacement = new ZergBuildingPlacement(ActiveUnitData, SharkyUnitData, DebugService, BuildingService);
             ResourceCenterLocator = new ResourceCenterLocator(this);
             BuildingPlacement = new BuildingPlacement(ProtossBuildingPlacement, TerranBuildingPlacement, ZergBuildingPlacement, ResourceCenterLocator, BaseData, SharkyUnitData, MacroData, UnitCountService);
