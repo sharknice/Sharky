@@ -55,6 +55,17 @@ namespace Sharky.MicroControllers.Protoss
             var blinkReady = SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.BLINKTECH) && commander.AbilityOffCooldown(Abilities.EFFECT_BLINK_STALKER, frame, SharkyOptions.FramesPerSecond, SharkyUnitData);
             if (blinkReady)
             {
+                if (commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.LOCKON))
+                {
+                    var cyclone = commander.UnitCalculation.NearbyEnemies.Where(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_CYCLONE).OrderBy(e => Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+                    if (cyclone != null)
+                    {
+                        var avoidPoint = GetGroundAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, cyclone.Unit.Pos, target, defensivePoint, 15f + cyclone.Unit.Radius + commander.UnitCalculation.Unit.Radius + AvoidDamageDistance + 4);
+                        action = commander.Order(frame, Abilities.EFFECT_BLINK_STALKER, avoidPoint);
+                        return true;
+                    }
+                }
+
                 var attack = commander.UnitCalculation.Attackers.OrderBy(e => (e.Range * e.Range) - Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position)).FirstOrDefault();
                 if (attack != null)
                 {

@@ -10,6 +10,7 @@ namespace Sharky.Macro
         MacroData MacroData;
         SharkyUnitData SharkyUnitData;
         BuildOptions BuildOptions;
+        BaseData BaseData;
 
         IBuildingBuilder BuildingBuilder;
 
@@ -20,6 +21,7 @@ namespace Sharky.Macro
             MacroData = defaultSharkyBot.MacroData;
             SharkyUnitData = defaultSharkyBot.SharkyUnitData;
             BuildOptions = defaultSharkyBot.BuildOptions;
+            BaseData = defaultSharkyBot.BaseData;
 
             BuildingBuilder = buildingBuilder;
         }
@@ -37,8 +39,9 @@ namespace Sharky.Macro
 
             if (MacroData.BuildPylon)
             {
+                var requireSameHeight = BaseData.SelfBases.Count == 1;
                 var unitData = SharkyUnitData.BuildingData[UnitTypes.PROTOSS_PYLON];
-                var command = BuildingBuilder.BuildBuilding(MacroData, UnitTypes.PROTOSS_PYLON, unitData, wallOffType: BuildOptions.WallOffType);
+                var command = BuildingBuilder.BuildBuilding(MacroData, UnitTypes.PROTOSS_PYLON, unitData, wallOffType: BuildOptions.WallOffType, requireSameHeight: requireSameHeight);
                 if (command != null)
                 {
                     commands.AddRange(command);

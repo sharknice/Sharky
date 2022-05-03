@@ -99,7 +99,7 @@ namespace Sharky.MicroTasks
                         ChatService.SendChatType("WallOffTask-TaskCompleted");
                         BlockedChatSent = true;
                     }
-                    if (shieldBattery.UnitCalculation.Unit.BuildProgress < 1 && shieldBattery.UnitCalculation.Unit.BuildProgress > .95f)
+                    if (shieldBattery.UnitCalculation.Unit.BuildProgress < 1 && shieldBattery.UnitCalculation.Unit.BuildProgress > .95f && shieldBattery.UnitCalculation.EnemiesInRangeOf.Count() < 2)
                     {
                         var cancelCommand = shieldBattery.Order(frame, Abilities.CANCEL);
                         if (cancelCommand != null)

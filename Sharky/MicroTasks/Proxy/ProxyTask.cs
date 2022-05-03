@@ -11,8 +11,6 @@ namespace Sharky.MicroTasks
     {
         SharkyUnitData SharkyUnitData;
         MacroData MacroData;
-        MicroTaskData MicroTaskData;
-        DebugService DebugService;
         ActiveUnitData ActiveUnitData;
         IIndividualMicroController IndividualMicroController;
 
@@ -28,9 +26,7 @@ namespace Sharky.MicroTasks
             Priority = priority;
             MacroData = macroData;
             ProxyName = proxyName;
-            MicroTaskData = microTaskData;
             ActiveUnitData = activeUnitData;
-            DebugService = debugService;
             IndividualMicroController = individualMicroController;
 
             UnitCommanders = new List<UnitCommander>();
@@ -89,16 +85,6 @@ namespace Sharky.MicroTasks
             }
         }
 
-        float DistanceToResourceCenter(KeyValuePair<ulong, UnitCommander> commander)
-        {
-            var resourceCenter = commander.Value.UnitCalculation.NearbyAllies.Take(25).FirstOrDefault(a => a.UnitClassifications.Contains(UnitClassification.ResourceCenter));
-            if (resourceCenter != null)
-            {
-                return Vector2.DistanceSquared(commander.Value.UnitCalculation.Position, resourceCenter.Position);
-            }
-            return 0;
-        }
-
         public override IEnumerable<SC2APIProtocol.Action> PerformActions(int frame)
         {
             var commands = new List<SC2APIProtocol.Action>();
@@ -121,7 +107,15 @@ namespace Sharky.MicroTasks
                 {
                     commander.UnitRole = UnitRole.Proxy;
                 }
-                if (Vector2.DistanceSquared(new Vector2(MacroData.Proxies[ProxyName].Location.X, MacroData.Proxies[ProxyName].Location.Y), commander.UnitCalculation.Position) > MacroData.Proxies[ProxyName].MaximumBuildingDistance)
+                if (commander.UnitCalculation.EnemiesInRangeOfAvoid.Any())
+                {
+                    var action = IndividualMicroController.Retreat(commander, MacroData.Proxies[ProxyName].Location, null, frame);
+                    if (action != null)
+                    {
+                        commands.AddRange(action);
+                    }
+                }
+                else if (Vector2.DistanceSquared(new Vector2(MacroData.Proxies[ProxyName].Location.X, MacroData.Proxies[ProxyName].Location.Y), commander.UnitCalculation.Position) > MacroData.Proxies[ProxyName].MaximumBuildingDistance)
                 {
                     List<SC2APIProtocol.Action> action;
                     if (IndividualMicroController.NavigateToTarget(commander, MacroData.Proxies[ProxyName].Location, null, null, Formation.Normal, frame, out action))

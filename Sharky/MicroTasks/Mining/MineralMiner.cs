@@ -26,6 +26,7 @@ namespace Sharky.MicroTasks.Mining
 
             foreach (var selfBase in BaseData.SelfBases)
             {
+                if (selfBase.ResourceCenter == null) { continue; }
                 var baseVector = new Vector2(selfBase.ResourceCenter.Pos.X, selfBase.ResourceCenter.Pos.Y);
                 foreach (var miningInfo in selfBase.MineralMiningInfo)
                 {

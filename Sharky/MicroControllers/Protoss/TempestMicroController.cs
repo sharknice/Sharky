@@ -21,21 +21,18 @@ namespace Sharky.MicroControllers.Protoss
         {
             action = null;
 
-            if (MicroPriority == MicroPriority.JustLive)
+            if (MicroPriority == MicroPriority.JustLive || MicroPriority == MicroPriority.AttackForward || commander.UnitCalculation.Unit.IsHallucination)
             {
                 return false;
             }
 
-            var range = 14; // 14 range for air
-            var enemiesInRange = new List<UnitCalculation>();
-
-            foreach (var enemyAttack in commander.UnitCalculation.NearbyEnemies)
+            if (commander.UnitCalculation.Unit.ShieldMax > 0 && commander.UnitCalculation.Unit.Shield < 1)
             {
-                if (DamageService.CanDamage(enemyAttack, commander.UnitCalculation) && InRange(commander.UnitCalculation.Position, enemyAttack.Position, range + commander.UnitCalculation.Unit.Radius + enemyAttack.Unit.Radius + AvoidDamageDistance))
-                {
-                    enemiesInRange.Add(enemyAttack);
-                }
+                return false;
             }
+
+            var range = 12;
+            var enemiesInRange = commander.UnitCalculation.NearbyEnemies.Take(25).Where(enemyAttack => DamageService.CanDamage(enemyAttack, commander.UnitCalculation) && InRange(commander.UnitCalculation.Position, enemyAttack.Position, range + commander.UnitCalculation.Unit.Radius + enemyAttack.Unit.Radius + AvoidDamageDistance));
 
             var closestEnemy = enemiesInRange.OrderBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position)).FirstOrDefault();
             if (closestEnemy == null)
@@ -64,10 +61,7 @@ namespace Sharky.MicroControllers.Protoss
                 range = 10;
             }
 
-            var angle = Math.Atan2(target.Y - position.Y, position.X - target.X);
-            var x = range * Math.Cos(angle);
-            var y = range * Math.Sin(angle);
-            return new Point2D { X = target.X + (float)x, Y = target.Y - (float)y };
+            return base.GetPositionFromRange(commander, target, position, range);
         }
     }
 }

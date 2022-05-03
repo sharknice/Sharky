@@ -128,7 +128,7 @@ namespace Sharky.Builds.BuildingPlacement
             if (x >= 0 && y >= 0 && x < MapDataService.MapData.MapWidth && y < MapDataService.MapData.MapHeight &&
                 (Vector2.DistanceSquared(vector, target) < (maxDistance * maxDistance)) &&
                 MapDataService.MapHeight((int)x, (int)y) == baseHeight &&
-                !BuildingService.Blocked(x, y, size / 2.0f, -.5f) && !BuildingService.HasAnyCreep(x, y, size / 2f) &&
+                !BuildingService.Blocked(x, y, size / 2.0f, 0) && !BuildingService.HasAnyCreep(x, y, size / 2f) &&
                 BuildingService.RoomBelowAndAbove(x, y, size))
             {
                 if (!BuildOptions.AllowBlockWall && MapDataService.MapData?.WallData != null && MapDataService.MapData.WallData.Any(d => d.FullDepotWall != null && d.FullDepotWall.Any(p => Vector2.DistanceSquared(new Vector2(p.X, p.Y), vector) < 16)))
