@@ -1,23 +1,30 @@
-﻿using Sharky.Chat;
+﻿using Sharky.DefaultBot;
 using System.Linq;
 
 namespace Sharky.EnemyStrategies.Protoss
 {
     public class ZealotRush : EnemyStrategy
     {
-        public ZealotRush(EnemyStrategyHistory enemyStrategyHistory, ChatService chatService, ActiveUnitData activeUnitData, SharkyOptions sharkyOptions, DebugService debugService, UnitCountService unitCountService, FrameToTimeConverter frameToTimeConverter)
+        EnemyData EnemyData;
+
+        public ZealotRush(DefaultSharkyBot defaultSharkyBot)
         {
-            EnemyStrategyHistory = enemyStrategyHistory;
-            ChatService = chatService;
-            ActiveUnitData = activeUnitData;
-            SharkyOptions = sharkyOptions;
-            DebugService = debugService;
-            UnitCountService = unitCountService;
-            FrameToTimeConverter = frameToTimeConverter;
+            EnemyStrategyHistory = defaultSharkyBot.EnemyStrategyHistory;
+            ChatService = defaultSharkyBot.ChatService;
+            ActiveUnitData = defaultSharkyBot.ActiveUnitData;
+            SharkyOptions = defaultSharkyBot.SharkyOptions;
+            DebugService = defaultSharkyBot.DebugService;
+            UnitCountService = defaultSharkyBot.UnitCountService;
+
+            FrameToTimeConverter = defaultSharkyBot.FrameToTimeConverter;
+
+            EnemyData = defaultSharkyBot.EnemyData;
         }
 
         protected override bool Detect(int frame)
         {
+            if (EnemyData.EnemyRace != SC2APIProtocol.Race.Protoss) { return false; }
+
             if (ActiveUnitData.EnemyUnits.Values.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && e.Unit.UnitType != (uint)UnitTypes.PROTOSS_ZEALOT))
             {
                 return false;

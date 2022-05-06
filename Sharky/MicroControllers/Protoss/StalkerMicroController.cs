@@ -117,5 +117,28 @@ namespace Sharky.MicroControllers.Protoss
 
             return base.AvoidDamage(commander, target, defensivePoint, frame, out action);
         }
+
+
+        protected override bool DealWithCyclones(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
+
+            if (commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.LOCKON))
+            {
+                var blinkReady = SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.BLINKTECH) && commander.AbilityOffCooldown(Abilities.EFFECT_BLINK_STALKER, frame, SharkyOptions.FramesPerSecond, SharkyUnitData);
+                if (blinkReady)
+                {
+                    var cyclone = commander.UnitCalculation.NearbyEnemies.Where(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_CYCLONE).OrderBy(e => Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+                    if (cyclone != null)
+                    {
+                        var avoidPoint = GetGroundAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, cyclone.Unit.Pos, target, defensivePoint, 15f + cyclone.Unit.Radius + commander.UnitCalculation.Unit.Radius + AvoidDamageDistance + 4);
+                        action = commander.Order(frame, Abilities.EFFECT_BLINK_STALKER, avoidPoint);
+                        return true;
+                    }
+                }
+            }
+
+            return base.DealWithCyclones(commander, target, defensivePoint, frame, out action);
+        }
     }
 }

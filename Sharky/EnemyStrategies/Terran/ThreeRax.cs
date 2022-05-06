@@ -1,22 +1,29 @@
-﻿using Sharky.Chat;
+﻿using Sharky.DefaultBot;
 
 namespace Sharky.EnemyStrategies.Terran
 {
     public class ThreeRax : EnemyStrategy
     {
-        public ThreeRax(EnemyStrategyHistory enemyStrategyHistory, ChatService chatService, ActiveUnitData activeUnitData, SharkyOptions sharkyOptions, DebugService debugService, UnitCountService unitCountService, FrameToTimeConverter frameToTimeConverter)
+        EnemyData EnemyData;
+
+        public ThreeRax(DefaultSharkyBot defaultSharkyBot)
         {
-            EnemyStrategyHistory = enemyStrategyHistory;
-            ChatService = chatService;
-            ActiveUnitData = activeUnitData;
-            SharkyOptions = sharkyOptions;
-            DebugService = debugService;
-            UnitCountService = unitCountService;
-            FrameToTimeConverter = frameToTimeConverter;
+            EnemyStrategyHistory = defaultSharkyBot.EnemyStrategyHistory;
+            ChatService = defaultSharkyBot.ChatService;
+            ActiveUnitData = defaultSharkyBot.ActiveUnitData;
+            SharkyOptions = defaultSharkyBot.SharkyOptions;
+            DebugService = defaultSharkyBot.DebugService;
+            UnitCountService = defaultSharkyBot.UnitCountService;
+
+            FrameToTimeConverter = defaultSharkyBot.FrameToTimeConverter;
+
+            EnemyData = defaultSharkyBot.EnemyData;
         }
 
         protected override bool Detect(int frame)
         {
+            if (EnemyData.EnemyRace != SC2APIProtocol.Race.Terran) { return false; }
+
             if (frame > SharkyOptions.FramesPerSecond * 2 * 60 || UnitCountService.EquivalentEnemyTypeCount(UnitTypes.TERRAN_FACTORY) > 0 || UnitCountService.EquivalentEnemyTypeCount(UnitTypes.TERRAN_STARPORT) > 0)
             {
                 return false;

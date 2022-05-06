@@ -1,4 +1,4 @@
-﻿using Sharky.Chat;
+﻿using Sharky.DefaultBot;
 using System.Linq;
 using System.Numerics;
 
@@ -7,25 +7,30 @@ namespace Sharky.EnemyStrategies.Protoss
     public class ProxyRobo : EnemyStrategy
     {
         TargetingData TargetingData;
+        EnemyData EnemyData;
 
-        public ProxyRobo(EnemyStrategyHistory enemyStrategyHistory, ChatService chatService, ActiveUnitData activeUnitData, SharkyOptions sharkyOptions, DebugService debugService, UnitCountService unitCountService, TargetingData targetingData, FrameToTimeConverter frameToTimeConverter)
+        public ProxyRobo(DefaultSharkyBot defaultSharkyBot)
         {
-            EnemyStrategyHistory = enemyStrategyHistory;
-            ChatService = chatService;
-            ActiveUnitData = activeUnitData;
-            SharkyOptions = sharkyOptions;
-            DebugService = debugService;
-            UnitCountService = unitCountService;
+            EnemyStrategyHistory = defaultSharkyBot.EnemyStrategyHistory;
+            ChatService = defaultSharkyBot.ChatService;
+            ActiveUnitData = defaultSharkyBot.ActiveUnitData;
+            SharkyOptions = defaultSharkyBot.SharkyOptions;
+            DebugService = defaultSharkyBot.DebugService;
+            UnitCountService = defaultSharkyBot.UnitCountService;
 
-            TargetingData = targetingData;
-            FrameToTimeConverter = frameToTimeConverter;
+            FrameToTimeConverter = defaultSharkyBot.FrameToTimeConverter;
+
+            EnemyData = defaultSharkyBot.EnemyData;
+            TargetingData = defaultSharkyBot.TargetingData;
         }
 
         protected override bool Detect(int frame)
         {
+            if (EnemyData.EnemyRace != SC2APIProtocol.Race.Protoss) { return false; }
+
             if (frame < SharkyOptions.FramesPerSecond * 60 * 5)
             {
-                if (ActiveUnitData.EnemyUnits.Values.Any(u => u.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && u.Unit.UnitType == (uint)UnitTypes.PROTOSS_ROBOTICSFACILITY && Vector2.DistanceSquared(new Vector2(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y), u.Position) > (75 * 75)))
+                if (ActiveUnitData.EnemyUnits.Values.Any(u => u.Unit.UnitType == (uint)UnitTypes.PROTOSS_ROBOTICSFACILITY && Vector2.DistanceSquared(new Vector2(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y), u.Position) > (75 * 75)))
                 {
                     return true;
                 }

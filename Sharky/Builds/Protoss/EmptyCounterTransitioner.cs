@@ -5,13 +5,8 @@ namespace Sharky.Builds.Protoss
 {
     public class EmptyCounterTransitioner : ICounterTransitioner
     {
-        EnemyData EnemyData;
-        SharkyOptions SharkyOptions;
-
-        public EmptyCounterTransitioner(EnemyData enemyData, SharkyOptions sharkyOptions)
+        public EmptyCounterTransitioner()
         {
-            EnemyData = enemyData;
-            SharkyOptions = sharkyOptions;
         }
 
         public List<string> DefaultCounterTransition(int frame)

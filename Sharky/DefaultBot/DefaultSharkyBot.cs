@@ -498,32 +498,34 @@ namespace Sharky.DefaultBot
             EnemyStrategyHistory = new EnemyStrategyHistory();
             EnemyData.EnemyStrategies = new Dictionary<string, IEnemyStrategy>
             {
-                ["Proxy"] = new EnemyStrategies.Proxy(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, TargetingData, DebugService, UnitCountService, FrameToTimeConverter),
-                ["WorkerRush"] = new WorkerRush(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, TargetingData, DebugService, UnitCountService, FrameToTimeConverter, MacroData),
-                ["InvisibleAttacks"] = new InvisibleAttacks(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, DebugService, UnitCountService, FrameToTimeConverter),
+                [nameof(EnemyStrategies.Proxy)] = new EnemyStrategies.Proxy(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, TargetingData, DebugService, UnitCountService, FrameToTimeConverter),
+                [nameof(WorkerRush)] = new WorkerRush(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, TargetingData, DebugService, UnitCountService, FrameToTimeConverter, MacroData),
+                [nameof(InvisibleAttacks)] = new InvisibleAttacks(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, DebugService, UnitCountService, FrameToTimeConverter),
 
-                ["AdeptRush"] = new AdeptRush(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, DebugService, UnitCountService, FrameToTimeConverter),
-                ["CannonRush"] = new CannonRush(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, TargetingData, DebugService, UnitCountService, FrameToTimeConverter),
-                ["FourGate"] = new EnemyStrategies.Protoss.FourGate(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, DebugService, UnitCountService, FrameToTimeConverter),
-                ["ProtossFastExpand"] = new ProtossFastExpand(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, DebugService, UnitCountService, TargetingData, FrameToTimeConverter),
-                ["ProxyRobo"] = new ProxyRobo(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, DebugService, UnitCountService, TargetingData, FrameToTimeConverter),
-                ["ProxyStargate"] = new ProxyStargate(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, DebugService, UnitCountService, TargetingData, FrameToTimeConverter),
-                ["ZealotRush"] = new ZealotRush(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, DebugService, UnitCountService, FrameToTimeConverter),
+                [nameof(AdeptRush)] = new AdeptRush(this),
+                [nameof(CannonRush)] = new CannonRush(this),
+                [nameof(EnemyStrategies.Protoss.FourGate)] = new EnemyStrategies.Protoss.FourGate(this),
+                [nameof(ProtossFastExpand)] = new ProtossFastExpand(this),
+                [nameof(ProxyRobo)] = new ProxyRobo(this),
+                [nameof(ProxyStargate)] = new ProxyStargate(this),
+                [nameof(ProxyShieldBattery)] = new ProxyShieldBattery(this),
+                [nameof(ZealotRush)] = new ZealotRush(this),
+                [nameof(FleetBeaconTech)] = new FleetBeaconTech(this),
 
-                ["MarineRush"] = new MarineRush(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, DebugService, UnitCountService, FrameToTimeConverter),
-                ["BunkerRush"] = new BunkerRush(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, TargetingData, DebugService, UnitCountService, FrameToTimeConverter),
-                ["BunkerContain"] = new BunkerContain(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, TargetingData, DebugService, UnitCountService, FrameToTimeConverter),
-                ["MassVikings"] = new MassVikings(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, DebugService, UnitCountService, FrameToTimeConverter),
-                ["ThreeRax"] = new ThreeRax(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, DebugService, UnitCountService, FrameToTimeConverter),
+                [nameof(MarineRush)] = new MarineRush(this),
+                [nameof(BunkerRush)] = new BunkerRush(this),
+                [nameof(BunkerContain)] = new BunkerContain(this),
+                [nameof(MassVikings)] = new MassVikings(this),
+                [nameof(ThreeRax)] = new ThreeRax(this),
 
-                ["ZerglingRush"] = new ZerglingRush(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, DebugService, UnitCountService, FrameToTimeConverter),
-                ["RoachRavager"] = new RoachRavager(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, DebugService, UnitCountService, FrameToTimeConverter)
+                [nameof(ZerglingRush)] = new ZerglingRush(this),
+                [nameof(RoachRavager)] = new RoachRavager(this)
             };
 
             EnemyStrategyManager = new EnemyStrategyManager(EnemyData);
             Managers.Add(EnemyStrategyManager);
 
-            EmptyCounterTransitioner = new EmptyCounterTransitioner(EnemyData, SharkyOptions);
+            EmptyCounterTransitioner = new EmptyCounterTransitioner();
 
             var antiMassMarine = new AntiMassMarine(this, EmptyCounterTransitioner);
             var fourGate = new Builds.Protoss.FourGate(this, EmptyCounterTransitioner);

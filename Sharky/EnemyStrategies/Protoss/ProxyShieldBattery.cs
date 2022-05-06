@@ -4,12 +4,12 @@ using System.Numerics;
 
 namespace Sharky.EnemyStrategies.Protoss
 {
-    public class ProxyStargate : EnemyStrategy
+    public class ProxyShieldBattery : EnemyStrategy
     {
         TargetingData TargetingData;
         EnemyData EnemyData;
 
-        public ProxyStargate(DefaultSharkyBot defaultSharkyBot)
+        public ProxyShieldBattery(DefaultSharkyBot defaultSharkyBot)
         {
             EnemyStrategyHistory = defaultSharkyBot.EnemyStrategyHistory;
             ChatService = defaultSharkyBot.ChatService;
@@ -31,7 +31,7 @@ namespace Sharky.EnemyStrategies.Protoss
 
             if (frame < SharkyOptions.FramesPerSecond * 60 * 5)
             {
-                if (ActiveUnitData.EnemyUnits.Values.Any(u => u.Unit.UnitType == (uint)UnitTypes.PROTOSS_STARGATE && Vector2.DistanceSquared(new Vector2(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y), u.Position) > (75 * 75)))
+                if (ActiveUnitData.EnemyUnits.Values.Any(u => u.Unit.UnitType == (uint)UnitTypes.PROTOSS_SHIELDBATTERY && Vector2.DistanceSquared(new Vector2(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y), u.Position) > (75 * 75)))
                 {
                     return true;
                 }

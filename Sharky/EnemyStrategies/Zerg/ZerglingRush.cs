@@ -1,23 +1,30 @@
-﻿using Sharky.Chat;
+﻿using Sharky.DefaultBot;
 using System.Linq;
 
 namespace Sharky.EnemyStrategies.Zerg
 {
     public class ZerglingRush : EnemyStrategy
     {
-        public ZerglingRush(EnemyStrategyHistory enemyStrategyHistory, ChatService chatService, ActiveUnitData activeUnitData, SharkyOptions sharkyOptions, DebugService debugService, UnitCountService unitCountService, FrameToTimeConverter frameToTimeConverter)
+        EnemyData EnemyData;
+
+        public ZerglingRush(DefaultSharkyBot defaultSharkyBot)
         {
-            EnemyStrategyHistory = enemyStrategyHistory;
-            ChatService = chatService;
-            ActiveUnitData = activeUnitData;
-            SharkyOptions = sharkyOptions;
-            DebugService = debugService;
-            UnitCountService = unitCountService;
-            FrameToTimeConverter = frameToTimeConverter;
+            EnemyStrategyHistory = defaultSharkyBot.EnemyStrategyHistory;
+            ChatService = defaultSharkyBot.ChatService;
+            ActiveUnitData = defaultSharkyBot.ActiveUnitData;
+            SharkyOptions = defaultSharkyBot.SharkyOptions;
+            DebugService = defaultSharkyBot.DebugService;
+            UnitCountService = defaultSharkyBot.UnitCountService;
+
+            FrameToTimeConverter = defaultSharkyBot.FrameToTimeConverter;
+
+            EnemyData = defaultSharkyBot.EnemyData;
         }
 
         protected override bool Detect(int frame)
         {
+            if (EnemyData.EnemyRace != SC2APIProtocol.Race.Zerg) { return false; }
+
             if (ActiveUnitData.EnemyUnits.Values.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && e.Unit.UnitType != (uint)UnitTypes.ZERG_ZERGLING))
             {
                 return false;

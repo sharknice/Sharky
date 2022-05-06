@@ -1,24 +1,30 @@
-﻿using Sharky.Chat;
-using Sharky.Managers;
+﻿using Sharky.DefaultBot;
 
 namespace Sharky.EnemyStrategies.Terran
 {
     public class MassVikings : EnemyStrategy
     {
-        public MassVikings(EnemyStrategyHistory enemyStrategyHistory, ChatService chatService, ActiveUnitData activeUnitData, SharkyOptions sharkyOptions, DebugService debugService, UnitCountService unitCountService, FrameToTimeConverter frameToTimeConverter)
+        EnemyData EnemyData;
+
+        public MassVikings(DefaultSharkyBot defaultSharkyBot)
         {
-            EnemyStrategyHistory = enemyStrategyHistory;
-            ChatService = chatService;
-            ActiveUnitData = activeUnitData;
-            SharkyOptions = sharkyOptions;
-            DebugService = debugService;
-            UnitCountService = unitCountService;
-            FrameToTimeConverter = frameToTimeConverter;
+            EnemyStrategyHistory = defaultSharkyBot.EnemyStrategyHistory;
+            ChatService = defaultSharkyBot.ChatService;
+            ActiveUnitData = defaultSharkyBot.ActiveUnitData;
+            SharkyOptions = defaultSharkyBot.SharkyOptions;
+            DebugService = defaultSharkyBot.DebugService;
+            UnitCountService = defaultSharkyBot.UnitCountService;
+
+            FrameToTimeConverter = defaultSharkyBot.FrameToTimeConverter;
+
+            EnemyData = defaultSharkyBot.EnemyData;
         }
 
         protected override bool Detect(int frame)
         {
-            if (UnitCountService.EnemyCount(UnitTypes.TERRAN_VIKINGASSAULT) + UnitCountService.EnemyCount(UnitTypes.TERRAN_VIKINGFIGHTER) >= 8)
+            if (EnemyData.EnemyRace != SC2APIProtocol.Race.Terran) { return false; }
+
+            if (UnitCountService.EquivalentEnemyTypeCount(UnitTypes.TERRAN_VIKINGFIGHTER) >= 8)
             {
                 return true;
             }
