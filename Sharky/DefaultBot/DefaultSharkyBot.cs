@@ -613,7 +613,7 @@ namespace Sharky.DefaultBot
             };
             BuildMatcher = new BuildMatcher();
             RecordService = new RecordService(BuildMatcher);
-            BuildDecisionService = new RecentBuildDecisionService(ChatService, EnemyPlayerService, RecordService, BuildMatcher);
+            BuildDecisionService = new RecentBuildDecisionService(this);
             BuildManager = new BuildManager(BuildChoices, DebugService, MacroBalancer, BuildDecisionService, EnemyPlayerService, ChatHistory, EnemyStrategyHistory, FrameToTimeConverter, SharkyOptions, ChatService, SimCityService);
             Managers.Add(BuildManager);
         }

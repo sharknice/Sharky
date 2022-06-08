@@ -1,5 +1,4 @@
-﻿using Sharky.Chat;
-using Sharky.EnemyPlayer;
+﻿using Sharky.DefaultBot;
 
 namespace Sharky.Builds.BuildChoosing
 {
@@ -10,10 +9,10 @@ namespace Sharky.Builds.BuildChoosing
     {
         protected BuildMatcher BuildMatcher;
 
-        public StrategyBuildDecisionService(ChatService chatService, EnemyPlayerService enemyPlayerService, RecordService recordService, BuildMatcher buildMatcher) 
-            : base(chatService, enemyPlayerService, recordService) 
+        public StrategyBuildDecisionService(DefaultSharkyBot defaultSharkyBot) 
+            : base(defaultSharkyBot) 
         { 
-            BuildMatcher = buildMatcher;
+            BuildMatcher = defaultSharkyBot.BuildMatcher;
         }
     }
 }

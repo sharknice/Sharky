@@ -12,7 +12,6 @@ namespace Sharky.Builds.Terran
     {
         TargetingData TargetingData;
         MapDataService MapDataService;
-        SharkyOptions SharkyOptions;
         OrbitalManager OrbitalManager;
         SharkyUnitData SharkyUnitData;
         BaseData BaseData;
@@ -25,7 +24,6 @@ namespace Sharky.Builds.Terran
         {
             TargetingData = defaultSharkyBot.TargetingData;
             MapDataService = defaultSharkyBot.MapDataService;
-            SharkyOptions = defaultSharkyBot.SharkyOptions;
             OrbitalManager = defaultSharkyBot.OrbitalManager;
             SharkyUnitData = defaultSharkyBot.SharkyUnitData;
             BaseData = defaultSharkyBot.BaseData;

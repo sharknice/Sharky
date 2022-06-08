@@ -1,5 +1,6 @@
 ﻿using SC2APIProtocol;
 using Sharky.Chat;
+using Sharky.DefaultBot;
 using Sharky.EnemyPlayer;
 using System;
 using System.Collections.Generic;
@@ -11,10 +12,10 @@ namespace Sharky.Builds.BuildChoosing
     {
         protected BuildMatcher BuildMatcher;
 
-        public RecentBuildDecisionService(ChatService chatService, EnemyPlayerService enemyPlayerService, RecordService recordService, BuildMatcher buildMatcher) 
-            : base(chatService, enemyPlayerService, recordService) 
+        public RecentBuildDecisionService(DefaultSharkyBot defaultSharkyBot) 
+            : base(defaultSharkyBot) 
         { 
-            BuildMatcher = buildMatcher;
+            BuildMatcher = defaultSharkyBot.BuildMatcher;
         }
 
         private bool SameBuildSequence(List<List<string>> buildSequences, Game originalGame, List<string> currentSequence)

@@ -45,5 +45,6 @@ namespace Sharky
 
         public Dictionary<int, string> EnemyChat { get; set; }
         public Dictionary<int, string> MyChat { get; set; }
+        public List<string> PlannedBuildSequence { get; set; }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using SC2APIProtocol;
 using Sharky.Chat;
+using Sharky.DefaultBot;
 using Sharky.EnemyPlayer;
 using System;
 using System.Collections.Generic;
@@ -14,11 +15,11 @@ namespace Sharky.Builds.BuildChoosing
         protected EnemyPlayerService EnemyPlayerService;
         protected RecordService RecordService;
 
-        public BuildDecisionService(ChatService chatService, EnemyPlayerService enemyPlayerService, RecordService recordService)
+        public BuildDecisionService(DefaultSharkyBot defaultSharkyBot)
         {
-            ChatService = chatService;
-            EnemyPlayerService = enemyPlayerService;
-            RecordService = recordService;
+            ChatService = defaultSharkyBot.ChatService;
+            EnemyPlayerService = defaultSharkyBot.EnemyPlayerService;
+            RecordService = defaultSharkyBot.RecordService;
         }
 
         protected bool BetterBuild(Record original, Record current)

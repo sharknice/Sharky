@@ -24,6 +24,7 @@ namespace Sharky.Managers
         protected IMacroBalancer MacroBalancer;
         protected ISharkyBuild CurrentBuild;
         protected List<string> BuildSequence;
+        protected List<string> PlannedBuildSequence;
 
         protected SimCityService SimCityService;
 
@@ -91,6 +92,7 @@ namespace Sharky.Managers
 
             MapName = gameInfo.MapName;
             BuildSequence = BuildDecisionService.GetBestBuild(EnemyPlayer, buildSequences, MapName, EnemyPlayerService.Enemies, EnemyRace, ActualRace);
+            PlannedBuildSequence = BuildSequence.ToList();
 
             BuildHistory = new Dictionary<int, string>();
             SwitchBuild(BuildSequence.First(), 0);
@@ -183,6 +185,7 @@ namespace Sharky.Managers
         public override void OnEnd(ResponseObservation observation, Result result)
         {
             Console.WriteLine($"Build Sequence: {string.Join(" ", BuildHistory.Select(b => b.Value.ToString()))}");
+            Console.WriteLine($"{result}");
 
             var game = GetGame(observation, result);
             EnemyPlayerService.SaveGame(game);
@@ -195,7 +198,7 @@ namespace Sharky.Managers
             {
                 length = (int)observation.Observation.GameLoop;
             }
-            return new Game { DateTime = DateTime.Now, EnemySelectedRace = EnemySelectedRace, MySelectedRace = SelectedRace, MyRace = ActualRace, EnemyRace = EnemyRace, Length = length, MapName = MapName, Result = (int)result, EnemyId = EnemyPlayer.Id, Builds = BuildHistory, EnemyStrategies = EnemyStrategyHistory.History, EnemyChat = ChatHistory.EnemyChatHistory, MyChat = ChatHistory.MyChatHistory };
+            return new Game { DateTime = DateTime.Now, EnemySelectedRace = EnemySelectedRace, MySelectedRace = SelectedRace, MyRace = ActualRace, EnemyRace = EnemyRace, Length = length, MapName = MapName, Result = (int)result, EnemyId = EnemyPlayer.Id, Builds = BuildHistory, EnemyStrategies = EnemyStrategyHistory.History, EnemyChat = ChatHistory.EnemyChatHistory, MyChat = ChatHistory.MyChatHistory, PlannedBuildSequence = PlannedBuildSequence };
         }
 
         protected void SwitchBuild(string buildName, int frame)

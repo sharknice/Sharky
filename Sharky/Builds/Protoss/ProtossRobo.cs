@@ -9,13 +9,11 @@ namespace Sharky.Builds.Protoss
 {
     public class ProtossRobo : ProtossSharkyBuild
     {
-        SharkyOptions SharkyOptions;
         EnemyData EnemyData;
 
         public ProtossRobo(DefaultSharkyBot defaultSharkyBot, ICounterTransitioner counterTransitioner)
             : base(defaultSharkyBot, counterTransitioner)
         {
-            SharkyOptions = defaultSharkyBot.SharkyOptions;
             EnemyData = defaultSharkyBot.EnemyData;
         }
 
