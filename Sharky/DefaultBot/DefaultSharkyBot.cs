@@ -614,7 +614,7 @@ namespace Sharky.DefaultBot
             BuildMatcher = new BuildMatcher();
             RecordService = new RecordService(BuildMatcher);
             BuildDecisionService = new RecentBuildDecisionService(this);
-            BuildManager = new BuildManager(BuildChoices, DebugService, MacroBalancer, BuildDecisionService, EnemyPlayerService, ChatHistory, EnemyStrategyHistory, FrameToTimeConverter, SharkyOptions, ChatService, SimCityService);
+            BuildManager = new BuildManager(this);
             Managers.Add(BuildManager);
         }
         public SharkyBot CreateBot(List<IManager> managers, DebugService debugService)

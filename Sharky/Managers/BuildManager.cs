@@ -54,21 +54,6 @@ namespace Sharky.Managers
             SimCityService = defaultSharkyBot.SimCityService;
         }
 
-        public BuildManager(Dictionary<Race, BuildChoices> buildChoices, DebugService debugService, IMacroBalancer macroBalancer, IBuildDecisionService buildDecisionService, IEnemyPlayerService enemyPlayerService, ChatHistory chatHistory, EnemyStrategyHistory enemyStrategyHistory, FrameToTimeConverter frameToTimeConverter, SharkyOptions sharkyOptions, ChatService chatService, SimCityService simCityService)
-        {
-            BuildChoices = buildChoices;
-            DebugService = debugService;
-            MacroBalancer = macroBalancer;
-            BuildDecisionService = buildDecisionService;
-            EnemyPlayerService = enemyPlayerService;
-            ChatHistory = chatHistory;
-            EnemyStrategyHistory = enemyStrategyHistory;
-            FrameToTimeConverter = frameToTimeConverter;
-            SharkyOptions = sharkyOptions;
-            ChatService = chatService;
-            SimCityService = simCityService;
-        }
-
         public override void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)
         {
             GetPlayerInfo(gameInfo, playerId, opponentId);
