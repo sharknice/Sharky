@@ -4,8 +4,6 @@ namespace Sharky.EnemyStrategies.Protoss
 {
     public class FleetBeaconTech : EnemyStrategy
     {
-        EnemyData EnemyData;
-
         public FleetBeaconTech(DefaultSharkyBot defaultSharkyBot)
         {
             EnemyStrategyHistory = defaultSharkyBot.EnemyStrategyHistory;
@@ -14,9 +12,7 @@ namespace Sharky.EnemyStrategies.Protoss
             SharkyOptions = defaultSharkyBot.SharkyOptions;
             DebugService = defaultSharkyBot.DebugService;
             UnitCountService = defaultSharkyBot.UnitCountService;
-
             FrameToTimeConverter = defaultSharkyBot.FrameToTimeConverter;
-
             EnemyData = defaultSharkyBot.EnemyData;
         }
 

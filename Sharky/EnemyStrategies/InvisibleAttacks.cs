@@ -1,19 +1,20 @@
-﻿using Sharky.Chat;
+﻿using Sharky.DefaultBot;
 using System.Linq;
 
 namespace Sharky.EnemyStrategies
 {
     public class InvisibleAttacks : EnemyStrategy
     {
-        public InvisibleAttacks(EnemyStrategyHistory enemyStrategyHistory, ChatService chatService, ActiveUnitData activeUnitData, SharkyOptions sharkyOptions, DebugService debugService, UnitCountService unitCountService, FrameToTimeConverter frameToTimeConverter)
+        public InvisibleAttacks(DefaultSharkyBot defaultSharkyBot)
         {
-            EnemyStrategyHistory = enemyStrategyHistory;
-            ChatService = chatService;
-            ActiveUnitData = activeUnitData;
-            SharkyOptions = sharkyOptions;
-            DebugService = debugService;
-            UnitCountService = unitCountService;
-            FrameToTimeConverter = frameToTimeConverter;
+            EnemyStrategyHistory = defaultSharkyBot.EnemyStrategyHistory;
+            ChatService = defaultSharkyBot.ChatService;
+            ActiveUnitData = defaultSharkyBot.ActiveUnitData;
+            SharkyOptions = defaultSharkyBot.SharkyOptions;
+            DebugService = defaultSharkyBot.DebugService;
+            UnitCountService = defaultSharkyBot.UnitCountService;
+            FrameToTimeConverter = defaultSharkyBot.FrameToTimeConverter;
+            EnemyData = defaultSharkyBot.EnemyData;
         }
 
         protected override bool Detect(int frame)

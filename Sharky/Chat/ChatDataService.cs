@@ -89,7 +89,7 @@ namespace Sharky.Chat
 
             while (chatType.Contains("-"))
             {
-                chatType = chatType.Substring(chatType.LastIndexOf('-') + 1);
+                chatType = chatType.Substring(chatType.IndexOf('-') + 1);
                 if (ChatTypeData.ContainsKey(chatType))
                 {
                     return ChatTypeData[chatType];

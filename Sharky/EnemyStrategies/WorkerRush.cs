@@ -1,4 +1,4 @@
-﻿using Sharky.Chat;
+﻿using Sharky.DefaultBot;
 using System.Linq;
 using System.Numerics;
 
@@ -9,17 +9,19 @@ namespace Sharky.EnemyStrategies
         TargetingData TargetingData;
         MacroData MacroData;
 
-        public WorkerRush(EnemyStrategyHistory enemyStrategyHistory, ChatService chatService, ActiveUnitData activeUnitData, SharkyOptions sharkyOptions, TargetingData targetingData, DebugService debugService, UnitCountService unitCountService, FrameToTimeConverter frameToTimeConverter, MacroData macroData)
+        public WorkerRush(DefaultSharkyBot defaultSharkyBot)
         {
-            EnemyStrategyHistory = enemyStrategyHistory;
-            ChatService = chatService;
-            ActiveUnitData = activeUnitData;
-            SharkyOptions = sharkyOptions;
-            TargetingData = targetingData;
-            DebugService = debugService;
-            UnitCountService = unitCountService;
-            FrameToTimeConverter = frameToTimeConverter;
-            MacroData = macroData;
+            EnemyStrategyHistory = defaultSharkyBot.EnemyStrategyHistory;
+            ChatService = defaultSharkyBot.ChatService;
+            ActiveUnitData = defaultSharkyBot.ActiveUnitData;
+            SharkyOptions = defaultSharkyBot.SharkyOptions;
+            DebugService = defaultSharkyBot.DebugService;
+            UnitCountService = defaultSharkyBot.UnitCountService;
+            FrameToTimeConverter = defaultSharkyBot.FrameToTimeConverter;
+            EnemyData = defaultSharkyBot.EnemyData;
+
+            TargetingData = defaultSharkyBot.TargetingData;
+            MacroData = defaultSharkyBot.MacroData;
         }
 
         protected override bool Detect(int frame)

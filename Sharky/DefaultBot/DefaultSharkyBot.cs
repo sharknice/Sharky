@@ -498,9 +498,9 @@ namespace Sharky.DefaultBot
             EnemyStrategyHistory = new EnemyStrategyHistory();
             EnemyData.EnemyStrategies = new Dictionary<string, IEnemyStrategy>
             {
-                [nameof(EnemyStrategies.Proxy)] = new EnemyStrategies.Proxy(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, TargetingData, DebugService, UnitCountService, FrameToTimeConverter),
-                [nameof(WorkerRush)] = new WorkerRush(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, TargetingData, DebugService, UnitCountService, FrameToTimeConverter, MacroData),
-                [nameof(InvisibleAttacks)] = new InvisibleAttacks(EnemyStrategyHistory, ChatService, ActiveUnitData, SharkyOptions, DebugService, UnitCountService, FrameToTimeConverter),
+                [nameof(EnemyStrategies.Proxy)] = new EnemyStrategies.Proxy(this),
+                [nameof(WorkerRush)] = new WorkerRush(this),
+                [nameof(InvisibleAttacks)] = new InvisibleAttacks(this),
 
                 [nameof(AdeptRush)] = new AdeptRush(this),
                 [nameof(CannonRush)] = new CannonRush(this),

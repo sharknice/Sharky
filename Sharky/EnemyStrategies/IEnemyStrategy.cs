@@ -1,4 +1,6 @@
-﻿namespace Sharky.EnemyStrategies
+﻿using SC2APIProtocol;
+
+namespace Sharky.EnemyStrategies
 {
     public interface IEnemyStrategy
     {

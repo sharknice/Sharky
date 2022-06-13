@@ -16,11 +16,29 @@
     ]
   },
   {
+    "ChatType": "Victory-Repeat-Proxy-EnemyStrategy",
+    "Messages": [
+      [ "You're proxying again?", "It didn't work last game" ]
+    ]
+  },
+  {
+    "ChatType": "Defeat-Repeat-Proxy-EnemyStrategy",
+    "Messages": [
+      [ "I knew you would proxy me again {name}" ]
+    ]
+  },
+  {
     "ChatType": "MarineRush-EnemyStrategy",
     "Messages": [
       [ "So", "many", "marines" ],
       [ "That's a lot of marines" ]
     ]
+  },
+  {
+    "ChatType": "New-MarineRush-EnemyStrategy",
+    "Messages": [
+      [ "You didn't do this last game" ],
+      [ "That's a lot more marines than last game" ]
+    ]
   }
-
 ]

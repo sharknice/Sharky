@@ -7,7 +7,6 @@ namespace Sharky.EnemyStrategies.Terran
     public class BunkerContain : EnemyStrategy
     {
         TargetingData TargetingData;
-        EnemyData EnemyData;
 
         public BunkerContain(DefaultSharkyBot defaultSharkyBot)
         {
@@ -17,10 +16,9 @@ namespace Sharky.EnemyStrategies.Terran
             SharkyOptions = defaultSharkyBot.SharkyOptions;
             DebugService = defaultSharkyBot.DebugService;
             UnitCountService = defaultSharkyBot.UnitCountService;
-
             FrameToTimeConverter = defaultSharkyBot.FrameToTimeConverter;
-
             EnemyData = defaultSharkyBot.EnemyData;
+
             TargetingData = defaultSharkyBot.TargetingData;
         }
 

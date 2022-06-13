@@ -39,6 +39,8 @@ namespace Sharky.Managers
         protected ChatHistory ChatHistory;
         protected EnemyStrategyHistory EnemyStrategyHistory;
 
+        EnemyData EnemyData;
+
         public BuildManager(DefaultSharkyBot defaultSharkyBot)
         {
             BuildChoices = defaultSharkyBot.BuildChoices;
@@ -52,6 +54,7 @@ namespace Sharky.Managers
             SharkyOptions = defaultSharkyBot.SharkyOptions;
             ChatService = defaultSharkyBot.ChatService;
             SimCityService = defaultSharkyBot.SimCityService;
+            EnemyData = defaultSharkyBot.EnemyData;
         }
 
         public override void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)
@@ -118,6 +121,7 @@ namespace Sharky.Managers
             {
                 EnemyPlayer = new EnemyPlayer.EnemyPlayer { ChatMatches = new List<string>(), Games = new List<Game>(), Id = opponentId, Name = enemyName };
             }
+            EnemyData.EnemyPlayer = EnemyPlayer;
         }
 
         public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)

@@ -4,8 +4,6 @@ namespace Sharky.EnemyStrategies.Terran
 {
     public class MassVikings : EnemyStrategy
     {
-        EnemyData EnemyData;
-
         public MassVikings(DefaultSharkyBot defaultSharkyBot)
         {
             EnemyStrategyHistory = defaultSharkyBot.EnemyStrategyHistory;
@@ -14,9 +12,7 @@ namespace Sharky.EnemyStrategies.Terran
             SharkyOptions = defaultSharkyBot.SharkyOptions;
             DebugService = defaultSharkyBot.DebugService;
             UnitCountService = defaultSharkyBot.UnitCountService;
-
             FrameToTimeConverter = defaultSharkyBot.FrameToTimeConverter;
-
             EnemyData = defaultSharkyBot.EnemyData;
         }
 

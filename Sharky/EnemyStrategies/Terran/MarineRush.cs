@@ -5,8 +5,6 @@ namespace Sharky.EnemyStrategies.Terran
 {
     public class MarineRush : EnemyStrategy
     {
-        EnemyData EnemyData;
-
         public MarineRush(DefaultSharkyBot defaultSharkyBot)
         {
             EnemyStrategyHistory = defaultSharkyBot.EnemyStrategyHistory;
@@ -15,9 +13,7 @@ namespace Sharky.EnemyStrategies.Terran
             SharkyOptions = defaultSharkyBot.SharkyOptions;
             DebugService = defaultSharkyBot.DebugService;
             UnitCountService = defaultSharkyBot.UnitCountService;
-
             FrameToTimeConverter = defaultSharkyBot.FrameToTimeConverter;
-
             EnemyData = defaultSharkyBot.EnemyData;
         }
 

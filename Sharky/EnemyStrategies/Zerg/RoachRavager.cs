@@ -5,8 +5,6 @@ namespace Sharky.EnemyStrategies.Zerg
 {
     public class RoachRavager : EnemyStrategy
     {
-        EnemyData EnemyData;
-
         public RoachRavager(DefaultSharkyBot defaultSharkyBot)
         {
             EnemyStrategyHistory = defaultSharkyBot.EnemyStrategyHistory;
@@ -15,9 +13,7 @@ namespace Sharky.EnemyStrategies.Zerg
             SharkyOptions = defaultSharkyBot.SharkyOptions;
             DebugService = defaultSharkyBot.DebugService;
             UnitCountService = defaultSharkyBot.UnitCountService;
-
             FrameToTimeConverter = defaultSharkyBot.FrameToTimeConverter;
-
             EnemyData = defaultSharkyBot.EnemyData;
         }
 

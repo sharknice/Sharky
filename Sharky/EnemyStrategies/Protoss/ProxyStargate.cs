@@ -7,7 +7,6 @@ namespace Sharky.EnemyStrategies.Protoss
     public class ProxyStargate : EnemyStrategy
     {
         TargetingData TargetingData;
-        EnemyData EnemyData;
 
         public ProxyStargate(DefaultSharkyBot defaultSharkyBot)
         {
@@ -17,11 +16,10 @@ namespace Sharky.EnemyStrategies.Protoss
             SharkyOptions = defaultSharkyBot.SharkyOptions;
             DebugService = defaultSharkyBot.DebugService;
             UnitCountService = defaultSharkyBot.UnitCountService;
-
             TargetingData = defaultSharkyBot.TargetingData;
             FrameToTimeConverter = defaultSharkyBot.FrameToTimeConverter;
-
             EnemyData = defaultSharkyBot.EnemyData;
+
             TargetingData = defaultSharkyBot.TargetingData;
         }
 

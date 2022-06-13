@@ -230,17 +230,20 @@ namespace Sharky
 
                 if (observation == null)
                 {
+                    Console.WriteLine($"Ended at {DateTime.UtcNow} UTC");
                     bot.OnEnd(observation, Result.Undecided);
                     break;
                 }
                 if (response.Status == Status.Ended || response.Status == Status.Quit)
                 {
+                    Console.WriteLine($"Ended at {DateTime.UtcNow} UTC");
                     bot.OnEnd(observation, observation.PlayerResult[(int)playerId - 1].Result);
                     break;
                 }
 
                 if (start)
                 {
+                    Console.WriteLine($"Started at {DateTime.UtcNow} UTC");
                     start = false;
                     bot.OnStart(gameInfoResponse.GameInfo, dataResponse.Data, pingResponse, observation, playerId, opponentID);
                 }

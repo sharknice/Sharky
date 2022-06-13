@@ -14,7 +14,6 @@ namespace SharkyProtossExampleBot.Builds
 {
     public class ProxyVoidRay : ProtossSharkyBuild
     {
-        SharkyOptions SharkyOptions;
         SharkyUnitData SharkyUnitData;
         ProxyLocationService ProxyLocationService;
 
@@ -26,7 +25,6 @@ namespace SharkyProtossExampleBot.Builds
         public ProxyVoidRay(DefaultSharkyBot defaultSharkyBot, ICounterTransitioner counterTransitioner, IIndividualMicroController probeMicroController)
             : base(defaultSharkyBot, counterTransitioner)
         {
-            SharkyOptions = defaultSharkyBot.SharkyOptions;
             SharkyUnitData = defaultSharkyBot.SharkyUnitData;
             ProxyLocationService = defaultSharkyBot.ProxyLocationService;
 
