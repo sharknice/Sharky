@@ -55,7 +55,7 @@ namespace Sharky.Builds.BuildChoosing
                     var sequence = buildSequences.FirstOrDefault(b => BuildMatcher.MatchesBuildSequence(game, b));
                     if (sequence == null)
                     {
-                        //Console.WriteLine($"Game didn't match any existing build sequences: {string.Join(" ", game.Builds.Select(g => g.Value))}");
+                        //Console.WriteLine($"Game didn't match any existing build sequences: {string.Join(" ", game.PlannedBuildSequence.Select(g => g))}");
                     }
                     else if (!losses.Any(loss => SameBuildSequence(buildSequences, loss, sequence)))
                     {

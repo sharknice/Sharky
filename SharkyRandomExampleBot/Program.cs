@@ -6,37 +6,29 @@ using SharkyTerranExampleBot;
 using SharkyZergExampleBot;
 using System;
 
-namespace SharkyRandomExampleBot
+Console.WriteLine("Starting SharkyRandomExampleBot");
+
+var gameConnection = new GameConnection();
+var defaultSharkyBot = new DefaultSharkyBot(gameConnection);
+
+var protossBuildChoices = new ProtossBuildChoices(defaultSharkyBot);
+defaultSharkyBot.BuildChoices[Race.Protoss] = protossBuildChoices.BuildChoices;
+
+var terranBuildChoices = new TerranBuildChoices(defaultSharkyBot);
+defaultSharkyBot.BuildChoices[Race.Terran] = terranBuildChoices.BuildChoices;
+
+var zergBuildChoices = new ZergBuildChoices(defaultSharkyBot);
+defaultSharkyBot.BuildChoices[Race.Zerg] = zergBuildChoices.BuildChoices;
+
+var sharkyExampleBot = defaultSharkyBot.CreateBot(defaultSharkyBot.Managers, defaultSharkyBot.DebugService);
+
+var myRace = Race.Random;
+if (args.Length == 0)
 {
-    internal class Program
-    {
-        static void Main(string[] args)
-        {
-            Console.WriteLine("Starting SharkyRandomExampleBot");
-
-            var gameConnection = new GameConnection();
-            var defaultSharkyBot = new DefaultSharkyBot(gameConnection);
-
-            var protossBuildChoices = new ProtossBuildChoices(defaultSharkyBot);
-            defaultSharkyBot.BuildChoices[Race.Protoss] = protossBuildChoices.BuildChoices;
-
-            var terranBuildChoices = new TerranBuildChoices(defaultSharkyBot);
-            defaultSharkyBot.BuildChoices[Race.Terran] = terranBuildChoices.BuildChoices;
-
-            var zergBuildChoices = new ZergBuildChoices(defaultSharkyBot);
-            defaultSharkyBot.BuildChoices[Race.Zerg] = zergBuildChoices.BuildChoices;
-
-            var sharkyExampleBot = defaultSharkyBot.CreateBot(defaultSharkyBot.Managers, defaultSharkyBot.DebugService);
-
-            var myRace = Race.Random;
-            if (args.Length == 0)
-            {
-                gameConnection.RunSinglePlayer(sharkyExampleBot, @"AutomatonLE.SC2Map", myRace, Race.Random, Difficulty.VeryHard, AIBuild.RandomBuild).Wait();
-            }
-            else
-            {
-                gameConnection.RunLadder(sharkyExampleBot, myRace, args).Wait();
-            }
-        }
-    }
+    gameConnection.RunSinglePlayer(sharkyExampleBot, @"AutomatonLE.SC2Map", myRace, Race.Random, Difficulty.VeryHard, AIBuild.RandomBuild).Wait();
 }
+else
+{
+    gameConnection.RunLadder(sharkyExampleBot, myRace, args).Wait();
+}
+
