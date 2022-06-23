@@ -39,6 +39,13 @@ namespace Sharky.Builds.MacroServices
                     {
                         if (unitCalculation.Unit.Health < 100 && unitCalculation.PreviousUnit.Health > unitCalculation.Unit.Health)
                         {
+                            if (unitCalculation.Unit.UnitType == (uint)UnitTypes.ZERG_SPINECRAWLER)
+                            {
+                                if (unitCalculation.EnemiesThreateningDamage.Sum(a => a.Damage) < unitCalculation.Unit.Health)
+                                {
+                                    continue;
+                                }
+                            }
                             var action = commander.Value.Order(MacroData.Frame, Abilities.CANCEL);
                             if (action != null)
                             {

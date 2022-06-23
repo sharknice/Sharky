@@ -124,6 +124,7 @@ namespace Sharky.DefaultBot
         public IBuildingPlacement ProtectNexusBatteryPlacement { get; set; }
         public IBuildingPlacement MissileTurretPlacement { get; set; }
         public IBuildingPlacement ZergBuildingPlacement { get; set; }
+        public IBuildingPlacement ZergGridPlacement { get; set; }
         public IBuildingPlacement BuildingPlacement { get; set; }
         public StasisWardPlacement StasisWardPlacement { get; set; }
         public IBuildingBuilder BuildingBuilder { get; set; }
@@ -257,6 +258,7 @@ namespace Sharky.DefaultBot
             ProtossProxyGridPlacement = new ProtossProxyGridPlacement(this);
             ProtossBuildingPlacement = new ProtossBuildingPlacement(ActiveUnitData, SharkyUnitData, BaseData, DebugService, MapDataService, BuildingService, WallOffPlacement, ProtossPylonGridPlacement, ProtossProductionGridPlacement, ProtectNexusPylonPlacement, TargetingData, ProtectNexusCannonPlacement, BuildOptions, ProtossDefensiveGridPlacement, ProtossProxyGridPlacement);
             ZergBuildingPlacement = new ZergBuildingPlacement(ActiveUnitData, SharkyUnitData, DebugService, BuildingService);
+            ZergGridPlacement = new ZergGridPlacement(this);
             ResourceCenterLocator = new ResourceCenterLocator(this);
             BuildingPlacement = new BuildingPlacement(ProtossBuildingPlacement, TerranBuildingPlacement, ZergBuildingPlacement, ResourceCenterLocator, BaseData, SharkyUnitData, MacroData, UnitCountService);
             StasisWardPlacement = new StasisWardPlacement(DebugService, BuildingService);

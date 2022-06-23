@@ -16,16 +16,24 @@ namespace Sharky.MicroTasks.Attack
 
         int EnemyBuildingCount = 0;
 
+        public bool TargetMainFirst { get; set; }
+
         public TargetingService(ActiveUnitData activeUnitData, MapDataService mapDataService, BaseData baseData, TargetingData targetingData)
         {
             ActiveUnitData = activeUnitData;
             MapDataService = mapDataService;
             BaseData = baseData;
             TargetingData = targetingData;
+            TargetMainFirst = false;
         }
 
         public Point2D UpdateAttackPoint(Point2D armyPoint, Point2D attackPoint)
         {
+            if (TargetMainFirst && (BaseData.EnemyBases.Any(e => e.Location.X == TargetingData.EnemyMainBasePoint.X && e.Location.Y == TargetingData.EnemyMainBasePoint.Y) || MapDataService.LastFrameVisibility(TargetingData.EnemyMainBasePoint) < 1))
+            {
+                return TargetingData.EnemyMainBasePoint;
+            }
+
             var enemyBuildings = ActiveUnitData.EnemyUnits.Where(e => e.Value.UnitTypeData.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && e.Value.Unit.UnitType != (uint)UnitTypes.ZERG_CREEPTUMOR && e.Value.Unit.UnitType != (uint)UnitTypes.ZERG_CREEPTUMORBURROWED && e.Value.Unit.UnitType != (uint)UnitTypes.ZERG_CREEPTUMORQUEEN);
             var currentEnemyBuildingCount = enemyBuildings.Count();
 

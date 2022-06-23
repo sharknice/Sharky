@@ -28,6 +28,7 @@ namespace Sharky.MicroControllers
 
         public bool GroupUpEnabled { get; set; }
         public bool IgnoreDistractions { get; set; }
+        public bool TargetEnemyMainFirst { get; set; }
 
         protected float GroupUpDistanceSmall;
         protected float GroupUpDistance;
@@ -37,7 +38,7 @@ namespace Sharky.MicroControllers
         protected float GroupUpStateDistanceSquared;
         protected float MaximumSupportDistanceSqaured;
 
-        public IndividualMicroController(MapDataService mapDataService, SharkyUnitData unitDataManager, ActiveUnitData activeUnitData, DebugService debugService, IPathFinder sharkyPathFinder, BaseData baseData, SharkyOptions sharkyOptions, DamageService damageService, UnitDataService unitDataService, TargetingData targetingData, TargetingService targetingService, MicroPriority microPriority, bool groupUpEnabled, float avoidDamageDistance = .5f, bool ignoreDistractions = true)
+        public IndividualMicroController(MapDataService mapDataService, SharkyUnitData unitDataManager, ActiveUnitData activeUnitData, DebugService debugService, IPathFinder sharkyPathFinder, BaseData baseData, SharkyOptions sharkyOptions, DamageService damageService, UnitDataService unitDataService, TargetingData targetingData, TargetingService targetingService, MicroPriority microPriority, bool groupUpEnabled, float avoidDamageDistance = .5f, bool ignoreDistractions = true, bool targetEnemyMainFirst = false)
         {
             MapDataService = mapDataService;
             SharkyUnitData = unitDataManager;
@@ -61,6 +62,7 @@ namespace Sharky.MicroControllers
             GroupUpStateDistanceSquared = 100f;
             IgnoreDistractions = ignoreDistractions;
             MaximumSupportDistanceSqaured = 225f;
+            TargetEnemyMainFirst = targetEnemyMainFirst;
         }
 
         public IndividualMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder pathFinder, MicroPriority microPriority, bool groupUpEnabled, float avoidDamageDistance = .5f, bool ignoreDistractions = true)
@@ -1252,6 +1254,20 @@ namespace Sharky.MicroControllers
                 return false;
             }
 
+            bool priorityEnemyMain = false;
+            if (TargetEnemyMainFirst && TargetingData.AttackPoint.X == TargetingData.EnemyMainBasePoint.X && TargetingData.AttackPoint.Y == TargetingData.EnemyMainBasePoint.Y)
+            {
+                if (Vector2.DistanceSquared(new Vector2(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y), commander.UnitCalculation.Position) > 100)
+                {
+                    priorityEnemyMain = true;
+                    if (bestTarget == null) { return false; }
+                    if (!bestTarget.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !bestTarget.UnitClassifications.Contains(UnitClassification.DefensiveStructure) && !bestTarget.UnitClassifications.Contains(UnitClassification.Worker))
+                    {
+                        return false;
+                    }
+                }
+            }
+
             if (bestTarget != null && commander.UnitCalculation.NearbyEnemies.Any(e => e.Unit.Tag == bestTarget.Unit.Tag) && MicroPriority != MicroPriority.NavigateToLocation)
             {              
                 if (GetHighGroundVision(commander, target, defensivePoint, bestTarget, frame, out action)) { return true; }
@@ -1265,7 +1281,14 @@ namespace Sharky.MicroControllers
 
                 if (WeaponReady(commander, frame))
                 {
-                    action = commander.Order(frame, Abilities.ATTACK, enemyPosition);
+                    if (priorityEnemyMain)
+                    {
+                        action = commander.Order(frame, Abilities.ATTACK, targetTag: bestTarget.Unit.Tag);
+                    }
+                    else
+                    {
+                        action = commander.Order(frame, Abilities.ATTACK, enemyPosition);
+                    }
                 }
                 else
                 {
@@ -1291,7 +1314,21 @@ namespace Sharky.MicroControllers
                 }
                 if (WeaponReady(commander, frame))
                 {
-                    action = commander.Order(frame, Abilities.ATTACK, enemyPosition);
+                    if (priorityEnemyMain)
+                    {
+                        if (bestTarget.Unit.Tag == commander.UnitCalculation.Unit.Tag)
+                        {
+                            action = commander.Order(frame, Abilities.MOVE, enemyPosition);
+                        }
+                        else
+                        {
+                            action = commander.Order(frame, Abilities.ATTACK, targetTag: bestTarget.Unit.Tag);
+                        }
+                    }
+                    else
+                    {
+                        action = commander.Order(frame, Abilities.ATTACK, enemyPosition);
+                    }
                 }
                 else
                 {
@@ -1303,7 +1340,16 @@ namespace Sharky.MicroControllers
             }
 
             if (AvoidDeceleration(commander, target, true, frame, out action)) { return true; }
-            action = commander.Order(frame, Abilities.ATTACK, target); // no damaging targets in range, attack towards the main target
+
+            // no damaging targets in range, attack towards the main target
+            if (priorityEnemyMain)
+            {
+                action = commander.Order(frame, Abilities.MOVE, target);
+            }
+            else
+            {
+                action = commander.Order(frame, Abilities.ATTACK, target); 
+            }
             return true;
         }
 

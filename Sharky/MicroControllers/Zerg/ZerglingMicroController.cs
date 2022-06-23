@@ -137,7 +137,7 @@ namespace Sharky.MicroControllers.Zerg
                 if (attacks.Count > 0)
                 {
                     var bestMainAttack = GetBestTargetFromList(commander, attacks, existingAttackOrder);
-                    if (bestMainAttack != null && (bestMainAttack.UnitClassifications.Contains(UnitClassification.ArmyUnit) || bestMainAttack.UnitClassifications.Contains(UnitClassification.DefensiveStructure)))
+                    if (bestMainAttack != null && (bestMainAttack.UnitClassifications.Contains(UnitClassification.ArmyUnit) || bestMainAttack.UnitClassifications.Contains(UnitClassification.DefensiveStructure) || bestMainAttack.UnitClassifications.Contains(UnitClassification.Worker)))
                     {
                         commander.BestTarget = bestMainAttack;
                         return bestMainAttack;
