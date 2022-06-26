@@ -124,6 +124,7 @@ namespace Sharky.MicroControllers
                 return AttackStayOutOfRange(commander, target, defensivePoint, groupCenter, bestTarget, formation, frame);
             }
 
+            if (GetHighGroundVision(commander, target, defensivePoint, bestTarget, frame, out action)) { return action; }
             if (AvoidPointlessDamage(commander, target, defensivePoint, frame, out action)) { return action; }
 
             if (WeaponReady(commander, frame))

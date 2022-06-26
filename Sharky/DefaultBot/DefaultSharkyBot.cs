@@ -320,6 +320,7 @@ namespace Sharky.DefaultBot
 
             var zerglingMicroController = new ZerglingMicroController(this, SharkySimplePathFinder, MicroPriority.AttackForward, false);
             var banelingMicroController = new BanelingMicroController(this, SharkySimplePathFinder, MicroPriority.AttackForward, false);
+            var roachMicroController = new RoachMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
             var ravagerMicroController = new RavagerMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
             var overseerMicroController = new OverseerMicroController(this, SharkySimplePathFinder, MicroPriority.StayOutOfRange, false);
             var infestorMicroController = new InfestorMicroController(this, SharkySimplePathFinder, MicroPriority.StayOutOfRange, false);
@@ -377,6 +378,7 @@ namespace Sharky.DefaultBot
 
                 { UnitTypes.ZERG_ZERGLING, zerglingMicroController },
                 { UnitTypes.ZERG_BANELING, banelingMicroController },
+                { UnitTypes.ZERG_ROACH, roachMicroController },
                 { UnitTypes.ZERG_RAVAGER, ravagerMicroController },
                 { UnitTypes.ZERG_OVERSEER, overseerMicroController },
                 { UnitTypes.ZERG_INFESTOR, infestorMicroController },

@@ -43,6 +43,10 @@ namespace Sharky.Builds.BuildingPlacement
                 while (angle + (sliceSize / 2) < fullCircle)
                 {
                     var point = new Point2D { X = x + (float)(radius * Math.Cos(angle)), Y = y + (float)(radius * Math.Sin(angle)) };
+                    if (size == 3)
+                    {
+                        point = GetValidSize3BuildLocation(point);
+                    }
                     if (!requireVision || (requireVision && BuildingService.AreaVisible(point.X, point.Y, size / 2f)))
                     {
                         if (BuildingService.HasCreep(point.X, point.Y, size / 2.0f) && BuildingService.AreaBuildable(point.X, point.Y, size / 2f) && !BuildingService.Blocked(point.X, point.Y, size / 2f) && !BuildingService.BlocksResourceCenter(point.X, point.Y, 1))
@@ -72,6 +76,28 @@ namespace Sharky.Builds.BuildingPlacement
             }
 
             return null;
+        }
+
+        protected Point2D GetValidSize3BuildLocation(Point2D point)
+        {
+            if (point.X % 1 != .5)
+            {
+                point.X = (float)(Math.Round(point.X / 0.5) * 0.5);
+                if (point.X % 1 != .5)
+                {
+                    point.X += .5f;
+                }
+            }
+            if (point.Y % 1 != .5)
+            {
+                point.Y = (float)(Math.Round(point.Y / 0.5) * 0.5);
+                if (point.Y % 1 != .5)
+                {
+                    point.Y += .5f;
+                }
+            }
+
+            return point;
         }
     }
 }

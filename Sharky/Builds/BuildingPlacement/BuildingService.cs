@@ -85,7 +85,7 @@ namespace Sharky.Builds.BuildingPlacement
             }
 
             if (ActiveUnitData.Commanders.Any(c => c.Key != tag && !c.Value.UnitCalculation.Attributes.Contains(SC2APIProtocol.Attribute.Structure) &&
-                (c.Value.UnitCalculation.Unit.BuildProgress < 1 || c.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED) &&
+                (c.Value.UnitCalculation.Unit.BuildProgress < 1 || c.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED || c.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.ZERG_EGG || c.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.ZERG_LARVA) &&
                 BuildingBlocks(x, y, radius, c.Value.UnitCalculation.Unit)))
             {
                 return true;

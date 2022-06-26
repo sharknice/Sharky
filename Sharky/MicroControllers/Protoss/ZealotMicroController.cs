@@ -2,6 +2,7 @@
 using Sharky.DefaultBot;
 using Sharky.Pathing;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Sharky.MicroControllers.Protoss
 {
@@ -22,7 +23,29 @@ namespace Sharky.MicroControllers.Protoss
                 return false;
             }
 
+            if (commander.UnitCalculation.EnemiesInRangeOfAvoid.Count() > 0 && commander.UnitCalculation.EnemiesInRangeOfAvoid.All(e => e.Range > 2))
+            {
+                return false;
+            }
+
             return base.AvoidTargettedDamage(commander, target, defensivePoint, frame, out action);
+        }
+
+        protected override bool AvoidDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
+
+            if (commander.UnitCalculation.Unit.Shield > 0)
+            {
+                return false;
+            }
+
+            if (commander.UnitCalculation.EnemiesInRangeOfAvoid.Count() > 0 && commander.UnitCalculation.EnemiesInRangeOfAvoid.All(e => e.Range > 2))
+            {
+                return false;
+            }
+
+            return base.AvoidDamage(commander, target, defensivePoint, frame, out action);
         }
 
         protected override bool WeaponReady(UnitCommander commander, int frame)

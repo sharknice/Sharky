@@ -34,7 +34,7 @@ namespace Sharky.Builds.BuildingPlacement
 
                 var baseHeight = MapDataService.MapHeight(powerSource.UnitCalculation.Unit.Pos);
                 var xStart = powerSource.UnitCalculation.Unit.Pos.X - .5f;
-                var yStart = powerSource.UnitCalculation.Unit.Pos.Y + 6.5f;
+                var yStart = powerSource.UnitCalculation.Unit.Pos.Y + 7.5f;
 
                 Point2D closest = null;
                 var x = xStart;
@@ -94,7 +94,7 @@ namespace Sharky.Builds.BuildingPlacement
                 }
                 y += 1;
             }
-            y = yStart - 1.5f;
+            y = yStart - 1f;
             while (yStart - y < 7)
             {
                 var point = GetValidPoint(x, y, size, baseHeight, maxDistance, target, allowBlockBase);
@@ -129,7 +129,8 @@ namespace Sharky.Builds.BuildingPlacement
                 (Vector2.DistanceSquared(vector, target) < (maxDistance * maxDistance)) &&
                 MapDataService.MapHeight((int)x, (int)y) == baseHeight &&
                 !BuildingService.Blocked(x, y, size / 2.0f, 0) && !BuildingService.HasAnyCreep(x, y, size / 2f) &&
-                BuildingService.RoomBelowAndAbove(x, y, size))
+                BuildingService.SameHeight(x, y, .5f + (size / 2.0f)) &&
+                (allowBlockBase || BuildingService.RoomBelowAndAbove(x, y, size)))
             {
                 if (!BuildOptions.AllowBlockWall && MapDataService.MapData?.WallData != null && MapDataService.MapData.WallData.Any(d => d.FullDepotWall != null && d.FullDepotWall.Any(p => Vector2.DistanceSquared(new Vector2(p.X, p.Y), vector) < 16)))
                 {

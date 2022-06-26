@@ -2,9 +2,9 @@
 
 namespace Sharky.Proxy
 {
-    interface IProxyLocationService
+    public interface IProxyLocationService
     {
-        Point2D GetCliffProxyLocation(float offsetDistance);
-        Point2D GetGroundProxyLocation(float offsetDistance);
+        Point2D GetCliffProxyLocation(float offsetDistance = 0);
+        Point2D GetGroundProxyLocation(float offsetDistance = 0);
     }
 }

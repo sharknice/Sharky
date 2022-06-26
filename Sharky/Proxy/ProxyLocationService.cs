@@ -65,7 +65,14 @@ namespace Sharky.Proxy
             }
             if (MapDataService.MapData.MapName.ToLower().Contains("glittering"))
             {
-                baseLocation = orderedLocations.Take(proxyBase).Skip(4).First().Location;
+                if (BaseData.BaseLocations.FirstOrDefault().Location.X == 135.5f)
+                {
+                    baseLocation = orderedLocations.Take(proxyBase).Skip(4).First().Location;
+                }
+                else
+                {
+                    baseLocation = orderedLocations.Take(proxyBase).Skip(3).First().Location;
+                }
             }
 
             var angle = Math.Atan2(TargetingData.EnemyMainBasePoint.Y - baseLocation.Y, baseLocation.X - TargetingData.EnemyMainBasePoint.X);
