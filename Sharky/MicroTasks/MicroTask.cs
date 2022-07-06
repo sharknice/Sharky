@@ -10,6 +10,8 @@ namespace Sharky.MicroTasks
         public float Priority { get; set; }
 
         public bool Enabled { get; protected set; }
+        public double LongestFrame { get; set; }
+        public double TotalFrameTime { get; set; }
 
         public virtual void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
         {

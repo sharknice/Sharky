@@ -343,7 +343,6 @@ namespace Sharky
             TargetPriorityCalculation = previous.TargetPriorityCalculation;
             PreviousUnit = previous.Unit;
             var vector = new Vector2(Unit.Pos.X - PreviousUnit.Pos.X, Unit.Pos.Y - PreviousUnit.Pos.Y);
-            Position = new Vector2(Unit.Pos.X + vector.X, Unit.Pos.Y + vector.Y);
 
             Vector = vector / (FrameLastSeen - frame);
             AverageVector = Vector;

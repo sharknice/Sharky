@@ -10,11 +10,12 @@ namespace Sharky.MicroControllers.Protoss
 {
     public class WarpPrismMicroController : IndividualMicroController
     {
-        int PickupRange = 5;
+        protected int PickupRange = 5;
 
         public WarpPrismMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled)
             : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled)
         {
+            AvoidDamageDistance = 2;
         }
 
         public override List<SC2APIProtocol.Action> Attack(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
@@ -213,7 +214,7 @@ namespace Sharky.MicroControllers.Protoss
             return false;
         }
 
-        bool StopWarping(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
+        protected bool StopWarping(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 

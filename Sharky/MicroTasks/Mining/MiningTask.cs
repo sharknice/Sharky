@@ -267,12 +267,7 @@ namespace Sharky.MicroTasks
             foreach (var worker in GetIdleWorkers())
             {
                 var saturationCount = 2;
-                var unsaturated = BaseData.SelfBases.Where(b => b.ResourceCenter.BuildProgress > .99 && b.MineralMiningInfo.Any(m => m.Workers.Count() < saturationCount));
-                //if (unsaturated.Count() == 0)
-                //{
-                //    saturationCount++;
-                //    unsaturated = BaseData.SelfBases.Where(b => b.ResourceCenter.BuildProgress == 1 && b.MineralMiningInfo.Any(m => m.Workers.Count() < saturationCount)).OrderBy(b => Vector2.DistanceSquared(new Vector2(b.Location.X, b.Location.Y), worker.UnitCalculation.Position));
-                //}
+                var unsaturated = BaseData.SelfBases.Where(b => b.ResourceCenter != null && b.ResourceCenter.BuildProgress > .99 && b.MineralMiningInfo.Any(m => m.Workers.Count() < saturationCount));
 
                 foreach (var selfBase in unsaturated)
                 {
@@ -361,7 +356,7 @@ namespace Sharky.MicroTasks
         {
             var actions = new List<SC2APIProtocol.Action>();
             if (BaseData.SelfBases.Count() > 1) { return actions; }
-            foreach (var selfBase in BaseData.SelfBases.Where(b => b.ResourceCenter.UnitType == (uint)UnitTypes.PROTOSS_NEXUS && b.ResourceCenter.Energy >= 50))
+            foreach (var selfBase in BaseData.SelfBases.Where(b => b.ResourceCenter != null && b.ResourceCenter.UnitType == (uint)UnitTypes.PROTOSS_NEXUS && b.ResourceCenter.Energy >= 50))
             {
                 var baseVector = new Vector2(selfBase.ResourceCenter.Pos.X, selfBase.ResourceCenter.Pos.Y);
                 foreach (var miningInfo in selfBase.MineralMiningInfo)

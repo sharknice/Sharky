@@ -139,7 +139,7 @@ namespace Sharky.Builds
             }
         }
 
-        protected void SendProbeForNexus(int frame)
+        protected virtual void SendProbeForNexus(int frame)
         {
             if (UnitCountService.Count(UnitTypes.PROTOSS_NEXUS) == 1 && MacroData.Minerals > 275)
             {

@@ -24,6 +24,7 @@
         Morph,
         Die,
         ChaseReaper,
-        WallOff
+        WallOff,
+        Regenerate
     }
 }

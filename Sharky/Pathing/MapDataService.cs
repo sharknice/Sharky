@@ -1,6 +1,7 @@
 ﻿using SC2APIProtocol;
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 
 namespace Sharky.Pathing
 {
@@ -91,6 +92,25 @@ namespace Sharky.Pathing
         public bool PathFlyable(Point start, Point2D end)
         {
             return PathFlyable(start.X, start.Y, end.X, end.Y);
+        }
+
+        public bool PathBuildable(Point2D point)
+        {
+            return PathBuildable(point.X, point.Y, point.X, point.Y);
+        }
+
+        public bool PathBuildable(Vector2 point)
+        {
+            return PathBuildable(point.X, point.Y, point.X, point.Y);
+        }
+
+        public bool PathBuildable(float startX, float startY, float endX, float endY)
+        {
+            if (endX < 0 || endY < 0 || endX >= MapData.MapWidth || endY >= MapData.MapHeight)
+            {
+                return false;
+            }
+            return MapData.Map[(int)endX][(int)endY].Buildable;
         }
 
         public bool SelfVisible(Point2D point)

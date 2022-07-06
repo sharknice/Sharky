@@ -170,7 +170,7 @@ namespace Sharky.DefaultBot
 
             var framesPerSecond = 22.4f;
 
-            SharkyOptions = new SharkyOptions { Debug = debug, FramesPerSecond = framesPerSecond, TagsEnabled = true, BuildTagsEnabled = true };
+            SharkyOptions = new SharkyOptions { Debug = debug, FramesPerSecond = framesPerSecond, TagsEnabled = true, BuildTagsEnabled = true, LogPerformance = false };
             FrameToTimeConverter = new FrameToTimeConverter(SharkyOptions);
             MacroData = new MacroData();
             AttackData = new AttackData { ArmyFoodAttack = 30, ArmyFoodRetreat = 25, Attacking = false, UseAttackDataManager = true, CustomAttackFunction = true, RetreatTrigger = 1f, AttackTrigger = 1.5f };
@@ -478,7 +478,7 @@ namespace Sharky.DefaultBot
             MicroTaskData.MicroTasks[defensiveZealotWarpInTask.GetType().Name] = defensiveZealotWarpInTask;
             MicroTaskData.MicroTasks[reaperMiningDefenseTask.GetType().Name] = reaperMiningDefenseTask;
 
-            MicroManager = new MicroManager(ActiveUnitData, MicroTaskData);
+            MicroManager = new MicroManager(ActiveUnitData, MicroTaskData, SharkyOptions);
             Managers.Add(MicroManager);
 
             AttackDataManager = new AttackDataManager(AttackData, ActiveUnitData, attackTask, TargetPriorityService, TargetingData, MacroData, BaseData, DebugService);
@@ -623,7 +623,7 @@ namespace Sharky.DefaultBot
         }
         public SharkyBot CreateBot(List<IManager> managers, DebugService debugService)
         {
-            return new SharkyBot(managers, DebugService, FrameToTimeConverter);
+            return new SharkyBot(managers, DebugService, FrameToTimeConverter, SharkyOptions);
         }
     }
 }

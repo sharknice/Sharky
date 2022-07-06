@@ -54,14 +54,14 @@ namespace Sharky.MicroControllers.Protoss
             return true;
         }
 
-        protected override Point2D GetPositionFromRange(UnitCommander commander, Point target, Point position, float range)
+        protected override Point2D GetPositionFromRange(UnitCommander commander, Point target, Point position, float range, float angleOffset = 0)
         {
             if (range > 10 && !commander.UnitCalculation.NearbyEnemies.Any(e => e.Unit.IsFlying))
             {
                 range = 10;
             }
 
-            return base.GetPositionFromRange(commander, target, position, range);
+            return base.GetPositionFromRange(commander, target, position, range, angleOffset);
         }
     }
 }

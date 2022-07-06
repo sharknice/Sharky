@@ -14,6 +14,9 @@ namespace Sharky.MicroTasks
         void Enable();
         void Disable();
         bool Enabled { get; }
+        double LongestFrame { get; set; }
+        double TotalFrameTime { get; set; }
+
         void RemoveDeadUnits(List<ulong> deadUnits);
     }
 }

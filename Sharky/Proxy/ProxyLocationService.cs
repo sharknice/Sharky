@@ -74,6 +74,10 @@ namespace Sharky.Proxy
                     baseLocation = orderedLocations.Take(proxyBase).Skip(3).First().Location;
                 }
             }
+            if (MapDataService.MapData.MapName.ToLower().Contains("sc2 ai cup"))
+            {
+                baseLocation = orderedLocations.Take(proxyBase).Skip(1).First().Location;
+            }
 
             var angle = Math.Atan2(TargetingData.EnemyMainBasePoint.Y - baseLocation.Y, baseLocation.X - TargetingData.EnemyMainBasePoint.X);
             var x = offsetDistance * Math.Cos(angle);

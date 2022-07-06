@@ -12,6 +12,7 @@ namespace Sharky
         List<IManager> Managers;
         DebugService DebugService;
         FrameToTimeConverter FrameToTimeConverter;
+        SharkyOptions SharkyOptions;
 
         List<SC2APIProtocol.Action> Actions;
 
@@ -20,7 +21,7 @@ namespace Sharky
 
         double TotalFrameTime;
 
-        public SharkyBot(List<IManager> managers, DebugService debugService, FrameToTimeConverter frameToTimeConverter)
+        public SharkyBot(List<IManager> managers, DebugService debugService, FrameToTimeConverter frameToTimeConverter, SharkyOptions sharkyOptions)
         {
             Managers = managers;
             DebugService = debugService;
@@ -28,6 +29,7 @@ namespace Sharky
 
             Stopwatch = new Stopwatch();
             ManagerStopwatch = new Stopwatch();
+            SharkyOptions = sharkyOptions;
         }
 
         public void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)
@@ -68,7 +70,6 @@ namespace Sharky
         {
             Actions = new List<SC2APIProtocol.Action>();
 
-            //Stopwatch.Restart();
             var begin = DateTime.UtcNow;
 
             try
@@ -78,7 +79,6 @@ namespace Sharky
                     if (!manager.NeverSkip && manager.SkipFrame)
                     {
                         manager.SkipFrame = false;
-                        //DebugService.DrawText($"{manager.GetType().Name}: skipped");
                         continue;
                     }
                     var beginManager = DateTime.UtcNow;
@@ -104,21 +104,20 @@ namespace Sharky
 
                     var endManager = DateTime.UtcNow;
                     var managerTime = (endManager - beginManager).TotalMilliseconds;
-                    //DebugService.DrawText($"{manager.GetType().Name}: {managerTime}");
+                    manager.TotalFrameTime += managerTime;
 
-                    if (managerTime > 1)
+                    if (managerTime > 1 && observation.Observation.GameLoop > 10)
                     {
                         manager.SkipFrame = true;
-                    }
-                    if (managerTime > 1000)
-                    {
-                        System.Console.WriteLine($"{observation.Observation.GameLoop} {manager.GetType().Name} {managerTime}");
-                        //DebugService.DrawText($"{manager.GetType().Name}: {managerTime}");
+
+                        if (SharkyOptions.LogPerformance && managerTime > manager.LongestFrame)
+                        {
+                            manager.LongestFrame = managerTime;
+                            Console.WriteLine($"{observation.Observation.GameLoop} {manager.GetType().Name} {managerTime} ms, average: {manager.TotalFrameTime / observation.Observation.GameLoop} ms");
+                        }
                     }
                 }
 
-                //Stopwatch.Stop();
-                //DebugService.DrawText($"OnFrame: {Stopwatch.ElapsedMilliseconds}");
                 var end = DateTime.UtcNow;
                 var endTime = (end - begin).TotalMilliseconds;
                 TotalFrameTime += endTime;

@@ -233,9 +233,19 @@ namespace Sharky.Managers
                 }
             }
 
-            var loadedTags = new List<ulong>();
             foreach (var allyAttack in ActiveUnitData.SelfUnits)
             {
+                ClearUnitCalculations(allyAttack);
+            }
+            foreach (var enemyAttack in ActiveUnitData.EnemyUnits)
+            {
+                ClearUnitCalculations(enemyAttack);
+            }
+
+            foreach (var allyAttack in ActiveUnitData.SelfUnits)
+            {
+                if (allyAttack.Value.FrameLastSeen != frame) { continue; }
+
                 foreach (var enemyAttack in ActiveUnitData.EnemyUnits)
                 {
                     var range = GetRange(allyAttack, enemyAttack);
@@ -288,15 +298,52 @@ namespace Sharky.Managers
 
                 if (allyAttack.Value.Unit.Passengers != null)
                 {
-                    loadedTags.AddRange(allyAttack.Value.Unit.Passengers.Select(p => p.Tag));
-                }
-            }
+                    var tags = allyAttack.Value.Unit.Passengers.Select(p => p.Tag);
+                    foreach (var tag in tags)
+                    {
+                        if (ActiveUnitData.SelfUnits.ContainsKey(tag))
+                        {
+                            ActiveUnitData.SelfUnits[tag].Loaded = true;
+                            ActiveUnitData.SelfUnits[tag].NearbyAllies = allyAttack.Value.NearbyAllies;
+                            ActiveUnitData.SelfUnits[tag].NearbyEnemies = allyAttack.Value.NearbyEnemies;
+                            ActiveUnitData.SelfUnits[tag].Position = allyAttack.Value.Position;
+                            var selfAttack = ActiveUnitData.SelfUnits[tag];
 
-            foreach (var tag in loadedTags)
-            {
-                if (ActiveUnitData.SelfUnits.ContainsKey(tag))
-                {
-                    ActiveUnitData.SelfUnits[tag].Loaded = true;
+                            foreach (var enemyAttack in allyAttack.Value.NearbyEnemies)
+                            {
+                                var range = GetRange(selfAttack, enemyAttack);
+                                if (DamageService.CanDamage(selfAttack, enemyAttack) && Vector2.DistanceSquared(selfAttack.Position, enemyAttack.Position) <= (range + selfAttack.Unit.Radius + enemyAttack.Unit.Radius) * (range + selfAttack.Unit.Radius + enemyAttack.Unit.Radius))
+                                {
+                                    selfAttack.EnemiesInRange.Add(enemyAttack);
+                                }
+                                if (DamageService.CanDamage(enemyAttack, selfAttack))
+                                {
+                                    range = GetRange(enemyAttack, selfAttack);
+                                    var distanceSquared = Vector2.DistanceSquared(selfAttack.Position, enemyAttack.Position);
+                                    if (distanceSquared <= (AvoidRange + range + selfAttack.Unit.Radius + enemyAttack.Unit.Radius) * (AvoidRange + range + selfAttack.Unit.Radius + enemyAttack.Unit.Radius))
+                                    {
+                                        selfAttack.EnemiesInRangeOfAvoid.Add(enemyAttack);
+                                        if (distanceSquared <= (range + selfAttack.Unit.Radius + enemyAttack.Unit.Radius) * (range + selfAttack.Unit.Radius + enemyAttack.Unit.Radius))
+                                        {
+                                            selfAttack.EnemiesInRangeOf.Add(enemyAttack);
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (ActiveUnitData.SelfUnits[tag].Unit.Shield < ActiveUnitData.SelfUnits[tag].Unit.ShieldMax)
+                            {
+                                // 7 seconds to start regen, 2 points regenerated per second
+                                var timeLoaded = frame - ActiveUnitData.SelfUnits[tag].FrameLastSeen;
+                                var regenFrames = timeLoaded - (SharkyOptions.FramesPerSecond * 7);
+                                var shieldRegenerated = (SharkyOptions.FramesPerSecond / 2f) * regenFrames;
+                                if (shieldRegenerated > ActiveUnitData.SelfUnits[tag].Unit.ShieldMax - ActiveUnitData.SelfUnits[tag].Unit.Shield)
+                                {
+                                    ActiveUnitData.SelfUnits[tag].Unit.Shield = ActiveUnitData.SelfUnits[tag].Unit.ShieldMax;
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
@@ -340,14 +387,25 @@ namespace Sharky.Managers
             return null;
         }
 
-        float GetRange(KeyValuePair<ulong, UnitCalculation> allyAttack, KeyValuePair<ulong, UnitCalculation> enemyAttack)
+        void ClearUnitCalculations(KeyValuePair<ulong, UnitCalculation> attack)
         {
-            var range = allyAttack.Value.Range;
+            attack.Value.NearbyAllies.Clear();
+            attack.Value.NearbyEnemies.Clear();
+            attack.Value.EnemiesInRange.Clear();
+            attack.Value.EnemiesInRangeOf.Clear();
+            attack.Value.EnemiesInRangeOfAvoid.Clear();
+            attack.Value.EnemiesThreateningDamage.Clear();
+            attack.Value.Attackers.Clear();
+        }
 
-            if (allyAttack.Value.Weapons.Count() > 0)
+        float GetRange(UnitCalculation allyAttack, UnitCalculation enemyAttack)
+        {
+            var range = allyAttack.Range;
+
+            if (allyAttack.Weapons.Count() > 0)
             {
-                var weapons = allyAttack.Value.Weapons;
-                var unit = enemyAttack.Value.Unit;
+                var weapons = allyAttack.Weapons;
+                var unit = enemyAttack.Unit;
                 Weapon weapon;
                 if (unit.IsFlying || unit.UnitType == (uint)UnitTypes.PROTOSS_COLOSSUS || unit.BuffIds.Contains((uint)Buffs.GRAVITONBEAM))
                 {
@@ -364,6 +422,11 @@ namespace Sharky.Managers
             }
 
             return range;
+        }
+
+        float GetRange(KeyValuePair<ulong, UnitCalculation> allyAttack, KeyValuePair<ulong, UnitCalculation> enemyAttack)
+        {
+            return GetRange(allyAttack.Value, enemyAttack.Value);
         }
 
         ConcurrentBag<UnitCalculation> GetTargettedAttacks(UnitCalculation unitCalculation)

@@ -776,7 +776,7 @@ namespace Sharky.MicroControllers
                     return false;
                 }
 
-                var attack = commander.UnitCalculation.EnemiesThreateningDamage.OrderBy(e => (e.Range * e.Range) - Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position)).FirstOrDefault();
+                var attack = commander.UnitCalculation.EnemiesThreateningDamage.OrderBy(e => Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position) - (e.Range * e.Range)).FirstOrDefault();
 
                 if (WeaponReady(commander, frame) && GetDamage(commander.UnitCalculation.Weapons, attack.Unit, attack.UnitTypeData) > attack.Unit.Health + attack.Unit.Shield)
                 {
@@ -855,7 +855,7 @@ namespace Sharky.MicroControllers
 
             if (attacks.Count() > 0)
             {
-                var attack = attacks.OrderBy(e => (e.Range * e.Range) - Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position)).FirstOrDefault();  // enemies that are closest to being outranged
+                var attack = attacks.OrderBy(e => Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position) - (e.Range * e.Range)).FirstOrDefault();  // enemies that are closest to being outranged
                 var range = UnitDataService.GetRange(attack.Unit);
                 if (attack.Range > range)
                 {
@@ -1871,10 +1871,10 @@ namespace Sharky.MicroControllers
         protected virtual bool AvoidTargettedOneHitKills(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
-            var attack = commander.UnitCalculation.Attackers.Where(a => a.Damage > commander.UnitCalculation.Unit.Health + commander.UnitCalculation.Unit.Shield).OrderBy(e => (e.Range * e.Range) - Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position)).FirstOrDefault();
+            var attack = commander.UnitCalculation.Attackers.Where(a => a.Damage > commander.UnitCalculation.Unit.Health + commander.UnitCalculation.Unit.Shield).OrderBy(e => Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position) - (e.Range * e.Range)).FirstOrDefault();
             if (attack == null)
             {
-                attack = commander.UnitCalculation.EnemiesThreateningDamage.Where(a => a.Damage > commander.UnitCalculation.Unit.Health + commander.UnitCalculation.Unit.Shield).OrderBy(e => (e.Range * e.Range) - Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position)).FirstOrDefault();
+                attack = commander.UnitCalculation.EnemiesThreateningDamage.Where(a => a.Damage > commander.UnitCalculation.Unit.Health + commander.UnitCalculation.Unit.Shield).OrderBy(e => Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position) - (e.Range * e.Range)).FirstOrDefault();
             }
             if (attack != null)
             {
@@ -1928,7 +1928,7 @@ namespace Sharky.MicroControllers
         {
             action = null;
             if ((MicroPriority == MicroPriority.AttackForward || commander.UnitCalculation.Unit.IsHallucination) && commander.UnitCalculation.Unit.Health > commander.UnitCalculation.Unit.HealthMax / 4.0) { return false; }
-            var attack = commander.UnitCalculation.Attackers.OrderBy(e => (e.Range * e.Range) - Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position)).FirstOrDefault();
+            var attack = commander.UnitCalculation.Attackers.OrderBy(e => Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position) - (e.Range * e.Range)).FirstOrDefault();
             if (attack != null)
             {
                 if (commander.UnitCalculation.Unit.IsFlying)
@@ -2169,9 +2169,9 @@ namespace Sharky.MicroControllers
             return false;
         }
 
-        protected virtual Point2D GetPositionFromRange(UnitCommander commander, Point target, Point position, float range)
+        protected virtual Point2D GetPositionFromRange(UnitCommander commander, Point target, Point position, float range, float angleOffset = 0)
         {
-            var angle = Math.Atan2(target.Y - position.Y, position.X - target.X);
+            var angle = Math.Atan2(target.Y - position.Y, position.X - target.X) + angleOffset;
             var x = range * Math.Cos(angle);
             var y = range * Math.Sin(angle);
             return new Point2D { X = target.X + (float)x, Y = target.Y - (float)y };

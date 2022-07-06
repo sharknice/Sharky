@@ -6,5 +6,6 @@
         public float FramesPerSecond { get; set; }
         public bool TagsEnabled { get; set; }
         public bool BuildTagsEnabled { get; set; }
+        public bool LogPerformance { get; set; }
     }
 }

@@ -8,11 +8,13 @@ namespace Sharky.Managers
     {      
         ActiveUnitData ActiveUnitData;
         MicroTaskData MicroTaskData;
+        SharkyOptions SharkyOptions;
 
-        public MicroManager(ActiveUnitData activeUnitData, MicroTaskData microTaskData)
+        public MicroManager(ActiveUnitData activeUnitData, MicroTaskData microTaskData, SharkyOptions sharkyOptions)
         {
             ActiveUnitData = activeUnitData;
             MicroTaskData = microTaskData;
+            SharkyOptions = sharkyOptions;
         }
 
         public override bool NeverSkip { get => true; }
@@ -40,10 +42,12 @@ namespace Sharky.Managers
                 }
                 var end = System.DateTime.UtcNow;
                 var time = (end - begin).TotalMilliseconds;
+                microTask.TotalFrameTime += time;
 
-                if (time > 100)
+                if (frame > 10 && SharkyOptions.LogPerformance && time > 1 && time > microTask.LongestFrame)
                 {
-                    System.Console.WriteLine($"{observation.Observation.GameLoop} {microTask.GetType().Name} {time}");
+                    microTask.LongestFrame = time;
+                    System.Console.WriteLine($"{frame} {microTask.GetType().Name} {time} ms, average: {microTask.TotalFrameTime / frame} ms");
                 }
             }
             if (SkipFrame)

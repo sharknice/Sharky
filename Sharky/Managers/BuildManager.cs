@@ -154,6 +154,7 @@ namespace Sharky.Managers
 
             var actions = SimCityService.OnFrame();
             MacroBalance();
+            // TODO: add some frame time stats for each section here and the macro balance
 
             return actions;
         }

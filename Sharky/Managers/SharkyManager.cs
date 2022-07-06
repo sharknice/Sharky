@@ -5,8 +5,9 @@ namespace Sharky.Managers
 {
     public abstract class SharkyManager : IManager
     {
+        public virtual double TotalFrameTime { get; set; }
+        public virtual double LongestFrame { get; set; }
         public virtual bool SkipFrame { get; set; }
-
         public virtual bool NeverSkip { protected set { } get { return false; } }
 
         public virtual void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)

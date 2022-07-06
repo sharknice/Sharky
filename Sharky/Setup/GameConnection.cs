@@ -45,10 +45,10 @@ namespace Sharky
             throw new Exception("Unable to make a connection.");
         }
 
-        public async Task CreateGame(String mapName, Race opponentRace, Difficulty opponentDifficulty, AIBuild aIBuild, int randomSeed = -1)
+        public async Task CreateGame(String mapName, Race opponentRace, Difficulty opponentDifficulty, AIBuild aIBuild, int randomSeed = -1, bool realTime = false)
         {
             var createGame = new RequestCreateGame();
-            createGame.Realtime = false;
+            createGame.Realtime = realTime;
 
             if (randomSeed >= 0)
             {
@@ -211,6 +211,7 @@ namespace Sharky
             int frames = 0;
 
             double specificTime = 0;
+            double longestFrameTime = 0;
             int actionCount = 0;
 
             while (true)
@@ -295,15 +296,20 @@ namespace Sharky
                 var frameTotal = (DateTime.UtcNow - beginTotal).TotalMilliseconds;
                 totalTime += frameTotal;
                 frames++;
+                if (frames > 1 && frameTotal > longestFrameTime)
+                {
+                    longestFrameTime = frameTotal;
+                    Console.WriteLine($"Longest Frame: #{frames}: {longestFrameTime} ms, average: {totalTime/frames} ms");
+                }
             }
         }
         
-        public async Task RunSinglePlayer(ISharkyBot bot, string map, Race myRace, Race opponentRace, Difficulty opponentDifficulty, AIBuild aIBuild, int randomSeed = -1, string opponentID = "test")
+        public async Task RunSinglePlayer(ISharkyBot bot, string map, Race myRace, Race opponentRace, Difficulty opponentDifficulty, AIBuild aIBuild, int randomSeed = -1, string opponentID = "test", bool realTime = false)
         {
             readSettings();
             StartSC2Instance(5678);
             await Connect(5678);
-            await CreateGame(map, opponentRace, opponentDifficulty, aIBuild, randomSeed);
+            await CreateGame(map, opponentRace, opponentDifficulty, aIBuild, randomSeed, realTime);
             var playerId = await JoinGame(myRace);
             await Run(bot, playerId, opponentID);
         }
