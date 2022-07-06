@@ -58,7 +58,15 @@ namespace Sharky
         public int UnitsInProgressCount(UnitTypes unitType)
         {
             var unitData = SharkyUnitData.TrainingData[unitType];
-            var inProgress = ActiveUnitData.SelfUnits.Count(u => (unitData.ProducingUnits.Contains((UnitTypes)u.Value.Unit.UnitType) || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_EGG || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_OVERLORDCOCOON || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_TRANSPORTOVERLORDCOCOON) && u.Value.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
+            var inProgress = ActiveUnitData.SelfUnits.Count(u => (unitData.ProducingUnits.Contains((UnitTypes)u.Value.Unit.UnitType) 
+            || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_EGG 
+            || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_OVERLORDCOCOON
+            || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_BANELINGCOCOON
+            || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_LURKERMPEGG
+            || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_BROODLORDCOCOON
+            || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_RAVAGERCOCOON
+            || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_TRANSPORTOVERLORDCOCOON) 
+            && u.Value.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
             if (unitType == UnitTypes.ZERG_ZERGLING)
             {
                 return inProgress * 2;
@@ -86,6 +94,73 @@ namespace Sharky
             else if (unitType == UnitTypes.ZERG_SPIRE)
             {
                 count += Count(UnitTypes.ZERG_GREATERSPIRE);
+            }
+            else if (unitType == UnitTypes.ZERG_SPINECRAWLER)
+            {
+                count += Count(UnitTypes.ZERG_SPINECRAWLERUPROOTED);
+            }
+            else if (unitType == UnitTypes.ZERG_SPORECRAWLER)
+            {
+                count += Count(UnitTypes.ZERG_SPORECRAWLERUPROOTED);
+            }
+
+            else if (unitType == UnitTypes.ZERG_DRONE)
+            {
+                count += Count(UnitTypes.ZERG_DRONEBURROWED);
+            }
+            else if (unitType == UnitTypes.ZERG_ZERGLING)
+            {
+                count += Count(UnitTypes.ZERG_ZERGLINGBURROWED);
+            }
+            else if (unitType == UnitTypes.ZERG_BANELING)
+            {
+                count += Count(UnitTypes.ZERG_BANELINGBURROWED);
+            }
+            else if (unitType == UnitTypes.ZERG_ROACH)
+            {
+                count += Count(UnitTypes.ZERG_ROACHBURROWED);
+            }
+            else if (unitType == UnitTypes.ZERG_RAVAGER)
+            {
+                count += Count(UnitTypes.ZERG_RAVAGERBURROWED);
+            }
+            else if (unitType == UnitTypes.ZERG_HYDRALISK)
+            {
+                count += Count(UnitTypes.ZERG_HYDRALISKBURROWED);
+            }
+            else if (unitType == UnitTypes.ZERG_LURKERMP)
+            {
+                count += Count(UnitTypes.ZERG_LURKERMPBURROWED);
+            }
+            else if (unitType == UnitTypes.ZERG_INFESTOR)
+            {
+                count += Count(UnitTypes.ZERG_INFESTORBURROWED);
+            }
+            else if (unitType == UnitTypes.ZERG_SWARMHOSTMP)
+            {
+                count += Count(UnitTypes.ZERG_SWARMHOSTBURROWEDMP);
+            }
+            else if (unitType == UnitTypes.ZERG_QUEEN)
+            {
+                count += Count(UnitTypes.ZERG_QUEENBURROWED);
+            }
+            else if (unitType == UnitTypes.ZERG_ULTRALISK)
+            {
+                count += Count(UnitTypes.ZERG_ULTRALISKBURROWED);
+            }
+            else if (unitType == UnitTypes.ZERG_OVERLORD)
+            {
+                count += Count(UnitTypes.ZERG_OVERSEER);
+                count += Count(UnitTypes.ZERG_OVERLORDTRANSPORT);
+            }
+
+            else if (unitType == UnitTypes.ZERG_CHANGELING)
+            {
+                count += Count(UnitTypes.ZERG_CHANGELINGMARINE);
+                count += Count(UnitTypes.ZERG_CHANGELINGMARINESHIELD);
+                count += Count(UnitTypes.ZERG_CHANGELINGZEALOT);
+                count += Count(UnitTypes.ZERG_CHANGELINGZERGLING);
+                count += Count(UnitTypes.ZERG_CHANGELINGZERGLINGWINGS);
             }
 
             else if (unitType == UnitTypes.TERRAN_COMMANDCENTER)
@@ -164,6 +239,7 @@ namespace Sharky
             {
                 count += EnemyCount(UnitTypes.PROTOSS_WARPGATE);
             }
+            
             else if (unitType == UnitTypes.ZERG_HATCHERY)
             {
                 count += EnemyCount(UnitTypes.ZERG_HIVE);
@@ -173,6 +249,73 @@ namespace Sharky
             {
                 count += EnemyCount(UnitTypes.ZERG_HIVE);
             }
+            else if (unitType == UnitTypes.ZERG_SPINECRAWLER)
+            {
+                count += Count(UnitTypes.ZERG_SPINECRAWLERUPROOTED);
+            }
+            else if (unitType == UnitTypes.ZERG_SPORECRAWLER)
+            {
+                count += Count(UnitTypes.ZERG_SPORECRAWLERUPROOTED);
+            }
+
+            else if (unitType == UnitTypes.ZERG_DRONE)
+            {
+                count += Count(UnitTypes.ZERG_DRONEBURROWED);
+            }
+            else if (unitType == UnitTypes.ZERG_ZERGLING)
+            {
+                count += Count(UnitTypes.ZERG_ZERGLINGBURROWED);
+            }
+            else if (unitType == UnitTypes.ZERG_BANELING)
+            {
+                count += Count(UnitTypes.ZERG_BANELINGBURROWED);
+            }
+            else if (unitType == UnitTypes.ZERG_ROACH)
+            {
+                count += Count(UnitTypes.ZERG_ROACHBURROWED);
+            }
+            else if (unitType == UnitTypes.ZERG_RAVAGER)
+            {
+                count += Count(UnitTypes.ZERG_RAVAGERBURROWED);
+            }
+            else if (unitType == UnitTypes.ZERG_HYDRALISK)
+            {
+                count += Count(UnitTypes.ZERG_HYDRALISKBURROWED);
+            }
+            else if (unitType == UnitTypes.ZERG_LURKERMP)
+            {
+                count += Count(UnitTypes.ZERG_LURKERMPBURROWED);
+            }
+            else if (unitType == UnitTypes.ZERG_INFESTOR)
+            {
+                count += Count(UnitTypes.ZERG_INFESTORBURROWED);
+            }
+            else if (unitType == UnitTypes.ZERG_SWARMHOSTMP)
+            {
+                count += Count(UnitTypes.ZERG_SWARMHOSTBURROWEDMP);
+            }
+            else if (unitType == UnitTypes.ZERG_QUEEN)
+            {
+                count += Count(UnitTypes.ZERG_QUEENBURROWED);
+            }
+            else if (unitType == UnitTypes.ZERG_ULTRALISK)
+            {
+                count += Count(UnitTypes.ZERG_ULTRALISKBURROWED);
+            }
+            else if (unitType == UnitTypes.ZERG_OVERLORD)
+            {
+                count += Count(UnitTypes.ZERG_OVERSEER);
+                count += Count(UnitTypes.ZERG_OVERLORDTRANSPORT);
+            }
+            else if (unitType == UnitTypes.ZERG_CHANGELING)
+            {
+                count += Count(UnitTypes.ZERG_CHANGELINGMARINE);
+                count += Count(UnitTypes.ZERG_CHANGELINGMARINESHIELD);
+                count += Count(UnitTypes.ZERG_CHANGELINGZEALOT);
+                count += Count(UnitTypes.ZERG_CHANGELINGZERGLING);
+                count += Count(UnitTypes.ZERG_CHANGELINGZERGLINGWINGS);
+            }
+
             else if (unitType == UnitTypes.TERRAN_COMMANDCENTER)
             {
                 count += EnemyCount(UnitTypes.TERRAN_COMMANDCENTERFLYING);
@@ -268,6 +411,14 @@ namespace Sharky
             else if (unitType == UnitTypes.ZERG_LAIR)
             {
                 completed += Completed(UnitTypes.ZERG_HIVE);
+            }
+            else if (unitType == UnitTypes.ZERG_SPINECRAWLER)
+            {
+                completed += Count(UnitTypes.ZERG_SPINECRAWLERUPROOTED);
+            }
+            else if (unitType == UnitTypes.ZERG_SPORECRAWLER)
+            {
+                completed += Count(UnitTypes.ZERG_SPORECRAWLERUPROOTED);
             }
             else if (unitType == UnitTypes.TERRAN_COMMANDCENTER)
             {
