@@ -42,6 +42,7 @@ namespace Sharky.DefaultBot
         public List<IManager> Managers { get; set; }
 
         public DebugManager DebugManager { get; set; }
+        public ReportingManager ReportingManager { get; set; }
 
         public UnitDataManager UnitDataManager { get; set; }
         public MapManager MapManager { get; set; }
@@ -189,6 +190,9 @@ namespace Sharky.DefaultBot
             DebugService = new DebugService(SharkyOptions);
             DebugManager = new DebugManager(gameConnection, SharkyOptions, DebugService);
             Managers.Add(DebugManager);
+
+            ReportingManager = new ReportingManager(this);
+            Managers.Add(ReportingManager);
 
             UpgradeDataService = new UpgradeDataService();
             BuildingDataService = new BuildingDataService();
