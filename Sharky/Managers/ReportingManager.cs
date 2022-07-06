@@ -34,8 +34,11 @@ namespace Sharky.Managers
         {
             var actions = new List<SC2APIProtocol.Action>();
 
-            if ((observation.Observation.GameLoop) > 10 && (observation.Observation.GameLoop % logFrameInterval == 0))
-                DetailedFrame((int)observation.Observation.GameLoop);
+            if (DefaultSharkyBot.SharkyOptions.GameStatusReportingEnabled)
+            {
+                if (observation.Observation.GameLoop > 10 && (observation.Observation.GameLoop % logFrameInterval == 0))
+                    DetailedFrame((int)observation.Observation.GameLoop);
+            }
 
             return actions;
         }
@@ -49,8 +52,26 @@ namespace Sharky.Managers
             var elapsedTime = DefaultSharkyBot.FrameToTimeConverter.GetTime(frame);
             Console.WriteLine(new String('=', 20));
             Console.WriteLine($"Frame {frame} report, elapsed time: {elapsedTime}, {Process.GetCurrentProcess().WorkingSet64 / 1024 / 1024} MiB memory used");
-            Console.WriteLine($"  Minerals: {DefaultSharkyBot.MacroData.Minerals} Gas: {DefaultSharkyBot.MacroData.VespeneGas} Supply: {DefaultSharkyBot.MacroData.FoodUsed}/{DefaultSharkyBot.MacroData.FoodLeft + DefaultSharkyBot.MacroData.FoodUsed} ({DefaultSharkyBot.MacroData.FoodArmy} army) Larvae: {DefaultSharkyBot.UnitCountService.Count(UnitTypes.ZERG_LARVA)}");
-            Console.WriteLine($"  Workers: {DefaultSharkyBot.UnitCountService.UnitsDoneAndInProgressCount(UnitTypes.ZERG_DRONE)} from wanted {DefaultSharkyBot.MacroData.DesiredUnitCounts[UnitTypes.ZERG_DRONE]} (strict: {DefaultSharkyBot.BuildOptions.StrictWorkerCount}), per extractor {DefaultSharkyBot.BuildOptions.StrictWorkersPerGasCount} (strict: {DefaultSharkyBot.BuildOptions.StrictWorkersPerGas}), extractors: {DefaultSharkyBot.UnitCountService.EquivalentTypeCount(UnitTypes.ZERG_EXTRACTOR)} from {DefaultSharkyBot.MacroData.DesiredGases}");
+            var larva = "";
+            if (DefaultSharkyBot.EnemyData.SelfRace == Race.Zerg)
+            {
+                larva = $"Larvae: {DefaultSharkyBot.UnitCountService.Count(UnitTypes.ZERG_LARVA)}";
+            }
+            Console.WriteLine($"  Minerals: {DefaultSharkyBot.MacroData.Minerals} Gas: {DefaultSharkyBot.MacroData.VespeneGas} Supply: {DefaultSharkyBot.MacroData.FoodUsed}/{DefaultSharkyBot.MacroData.FoodLeft + DefaultSharkyBot.MacroData.FoodUsed} ({DefaultSharkyBot.MacroData.FoodArmy} army) {larva}");
+
+            var workerType = UnitTypes.ZERG_DRONE;
+            var gasType = UnitTypes.ZERG_EXTRACTOR;
+            if (DefaultSharkyBot.EnemyData.SelfRace == Race.Protoss) 
+            { 
+                workerType = UnitTypes.PROTOSS_PROBE;
+                gasType = UnitTypes.PROTOSS_ASSIMILATOR;
+            }
+            else if (DefaultSharkyBot.EnemyData.SelfRace == Race.Terran)
+            {
+                workerType = UnitTypes.TERRAN_SCV;
+                gasType = UnitTypes.TERRAN_REFINERY;
+            }
+            Console.WriteLine($"  Workers: {DefaultSharkyBot.UnitCountService.UnitsDoneAndInProgressCount(workerType)} from wanted {DefaultSharkyBot.MacroData.DesiredUnitCounts[workerType]} (strict: {DefaultSharkyBot.BuildOptions.StrictWorkerCount}), per gas {DefaultSharkyBot.BuildOptions.StrictWorkersPerGasCount} (strict: {DefaultSharkyBot.BuildOptions.StrictWorkersPerGas}), gas: {DefaultSharkyBot.UnitCountService.EquivalentTypeCount(gasType)} from {DefaultSharkyBot.MacroData.DesiredGases}");
             Console.WriteLine($"  Desired units:");
             foreach (var entry in DefaultSharkyBot.MacroData.DesiredUnitCounts)
             {
@@ -92,6 +113,10 @@ namespace Sharky.Managers
             {
                 if (entry.Value.Detected)
                     Console.WriteLine($"    [{entry.Key}] is { (entry.Value.Active ? "active" : "inactive") }");
+            }
+            if (DefaultSharkyBot.AttackData.UseAttackDataManager)
+            {
+                Console.WriteLine($"Attacking: {DefaultSharkyBot.AttackData.Attacking}");
             }
             CheckCommanders();
             Console.WriteLine(new String('=', 20));
