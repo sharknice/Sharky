@@ -5,7 +5,7 @@ The goal of Sharky is to provide a framework that handles all the complex setup 
 
 You can clone it and use it directly in your solution (recomended), or install it to your project via the nuget package 'Sharky' (not updated as frequently)
 
-There is an example bot included in the Sharky source, and another example using the nuget package here https://github.com/sharknice/SharkyExampleBot
+There are example bots included in the Sharky source, and another example using the nuget package [here](https://github.com/sharknice/SharkyExampleBot)
 
 And a video tutorial here https://www.youtube.com/watch?v=2Tf0jLTJQME
 
