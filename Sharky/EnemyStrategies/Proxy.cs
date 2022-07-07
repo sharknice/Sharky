@@ -9,17 +9,8 @@ namespace Sharky.EnemyStrategies
     {
         TargetingData TargetingData;
 
-        public Proxy(DefaultSharkyBot defaultSharkyBot)
+        public Proxy(DefaultSharkyBot defaultSharkyBot) : base(defaultSharkyBot)
         {
-            EnemyStrategyHistory = defaultSharkyBot.EnemyStrategyHistory;
-            ChatService = defaultSharkyBot.ChatService;
-            ActiveUnitData = defaultSharkyBot.ActiveUnitData;
-            SharkyOptions = defaultSharkyBot.SharkyOptions;
-            DebugService = defaultSharkyBot.DebugService;
-            UnitCountService = defaultSharkyBot.UnitCountService;
-            FrameToTimeConverter = defaultSharkyBot.FrameToTimeConverter;
-            EnemyData = defaultSharkyBot.EnemyData;
-
             TargetingData = defaultSharkyBot.TargetingData;
         }
 

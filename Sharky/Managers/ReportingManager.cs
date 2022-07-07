@@ -27,7 +27,7 @@ namespace Sharky.Managers
         public ReportingManager(DefaultSharkyBot defaultSharkyBot, float logInterval = 10.0f)
         {
             DefaultSharkyBot = defaultSharkyBot;
-            logFrameInterval = (int)(logInterval * 22.4f);
+            logFrameInterval = (int)(logInterval * defaultSharkyBot.SharkyOptions.FramesPerSecond);
         }
 
         public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)

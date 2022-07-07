@@ -7,17 +7,8 @@ namespace Sharky.EnemyStrategies.Protoss
     public class ProxyRobo : EnemyStrategy
     {
         TargetingData TargetingData;
-        public ProxyRobo(DefaultSharkyBot defaultSharkyBot)
+        public ProxyRobo(DefaultSharkyBot defaultSharkyBot) : base(defaultSharkyBot)
         {
-            EnemyStrategyHistory = defaultSharkyBot.EnemyStrategyHistory;
-            ChatService = defaultSharkyBot.ChatService;
-            ActiveUnitData = defaultSharkyBot.ActiveUnitData;
-            SharkyOptions = defaultSharkyBot.SharkyOptions;
-            DebugService = defaultSharkyBot.DebugService;
-            UnitCountService = defaultSharkyBot.UnitCountService;
-            FrameToTimeConverter = defaultSharkyBot.FrameToTimeConverter;
-            EnemyData = defaultSharkyBot.EnemyData;
-
             TargetingData = defaultSharkyBot.TargetingData;
         }
 

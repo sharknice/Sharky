@@ -510,6 +510,10 @@ namespace Sharky.DefaultBot
                 [nameof(EnemyStrategies.Proxy)] = new EnemyStrategies.Proxy(this),
                 [nameof(WorkerRush)] = new WorkerRush(this),
                 [nameof(InvisibleAttacks)] = new InvisibleAttacks(this),
+                [nameof(Air)] = new Air(this),
+
+                [nameof(OneBase)] = new OneBase(this),
+                [nameof(TwoBase)] = new TwoBase(this),
 
                 [nameof(AdeptRush)] = new AdeptRush(this),
                 [nameof(CannonRush)] = new CannonRush(this),
@@ -520,15 +524,23 @@ namespace Sharky.DefaultBot
                 [nameof(ProxyShieldBattery)] = new ProxyShieldBattery(this),
                 [nameof(ZealotRush)] = new ZealotRush(this),
                 [nameof(FleetBeaconTech)] = new FleetBeaconTech(this),
+                [nameof(AirToss)] = new AirToss(this),
+                [nameof(FastForge)] = new FastForge(this),
+                [nameof(FastStargate)] = new FastStargate(this),
 
                 [nameof(MarineRush)] = new MarineRush(this),
                 [nameof(BunkerRush)] = new BunkerRush(this),
                 [nameof(BunkerContain)] = new BunkerContain(this),
                 [nameof(MassVikings)] = new MassVikings(this),
                 [nameof(ThreeRax)] = new ThreeRax(this),
+                [nameof(BansheeRush)] = new BansheeRush(this),
 
                 [nameof(ZerglingRush)] = new ZerglingRush(this),
-                [nameof(RoachRavager)] = new RoachRavager(this)
+                [nameof(RoachRavager)] = new RoachRavager(this),
+                [nameof(ZerglingDroneRush)] = new ZerglingDroneRush(this),
+                [nameof(RoachRush)] = new RoachRush(this),
+                [nameof(MutaliskRush)] = new MutaliskRush(this),
+                [nameof(BurrowStrategy)] = new BurrowStrategy(this)
             };
 
             EnemyStrategyManager = new EnemyStrategyManager(EnemyData);

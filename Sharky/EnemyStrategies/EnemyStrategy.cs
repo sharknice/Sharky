@@ -1,5 +1,6 @@
 ﻿using SC2APIProtocol;
 using Sharky.Chat;
+using Sharky.DefaultBot;
 using System;
 using System.Linq;
 
@@ -22,6 +23,18 @@ namespace Sharky.EnemyStrategies
         public string Name()
         {
             return GetType().Name;
+        }
+
+        public EnemyStrategy(DefaultSharkyBot defaultSharkyBot) 
+        {
+            EnemyStrategyHistory = defaultSharkyBot.EnemyStrategyHistory;
+            ChatService = defaultSharkyBot.ChatService;
+            ActiveUnitData = defaultSharkyBot.ActiveUnitData;
+            SharkyOptions = defaultSharkyBot.SharkyOptions;
+            DebugService = defaultSharkyBot.DebugService;
+            UnitCountService = defaultSharkyBot.UnitCountService;
+            FrameToTimeConverter = defaultSharkyBot.FrameToTimeConverter;
+            EnemyData = defaultSharkyBot.EnemyData;
         }
 
         public void OnFrame(int frame)
