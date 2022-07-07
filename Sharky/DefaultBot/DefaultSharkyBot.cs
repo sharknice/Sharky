@@ -42,6 +42,7 @@ namespace Sharky.DefaultBot
         public List<IManager> Managers { get; set; }
 
         public DebugManager DebugManager { get; set; }
+        public ReportingManager ReportingManager { get; set; }
 
         public UnitDataManager UnitDataManager { get; set; }
         public MapManager MapManager { get; set; }
@@ -170,7 +171,7 @@ namespace Sharky.DefaultBot
 
             var framesPerSecond = 22.4f;
 
-            SharkyOptions = new SharkyOptions { Debug = debug, FramesPerSecond = framesPerSecond, TagsEnabled = true, BuildTagsEnabled = true, LogPerformance = false };
+            SharkyOptions = new SharkyOptions { Debug = debug, FramesPerSecond = framesPerSecond, TagsEnabled = true, BuildTagsEnabled = true, LogPerformance = false, GameStatusReportingEnabled = true };
             FrameToTimeConverter = new FrameToTimeConverter(SharkyOptions);
             MacroData = new MacroData();
             AttackData = new AttackData { ArmyFoodAttack = 30, ArmyFoodRetreat = 25, Attacking = false, UseAttackDataManager = true, CustomAttackFunction = true, RetreatTrigger = 1f, AttackTrigger = 1.5f };
@@ -179,6 +180,7 @@ namespace Sharky.DefaultBot
             ActiveChatData = new ActiveChatData();
             EnemyData = new EnemyData();
             SharkyUnitData = new SharkyUnitData { CorrosiveBiles = new Dictionary<Point2D, uint>() };
+            ActiveUnitData = new ActiveUnitData();
 
             UnitDataService = new UnitDataService(SharkyUnitData, SharkyOptions, MacroData);
 
@@ -186,9 +188,12 @@ namespace Sharky.DefaultBot
 
             Managers = new List<IManager>();
 
-            DebugService = new DebugService(SharkyOptions);
+            DebugService = new DebugService(SharkyOptions, ActiveUnitData);
             DebugManager = new DebugManager(gameConnection, SharkyOptions, DebugService);
             Managers.Add(DebugManager);
+
+            ReportingManager = new ReportingManager(this);
+            Managers.Add(ReportingManager);
 
             UpgradeDataService = new UpgradeDataService();
             BuildingDataService = new BuildingDataService();
@@ -205,7 +210,7 @@ namespace Sharky.DefaultBot
             AreaService = new AreaService(MapDataService);
             TargetPriorityService = new TargetPriorityService(SharkyUnitData);
             CollisionCalculator = new CollisionCalculator();
-            ActiveUnitData = new ActiveUnitData();
+            
             UnitCountService = new UnitCountService(ActiveUnitData, SharkyUnitData);
             DamageService = new DamageService();
             BuildingService = new BuildingService(MapData, ActiveUnitData, TargetingData, BaseData);
