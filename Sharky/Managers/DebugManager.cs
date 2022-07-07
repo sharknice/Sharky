@@ -101,6 +101,22 @@ namespace Sharky.Managers
                     DebugService.SetCamera(new Point { X = x, Y = y, Z = camera.Z });
                     return;
                 }
+
+                match = Regex.Match(chatReceived.Message.ToLower(), "kill friendly (.*)");
+                if (match.Success)
+                {
+                    var unitType = (UnitTypes)System.Enum.Parse(typeof(UnitTypes), match.Groups[1].Value, true);
+                    DebugService.KillFriendlyUnits(unitType);
+                    return;
+                }
+
+                match = Regex.Match(chatReceived.Message.ToLower(), "kill enemy (.*)");
+                if (match.Success)
+                {
+                    var unitType = (UnitTypes)System.Enum.Parse(typeof(UnitTypes), match.Groups[1].Value, true);
+                    DebugService.KillEnemyUnits(unitType);
+                    return;
+                }
             }
         }
     }

@@ -180,6 +180,7 @@ namespace Sharky.DefaultBot
             ActiveChatData = new ActiveChatData();
             EnemyData = new EnemyData();
             SharkyUnitData = new SharkyUnitData { CorrosiveBiles = new Dictionary<Point2D, uint>() };
+            ActiveUnitData = new ActiveUnitData();
 
             UnitDataService = new UnitDataService(SharkyUnitData, SharkyOptions, MacroData);
 
@@ -187,7 +188,7 @@ namespace Sharky.DefaultBot
 
             Managers = new List<IManager>();
 
-            DebugService = new DebugService(SharkyOptions);
+            DebugService = new DebugService(SharkyOptions, ActiveUnitData);
             DebugManager = new DebugManager(gameConnection, SharkyOptions, DebugService);
             Managers.Add(DebugManager);
 
@@ -209,7 +210,7 @@ namespace Sharky.DefaultBot
             AreaService = new AreaService(MapDataService);
             TargetPriorityService = new TargetPriorityService(SharkyUnitData);
             CollisionCalculator = new CollisionCalculator();
-            ActiveUnitData = new ActiveUnitData();
+            
             UnitCountService = new UnitCountService(ActiveUnitData, SharkyUnitData);
             DamageService = new DamageService();
             BuildingService = new BuildingService(MapData, ActiveUnitData, TargetingData, BaseData);

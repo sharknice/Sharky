@@ -1,10 +1,12 @@
 ﻿using SC2APIProtocol;
+using System.Linq;
 
 namespace Sharky
 {
     public class DebugService
     {
         SharkyOptions SharkyOptions;
+        ActiveUnitData ActiveUnitData;
 
         int TextLine;
         Color DefaultColor;
@@ -13,9 +15,10 @@ namespace Sharky
         public Request SpawnRequest { get; set; }
         public bool Surrender { get; private set; }
 
-        public DebugService(SharkyOptions sharkyOptions)
+        public DebugService(SharkyOptions sharkyOptions, ActiveUnitData activeUnitData)
         {
             SharkyOptions = sharkyOptions;
+            ActiveUnitData = activeUnitData;
             DefaultColor = new Color() { R = 255, G = 0, B = 0 };
             ResetDrawRequest();
             ResetSpawnRequest();
@@ -103,6 +106,34 @@ namespace Sharky
                     UnitType = (uint)unitType
                 }
             });
+        }
+
+        public void KillFriendlyUnits(UnitTypes unitType)
+        {
+            var tags = ActiveUnitData.SelfUnits.Where(u => u.Value.Unit.UnitType == (uint)unitType).Select(u => u.Key);
+            if (tags.Any())
+            {
+                var command = new DebugKillUnit();
+                command.Tag.AddRange(tags);
+                SpawnRequest.Debug.Debug.Add(new DebugCommand()
+                {
+                    KillUnit = command,
+                });
+            }
+        }
+
+        public void KillEnemyUnits(UnitTypes unitType)
+        {
+            var tags = ActiveUnitData.EnemyUnits.Where(u => u.Value.Unit.UnitType == (uint)unitType).Select(u => u.Key);
+            if (tags.Any())
+            {
+                var command = new DebugKillUnit();
+                command.Tag.AddRange(tags);
+                SpawnRequest.Debug.Debug.Add(new DebugCommand()
+                {
+                    KillUnit = command,
+                });
+            }
         }
 
         public void SetEnergy(ulong unitTag, float value)

@@ -336,7 +336,7 @@ namespace Sharky.Managers
                                 // 7 seconds to start regen, 2 points regenerated per second
                                 var timeLoaded = frame - ActiveUnitData.SelfUnits[tag].FrameLastSeen;
                                 var regenFrames = timeLoaded - (SharkyOptions.FramesPerSecond * 7);
-                                var shieldRegenerated = (SharkyOptions.FramesPerSecond / 2f) * regenFrames;
+                                var shieldRegenerated = regenFrames / (SharkyOptions.FramesPerSecond / 2f);
                                 if (shieldRegenerated > ActiveUnitData.SelfUnits[tag].Unit.ShieldMax - ActiveUnitData.SelfUnits[tag].Unit.Shield)
                                 {
                                     ActiveUnitData.SelfUnits[tag].Unit.Shield = ActiveUnitData.SelfUnits[tag].Unit.ShieldMax;
