@@ -331,12 +331,13 @@ namespace Sharky.Managers
                                 }
                             }
 
+                            ActiveUnitData.SelfUnits[tag].EnemiesThreateningDamage = GetEnemiesThreateningDamage(ActiveUnitData.SelfUnits[tag]);
+
                             if (ActiveUnitData.SelfUnits[tag].Unit.Shield < ActiveUnitData.SelfUnits[tag].Unit.ShieldMax)
                             {
-                                // 7 seconds to start regen, 2 points regenerated per second
                                 var timeLoaded = frame - ActiveUnitData.SelfUnits[tag].FrameLastSeen;
-                                var regenFrames = timeLoaded - (SharkyOptions.FramesPerSecond * 7);
-                                var shieldRegenerated = regenFrames / (SharkyOptions.FramesPerSecond / 2f);
+                                var regenFrames = timeLoaded - (SharkyOptions.FramesPerSecond * 7); // 7 seconds to start regenerating shields
+                                var shieldRegenerated = regenFrames / (SharkyOptions.FramesPerSecond / 2f); // 2 shield points regenerated per second
                                 if (shieldRegenerated > ActiveUnitData.SelfUnits[tag].Unit.ShieldMax - ActiveUnitData.SelfUnits[tag].Unit.Shield)
                                 {
                                     ActiveUnitData.SelfUnits[tag].Unit.Shield = ActiveUnitData.SelfUnits[tag].Unit.ShieldMax;
