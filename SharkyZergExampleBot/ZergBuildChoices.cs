@@ -3,7 +3,6 @@ using Sharky.Builds;
 using Sharky.Builds.Zerg;
 using Sharky.DefaultBot;
 using SharkyZergExampleBot.Builds;
-using SharkyZergExampleBot.MicroTasks;
 using System.Collections.Generic;
 
 namespace SharkyZergExampleBot
@@ -50,8 +49,7 @@ namespace SharkyZergExampleBot
 
         void AddZergTasks(DefaultSharkyBot defaultSharkyBot)
         {
-            var overlordScoutTask = new OverlordScoutTask(defaultSharkyBot, 2, true);
-            defaultSharkyBot.MicroTaskData.MicroTasks[overlordScoutTask.GetType().Name] = overlordScoutTask;
+
         }
     }
 }

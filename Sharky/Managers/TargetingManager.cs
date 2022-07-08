@@ -1,5 +1,6 @@
 ﻿using SC2APIProtocol;
 using Sharky.Builds.BuildingPlacement;
+using Sharky.Extensions;
 using Sharky.Pathing;
 using System;
 using System.Collections.Generic;
@@ -90,6 +91,10 @@ namespace Sharky.Managers
                 }
 
                 TargetingData.SelfMainBasePoint = new Point2D { X = unit.Pos.X, Y = unit.Pos.Y };
+
+                var mainVector = Vector2.Normalize(TargetingData.SelfMainBasePoint.ToVector2() - TargetingData.EnemyMainBasePoint.ToVector2()) * 22.0f;
+                TargetingData.NaturalFrontScoutPoint = (BaseData.EnemyNaturalBase.Location.ToVector2() + mainVector).ToPoint2D();
+
                 var naturalBaseLocation = BaseData.BaseLocations.Skip(1).Take(1).FirstOrDefault();
                 if (naturalBaseLocation != null)
                 {
@@ -339,11 +344,39 @@ namespace Sharky.Managers
             return data;
         }
 
+        /// <summary>
+        /// Stores enemy army center in TargetingData.EnemyArmyCenter.
+        /// </summary>
+        private void UpdateEnemyArmyCenter()
+        {
+            int count = 0;
+            TargetingData.EnemyArmyCenter = Vector2.Zero;
+
+            foreach (var enemy in ActiveUnitData.EnemyUnits)
+            {
+                if (enemy.Value.UnitClassifications.Contains(UnitClassification.ArmyUnit))
+                {
+                    TargetingData.EnemyArmyCenter += enemy.Value.Position;
+                    count++;
+                }
+            }
+
+            if (count == 0)
+            {
+                TargetingData.EnemyArmyCenter = BaseData.EnemyBaseLocations.First().Location.ToVector2();
+            }
+            else
+            {
+                TargetingData.EnemyArmyCenter = TargetingData.EnemyArmyCenter / count;
+            }
+        }
+
         public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
         {
             UpdateDefensePoint((int)observation.Observation.GameLoop);
             UpdateChokePoints((int)observation.Observation.GameLoop);
             UpdateWall((int)observation.Observation.GameLoop);
+            UpdateEnemyArmyCenter();
 
             DebugService.DrawSphere(new Point { X = TargetingData.MainDefensePoint.X, Y = TargetingData.MainDefensePoint.Y, Z = 12 }, 2, new Color { R = 0, G = 255, B = 0 });
             DebugService.DrawSphere(new Point { X = TargetingData.ForwardDefensePoint.X, Y = TargetingData.ForwardDefensePoint.Y, Z = 12 }, 2, new Color { R = 0, G = 0, B = 255 });

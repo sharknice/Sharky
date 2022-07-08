@@ -1,6 +1,7 @@
 ﻿using SC2APIProtocol;
 using Sharky.Builds.BuildingPlacement;
 using Sharky.DefaultBot;
+using Sharky.Extensions;
 using Sharky.Pathing;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,129 +11,168 @@ namespace Sharky.MicroTasks.Zerg
 {
     public class CreepTumorPlacementFinder
     {
-        BuildingService BuildingService;
         TargetingData TargetingData;
-        MacroData MacroData;
-        BaseData BaseData;
         IBuildingPlacement ZergBuildingPlacement;
+        ActiveUnitData ActiveUnitData;
 
-        IPathFinder PathFinder;
+        MapData MapData;
 
-        // Path from main to expansions, target, any base
-        // Check if every single point is creep, if spot is not creep, place a creep tumor at the spot before it that is creep
-        // For extending tumors follow path but only use points within range
-        // Also spreed creep in main base for vision later
+        int lastMapUpdate = 0;
+        bool needsUpdate = true;
+
+        float[,] CreepTumorPlacementMap;
 
         public CreepTumorPlacementFinder(DefaultSharkyBot defaultSharkyBot, IPathFinder pathFinder)
         {
-            BuildingService = defaultSharkyBot.BuildingService;
             TargetingData = defaultSharkyBot.TargetingData;
-            MacroData = defaultSharkyBot.MacroData;
-            BaseData = defaultSharkyBot.BaseData;
             ZergBuildingPlacement = defaultSharkyBot.ZergBuildingPlacement;
-
-            PathFinder = pathFinder;
+            MapData = defaultSharkyBot.MapData;
+            ActiveUnitData = defaultSharkyBot.ActiveUnitData;
         }
 
-        public Point2D FindTumorPlacement()
+        private void ScoreArea(float posX, float posY, float multiplier)
         {
-            // path from main to natural
-            var main = BaseData.SelfBases.FirstOrDefault();
-            if (main != null)
-            {
-                var startLocation = main.Location;
-                foreach (var baseLocation in BaseData.BaseLocations)
+            for (int x = -10; x <= 10; x++)
+                for (int y = -10; y <= 10; y++)
                 {
-                    var start = new Point2D { X = startLocation.X + 4, Y = startLocation.Y + 4 };
-                    var end = new Point2D { X = baseLocation.Location.X + 4, Y = baseLocation.Location.Y + 4 };
-                    var path = PathFinder.GetGroundPath(start.X, start.Y, end.X, end.Y, MacroData.Frame);
+                    float distance = Vector2.Distance(new Vector2(x, y), Vector2.Zero);
+                    if (distance > 10.0f)
+                        continue;
 
-                    var spot = start;
-                    foreach (var point in path)
+                    int arrX = (int)(x + posX);
+                    int arrY = (int)(y + posY);
+
+                    if (arrX >= 0 && arrX < MapData.MapWidth && arrY >= 0 && arrY < MapData.MapHeight)
                     {
-                        if (!BuildingService.HasAnyCreep(point.X, point.Y, 1))
+                        if (MapData.Map[arrX][arrY].HasCreep && MapData.Map[arrX][arrY].Walkable && MapData.Map[arrX][arrY].CurrentlyBuildable)
                         {
-                            return ZergBuildingPlacement.FindPlacement(spot, UnitTypes.ZERG_CREEPTUMORQUEEN, 1);
-                        }
-                        else
-                        {
-                            spot = new Point2D { X = point.X, Y = point.Y };
+                            CreepTumorPlacementMap[arrX, arrY] = CreepTumorPlacementMap[arrX, arrY] == 0.0f ? 100.0f : CreepTumorPlacementMap[arrX, arrY];
+                            CreepTumorPlacementMap[arrX, arrY] -= (1 - (distance / 10.0f)) * multiplier;
                         }
                     }
+                }
+        }
 
-                    startLocation = baseLocation.Location;
+        private void UpdateMap(IEnumerable<UnitCommander> queens)
+        {
+            for (int x = 0; x < MapData.MapWidth; x++)
+                for (int y = 0; y < MapData.MapHeight; y++)
+                {
+                    CreepTumorPlacementMap[x, y] = 0.0f;
+                }
+
+            // Score area around creep spread structures
+            foreach (var creepSpreader in ActiveUnitData.Commanders.Values.Where(
+                x => x.UnitCalculation.Unit.UnitType == (int)UnitTypes.ZERG_CREEPTUMORBURROWED
+                || x.UnitCalculation.Unit.UnitType == (int)UnitTypes.ZERG_CREEPTUMORQUEEN
+                || x.UnitCalculation.Unit.UnitType == (int)UnitTypes.ZERG_CREEPTUMOR
+                || x.UnitCalculation.Unit.UnitType == (int)UnitTypes.ZERG_HATCHERY
+                || x.UnitCalculation.Unit.UnitType == (int)UnitTypes.ZERG_LAIR
+                || x.UnitCalculation.Unit.UnitType == (int)UnitTypes.ZERG_HIVE
+                ))
+            {
+                ScoreArea(creepSpreader.UnitCalculation.Position.X, creepSpreader.UnitCalculation.Position.Y, 2.0f);
+
+                // Creep tumor targets
+                if (creepSpreader.UnitCalculation.Unit.UnitType == (int)UnitTypes.ZERG_CREEPTUMORBURROWED && creepSpreader.UnitCalculation.Unit.Orders.Any() && creepSpreader.UnitCalculation.Unit.Orders.First().TargetWorldSpacePos != null)
+                {
+                    ScoreArea(creepSpreader.UnitCalculation.Unit.Orders.First().TargetWorldSpacePos.X, creepSpreader.UnitCalculation.Unit.Orders.First().TargetWorldSpacePos.X, 1.0f);
                 }
             }
 
-            return null;
-        }
-
-        public Point2D FindTumorExtensionPlacement(Vector2 location)
-        {
-            var start = new Point2D { X = location.X + 1, Y = location.Y + 1 };
-            Point2D spot = null;
-
-            var closestBase = BaseData.BaseLocations.OrderBy(b => Vector2.DistanceSquared(location, new Vector2(b.Location.X, b.Location.Y))).FirstOrDefault();
-            if (closestBase != null)
+            // Queen targets
+            foreach (var queen in queens)
             {
-                var end = new Point2D { X = closestBase.Location.X + 4, Y = closestBase.Location.Y + 4 };
-                var path = PathFinder.GetGroundPath(start.X, start.Y, end.X, end.Y, MacroData.Frame);
-                if (!FullyCreeped(path))
+                ScoreArea(queen.UnitCalculation.Unit.Orders.First().TargetWorldSpacePos.X, queen.UnitCalculation.Unit.Orders.First().TargetWorldSpacePos.Y, 1.5f);
+            }
+
+            // Distance to main/enemy base
+            var enemyMain = TargetingData.EnemyMainBasePoint.ToVector2();
+            var selfMain = TargetingData.SelfMainBasePoint.ToVector2();
+            float mainBasesDistance = Vector2.Distance(TargetingData.SelfMainBasePoint.ToVector2(), enemyMain);
+            for (int x = 0; x < MapData.MapWidth; x++)
+                for (int y = 0; y < MapData.MapHeight; y++)
                 {
-                    spot = GetSpot(location, start, end, path);
+                    float enemyBaseBonus = Vector2.Distance(new Vector2(x, y), enemyMain) / mainBasesDistance;
+                    enemyBaseBonus = enemyBaseBonus * enemyBaseBonus;
+                    //float selfBaseBonus = Vector2.Distance(new Vector2(x, y), selfMain) / mainBasesDistance;
+                    //CreepTumorPlacementMap[x, y] += 0.8f * (selfBaseBonus - enemyBaseBonus);
+                    //CreepTumorPlacementMap[x, y] += 2.0f * selfBaseBonus;
+                    CreepTumorPlacementMap[x, y] -= 1.5f * enemyBaseBonus;
                 }
-            }
-
-            if (spot == null)
-            {
-                var end = new Point2D { X = TargetingData.AttackPoint.X + 4, Y = TargetingData.AttackPoint.Y + 4 };
-                spot = GetSpot(location, start, end);
-            }
-
-            if (spot == null)
-            {
-                spot = start;
-            }
-            return ZergBuildingPlacement.FindPlacement(spot, UnitTypes.ZERG_CREEPTUMORQUEEN, 1, maxDistance: 10);
         }
 
-        private Point2D GetSpot(Vector2 location, Point2D start, Point2D end, List<Vector2> path = null)
+        private void ConsiderUpdatingMap(int frame, IEnumerable<UnitCommander> queens, bool forceUpdate = false)
         {
-            if (path == null)
+            if (CreepTumorPlacementMap == null)
             {
-                path = PathFinder.GetGroundPath(start.X, start.Y, end.X, end.Y, MacroData.Frame);
+                CreepTumorPlacementMap = new float[MapData.MapWidth, MapData.MapHeight];
             }
 
-            var spot = start;
-            foreach (var point in path)
+            //if (frame - lastMapUpdate > 22 || forceUpdate)
             {
-                if (!BuildingService.HasAnyCreep(point.X, point.Y, 1) || Vector2.DistanceSquared(location, point) > 64)
+                UpdateMap(queens.Where(x => x.UnitRole == UnitRole.SpreadCreep && x.UnitCalculation.Unit.Orders.Any() && x.UnitCalculation.Unit.Orders.First().AbilityId == (uint)Abilities.EFFECT_INJECTLARVA));
+                lastMapUpdate = frame;
+                needsUpdate = false;
+            }
+        }
+
+        public Point2D FindTumorPlacement(int frame, IEnumerable<UnitCommander> queens, bool canFindSuboptimal = false, bool forceUpdate = false)
+        {
+            ConsiderUpdatingMap(frame, queens, forceUpdate);
+
+            if (needsUpdate && !canFindSuboptimal)
+                return null;
+
+            Point2D highest = null;
+
+            // Find best tumor place
+            for (int x = 0; x < MapData.MapWidth; x++)
+                for (int y = 0; y < MapData.MapHeight; y++)
                 {
-                    var result = ZergBuildingPlacement.FindPlacement(spot, UnitTypes.ZERG_CREEPTUMORQUEEN, 1, maxDistance: 10);
-                    if (result == null)
+                    if (highest == null || CreepTumorPlacementMap[x, y] > CreepTumorPlacementMap[(int)highest.X, (int)highest.Y])
+                        highest = new Point2D().Create(x, y);
+                }
+
+            if (highest != null)
+            {
+                needsUpdate = true;
+                return ZergBuildingPlacement.FindPlacement(highest, UnitTypes.ZERG_CREEPTUMORQUEEN, 1, ignoreResourceProximity: true, maxDistance: 10, allowBlockBase: false);
+            }
+            else
+                return null;
+        }
+
+        public Point2D FindTumorExtensionPlacement(int frame, IEnumerable<UnitCommander> queens, Vector2 location, bool canFindSuboptimal = false, bool forceUpdate = false)
+        {
+            ConsiderUpdatingMap(frame, queens, forceUpdate);
+
+            if (needsUpdate && !canFindSuboptimal)
+                return null;
+
+            Point2D highest = null;
+            float highestValue = float.MinValue;
+
+            for (int x = -10; x < 10; x ++)
+                for (int y = -10; y < 10; y ++)
+                {
+                    int arrX = (int)(x + location.X);
+                    int arrY = (int)(y + location.Y);
+
+                    if (arrX >= 0 && arrX < MapData.MapWidth && arrY >= 0 && arrY < MapData.MapHeight
+                        && Vector2.Distance(new Vector2(x, y), Vector2.Zero) <= 10
+                        && MapData.Map[arrX][arrY].InSelfVision
+                        && (highest == null || CreepTumorPlacementMap[arrX, arrY] > highestValue))
                     {
-                        result = ZergBuildingPlacement.FindPlacement(start, UnitTypes.ZERG_CREEPTUMORQUEEN, 1, maxDistance: 10);
+                        highest = new Point2D().Create(arrX, arrY);
+                        highestValue = CreepTumorPlacementMap[arrX, arrY];
                     }
-                    return result;
                 }
-                else
-                {
-                    spot = new Point2D { X = point.X, Y = point.Y };
-                }
-            }
-            return null;
-        }
 
-        private bool FullyCreeped(List<Vector2> path)
-        {
-            foreach (var point in path)
-            {
-                if (!BuildingService.HasAnyCreep(point.X, point.Y, 1))
-                {
-                    return false;
-                }
-            }
-            return true;
+            if (highest == null)
+                return null;
+
+            return ZergBuildingPlacement.FindPlacement(highest, UnitTypes.ZERG_CREEPTUMORQUEEN, 1, maxDistance: 10, ignoreResourceProximity: true, allowBlockBase: false, requireVision: true);
         }
     }
 }
