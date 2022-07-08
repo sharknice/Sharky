@@ -8,18 +8,8 @@ namespace Sharky.EnemyStrategies.Terran
     {
         TargetingData TargetingData;
 
-        public BunkerRush(DefaultSharkyBot defaultSharkyBot)
+        public BunkerRush(DefaultSharkyBot defaultSharkyBot) : base(defaultSharkyBot)
         {
-            EnemyStrategyHistory = defaultSharkyBot.EnemyStrategyHistory;
-            ChatService = defaultSharkyBot.ChatService;
-            ActiveUnitData = defaultSharkyBot.ActiveUnitData;
-            SharkyOptions = defaultSharkyBot.SharkyOptions;
-            DebugService = defaultSharkyBot.DebugService;
-            UnitCountService = defaultSharkyBot.UnitCountService;
-            TargetingData = defaultSharkyBot.TargetingData;
-            FrameToTimeConverter = defaultSharkyBot.FrameToTimeConverter;
-            EnemyData = defaultSharkyBot.EnemyData;
-
             TargetingData = defaultSharkyBot.TargetingData;
         }
 

@@ -5,17 +5,7 @@ namespace Sharky.EnemyStrategies.Zerg
 {
     public class RoachRavager : EnemyStrategy
     {
-        public RoachRavager(DefaultSharkyBot defaultSharkyBot)
-        {
-            EnemyStrategyHistory = defaultSharkyBot.EnemyStrategyHistory;
-            ChatService = defaultSharkyBot.ChatService;
-            ActiveUnitData = defaultSharkyBot.ActiveUnitData;
-            SharkyOptions = defaultSharkyBot.SharkyOptions;
-            DebugService = defaultSharkyBot.DebugService;
-            UnitCountService = defaultSharkyBot.UnitCountService;
-            FrameToTimeConverter = defaultSharkyBot.FrameToTimeConverter;
-            EnemyData = defaultSharkyBot.EnemyData;
-        }
+        public RoachRavager(DefaultSharkyBot defaultSharkyBot) : base(defaultSharkyBot) { }
 
         protected override bool Detect(int frame)
         {

@@ -4,17 +4,7 @@ namespace Sharky.EnemyStrategies.Terran
 {
     public class ThreeRax : EnemyStrategy
     {
-        public ThreeRax(DefaultSharkyBot defaultSharkyBot)
-        {
-            EnemyStrategyHistory = defaultSharkyBot.EnemyStrategyHistory;
-            ChatService = defaultSharkyBot.ChatService;
-            ActiveUnitData = defaultSharkyBot.ActiveUnitData;
-            SharkyOptions = defaultSharkyBot.SharkyOptions;
-            DebugService = defaultSharkyBot.DebugService;
-            UnitCountService = defaultSharkyBot.UnitCountService;
-            FrameToTimeConverter = defaultSharkyBot.FrameToTimeConverter;
-            EnemyData = defaultSharkyBot.EnemyData;
-        }
+        public ThreeRax(DefaultSharkyBot defaultSharkyBot) : base(defaultSharkyBot) { }
 
         protected override bool Detect(int frame)
         {

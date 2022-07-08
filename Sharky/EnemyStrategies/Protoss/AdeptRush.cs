@@ -5,17 +5,7 @@ namespace Sharky.EnemyStrategies.Protoss
 {
     public class AdeptRush : EnemyStrategy
     {
-        public AdeptRush(DefaultSharkyBot defaultSharkyBot)
-        {
-            EnemyStrategyHistory = defaultSharkyBot.EnemyStrategyHistory;
-            ChatService = defaultSharkyBot.ChatService;
-            ActiveUnitData = defaultSharkyBot.ActiveUnitData;
-            SharkyOptions = defaultSharkyBot.SharkyOptions;
-            DebugService = defaultSharkyBot.DebugService;
-            UnitCountService = defaultSharkyBot.UnitCountService;
-            FrameToTimeConverter = defaultSharkyBot.FrameToTimeConverter;
-            EnemyData = defaultSharkyBot.EnemyData;
-        }
+        public AdeptRush(DefaultSharkyBot defaultSharkyBot) : base(defaultSharkyBot) { }
 
         protected override bool Detect(int frame)
         {

@@ -9,5 +9,6 @@ namespace Sharky
         public List<BaseLocation> EnemyBaseLocations { get; set; }
         public List<BaseLocation> EnemyBases { get; set; }
         public BaseLocation MainBase { get; set; }
+        public BaseLocation EnemyNaturalBase { get; set; }
     }
 }
