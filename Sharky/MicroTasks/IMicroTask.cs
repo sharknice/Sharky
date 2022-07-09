@@ -18,5 +18,6 @@ namespace Sharky.MicroTasks
         double TotalFrameTime { get; set; }
 
         void RemoveDeadUnits(List<ulong> deadUnits);
+        void StealUnit(UnitCommander commander);
     }
 }

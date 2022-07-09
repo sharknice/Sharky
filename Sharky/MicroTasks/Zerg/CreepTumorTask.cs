@@ -11,14 +11,16 @@ namespace Sharky.MicroTasks
     {
         EnemyData EnemyData;
         SharkyOptions SharkyOptions;
+        QueenCreepTask QueenCreepAndDefendTask;
 
         CreepTumorPlacementFinder CreepTumorPlacementFinder;
 
-        public CreepTumorTask(DefaultSharkyBot defaultSharkyBot, int desiredCreepSpreaders, float priority, bool enabled = true)
+        public CreepTumorTask(DefaultSharkyBot defaultSharkyBot, QueenCreepTask queenCreepAndDefendTask, int desiredCreepSpreaders, float priority, bool enabled = true)
         {
             EnemyData = defaultSharkyBot.EnemyData;
             SharkyOptions = defaultSharkyBot.SharkyOptions;
             CreepTumorPlacementFinder = defaultSharkyBot.CreepTumorPlacementFinder;
+            QueenCreepAndDefendTask = queenCreepAndDefendTask;
 
             UnitCommanders = new List<UnitCommander>();
 
@@ -36,7 +38,6 @@ namespace Sharky.MicroTasks
             }
         }
 
-
         public override IEnumerable<SC2APIProtocol.Action> PerformActions(int frame)
         {
             var actions = new List<SC2APIProtocol.Action>();
@@ -49,6 +50,8 @@ namespace Sharky.MicroTasks
 
             actions.AddRange(SpreadCreep(frame));
 
+            UnitCommanders.RemoveAll(x => x.LastAbility == Abilities.BUILD_CREEPTUMOR_TUMOR);
+
             return actions;
         }
 
@@ -58,25 +61,26 @@ namespace Sharky.MicroTasks
 
             foreach (var commander in UnitCommanders)
             {
-                if (commander.UnitCalculation.Unit.Orders.Count() == 0 && commander.LastAbility != Abilities.BUILD_CREEPTUMOR_TUMOR && frame - commander.UnitCalculation.FrameFirstSeen > SharkyOptions.FramesPerSecond * 22)
+                if ((commander.UnitCalculation.Unit.Orders.Count() == 0) && (frame - commander.UnitCalculation.FrameFirstSeen > SharkyOptions.FramesPerSecond * 22))
                 {
                     if (commander.UnitCalculation.EnemiesInRangeOf.Count() > 0)
                     {
-                        continue; // TODO: don't suicide and stuff
+                        continue; // Don't suicide and stuff
                     }
-                    var spot = CreepTumorPlacementFinder.FindTumorExtensionPlacement(commander.UnitCalculation.Position);
+
+                    var spot = CreepTumorPlacementFinder.FindTumorExtensionPlacement(frame, QueenCreepAndDefendTask.UnitCommanders, commander.UnitCalculation.Position, true, UnitCommanders.Count < 3);
+
                     if (spot == null)
                     {
                         spot = new SC2APIProtocol.Point2D { X = commander.UnitCalculation.Position.X, Y = commander.UnitCalculation.Position.Y };
                     }
-                    if (spot != null)
+                    
+                    var action = commander.Order(frame, Abilities.BUILD_CREEPTUMOR_TUMOR, spot);
+                    if (action != null)
                     {
-                        var action = commander.Order(frame, Abilities.BUILD_CREEPTUMOR_TUMOR, spot);
-                        if (action != null)
-                        {
-                            actions.AddRange(action);
-                        }
+                        actions.AddRange(action);
                     }
+
                 }
             }
 

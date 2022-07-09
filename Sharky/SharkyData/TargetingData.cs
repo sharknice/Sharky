@@ -3,6 +3,7 @@ using Sharky.Builds.BuildingPlacement;
 using Sharky.MicroTasks.Attack;
 using Sharky.Pathing;
 using System.Collections.Generic;
+using System.Numerics;
 
 namespace Sharky
 {
@@ -20,5 +21,7 @@ namespace Sharky
         public WallOffBasePosition WallOffBasePosition { get; set; }
         public AttackState AttackState { get; set; }
         public List<UnitCalculation> WallBuildings { get; set; }
+        public Point2D NaturalFrontScoutPoint;
+        public Vector2 EnemyArmyCenter;
     }
 }
