@@ -201,7 +201,7 @@ namespace Sharky.MicroTasks
                         var expansionVector = new Vector2(expansion.Location.X, expansion.Location.Y);
                         if (Vector2.DistanceSquared(expansionVector, commander.UnitCalculation.Position) < 225)
                         {
-                            if (!commander.UnitCalculation.NearbyAllies.Any(a => Vector2.DistanceSquared(expansionVector, a.Position) < 9))
+                            if (!commander.UnitCalculation.NearbyAllies.Any(a => Vector2.DistanceSquared(expansionVector, a.Position) < 9) && !commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ResourceCenter) && !e.Unit.IsFlying && Vector2.DistanceSquared(expansionVector, e.Position) < 2))
                             {
                                 var expansionBlock = commander.Order(frame, Abilities.BUILD_PYLON, expansion.Location);
                                 if (expansionBlock != null)
