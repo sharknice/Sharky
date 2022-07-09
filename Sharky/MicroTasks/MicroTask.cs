@@ -56,5 +56,14 @@ namespace Sharky.MicroTasks
                 UnitCommanders.RemoveAll(c => c.UnitCalculation.Unit.Tag == tag);
             }
         }
+
+        /// <summary>
+        /// Steals unit completely from this microtask commanders
+        /// </summary>
+        /// <param name="commander"></param>
+        public virtual void StealUnit(UnitCommander commander)
+        {
+            UnitCommanders.Remove(commander);
+        }
     }
 }

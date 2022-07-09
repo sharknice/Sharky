@@ -325,8 +325,10 @@ namespace Sharky.DefaultBot
 
             var zerglingMicroController = new ZerglingMicroController(this, SharkySimplePathFinder, MicroPriority.AttackForward, false);
             var banelingMicroController = new BanelingMicroController(this, SharkySimplePathFinder, MicroPriority.AttackForward, false);
-            var roachMicroController = new RoachMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
+            var roachMicroController = new RoachMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false, SharkyUnitData);
             var ravagerMicroController = new RavagerMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
+            var lurkerMicroController = new LurkerMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
+            var lurkerBurrowedMicroController = new LurkerBurrowedMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
             var overseerMicroController = new OverseerMicroController(this, SharkySimplePathFinder, MicroPriority.StayOutOfRange, false);
             var infestorMicroController = new InfestorMicroController(this, SharkySimplePathFinder, MicroPriority.StayOutOfRange, false);
             var infestorBurrowedMicroController = new InfestorBurrowedMicroController(this, SharkySimplePathFinder, MicroPriority.JustLive, false);
@@ -384,7 +386,10 @@ namespace Sharky.DefaultBot
                 { UnitTypes.ZERG_ZERGLING, zerglingMicroController },
                 { UnitTypes.ZERG_BANELING, banelingMicroController },
                 { UnitTypes.ZERG_ROACH, roachMicroController },
+                { UnitTypes.ZERG_ROACHBURROWED, roachMicroController },
                 { UnitTypes.ZERG_RAVAGER, ravagerMicroController },
+                { UnitTypes.ZERG_LURKERMP, lurkerMicroController },
+                { UnitTypes.ZERG_LURKERMPBURROWED, lurkerBurrowedMicroController },
                 { UnitTypes.ZERG_OVERSEER, overseerMicroController },
                 { UnitTypes.ZERG_INFESTOR, infestorMicroController },
                 { UnitTypes.ZERG_INFESTORBURROWED, infestorBurrowedMicroController },
@@ -427,8 +432,10 @@ namespace Sharky.DefaultBot
             var proxyScoutTask = new ProxyScoutTask(SharkyUnitData, TargetingData, BaseData, SharkyOptions, false, 0.5f, workerProxyScoutMicroController);
             var miningDefenseService = new MiningDefenseService(BaseData, ActiveUnitData, workerDefenseMicroController, DebugService, DamageService);
             var miningTask = new MiningTask(SharkyUnitData, BaseData, ActiveUnitData, 1, miningDefenseService, MacroData, BuildOptions, MicroTaskData, new MineralMiner(this), new GasMiner(this));
-            var queenMacroTask = new QueenMacroTask(this, 1, 1.1f);
-            var creepTumorTask = new CreepTumorTask(this, 1, 1.11f);
+            var queenInjectTask = new QueenInjectTask(this, 1.0f);
+            var queenCreepTask = new QueenCreepTask(this, 1.1f);
+            var queenDefendTask = new QueenDefendTask(this, 1.1f);
+            var creepTumorTask = new CreepTumorTask(this, queenCreepTask, 1, 1.11f);
             var attackTask = new AttackTask(MicroController, TargetingData, ActiveUnitData, DefenseService, MacroData, AttackData, TargetingService, MicroTaskData, SharkyUnitData, new ArmySplitter(AttackData, TargetingData, ActiveUnitData, DefenseService, TargetingService, TerranWallService, MicroController), new EnemyCleanupService(MicroController, DamageService), 2);
             var adeptWorkerHarassTask = new AdeptWorkerHarassTask(BaseData, TargetingData, adeptMicroController, adeptShadeMicroController, false);
             var oracleWorkerHarassTask = new OracleWorkerHarassTask(TargetingData, BaseData, ChatService, MapDataService, MapData, oracleHarassMicroController, 1, false);
@@ -450,6 +457,10 @@ namespace Sharky.DefaultBot
             var darkTemplarHarassTask = new DarkTemplarHarassTask(BaseData, TargetingData, MapDataService, darkTemplarMicroController, 2, false);
             var defensiveZealotWarpInTask = new DefensiveZealotWarpInTask(this, false, .5f);
             var reaperMiningDefenseTask = new ReaperMiningDefenseTask(this, true, .5f);
+            var overlordScoutTask = new OverlordScoutTask(this, true, 0.9f);
+            var overlordProxyScoutTask = new SecondaryOverlordScoutingTask(this, true, 1.0f, new IndividualMicroController(this, SharkySimplePathFinder, MicroPriority.StayOutOfRange, false));
+            var zerglingScoutTask = new ZerglingScoutTask(this, true, 1.0f);
+            var scoutForSpineTask = new ScoutForSpineTask(this, true, 0.5f);
 
 
             MicroTaskData.MicroTasks[defenseSquadTask.GetType().Name] = defenseSquadTask;
@@ -459,7 +470,9 @@ namespace Sharky.DefaultBot
             MicroTaskData.MicroTasks[findHiddenBaseTask.GetType().Name] = findHiddenBaseTask;
             MicroTaskData.MicroTasks[proxyScoutTask.GetType().Name] = proxyScoutTask;
             MicroTaskData.MicroTasks[miningTask.GetType().Name] = miningTask;
-            MicroTaskData.MicroTasks[queenMacroTask.GetType().Name] = queenMacroTask;
+            MicroTaskData.MicroTasks[queenInjectTask.GetType().Name] = queenInjectTask;
+            MicroTaskData.MicroTasks[queenCreepTask.GetType().Name] = queenCreepTask;
+            MicroTaskData.MicroTasks[queenDefendTask.GetType().Name] = queenDefendTask;
             MicroTaskData.MicroTasks[creepTumorTask.GetType().Name] = creepTumorTask;
             MicroTaskData.MicroTasks[attackTask.GetType().Name] = attackTask;
             MicroTaskData.MicroTasks[adeptWorkerHarassTask.GetType().Name] = adeptWorkerHarassTask;
@@ -482,6 +495,10 @@ namespace Sharky.DefaultBot
             MicroTaskData.MicroTasks[darkTemplarHarassTask.GetType().Name] = darkTemplarHarassTask;
             MicroTaskData.MicroTasks[defensiveZealotWarpInTask.GetType().Name] = defensiveZealotWarpInTask;
             MicroTaskData.MicroTasks[reaperMiningDefenseTask.GetType().Name] = reaperMiningDefenseTask;
+            MicroTaskData.MicroTasks[overlordScoutTask.GetType().Name] = overlordScoutTask;
+            MicroTaskData.MicroTasks[overlordProxyScoutTask.GetType().Name] = overlordProxyScoutTask;
+            MicroTaskData.MicroTasks[zerglingScoutTask.GetType().Name] = zerglingScoutTask;
+            MicroTaskData.MicroTasks[scoutForSpineTask.GetType().Name] = scoutForSpineTask;
 
             MicroManager = new MicroManager(ActiveUnitData, MicroTaskData, SharkyOptions);
             Managers.Add(MicroManager);
