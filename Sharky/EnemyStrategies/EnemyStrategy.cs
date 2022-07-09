@@ -62,10 +62,7 @@ namespace Sharky.EnemyStrategies
 
         protected void DetectedChat()
         {
-            if (SharkyOptions.TagsEnabled)
-            {
-                ChatService.SendAllyChatMessage($"Tag:EnemyStrategy-{Name()}", true);
-            }
+            ChatService.Tag($"EnemyStrategy-{Name()}");
 
             var lastGame = EnemyData?.EnemyPlayer.Games.FirstOrDefault();
             if (lastGame != null)

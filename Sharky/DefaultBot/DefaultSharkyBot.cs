@@ -171,7 +171,7 @@ namespace Sharky.DefaultBot
 
             var framesPerSecond = 22.4f;
 
-            SharkyOptions = new SharkyOptions { Debug = debug, FramesPerSecond = framesPerSecond, TagsEnabled = true, BuildTagsEnabled = true, LogPerformance = false, GameStatusReportingEnabled = true };
+            SharkyOptions = new SharkyOptions { Debug = debug, FramesPerSecond = framesPerSecond, TagsEnabled = true, BuildTagsEnabled = true, LogPerformance = false, GameStatusReportingEnabled = true, TagsAllChat = false };
             FrameToTimeConverter = new FrameToTimeConverter(SharkyOptions);
             MacroData = new MacroData();
             AttackData = new AttackData { ArmyFoodAttack = 30, ArmyFoodRetreat = 25, Attacking = false, UseAttackDataManager = true, CustomAttackFunction = true, RetreatTrigger = 1f, AttackTrigger = 1.5f };

@@ -82,9 +82,9 @@ namespace Sharky.Builds
 
             if (!Started)
             {
-                if (SharkyOptions.TagsEnabled && SharkyOptions.BuildTagsEnabled)
+                if (SharkyOptions.BuildTagsEnabled)
                 {
-                    ChatService.SendAllyChatMessage($"Tag:Build-{Name()}", true);
+                    ChatService.Tag($"Build-{Name()}");
                 }
                 Started = true;
             }
