@@ -22,6 +22,7 @@ namespace Sharky.Managers
         IEnemyPlayerService EnemyPlayerManager;
         IEnemyNameService EnemyNameService;
         ChatService ChatService;
+        VersionService VersionService;
         ActiveChatData ActiveChatData;
         FrameToTimeConverter FrameToTimeConverter;
 
@@ -38,7 +39,7 @@ namespace Sharky.Managers
 
         bool ApiEnabled;
 
-        public ChatManager(HttpClient httpClient, ChatHistory chatHistory, SharkyOptions sharkyOptions, IChatDataService chatDataService, IEnemyPlayerService enemyPlayerManager, IEnemyNameService enemyNameService, ChatService chatService, ActiveChatData activeChatData, FrameToTimeConverter frameToTimeConverter)
+        public ChatManager(HttpClient httpClient, ChatHistory chatHistory, SharkyOptions sharkyOptions, IChatDataService chatDataService, IEnemyPlayerService enemyPlayerManager, IEnemyNameService enemyNameService, ChatService chatService, ActiveChatData activeChatData, FrameToTimeConverter frameToTimeConverter, VersionService versionService)
         {
             HttpClient = httpClient;
             ChatHistory = chatHistory;
@@ -47,6 +48,7 @@ namespace Sharky.Managers
             EnemyPlayerManager = enemyPlayerManager;
             EnemyNameService = enemyNameService;
             ChatService = chatService;
+            VersionService = versionService;
             ActiveChatData = activeChatData;
             FrameToTimeConverter = frameToTimeConverter;
 
@@ -79,6 +81,8 @@ namespace Sharky.Managers
 
             ChatHistory.EnemyChatHistory = new Dictionary<int, string>();
             ChatHistory.MyChatHistory = new Dictionary<int, string>();
+
+            ChatService.Tag(VersionService.VersionString);
         }
 
         public override IEnumerable<Action> OnFrame(ResponseObservation observation)

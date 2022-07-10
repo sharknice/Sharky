@@ -108,5 +108,17 @@ namespace Sharky.Chat
             }
             ActiveChatData.ChatActions.Add(chatAction);
         }
+
+        /// <summary>
+        /// Tags the game
+        /// </summary>
+        /// <param name="tag"></param>
+        public void Tag(string tag)
+        {
+            if (SharkyOptions.TagsEnabled)
+            {
+                SendAllyChatMessage($"Tag:{tag}", true);
+            }
+        }
     }
 }
