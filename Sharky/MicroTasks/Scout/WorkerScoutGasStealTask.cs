@@ -12,6 +12,7 @@ namespace Sharky.MicroTasks
 {
     public class WorkerScoutGasStealTask : MicroTask
     {
+        public bool StealGas { get; set; }
         public bool BlockExpansion { get; set; }
         public bool HidePylonInBase { get; set; }
         public bool BlockWall { get; set; }
@@ -53,6 +54,7 @@ namespace Sharky.MicroTasks
             Enabled = enabled;
             Priority = priority;
 
+            StealGas = true;
             BlockExpansion = false;
             HidePylonInBase = false;
             BlockWall = false;
@@ -126,7 +128,7 @@ namespace Sharky.MicroTasks
                     }
                 }
 
-                if (MacroData.Minerals >= 75 && commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE)
+                if (StealGas && MacroData.Minerals >= 75 && commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE)
                 {
                     if (!BaseData.EnemyBases.Any(enemyBase => enemyBase.VespeneGeysers.Any(g => g.Alliance == Alliance.Enemy)) && MapDataService.LastFrameVisibility(TargetingData.EnemyMainBasePoint) > 0)
                     {
@@ -199,7 +201,7 @@ namespace Sharky.MicroTasks
                         var expansionVector = new Vector2(expansion.Location.X, expansion.Location.Y);
                         if (Vector2.DistanceSquared(expansionVector, commander.UnitCalculation.Position) < 225)
                         {
-                            if (!commander.UnitCalculation.NearbyAllies.Any(a => Vector2.DistanceSquared(expansionVector, a.Position) < 9))
+                            if (!commander.UnitCalculation.NearbyAllies.Any(a => Vector2.DistanceSquared(expansionVector, a.Position) < 9) && !commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ResourceCenter) && !e.Unit.IsFlying && Vector2.DistanceSquared(expansionVector, e.Position) < 2))
                             {
                                 var expansionBlock = commander.Order(frame, Abilities.BUILD_PYLON, expansion.Location);
                                 if (expansionBlock != null)

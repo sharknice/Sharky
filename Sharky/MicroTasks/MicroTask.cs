@@ -28,6 +28,7 @@ namespace Sharky.MicroTasks
             foreach (var commander in UnitCommanders)
             {
                 commander.Claimed = false;
+                commander.UnitRole = UnitRole.None;
             }
             UnitCommanders = new List<UnitCommander>();
         }
@@ -39,13 +40,7 @@ namespace Sharky.MicroTasks
 
         public virtual void Disable()
         {
-            foreach (var commander in UnitCommanders)
-            {
-                commander.Claimed = false;
-                commander.UnitRole = UnitRole.None;
-            }
-            UnitCommanders = new List<UnitCommander>();
-
+            ResetClaimedUnits();
             Enabled = false;
         }
 

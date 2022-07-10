@@ -99,6 +99,14 @@ namespace Sharky.Chat
             }
         }
 
+        public void Tag(string tag)
+        {
+            if (SharkyOptions.TagsEnabled)
+            {
+                SendInstantChatMessage($"Tag:{tag}", !SharkyOptions.TagsAllChat);
+            }
+        }
+
         void SendInstantChatMessage(string message, bool teamChannel = false)
         {
             var chatAction = new Action { ActionChat = new ActionChat { Message = message } };
