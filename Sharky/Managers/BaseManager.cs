@@ -95,14 +95,19 @@ namespace Sharky.Managers
             }
 
             var startingUnit = observation.Observation.RawData.Units.FirstOrDefault(u => u.Alliance == Alliance.Self && SharkyUnitData.ResourceCenterTypes.Contains((UnitTypes)u.UnitType));
-            BaseData.BaseLocations = BaseData.BaseLocations.OrderBy(b => PathFinder.GetGroundPath(startingUnit.Pos.X + 4, startingUnit.Pos.Y + 4, b.Location.X, b.Location.Y, 0).Count()).ToList();
+            var enemystartingLocation = gameInfo.StartRaw.StartLocations.Last();
+
+            var closerBases = BaseData.BaseLocations.Where(b => PathFinder.GetGroundPath(startingUnit.Pos.X + 4, startingUnit.Pos.Y + 4, b.Location.X, b.Location.Y, 0).Count() <= PathFinder.GetGroundPath(enemystartingLocation.X + 4, enemystartingLocation.Y + 4, b.Location.X, b.Location.Y, 0).Count()).ToList();
+            var fartherBases = BaseData.BaseLocations.Where(b => PathFinder.GetGroundPath(startingUnit.Pos.X + 4, startingUnit.Pos.Y + 4, b.Location.X, b.Location.Y, 0).Count() > PathFinder.GetGroundPath(enemystartingLocation.X + 4, enemystartingLocation.Y + 4, b.Location.X, b.Location.Y, 0).Count()).ToList();
+            BaseData.BaseLocations = closerBases.OrderBy(b => PathFinder.GetGroundPath(startingUnit.Pos.X + 4, startingUnit.Pos.Y + 4, b.Location.X, b.Location.Y, 0).Count()).ToList();
+            BaseData.BaseLocations.AddRange(fartherBases.OrderByDescending(b => PathFinder.GetGroundPath(enemystartingLocation.X + 4, enemystartingLocation.Y + 4, b.Location.X, b.Location.Y, 0).Count()));
             BaseData.MainBase = BaseData.BaseLocations.FirstOrDefault();
             BaseData.MainBase.ResourceCenter = startingUnit;
             BaseData.SelfBases = new List<BaseLocation> { BaseData.MainBase };
             SetupMiningInfo();
 
-            var enemystartingLocation = gameInfo.StartRaw.StartLocations.Last();
-            BaseData.EnemyBaseLocations = BaseData.BaseLocations.OrderBy(b => PathFinder.GetGroundPath(enemystartingLocation.X + 4, enemystartingLocation.Y + 4, b.Location.X, b.Location.Y, 0).Count()).ToList();
+            BaseData.EnemyBaseLocations = fartherBases.OrderBy(b => PathFinder.GetGroundPath(enemystartingLocation.X + 4, enemystartingLocation.Y + 4, b.Location.X, b.Location.Y, 0).Count()).ToList();
+            BaseData.EnemyBaseLocations.AddRange(closerBases.OrderByDescending(b => PathFinder.GetGroundPath(startingUnit.Pos.X + 4, startingUnit.Pos.Y + 4, b.Location.X, b.Location.Y, 0).Count()));
             BaseData.EnemyBases = new List<BaseLocation> { BaseData.EnemyBaseLocations.FirstOrDefault() };
             BaseData.EnemyNaturalBase = BaseData.EnemyBaseLocations.Skip(1).FirstOrDefault();
         }

@@ -354,6 +354,16 @@ namespace Sharky.MicroControllers.Protoss
 
             if (commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.LOCKON) || enemyCyclones.Any(c => c.EnemiesInRange.Count() < 2))
             {
+                var avoidPoint = GetPositionFromRange(commander, enemyCyclones.FirstOrDefault().Unit.Pos, commander.UnitCalculation.Unit.Pos, 20);
+                if (commander.RetreatPathFrame + 5 < frame || commander.RetreatPathIndex >= commander.RetreatPath.Count())
+                {
+                    commander.RetreatPath = SharkyPathFinder.GetSafeAirPath(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y, defensivePoint.X, defensivePoint.Y, frame);
+                    commander.RetreatPathFrame = frame;
+                    commander.RetreatPathIndex = 1;
+                }
+
+                if (FollowPath(commander, frame, out action)) { return true; }
+
                 if (Retreat(commander, defensivePoint, defensivePoint, frame, out action)) { return true; }
             }
 

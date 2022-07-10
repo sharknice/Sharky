@@ -114,12 +114,37 @@ namespace Sharky.Managers
                 if (entry.Value.Detected)
                     Console.WriteLine($"    [{entry.Key}] is { (entry.Value.Active ? "active" : "inactive") }");
             }
+            PrintEnemyUnits();
             if (DefaultSharkyBot.AttackData.UseAttackDataManager)
             {
                 Console.WriteLine($"Attacking: {DefaultSharkyBot.AttackData.Attacking}");
             }
             CheckCommanders();
             Console.WriteLine(new String('=', 20));
+        }
+
+        private void PrintEnemyUnits()
+        {
+            Console.WriteLine("Enemy Units:");
+            var enemyUnitGroups = DefaultSharkyBot.ActiveUnitData.EnemyUnits.GroupBy(x => x.Value.Unit.UnitType);
+            var army = enemyUnitGroups.Where(g => g.FirstOrDefault().Value.UnitClassifications.Contains(UnitClassification.ArmyUnit));
+            Console.WriteLine("  Army:");
+            foreach (var group in army)
+            {
+                Console.WriteLine($"    [{(UnitTypes)group.Key}]={group.Count()}");
+            }
+            var buildings = enemyUnitGroups.Where(g => g.FirstOrDefault().Value.Attributes.Contains(SC2APIProtocol.Attribute.Structure));
+            Console.WriteLine("  Structures:");
+            foreach (var group in buildings)
+            {
+                Console.WriteLine($"    [{(UnitTypes)group.Key}]={group.Count()}");
+            }
+            var workers = enemyUnitGroups.Where(g => g.FirstOrDefault().Value.UnitClassifications.Contains(UnitClassification.Worker));
+            Console.WriteLine("  Workers:");
+            foreach (var group in workers)
+            {
+                Console.WriteLine($"    [{(UnitTypes)group.Key}]={group.Count()}");
+            }
         }
 
         private void CheckCommanders()
