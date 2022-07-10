@@ -103,8 +103,10 @@ namespace Sharky.DefaultBot
         public TargetingService TargetingService { get; set; }
         public ChatService ChatService { get; set; }
         public DebugService DebugService { get; set; }
+        public VersionService VersionService { get; set; }
         public UnitDataService UnitDataService { get; set; }
         public BuildingCancelService BuildingCancelService { get; set; }
+        public BuildingRequestCancellingService BuildingRequestCancellingService { get; set; }
         public AreaService AreaService { get; set; }
         public WallDataService WallDataService { get; set; }
         public SimCityService SimCityService { get; set; }
@@ -183,6 +185,7 @@ namespace Sharky.DefaultBot
             ActiveUnitData = new ActiveUnitData();
 
             UnitDataService = new UnitDataService(SharkyUnitData, SharkyOptions, MacroData);
+            VersionService = new VersionService();
 
             MineralWalker = new MineralWalker(BaseData);
 
@@ -293,7 +296,7 @@ namespace Sharky.DefaultBot
             SupplyDepotManager = new SupplyDepotManager(ActiveUnitData);
             Managers.Add(SupplyDepotManager);
 
-            ChatManager = new ChatManager(HttpClient, ChatHistory, SharkyOptions, ChatDataService, EnemyPlayerService, EnemyNameService, ChatService, ActiveChatData, FrameToTimeConverter);
+            ChatManager = new ChatManager(HttpClient, ChatHistory, SharkyOptions, ChatDataService, EnemyPlayerService, EnemyNameService, ChatService, ActiveChatData, FrameToTimeConverter, VersionService);
             Managers.Add(ChatManager);
 
             ProxyLocationService = new ProxyLocationService(BaseData, TargetingData, SharkyPathFinder, MapDataService, AreaService);
@@ -509,6 +512,7 @@ namespace Sharky.DefaultBot
             BuildProxyService = new BuildProxyService(MacroData, BuildingBuilder, SharkyUnitData, ActiveUnitData, Morpher, MicroTaskData);
             BuildAddOnSwapService = new BuildAddOnSwapService(MacroData, ActiveUnitData, SharkyUnitData, BuildingService, BuildingPlacement);
             BuildingCancelService = new BuildingCancelService(ActiveUnitData, MacroData);
+            BuildingRequestCancellingService = new BuildingRequestCancellingService(ActiveUnitData, MacroData, UnitCountService);
             VespeneGasBuilder = new VespeneGasBuilder(this, BuildingBuilder);
             UnitBuilder = new UnitBuilder(this, WarpInPlacement);
             UpgradeResearcher = new UpgradeResearcher(this);

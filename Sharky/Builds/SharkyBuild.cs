@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using Sharky.Builds.MacroServices;
 using Sharky.Chat;
 using Sharky.DefaultBot;
 using Sharky.MicroTasks.Macro;
@@ -20,6 +21,7 @@ namespace Sharky.Builds
         protected UnitCountService UnitCountService;
 
         protected FrameToTimeConverter FrameToTimeConverter;
+        protected BuildingRequestCancellingService BuildingRequestCancellingService;
 
         protected PrePositionBuilderTask PrePositionBuilderTask;
 
@@ -37,6 +39,7 @@ namespace Sharky.Builds
             UnitCountService = defaultSharkyBot.UnitCountService;
             MicroTaskData = defaultSharkyBot.MicroTaskData;
             FrameToTimeConverter = defaultSharkyBot.FrameToTimeConverter;
+            BuildingRequestCancellingService = defaultSharkyBot.BuildingRequestCancellingService;
 
             if (defaultSharkyBot.MicroTaskData.MicroTasks.ContainsKey("PrePositionBuilderTask"))
             {

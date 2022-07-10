@@ -17,6 +17,7 @@ namespace Sharky.Managers
         BuildProxyService BuildProxyService;
         BuildAddOnSwapService BuildAddOnSwapService;
         BuildingCancelService BuildingCancelService;
+        BuildingRequestCancellingService BuildingRequestCancellingService;
 
         VespeneGasBuilder VespeneGasBuilder;
         UnitBuilder UnitBuilder;
@@ -44,6 +45,7 @@ namespace Sharky.Managers
             BuildProxyService = defaultSharkyBot.BuildProxyService;
             BuildAddOnSwapService = defaultSharkyBot.BuildAddOnSwapService;
             BuildingCancelService = defaultSharkyBot.BuildingCancelService;
+            BuildingRequestCancellingService = defaultSharkyBot.BuildingRequestCancellingService;
 
             VespeneGasBuilder = defaultSharkyBot.VespeneGasBuilder;
             UnitBuilder = defaultSharkyBot.UnitBuilder;
