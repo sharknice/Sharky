@@ -76,6 +76,7 @@ namespace Sharky
         public int FoodUsed { get; set; }
         public int FoodLeft { get; set; }
         public int FoodArmy { get; set; }
+        public int FoodWorkers { get; set; }
         public int Minerals { get; set; }
         public int VespeneGas { get; set; }
         public int Frame { get; set; }

@@ -25,6 +25,9 @@ namespace Sharky.Builds
 
         protected PrePositionBuilderTask PrePositionBuilderTask;
 
+        protected QuickBuild QuickBuild = null;
+        protected QuickBuildFollower QuickBuildFollower;
+
         protected int StartFrame;
         protected bool Started;
 
@@ -40,6 +43,8 @@ namespace Sharky.Builds
             MicroTaskData = defaultSharkyBot.MicroTaskData;
             FrameToTimeConverter = defaultSharkyBot.FrameToTimeConverter;
             BuildingRequestCancellingService = defaultSharkyBot.BuildingRequestCancellingService;
+
+            QuickBuildFollower = new QuickBuildFollower(defaultSharkyBot);
 
             if (defaultSharkyBot.MicroTaskData.MicroTasks.ContainsKey("PrePositionBuilderTask"))
             {
@@ -76,6 +81,10 @@ namespace Sharky.Builds
 
         public virtual void OnFrame(ResponseObservation observation)
         {
+            if (QuickBuild != null)
+            {
+                QuickBuildFollower.Follow(QuickBuild);
+            }
         }
 
         public virtual void StartBuild(int frame)
