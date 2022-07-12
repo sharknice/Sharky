@@ -163,6 +163,7 @@ namespace Sharky.DefaultBot
         public EnemyData EnemyData { get; set; }
         public SharkyUnitData SharkyUnitData { get; set; }
         public MineralWalker MineralWalker { get; set; }
+        public UnitTypeBuildClassifications UnitTypeBuildClassifications { get; set; }
 
         public DefaultSharkyBot(GameConnection gameConnection)
         {
@@ -186,6 +187,7 @@ namespace Sharky.DefaultBot
 
             UnitDataService = new UnitDataService(SharkyUnitData, SharkyOptions, MacroData);
             VersionService = new VersionService();
+            UnitTypeBuildClassifications = new UnitTypeBuildClassifications();
 
             MineralWalker = new MineralWalker(BaseData);
 

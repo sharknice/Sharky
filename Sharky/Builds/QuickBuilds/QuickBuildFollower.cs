@@ -2,7 +2,7 @@
 using Sharky.DefaultBot;
 using System;
 
-namespace Sharky.Builds
+namespace Sharky.Builds.QuickBuilds
 {
     /// <summary>
     /// Simple class that follows quickbuild and builds what is needed accordingly.
@@ -13,6 +13,7 @@ namespace Sharky.Builds
         BuildOptions BuildOptions;
         UnitCountService UnitCountService;
         EnemyData EnemyData;
+        UnitTypeBuildClassifications UnitTypeBuildClassifications;
 
         public QuickBuildFollower(DefaultSharkyBot defaultSharkyBot)
         {
@@ -20,6 +21,7 @@ namespace Sharky.Builds
             BuildOptions = defaultSharkyBot.BuildOptions;
             UnitCountService = defaultSharkyBot.UnitCountService;
             EnemyData = defaultSharkyBot.EnemyData;
+            UnitTypeBuildClassifications = defaultSharkyBot.UnitTypeBuildClassifications;
         }
 
         public void Follow(QuickBuild build)
@@ -47,11 +49,22 @@ namespace Sharky.Builds
                 if (step.Value.Item2 is UnitTypes unit)
                 {
                     var unitCount = step.Value.Item3 ?? 0;
-                    MacroData.DesiredUnitCounts[unit] += unitCount;
-                    MacroData.DesiredTechCounts[unit] += unitCount;
-                    MacroData.DesiredProductionCounts[unit] += unitCount;
-                    MacroData.DesiredMorphCounts[unit] += unitCount;
-                    throw new NotImplementedException("todo: this needs to be updated to properly produce unit/techbuilding/productionbuilding/morph");
+                    if (UnitTypeBuildClassifications.ProducedUnits.Contains(step.Value.Item2))
+                    {
+                        MacroData.DesiredUnitCounts[unit] += unitCount;
+                    }
+                    else if (UnitTypeBuildClassifications.TechUnits.Contains(step.Value.Item2))
+                    {
+                        MacroData.DesiredTechCounts[unit] += unitCount;
+                    }
+                    else if (UnitTypeBuildClassifications.ProductionUnits.Contains(step.Value.Item2))
+                    {
+                        MacroData.DesiredProductionCounts[unit] += unitCount;
+                    }
+                    else if (UnitTypeBuildClassifications.MorphUnits.Contains(step.Value.Item2))
+                    {
+                        MacroData.DesiredMorphCounts[unit] += unitCount;
+                    }
                 }
                 else if (step.Value.Item2 is Upgrades upgrade)
                 {

@@ -1,8 +1,6 @@
-﻿using Sharky.DefaultBot;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace Sharky.Builds
+namespace Sharky.Builds.QuickBuilds
 {
     /// <summary>
     /// Allows to define build steps in easy way. The units/upgrades are built step by step once enough workers are produced.
@@ -14,6 +12,6 @@ namespace Sharky.Builds
     {
         public int CurrentStepIndex { get; set; } = 0;
 
-        public (int?, dynamic, int?)? CurrentStep => ((CurrentStepIndex < this.Count) ? this[CurrentStepIndex] : null);
+        public (int?, dynamic, int?)? CurrentStep => CurrentStepIndex < Count ? this[CurrentStepIndex] : null;
     }
 }
