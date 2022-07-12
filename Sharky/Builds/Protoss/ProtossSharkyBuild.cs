@@ -38,7 +38,10 @@ namespace Sharky.Builds
         }
 
         public override void StartBuild(int frame)
-        {  
+        {
+            BuildOptions.ProtossBuildOptions.PylonsAtDefensivePoint = 0;
+            BuildOptions.ProtossBuildOptions.ShieldsAtDefensivePoint = 0;
+
             base.StartBuild(frame);
 
             BuildOptions.WallOffType = BuildingPlacement.WallOffType.Partial;

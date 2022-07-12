@@ -35,6 +35,8 @@ namespace Sharky.MicroTasks
 
         bool started { get; set; }
 
+        // TODO: go under lifted baracks, build pylon under them
+
         public WorkerScoutGasStealTask(DefaultSharkyBot defaultSharkyBot, bool enabled, float priority)
         {
             SharkyUnitData = defaultSharkyBot.SharkyUnitData;
