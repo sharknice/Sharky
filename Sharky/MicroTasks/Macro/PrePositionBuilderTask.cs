@@ -14,6 +14,7 @@ namespace Sharky.MicroTasks.Macro
         public Point2D BuildPosition { get; set; }
 
         int LastSendFrame;
+        bool started;
 
         public PrePositionBuilderTask(DefaultSharkyBot defaultSharkyBot, float priority)
         {
@@ -24,6 +25,7 @@ namespace Sharky.MicroTasks.Macro
 
             UnitCommanders = new List<UnitCommander>();
             LastSendFrame = -1000;
+            started = false;
         }
 
         public void SendBuilder(Point2D buildPoint, int frame)
@@ -43,6 +45,11 @@ namespace Sharky.MicroTasks.Macro
         {
             if (UnitCommanders.Count() < 1)
             {
+                if (started)
+                {
+                    Disable();
+                    return;
+                }
                 foreach (var commander in commanders.OrderBy(c => c.Value.Claimed).ThenBy(c => c.Value.UnitCalculation.Unit.BuffIds.Count()).ThenBy(c => DistanceToResourceCenter(c)))
                 {
                     if (commander.Value.UnitRole != UnitRole.Gas && (!commander.Value.Claimed || commander.Value.UnitRole == UnitRole.Minerals) && commander.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && !commander.Value.UnitCalculation.Unit.BuffIds.Any(b => SharkyUnitData.CarryingResourceBuffs.Contains((Buffs)b)) && commander.Value.UnitRole != UnitRole.Build)
@@ -50,6 +57,7 @@ namespace Sharky.MicroTasks.Macro
                         commander.Value.UnitRole = UnitRole.PreBuild;
                         commander.Value.Claimed = true;
                         UnitCommanders.Add(commander.Value);
+                        started = true;
                         return;
                     }
                 }
@@ -122,6 +130,12 @@ namespace Sharky.MicroTasks.Macro
                 return Vector2.DistanceSquared(commander.Value.UnitCalculation.Position, resourceCenter.Position);
             }
             return 0;
+        }
+
+        public override void Enable()
+        {
+            started = false;
+            base.Enable();
         }
     }
 }
