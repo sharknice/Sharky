@@ -14,11 +14,19 @@ namespace Sharky.Builds.QuickBuilds
             QuickBuildFollower = new QuickBuildFollower(defaultSharkyBot);
         }
 
+        public override void StartBuild(int frame)
+        {
+            if (QuickBuild != null)
+            {
+                QuickBuildFollower.Start(QuickBuild);
+            }
+        }
+
         public override void OnFrame(ResponseObservation observation)
         {
             if (QuickBuild != null)
             {
-                QuickBuildFollower.Follow(QuickBuild);
+                QuickBuildFollower.BuildFrame((int)observation.Observation.GameLoop);
             }
         }
     }
