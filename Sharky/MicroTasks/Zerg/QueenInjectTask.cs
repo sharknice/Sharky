@@ -1,6 +1,4 @@
-﻿using Sharky.Chat;
-using Sharky.DefaultBot;
-using Sharky.MicroTasks.Zerg;
+﻿using Sharky.DefaultBot;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;

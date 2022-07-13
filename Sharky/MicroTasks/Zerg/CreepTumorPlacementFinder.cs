@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using Sharky.Builds;
 using Sharky.Builds.BuildingPlacement;
 using Sharky.DefaultBot;
 using Sharky.Extensions;
@@ -14,6 +15,9 @@ namespace Sharky.MicroTasks.Zerg
         TargetingData TargetingData;
         IBuildingPlacement ZergBuildingPlacement;
         ActiveUnitData ActiveUnitData;
+        BuildOptions BuildOptions;
+        UnitCountService UnitCountService;
+        BuildingService BuildingService;
 
         MapData MapData;
 
@@ -28,6 +32,9 @@ namespace Sharky.MicroTasks.Zerg
             ZergBuildingPlacement = defaultSharkyBot.ZergBuildingPlacement;
             MapData = defaultSharkyBot.MapData;
             ActiveUnitData = defaultSharkyBot.ActiveUnitData;
+            BuildOptions = defaultSharkyBot.BuildOptions;
+            UnitCountService = defaultSharkyBot.UnitCountService;
+            BuildingService = defaultSharkyBot.BuildingService;
         }
 
         private void ScoreArea(float posX, float posY, float multiplier)
@@ -58,7 +65,11 @@ namespace Sharky.MicroTasks.Zerg
             for (int x = 0; x < MapData.MapWidth; x++)
                 for (int y = 0; y < MapData.MapHeight; y++)
                 {
-                    CreepTumorPlacementMap[x, y] = 0.0f;
+                    bool valid = MapData.Map[x][y].HasCreep 
+                        && MapData.Map[x][y].CurrentlyBuildable 
+                        && !BuildingService.BlocksResourceCenter(x, y, 1)
+                        && MapData.Map[x][y].InSelfVision;
+                    CreepTumorPlacementMap[x, y] = valid ? 0.0f : -1000.0f;
                 }
 
             // Score area around creep spread structures
@@ -86,6 +97,8 @@ namespace Sharky.MicroTasks.Zerg
                 ScoreArea(queen.UnitCalculation.Unit.Orders.First().TargetWorldSpacePos.X, queen.UnitCalculation.Unit.Orders.First().TargetWorldSpacePos.Y, 1.5f);
             }
 
+            bool earlyTumors = UnitCountService.EquivalentTypeCount(UnitTypes.ZERG_CREEPTUMOR) < BuildOptions.ZergBuildOptions.TumorsPreferForward;
+
             // Distance to main/enemy base
             var enemyMain = TargetingData.EnemyMainBasePoint.ToVector2();
             var selfMain = TargetingData.SelfMainBasePoint.ToVector2();
@@ -94,11 +107,8 @@ namespace Sharky.MicroTasks.Zerg
                 for (int y = 0; y < MapData.MapHeight; y++)
                 {
                     float enemyBaseBonus = Vector2.Distance(new Vector2(x, y), enemyMain) / mainBasesDistance;
-                    enemyBaseBonus = enemyBaseBonus * enemyBaseBonus;
-                    //float selfBaseBonus = Vector2.Distance(new Vector2(x, y), selfMain) / mainBasesDistance;
-                    //CreepTumorPlacementMap[x, y] += 0.8f * (selfBaseBonus - enemyBaseBonus);
-                    //CreepTumorPlacementMap[x, y] += 2.0f * selfBaseBonus;
-                    CreepTumorPlacementMap[x, y] -= 1.5f * enemyBaseBonus;
+                    enemyBaseBonus = 1.0f - enemyBaseBonus * enemyBaseBonus;
+                    CreepTumorPlacementMap[x, y] += (earlyTumors ? 50 : 3f) * enemyBaseBonus;
                 }
         }
 
@@ -137,7 +147,8 @@ namespace Sharky.MicroTasks.Zerg
             if (highest != null)
             {
                 needsUpdate = true;
-                return ZergBuildingPlacement.FindPlacement(highest, UnitTypes.ZERG_CREEPTUMORQUEEN, 1, ignoreResourceProximity: true, maxDistance: 10, allowBlockBase: false);
+                return highest;
+                //return ZergBuildingPlacement.FindPlacement(highest, UnitTypes.ZERG_CREEPTUMORQUEEN, 1, ignoreResourceProximity: true, maxDistance: 10, allowBlockBase: false) ?? highest;
             }
             else
                 return null;

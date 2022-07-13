@@ -1,23 +1,18 @@
-﻿using Sharky.Chat;
-using Sharky.DefaultBot;
+﻿using Sharky.DefaultBot;
 using Sharky.MicroTasks.Zerg;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 
 namespace Sharky.MicroTasks
 {
     public class QueenCreepTask : MicroTask
     {
-        ActiveUnitData ActiveUnitData;
         EnemyData EnemyData;
         CreepTumorPlacementFinder CreepTumorPlacementFinder;
 
         public QueenCreepTask(DefaultSharkyBot defaultSharkyBot, float priority, bool enabled = true)
         {
-            ActiveUnitData = defaultSharkyBot.ActiveUnitData;
-
             UnitCommanders = new List<UnitCommander>();
             EnemyData = defaultSharkyBot.EnemyData;
             CreepTumorPlacementFinder = defaultSharkyBot.CreepTumorPlacementFinder;
