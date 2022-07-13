@@ -28,5 +28,14 @@ namespace Sharky.Builds.QuickBuilds
         { 
             CurrentStepIndex++;
         }
+
+        /// <summary>
+        /// Returns true if this build has finished.
+        /// </summary>
+        /// <returns></returns>
+        public bool Finished()
+        {
+            return CurrentStepIndex >= Count;
+        }
     }
 }

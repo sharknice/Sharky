@@ -1,4 +1,5 @@
 ﻿using Sharky.Builds.BuildingPlacement;
+using Sharky.Builds.Zerg;
 
 namespace Sharky.Builds
 {
@@ -12,6 +13,7 @@ namespace Sharky.Builds
         public int StrictWorkersPerGasCount { get; set; }
         public int MaxActiveGasCount { get; set; }
         public ProtossBuildOptions ProtossBuildOptions { get; set; }
+        public ZergBuildOptions ZergBuildOptions { get; set; }
         public WallOffType WallOffType { get; set; }
         
         /// <summary>
@@ -30,6 +32,7 @@ namespace Sharky.Builds
             MaxActiveGasCount = 8;
             StrictWorkersPerGasCount = 3;
             ProtossBuildOptions = new ProtossBuildOptions { PylonsAtDefensivePoint = 0, ShieldsAtDefensivePoint = 0 };
+            ZergBuildOptions = new ZergBuildOptions { ConnectMainWithNatWithCreep = false };
             WallOffType = WallOffType.None;
         }
     }
