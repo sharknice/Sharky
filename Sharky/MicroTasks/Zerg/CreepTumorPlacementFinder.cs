@@ -21,7 +21,6 @@ namespace Sharky.MicroTasks.Zerg
 
         MapData MapData;
 
-        int lastMapUpdate = 0;
         bool needsUpdate = true;
 
         float[,] CreepTumorPlacementMap;
@@ -119,10 +118,8 @@ namespace Sharky.MicroTasks.Zerg
                 CreepTumorPlacementMap = new float[MapData.MapWidth, MapData.MapHeight];
             }
 
-            //if (frame - lastMapUpdate > 22 || forceUpdate)
             {
                 UpdateMap(queens.Where(x => x.UnitRole == UnitRole.SpreadCreep && x.UnitCalculation.Unit.Orders.Any() && x.UnitCalculation.Unit.Orders.First().AbilityId == (uint)Abilities.EFFECT_INJECTLARVA));
-                lastMapUpdate = frame;
                 needsUpdate = false;
             }
         }
@@ -148,7 +145,6 @@ namespace Sharky.MicroTasks.Zerg
             {
                 needsUpdate = true;
                 return highest;
-                //return ZergBuildingPlacement.FindPlacement(highest, UnitTypes.ZERG_CREEPTUMORQUEEN, 1, ignoreResourceProximity: true, maxDistance: 10, allowBlockBase: false) ?? highest;
             }
             else
                 return null;

@@ -132,6 +132,7 @@ namespace Sharky.Managers
             actions.AddRange(UnitBuilder.ProduceUnits());
 
             actions.AddRange(BuildingCancelService.CancelBuildings());
+            actions.AddRange(BuildingRequestCancellingService.CancelBuildings());
 
             return actions;
         }
