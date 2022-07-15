@@ -83,6 +83,7 @@ namespace Sharky.Managers
             MacroData.FoodUsed = (int)observation.Observation.PlayerCommon.FoodUsed;
             MacroData.FoodLeft = (int)observation.Observation.PlayerCommon.FoodCap - MacroData.FoodUsed;
             MacroData.FoodArmy = (int)observation.Observation.PlayerCommon.FoodArmy;
+            MacroData.FoodWorkers = (int)observation.Observation.PlayerCommon.FoodWorkers;
             MacroData.Minerals = (int)observation.Observation.PlayerCommon.Minerals;
             MacroData.VespeneGas = (int)observation.Observation.PlayerCommon.Vespene;
             MacroData.Frame = (int)observation.Observation.GameLoop;
@@ -131,6 +132,7 @@ namespace Sharky.Managers
             actions.AddRange(UnitBuilder.ProduceUnits());
 
             actions.AddRange(BuildingCancelService.CancelBuildings());
+            actions.AddRange(BuildingRequestCancellingService.CancelBuildings());
 
             return actions;
         }

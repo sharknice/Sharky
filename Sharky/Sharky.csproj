@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <LangVersion>8.0</LangVersion>
+    <LangVersion>10.0</LangVersion>
     <Authors>Sharknice</Authors>
     <Description>The Sharky Framework.  A StarCraft 2 API framework for creating StarCraft 2 bots</Description>
     <PackageProjectUrl>https://github.com/sharknice/Sharky</PackageProjectUrl>
@@ -17,6 +17,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="RoyT.AStar" Version="3.0.2" />
   </ItemGroup>

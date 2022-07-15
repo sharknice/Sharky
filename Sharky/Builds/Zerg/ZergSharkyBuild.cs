@@ -22,7 +22,7 @@ namespace Sharky.Builds.Zerg
 
         protected void SendDroneForHatchery(int frame)
         {
-            if (TargetingData != null && UnitCountService.EquivalentTypeCount(UnitTypes.ZERG_HATCHERY) == 1 && MacroData.Minerals > 200)
+            if (TargetingData != null && UnitCountService.EquivalentTypeCount(UnitTypes.ZERG_HATCHERY) == 1 && MacroData.Minerals > 180)
             {
                 PrePositionBuilderTask.SendBuilder(TargetingData.NaturalBasePoint, frame);
             }
