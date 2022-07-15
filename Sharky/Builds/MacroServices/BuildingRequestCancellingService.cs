@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Sharky.Builds.MacroServices
 {
@@ -38,7 +39,7 @@ namespace Sharky.Builds.MacroServices
             foreach (var request in CancelRequests)
             {
                 int completed = UnitCountService.Completed(request.Key);
-                int building = UnitCountService.BuildingsInProgressCount(request.Key);
+                int building = ActiveUnitData.SelfUnits.Values.Count(u => (u.Unit.UnitType == (uint)request.Key) && (u.Unit.BuildProgress < 1.0f));
 
                 if (building > 0 && (completed + building) > request.Value)
                 {

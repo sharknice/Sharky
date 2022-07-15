@@ -1,4 +1,5 @@
-﻿using Sharky.DefaultBot;
+﻿using Sharky.Builds;
+using Sharky.DefaultBot;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,7 @@ namespace Sharky.MicroTasks
         ActiveUnitData ActiveUnitData;
         EnemyData EnemyData;
         UnitCountService UnitCountService;
+        BuildOptions BuildOptions;
 
         List<InjectData> HatcheryQueenPairing = new List<InjectData>();
 
@@ -21,6 +23,7 @@ namespace Sharky.MicroTasks
             UnitCommanders = new List<UnitCommander>();
             EnemyData = defaultSharkyBot.EnemyData;
             UnitCountService = defaultSharkyBot.UnitCountService;
+            BuildOptions = defaultSharkyBot.BuildOptions;
 
             Priority = priority;
             Enabled = enabled;
@@ -28,7 +31,7 @@ namespace Sharky.MicroTasks
 
         public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
         {
-            if (EnemyData.EnemyRace != SC2APIProtocol.Race.Zerg && UnitCommanders.Count == 1 && UnitCountService.Count(UnitTypes.ZERG_CREEPTUMORBURROWED) == 0)
+            if (BuildOptions.ZergBuildOptions.SecondQueenPreferCreepOnBorn && UnitCommanders.Count == 1 && UnitCountService.EquivalentTypeCount(UnitTypes.ZERG_CREEPTUMORBURROWED) == 0)
                 return;
 
             foreach (var entry in HatcheryQueenPairing)
