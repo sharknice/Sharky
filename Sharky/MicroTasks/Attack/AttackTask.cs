@@ -1,5 +1,6 @@
 ﻿using Sharky.MicroControllers;
 using Sharky.MicroTasks.Attack;
+using Sharky.MicroTasks.Scout;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -67,11 +68,6 @@ namespace Sharky.MicroTasks
         {
             var actions = new List<SC2APIProtocol.Action>();
 
-            //if (lastFrameTime > 5)
-            //{
-            //    lastFrameTime = 0;
-            //    return actions;
-            //}
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
@@ -117,16 +113,16 @@ namespace Sharky.MicroTasks
             if (!hiddenBase && TargetingData.HiddenEnemyBase)
             {
                 ResetClaimedUnits();
-                if (MicroTaskData.MicroTasks.ContainsKey("FindHiddenBaseTask"))
+                if (MicroTaskData.MicroTasks.ContainsKey(typeof(FindHiddenBaseTask).Name))
                 {
-                    MicroTaskData.MicroTasks["FindHiddenBaseTask"].Enable();
+                    MicroTaskData.MicroTasks[typeof(FindHiddenBaseTask).Name].Enable();
                 }
             }
             else if (!TargetingData.HiddenEnemyBase)
             {
-                if (MicroTaskData.MicroTasks.ContainsKey("FindHiddenBaseTask") && MicroTaskData.MicroTasks["FindHiddenBaseTask"].Enabled)
+                if (MicroTaskData.MicroTasks.ContainsKey(typeof(FindHiddenBaseTask).Name) && MicroTaskData.MicroTasks[typeof(FindHiddenBaseTask).Name].Enabled)
                 {
-                    MicroTaskData.MicroTasks["FindHiddenBaseTask"].Disable();
+                    MicroTaskData.MicroTasks[typeof(FindHiddenBaseTask).Name].Disable();
                 }
             }
 
