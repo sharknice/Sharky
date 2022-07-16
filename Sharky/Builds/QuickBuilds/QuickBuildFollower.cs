@@ -44,10 +44,12 @@ namespace Sharky.Builds.QuickBuilds
             ActiveUnitData = defaultSharkyBot.ActiveUnitData;
         }
 
+        public bool HasBuild => Build != null;
+
         public void Start(QuickBuildOrders build)
         {
             Build = build;
-            build.Reset();
+            build?.Reset();
         }
 
         public void BuildFrame(int frame)

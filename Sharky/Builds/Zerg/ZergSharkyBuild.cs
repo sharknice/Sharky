@@ -1,6 +1,5 @@
 ﻿using SC2APIProtocol;
 using Sharky.Builds.QuickBuilds;
-using Sharky.Chat;
 using Sharky.DefaultBot;
 
 namespace Sharky.Builds.Zerg
