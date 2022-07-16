@@ -1,6 +1,8 @@
 ﻿using SC2APIProtocol;
+using Sharky.Builds.MacroServices;
 using Sharky.DefaultBot;
 using System;
+using System.Linq;
 
 namespace Sharky.Builds.QuickBuilds
 {
@@ -22,8 +24,10 @@ namespace Sharky.Builds.QuickBuilds
         protected UnitTypeBuildClassifications UnitTypeBuildClassifications;
         protected SharkyUnitData SharkyUnitData;
         protected DebugService DebugService;
+        protected BuildingRequestCancellingService BuildingRequestCancellingService;
+        protected ActiveUnitData ActiveUnitData;
 
-        protected QuickBuild Build;
+        protected QuickBuildOrders Build;
         protected int InitialUnitCount = 0;
         protected QuickBuildStepStatus QuickBuildStepStatus = QuickBuildStepStatus.WaitingForWorkers;
 
@@ -36,11 +40,14 @@ namespace Sharky.Builds.QuickBuilds
             UnitTypeBuildClassifications = defaultSharkyBot.UnitTypeBuildClassifications;
             SharkyUnitData = defaultSharkyBot.SharkyUnitData;
             DebugService = defaultSharkyBot.DebugService;
+            BuildingRequestCancellingService = defaultSharkyBot.BuildingRequestCancellingService;
+            ActiveUnitData = defaultSharkyBot.ActiveUnitData;
         }
 
-        public void Start(QuickBuild build)
+        public void Start(QuickBuildOrders build)
         {
             Build = build;
+            build.Reset();
         }
 
         public void BuildFrame(int frame)
@@ -52,7 +59,7 @@ namespace Sharky.Builds.QuickBuilds
 
             DebugService.DrawText($"QuickBuild step: ({step.Value.Item1}) {step.Value.Item2} {step.Value.Item3} ({(QuickBuildStepStatus == QuickBuildStepStatus.WaitingForWorkers ? "waiting for workers" : "waiting for production")})");
 
-            
+
             if (QuickBuildStepStatus == QuickBuildStepStatus.WaitingForWorkers)
             {
                 if (MacroData.FoodUsed >= step.Value.Item1)
@@ -62,8 +69,7 @@ namespace Sharky.Builds.QuickBuilds
                 }
                 else
                 {
-                    // TODO: race agnostic
-                    MacroData.DesiredUnitCounts[UnitTypes.ZERG_DRONE] = UnitCountService.UnitsDoneAndInProgressCount(UnitTypes.ZERG_DRONE) + (step.Value.Item1 - MacroData.FoodUsed);
+                    MacroData.DesiredUnitCounts[UnitTypes.ZERG_DRONE] = WorkerCount + (step.Value.Item1 - MacroData.FoodUsed);
                 }
             }
 
@@ -82,7 +88,7 @@ namespace Sharky.Builds.QuickBuilds
                         if (unitType == UnitTypes.ZERG_EXTRACTOR)
                         {
                             MacroData.DesiredGases = InitialUnitCount + unitCount;
-                        } 
+                        }
                         else if (UnitTypeBuildClassifications.ProducedUnits.Contains(step.Value.Item2))
                         {
                             MacroData.DesiredUnitCounts[unitType] = InitialUnitCount + unitCount;
@@ -108,23 +114,9 @@ namespace Sharky.Builds.QuickBuilds
             }
         }
 
-        /*protected int WorkerCount
-        {
-            get
-            {
-                var workerType = UnitTypes.ZERG_DRONE;
-                if (EnemyData.SelfRace == Race.Protoss)
-                {
-                    workerType = UnitTypes.PROTOSS_PROBE;
-                }
-                else if (EnemyData.SelfRace == Race.Terran)
-                {
-                    workerType = UnitTypes.TERRAN_SCV;
-                }
+        protected UnitTypes MyWorkerType => EnemyData.SelfRace == Race.Zerg ? UnitTypes.ZERG_DRONE : (EnemyData.SelfRace == Race.Protoss ? UnitTypes.PROTOSS_PROBE : UnitTypes.TERRAN_SCV);
 
-                return UnitCountService.UnitsDoneAndInProgressCount(workerType);
-            }
-        }*/
+        protected int WorkerCount => UnitCountService.UnitsDoneAndInProgressCount(MyWorkerType);
 
         protected bool IsProductionMet((int, dynamic, int)? step)
         {
@@ -140,8 +132,25 @@ namespace Sharky.Builds.QuickBuilds
             {
                 return UnitCountService.UpgradeDoneOrInProgress(upgrade);
             }
+            else if (step.Value.Item2 is QuickAction action)
+            {
+                int extractorsBeingBuild = ActiveUnitData.SelfUnits.Values.Count(u => u.Unit.UnitType == (uint)UnitTypes.ZERG_EXTRACTOR && u.Unit.BuildProgress < 1.0f);
+                if (action == QuickAction.DoExtractorTrick)
+                {
+                    if (extractorsBeingBuild > 0)
+                    {
+                        BuildingRequestCancellingService.RequestCancel(UnitTypes.ZERG_EXTRACTOR, UnitCountService.Completed(UnitTypes.ZERG_EXTRACTOR));
+                        MacroData.DesiredGases = UnitCountService.Completed(UnitTypes.ZERG_EXTRACTOR);
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+            }
 
-            return false;
+            return true;
         }
 
         protected void AddStep((int, dynamic, int)? step)

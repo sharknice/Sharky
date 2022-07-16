@@ -45,9 +45,9 @@ namespace Sharky.Builds.MacroServices
                 {
                     int toCancel = (completed + building) - request.Value;
 
-                    foreach (var commander in ActiveUnitData.Commanders)
+                    foreach (var commander in ActiveUnitData.Commanders.OrderBy(c => c.Value.UnitCalculation.Unit.BuildProgress))
                     {
-                        if (toCancel == 0)
+                        if (toCancel <= 0)
                             break;
 
                         if (commander.Value.UnitCalculation.Unit.UnitType == (int)request.Key && commander.Value.UnitCalculation.Unit.BuildProgress < 1.0f)

@@ -1,41 +1,29 @@
-﻿using System.Collections.Generic;
+﻿using SC2APIProtocol;
+using Sharky.DefaultBot;
 
 namespace Sharky.Builds.QuickBuilds
 {
     /// <summary>
-    /// Allows to define build steps in easy way. The units/upgrades are built step by step once enough workers are produced.
-    /// First parameter in step is food supply used, when the unit/upgrade can be started.
-    /// Second parameter is UnitType or Upgrade type.
-    /// Third parameter is count of additional units to be created (ignored for upgrades).
+    /// To use quick build orders you need to call base.StartBuild and base.OnFrame at start of those functions, if your build overrides them. <see cref="ZergSharkyBuild"/> as example.
     /// </summary>
-    public class QuickBuild : List<(int, object, int)>
+    public class QuickBuild : SharkyBuild
     {
-        /// <summary>
-        /// Index of current step.
-        /// </summary>
-        public int CurrentStepIndex { get; private set; } = 0;
+        protected QuickBuildOrders QuickBuildOrders = null;
+        protected QuickBuildFollower QuickBuildFollower;
 
-        /// <summary>
-        /// Returns current step.
-        /// </summary>
-        public (int, dynamic, int)? CurrentStep => CurrentStepIndex < Count ? this[CurrentStepIndex] : null;
-
-        /// <summary>
-        /// Moves to next build step
-        /// </summary>
-        /// <returns></returns>
-        public void Advance() 
-        { 
-            CurrentStepIndex++;
+        public QuickBuild(DefaultSharkyBot defaultSharkyBot) : base(defaultSharkyBot)
+        {
+            QuickBuildFollower = new QuickBuildFollower(defaultSharkyBot);
         }
 
-        /// <summary>
-        /// Returns true if this build has finished.
-        /// </summary>
-        /// <returns></returns>
-        public bool Finished()
+        public override void StartBuild(int frame)
         {
-            return CurrentStepIndex >= Count;
+            QuickBuildFollower?.Start(QuickBuildOrders);
+        }
+
+        public override void OnFrame(ResponseObservation observation)
+        {
+            QuickBuildFollower?.BuildFrame((int)observation.Observation.GameLoop);
         }
     }
 }
