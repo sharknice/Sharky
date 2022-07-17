@@ -82,7 +82,7 @@ namespace Sharky.Managers
             ChatHistory.EnemyChatHistory = new Dictionary<int, string>();
             ChatHistory.MyChatHistory = new Dictionary<int, string>();
 
-            ChatService.Tag(VersionService.VersionString);
+            ChatService.Tag($"b-{VersionService.BuildDate}");
         }
 
         public override IEnumerable<Action> OnFrame(ResponseObservation observation)
