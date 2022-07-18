@@ -94,6 +94,7 @@ namespace Sharky.DefaultBot
         public EnemyNameService EnemyNameService { get; set; }
         public EnemyPlayerService EnemyPlayerService { get; set; }
         public DefenseService DefenseService { get; set; }
+        public EnemyAggressivityService EnemyAggressivityService { get; set; }
         public BuildMatcher BuildMatcher { get; set; }
         public RecordService RecordService { get; set; }
         public IBuildDecisionService BuildDecisionService { get; set; }
@@ -238,7 +239,7 @@ namespace Sharky.DefaultBot
             SharkySimplePathFinder = new SharkySimplePathFinder(MapDataService);
             SharkyAdvancedPathFinder = new SharkyAdvancedPathFinder(new Roy_T.AStar.Paths.PathFinder(), MapData, MapDataService, DebugService);
             NoPathFinder = new SharkyNoPathFinder();
-            
+
             ChokePointService = new ChokePointService(SharkyPathFinder, MapDataService, BuildingService);
             ChokePointsService = new ChokePointsService(SharkyPathFinder, ChokePointService);
 
@@ -304,6 +305,8 @@ namespace Sharky.DefaultBot
             ProxyLocationService = new ProxyLocationService(BaseData, TargetingData, SharkyPathFinder, MapDataService, AreaService);
             TargetingService = new TargetingService(ActiveUnitData, MapDataService, BaseData, TargetingData);
             CreepTumorPlacementFinder = new CreepTumorPlacementFinder(this, SharkyPathFinder);
+
+            EnemyAggressivityService = new EnemyAggressivityService(this);
 
             var individualMicroController = new IndividualMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
 
@@ -563,10 +566,13 @@ namespace Sharky.DefaultBot
                 [nameof(ZerglingDroneRush)] = new ZerglingDroneRush(this),
                 [nameof(RoachRush)] = new RoachRush(this),
                 [nameof(MutaliskRush)] = new MutaliskRush(this),
-                [nameof(BurrowStrategy)] = new BurrowStrategy(this)
+                [nameof(BurrowStrategy)] = new BurrowStrategy(this),
+                [nameof(BanelingDrops)] = new BanelingDrops(this),
+                [nameof(NydusNetworkStrategy)] = new NydusNetworkStrategy(this),
+                [nameof(MassQueen)] = new MassQueen(this),
             };
 
-            EnemyStrategyManager = new EnemyStrategyManager(EnemyData);
+            EnemyStrategyManager = new EnemyStrategyManager(this);
             Managers.Add(EnemyStrategyManager);
 
             EmptyCounterTransitioner = new EmptyCounterTransitioner();
