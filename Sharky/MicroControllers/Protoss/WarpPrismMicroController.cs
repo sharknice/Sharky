@@ -15,7 +15,7 @@ namespace Sharky.MicroControllers.Protoss
         public WarpPrismMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled)
             : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled)
         {
-            AvoidDamageDistance = 2;
+            AvoidDamageDistance = 3;
         }
 
         public override List<SC2APIProtocol.Action> Attack(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
