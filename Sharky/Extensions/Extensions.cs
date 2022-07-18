@@ -39,6 +39,17 @@ namespace Sharky.Extensions
         }
 
         /// <summary>
+        /// Calculates squared distance of two points
+        /// </summary>
+        /// <param name="thisPos"></param>
+        /// <param name="pos">Point to get distance to</param>
+        /// <returns></returns>
+        public static float DistanceSquared(this Point thisPos, Point pos)
+        {
+            return Vector2.DistanceSquared(pos.ToVector2(), thisPos.ToVector2());
+        }
+
+        /// <summary>
         /// Calculates squared distance of two vectors
         /// </summary>
         /// <param name="thisPos"></param>

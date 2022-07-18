@@ -11,5 +11,6 @@ namespace Sharky
         public Dictionary<string, IEnemyStrategy> EnemyStrategies { get; set; }
         public Race SelfRace { get; set; }
         public EnemyPlayer.EnemyPlayer EnemyPlayer { get; set; }
+        public EnemyAggressivityData EnemyAggressivityData { get; set; }
     }
 }
