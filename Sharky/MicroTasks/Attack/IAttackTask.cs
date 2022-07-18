@@ -5,6 +5,6 @@ namespace Sharky.MicroTasks.Attack
     public interface IAttackTask : IMicroTask
     {
         void GiveCommanderToChild(UnitCommander commander);
-        IList<UnitCommander> GetAvailableCommanders();
+        IEnumerable<UnitCommander> GetAvailableCommanders();
     }
 }
