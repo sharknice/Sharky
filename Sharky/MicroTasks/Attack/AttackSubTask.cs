@@ -15,8 +15,9 @@ namespace Sharky.MicroTasks.Attack
             return MicroController.Attack(UnitCommanders, attackPoint, defensePoint, armyPoint, frame);
         }
 
-        public virtual void ClaimUnitsFromParent(IList<UnitCommander> commanders)
+        public virtual void ClaimUnitsFromParent(IEnumerable<UnitCommander> commanders)
         {
+            throw new System.NotImplementedException();
         }
 
         public virtual IEnumerable<SC2APIProtocol.Action> Retreat(Point2D defensePoint, Point2D armyPoint, int frame)
