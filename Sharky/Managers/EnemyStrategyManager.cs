@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using Sharky.DefaultBot;
 using System.Collections.Generic;
 
 namespace Sharky.Managers
@@ -6,10 +7,14 @@ namespace Sharky.Managers
     public class EnemyStrategyManager : SharkyManager
     {
         EnemyData EnemyData;
+        EnemyAggressivityService EnemyAggressivityService;
+        DebugService DebugService;
 
-        public EnemyStrategyManager(EnemyData enemyData)
+        public EnemyStrategyManager(DefaultSharkyBot defaultSharkyBot)
         {
-            EnemyData = enemyData;
+            EnemyData = defaultSharkyBot.EnemyData;
+            EnemyAggressivityService = defaultSharkyBot.EnemyAggressivityService;
+            DebugService = defaultSharkyBot.DebugService;
         }
 
         public override IEnumerable<Action> OnFrame(ResponseObservation observation)
@@ -20,6 +25,10 @@ namespace Sharky.Managers
             {
                 enemyStrategy.OnFrame(frame);
             }
+
+            EnemyAggressivityService.Update(frame);
+
+            DebugService.DrawText($"Enemy aggression {EnemyData.EnemyAggressivityData.ArmyAggressivity}");
 
             return new List<Action>();
         }

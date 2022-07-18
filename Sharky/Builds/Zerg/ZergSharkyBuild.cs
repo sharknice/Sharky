@@ -1,9 +1,10 @@
-﻿using Sharky.Chat;
+﻿using SC2APIProtocol;
+using Sharky.Builds.QuickBuilds;
 using Sharky.DefaultBot;
 
 namespace Sharky.Builds.Zerg
 {
-    public class ZergSharkyBuild : SharkyBuild
+    public class ZergSharkyBuild : QuickBuild
     {
         protected TargetingData TargetingData;
 
@@ -13,18 +14,29 @@ namespace Sharky.Builds.Zerg
             TargetingData = defaultSharkyBot.TargetingData;
         }
 
-        public ZergSharkyBuild (BuildOptions buildOptions, SharkyOptions sharkyOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, MicroTaskData microTaskData,
-            ChatService chatService, UnitCountService unitCountService,
-            FrameToTimeConverter frameToTimeConverter) 
-            : base(buildOptions, sharkyOptions, macroData, activeUnitData, attackData, microTaskData, chatService, unitCountService, frameToTimeConverter)
-        {
-        }
-
         protected void SendDroneForHatchery(int frame)
         {
             if (TargetingData != null && UnitCountService.EquivalentTypeCount(UnitTypes.ZERG_HATCHERY) == 1 && MacroData.Minerals > 180)
             {
                 PrePositionBuilderTask.SendBuilder(TargetingData.NaturalBasePoint, frame);
+            }
+        }
+
+        public override void OnFrame(ResponseObservation observation)
+        {
+            base.OnFrame(observation);
+
+            if (BuildOptions.ZergBuildOptions.PrepositionDroneForNaturalHatch && QuickBuildOrders != null)
+            {
+                // Preposition drone for hatchery
+                if (QuickBuildOrders.CurrentStep.HasValue
+                    && QuickBuildOrders.CurrentStep.Value.Item2 is UnitTypes unitType
+                    && unitType == UnitTypes.ZERG_HATCHERY
+                    && MacroData.FoodUsed >= QuickBuildOrders.CurrentStep.Value.Item1
+                    && UnitCountService.BuildingsDoneAndInProgressCount(UnitTypes.ZERG_HATCHERY) < 2)
+                {
+                    SendDroneForHatchery((int)observation.Observation.GameLoop);
+                }
             }
         }
     }

@@ -320,6 +320,14 @@ namespace Sharky
                 count += Count(UnitTypes.ZERG_CHANGELINGZERGLING);
                 count += Count(UnitTypes.ZERG_CHANGELINGZERGLINGWINGS);
             }
+            else if (unitType == UnitTypes.ZERG_NYDUSCANAL)
+            {
+                count += Count(UnitTypes.ZERG_NYDUSNETWORK);
+            }
+            else if (unitType == UnitTypes.ZERG_NYDUSNETWORK)
+            {
+                count += Count(UnitTypes.ZERG_NYDUSCANAL);
+            }
 
             else if (unitType == UnitTypes.TERRAN_COMMANDCENTER)
             {

@@ -107,7 +107,9 @@ namespace Sharky.Managers
             {
                 var upgrade = (Upgrades)entry;
                 Console.WriteLine($"    [{upgrade}]");
+            
             }
+            Console.WriteLine($"Enemy aggressivity: {DefaultSharkyBot.EnemyData.EnemyAggressivityData}");
             Console.WriteLine("Enemy strategies:");
             foreach (var entry in DefaultSharkyBot.EnemyData.EnemyStrategies)
             {
