@@ -162,6 +162,7 @@ namespace Sharky.DefaultBot
         public BaseData BaseData { get; set; }
         public ActiveChatData ActiveChatData { get; set; }
         public EnemyData EnemyData { get; set; }
+        public PerformanceData PerformanceData { get; set; }
         public SharkyUnitData SharkyUnitData { get; set; }
         public MineralWalker MineralWalker { get; set; }
         public UnitTypeBuildClassifications UnitTypeBuildClassifications { get; set; }
@@ -183,6 +184,7 @@ namespace Sharky.DefaultBot
             BaseData = new BaseData();
             ActiveChatData = new ActiveChatData();
             EnemyData = new EnemyData();
+            PerformanceData = new PerformanceData();
             SharkyUnitData = new SharkyUnitData { CorrosiveBiles = new Dictionary<Point2D, uint>() };
             ActiveUnitData = new ActiveUnitData();
 
@@ -669,7 +671,7 @@ namespace Sharky.DefaultBot
         }
         public SharkyBot CreateBot(List<IManager> managers, DebugService debugService)
         {
-            return new SharkyBot(managers, DebugService, FrameToTimeConverter, SharkyOptions);
+            return new SharkyBot(managers, debugService, FrameToTimeConverter, SharkyOptions, PerformanceData);
         }
     }
 }

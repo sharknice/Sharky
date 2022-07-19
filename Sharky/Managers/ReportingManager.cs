@@ -12,6 +12,8 @@ namespace Sharky.Managers
     /// </summary>
     public class ReportingManager : SharkyManager
     {
+        DateTime StartTime;
+
         private readonly DefaultSharkyBot DefaultSharkyBot;
         
         /// <summary>
@@ -28,6 +30,11 @@ namespace Sharky.Managers
         {
             DefaultSharkyBot = defaultSharkyBot;
             logFrameInterval = (int)(logInterval * defaultSharkyBot.SharkyOptions.FramesPerSecond);
+        }
+
+        public override void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)
+        {
+            StartTime = DateTime.Now;
         }
 
         public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
@@ -50,8 +57,10 @@ namespace Sharky.Managers
         private void DetailedFrame(int frame)
         {
             var elapsedTime = DefaultSharkyBot.FrameToTimeConverter.GetTime(frame);
+            var elapsedRealTime = DateTime.Now - StartTime;
             Console.WriteLine(new String('=', 20));
-            Console.WriteLine($"Frame {frame} report, elapsed time: {elapsedTime}, {Process.GetCurrentProcess().WorkingSet64 / 1024 / 1024} MiB memory used");
+            Console.WriteLine($"Frame {frame} report, elapsed game time: {elapsedTime}, real time: {elapsedRealTime.ToString(@"hh\:mm\:ss")}, {Math.Round(elapsedTime.TotalSeconds/(double)elapsedRealTime.TotalSeconds, 2)}X speed, {Process.GetCurrentProcess().WorkingSet64 / 1024 / 1024} MiB memory used");
+            Console.WriteLine($"Average Frames, calculation: {Math.Round(DefaultSharkyBot.PerformanceData.TotalFrameCalculationTime / frame)} ms, game: {Math.Round(elapsedRealTime.TotalMilliseconds / frame)} ms ({Math.Round(frame / (double)elapsedRealTime.TotalSeconds)} fps)");
             var larva = "";
             if (DefaultSharkyBot.EnemyData.SelfRace == Race.Zerg)
             {

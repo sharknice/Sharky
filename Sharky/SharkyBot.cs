@@ -13,19 +13,19 @@ namespace Sharky
         DebugService DebugService;
         FrameToTimeConverter FrameToTimeConverter;
         SharkyOptions SharkyOptions;
+        PerformanceData PerformanceData;
 
         List<SC2APIProtocol.Action> Actions;
 
         Stopwatch Stopwatch;
         Stopwatch ManagerStopwatch;
 
-        double TotalFrameTime;
-
-        public SharkyBot(List<IManager> managers, DebugService debugService, FrameToTimeConverter frameToTimeConverter, SharkyOptions sharkyOptions)
+        public SharkyBot(List<IManager> managers, DebugService debugService, FrameToTimeConverter frameToTimeConverter, SharkyOptions sharkyOptions, PerformanceData performanceData)
         {
             Managers = managers;
             DebugService = debugService;
             FrameToTimeConverter = frameToTimeConverter;
+            PerformanceData = performanceData;
 
             Stopwatch = new Stopwatch();
             ManagerStopwatch = new Stopwatch();
@@ -46,7 +46,7 @@ namespace Sharky
             stopwatch.Stop();
             Console.WriteLine($"OnStart: {stopwatch.ElapsedMilliseconds} ms");
 
-            TotalFrameTime = 0;
+            PerformanceData.TotalFrameCalculationTime = 0;
         }
 
         public void OnEnd(ResponseObservation observation, Result result)
@@ -63,7 +63,7 @@ namespace Sharky
                 frames = (int)observation.Observation.GameLoop;
             }
             Console.WriteLine($"Total Frames: {frames} {FrameToTimeConverter.GetTime(frames)}");
-            Console.WriteLine($"Average Frame Time: {TotalFrameTime/ frames}");
+            Console.WriteLine($"Average Frame Time: {PerformanceData.TotalFrameCalculationTime / frames}");
         }
 
         public IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
@@ -120,7 +120,7 @@ namespace Sharky
 
                 var end = DateTime.UtcNow;
                 var endTime = (end - begin).TotalMilliseconds;
-                TotalFrameTime += endTime;
+                PerformanceData.TotalFrameCalculationTime += endTime;
                 DebugService.DrawText($"OnFrame: {endTime}");
             }
             catch (Exception exception)
