@@ -5,7 +5,7 @@ namespace Sharky
     public class EnemyAggressivityData
     {
         /// <summary>
-        /// If true, enemy is close enough to one of our bases with harassing unit(s)
+        /// If true, enemy is close enough to one of our bases with harassing unit(s). Harassing is considered only with small unit groups.
         /// </summary>
         public bool IsHarassing => IsGroundHarassing || IsAirHarassing;
         public bool IsGroundHarassing { get; set; }
