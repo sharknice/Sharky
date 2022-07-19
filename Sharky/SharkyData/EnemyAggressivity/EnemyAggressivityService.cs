@@ -99,7 +99,8 @@ namespace Sharky
 
             foreach (var unit in enemyUnits)
             {
-                var maxCount = harassingUnits[(UnitTypes)unit.Unit.UnitType];
+                if (!harassingUnits.TryGetValue((UnitTypes)unit.Unit.UnitType, out var maxCount))
+                    continue;
                 
                 if (maxCount == 0)
                 {

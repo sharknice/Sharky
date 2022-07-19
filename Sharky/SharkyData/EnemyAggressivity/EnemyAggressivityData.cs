@@ -10,7 +10,7 @@ namespace Sharky
         public bool IsHarassing => IsGroundHarassing || IsAirHarassing;
         public bool IsGroundHarassing { get; set; }
         public bool IsAirHarassing { get; set; }
-        public List<UnitCalculation> HarassingUnits { get; set; }
+        public List<UnitCalculation> HarassingUnits { get; } = new List<UnitCalculation>();
 
         /// <summary>
         /// 0 means no enemy army or no enemy aggressivity (enemy army is in his base), 1 means enemy has army next to our base.
