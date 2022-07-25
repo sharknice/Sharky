@@ -29,6 +29,7 @@ namespace Sharky.MicroControllers
         public bool GroupUpEnabled { get; set; }
         public bool IgnoreDistractions { get; set; }
         public bool TargetEnemyMainFirst { get; set; }
+        public HashSet<UnitTypes> AvoidedUnitTypes { get; set; } = new HashSet<UnitTypes>();
 
         protected float GroupUpDistanceSmall;
         protected float GroupUpDistance;
@@ -1123,7 +1124,7 @@ namespace Sharky.MicroControllers
             }
             // TODO: don't go attack units super far away if there are still units that can't attack this unit, but are close
             var outOfRangeAttacks = commander.UnitCalculation.NearbyEnemies.Take(25).Where(enemyAttack => !commander.UnitCalculation.EnemiesInRange.Any(e => e.Unit.Tag == enemyAttack.Unit.Tag)
-                && enemyAttack.Unit.DisplayType == DisplayType.Visible && DamageService.CanDamage(commander.UnitCalculation, enemyAttack) && AttackersFilter(commander, enemyAttack));
+                && enemyAttack.Unit.DisplayType == DisplayType.Visible && DamageService.CanDamage(commander.UnitCalculation, enemyAttack) && !AvoidedUnitTypes.Contains((UnitTypes)enemyAttack.Unit.UnitType) && AttackersFilter(commander, enemyAttack));
 
             attacks = outOfRangeAttacks.Where(enemyAttack => enemyAttack.EnemiesInRange.Count() > 0);
             if (attacks.Count() > 0)
@@ -1165,7 +1166,7 @@ namespace Sharky.MicroControllers
                 fakeMainBase.Alliance = Alliance.Enemy;
                 return new UnitCalculation(fakeMainBase, 0, SharkyUnitData, SharkyOptions, UnitDataService, frame);
             }
-            var unitsNearEnemyMain = ActiveUnitData.EnemyUnits.Values.Where(e => e.Unit.UnitType != (uint)UnitTypes.ZERG_LARVA && InRange(new Vector2(target.X, target.Y), e.Position, 20));
+            var unitsNearEnemyMain = ActiveUnitData.EnemyUnits.Values.Where(e => !AvoidedUnitTypes.Contains((UnitTypes)e.Unit.UnitType) && e.Unit.UnitType != (uint)UnitTypes.ZERG_LARVA && InRange(new Vector2(target.X, target.Y), e.Position, 20));
             if (unitsNearEnemyMain.Count() > 0 && InRange(new Vector2(target.X, target.Y), commander.UnitCalculation.Position, 100))
             {
                 attacks = unitsNearEnemyMain.Where(enemyAttack => enemyAttack.Unit.DisplayType == DisplayType.Visible && DamageService.CanDamage(commander.UnitCalculation, enemyAttack) && AttackersFilter(commander, enemyAttack));
@@ -1226,6 +1227,10 @@ namespace Sharky.MicroControllers
 
         protected virtual bool IsDistraction(UnitCommander commander, Point2D target, UnitCalculation enemy, int frame)
         {
+            if (enemy != null && AvoidedUnitTypes.Contains((UnitTypes)enemy.Unit.UnitType))
+            {
+                return true;
+            }
             if (enemy != null && !enemy.EnemiesInRange.Any() && !enemy.EnemiesInRangeOf.Any() &&
                 !commander.UnitCalculation.EnemiesInRangeOfAvoid.Any() && !commander.UnitCalculation.EnemiesInRange.Any())
             {
@@ -1282,7 +1287,7 @@ namespace Sharky.MicroControllers
 
                 if (WeaponReady(commander, frame))
                 {
-                    if (priorityEnemyMain)
+                    if (priorityEnemyMain || (bestTarget != null && commander.UnitCalculation.NearbyEnemies.Any(e => AvoidedUnitTypes.Contains((UnitTypes)e.Unit.UnitType))))
                     {
                         action = commander.Order(frame, Abilities.ATTACK, targetTag: bestTarget.Unit.Tag);
                     }
@@ -1308,7 +1313,7 @@ namespace Sharky.MicroControllers
             if (bestTarget != null && MicroPriority != MicroPriority.NavigateToLocation)
             {
                 var enemyPosition = GetBestTargetAttackPoint(commander, bestTarget);
-                if (SharkyUnitData.NoWeaponCooldownTypes.Contains((UnitTypes)commander.UnitCalculation.Unit.UnitType))
+                if (SharkyUnitData.NoWeaponCooldownTypes.Contains((UnitTypes)commander.UnitCalculation.Unit.UnitType) || commander.UnitCalculation.NearbyEnemies.Any(e => AvoidedUnitTypes.Contains((UnitTypes)e.Unit.UnitType)))
                 {
                     action = commander.Order(frame, Abilities.MOVE, enemyPosition);
                     return true;
@@ -2318,6 +2323,7 @@ namespace Sharky.MicroControllers
 
             var distanceSquredToSupportUnit = Vector2.DistanceSquared(unitToSupport.UnitCalculation.Position, commander.UnitCalculation.Position);
             // don't initiate the attack, just defend yourself and the support target
+            // TODO: only attack unitToSupport.UnitCalculation.EnemiesInRangeOf
             if (weaponReady && distanceSquredToSupportUnit < MaximumSupportDistanceSqaured && unitToSupport.UnitCalculation.EnemiesInRangeOf.Count() > 0)
             {
                 if (AttackBestTarget(commander, supportPoint, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }

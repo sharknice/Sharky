@@ -1,5 +1,7 @@
 ﻿using SC2APIProtocol;
+using Sharky.Builds.BuildingPlacement;
 using Sharky.Chat;
+using Sharky.DefaultBot;
 using Sharky.MicroControllers.Protoss;
 using Sharky.Pathing;
 using System.Collections.Concurrent;
@@ -17,6 +19,8 @@ namespace Sharky.MicroTasks
         MapDataService MapDataService;
         MapData MapData;
         OracleMicroController OracleMicroController;
+        StasisWardPlacement BuildingPlacement;
+        DebugService DebugService;
 
         bool started { get; set; }
         int DesiredCount { get; set; }
@@ -24,7 +28,6 @@ namespace Sharky.MicroTasks
 
         Point2D MidPoint;
         Point2D StagingPoint;
-        float WallDistanceSquared;
         bool Left;
         bool Right;
         bool Top;
@@ -32,14 +35,18 @@ namespace Sharky.MicroTasks
         bool CheeseChatSent;
         int TargetIndex;
 
-        public OracleWorkerHarassTask(TargetingData targetingData, BaseData baseData, ChatService chatService, MapDataService mapDataService, MapData mapData, OracleMicroController oracleMicroController, int desiredCount = 1, bool enabled = true, float priority = -1f)
+        public bool StasisTrapWorkers { get; set; }
+
+        public OracleWorkerHarassTask(DefaultSharkyBot defaultSharkyBot, OracleMicroController oracleMicroController, int desiredCount = 1, bool enabled = true, float priority = -1f)
         {
-            TargetingData = targetingData;
-            BaseData = baseData;
-            ChatService = chatService;
-            MapDataService = mapDataService;
-            MapData = mapData;
+            TargetingData = defaultSharkyBot.TargetingData;
+            BaseData = defaultSharkyBot.BaseData;
+            ChatService = defaultSharkyBot.ChatService;
+            MapDataService = defaultSharkyBot.MapDataService;
+            MapData = defaultSharkyBot.MapData;
             OracleMicroController = oracleMicroController;
+            BuildingPlacement = defaultSharkyBot.StasisWardPlacement;
+            DebugService = defaultSharkyBot.DebugService;
 
             DesiredCount = desiredCount;
             Enabled = enabled;
@@ -87,9 +94,11 @@ namespace Sharky.MicroTasks
 
             if (Target == null)
             {
-                Target = TargetingData.EnemyMainBasePoint;
+                Target = BaseData.EnemyBaseLocations.FirstOrDefault().MiddleMineralLocation;
                 GetTargetPath(Target);
             }
+
+            DebugService.DrawSphere(new Point { X = Target.X, Y = Target.Y, Z = 10 }, .5f);
 
             foreach (var commander in UnitCommanders)
             {
@@ -101,15 +110,34 @@ namespace Sharky.MicroTasks
                     && commander.UnitCalculation.EnemiesInRangeOfAvoid.Count() == 0 &&
                     (commander.UnitCalculation.EnemiesInRange.Take(25).Count(e => e.UnitClassifications.Contains(UnitClassification.Worker)) > 1 || (commander.UnitCalculation.NearbyEnemies.Take(25).Count(e => e.UnitClassifications.Contains(UnitClassification.Worker)) > 2 && !commander.UnitCalculation.NearbyEnemies.Take(25).Any(e => e.DamageAir && e.Unit.BuildProgress == 1))))
                 {
-                    var action = OracleMicroController.HarassWorkers(commander, Target, defensivePoint, frame);
-                    if (action != null)
+                    if (StasisTrapWorkers && commander.UnitCalculation.Unit.Energy >= 50 && !commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.ORACLEWEAPON))
                     {
-                        commands.AddRange(action);
+                        var existingStasisWard = commander.UnitCalculation.NearbyAllies.FirstOrDefault(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_ORACLESTASISTRAP);
+                        if (existingStasisWard == null)
+                        {
+                            var location = BuildingPlacement.FindPlacement(Target);
+                            if (location != null)
+                            {
+                                var stasis = commander.Order(frame, Abilities.BUILD_STASISTRAP, location, allowSpam: true);
+                                if (stasis != null)
+                                {
+                                    commands.AddRange(stasis);
+                                }
+                            }
+                        }
                     }
-                    continue;
+                    else
+                    {
+                        var action = OracleMicroController.HarassWorkers(commander, Target, defensivePoint, frame);
+                        if (action != null)
+                        {
+                            commands.AddRange(action);
+                        }
+                        continue;
+                    }
                 }
 
-                if ((commander.UnitCalculation.Unit.Energy > 50 || commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.ORACLEWEAPON)) && Vector2.DistanceSquared(commanderVector, targetVector) < WallDistanceSquared + 5)
+                if ((commander.UnitCalculation.Unit.Energy > 50 || commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.ORACLEWEAPON)) && Vector2.DistanceSquared(commanderVector, targetVector) < 25)
                 {
                     if (!CheeseChatSent)
                     {
@@ -127,7 +155,24 @@ namespace Sharky.MicroTasks
                     var canHarass = CanHarass(commander, Target);
                     if (canHarass)
                     {
-                        var action = OracleMicroController.HarassWorkers(commander, Target, defensivePoint, frame); // need to make it attack drones and not a pylon lol
+                        if (StasisTrapWorkers && commander.UnitCalculation.Unit.Energy >= 50)
+                        {
+                            var existingStasisWard = commander.UnitCalculation.NearbyAllies.FirstOrDefault(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_ORACLESTASISTRAP);
+                            if (existingStasisWard == null)
+                            {
+                                var location = BuildingPlacement.FindPlacement(Target);
+                                if (location != null)
+                                {
+                                    var stasis = commander.Order(frame, Abilities.BUILD_STASISTRAP, location, allowSpam: true);
+                                    if (stasis != null)
+                                    {
+                                        commands.AddRange(stasis);
+                                    }
+                                    continue;
+                                }
+                            }
+                        }
+                        var action = OracleMicroController.HarassWorkers(commander, Target, defensivePoint, frame);
                         if (action != null)
                         {
                             commands.AddRange(action);
@@ -136,7 +181,6 @@ namespace Sharky.MicroTasks
                     else
                     {
                         GetNextTarget();
-
                     }
                     continue;
                 }
@@ -233,7 +277,7 @@ namespace Sharky.MicroTasks
             }
             else
             {
-                Target = target.MineralLineLocation;
+                Target = target.MiddleMineralLocation;
                 TargetIndex++;
                 if (TargetIndex > 3)
                 {
@@ -245,15 +289,15 @@ namespace Sharky.MicroTasks
 
         void GetTargetPath(Point2D target)
         {
-            var closeestDistance = target.X - 0;
+            var closestDistance = target.X - 0;
             Left = true;
             MidPoint = new Point2D { X = 0, Y = (target.Y + TargetingData.ForwardDefensePoint.Y) / 2f };
             StagingPoint = new Point2D { X = 0, Y = target.Y };
 
             var right = MapData.MapWidth - target.X;
-            if (right < closeestDistance)
+            if (right < closestDistance)
             {
-                closeestDistance = right;
+                closestDistance = right;
                 Left = false;
                 Right = true;
                 MidPoint = new Point2D { X = MapData.MapWidth, Y = (target.Y + TargetingData.ForwardDefensePoint.Y) / 2f };
@@ -261,9 +305,9 @@ namespace Sharky.MicroTasks
             }
 
             var top = target.Y;
-            if (top < closeestDistance)
+            if (top < closestDistance)
             {
-                closeestDistance = top;
+                closestDistance = top;
                 Left = false;
                 Right = false;
                 Top = true;
@@ -272,9 +316,9 @@ namespace Sharky.MicroTasks
             }
 
             var bottom = MapData.MapHeight - target.Y;
-            if (bottom < closeestDistance)
+            if (bottom < closestDistance)
             {
-                closeestDistance = bottom;
+                closestDistance = bottom;
                 Left = false;
                 Right = false;
                 Top = false;
@@ -282,8 +326,6 @@ namespace Sharky.MicroTasks
                 MidPoint = new Point2D { X = (target.X + TargetingData.ForwardDefensePoint.X) / 2f, Y = MapData.MapHeight };
                 StagingPoint = new Point2D { X = target.X, Y = MapData.MapHeight - 0 };
             }
-
-            WallDistanceSquared = closeestDistance * closeestDistance;
         }
     }
 }

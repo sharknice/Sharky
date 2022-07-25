@@ -36,10 +36,10 @@ namespace Sharky.MicroControllers.Zerg
 
             var range = commander.UnitCalculation.Range;
 
-            var attacks = new List<UnitCalculation>(commander.UnitCalculation.EnemiesInRange.Where(u => u.Unit.DisplayType == DisplayType.Visible)); // units that are in range right now
+            var attacks = commander.UnitCalculation.EnemiesInRange.Where(u => u.Unit.DisplayType == DisplayType.Visible); // units that are in range right now
 
             UnitCalculation bestAttack = null;
-            if (attacks.Count > 0)
+            if (attacks.Any())
             {
                 var oneShotKills = attacks.Where(a => a.Unit.Health + a.Unit.Shield < GetDamage(commander.UnitCalculation.Weapons, a.Unit, a.UnitTypeData) && !a.Unit.BuffIds.Contains((uint)Buffs.IMMORTALOVERLOAD));
                 if (oneShotKills.Count() > 0)
@@ -73,14 +73,7 @@ namespace Sharky.MicroControllers.Zerg
                 }
             }
 
-            attacks = new List<UnitCalculation>(); // nearby units not in range right now
-            foreach (var enemyAttack in commander.UnitCalculation.NearbyEnemies)
-            {
-                if (enemyAttack.Unit.DisplayType == DisplayType.Visible && DamageService.CanDamage(commander.UnitCalculation, enemyAttack) && !InRange(enemyAttack.Position, commander.UnitCalculation.Position, range + enemyAttack.Unit.Radius + commander.UnitCalculation.Unit.Radius))
-                {
-                    attacks.Add(enemyAttack);
-                }
-            }
+            attacks = commander.UnitCalculation.NearbyEnemies.Where(enemyAttack => enemyAttack.Unit.DisplayType == DisplayType.Visible && !AvoidedUnitTypes.Contains((UnitTypes)enemyAttack.Unit.UnitType) && DamageService.CanDamage(commander.UnitCalculation, enemyAttack) && !InRange(enemyAttack.Position, commander.UnitCalculation.Position, range + enemyAttack.Unit.Radius + commander.UnitCalculation.Unit.Radius));
 
             var safeAttacks = attacks.Where(a => a.Damage < commander.UnitCalculation.Unit.Health);
             if (safeAttacks.Count() > 0)
@@ -102,7 +95,7 @@ namespace Sharky.MicroControllers.Zerg
                 return null;
             }
 
-            if (attacks.Count > 0)
+            if (attacks.Any())
             {
                 var bestOutOfRangeAttack = GetBestTargetFromList(commander, attacks, existingAttackOrder);
                 if (bestOutOfRangeAttack != null && (bestOutOfRangeAttack.UnitClassifications.Contains(UnitClassification.ArmyUnit) || bestOutOfRangeAttack.UnitClassifications.Contains(UnitClassification.DefensiveStructure)))
@@ -123,18 +116,11 @@ namespace Sharky.MicroControllers.Zerg
                 fakeMainBase.Alliance = Alliance.Enemy;
                 return new UnitCalculation(fakeMainBase, 0, SharkyUnitData, SharkyOptions, UnitDataService, frame);
             }
-            var unitsNearEnemyMain = ActiveUnitData.EnemyUnits.Values.Where(e => e.Unit.UnitType != (uint)UnitTypes.ZERG_LARVA && InRange(new Vector2(target.X, target.Y), e.Position, 20));
-            if (unitsNearEnemyMain.Count() > 0 && InRange(new Vector2(target.X, target.Y), commander.UnitCalculation.Position, 100))
+            var unitsNearEnemyMain = ActiveUnitData.EnemyUnits.Values.Where(e => !AvoidedUnitTypes.Contains((UnitTypes)e.Unit.UnitType) && e.Unit.UnitType != (uint)UnitTypes.ZERG_LARVA && InRange(new Vector2(target.X, target.Y), e.Position, 20));
+            if (unitsNearEnemyMain.Any() && InRange(new Vector2(target.X, target.Y), commander.UnitCalculation.Position, 100))
             {
-                attacks = new List<UnitCalculation>(); // enemies in the main enemy base
-                foreach (var enemyAttack in unitsNearEnemyMain)
-                {
-                    if (enemyAttack.Unit.DisplayType == DisplayType.Visible && DamageService.CanDamage(commander.UnitCalculation, enemyAttack))
-                    {
-                        attacks.Add(enemyAttack);
-                    }
-                }
-                if (attacks.Count > 0)
+                attacks = unitsNearEnemyMain.Where(enemyAttack => enemyAttack.Unit.DisplayType == DisplayType.Visible && DamageService.CanDamage(commander.UnitCalculation, enemyAttack)); // enemies in the main enemy base
+                if (attacks.Any())
                 {
                     var bestMainAttack = GetBestTargetFromList(commander, attacks, existingAttackOrder);
                     if (bestMainAttack != null && (bestMainAttack.UnitClassifications.Contains(UnitClassification.ArmyUnit) || bestMainAttack.UnitClassifications.Contains(UnitClassification.DefensiveStructure) || bestMainAttack.UnitClassifications.Contains(UnitClassification.Worker)))

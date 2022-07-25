@@ -10,18 +10,26 @@ namespace Sharky.Chat
         IChatDataService ChatDataService;
         SharkyOptions SharkyOptions;
         ActiveChatData ActiveChatData;
+        EnemyData EnemyData;
 
-        public ChatService(IChatDataService chatDataService, SharkyOptions sharkyOptions, ActiveChatData activeChatData)
+        public ChatService(IChatDataService chatDataService, SharkyOptions sharkyOptions, ActiveChatData activeChatData, EnemyData enemyData)
         {
             ChatDataService = chatDataService;
             SharkyOptions = sharkyOptions;
             ActiveChatData = activeChatData;
+            EnemyData = enemyData;
         }
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public async void SendChatType(string chatType, bool instant = false)
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
+            var lastGame = EnemyData?.EnemyPlayer.Games.FirstOrDefault();
+            if (lastGame != null)
+            {
+                chatType = $"{(Result)lastGame.Result}-{chatType}";
+            }
+
             var data = ChatDataService.GetChatTypeData(chatType);
 
             if (data != null)

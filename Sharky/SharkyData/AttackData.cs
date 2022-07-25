@@ -14,6 +14,9 @@ namespace Sharky
         public float AttackTrigger { get; set; }
         public bool RequireDetection { get; set; }
         public bool RequireMaxOut { get; set; }
+        public bool AttackWhenMaxedOut { get; set; }
+        public bool AttackWhenOverwhelm { get; set; }
+
         public TargetPriorityCalculation TargetPriorityCalculation { get; set; }
     }
 }

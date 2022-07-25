@@ -12,7 +12,7 @@ namespace Sharky.MicroControllers.Protoss
         public CarrierMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled)
             : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled)
         {
-
+            MaximumSupportDistanceSqaured = 9;
         }
 
         protected override bool WeaponReady(UnitCommander commander, int frame)

@@ -345,6 +345,7 @@ namespace Sharky.Managers
             var angle = Math.Atan2(baseLocation.Location.Y - baseLocation.MineralLineLocation.Y, baseLocation.MineralLineLocation.X - baseLocation.Location.X);
             baseLocation.MineralLineBuildingLocation = new Point2D { X = baseLocation.MineralLineLocation.X + (float)(3 * Math.Cos(angle)), Y = baseLocation.MineralLineLocation.Y - (float)(3 * Math.Sin(angle)) };
             baseLocation.BehindMineralLineLocation = new Point2D { X = baseLocation.MineralLineLocation.X + (float)(3 * Math.Cos(angle)), Y = baseLocation.MineralLineLocation.Y - (float)(3 * Math.Sin(angle)) };
+            baseLocation.MiddleMineralLocation = new Point2D { X = baseLocation.MineralLineLocation.X + (float)(1 * Math.Cos(angle)), Y = baseLocation.MineralLineLocation.Y - (float)(1 * Math.Sin(angle)) };
         }
 
         void DetermineFinalLocation(BaseLocation baseLocation, List<Unit> gasses)

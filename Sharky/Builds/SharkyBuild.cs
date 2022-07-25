@@ -103,6 +103,9 @@ namespace Sharky.Builds
             AttackData.UseAttackDataManager = true;
             AttackData.AttackTrigger = 1.5f;
             AttackData.RetreatTrigger = 1f;
+            AttackData.AttackWhenMaxedOut = true;
+            AttackData.AttackWhenOverwhelm = true;
+            AttackData.RequireMaxOut = false;
 
             foreach (var u in MacroData.Units)
             {

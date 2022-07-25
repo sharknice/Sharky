@@ -275,6 +275,7 @@ namespace Sharky.MicroTasks
                     {
                         worker.UnitRole = UnitRole.Minerals;
                         info.Workers.Add(worker);
+                        MineWithIdleWorkers(frame);
                         return actions;
                     }
                 }

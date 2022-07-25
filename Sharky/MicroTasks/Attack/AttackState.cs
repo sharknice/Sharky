@@ -2,6 +2,7 @@
 {
     public enum AttackState
     {
+        None,
         Kill,
         Contain,
         Regroup,

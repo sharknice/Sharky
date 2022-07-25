@@ -158,41 +158,6 @@ namespace Sharky.MicroControllers.Protoss
             if (enemies.Count() > 2)
             {
                 var bestAttack = GetBestAttack(commander.UnitCalculation, enemies);
-                if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.WinAir)
-                {
-                    var airAttackers = enemies.Where(u => u.DamageAir);
-                    if (airAttackers.Count() > 0)
-                    {
-                        var air = GetBestAttack(commander.UnitCalculation, airAttackers);
-                        if (air != null)
-                        {
-                            bestAttack = air;
-                        }
-                    }
-                }
-                else if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.WinGround)
-                {
-                    var groundAttackers = enemies.Where(u => u.DamageGround);
-                    if (groundAttackers.Count() > 0)
-                    {
-                        var ground = GetBestAttack(commander.UnitCalculation, groundAttackers);
-                        if (ground != null)
-                        {
-                            bestAttack = ground;
-                        }
-                    }
-                }
-                else
-                {
-                    if (enemies.Count() > 0)
-                    {
-                        var any = GetBestAttack(commander.UnitCalculation, enemies);
-                        if (any != null)
-                        {
-                            bestAttack = any;
-                        }
-                    }
-                }
 
                 if (bestAttack != null)
                 {

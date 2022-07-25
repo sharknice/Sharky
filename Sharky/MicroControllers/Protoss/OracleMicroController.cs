@@ -351,6 +351,10 @@ namespace Sharky.MicroControllers.Protoss
 
             var lockOnRange = 7;
             var enemyCyclones = commander.UnitCalculation.NearbyEnemies.Where(u => u.Unit.UnitType == (uint)UnitTypes.TERRAN_CYCLONE && InRange(commander.UnitCalculation.Position, u.Position, commander.UnitCalculation.Unit.Radius + lockOnRange + 4));
+            if (!enemyCyclones.Any())
+            {
+                return false;
+            }
 
             if (commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.LOCKON) || enemyCyclones.Any(c => c.EnemiesInRange.Count() < 2))
             {

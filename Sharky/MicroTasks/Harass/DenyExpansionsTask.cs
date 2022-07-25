@@ -37,6 +37,12 @@ namespace Sharky.MicroTasks.Harass
             DisableAfterFailure = true;
         }
 
+        public override void Enable()
+        {
+            Started = false;
+            base.Enable();
+        }
+
         public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
         {
             if (HarassGroupInfo == null) { return; }

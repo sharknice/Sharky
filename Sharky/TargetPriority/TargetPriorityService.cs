@@ -14,8 +14,8 @@ namespace Sharky
 
         public TargetPriorityCalculation CalculateTargetPriority(UnitCalculation unitCalculation, int frame)
         {
-            var allies = unitCalculation.NearbyAllies.Where(e => e.UnitClassifications.Contains(UnitClassification.DefensiveStructure) || e.UnitClassifications.Contains(UnitClassification.ArmyUnit) || e.Unit.UnitType == (uint)UnitTypes.ZERG_QUEEN).Concat(new List<UnitCalculation> { unitCalculation });
-            var enemies = unitCalculation.NearbyEnemies.Where(e => e.UnitClassifications.Contains(UnitClassification.DefensiveStructure) || e.UnitClassifications.Contains(UnitClassification.ArmyUnit) || e.Unit.UnitType == (uint)UnitTypes.ZERG_QUEEN);
+            var allies = unitCalculation.NearbyAllies.Where(e => e.Unit.BuildProgress == 1 && (e.UnitClassifications.Contains(UnitClassification.DefensiveStructure) || e.UnitClassifications.Contains(UnitClassification.ArmyUnit) || e.Unit.UnitType == (uint)UnitTypes.ZERG_QUEEN)).Concat(new List<UnitCalculation> { unitCalculation });
+            var enemies = unitCalculation.NearbyEnemies.Where(e => e.Unit.BuildProgress == 1 && (e.UnitClassifications.Contains(UnitClassification.DefensiveStructure) || e.UnitClassifications.Contains(UnitClassification.ArmyUnit) || e.Unit.UnitType == (uint)UnitTypes.ZERG_QUEEN));
 
             var calculation = CalculateTargetPriority(allies, enemies);
 

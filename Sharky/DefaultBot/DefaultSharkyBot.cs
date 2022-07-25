@@ -179,7 +179,7 @@ namespace Sharky.DefaultBot
             SharkyOptions = new SharkyOptions { Debug = debug, FramesPerSecond = framesPerSecond, TagsEnabled = true, BuildTagsEnabled = true, LogPerformance = false, GameStatusReportingEnabled = true, TagsAllChat = false };
             FrameToTimeConverter = new FrameToTimeConverter(SharkyOptions);
             MacroData = new MacroData();
-            AttackData = new AttackData { ArmyFoodAttack = 30, ArmyFoodRetreat = 25, Attacking = false, UseAttackDataManager = true, CustomAttackFunction = true, RetreatTrigger = 1f, AttackTrigger = 1.5f, RequireDetection = false, RequireMaxOut = false };
+            AttackData = new AttackData { ArmyFoodAttack = 30, ArmyFoodRetreat = 25, Attacking = false, UseAttackDataManager = true, CustomAttackFunction = true, RetreatTrigger = 1f, AttackTrigger = 1.5f, RequireDetection = false, RequireMaxOut = false, AttackWhenMaxedOut = true, AttackWhenOverwhelm = true };
             TargetingData = new TargetingData { HiddenEnemyBase = false };
             BaseData = new BaseData();
             ActiveChatData = new ActiveChatData();
@@ -221,7 +221,7 @@ namespace Sharky.DefaultBot
             
             UnitCountService = new UnitCountService(ActiveUnitData, SharkyUnitData);
             DamageService = new DamageService();
-            BuildingService = new BuildingService(MapData, ActiveUnitData, TargetingData, BaseData);
+            BuildingService = new BuildingService(MapData, ActiveUnitData, TargetingData, BaseData, SharkyUnitData);
 
             UnitManager = new UnitManager(ActiveUnitData, SharkyUnitData, SharkyOptions, TargetPriorityService, CollisionCalculator, MapDataService, DebugService, DamageService, UnitDataService);
             MapManager = new MapManager(MapData, ActiveUnitData, SharkyOptions, SharkyUnitData, DebugService, WallDataService);
@@ -233,7 +233,7 @@ namespace Sharky.DefaultBot
             ChatDataService = new ChatDataService();
             EnemyNameService = new EnemyNameService();
             EnemyPlayerService = new EnemyPlayerService(EnemyNameService);
-            ChatService = new ChatService(ChatDataService, SharkyOptions, ActiveChatData);
+            ChatService = new ChatService(ChatDataService, SharkyOptions, ActiveChatData, EnemyData);
             EnemyRaceManager = new EnemyRaceManager(ActiveUnitData, SharkyUnitData, EnemyData, SharkyOptions, ChatService);
             Managers.Add(EnemyRaceManager);
 
@@ -274,7 +274,7 @@ namespace Sharky.DefaultBot
             ZergGridPlacement = new ZergGridPlacement(this);
             ResourceCenterLocator = new ResourceCenterLocator(this);
             BuildingPlacement = new BuildingPlacement(ProtossBuildingPlacement, TerranBuildingPlacement, ZergBuildingPlacement, ResourceCenterLocator, BaseData, SharkyUnitData, MacroData, UnitCountService);
-            StasisWardPlacement = new StasisWardPlacement(DebugService, BuildingService);
+            StasisWardPlacement = new StasisWardPlacement(this);
             WorkerBuilderService = new WorkerBuilderService(this);
             SimCityService = new SimCityService(this);
             BuildingBuilder = new BuildingBuilder(ActiveUnitData, TargetingData, BuildingPlacement, SharkyUnitData, BaseData, BuildingService, MapDataService, WorkerBuilderService);
@@ -448,7 +448,7 @@ namespace Sharky.DefaultBot
             var creepTumorTask = new CreepTumorTask(this, queenCreepTask, 1, 1.11f);
             var attackTask = new AttackTask(MicroController, TargetingData, ActiveUnitData, DefenseService, MacroData, AttackData, TargetingService, MicroTaskData, SharkyUnitData, new ArmySplitter(AttackData, TargetingData, ActiveUnitData, DefenseService, TargetingService, TerranWallService, MicroController), new EnemyCleanupService(MicroController, DamageService), 2);
             var adeptWorkerHarassTask = new AdeptWorkerHarassTask(BaseData, TargetingData, adeptMicroController, adeptShadeMicroController, false);
-            var oracleWorkerHarassTask = new OracleWorkerHarassTask(TargetingData, BaseData, ChatService, MapDataService, MapData, oracleHarassMicroController, 1, false);
+            var oracleWorkerHarassTask = new OracleWorkerHarassTask(this, oracleHarassMicroController, 1, false);
             var lateGameOracleHarassTask = new LateGameOracleHarassTask(BaseData, TargetingData, MapDataService, oracleHarassMicroController, 1, false);
             var reaperWorkerHarassTask = new ReaperWorkerHarassTask(BaseData, TargetingData, reaperHarassMicroController, 2, false);
             var bansheeHarassTask = new BansheeHarassTask(BaseData, TargetingData, MapDataService, bansheeMicroController, 2, false);
@@ -469,8 +469,8 @@ namespace Sharky.DefaultBot
             var reaperMiningDefenseTask = new ReaperMiningDefenseTask(this, true, .5f);
             var overlordScoutTask = new OverlordScoutTask(this, true, 0.9f);
             var overlordProxyScoutTask = new SecondaryOverlordScoutingTask(this, true, 1.0f, new IndividualMicroController(this, SharkySimplePathFinder, MicroPriority.StayOutOfRange, false));
-            var zerglingScoutTask = new ZerglingScoutTask(this, true, 1.0f);
-            var scoutForSpineTask = new ScoutForSpineTask(this, true, 0.5f);
+            var zerglingScoutTask = new ZerglingScoutTask(this, false, 1.0f);
+            var scoutForSpineTask = new ScoutForSpineTask(this, false, 0.5f);
 
 
             MicroTaskData.MicroTasks[defenseSquadTask.GetType().Name] = defenseSquadTask;

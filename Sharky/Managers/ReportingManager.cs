@@ -130,6 +130,10 @@ namespace Sharky.Managers
             {
                 Console.WriteLine($"Attacking: {DefaultSharkyBot.AttackData.Attacking}");
             }
+            if (DefaultSharkyBot.TargetingData.AttackState != MicroTasks.Attack.AttackState.None)
+            {
+                Console.WriteLine($"Attack State: {DefaultSharkyBot.TargetingData.AttackState}");
+            }
             CheckCommanders();
             Console.WriteLine(new String('=', 20));
         }

@@ -92,7 +92,7 @@ namespace Sharky.Managers
 
             if (!GreetingSent && observation.Observation.GameLoop > 20)
             {
-                ChatService.SendChatType($"{ActiveChatData.EnemyName}-Greeting");
+                ChatService.SendChatType($"Greeting");
                 GreetingSent = true;
             }
 

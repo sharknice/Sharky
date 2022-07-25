@@ -17,6 +17,7 @@ namespace Sharky
         public Point2D MineralLineLocation { get; set; }
         public Point2D MineralLineBuildingLocation { get; set; }
         public Point2D BehindMineralLineLocation { get; set; }
+        public Point2D MiddleMineralLocation { get; set; }
         public List<Unit> VespeneGeysers { get; set; }
         public Point2D Location { get; set; }
         public Unit ResourceCenter { get; set; }

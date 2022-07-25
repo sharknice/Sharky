@@ -70,12 +70,12 @@ namespace Sharky.EnemyStrategies
                 var match = lastGame.EnemyStrategies.FirstOrDefault(s => s.Value == Name());
                 if (match.Value != null)
                 {
-                    ChatService.SendChatType($"{(Result)lastGame.Result}-Repeat-{Name()}-EnemyStrategy");
+                    ChatService.SendChatType($"Repeat-{Name()}-EnemyStrategy");
                     return;        
                 }
                 else
                 {
-                    ChatService.SendChatType($"{(Result)lastGame.Result}-New-{Name()}-EnemyStrategy");
+                    ChatService.SendChatType($"New-{Name()}-EnemyStrategy");
                     return;
                 }
             }
