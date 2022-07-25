@@ -183,6 +183,7 @@ namespace Sharky.DefaultBot
             AttackData = new AttackData { ArmyFoodAttack = 30, ArmyFoodRetreat = 25, Attacking = false, UseAttackDataManager = true, CustomAttackFunction = true, RetreatTrigger = 1f, AttackTrigger = 1.5f, RequireDetection = false, RequireMaxOut = false, AttackWhenMaxedOut = true, AttackWhenOverwhelm = true };
             TargetingData = new TargetingData { HiddenEnemyBase = false };
             BaseData = new BaseData();
+            MapData = new MapData();
             ActiveChatData = new ActiveChatData();
             EnemyData = new EnemyData();
             PerformanceData = new PerformanceData();
@@ -208,25 +209,26 @@ namespace Sharky.DefaultBot
             BuildingDataService = new BuildingDataService();
             TrainingDataService = new TrainingDataService();
             AddOnDataService = new AddOnDataService();
-            MorphDataService = new MorphDataService();
-            WallDataService = new WallDataService();
+            MorphDataService = new MorphDataService();       
 
             UnitDataManager = new UnitDataManager(UpgradeDataService, BuildingDataService, TrainingDataService, AddOnDataService, MorphDataService, SharkyUnitData);
             Managers.Add(UnitDataManager);
 
-            MapData = new MapData();
             MapDataService = new MapDataService(MapData);
             AreaService = new AreaService(MapDataService);
             TargetPriorityService = new TargetPriorityService(SharkyUnitData);
             CollisionCalculator = new CollisionCalculator();
-            
+
+            SharkyPathFinder = new SharkyPathFinder(new Roy_T.AStar.Paths.PathFinder(), MapData, MapDataService, DebugService);
+            SharkySimplePathFinder = new SharkySimplePathFinder(MapDataService);
+            SharkyAdvancedPathFinder = new SharkyAdvancedPathFinder(new Roy_T.AStar.Paths.PathFinder(), MapData, MapDataService, DebugService);
+            NoPathFinder = new SharkyNoPathFinder();
+
             UnitCountService = new UnitCountService(ActiveUnitData, SharkyUnitData);
             DamageService = new DamageService();
             BuildingService = new BuildingService(MapData, ActiveUnitData, TargetingData, BaseData, SharkyUnitData);
 
             UnitManager = new UnitManager(ActiveUnitData, SharkyUnitData, SharkyOptions, TargetPriorityService, CollisionCalculator, MapDataService, DebugService, DamageService, UnitDataService);
-            MapManager = new MapManager(MapData, ActiveUnitData, SharkyOptions, SharkyUnitData, DebugService, WallDataService);
-            Managers.Add(MapManager);
             Managers.Add(UnitManager);
 
             HttpClient = new HttpClient();
@@ -238,18 +240,17 @@ namespace Sharky.DefaultBot
             EnemyRaceManager = new EnemyRaceManager(ActiveUnitData, SharkyUnitData, EnemyData, SharkyOptions, ChatService);
             Managers.Add(EnemyRaceManager);
 
-            SharkyPathFinder = new SharkyPathFinder(new Roy_T.AStar.Paths.PathFinder(), MapData, MapDataService, DebugService);
-            SharkySimplePathFinder = new SharkySimplePathFinder(MapDataService);
-            SharkyAdvancedPathFinder = new SharkyAdvancedPathFinder(new Roy_T.AStar.Paths.PathFinder(), MapData, MapDataService, DebugService);
-            NoPathFinder = new SharkyNoPathFinder();
-
             ChokePointService = new ChokePointService(SharkyPathFinder, MapDataService, BuildingService);
             ChokePointsService = new ChokePointsService(SharkyPathFinder, ChokePointService);
+
+            WallDataService = new WallDataService(this);
+            MapManager = new MapManager(MapData, ActiveUnitData, SharkyOptions, SharkyUnitData, DebugService, WallDataService);
+            Managers.Add(MapManager);
 
             BaseManager = new BaseManager(SharkyUnitData, ActiveUnitData, SharkyPathFinder, UnitCountService, BaseData);
             Managers.Add(BaseManager);
 
-            TargetingManager = new TargetingManager(SharkyUnitData, BaseData, MacroData, TargetingData, MapData, EnemyData, ChokePointService, ChokePointsService, DebugService, ActiveUnitData);
+            TargetingManager = new TargetingManager(this);
             Managers.Add(TargetingManager);
 
             BuildOptions = new BuildOptions { StrictGasCount = false, StrictSupplyCount = false, StrictWorkerCount = false };

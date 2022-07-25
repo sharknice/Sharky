@@ -110,6 +110,7 @@ namespace Sharky.Managers
             BaseData.EnemyBaseLocations.AddRange(closerBases.OrderByDescending(b => PathFinder.GetGroundPath(startingUnit.Pos.X + 4, startingUnit.Pos.Y + 4, b.Location.X, b.Location.Y, 0).Count()));
             BaseData.EnemyBases = new List<BaseLocation> { BaseData.EnemyBaseLocations.FirstOrDefault() };
             BaseData.EnemyNaturalBase = BaseData.EnemyBaseLocations.Skip(1).FirstOrDefault();
+            // TODO: save baselocations to data then load them
         }
 
         public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)

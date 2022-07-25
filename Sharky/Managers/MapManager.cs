@@ -52,14 +52,8 @@ namespace Sharky.Managers
                 }
                 MapData.Map[x] = row;
             }
-            MapData.WallData = new List<WallData>();
 
-            Console.WriteLine("Calculating wall data");
-            WallDataService.AddTerranWallData(gameInfo.MapName, MapData.WallData);
-            WallDataService.AddPartialWallData(gameInfo.MapName, MapData.WallData);
-            WallDataService.AddPartialWallData(gameInfo.MapName, MapData.WallData);
-            WallDataService.AddBlockWallData(gameInfo.MapName, MapData.WallData);
-            MapData.MapName = gameInfo.MapName;
+           MapData.MapName = gameInfo.MapName;
         }
 
         public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
