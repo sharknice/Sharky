@@ -1,5 +1,6 @@
 ﻿using SC2APIProtocol;
 using Sharky.DefaultBot;
+using Sharky.Extensions;
 using Sharky.Pathing;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,9 +22,9 @@ namespace Sharky.MicroControllers.Zerg
         {
             action = null;
 
-            if (commander.UnitCalculation.Unit.Energy < 75)
+            if (Consume(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action))
             {
-                return false;
+                return true;
             }
 
             if (ParasiticBomb(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action))
@@ -39,6 +40,30 @@ namespace Sharky.MicroControllers.Zerg
 
             // TODO: parasitic bomb
             // TODO: abduct
+
+            return false;
+        }
+
+        private bool Consume(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<Action> action)
+        {
+            action = null;
+
+            if (commander.UnitCalculation.Unit.Energy > commander.UnitCalculation.Unit.EnergyMax - 10)
+            {
+                return false;
+            }
+
+            bool wasConsuming = commander.LastAbility == Abilities.EFFECT_VIPERCONSUME || commander.LastAbility == Abilities.INVALID;
+            if (commander.UnitCalculation.Unit.Energy < 75 || wasConsuming)
+            {
+                var buildings = ActiveUnitData.SelfUnits.Where(b => b.Value.Unit.Health >= 450 && b.Value.Attributes.Contains(Attribute.Structure)).OrderBy(b => commander.UnitCalculation.Position.DistanceSquared(b.Value.Position));
+
+                if (buildings.Any())
+                {
+                    action = commander.Order(frame, Abilities.EFFECT_VIPERCONSUME, null, buildings.First().Key);
+                    return true;
+                }
+            }
 
             return false;
         }
@@ -108,7 +133,7 @@ namespace Sharky.MicroControllers.Zerg
                 return false;
             }
 
-            var attacks = commander.UnitCalculation.NearbyEnemies.Take(25).Where(enemyAttack => enemyAttack.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELING && enemyAttack.Unit.IsFlying && 
+            var attacks = commander.UnitCalculation.NearbyEnemies.Take(25).Where(enemyAttack => enemyAttack.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELING && enemyAttack.Unit.IsFlying &&
                         !enemyAttack.Unit.BuffIds.Contains((uint)Buffs.PARASITICBOMB) &&
                                 InRange(enemyAttack.Position, commander.UnitCalculation.Position, 12 + enemyAttack.Unit.Radius + commander.UnitCalculation.Unit.Radius));
 

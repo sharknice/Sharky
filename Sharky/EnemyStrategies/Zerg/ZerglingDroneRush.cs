@@ -11,7 +11,7 @@ namespace Sharky.EnemyStrategies.Zerg
         {
             if (EnemyData.EnemyRace != SC2APIProtocol.Race.Zerg) { return false; }
 
-            if (frame <= SharkyOptions.FramesPerSecond * 60 * 2.5f
+            if (frame <= SharkyOptions.FramesPerSecond * 60 * 5f
                 && EnemyData.EnemyStrategies[nameof(ZerglingRush)].Detected
                 && ActiveUnitData.EnemyUnits.Values.Count(u => u.Unit.UnitType == (int)UnitTypes.ZERG_DRONE) > 2)
             {

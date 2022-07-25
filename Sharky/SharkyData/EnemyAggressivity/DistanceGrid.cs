@@ -7,7 +7,7 @@ using System.Linq;
 namespace Sharky
 {
     /// <summary>
-    /// Grid with distances to enemy and self bases
+    /// Grid with distances to enemy and self resource center
     /// </summary>
     public class DistanceGrid
     {
@@ -39,6 +39,27 @@ namespace Sharky
             }
         }
 
+        /// <summary>
+        /// Gets distance to nearest self or enemy resource center on ground / air.
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="self"></param>
+        /// <param name="ground"></param>
+        /// <returns></returns>
+        public float GetDist(float x, float y, bool self, bool ground = true)
+        {
+            return GetDist((int)(x + 0.5f), (int)(y + 0.5f), self, ground);
+        }
+
+        /// <summary>
+        /// Gets distance to nearest self or enemy resource center on ground / air.
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="self"></param>
+        /// <param name="ground"></param>
+        /// <returns></returns>
         public int GetDist(int x, int y, bool self, bool ground = true)
         {
             // Clamp to map - not sure if pos can be out of map

@@ -108,6 +108,7 @@ namespace Sharky.DefaultBot
         public UnitDataService UnitDataService { get; set; }
         public BuildingCancelService BuildingCancelService { get; set; }
         public BuildingRequestCancellingService BuildingRequestCancellingService { get; set; }
+        public UpgradeRequestCancellingService UpgradeRequestCancellingService { get; set; }
         public AreaService AreaService { get; set; }
         public WallDataService WallDataService { get; set; }
         public SimCityService SimCityService { get; set; }
@@ -519,6 +520,7 @@ namespace Sharky.DefaultBot
             BuildProxyService = new BuildProxyService(MacroData, BuildingBuilder, SharkyUnitData, ActiveUnitData, Morpher, MicroTaskData);
             BuildAddOnSwapService = new BuildAddOnSwapService(MacroData, ActiveUnitData, SharkyUnitData, BuildingService, BuildingPlacement);
             BuildingCancelService = new BuildingCancelService(ActiveUnitData, MacroData);
+            UpgradeRequestCancellingService = new UpgradeRequestCancellingService(this);
             BuildingRequestCancellingService = new BuildingRequestCancellingService(ActiveUnitData, MacroData, UnitCountService);
             VespeneGasBuilder = new VespeneGasBuilder(this, BuildingBuilder);
             UnitBuilder = new UnitBuilder(this, WarpInPlacement);

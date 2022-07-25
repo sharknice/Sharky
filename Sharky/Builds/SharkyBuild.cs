@@ -21,7 +21,9 @@ namespace Sharky.Builds
         protected UnitCountService UnitCountService;
 
         protected FrameToTimeConverter FrameToTimeConverter;
+        
         protected BuildingRequestCancellingService BuildingRequestCancellingService;
+        protected UpgradeRequestCancellingService UpgradeRequestCancellingService;
 
         protected PrePositionBuilderTask PrePositionBuilderTask;
 
@@ -40,6 +42,7 @@ namespace Sharky.Builds
             MicroTaskData = defaultSharkyBot.MicroTaskData;
             FrameToTimeConverter = defaultSharkyBot.FrameToTimeConverter;
             BuildingRequestCancellingService = defaultSharkyBot.BuildingRequestCancellingService;
+            UpgradeRequestCancellingService = defaultSharkyBot.UpgradeRequestCancellingService;
 
             if (defaultSharkyBot.MicroTaskData.MicroTasks.ContainsKey("PrePositionBuilderTask"))
             {
