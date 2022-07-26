@@ -1,9 +1,13 @@
-﻿using SC2APIProtocol;
+﻿using Newtonsoft.Json;
+using SC2APIProtocol;
 using Sharky.Pathing;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Text;
 
 namespace Sharky.Managers
 {
@@ -17,6 +21,8 @@ namespace Sharky.Managers
         UnitCountService UnitCountService;
         BaseData BaseData;
 
+        Dictionary<string, BaseLocationData> GeneratedBaseLocationData;
+
         public BaseManager(SharkyUnitData sharkyUnitData, ActiveUnitData activeUnitData, IPathFinder pathFinder, UnitCountService unitCountService, BaseData baseData)
         {
             SharkyUnitData = sharkyUnitData;
@@ -25,6 +31,8 @@ namespace Sharky.Managers
             UnitCountService = unitCountService;
             BaseData = baseData;
             BaseData.BaseLocations = new List<BaseLocation>();
+
+            GeneratedBaseLocationData = LoadBaseLocationData();
         }
 
         public override void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)
@@ -97,20 +105,83 @@ namespace Sharky.Managers
             var startingUnit = observation.Observation.RawData.Units.FirstOrDefault(u => u.Alliance == Alliance.Self && SharkyUnitData.ResourceCenterTypes.Contains((UnitTypes)u.UnitType));
             var enemystartingLocation = gameInfo.StartRaw.StartLocations.Last();
 
+            var folder = GetGneratedBaseDataFolder();
+            var fileName = GetGeneratedBaseDataFileName(gameInfo.MapName, folder, gameInfo.StartRaw.StartLocations.First());
+            if (GeneratedBaseLocationData.ContainsKey(Path.GetFileNameWithoutExtension(fileName)))
+            {
+                var loadedData = GeneratedBaseLocationData[Path.GetFileNameWithoutExtension(fileName)];
+                BaseData.BaseLocations = BaseData.BaseLocations.OrderBy(b => loadedData.SelfBaseLocations.FindIndex(d => d.X == b.Location.X && d.Y == b.Location.Y)).ToList();
+                BaseData.EnemyBaseLocations = BaseData.BaseLocations.OrderBy(b => loadedData.EnemyBaseLocations.FindIndex(d => d.X == b.Location.X && d.Y == b.Location.Y)).ToList();
+            }
+            else
+            {
+                GenerateBaseLocations(startingUnit, enemystartingLocation);
+                SaveBaseLocationData(folder, fileName, BaseData);
+            }
+
+            BaseData.MainBase = BaseData.BaseLocations.FirstOrDefault();
+            BaseData.MainBase.ResourceCenter = startingUnit;
+            BaseData.SelfBases = new List<BaseLocation> { BaseData.MainBase };
+            BaseData.EnemyBases = new List<BaseLocation> { BaseData.EnemyBaseLocations.FirstOrDefault() };
+            BaseData.EnemyNaturalBase = BaseData.EnemyBaseLocations.Skip(1).FirstOrDefault();
+
+            SetupMiningInfo();
+        }
+
+        private void GenerateBaseLocations(Unit startingUnit, Point2D enemystartingLocation)
+        {
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+            Console.WriteLine("Calculating base expansion order");
             var closerBases = BaseData.BaseLocations.Where(b => PathFinder.GetGroundPath(startingUnit.Pos.X + 4, startingUnit.Pos.Y + 4, b.Location.X, b.Location.Y, 0).Count() <= PathFinder.GetGroundPath(enemystartingLocation.X + 4, enemystartingLocation.Y + 4, b.Location.X, b.Location.Y, 0).Count()).ToList();
             var fartherBases = BaseData.BaseLocations.Where(b => PathFinder.GetGroundPath(startingUnit.Pos.X + 4, startingUnit.Pos.Y + 4, b.Location.X, b.Location.Y, 0).Count() > PathFinder.GetGroundPath(enemystartingLocation.X + 4, enemystartingLocation.Y + 4, b.Location.X, b.Location.Y, 0).Count()).ToList();
             BaseData.BaseLocations = closerBases.OrderBy(b => PathFinder.GetGroundPath(startingUnit.Pos.X + 4, startingUnit.Pos.Y + 4, b.Location.X, b.Location.Y, 0).Count()).ToList();
             BaseData.BaseLocations.AddRange(fartherBases.OrderByDescending(b => PathFinder.GetGroundPath(enemystartingLocation.X + 4, enemystartingLocation.Y + 4, b.Location.X, b.Location.Y, 0).Count()));
-            BaseData.MainBase = BaseData.BaseLocations.FirstOrDefault();
-            BaseData.MainBase.ResourceCenter = startingUnit;
-            BaseData.SelfBases = new List<BaseLocation> { BaseData.MainBase };
-            SetupMiningInfo();
-
             BaseData.EnemyBaseLocations = fartherBases.OrderBy(b => PathFinder.GetGroundPath(enemystartingLocation.X + 4, enemystartingLocation.Y + 4, b.Location.X, b.Location.Y, 0).Count()).ToList();
             BaseData.EnemyBaseLocations.AddRange(closerBases.OrderByDescending(b => PathFinder.GetGroundPath(startingUnit.Pos.X + 4, startingUnit.Pos.Y + 4, b.Location.X, b.Location.Y, 0).Count()));
-            BaseData.EnemyBases = new List<BaseLocation> { BaseData.EnemyBaseLocations.FirstOrDefault() };
-            BaseData.EnemyNaturalBase = BaseData.EnemyBaseLocations.Skip(1).FirstOrDefault();
-            // TODO: save baselocations to data then load them
+            stopwatch.Stop();
+            Console.WriteLine($"Calculating base expansion order in {stopwatch.ElapsedMilliseconds} ms");
+        }
+
+        private void SaveBaseLocationData(string folder, string fileName, BaseData baseData)
+        {
+            Console.WriteLine($"Saving base expansion order to {fileName}");
+            Directory.CreateDirectory(folder);
+            var data = new BaseLocationData { SelfBaseLocations = baseData.BaseLocations.Select(b => new Vector2(b.Location.X, b.Location.Y)).ToList(), EnemyBaseLocations = baseData.EnemyBaseLocations.Select(b => new Vector2(b.Location.X, b.Location.Y)).ToList() };
+            string json = JsonConvert.SerializeObject(data, new JsonSerializerSettings
+            {
+                TypeNameHandling = TypeNameHandling.Auto,
+                NullValueHandling = NullValueHandling.Ignore,
+                Formatting = Formatting.Indented
+            });
+            File.WriteAllText(fileName, json, Encoding.UTF8);
+        }
+
+        public Dictionary<string, BaseLocationData> LoadBaseLocationData()
+        {
+            var dictionary = new Dictionary<string, BaseLocationData>();
+            var folder = GetGneratedBaseDataFolder();
+            Directory.CreateDirectory(folder);
+            foreach (var fileName in Directory.GetFiles(folder))
+            {
+                using (StreamReader file = File.OpenText(fileName))
+                {
+                    var serializer = new JsonSerializer { TypeNameHandling = TypeNameHandling.Auto };
+                    var data = (BaseLocationData)serializer.Deserialize(file, typeof(BaseLocationData));
+                    dictionary[Path.GetFileNameWithoutExtension(fileName)] = data;
+                }
+            }
+            return dictionary;
+        }
+
+        private string GetGneratedBaseDataFolder()
+        {
+            return Directory.GetCurrentDirectory() + "/Data/base/";
+        }
+
+        private static string GetGeneratedBaseDataFileName(string map, string folder, Point2D startLocation)
+        {
+            return $"{folder}{map}-{startLocation.X}-{startLocation.Y}.json";
         }
 
         public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)

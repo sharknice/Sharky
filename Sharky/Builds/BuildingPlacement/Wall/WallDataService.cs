@@ -101,7 +101,6 @@ namespace Sharky.Builds.BuildingPlacement
             }
 
             var stopwatch = new Stopwatch();
-
             stopwatch.Start();
             Console.WriteLine("Calculating wall data");
             var wallData = new List<WallData>();
