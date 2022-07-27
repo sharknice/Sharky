@@ -283,12 +283,12 @@ namespace Sharky.Builds.BuildingPlacement
                                 data.WallSegments = new List<WallSegment>
                                 {
                                     new WallSegment { Position = new Point2D { X = baseX - .5f, Y = baseY + 1.5f }, Size = 3 },
-                                    new WallSegment { Position = new Point2D { X = baseX - 3.5f, Y = baseY + .5f }, Size = 3 }
+                                    new WallSegment { Position = new Point2D { X = baseX - 3.5f, Y = baseY - .5f }, Size = 3 }
                                 };
                             }
                             if (data.Block == null)
                             {
-                                data.Block = new Point2D { X = baseX - 3, Y = baseY - 2 };
+                                data.Block = new Point2D { X = baseX - 4, Y = baseY - 3 };
                             }
                             if (data.Door == null)
                             {
@@ -330,12 +330,12 @@ namespace Sharky.Builds.BuildingPlacement
                                 data.WallSegments = new List<WallSegment>
                                 {
                                     new WallSegment { Position = new Point2D { X = baseX - 1.5f, Y = baseY - .5f }, Size = 3 },
-                                    new WallSegment { Position = new Point2D { X = baseX - .5f, Y = baseY - 3.5f }, Size = 3 }
+                                    new WallSegment { Position = new Point2D { X = baseX + .5f, Y = baseY - 3.5f }, Size = 3 }
                                 };
                             }
                             if (data.Block == null)
                             {
-                                data.Block = new Point2D { X = baseX + 2, Y = baseY - 3 };
+                                data.Block = new Point2D { X = baseX + 3, Y = baseY - 4 };
                             }
                             if (data.Door == null)
                             {
@@ -376,12 +376,12 @@ namespace Sharky.Builds.BuildingPlacement
                                 data.WallSegments = new List<WallSegment>
                                 {
                                     new WallSegment { Position = new Point2D { X = baseX + .5f, Y = baseY + 1.5f }, Size = 3 },
-                                    new WallSegment { Position = new Point2D { X = baseX - .5f, Y = baseY + 4.5f }, Size = 3 }
+                                    new WallSegment { Position = new Point2D { X = baseX - 1.5f, Y = baseY + 4.5f }, Size = 3 }
                                 };
                             }
                             if (data.Block == null)
                             {
-                                data.Block = new Point2D { X = baseX - 3, Y = baseY + 4 };
+                                data.Block = new Point2D { X = baseX - 4, Y = baseY + 3 };
                             }
                             if (data.Door == null)
                             {
@@ -419,16 +419,16 @@ namespace Sharky.Builds.BuildingPlacement
                                 data.WallSegments = new List<WallSegment>
                                 {
                                     new WallSegment { Position = new Point2D { X = baseX + 1.5f, Y = baseY - .5f }, Size = 3 },
-                                    new WallSegment { Position = new Point2D { X = baseX + 4.5f, Y = baseY + .5f }, Size = 3 }
+                                    new WallSegment { Position = new Point2D { X = baseX + 4.5f, Y = baseY + 1.5f }, Size = 3 }
                                 };
                             }
                             if (data.Block == null)
                             {
-                                data.Block = new Point2D { X = baseX + 4, Y = baseY + 3 };
+                                data.Block = new Point2D { X = baseX + 5, Y = baseY + 4 };
                             }
                             if (data.Door == null)
                             {
-                                data.Door = new Point2D { X = baseX + 4, Y = baseY + 3 };
+                                data.Door = new Point2D { X = baseX + 3, Y = baseY + 3 };
                             }
                         }
                     }
