@@ -1,5 +1,5 @@
-﻿using Sharky.Builds.BuildChoosing;
-using Sharky.Chat;
+﻿using SC2APIProtocol;
+using Sharky.Builds.BuildChoosing;
 using Sharky.DefaultBot;
 using Sharky.Pathing;
 using System.Collections.Generic;
@@ -14,6 +14,7 @@ namespace Sharky.Builds
 
         protected TargetingData TargetingData;
         protected MapDataService MapDataService;
+        protected EnemyData EnemyData;
 
         public ProtossSharkyBuild(DefaultSharkyBot defaultSharkyBot, ICounterTransitioner counterTransitioner)
             : base(defaultSharkyBot)
@@ -21,14 +22,7 @@ namespace Sharky.Builds
             ChronoData = defaultSharkyBot.ChronoData;
             TargetingData = defaultSharkyBot.TargetingData;
             MapDataService = defaultSharkyBot.MapDataService;
-            CounterTransitioner = counterTransitioner;
-        }
-
-        public ProtossSharkyBuild(BuildOptions buildOptions, SharkyOptions sharkyOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, ChatService chatService, ChronoData chronoData, ICounterTransitioner counterTransitioner, UnitCountService unitCountService, MicroTaskData microTaskData, TargetingData targetingData, FrameToTimeConverter frameToTimeConverter) 
-            : base(buildOptions, sharkyOptions, macroData, activeUnitData, attackData, microTaskData, chatService, unitCountService, frameToTimeConverter)
-        {
-            ChronoData = chronoData;
-            TargetingData = targetingData;
+            EnemyData = defaultSharkyBot.EnemyData;
             CounterTransitioner = counterTransitioner;
         }
 
@@ -44,7 +38,14 @@ namespace Sharky.Builds
 
             base.StartBuild(frame);
 
-            BuildOptions.WallOffType = BuildingPlacement.WallOffType.Partial;
+            if (EnemyData.EnemyRace == Race.Terran)
+            {
+                BuildOptions.WallOffType = BuildingPlacement.WallOffType.None;
+            }
+            else
+            {
+                BuildOptions.WallOffType = BuildingPlacement.WallOffType.Partial;
+            }
         }
 
         protected void SendProbeForFirstPylon(int frame)

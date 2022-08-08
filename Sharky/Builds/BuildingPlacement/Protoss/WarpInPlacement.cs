@@ -11,118 +11,149 @@ namespace Sharky.Builds.BuildingPlacement
         ActiveUnitData ActiveUnitData;
         DebugService DebugService;
         MapData MapData;
+        MapDataService MapDataService;
+        BuildingService BuildingService;
 
-        public WarpInPlacement(ActiveUnitData activeUnitData, DebugService debugService, MapData mapData)
+        public WarpInPlacement(ActiveUnitData activeUnitData, DebugService debugService, MapData mapData, MapDataService mapDataService, BuildingService buildingService)
         {
             ActiveUnitData = activeUnitData;
             DebugService = debugService;
             MapData = mapData;
+            MapDataService =
+            MapDataService = mapDataService;
+            BuildingService = buildingService;
         }
 
         public Point2D FindPlacement(Point2D target, UnitTypes unitType, int size, bool ignoreMineralProximity = true, float maxDistance = 50, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.None, bool requireVision = false, bool allowBlockBase = true)
         {
+            var targetVector = new Vector2(target.X, target.Y);
+            Point2D closest = null;
+
             var powerSources = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON || c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISMPHASING && c.UnitCalculation.Unit.BuildProgress == 1).OrderBy(c => Vector2.DistanceSquared(c.UnitCalculation.Position, new Vector2(target.X, target.Y)));
             foreach (var powerSource in powerSources)
             {
-                var x = powerSource.UnitCalculation.Unit.Pos.X;
-                var y = powerSource.UnitCalculation.Unit.Pos.Y;
-                var sourceRadius = 7f;
-                if (powerSource.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISMPHASING)
+                var point = FindPlacementForPylon(powerSource.UnitCalculation, size, target);
+                if (closest == null || point != null && Vector2.DistanceSquared(new Vector2(point.X, point.Y), targetVector) < Vector2.DistanceSquared(new Vector2(closest.X, closest.Y), targetVector))
                 {
-                    sourceRadius = 5f;
-                }
-
-                var radius = 1 + (size / 2f);
-                var powerRadius = sourceRadius - (size / 2f);
-
-                // start at 12 o'clock then rotate around 12 times, increase radius by 1 until it's more than powerRadius
-                while (radius < powerRadius)
-                {
-                    var fullCircle = Math.PI * 2;
-                    var sliceSize = fullCircle / 12.0;
-                    var angle = 0.0;
-                    while (angle + (sliceSize / 2) < fullCircle)
-                    {
-                        var point = new Point2D { X = x + (float)(radius * Math.Cos(angle)), Y = y + (float)(radius * Math.Sin(angle)) };
-                        if (AreaPlaceable(point.X, point.Y, size / 2.0f) && !Blocked(point.X, point.Y, size / 2.0f))
-                        {
-                            DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
-                            return point;
-                        }
-
-                        angle += sliceSize;
-                    }
-                    radius += 1;
+                    closest = point;
                 }
             }
+            return closest;
+        }
+
+        public Point2D FindPlacementForPylon(UnitCalculation powerSource, int size, Point2D target = null)
+        {
+            if (target == null)
+            {
+                target = new Point2D { X = powerSource.Unit.Pos.X, Y = powerSource.Unit.Pos.Y };
+            }
+            var targetVector = new Vector2(target.X, target.Y);
+
+            var baseHeight = MapDataService.MapHeight(powerSource.Unit.Pos);
+            var xStart = (float)Math.Round(powerSource.Position.X) + .5f;
+            var yStart = (float)Math.Round(powerSource.Position.Y) + 6.5f;
+
+            Point2D closest = null;
+            var x = xStart;
+            while (x - xStart < 7)
+            {
+                var point = GetValidPointInColumn(x, baseHeight, yStart, targetVector, powerSource);
+                if (closest == null || point != null && Vector2.DistanceSquared(new Vector2(point.X, point.Y), targetVector) < Vector2.DistanceSquared(new Vector2(closest.X, closest.Y), targetVector))
+                {
+                    closest = point;
+                }
+                x += 1;
+            }
+            x = xStart - 1;
+            while (xStart - x < 7)
+            {
+                var point = GetValidPointInColumn(x, baseHeight, yStart, targetVector, powerSource);
+                if (closest == null || point != null && Vector2.DistanceSquared(new Vector2(point.X, point.Y), targetVector) < Vector2.DistanceSquared(new Vector2(closest.X, closest.Y), targetVector))
+                {
+                    closest = point;
+                }
+                x -= 1;
+            }
+
+            return closest;
+        }
+
+        Point2D GetValidPointInColumn(float x, int baseHeight, float yStart, Vector2 target, UnitCalculation powerSource)
+        {
+            Point2D closest = null;
+            var y = yStart;
+            while (y - yStart < 7)
+            {
+                var point = GetValidPoint(x, y, baseHeight, target, powerSource);
+                if (closest == null || point != null && Vector2.DistanceSquared(new Vector2(point.X, point.Y), target) < Vector2.DistanceSquared(new Vector2(closest.X, closest.Y), target))
+                {
+                    closest = point;
+                }
+                var point2 = GetValidPoint(x + 3, y + 2, baseHeight, target, powerSource);
+                if (closest == null || point2 != null && Vector2.DistanceSquared(new Vector2(point2.X, point2.Y), target) < Vector2.DistanceSquared(new Vector2(closest.X, closest.Y), target))
+                {
+                    closest = point2;
+                }
+                var point3 = GetValidPoint(x + 1, y + 5, baseHeight, target, powerSource);
+                if (closest == null || point3 != null && Vector2.DistanceSquared(new Vector2(point3.X, point3.Y), target) < Vector2.DistanceSquared(new Vector2(closest.X, closest.Y), target))
+                {
+                    closest = point3;
+                }
+                var point4 = GetValidPoint(x - 2, y + 4, baseHeight, target, powerSource);
+                if (closest == null || point4 != null && Vector2.DistanceSquared(new Vector2(point4.X, point4.Y), target) < Vector2.DistanceSquared(new Vector2(closest.X, closest.Y), target))
+                {
+                    closest = point4;
+                }
+                y += 1;
+            }
+            y = yStart - 1;
+            while (yStart - y < 7)
+            {
+                var point = GetValidPoint(x, y, baseHeight, target, powerSource);
+                if (closest == null || point != null && Vector2.DistanceSquared(new Vector2(point.X, point.Y), target) < Vector2.DistanceSquared(new Vector2(closest.X, closest.Y), target))
+                {
+                    closest = point;
+                }
+                var point2 = GetValidPoint(x + 3, y + 2, baseHeight, target, powerSource);
+                if (closest == null || point2 != null && Vector2.DistanceSquared(new Vector2(point2.X, point2.Y), target) < Vector2.DistanceSquared(new Vector2(closest.X, closest.Y), target))
+                {
+                    closest = point2;
+                }
+                var point3 = GetValidPoint(x + 1, y + 5, baseHeight, target, powerSource);
+                if (closest == null || point3 != null && Vector2.DistanceSquared(new Vector2(point3.X, point3.Y), target) < Vector2.DistanceSquared(new Vector2(closest.X, closest.Y), target))
+                {
+                    closest = point3;
+                }
+                var point4 = GetValidPoint(x - 2, y + 4, baseHeight, target, powerSource);
+                if (closest == null || point4 != null && Vector2.DistanceSquared(new Vector2(point4.X, point4.Y), target) < Vector2.DistanceSquared(new Vector2(closest.X, closest.Y), target))
+                {
+                    closest = point4;
+                }
+                y -= 1;
+            }
+            return closest;
+        }
+
+        Point2D GetValidPoint(float x, float y, int baseHeight, Vector2 target, UnitCalculation powerSource)
+        {
+            if (x >= 0 && y >= 0 && x < MapDataService.MapData.MapWidth && y < MapDataService.MapData.MapHeight &&
+                BuildingService.AreaBuildable(x, y, .5f) && !BuildingService.BlockedByStructuresOrMinerals(x, y, .5f, 0f) && Powered(powerSource, x, y))
+            {
+                return new Point2D { X = x, Y = y };
+            }
+
             return null;
         }
 
-        public Point2D FindPlacementForPylon(UnitCalculation powerSource, int size)
+        bool Powered(UnitCalculation powerSource, float x, float y)
         {
-            var x = powerSource.Unit.Pos.X;
-            var y = powerSource.Unit.Pos.Y;
             var sourceRadius = 7f;
             if (powerSource.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISMPHASING)
             {
                 sourceRadius = 5f;
             }
 
-            var radius = 1 + (size / 2f);
-            var powerRadius = sourceRadius - (size / 2f);
-
-            // start at 12 o'clock then rotate around 12 times, increase radius by 1 until it's more than powerRadius
-            while (radius < powerRadius)
-            {
-                var fullCircle = Math.PI * 2;
-                var sliceSize = fullCircle / 48.0;
-                var angle = 0.0;
-                while (angle + (sliceSize / 2) < fullCircle)
-                {
-                    var point = new Point2D { X = x + (float)(radius * Math.Cos(angle)), Y = y + (float)(radius * Math.Sin(angle)) };
-                    if (AreaPlaceable(point.X, point.Y, size / 2.0f) && !Blocked(point.X, point.Y, size / 2.0f))
-                    {
-                        DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
-                        return point;
-                    }
-
-                    angle += sliceSize;
-                }
-                radius += 1;
-            }
-
-            return null;
-        }
-
-        private bool AreaPlaceable(float x, float y, float radius)
-        {
-            if (x - radius < 0 || y - radius < 0 || x + radius >= MapData.MapWidth || y + radius >= MapData.MapHeight)
-            {
-                return false;
-            }
-            return MapData.Map[(int)x][(int)y].Walkable && MapData.Map[(int)x][(int)y + (int)radius].Walkable && MapData.Map[(int)x][(int)y - (int)radius].Walkable
-                && MapData.Map[(int)x + (int)radius][(int)y].Walkable && MapData.Map[(int)x + (int)radius][(int)y + (int)radius].Walkable && MapData.Map[(int)x + (int)radius][(int)y - (int)radius].Walkable
-                && MapData.Map[(int)x - (int)radius][(int)y].Walkable && MapData.Map[(int)x - (int)radius][(int)y + (int)radius].Walkable && MapData.Map[(int)x - (int)radius][(int)y - (int)radius].Walkable; 
-        }
-
-        private bool Blocked(float x, float y, float radius)
-        {
-            if (ActiveUnitData.NeutralUnits.Any(u => Vector2.DistanceSquared(new Vector2(x, y), u.Value.Position) < (u.Value.Unit.Radius + radius) * (u.Value.Unit.Radius + radius)))
-            {
-                return true;
-            }
-
-            if (ActiveUnitData.EnemyUnits.Any(u => !u.Value.Unit.IsFlying && Vector2.DistanceSquared(new Vector2(x, y), u.Value.Position) < (u.Value.Unit.Radius + radius) * (u.Value.Unit.Radius + radius)))
-            {
-                return true;
-            }
-
-            if (ActiveUnitData.SelfUnits.Any(u => !u.Value.Unit.IsFlying && Vector2.DistanceSquared(new Vector2(x, y), u.Value.Position) < (u.Value.Unit.Radius + radius) * (u.Value.Unit.Radius + radius)))
-            {
-                return true;
-            }
-
-            return false;
+            return Vector2.DistanceSquared(new Vector2(x, y), powerSource.Position) <= sourceRadius;
         }
     }
 }

@@ -281,7 +281,7 @@ namespace Sharky.DefaultBot
             SimCityService = new SimCityService(this);
             BuildingBuilder = new BuildingBuilder(ActiveUnitData, TargetingData, BuildingPlacement, SharkyUnitData, BaseData, BuildingService, MapDataService, WorkerBuilderService);
 
-            WarpInPlacement = new WarpInPlacement(ActiveUnitData, DebugService, MapData);
+            WarpInPlacement = new WarpInPlacement(ActiveUnitData, DebugService, MapData, MapDataService, BuildingService);
             
             Morpher = new Morpher(ActiveUnitData);
             BuildPylonService = new BuildPylonService(MacroData, BuildingBuilder, SharkyUnitData, ActiveUnitData, BaseData, TargetingData, BuildingService);

@@ -26,7 +26,7 @@ namespace Sharky.Builds.MacroServices
                 {
                     if (unitCalculation.Unit.ShieldMax > 0)
                     {
-                        if (unitCalculation.Unit.BuildProgress > 0.1f && unitCalculation.Unit.Shield < 1 && unitCalculation.Unit.Health < 100)
+                        if (unitCalculation.Unit.BuildProgress > 0.1f && unitCalculation.Unit.Shield < 1 && unitCalculation.Unit.Health < 100 && unitCalculation.Unit.Health <= unitCalculation.EnemiesThreateningDamage.Sum(e => e.Damage))
                         {
                             var action = commander.Value.Order(MacroData.Frame, Abilities.CANCEL);
                             if (action != null)

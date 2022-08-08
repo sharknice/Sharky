@@ -953,6 +953,13 @@ namespace Sharky.MicroControllers
             }
 
             var avoidPoint = GetPositionFromRange(commander, closestEnemy.Unit.Pos, commander.UnitCalculation.Unit.Pos, range + commander.UnitCalculation.Unit.Radius + closestEnemy.Unit.Radius);
+            if (!commander.UnitCalculation.Unit.IsFlying && commander.UnitCalculation.Unit.UnitType != (uint)UnitTypes.PROTOSS_COLOSSUS)
+            {
+                if (MapDataService.MapHeight(avoidPoint) != MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos))
+                {
+                    return false;
+                }
+            }
             action = commander.Order(frame, Abilities.MOVE, avoidPoint);
             return true;
         }
@@ -2176,10 +2183,20 @@ namespace Sharky.MicroControllers
 
         protected virtual Point2D GetPositionFromRange(UnitCommander commander, Point target, Point position, float range, float angleOffset = 0)
         {
-            var angle = Math.Atan2(target.Y - position.Y, position.X - target.X) + angleOffset;
+            return GetPositionFromRange(target.X, target.Y, position.X, position.Y, range, angleOffset);
+        }
+
+        protected virtual Point2D GetPositionFromRange(Point2D target, Point position, float range, float angleOffset = 0)
+        {
+            return GetPositionFromRange(target.X, target.Y, position.X, position.Y, range, angleOffset);
+        }
+
+        protected virtual Point2D GetPositionFromRange(float targetX, float targetY, float positionX, float positionY, float range, float angleOffset = 0)
+        {
+            var angle = Math.Atan2(targetY - positionY, positionX - targetX) + angleOffset;
             var x = range * Math.Cos(angle);
             var y = range * Math.Sin(angle);
-            return new Point2D { X = target.X + (float)x, Y = target.Y - (float)y };
+            return new Point2D { X = targetX + (float)x, Y = targetY - (float)y };
         }
 
         protected virtual Point2D GetGroundAvoidPoint(UnitCommander commander, Point start, Point avoid, Point2D target, Point2D defensivePoint, float range)

@@ -124,7 +124,7 @@ namespace Sharky.MicroControllers.Protoss
                 }
             }
 
-            if (target != null && target.Unit.Energy > 50)
+            if (target != null && target.Unit.Energy >= 50)
             {
                 action = commander.Order(frame, Abilities.EFFECT_FEEDBACK, null, target.Unit.Tag);
                 return true;
@@ -170,7 +170,7 @@ namespace Sharky.MicroControllers.Protoss
             return false;
         }
 
-        private Point2D GetBestAttack(UnitCalculation potentialAttack, IEnumerable<UnitCalculation> enemies)
+        protected Point2D GetBestAttack(UnitCalculation potentialAttack, IEnumerable<UnitCalculation> enemies)
         {
             var killCounts = new Dictionary<Point, float>();
             foreach (var enemyAttack in enemies)
