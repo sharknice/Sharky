@@ -61,7 +61,7 @@ namespace Sharky.MicroControllers.Zerg
                 if ((frame - lastBurrowFrame) > 100
                     && UnitData.ResearchedUpgrades.Contains((uint)Upgrades.BURROW)
                     && commander.UnitCalculation.Unit.Health < commander.UnitCalculation.Unit.HealthMax * 0.3f
-                    && !commander.UnitCalculation.NearbyEnemies.Any(x => x.UnitClassifications.Contains(UnitClassification.Detector)))
+                    && (!commander.UnitCalculation.NearbyEnemies.Any(x => x.UnitClassifications.Contains(UnitClassification.Detector)) || commander.UnitCalculation.EnemiesThreateningDamage.Count <= 2))
                 {
                     lastBurrowFrame = frame;
                     return commander.Order(frame, Abilities.BURROWDOWN_ROACH);
