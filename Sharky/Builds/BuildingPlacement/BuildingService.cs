@@ -165,6 +165,10 @@ namespace Sharky.Builds.BuildingPlacement
         float BuildingPlacementRadius(float radius)
         {
             var result = Math.Floor(radius * 2f) / 2;
+            if (result == 0)
+            {
+                return radius;
+            }
             return (float)result;
         }
 
