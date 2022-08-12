@@ -350,6 +350,7 @@ namespace Sharky.DefaultBot
             var corruptorMicroController = new CorruptorMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
             var broodlordMicroController = new BroodlordMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
             var viperMicroController = new ViperMicroController(this, SharkySimplePathFinder, MicroPriority.StayOutOfRange, false);
+            var queenMicroController = new QueenMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
 
             var scvMicroController = new ScvMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
             var reaperMicroController = new ReaperMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
@@ -413,6 +414,7 @@ namespace Sharky.DefaultBot
                 { UnitTypes.ZERG_CORRUPTOR, corruptorMicroController },
                 { UnitTypes.ZERG_BROODLORD, broodlordMicroController },
                 { UnitTypes.ZERG_VIPER, viperMicroController },
+                { UnitTypes.ZERG_QUEEN, queenMicroController },
 
                 { UnitTypes.TERRAN_SCV, scvMicroController },
                 { UnitTypes.TERRAN_REAPER, reaperMicroController },
