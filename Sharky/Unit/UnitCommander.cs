@@ -30,6 +30,7 @@ namespace Sharky
         public LockOnData LastLockOn { get; set; }
         public bool AutoCastOff { get; set; }
         public bool RallyPointSet { get; set; }
+        public bool AlwaysSpam { get; set; }
 
         /// <summary>
         /// The adept for an adept shade, etc.
@@ -68,6 +69,7 @@ namespace Sharky
             FrameFirstSeen = unitCalculation.FrameLastSeen;
             AutoCastOff = false;
             RallyPointSet = false;
+            AlwaysSpam = false;
         }
 
         public List<SC2APIProtocol.Action> Order(int frame, Abilities ability, Point2D targetLocation = null, ulong targetTag = 0, bool allowSpam = false, bool queue = false)
@@ -76,7 +78,7 @@ namespace Sharky
             {
                 return new List<SC2APIProtocol.Action>(); // don't give a unit conflicting orders, only one order per frame
             }
-            if (!allowSpam)
+            if (!allowSpam || AlwaysSpam)
             {
                 if (ability == LastAbility && targetTag == LastTargetTag && ((targetLocation == null && LastTargetLocation == null) || (LastTargetLocation != null && targetLocation != null && targetLocation.X == LastTargetLocation.X && targetLocation.Y == LastTargetLocation.Y)) && AbilityOrderTimes[ability] > frame - SpamFrames)
                 {
@@ -211,7 +213,7 @@ namespace Sharky
 
         public List<SC2APIProtocol.Action> UnloadSpecificUnit(int frame, Abilities ability, ulong targetTag, bool allowSpam = false)
         {
-            if (!allowSpam && ability == LastAbility && targetTag == LastTargetTag && AbilityOrderTimes[ability] > frame - SpamFrames)
+            if (!allowSpam && !AlwaysSpam && ability == LastAbility && targetTag == LastTargetTag && AbilityOrderTimes[ability] > frame - SpamFrames)
             {
                 return null; // if new action is exactly the same, don't do anything to prevent apm spam
             }

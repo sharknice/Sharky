@@ -25,6 +25,8 @@
         Die,
         ChaseReaper,
         WallOff,
-        Regenerate
+        Regenerate,
+        Hide,
+        Regroup
     }
 }
