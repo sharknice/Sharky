@@ -43,7 +43,7 @@ namespace Sharky.MicroControllers.Zerg
 
                 var attackers = commanders.Where(c => c.UnitRole == UnitRole.Attack);
                 var grouped = attackers.Where(c => Vector2.DistanceSquared(c.UnitCalculation.Position, leader.UnitCalculation.Position) <= GroupTightness);
-                if (grouped.Count() > MinimumGroupSize)
+                if (grouped.Count() >= MinimumGroupSize)
                 {
                     if (MapDataService.GetCells(leader.UnitCalculation.Unit.Pos.X, leader.UnitCalculation.Unit.Pos.Y, 5).Any(e => e.EnemyAirSplashDpsInRange > 0))
                     {
@@ -72,7 +72,7 @@ namespace Sharky.MicroControllers.Zerg
                     }
                     else
                     {
-                        var action = leader.Order(frame, Abilities.MOVE, point);
+                        var action = leader.Order(frame, Abilities.MOVE, point, allowSpam: true);
                         actions.AddRange(DuplicateActionsForCommanders(attackers, action));
                     }
                 }

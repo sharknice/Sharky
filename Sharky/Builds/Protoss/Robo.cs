@@ -8,12 +8,9 @@ namespace Sharky.Builds.Protoss
 {
     public class Robo : ProtossSharkyBuild
     {
-        EnemyData EnemyData;
-
         public Robo(DefaultSharkyBot defaultSharkyBot, ICounterTransitioner counterTransitioner)
             : base(defaultSharkyBot, counterTransitioner)
         {
-            EnemyData = defaultSharkyBot.EnemyData;
         }
 
         public override void StartBuild(int frame)

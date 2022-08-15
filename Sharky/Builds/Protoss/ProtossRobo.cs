@@ -1,6 +1,5 @@
 ﻿using SC2APIProtocol;
 using Sharky.Builds.BuildChoosing;
-using Sharky.Chat;
 using Sharky.DefaultBot;
 using Sharky.MicroTasks;
 using System.Collections.Generic;
@@ -9,12 +8,9 @@ namespace Sharky.Builds.Protoss
 {
     public class ProtossRobo : ProtossSharkyBuild
     {
-        EnemyData EnemyData;
-
         public ProtossRobo(DefaultSharkyBot defaultSharkyBot, ICounterTransitioner counterTransitioner)
             : base(defaultSharkyBot, counterTransitioner)
         {
-            EnemyData = defaultSharkyBot.EnemyData;
         }
 
         public override void StartBuild(int frame)
