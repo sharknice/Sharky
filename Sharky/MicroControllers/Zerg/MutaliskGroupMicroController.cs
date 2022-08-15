@@ -36,7 +36,7 @@ namespace Sharky.MicroControllers.Zerg
         {
             var actions = new List<SC2APIProtocol.Action>();
             var centerVector = new Vector2(groupCenter.X, groupCenter.Y);
-            var leader = commanders.Where(c => c.UnitRole == UnitRole.Attack).OrderBy(c => c.UnitCalculation.Unit.Tag).FirstOrDefault();
+            var leader = commanders.Where(c => c.UnitRole == UnitRole.Attack).OrderBy(c => c.UnitCalculation.FrameFirstSeen).FirstOrDefault();
             if (leader != null)
             {
                 var point = new Point2D { X = leader.UnitCalculation.Position.X, Y = leader.UnitCalculation.Position.Y };
