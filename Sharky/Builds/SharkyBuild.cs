@@ -81,6 +81,10 @@ namespace Sharky.Builds
         {
         }
 
+        public virtual void OnAfterFrame() 
+        { 
+        }
+
         public virtual void StartBuild(int frame)
         {
             Console.WriteLine($"{frame} {FrameToTimeConverter.GetTime(frame)} Build: {Name()}");

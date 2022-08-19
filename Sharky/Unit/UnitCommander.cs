@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using Sharky.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -271,6 +272,11 @@ namespace Sharky
                 }
             }
             return false;
+        }
+
+        public override string ToString()
+        {
+            return $"UnitCommander: {(UnitTypes)UnitCalculation.Unit.UnitType} UnitRole.{UnitRole} <{ StringHelpers.ToString(UnitCalculation.Unit.Orders.LastOrDefault())}> ({UnitCalculation.Unit.Tag})";
         }
     }
 }
