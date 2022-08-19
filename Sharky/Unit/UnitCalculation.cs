@@ -73,6 +73,8 @@ namespace Sharky
         public int FrameLastSeen { get; set; }
         public int FrameFirstSeen { get; internal set; }
 
+        public bool IsOnCreep { get; set; }
+
         /// <summary>
         /// amount of damage this unit will take from the next frame of attacks
         /// </summary>
@@ -80,14 +82,11 @@ namespace Sharky
 
         public int Repairers { get; set; }
 
-        float oneSecondInFrames;
-
         public bool Loaded { get; set; }
 
-        public UnitCalculation(Unit unit, int repairers, SharkyUnitData sharkyUnitData, SharkyOptions sharkyOptions, UnitDataService unitDataService, int frame)
+        public UnitCalculation(Unit unit, int repairers, SharkyUnitData sharkyUnitData, SharkyOptions sharkyOptions, UnitDataService unitDataService, bool isOnCreep, int frame)
         {
             TargetPriorityCalculation = new TargetPriorityCalculation();
-            oneSecondInFrames = sharkyOptions.FramesPerSecond;
 
             //PreviousUnits = new Dictionary<int, Unit>();
             //PreviousUnits[frame] = unit;
@@ -96,6 +95,8 @@ namespace Sharky
             UnitTypeData = sharkyUnitData.UnitData[(UnitTypes)unit.UnitType];
 
             Repairers = repairers;
+
+            IsOnCreep = isOnCreep;
 
             Velocity = 0;
             AverageVelocity = 0;

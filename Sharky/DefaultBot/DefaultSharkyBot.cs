@@ -446,9 +446,9 @@ namespace Sharky.DefaultBot
             var proxyScoutTask = new ProxyScoutTask(SharkyUnitData, TargetingData, BaseData, SharkyOptions, false, 0.5f, workerProxyScoutMicroController);
             var miningDefenseService = new MiningDefenseService(BaseData, ActiveUnitData, workerDefenseMicroController, DebugService, DamageService);
             var miningTask = new MiningTask(SharkyUnitData, BaseData, ActiveUnitData, 1, miningDefenseService, MacroData, BuildOptions, MicroTaskData, new MineralMiner(this), new GasMiner(this));
-            var queenInjectTask = new QueenInjectTask(this, 1.0f);
-            var queenCreepTask = new QueenCreepTask(this, 1.1f);
-            var queenDefendTask = new QueenDefendTask(this, 1.1f);
+            var queenInjectTask = new QueenInjectTask(this, 1.0f, queenMicroController);
+            var queenCreepTask = new QueenCreepTask(this, 1.1f, queenMicroController);
+            var queenDefendTask = new QueenDefendTask(this, 1.1f, queenMicroController);
             var creepTumorTask = new CreepTumorTask(this, queenCreepTask, 1, 1.11f);
             var attackTask = new AttackTask(MicroController, TargetingData, ActiveUnitData, DefenseService, MacroData, AttackData, TargetingService, MicroTaskData, SharkyUnitData, new ArmySplitter(AttackData, TargetingData, ActiveUnitData, DefenseService, TargetingService, TerranWallService, MicroController), new EnemyCleanupService(MicroController, DamageService), 2);
             var adeptWorkerHarassTask = new AdeptWorkerHarassTask(BaseData, TargetingData, adeptMicroController, adeptShadeMicroController, false);

@@ -119,7 +119,7 @@ namespace Sharky.MicroTasks.Zerg
             }
 
             {
-                UpdateMap(queens.Where(x => x.UnitRole == UnitRole.SpreadCreep && x.UnitCalculation.Unit.Orders.Any() && x.UnitCalculation.Unit.Orders.First().AbilityId == (uint)Abilities.EFFECT_INJECTLARVA));
+                UpdateMap(queens.Where(x => x.UnitRole == UnitRole.SpreadCreep && x.UnitCalculation.Unit.Orders.Any() && x.UnitCalculation.Unit.Orders.First().AbilityId == (uint)Abilities.BUILD_CREEPTUMOR_QUEEN));
                 needsUpdate = false;
             }
         }
