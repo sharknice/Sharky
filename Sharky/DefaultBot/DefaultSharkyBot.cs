@@ -449,6 +449,7 @@ namespace Sharky.DefaultBot
             var queenInjectTask = new QueenInjectTask(this, 1.0f, queenMicroController);
             var queenCreepTask = new QueenCreepTask(this, 1.1f, queenMicroController);
             var queenDefendTask = new QueenDefendTask(this, 1.1f, queenMicroController);
+            var burrowBlockExpansions = new BurrowBlockExpansionsTask(this, 1, new IndividualMicroController(this, SharkySimplePathFinder, MicroPriority.StayOutOfRange, false), SharkyUnitData);
             var creepTumorTask = new CreepTumorTask(this, queenCreepTask, 1, 1.11f);
             var attackTask = new AttackTask(MicroController, TargetingData, ActiveUnitData, DefenseService, MacroData, AttackData, TargetingService, MicroTaskData, SharkyUnitData, new ArmySplitter(AttackData, TargetingData, ActiveUnitData, DefenseService, TargetingService, TerranWallService, MicroController), new EnemyCleanupService(MicroController, DamageService), 2);
             var adeptWorkerHarassTask = new AdeptWorkerHarassTask(BaseData, TargetingData, adeptMicroController, adeptShadeMicroController, false);
@@ -513,6 +514,7 @@ namespace Sharky.DefaultBot
             MicroTaskData.MicroTasks[overlordProxyScoutTask.GetType().Name] = overlordProxyScoutTask;
             MicroTaskData.MicroTasks[zerglingScoutTask.GetType().Name] = zerglingScoutTask;
             MicroTaskData.MicroTasks[scoutForSpineTask.GetType().Name] = scoutForSpineTask;
+            MicroTaskData.MicroTasks[burrowBlockExpansions.GetType().Name] = burrowBlockExpansions;
 
             MicroManager = new MicroManager(ActiveUnitData, MicroTaskData, SharkyOptions);
             Managers.Add(MicroManager);

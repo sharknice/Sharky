@@ -34,7 +34,7 @@ namespace Sharky.MicroTasks
 
             foreach (var commander in commanders)
             {
-                if ((!commander.Value.Claimed || allowSteal) && commander.Value.UnitCalculation.Unit.UnitType == (int)UnitTypes.ZERG_ZERGLING)
+                if ((!commander.Value.Claimed || allowSteal) && commander.Value.UnitCalculation.Unit.UnitType == (int)UnitTypes.ZERG_ZERGLING && commander.Value.UnitRole != UnitRole.BlockExpansion)
                 {
                     // Remove from other microtasks
                     if (commander.Value.Claimed)

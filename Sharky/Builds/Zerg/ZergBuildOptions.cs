@@ -26,5 +26,10 @@
         /// Maximum count of queens simultaneously spreadiong creep.
         /// </summary>
         public int MaxCreepQueens { get; set; } = 6;
+
+        /// <summary>
+        /// Zerglings blocking enemy expansions
+        /// </summary>
+        public int MaxBurrowedBlockingZerglings { get; set; } = 2;
     }
 }
