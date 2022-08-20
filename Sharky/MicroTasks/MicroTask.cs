@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Sharky.MicroTasks
 {
@@ -59,6 +60,11 @@ namespace Sharky.MicroTasks
         public virtual void StealUnit(UnitCommander commander)
         {
             UnitCommanders.Remove(commander);
+        }
+
+        public override string ToString()
+        {
+            return !Enabled ? "<Disabled>" : $"Commanders: ({UnitCommanders.Count}) {string.Join(", ", UnitCommanders.Select(x => x.ToString()))}";
         }
     }
 }

@@ -239,7 +239,7 @@ namespace Sharky.MicroControllers.Terran
                 var fakeMainBase = new Unit(commander.UnitCalculation.Unit);
                 fakeMainBase.Pos = new Point { X = target.X, Y = target.Y, Z = 1 };
                 fakeMainBase.Alliance = Alliance.Enemy;
-                return new UnitCalculation(fakeMainBase, 0, SharkyUnitData, SharkyOptions, UnitDataService, frame);
+                return new UnitCalculation(fakeMainBase, 0, SharkyUnitData, SharkyOptions, UnitDataService, MapDataService.IsOnCreep(fakeMainBase.Pos), frame);
             }
             var unitsNearEnemyMain = ActiveUnitData.EnemyUnits.Values.Where(e => e.Unit.UnitType != (uint)UnitTypes.ZERG_LARVA && InRange(new Vector2(target.X, target.Y), e.Position, 20) && !e.Unit.BuffIds.Contains((uint)Buffs.LOCKON));
             if (unitsNearEnemyMain.Count() > 0 && InRange(new Vector2(target.X, target.Y), commander.UnitCalculation.Position, 100))

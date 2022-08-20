@@ -1,11 +1,8 @@
 ﻿using SC2APIProtocol;
 using Sharky.DefaultBot;
-using Sharky.MicroControllers;
-using Sharky.Pathing;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 
 namespace Sharky.MicroTasks
 {
@@ -37,7 +34,7 @@ namespace Sharky.MicroTasks
 
             foreach (var commander in commanders)
             {
-                if ((!commander.Value.Claimed || allowSteal) && commander.Value.UnitCalculation.Unit.UnitType == (int)UnitTypes.ZERG_ZERGLING)
+                if ((!commander.Value.Claimed || allowSteal) && commander.Value.UnitCalculation.Unit.UnitType == (int)UnitTypes.ZERG_ZERGLING && commander.Value.UnitRole != UnitRole.BlockExpansion)
                 {
                     // Remove from other microtasks
                     if (commander.Value.Claimed)

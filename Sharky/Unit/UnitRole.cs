@@ -27,6 +27,7 @@
         WallOff,
         Regenerate,
         Hide,
-        Regroup
+        Regroup,
+        BlockExpansion,
     }
 }

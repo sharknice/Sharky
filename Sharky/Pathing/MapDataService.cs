@@ -180,6 +180,11 @@ namespace Sharky.Pathing
             return MapData.Map[x][y].TerrainHeight;
         }
 
+        public bool IsOnCreep(Point point)
+        {
+            return MapData.Map[(int)point.X][(int)point.Y].HasCreep;
+        }
+
         public float EnemyAirDpsInRange(Point point)
         {
             return MapData.Map[(int)point.X][(int)point.Y].EnemyAirDpsInRange;

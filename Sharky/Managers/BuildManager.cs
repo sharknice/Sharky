@@ -151,6 +151,7 @@ namespace Sharky.Managers
             }
 
             CurrentBuild.OnFrame(observation);
+            CurrentBuild.OnAfterFrame();
 
             var actions = SimCityService.OnFrame();
             MacroBalance();
