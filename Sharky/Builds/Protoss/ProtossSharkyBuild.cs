@@ -1,6 +1,7 @@
 ﻿using SC2APIProtocol;
 using Sharky.Builds.BuildChoosing;
 using Sharky.DefaultBot;
+using Sharky.MicroTasks;
 using Sharky.Pathing;
 using System.Collections.Generic;
 using System.Linq;
@@ -45,6 +46,10 @@ namespace Sharky.Builds
             else
             {
                 BuildOptions.WallOffType = BuildingPlacement.WallOffType.Partial;
+                if (EnemyData.EnemyRace == Race.Zerg || EnemyData.EnemyRace == Race.Random)
+                {
+                    MicroTaskData.MicroTasks[typeof(ProtossDoorTask).Name].Enable();
+                }
             }
         }
 

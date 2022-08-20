@@ -136,6 +136,20 @@ namespace Sharky
             }
         }
 
+        public void KillCritters()
+        {
+            var tags = ActiveUnitData.NeutralUnits.Where(u => u.Value.Unit.Health == 10).Select(u => u.Key);
+            if (tags.Any())
+            {
+                var command = new DebugKillUnit();
+                command.Tag.AddRange(tags);
+                SpawnRequest.Debug.Debug.Add(new DebugCommand()
+                {
+                    KillUnit = command,
+                });
+            }
+        }
+
         public void SetEnergy(ulong unitTag, float value)
         {
             SpawnRequest.Debug.Debug.Add(new DebugCommand()

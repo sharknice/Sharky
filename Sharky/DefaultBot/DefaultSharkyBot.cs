@@ -475,6 +475,7 @@ namespace Sharky.DefaultBot
             var overlordProxyScoutTask = new SecondaryOverlordScoutingTask(this, true, 1.0f, new IndividualMicroController(this, SharkySimplePathFinder, MicroPriority.StayOutOfRange, false));
             var zerglingScoutTask = new ZerglingScoutTask(this, false, 1.0f);
             var scoutForSpineTask = new ScoutForSpineTask(this, false, 0.5f);
+            var protossDoorTask = new ProtossDoorTask(this, false, -0.5f);
 
 
             MicroTaskData.MicroTasks[defenseSquadTask.GetType().Name] = defenseSquadTask;
@@ -513,6 +514,7 @@ namespace Sharky.DefaultBot
             MicroTaskData.MicroTasks[overlordProxyScoutTask.GetType().Name] = overlordProxyScoutTask;
             MicroTaskData.MicroTasks[zerglingScoutTask.GetType().Name] = zerglingScoutTask;
             MicroTaskData.MicroTasks[scoutForSpineTask.GetType().Name] = scoutForSpineTask;
+            MicroTaskData.MicroTasks[protossDoorTask.GetType().Name] = protossDoorTask;
 
             MicroManager = new MicroManager(ActiveUnitData, MicroTaskData, SharkyOptions);
             Managers.Add(MicroManager);

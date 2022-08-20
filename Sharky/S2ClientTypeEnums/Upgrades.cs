@@ -21,6 +21,9 @@
         TERRANINFANTRYARMORSLEVEL3 = 13,
         STIMPACK = 15,
         SHIELDWALL = 16,
+        /// <summary>
+        /// Concussive Shells Marauder slow
+        /// </summary>
         PUNISHERGRENADES = 17,
         /// <summary>
         /// Infernal Pre-Igniter hellion blue flame
