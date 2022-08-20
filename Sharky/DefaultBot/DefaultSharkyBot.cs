@@ -180,7 +180,7 @@ namespace Sharky.DefaultBot
             SharkyOptions = new SharkyOptions { Debug = debug, FramesPerSecond = framesPerSecond, TagsEnabled = true, BuildTagsEnabled = true, LogPerformance = false, GameStatusReportingEnabled = true, TagsAllChat = false };
             FrameToTimeConverter = new FrameToTimeConverter(SharkyOptions);
             MacroData = new MacroData();
-            AttackData = new AttackData { ArmyFoodAttack = 30, ArmyFoodRetreat = 25, Attacking = false, UseAttackDataManager = true, CustomAttackFunction = true, RetreatTrigger = 1f, AttackTrigger = 1.5f, RequireDetection = false, RequireMaxOut = false, AttackWhenMaxedOut = true, AttackWhenOverwhelm = true };
+            AttackData = new AttackData { ArmyFoodAttack = 30, ArmyFoodRetreat = 25, Attacking = false, UseAttackDataManager = true, CustomAttackFunction = true, RetreatTrigger = 1f, AttackTrigger = 1.5f, RequireDetection = false, RequireMaxOut = false, AttackWhenMaxedOut = true, AttackWhenOverwhelm = true, ContainTrigger = 1.5f, KillTrigger = 3f };
             TargetingData = new TargetingData { HiddenEnemyBase = false };
             BaseData = new BaseData();
             MapData = new MapData();

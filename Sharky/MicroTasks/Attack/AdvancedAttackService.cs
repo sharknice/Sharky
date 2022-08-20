@@ -82,7 +82,7 @@ namespace Sharky.MicroTasks.Attack
             if (TargetingData.AttackState == AttackState.Contain)
             {
                 var containTargetPriority = CalculateContainTargetPriority();
-                if (targetPriority.Overwhelm)
+                if (targetPriority.Overwhelm || targetPriority.OverallWinnability > AttackData.KillTrigger)
                 {
                     TargetingData.AttackState = AttackState.Kill;
                 }
@@ -111,22 +111,18 @@ namespace Sharky.MicroTasks.Attack
             }
             else if (TargetingData.AttackState == AttackState.Kill)
             {
-                if (targetPriority.OverallWinnability >= AttackData.AttackTrigger)
-                {
-                    TargetingData.AttackState = AttackState.Kill;
-                }
-                else if (targetPriority.OverallWinnability <= AttackData.RetreatTrigger)
+                if (targetPriority.OverallWinnability <= AttackData.KillTrigger)
                 {
                     TargetingData.AttackState = AttackState.Contain;
                 }
             }
             else
             {
-                if (targetPriority.Overwhelm && AttackData.AttackWhenOverwhelm)
+                if (targetPriority.Overwhelm && AttackData.AttackWhenOverwhelm || targetPriority.OverallWinnability > AttackData.KillTrigger)
                 {
                     TargetingData.AttackState = AttackState.Kill;
                 }
-                if (targetPriority.OverallWinnability >= AttackData.AttackTrigger)
+                if (targetPriority.OverallWinnability >= AttackData.ContainTrigger)
                 {
                     TargetingData.AttackState = AttackState.Contain;
                 }
