@@ -31,22 +31,22 @@ namespace Sharky.MicroControllers.Zerg
 
         public override List<Action> Attack(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
-            return ManageBurrow(commander, frame) ?? base.Attack(commander, target, defensivePoint, groupCenter, frame);
+            return ManageBurrow(commander, defensivePoint, frame) ?? base.Attack(commander, target, defensivePoint, groupCenter, frame);
         }
 
         protected override bool Retreat(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<Action> action)
         {
-            action = ManageBurrow(commander, frame);
+            action = ManageBurrow(commander, defensivePoint, frame);
             if (action is null) return base.Retreat(commander, target, defensivePoint, frame, out action);
             return true;
         }
 
         public override List<Action> Idle(UnitCommander commander, Point2D defensivePoint, int frame)
         {
-            return ManageBurrow(commander, frame) ?? base.Idle(commander, defensivePoint, frame);
+            return ManageBurrow(commander, defensivePoint, frame) ?? base.Idle(commander, defensivePoint, frame);
         }
 
-        private List<Action> ManageBurrow(UnitCommander commander, int frame)
+        private List<Action> ManageBurrow(UnitCommander commander, Point2D defensivePoint, int frame)
         {
             if (commander.UnitCalculation.Unit.IsBurrowed)
             {
@@ -55,13 +55,20 @@ namespace Sharky.MicroControllers.Zerg
                     lastBurrowFrame = frame;
                     return commander.Order(frame, Abilities.BURROWUP_ROACH);
                 }
+                else
+                {
+                    List<Action> actions;
+                    base.Retreat(commander, defensivePoint, defensivePoint, frame, out actions);
+                    return actions;
+
+                }
             }
             else
             {
                 if ((frame - lastBurrowFrame) > 100
                     && UnitData.ResearchedUpgrades.Contains((uint)Upgrades.BURROW)
                     && commander.UnitCalculation.Unit.Health < commander.UnitCalculation.Unit.HealthMax * 0.3f
-                    && (!commander.UnitCalculation.NearbyEnemies.Any(x => x.UnitClassifications.Contains(UnitClassification.Detector)) || commander.UnitCalculation.EnemiesThreateningDamage.Count <= 2))
+                    && (!commander.UnitCalculation.NearbyEnemies.Any(x => x.UnitClassifications.Contains(UnitClassification.Detector)) || commander.UnitCalculation.EnemiesThreateningDamage.Count <= 2 || commander.UnitCalculation.NearbyAllies.Count > 2))
                 {
                     lastBurrowFrame = frame;
                     return commander.Order(frame, Abilities.BURROWDOWN_ROACH);
