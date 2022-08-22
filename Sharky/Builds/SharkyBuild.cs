@@ -2,6 +2,7 @@
 using Sharky.Builds.MacroServices;
 using Sharky.Chat;
 using Sharky.DefaultBot;
+using Sharky.MicroTasks;
 using Sharky.MicroTasks.Macro;
 using System;
 using System.Collections.Generic;
@@ -44,9 +45,9 @@ namespace Sharky.Builds
             BuildingRequestCancellingService = defaultSharkyBot.BuildingRequestCancellingService;
             UpgradeRequestCancellingService = defaultSharkyBot.UpgradeRequestCancellingService;
 
-            if (defaultSharkyBot.MicroTaskData.MicroTasks.ContainsKey("PrePositionBuilderTask"))
+            if (defaultSharkyBot.MicroTaskData.MicroTasks.ContainsKey(typeof(PrePositionBuilderTask).Name))
             {
-                PrePositionBuilderTask = (PrePositionBuilderTask)defaultSharkyBot.MicroTaskData.MicroTasks["PrePositionBuilderTask"];
+                PrePositionBuilderTask = (PrePositionBuilderTask)defaultSharkyBot.MicroTaskData.MicroTasks[typeof(PrePositionBuilderTask).Name];
             }
 
             Started = false;
@@ -66,9 +67,9 @@ namespace Sharky.Builds
             MicroTaskData = microTaskData;
             FrameToTimeConverter = frameToTimeConverter;
 
-            if (microTaskData.MicroTasks.ContainsKey("PrePositionBuilderTask"))
+            if (microTaskData.MicroTasks.ContainsKey(typeof(PrePositionBuilderTask).Name))
             {
-                PrePositionBuilderTask = (PrePositionBuilderTask)microTaskData.MicroTasks["PrePositionBuilderTask"];
+                PrePositionBuilderTask = (PrePositionBuilderTask)microTaskData.MicroTasks[typeof(PrePositionBuilderTask).Name];
             }
         }
 
@@ -148,9 +149,9 @@ namespace Sharky.Builds
                 MacroData.DesiredProductionCounts[UnitTypes.ZERG_HATCHERY] = 1;
             }
 
-            if (MicroTaskData.MicroTasks.ContainsKey("AttackTask"))
+            if (MicroTaskData.MicroTasks.ContainsKey(typeof(AttackTask).Name))
             {
-                MicroTaskData.MicroTasks["AttackTask"].Enable();
+                MicroTaskData.MicroTasks[typeof(AttackTask).Name].Enable();
             }
         }
 

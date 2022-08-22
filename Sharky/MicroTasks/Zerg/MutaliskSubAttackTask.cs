@@ -21,6 +21,8 @@ namespace Sharky.MicroTasks.Zerg
         IMicroController MutaliskMicroController;
 
         private int groupSize;
+
+        public bool AlwaysAttack { get; set; }
         public int GroupSize
         {
             get { return groupSize; }
@@ -34,7 +36,7 @@ namespace Sharky.MicroTasks.Zerg
         public int MinimumAttackSize { get; set; }
 
         public MutaliskSubAttackTask(DefaultSharkyBot defaultSharkyBot, IAttackTask parentTask, IMicroController mutaliskMicroController, int minimumAttackSize,
-            float priority, bool enabled = false)
+            float priority, bool enabled = false, bool alwaysAttack = true)
         {
             ParentTask = parentTask;
 
@@ -56,6 +58,7 @@ namespace Sharky.MicroTasks.Zerg
             MinimumAttackSize = minimumAttackSize;
 
             ArmySplitter = new ArmySplitter(defaultSharkyBot);
+            AlwaysAttack = alwaysAttack;
         }
 
         public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
@@ -231,6 +234,8 @@ namespace Sharky.MicroTasks.Zerg
 
         public override IEnumerable<SC2APIProtocol.Action> Retreat(Point2D defensePoint, Point2D armyPoint, int frame)
         {
+            if (AlwaysAttack) { return Attack(TargetingData.AttackPoint, defensePoint, armyPoint, frame); }
+
             UpdateStates();
 
             var actions = new List<SC2APIProtocol.Action>();
@@ -268,6 +273,8 @@ namespace Sharky.MicroTasks.Zerg
 
         public override IEnumerable<SC2APIProtocol.Action> SupportRetreat(IEnumerable<UnitCommander> mainUnits, Point2D attackPoint, Point2D defensivePoint, Point2D armyPoint, int frame)
         {
+            if (AlwaysAttack) { return Support(mainUnits, attackPoint, defensivePoint, armyPoint, frame); }
+
             UpdateStates();
 
             var actions = new List<SC2APIProtocol.Action>();

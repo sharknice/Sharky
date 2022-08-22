@@ -163,7 +163,6 @@ namespace Sharky.MicroTasks
 
         private void UpdateWall(int frame)
         {
-            // TODO: if wall bock, after 5 minutes destroy it if no ground enemies nearby
             if (BlockPylon != null && BlockPylon.UnitCalculation.FrameLastSeen == frame)
             {
                 if (frame - BlockPylon.UnitCalculation.FrameFirstSeen > SharkyOptions.FramesPerSecond * 60 * 2)
@@ -226,7 +225,7 @@ namespace Sharky.MicroTasks
 
             if (WallData?.Block != null && wallCompleted)
             {
-                if (DoorCommander == null || DoorCommander.UnitCalculation.Unit.Health < DoorCommander.UnitCalculation.Unit.HealthMax)
+                if ((DoorCommander == null || DoorCommander.UnitCalculation.Unit.Health < DoorCommander.UnitCalculation.Unit.HealthMax) && (BackupDoorCommander == null || BackupDoorCommander.UnitCalculation.Unit.Health < BackupDoorCommander.UnitCalculation.Unit.HealthMax))
                 {
                     NeedProbe = true;
                 }

@@ -398,7 +398,7 @@ namespace Sharky.MicroTasks
                 }
                 else if (worker.UnitCalculation.NearbyEnemies.Any() && worker.UnitCalculation.NearbyAllies.Take(25).Any(a => a.Attributes.Contains(SC2APIProtocol.Attribute.Structure)))
                 {
-                    var attackTask = MicroTaskData.MicroTasks["AttackTask"];
+                    var attackTask = MicroTaskData.MicroTasks[typeof(AttackTask).Name];
                     if (attackTask.Enabled)
                     {
                         worker.UnitRole = UnitRole.Attack;
@@ -427,9 +427,9 @@ namespace Sharky.MicroTasks
 
         private void AttackWithWorker(UnitCommander worker)
         {
-            if (MicroTaskData.MicroTasks.ContainsKey("AttackTask"))
+            if (MicroTaskData.MicroTasks.ContainsKey(typeof(AttackTask).Name))
             {
-                var attackTask = MicroTaskData.MicroTasks["AttackTask"];
+                var attackTask = MicroTaskData.MicroTasks[typeof(AttackTask).Name];
                 if (attackTask.Enabled)
                 {
                     attackTask.UnitCommanders.Add(worker);
@@ -440,9 +440,9 @@ namespace Sharky.MicroTasks
 
         private void StopAttackingWithSafeWorkers()
         {
-            if (MicroTaskData.MicroTasks.ContainsKey("AttackTask"))
+            if (MicroTaskData.MicroTasks.ContainsKey(typeof(AttackTask).Name))
             {
-                var attackTask = MicroTaskData.MicroTasks["AttackTask"];
+                var attackTask = MicroTaskData.MicroTasks[typeof(AttackTask).Name];
                 if (attackTask.Enabled)
                 {
                     var tags = new List<ulong>();
@@ -456,6 +456,7 @@ namespace Sharky.MicroTasks
                     {
                         attackTask.UnitCommanders.RemoveAll(u => u.UnitCalculation.Unit.Tag == tag);
                     }
+                    attackTask.UnitCommanders.RemoveAll(u => u.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && u.UnitRole == UnitRole.Minerals || u.UnitRole == UnitRole.Gas);
                 }
             }
         }
