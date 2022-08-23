@@ -16,7 +16,6 @@ namespace Sharky.MicroTasks
         BuildOptions BuildOptions;
         SharkyUnitData UnitData;
         BaseData BaseData;
-        ActiveUnitData ActiveUnitData;
 
         public BurrowBlockExpansionsTask(DefaultSharkyBot defaultSharkyBot, float priority, IndividualMicroController individualMicroController, SharkyUnitData unitData, bool enabled = true)
         {
@@ -25,7 +24,6 @@ namespace Sharky.MicroTasks
             BuildOptions = defaultSharkyBot.BuildOptions;
             UnitData = unitData;
             BaseData = defaultSharkyBot.BaseData;
-            ActiveUnitData = defaultSharkyBot.ActiveUnitData;
             IndividualMicroController = individualMicroController;
 
             Priority = priority;
@@ -40,12 +38,12 @@ namespace Sharky.MicroTasks
                 return;
             }
 
-            if (!UnitData.ResearchedUpgrades.Contains((uint)Upgrades.BURROW))
+            if (!UnitData.ResearchedUpgrades.Contains((uint)Upgrades.BURROW) || EnemyData.EnemyAggressivityData.ArmyAggressivity > 0.5f)
             {
                 return;
             }
 
-            foreach (var commander in commanders.Where(commander => (commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.ZERG_ZERGLING && !commander.Value.Claimed)))
+            foreach (var commander in commanders.Where(commander => ((commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.ZERG_ZERGLING || commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.ZERG_ZERGLINGBURROWED) && (!commander.Value.Claimed || commander.Value.UnitRole == UnitRole.Attack))))
             {
                 if (UnitCommanders.Count >= BuildOptions.ZergBuildOptions.MaxBurrowedBlockingZerglings)
                     break;
@@ -67,28 +65,53 @@ namespace Sharky.MicroTasks
 
             foreach (var ling in UnitCommanders)
             {
-                if (!points.Any())
-                    return actions;
-
-                if (ling.UnitCalculation.Unit.IsBurrowed)
-                    continue;
-
-                var point = points.First();
+                var point = points.FirstOrDefault();
                 points = points.Skip(1);
 
-                if (point.Distance(ling.UnitCalculation.Unit.Pos.ToPoint2D()) > 1)
+                if (!FreeOurExpansions(ling, frame, point, actions) && point != null)
                 {
-                    actions.AddRange(IndividualMicroController.NavigateToPoint(ling, point, point, point, frame));
+                    if (point != null)
+                    {
+                        actions.AddRange(BlockExpansion(ling, point, frame));
+                    }
                 }
-                else
-                {
-                    actions.AddRange(ling.Order(frame, Abilities.BURROWDOWN_ZERGLING));
-                }
-
-                // TODO: unblock bases we want to expand to
             }
 
             return actions;
+        }
+
+        private bool FreeOurExpansions(UnitCommander ling, int frame, Point2D pos, List<SC2APIProtocol.Action> actions)
+        {
+            if ((ling.UnitCalculation.Unit.IsBurrowed || (pos != null && pos.ToVector2().Distance(ling.UnitCalculation.Position) < 6))
+                && ling.UnitCalculation.NearbyAllies.Any(x => x.Unit.UnitType == (uint)UnitTypes.ZERG_DRONE && x.Position.Distance(ling.UnitCalculation.Position) < 8))
+            {
+                actions.AddRange(ling.Order(frame, Abilities.BURROWUP_ZERGLING));
+                return true;
+            }
+
+            return false;
+        }
+
+        private IEnumerable<SC2APIProtocol.Action> BlockExpansion(UnitCommander ling, Point2D pos, int frame)
+        {
+            if (pos == null)
+                return new List<SC2APIProtocol.Action>();
+
+            var distanceFromTarget = pos.Distance(ling.UnitCalculation.Unit.Pos.ToPoint2D());
+
+            if (distanceFromTarget > 1.5f)
+            {
+                if (ling.UnitCalculation.Unit.IsBurrowed && distanceFromTarget > 10 && (ling.UnitCalculation.NearbyAllies.Any(z => z.Unit.UnitType == (int)UnitTypes.ZERG_ZERGLINGBURROWED && z.Position.Distance(ling.UnitCalculation.Position) < 5) || distanceFromTarget > 36))
+                {
+                    return ling.Order(frame, Abilities.BURROWUP_ZERGLING);
+                }
+
+                return IndividualMicroController.NavigateToPoint(ling, pos, pos, pos, frame);
+            }
+            else
+            {
+                return ling.Order(frame, Abilities.BURROWDOWN_ZERGLING);
+            }
         }
 
         private IEnumerable<Point2D> GetBlockingPoints()
