@@ -1,6 +1,8 @@
 ﻿using SC2APIProtocol;
 using Sharky.DefaultBot;
+using Sharky.Extensions;
 using Sharky.MicroControllers;
+using Sharky.Pathing;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,21 +20,17 @@ namespace Sharky.MicroTasks
         private BaseData BaseData;
         private SharkyOptions SharkyOptions;
         private EnemyData EnemyData;
-        private IIndividualMicroController IndividualMicroController;
+        private IndividualMicroController IndividualMicroController;
+        private MapData MapData;
 
-        private bool LateGame = false;
-
-        int ScoutLocationIndex = 0;
-
-        List<Point2D> ScoutLocations { get; set; }
-
-        public SecondaryOverlordScoutingTask(DefaultSharkyBot defaultSharkyBot, bool enabled, float priority, IIndividualMicroController individualMicroController)
+        public SecondaryOverlordScoutingTask(DefaultSharkyBot defaultSharkyBot, bool enabled, float priority, IndividualMicroController individualMicroController)
         {
             SharkyUnitData = defaultSharkyBot.SharkyUnitData;
             TargetingData = defaultSharkyBot.TargetingData;
             BaseData = defaultSharkyBot.BaseData;
             EnemyData = defaultSharkyBot.EnemyData;
             SharkyOptions = defaultSharkyBot.SharkyOptions;
+            MapData = defaultSharkyBot.MapData;
             IndividualMicroController = individualMicroController;
 
             Priority = priority;
@@ -54,6 +52,8 @@ namespace Sharky.MicroTasks
                     UnitCommanders.Add(commander.Value);
                 }
             }
+
+            UnitCommanders.RemoveAll(u => u.UnitRole != UnitRole.Scout || u.UnitCalculation.Unit.UnitType != (int)UnitTypes.ZERG_OVERLORD);
         }
 
         public override IEnumerable<SC2APIProtocol.Action> PerformActions(int frame)
@@ -63,30 +63,16 @@ namespace Sharky.MicroTasks
             if (EnemyData.SelfRace != Race.Zerg)
                 return commands;
 
-            if (ScoutLocations == null)
-            {
-                GetScoutLocations();
-            }
-
-            if (!LateGame && frame > SharkyOptions.FramesPerSecond * 4 * 60)
-            {
-                LateGame = true;
-                ScoutLocations = new List<Point2D>();
-                ScoutLocationIndex = 0;
-
-                foreach (var baseLocation in BaseData.BaseLocations.Where(b => !BaseData.SelfBases.Any(s => s.Location == b.Location) && !BaseData.EnemyBases.Any(s => s.Location == b.Location)))
-                {
-                    ScoutLocations.Add(baseLocation.MineralLineLocation);
-                }
-            }
+            HashSet<Point2D> scoutedPos = new();
 
             foreach (var commander in UnitCommanders)
             {
+                var pos = GetPoint(scoutedPos, commander.UnitCalculation.Position.ToPoint2D());
+
                 // Retreat on damage or seeing enemy attacker unit
-                if ((commander.UnitCalculation.Unit.Health != commander.UnitCalculation.Unit.HealthMax) || commander.UnitCalculation.EnemiesThreateningDamage.Any())
+                if ((commander.UnitCalculation.Unit.Health < commander.UnitCalculation.Unit.HealthMax * 0.8f) || commander.UnitCalculation.EnemiesThreateningDamage.Any())
                 {
-                    commander.UnitRole = UnitRole.None;
-                    var action = commander.Order(frame, Abilities.MOVE, BaseData.MainBase.Location);
+                    var action = IndividualMicroController.Retreat(commander, BaseData.MainBase.Location, null, frame);
                     if (action != null)
                     {
                         commands.AddRange(action);
@@ -94,17 +80,13 @@ namespace Sharky.MicroTasks
                 }
                 else
                 {
-                    if (commander.UnitCalculation.Velocity == 0)
+                    if (pos != null)
                     {
-                        commander.UnitRole = UnitRole.Scout;
-
-                        var action = IndividualMicroController.Scout(commander, ScoutLocations[ScoutLocationIndex % ScoutLocations.Count], TargetingData.NaturalBasePoint, frame);
+                        var action = IndividualMicroController.Scout(commander, pos, TargetingData.NaturalBasePoint, frame);
                         if (action != null)
                         {
                             commands.AddRange(action);
                         }
-
-                        ScoutLocationIndex = (ScoutLocationIndex + 1) % ScoutLocations.Count;
                     }
                 }
             }
@@ -112,29 +94,20 @@ namespace Sharky.MicroTasks
             return commands;
         }
 
-        private void GetScoutLocations()
+        private Point2D GetPoint(HashSet<Point2D> scoutedPos, Point2D unitPos)
         {
-            ScoutLocations = new List<Point2D>();
+            var pos = BaseData.BaseLocations
+                .Where(x => !BaseData.EnemyBases.Contains(x))
+                .Select(x => x.Location)
+                .Where(p => !scoutedPos.Contains(p))
+                .OrderBy(p => MapData.Map[(int)p.X][(int)p.Y].LastFrameVisibility)
+                .ThenBy(p => p.Distance(unitPos))
+                .FirstOrDefault();
 
-            if (EnemyData.EnemyRace == Race.Zerg)
-            {
-                if (BaseData.EnemyBaseLocations.Count >= 3)
-                    ScoutLocations.Add(BaseData.EnemyBaseLocations.Skip(2).First().Location);
+            if (pos != null)
+                scoutedPos.Add(pos);
 
-                if (BaseData.EnemyBaseLocations.Count >= 4)
-                    ScoutLocations.Add(BaseData.EnemyBaseLocations.Skip(3).First().Location);
-            }
-            else
-            {
-                ScoutLocations.Add(TargetingData.ForwardDefensePoint);
-                ScoutLocations.Add(TargetingData.MainDefensePoint);
-            }
-
-            foreach (var baseLocation in BaseData.BaseLocations.Skip(1).Take(BaseData.BaseLocations.Count - 3))
-            {
-                ScoutLocations.Add(baseLocation.MineralLineLocation);
-            }
-
+            return pos;
         }
     }
 }
