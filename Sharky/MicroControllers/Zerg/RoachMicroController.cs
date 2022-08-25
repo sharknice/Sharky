@@ -52,7 +52,6 @@ namespace Sharky.MicroControllers.Zerg
             {
                 if ((Detected(commander) && commander.UnitCalculation.NearbyAllies.Count < 5) || (commander.UnitCalculation.Unit.Health > commander.UnitCalculation.Unit.HealthMax * 0.9f) || (commander.UnitCalculation.EnemiesThreateningDamage.Count == 0 && commander.UnitCalculation.Unit.Health > commander.UnitCalculation.Unit.HealthMax * 0.8f))
                 {
-                    lastBurrowFrame = frame;
                     return commander.Order(frame, Abilities.BURROWUP_ROACH);
                 }
                 else
@@ -65,12 +64,10 @@ namespace Sharky.MicroControllers.Zerg
             }
             else
             {
-                if ((frame - lastBurrowFrame) > 100
-                    && UnitData.ResearchedUpgrades.Contains((uint)Upgrades.BURROW)
+                if (UnitData.ResearchedUpgrades.Contains((uint)Upgrades.BURROW)
                     && commander.UnitCalculation.Unit.Health < commander.UnitCalculation.Unit.HealthMax * 0.3f
                     && (!commander.UnitCalculation.NearbyEnemies.Any(x => x.UnitClassifications.Contains(UnitClassification.Detector)) || commander.UnitCalculation.EnemiesThreateningDamage.Count <= 2 || commander.UnitCalculation.NearbyAllies.Count > 2))
                 {
-                    lastBurrowFrame = frame;
                     return commander.Order(frame, Abilities.BURROWDOWN_ROACH);
                 }
             }

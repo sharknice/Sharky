@@ -30,6 +30,6 @@
         /// <summary>
         /// Zerglings blocking enemy expansions
         /// </summary>
-        public int MaxBurrowedBlockingZerglings { get; set; } = 2;
+        public int MaxBurrowedBlockingZerglings { get; set; } = 3;
     }
 }
