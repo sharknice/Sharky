@@ -46,7 +46,7 @@ namespace Sharky.Builds
             else
             {
                 BuildOptions.WallOffType = BuildingPlacement.WallOffType.Partial;
-                if (EnemyData.EnemyRace == Race.Zerg || EnemyData.EnemyRace == Race.Random)
+                if (EnemyData.EnemyRace == Race.Zerg || EnemyData.EnemyRace == Race.Random && !MicroTaskData.MicroTasks[typeof(ProtossDoorTask).Name].Enabled)
                 {
                     MicroTaskData.MicroTasks[typeof(ProtossDoorTask).Name].Enable();
                 }

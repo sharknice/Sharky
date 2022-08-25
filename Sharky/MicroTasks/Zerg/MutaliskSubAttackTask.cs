@@ -187,7 +187,12 @@ namespace Sharky.MicroTasks.Zerg
             var actions = new List<SC2APIProtocol.Action>();
 
             foreach (var group in Groups)
-            {               
+            {   
+                if (group?.FirstOrDefault() == null)
+                {
+                    continue;
+                }
+
                 var groupCenter = TargetingService.GetArmyPoint(group);
 
                 var retreatSpot = GetRegenerationSpot(group, defensePoint, armyPoint, frame);
@@ -215,6 +220,7 @@ namespace Sharky.MicroTasks.Zerg
         Point2D GetRegenerationSpot(List<UnitCommander> group, Point2D defensePoint, Point2D armyPoint, int frame)
         {
             var retreatSpot = defensePoint;
+            var firstUnit = group.FirstOrDefault();
             if (group.FirstOrDefault().UnitRole == UnitRole.Hide)
             {
                 // TODO: find best hiding spot near own base
@@ -222,7 +228,7 @@ namespace Sharky.MicroTasks.Zerg
             } 
             else
             {
-                var closestSafeBase = BaseData.EnemyBaseLocations.FirstOrDefault(b => b.ResourceCenter == null && !MapDataService.InEnemyVision(b.Location));
+                var closestSafeBase = BaseData?.EnemyBaseLocations?.FirstOrDefault(b => b.ResourceCenter == null && !MapDataService.InEnemyVision(b.Location));
                 if (closestSafeBase != null)
                 {
                     return closestSafeBase.Location;

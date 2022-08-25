@@ -29,7 +29,7 @@ namespace Sharky.Builds.BuildingPlacement
             var targetVector = new Vector2(target.X, target.Y);
             Point2D closest = null;
 
-            var powerSources = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON || c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISMPHASING && c.UnitCalculation.Unit.BuildProgress == 1).OrderBy(c => Vector2.DistanceSquared(c.UnitCalculation.Position, new Vector2(target.X, target.Y)));
+            var powerSources = ActiveUnitData.Commanders.Values.Where(c => (c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON || c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISMPHASING) && c.UnitCalculation.Unit.BuildProgress == 1).OrderBy(c => Vector2.DistanceSquared(c.UnitCalculation.Position, new Vector2(target.X, target.Y)));
             foreach (var powerSource in powerSources)
             {
                 var point = FindPlacementForPylon(powerSource.UnitCalculation, size, target);
@@ -137,7 +137,7 @@ namespace Sharky.Builds.BuildingPlacement
         Point2D GetValidPoint(float x, float y, int baseHeight, Vector2 target, UnitCalculation powerSource)
         {
             if (x >= 0 && y >= 0 && x < MapDataService.MapData.MapWidth && y < MapDataService.MapData.MapHeight &&
-                BuildingService.AreaBuildable(x, y, .5f) && !BuildingService.BlockedByStructuresOrMinerals(x, y, .5f, 0f) && Powered(powerSource, x, y))
+                BuildingService.AreaBuildable(x, y, .5f) && !BuildingService.Blocked(x, y, .75f, 0f) && Powered(powerSource, x, y))
             {
                 return new Point2D { X = x, Y = y };
             }
