@@ -31,6 +31,8 @@ namespace Sharky.MicroTasks.Mining
             var actions = new List<SC2APIProtocol.Action>();
             if (!Enabled) { return actions; }
 
+            bool workerRushActive = false;
+
             foreach (var selfBase in BaseData.SelfBases)
             {
                 bool preventGasSteal = false;
@@ -111,6 +113,7 @@ namespace Sharky.MicroTasks.Mining
                             if (ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Where(u => !u.Unit.IsFlying).Count() > 8)
                             {
                                 DebugService.DrawText("--------------Defending Worker Rush-------------");
+                                workerRushActive = true;
                                 while (commanders.Count(c => c.Value.UnitRole == UnitRole.Defend) < desiredWorkers)
                                 {
                                     var commander = commanders.FirstOrDefault(c => c.Value.UnitRole != UnitRole.Defend && c.Value.UnitRole != UnitRole.PreventGasSteal).Value;
@@ -237,7 +240,7 @@ namespace Sharky.MicroTasks.Mining
             var safeWorkers = ActiveUnitData.Commanders.Where(c => c.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && (c.Value.UnitRole == UnitRole.Defend || c.Value.UnitRole == UnitRole.Bait) && (c.Value.UnitCalculation.Unit.Orders.Count(o => o.AbilityId != (uint)Abilities.MOVE) == 0));
             foreach (var safeWorker in safeWorkers)
             {
-                if (safeWorker.Value.UnitRole == UnitRole.Bait && safeWorker.Value.UnitCalculation.NearbyEnemies.Count() > 0)
+                if (safeWorker.Value.UnitRole == UnitRole.Bait && safeWorker.Value.UnitCalculation.NearbyEnemies.Count(e => e.FrameLastSeen == frame) > 0)
                 {
                     continue;
                 }
@@ -254,6 +257,18 @@ namespace Sharky.MicroTasks.Mining
                     {
                         actions.AddRange(action);
                     }
+                }
+            }
+
+            if (!workerRushActive)
+            {
+                foreach (var commander in unitCommanders.Where(u => u.UnitRole == UnitRole.Attack))
+                {
+                    if (commander.UnitCalculation.NearbyEnemies.Count(e => e.FrameLastSeen == frame) > 0)
+                    {
+                        continue;
+                    }
+                    commander.UnitRole = UnitRole.None;
                 }
             }
 

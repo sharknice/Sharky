@@ -477,7 +477,7 @@ namespace Sharky.DefaultBot
             var zerglingScoutTask = new ZerglingScoutTask(this, false, 1.0f);
             var scoutForSpineTask = new ScoutForSpineTask(this, false, 0.5f);
             var protossDoorTask = new ProtossDoorTask(this, false, -0.5f);
-
+            var zealotHarassTask = new ZealotHarassTask(this, false, 0.5f, zealotMicroController);
 
             MicroTaskData.MicroTasks[defenseSquadTask.GetType().Name] = defenseSquadTask;
             MicroTaskData.MicroTasks[workerScoutGasStealTask.GetType().Name] = workerScoutGasStealTask;
@@ -517,6 +517,7 @@ namespace Sharky.DefaultBot
             MicroTaskData.MicroTasks[scoutForSpineTask.GetType().Name] = scoutForSpineTask;
             MicroTaskData.MicroTasks[burrowBlockExpansions.GetType().Name] = burrowBlockExpansions;
             MicroTaskData.MicroTasks[protossDoorTask.GetType().Name] = protossDoorTask;
+            MicroTaskData.MicroTasks[zealotHarassTask.GetType().Name] = zealotHarassTask;
 
             MicroManager = new MicroManager(ActiveUnitData, MicroTaskData, SharkyOptions);
             Managers.Add(MicroManager);

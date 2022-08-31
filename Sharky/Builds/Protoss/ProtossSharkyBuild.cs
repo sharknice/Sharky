@@ -34,8 +34,8 @@ namespace Sharky.Builds
 
         public override void StartBuild(int frame)
         {
-            BuildOptions.ProtossBuildOptions.PylonsAtDefensivePoint = 0;
-            BuildOptions.ProtossBuildOptions.ShieldsAtDefensivePoint = 0;
+            MacroData.DesiredPylonsAtDefensivePoint = 0;
+            MacroData.DesiredDefensiveBuildingsAtDefensivePoint[UnitTypes.PROTOSS_SHIELDBATTERY] = 0;
 
             base.StartBuild(frame);
 

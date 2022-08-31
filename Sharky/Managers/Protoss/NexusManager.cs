@@ -24,8 +24,8 @@ namespace Sharky.Managers.Protoss
         {
             var actions = new List<SC2APIProtocol.Action>();
 
-            var nexus = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS && c.UnitCalculation.Unit.BuildProgress == 1).OrderByDescending(c => c.UnitCalculation.Unit.Energy).FirstOrDefault();
-            if (nexus != null)
+            var nexuses = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS && c.UnitCalculation.Unit.BuildProgress == 1).OrderByDescending(c => c.UnitCalculation.Unit.Energy);
+            foreach (var nexus in nexuses)
             {
                 var action = Overcharge(nexus, (int)observation.Observation.GameLoop);
                 if (action != null)
@@ -38,7 +38,13 @@ namespace Sharky.Managers.Protoss
                     if (action != null)
                     {
                         actions.AddRange(action);
-                    }
+                        return actions;
+                    }               
+                }
+
+                if (nexus.UnitRole != UnitRole.Defend && nexus.UnitCalculation.NearbyAllies.Any(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_SHIELDBATTERY && Vector2.DistanceSquared(nexus.UnitCalculation.Position, a.Position) <= 64))
+                {
+                    nexus.UnitRole = UnitRole.Defend;
                 }
             }
 

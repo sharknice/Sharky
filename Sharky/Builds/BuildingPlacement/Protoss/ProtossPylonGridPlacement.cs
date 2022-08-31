@@ -116,14 +116,23 @@ namespace Sharky.Builds.BuildingPlacement
         Point2D GetValidPoint(float x, float y, int baseHeight, Vector2 mineralLocationVector, float maxDistance, Point2D target)
         {
             var size = 2.25f;
-            if (Vector2.DistanceSquared(new Vector2(x, y), mineralLocationVector) > 36 && Vector2.DistanceSquared(new Vector2(x, y), new Vector2(target.X, target.Y)) < maxDistance * maxDistance)
+            if (Vector2.DistanceSquared(new Vector2(x, y), mineralLocationVector) > 169 && Vector2.DistanceSquared(new Vector2(x, y), new Vector2(target.X, target.Y)) < maxDistance * maxDistance)
             {
-                if (x >= 0 && y >= 0 && x < MapDataService.MapData.MapWidth && y < MapDataService.MapData.MapHeight &&
-                    MapDataService.MapHeight((int)x, (int)y) == baseHeight &&
-                    BuildingService.AreaBuildable(x, y, size / 2.0f) &&
-                    !BuildingService.BlocksPath(x, y, size / 2.0f) && !BuildingService.Blocked(x, y, 1, 0f) && !BuildingService.HasAnyCreep(x, y, size / 2.0f) && !BuildingService.BlocksResourceCenter(x, y, 1))
-                {
-                    return new Point2D { X = x, Y = y };
+                if (x >= 0 && y >= 0 && x < MapDataService.MapData.MapWidth && y < MapDataService.MapData.MapHeight && MapDataService.MapHeight((int)x, (int)y) == baseHeight)
+                { 
+                    if (BuildingService.AreaBuildable(x, y, size / 2.0f))
+                    {
+                        if (!BuildingService.BlocksPath(x, y, size / 2.0f))
+                        {
+                            if (!BuildingService.Blocked(x, y, 1, 0f))
+                            {
+                                if (!BuildingService.HasAnyCreep(x, y, size / 2.0f) && !BuildingService.BlocksResourceCenter(x, y, 1))
+                                {
+                                    return new Point2D { X = x, Y = y };
+                                }
+                            }
+                        }
+                    }
                 }
             }
             return null;

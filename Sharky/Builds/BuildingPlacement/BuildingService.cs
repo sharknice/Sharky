@@ -183,7 +183,7 @@ namespace Sharky.Builds.BuildingPlacement
 
         public bool BlocksPath(float x, float y, float unitRadius)
         {
-            var radius = unitRadius + 4.5f;
+            var radius = unitRadius + 2f;
             if (x - radius < 0 || y - radius < 0 || x + radius >= MapData.MapWidth || y + radius >= MapData.MapHeight)
             {
                 return true;

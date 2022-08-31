@@ -89,7 +89,7 @@ namespace Sharky.MicroTasks
             var structures = ActiveUnitData.SelfUnits.Where(u => u.Value.Attributes.Contains(Attribute.Structure));
             if (OnlyDefendMain)
             {
-                var vector = new Vector2(TargetingData.MainDefensePoint.X, TargetingData.MainDefensePoint.Y);
+                var vector = new Vector2(TargetingData.SelfMainBasePoint.X, TargetingData.SelfMainBasePoint.Y);
                 structures = structures.Where(u => Vector2.DistanceSquared(u.Value.Position, vector) < 400);
             }
             var attackingEnemies = structures.SelectMany(u => u.Value.NearbyEnemies).Distinct().Where(e => ActiveUnitData.EnemyUnits.ContainsKey(e.Unit.Tag));
@@ -121,7 +121,7 @@ namespace Sharky.MicroTasks
                 var defensePoint = TargetingData.ForwardDefensePoint;
                 if (OnlyDefendMain)
                 {
-                    defensePoint = TargetingData.MainDefensePoint;
+                    defensePoint = TargetingData.SelfMainBasePoint;
                 }
                 actions = MicroController.Retreat(UnitCommanders, defensePoint, null, frame);
             }

@@ -6,7 +6,6 @@ using Sharky.Pathing;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.ComponentModel.Design;
 using System.Linq;
 using System.Numerics;
 
@@ -172,12 +171,9 @@ namespace Sharky.MicroTasks
                         BlockPylon.UnitRole = UnitRole.Die;
                     }
 
-                    if (frame - BlockPylon.UnitCalculation.FrameFirstSeen > SharkyOptions.FramesPerSecond * 60 * 5)
+                    if (frame - BlockPylon.UnitCalculation.FrameFirstSeen > SharkyOptions.FramesPerSecond * 60 * 5 || MacroData.Minerals > 600)
                     {
-                        if (BlockPylon.UnitCalculation.TargetPriorityCalculation.OverallWinnability > 5)
-                        {
-                            BlockPylon.UnitRole = UnitRole.Die;
-                        }
+                        BlockPylon.UnitRole = UnitRole.Die;
                     }
                 }
             }
@@ -227,6 +223,7 @@ namespace Sharky.MicroTasks
             {
                 if ((DoorCommander == null || DoorCommander.UnitCalculation.Unit.Health < DoorCommander.UnitCalculation.Unit.HealthMax) && (BackupDoorCommander == null || BackupDoorCommander.UnitCalculation.Unit.Health < BackupDoorCommander.UnitCalculation.Unit.HealthMax))
                 {
+                    // TODO: if enemy has tunneling claws, burrowed roach movement, build pylon to block them
                     NeedProbe = true;
                 }
                 else
@@ -262,15 +259,23 @@ namespace Sharky.MicroTasks
             }
 
             var vector = new Vector2(DoorSpot.X, DoorSpot.Y);
-            if (Vector2.DistanceSquared(commander.UnitCalculation.Position, vector) > .5f)
+            if (Vector2.DistanceSquared(commander.UnitCalculation.Position, vector) > .25f)
             {
                 return commander.Order(frame, Abilities.MOVE, DoorSpot);
             }
-
-            if (commander.UnitCalculation.EnemiesInRange.Any())
+            else if (commander.UnitCalculation.NearbyEnemies.Any(e => Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position) < 4))
             {
-                // TODO: use an individualmcirocontroller so it targets the correct units
+                return commander.Order(frame, Abilities.HOLDPOSITION);
             }
+            else if (commander.UnitCalculation.NearbyEnemies.Any())
+            {
+                return commander.Order(frame, Abilities.ATTACK, DoorSpot);
+            }
+            else
+            {
+                return commander.Order(frame, Abilities.MOVE, DoorSpot);
+            }
+            // TODO: use an individualmcirocontroller so it targets the correct units
 
             return commands;
         }
@@ -292,7 +297,6 @@ namespace Sharky.MicroTasks
                 BlockPylon = ActiveUnitData.Commanders.FirstOrDefault(u => u.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && u.Value.UnitCalculation.Unit.Pos.X == WallData.Block.X && u.Value.UnitCalculation.Unit.Pos.Y == WallData.Block.Y).Value;
                 if (BlockPylon != null)
                 {
-
                     if (!BlockedChatSent)
                     {
                         ChatService.SendChatType("ProtossDoorTask-TaskCompleted");

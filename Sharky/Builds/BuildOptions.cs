@@ -12,7 +12,6 @@ namespace Sharky.Builds
         public bool StrictWorkersPerGas { get; set; }
         public int StrictWorkersPerGasCount { get; set; }
         public int MaxActiveGasCount { get; set; }
-        public ProtossBuildOptions ProtossBuildOptions { get; set; }
         public ZergBuildOptions ZergBuildOptions { get; set; }
         public WallOffType WallOffType { get; set; }
         
@@ -31,7 +30,6 @@ namespace Sharky.Builds
             AllowBlockWall = false;
             MaxActiveGasCount = 8;
             StrictWorkersPerGasCount = 3;
-            ProtossBuildOptions = new ProtossBuildOptions { PylonsAtDefensivePoint = 0, ShieldsAtDefensivePoint = 0 };
             ZergBuildOptions = new ZergBuildOptions { ConnectMainWithNatWithCreep = false };
             WallOffType = WallOffType.None;
         }

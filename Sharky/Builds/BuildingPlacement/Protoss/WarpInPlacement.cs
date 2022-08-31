@@ -14,6 +14,8 @@ namespace Sharky.Builds.BuildingPlacement
         MapDataService MapDataService;
         BuildingService BuildingService;
 
+        Point2D LastWarpInLocation;
+
         public WarpInPlacement(ActiveUnitData activeUnitData, DebugService debugService, MapData mapData, MapDataService mapDataService, BuildingService buildingService)
         {
             ActiveUnitData = activeUnitData;
@@ -37,6 +39,11 @@ namespace Sharky.Builds.BuildingPlacement
                 {
                     closest = point;
                 }
+            }
+
+            if (closest != null)
+            {
+                LastWarpInLocation = closest;
             }
             return closest;
         }
@@ -136,6 +143,11 @@ namespace Sharky.Builds.BuildingPlacement
 
         Point2D GetValidPoint(float x, float y, int baseHeight, Vector2 target, UnitCalculation powerSource)
         {
+            if (LastWarpInLocation != null && LastWarpInLocation.X == x && LastWarpInLocation.Y == y) 
+            { 
+                return null; 
+            }
+
             if (x >= 0 && y >= 0 && x < MapDataService.MapData.MapWidth && y < MapDataService.MapData.MapHeight &&
                 BuildingService.AreaBuildable(x, y, .5f) && !BuildingService.Blocked(x, y, .75f, 0f) && Powered(powerSource, x, y))
             {

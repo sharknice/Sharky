@@ -82,21 +82,21 @@ namespace Sharky.Builds.Protoss
 
             if (UnitCountService.Count(UnitTypes.PROTOSS_STALKER) > 0)
             {
-                BuildOptions.ProtossBuildOptions.PylonsAtDefensivePoint = 1;
-                BuildOptions.ProtossBuildOptions.ShieldsAtDefensivePoint = 1;
+                MacroData.DesiredPylonsAtDefensivePoint = 1;
+                MacroData.DesiredDefensiveBuildingsAtDefensivePoint[UnitTypes.PROTOSS_SHIELDBATTERY] = 1;
             }
             if (UnitCountService.Count(UnitTypes.PROTOSS_STALKER) >= 2)
             {
-                BuildOptions.ProtossBuildOptions.ShieldsAtDefensivePoint = 2;
+                MacroData.DesiredDefensiveBuildingsAtDefensivePoint[UnitTypes.PROTOSS_SHIELDBATTERY] = 2;
             }
             if (UnitCountService.Count(UnitTypes.PROTOSS_STALKER) >= 3)
             {
-                BuildOptions.ProtossBuildOptions.ShieldsAtDefensivePoint = 3;
+                MacroData.DesiredDefensiveBuildingsAtDefensivePoint[UnitTypes.PROTOSS_SHIELDBATTERY] = 3;
             }
             if (UnitCountService.Count(UnitTypes.PROTOSS_STALKER) >= 4)
             {
-                BuildOptions.ProtossBuildOptions.PylonsAtDefensivePoint = 2;
-                BuildOptions.ProtossBuildOptions.ShieldsAtDefensivePoint = 4;
+                MacroData.DesiredPylonsAtDefensivePoint = 2;
+                MacroData.DesiredDefensiveBuildingsAtDefensivePoint[UnitTypes.PROTOSS_SHIELDBATTERY] = 4;
             }
 
             if (MacroData.FoodUsed >= 50)

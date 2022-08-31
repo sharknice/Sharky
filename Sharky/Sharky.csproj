@@ -99,6 +99,9 @@
     <None Update="StaticData\opponents\Jensiiibot.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="StaticData\opponents\ChaosBot.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="StaticData\opponents\Ketroc.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
