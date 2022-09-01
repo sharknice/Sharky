@@ -16,6 +16,8 @@ namespace Sharky.MicroTasks.Mining
 
         public bool Enabled { get; set; }
 
+        // TODO: run away from oracles with weapon active
+
         public MiningDefenseService(BaseData baseData, ActiveUnitData activeUnitData, IIndividualMicroController workerMicroController, DebugService debugService, DamageService damageService)
         {
             BaseData = baseData;
@@ -32,11 +34,11 @@ namespace Sharky.MicroTasks.Mining
             if (!Enabled) { return actions; }
 
             bool workerRushActive = false;
+            bool preventGasSteal = false;
+            bool preventBuildingLanding = false;
 
             foreach (var selfBase in BaseData.SelfBases)
             {
-                bool preventGasSteal = false;
-                bool preventBuildingLanding = false;
                 if (selfBase.ResourceCenter != null && ActiveUnitData.Commanders.ContainsKey(selfBase.ResourceCenter.Tag) && ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Count(e => e.Unit.UnitType != (uint)UnitTypes.TERRAN_REAPER) > 0) // reapers are handled by the ReaperMiningDefenseTask
                 {
                     var flyingBuildings = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Take(25).Where(u => u.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && u.Unit.IsFlying);
@@ -87,11 +89,18 @@ namespace Sharky.MicroTasks.Mining
                                         {
                                             preventGasSteal = true; // If enemy probe looking at empty gas send closest worker to touch that gas and prevent a steal
                                             var closestDefender = commanders.OrderBy(d => Vector2.DistanceSquared(d.Value.UnitCalculation.Position, new Vector2(gas.Pos.X, gas.Pos.Y))).FirstOrDefault();
-                                            closestDefender.Value.UnitRole = UnitRole.PreventGasSteal;
-                                            var action = closestDefender.Value.Order(frame, Abilities.MOVE, new SC2APIProtocol.Point2D { X = gas.Pos.X, Y = gas.Pos.Y });
-                                            if (action != null)
+                                            if (Vector2.DistanceSquared(closestDefender.Value.UnitCalculation.Position, new Vector2(gas.Pos.X, gas.Pos.Y)) < 25)
                                             {
-                                                actions.AddRange(action);
+                                                closestDefender.Value.UnitRole = UnitRole.PreventGasSteal;
+                                                var action = closestDefender.Value.Order(frame, Abilities.MOVE, new SC2APIProtocol.Point2D { X = gas.Pos.X, Y = gas.Pos.Y });
+                                                if (action != null)
+                                                {
+                                                    actions.AddRange(action);
+                                                }
+                                            }
+                                            else
+                                            {
+                                                break;
                                             }
                                         }
                                     }
@@ -221,21 +230,8 @@ namespace Sharky.MicroTasks.Mining
                         actions.AddRange(Run(frame, unitCommanders, selfBase));
                     }
                 }
-                if (!preventGasSteal)
-                {
-                    foreach (var commander in unitCommanders.Where(c => c.UnitRole == UnitRole.PreventGasSteal))
-                    {
-                        commander.UnitRole = UnitRole.None;
-                    }
-                }
-                if (!preventBuildingLanding)
-                {
-                    foreach (var commander in unitCommanders.Where(c => c.UnitRole == UnitRole.PreventBuildingLand))
-                    {
-                        commander.UnitRole = UnitRole.None;
-                    }
-                }
             }
+
 
             var safeWorkers = ActiveUnitData.Commanders.Where(c => c.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && (c.Value.UnitRole == UnitRole.Defend || c.Value.UnitRole == UnitRole.Bait) && (c.Value.UnitCalculation.Unit.Orders.Count(o => o.AbilityId != (uint)Abilities.MOVE) == 0));
             foreach (var safeWorker in safeWorkers)
@@ -268,6 +264,20 @@ namespace Sharky.MicroTasks.Mining
                     {
                         continue;
                     }
+                    commander.UnitRole = UnitRole.None;
+                }
+            }
+            if (!preventGasSteal)
+            {
+                foreach (var commander in unitCommanders.Where(c => c.UnitRole == UnitRole.PreventGasSteal))
+                {
+                    commander.UnitRole = UnitRole.None;
+                }
+            }
+            if (!preventBuildingLanding)
+            {
+                foreach (var commander in unitCommanders.Where(c => c.UnitRole == UnitRole.PreventBuildingLand))
+                {
                     commander.UnitRole = UnitRole.None;
                 }
             }
@@ -324,6 +334,18 @@ namespace Sharky.MicroTasks.Mining
                             {
                                 actions.AddRange(action);
                             }
+                        }
+                    }
+                    else if (commander.UnitCalculation.EnemiesThreateningDamage.Any(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_ORACLE && e.Unit.BuffIds.Contains((uint)Buffs.ORACLEWEAPON)))
+                    {
+                        if (commander.UnitRole == UnitRole.Minerals || commander.UnitRole == UnitRole.Gas)
+                        {
+                            commander.UnitRole = UnitRole.Defend;
+                        }
+                        var action = WorkerMicroController.Retreat(commander, otherBase.MineralLineLocation, null, frame);
+                        if (action != null)
+                        {
+                            actions.AddRange(action);
                         }
                     }
                     else if (commander.UnitCalculation.Unit.WeaponCooldown == 0 && commander.UnitCalculation.EnemiesInRange.Count() > 0) // TODO: test this, attack any units if they walk by

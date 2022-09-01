@@ -88,7 +88,7 @@ namespace Sharky.MicroTasks
 
             ReclaimBuilders(frame);
             RemoveLostWorkers(frame);
-            StopAttackingWithSafeWorkers();
+            StopAttackingWithSafeWorkers(frame);
 
             commands.AddRange(BalanceGasWorkers(frame));
             commands.AddRange(MineWithIdleWorkers(frame));
@@ -396,13 +396,16 @@ namespace Sharky.MicroTasks
                         actions.AddRange(action);
                     }
                 }
-                else if (worker.UnitCalculation.NearbyEnemies.Any() && worker.UnitCalculation.NearbyAllies.Take(25).Any(a => a.Attributes.Contains(SC2APIProtocol.Attribute.Structure)))
+                else if (worker.UnitCalculation.NearbyEnemies.Any(e => e.FrameFirstSeen == frame) && worker.UnitCalculation.NearbyAllies.Take(25).Any(a => a.Attributes.Contains(SC2APIProtocol.Attribute.Structure)))
                 {
                     var attackTask = MicroTaskData.MicroTasks[typeof(AttackTask).Name];
                     if (attackTask.Enabled)
                     {
-                        worker.UnitRole = UnitRole.Attack;
-                        attackTask.UnitCommanders.Add(worker);
+                        if (!attackTask.UnitCommanders.Contains(worker))
+                        {
+                            worker.UnitRole = UnitRole.Attack;
+                            attackTask.UnitCommanders.Add(worker);
+                        }
                     }
                 }
                 else if (worker.UnitCalculation.Unit.Orders.Count() == 0 || worker.UnitCalculation.Unit.Orders.Any(o => BaseData.SelfBases.Any(b => b.MineralMiningInfo.Any(m => m.ResourceUnit.Tag == o.TargetUnitTag))))
@@ -432,13 +435,16 @@ namespace Sharky.MicroTasks
                 var attackTask = MicroTaskData.MicroTasks[typeof(AttackTask).Name];
                 if (attackTask.Enabled)
                 {
-                    attackTask.UnitCommanders.Add(worker);
-                    worker.UnitRole = UnitRole.Attack;
+                    if (!attackTask.UnitCommanders.Contains(worker))
+                    {
+                        attackTask.UnitCommanders.Add(worker);
+                        worker.UnitRole = UnitRole.Attack;
+                    }
                 }
             }
         }
 
-        private void StopAttackingWithSafeWorkers()
+        private void StopAttackingWithSafeWorkers(int frame)
         {
             if (MicroTaskData.MicroTasks.ContainsKey(typeof(AttackTask).Name))
             {
@@ -446,7 +452,7 @@ namespace Sharky.MicroTasks
                 if (attackTask.Enabled)
                 {
                     var tags = new List<ulong>();
-                    foreach (var worker in attackTask.UnitCommanders.Where(u => u.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && (u.UnitCalculation.NearbyEnemies.Count() == 0 || !u.UnitCalculation.NearbyAllies.Take(25).Any(a => a.Attributes.Contains(SC2APIProtocol.Attribute.Structure))) && u.UnitRole == UnitRole.Attack))
+                    foreach (var worker in attackTask.UnitCommanders.Where(u => u.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && (u.UnitCalculation.NearbyEnemies.Count(e => e.FrameFirstSeen == frame) == 0 || !u.UnitCalculation.NearbyAllies.Take(25).Any(a => a.Attributes.Contains(SC2APIProtocol.Attribute.Structure))) && u.UnitRole == UnitRole.Attack))
                     {
                         worker.UnitRole = UnitRole.None;
                         worker.Claimed = false;

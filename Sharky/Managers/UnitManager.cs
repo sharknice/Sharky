@@ -212,6 +212,7 @@ namespace Sharky.Managers
                 ActiveUnitData.EnemyUnits.TryRemove(unit.Key, out UnitCalculation removed);
             }
 
+            var beforeFiveMinutes = frame < SharkyOptions.FramesPerSecond * 60 * 5;
             foreach (var enemy in ActiveUnitData.EnemyUnits.Select(e => e.Value).ToList()) // if we can see this area of the map and the unit isn't there anymore remove it (we just remove it because visible units will get re-added below)
             {
                 if (enemy.FrameLastSeen != frame && MapDataService.SelfVisible(enemy.Unit.Pos))
@@ -222,6 +223,13 @@ namespace Sharky.Managers
                         continue; // it's still there but it's burrowed so we can't see it
                     }
                     ActiveUnitData.EnemyUnits.TryRemove(enemy.Unit.Tag, out UnitCalculation removed);
+                }
+                else if (beforeFiveMinutes)
+                {
+                    if (enemy.Unit.UnitType == (uint)UnitTypes.PROTOSS_COLOSSUS || enemy.Unit.UnitType == (uint)UnitTypes.PROTOSS_ARCHON)
+                    {
+                        enemy.Unit.IsHallucination = true;
+                    }
                 }
             }
 

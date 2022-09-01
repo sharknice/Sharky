@@ -92,6 +92,7 @@ namespace Sharky.Managers
 
             if (LastRunFrame + RunFrequency > observation.Observation.GameLoop)
             {
+                actions.AddRange(EveryFrameProduction());
                 return actions;
             }
             LastRunFrame = (int)observation.Observation.GameLoop;
@@ -129,6 +130,15 @@ namespace Sharky.Managers
             actions.AddRange(ProductionBuilder.BuildProductionBuildings());
             actions.AddRange(TechBuilder.BuildTechBuildings());
             actions.AddRange(UnfinishedBuildingCompleter.SendScvToFinishIncompleteBuildings());
+
+            actions.AddRange(EveryFrameProduction());
+
+            return actions;
+        }
+
+        IEnumerable<SC2APIProtocol.Action> EveryFrameProduction()
+        {
+            var actions = new List<Action>();
 
             actions.AddRange(UpgradeResearcher.ResearchUpgrades());
             actions.AddRange(UnitBuilder.ProduceUnits());
