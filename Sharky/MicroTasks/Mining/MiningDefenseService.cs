@@ -294,11 +294,11 @@ namespace Sharky.MicroTasks.Mining
             {
                 foreach (var commander in unitCommanders)
                 {
-                    if (commander.UnitCalculation.EnemiesInRangeOf.Count() > 0 && (commander.UnitCalculation.Unit.Health < commander.UnitCalculation.Unit.HealthMax || commander.UnitCalculation.Unit.Shield < commander.UnitCalculation.Unit.ShieldMax))
+                    if (commander.UnitCalculation.EnemiesThreateningDamage.Count() > 0 && (commander.UnitCalculation.Unit.Health < commander.UnitCalculation.Unit.HealthMax || commander.UnitCalculation.Unit.Shield < commander.UnitCalculation.Unit.ShieldMax))
                     {
-                        if (commander.UnitCalculation.Unit.Health + commander.UnitCalculation.Unit.Shield < commander.UnitCalculation.EnemiesInRangeOf.First().Damage || commander.UnitCalculation.UnitTypeData.MovementSpeed < commander.UnitCalculation.EnemiesInRangeOf.First().UnitTypeData.MovementSpeed)
+                        if (commander.UnitCalculation.Unit.Health + commander.UnitCalculation.Unit.Shield <= (commander.UnitCalculation.EnemiesThreateningDamage.First().Damage * 2) || commander.UnitCalculation.UnitTypeData.MovementSpeed < commander.UnitCalculation.EnemiesThreateningDamage.First().UnitTypeData.MovementSpeed)
                         {
-                            var enemy = commander.UnitCalculation.EnemiesInRangeOf.FirstOrDefault();
+                            var enemy = commander.UnitCalculation.EnemiesThreateningDamage.FirstOrDefault();
                             if (enemy != null)
                             {
                                 var closestFriendlyArmy = commander.UnitCalculation.NearbyAllies.Take(25).Where(u => u.UnitClassifications.Any(c => c == UnitClassification.ArmyUnit || c == UnitClassification.DefensiveStructure) && DamageService.CanDamage(u, enemy)).OrderBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position)).FirstOrDefault();
