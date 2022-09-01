@@ -274,6 +274,7 @@ namespace Sharky
             else if (unitType == UnitTypes.ZERG_BANELING)
             {
                 count += Count(UnitTypes.ZERG_BANELINGBURROWED);
+                count += Count(UnitTypes.ZERG_BANELINGCOCOON);
             }
             else if (unitType == UnitTypes.ZERG_ROACH)
             {
@@ -282,6 +283,7 @@ namespace Sharky
             else if (unitType == UnitTypes.ZERG_RAVAGER)
             {
                 count += Count(UnitTypes.ZERG_RAVAGERBURROWED);
+                count += Count(UnitTypes.ZERG_RAVAGERCOCOON);
             }
             else if (unitType == UnitTypes.ZERG_HYDRALISK)
             {
@@ -290,6 +292,7 @@ namespace Sharky
             else if (unitType == UnitTypes.ZERG_LURKERMP)
             {
                 count += Count(UnitTypes.ZERG_LURKERMPBURROWED);
+                count += Count(UnitTypes.ZERG_LURKERMPEGG);
             }
             else if (unitType == UnitTypes.ZERG_INFESTOR)
             {
@@ -392,6 +395,10 @@ namespace Sharky
             else if (unitType == UnitTypes.TERRAN_THORAP)
             {
                 count += EnemyCount(UnitTypes.TERRAN_THOR);
+            }
+            else if (unitType == UnitTypes.TERRAN_LIBERATOR)
+            {
+                count += EnemyCount(UnitTypes.TERRAN_LIBERATORAG);
             }
 
             else if (unitType == UnitTypes.PROTOSS_WARPPRISM)

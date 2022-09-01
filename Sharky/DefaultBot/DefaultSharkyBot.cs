@@ -570,6 +570,7 @@ namespace Sharky.DefaultBot
                 [nameof(BunkerRush)] = new BunkerRush(this),
                 [nameof(BunkerContain)] = new BunkerContain(this),
                 [nameof(MassVikings)] = new MassVikings(this),
+                [nameof(MassRavens)] = new MassRavens(this),
                 [nameof(ThreeRax)] = new ThreeRax(this),
                 [nameof(BansheeRush)] = new BansheeRush(this),
 
