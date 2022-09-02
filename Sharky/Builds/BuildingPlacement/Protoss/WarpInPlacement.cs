@@ -1,6 +1,7 @@
 ﻿using SC2APIProtocol;
 using Sharky.Pathing;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
@@ -14,7 +15,7 @@ namespace Sharky.Builds.BuildingPlacement
         MapDataService MapDataService;
         BuildingService BuildingService;
 
-        Point2D LastWarpInLocation;
+        List<Point2D> LastWarpInLocations;
 
         public WarpInPlacement(ActiveUnitData activeUnitData, DebugService debugService, MapData mapData, MapDataService mapDataService, BuildingService buildingService)
         {
@@ -24,6 +25,7 @@ namespace Sharky.Builds.BuildingPlacement
             MapDataService =
             MapDataService = mapDataService;
             BuildingService = buildingService;
+            LastWarpInLocations = new List<Point2D>();
         }
 
         public Point2D FindPlacement(Point2D target, UnitTypes unitType, int size, bool ignoreMineralProximity = true, float maxDistance = 50, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.None, bool requireVision = false, bool allowBlockBase = true)
@@ -43,7 +45,11 @@ namespace Sharky.Builds.BuildingPlacement
 
             if (closest != null)
             {
-                LastWarpInLocation = closest;
+                LastWarpInLocations.Add(closest);
+                if (LastWarpInLocations.Count() > 5)
+                {
+                    LastWarpInLocations.RemoveAt(0);
+                }
             }
             return closest;
         }
@@ -143,7 +149,7 @@ namespace Sharky.Builds.BuildingPlacement
 
         Point2D GetValidPoint(float x, float y, int baseHeight, Vector2 target, UnitCalculation powerSource)
         {
-            if (LastWarpInLocation != null && LastWarpInLocation.X == x && LastWarpInLocation.Y == y) 
+            if (LastWarpInLocations.Any(l => l.X == x && l.Y == y))
             { 
                 return null; 
             }

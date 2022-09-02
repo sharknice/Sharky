@@ -122,7 +122,7 @@ namespace Sharky.MicroTasks.Attack
                 {
                     TargetingData.AttackState = AttackState.Kill;
                 }
-                if (targetPriority.OverallWinnability >= AttackData.ContainTrigger)
+                else if (targetPriority.OverallWinnability >= AttackData.ContainTrigger)
                 {
                     TargetingData.AttackState = AttackState.Contain;
                 }

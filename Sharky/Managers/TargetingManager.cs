@@ -255,7 +255,7 @@ namespace Sharky.Managers
                 var resourceCenters = ActiveUnitData.SelfUnits.Values.Where(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter) && !u.Unit.IsFlying);
                 var ordered = BaseData.BaseLocations.Where(b => resourceCenters.Any(r => Vector2.DistanceSquared(r.Position, new Vector2(b.Location.X, b.Location.Y)) < 25)).OrderBy(b => Vector2.DistanceSquared(new Vector2(b.Location.X, b.Location.Y), new Vector2(TargetingData.AttackPoint.X, TargetingData.AttackPoint.Y)));
                 var closestBase = ordered.FirstOrDefault();
-                if (TargetingData.WallOffBasePosition == WallOffBasePosition.Natural && resourceCenters.Count() == 1)
+                if (TargetingData.WallOffBasePosition == WallOffBasePosition.Natural && resourceCenters.Count() <= 2)
                 {
                     closestBase = BaseData.BaseLocations.FirstOrDefault(b => b.Location.X == TargetingData.NaturalBasePoint.X && b.Location.Y == TargetingData.NaturalBasePoint.Y);
                 }
