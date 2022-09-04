@@ -57,7 +57,7 @@ namespace Sharky.MicroTasks
             {
                 if ((!commander.Value.Claimed || commander.Value.UnitRole == UnitRole.Minerals || commander.Value.UnitRole == UnitRole.None) && commander.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker))
                 {
-                    MicroTaskData.MicroTasks["MiningTask"].StealUnit(commander.Value);
+                    MicroTaskData["MiningTask"].StealUnit(commander.Value);
 
                     commander.Value.Claimed = true;
                     commander.Value.UnitRole = UnitRole.Scout;
@@ -113,7 +113,7 @@ namespace Sharky.MicroTasks
                     GetScoutPoints(BaseData.SelfBases.First().Location.ToVector2(), frame);
                 }
 
-                if (!ScoutPoints.Any() || commander.UnitCalculation.EnemiesThreateningDamage.Any())
+                if (!ScoutPoints.Any() || commander.UnitCalculation.EnemiesInRangeOf.Any())
                 {
                     Disable();
                     return commands;

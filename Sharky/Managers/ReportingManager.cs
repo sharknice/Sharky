@@ -164,9 +164,9 @@ namespace Sharky.Managers
 
         private void CheckCommanders()
         {
-            foreach (var m1 in DefaultSharkyBot.MicroTaskData.MicroTasks)
+            foreach (var m1 in DefaultSharkyBot.MicroTaskData)
             {
-                foreach (var m2 in DefaultSharkyBot.MicroTaskData.MicroTasks)
+                foreach (var m2 in DefaultSharkyBot.MicroTaskData)
                 {
                     if (m1.Key == m2.Key)
                         continue;

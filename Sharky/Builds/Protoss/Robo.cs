@@ -38,15 +38,15 @@ namespace Sharky.Builds.Protoss
                 desiredUnitsClaim = new DesiredUnitsClaim(UnitTypes.PROTOSS_STALKER, 1);
             }
 
-            if (MicroTaskData.MicroTasks.ContainsKey("DefenseSquadTask"))
+            if (MicroTaskData.ContainsKey("DefenseSquadTask"))
             {
-                var defenseSquadTask = (DefenseSquadTask)MicroTaskData.MicroTasks["DefenseSquadTask"];
+                var defenseSquadTask = (DefenseSquadTask)MicroTaskData["DefenseSquadTask"];
                 defenseSquadTask.DesiredUnitsClaims = new List<DesiredUnitsClaim> { desiredUnitsClaim };
                 defenseSquadTask.Enable();
 
-                if (MicroTaskData.MicroTasks.ContainsKey("AttackTask"))
+                if (MicroTaskData.ContainsKey("AttackTask"))
                 {
-                    MicroTaskData.MicroTasks["AttackTask"].ResetClaimedUnits();
+                    MicroTaskData["AttackTask"].ResetClaimedUnits();
                 }
             }
         }

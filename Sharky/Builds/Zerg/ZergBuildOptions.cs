@@ -28,8 +28,13 @@
         public int MaxCreepQueens { get; set; } = 6;
 
         /// <summary>
-        /// Zerglings blocking enemy expansions
+        /// Zerglings blocking enemy expansions.
         /// </summary>
         public int MaxBurrowedBlockingZerglings { get; set; } = 3;
+
+        /// <summary>
+        /// If true, drones are burrowed when harrassed.
+        /// </summary>
+        public bool BurrowDronesFromHarrass { get; set; } = true;
     }
 }

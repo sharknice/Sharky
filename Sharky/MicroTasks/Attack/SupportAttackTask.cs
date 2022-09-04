@@ -135,16 +135,16 @@ namespace Sharky.MicroTasks.Proxy
             if (!hiddenBase && TargetingData.HiddenEnemyBase)
             {
                 ResetClaimedUnits();
-                if (MicroTaskData.MicroTasks.ContainsKey("FindHiddenBaseTask"))
+                if (MicroTaskData.ContainsKey("FindHiddenBaseTask"))
                 {
-                    MicroTaskData.MicroTasks["FindHiddenBaseTask"].Enable();
+                    MicroTaskData["FindHiddenBaseTask"].Enable();
                 }
             }
             else if (hiddenBase && !TargetingData.HiddenEnemyBase)
             {
-                if (MicroTaskData.MicroTasks.ContainsKey("FindHiddenBaseTask"))
+                if (MicroTaskData.ContainsKey("FindHiddenBaseTask"))
                 {
-                    MicroTaskData.MicroTasks["FindHiddenBaseTask"].Disable();
+                    MicroTaskData["FindHiddenBaseTask"].Disable();
                 }
             }
 

@@ -48,9 +48,9 @@ namespace Sharky.MicroTasks.Attack
 
         protected void ResetAttackTaskClaims()
         {
-            if (MicroTaskData.MicroTasks.ContainsKey(typeof(AttackTask).Name))
+            if (MicroTaskData.ContainsKey(typeof(AttackTask).Name))
             {
-                MicroTaskData.MicroTasks[typeof(AttackTask).Name].ResetClaimedUnits();
+                MicroTaskData[typeof(AttackTask).Name].ResetClaimedUnits();
             }
         }
     }

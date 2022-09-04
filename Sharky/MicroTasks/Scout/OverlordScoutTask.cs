@@ -97,7 +97,7 @@ namespace Sharky.MicroTasks
                 }
                 else if (CurrentScoutTargetPoint == TargetingData.EnemyMainBasePoint)
                 {
-                    if (enemyStructures || scoutUnit.Health < scoutUnit.HealthMax || MapDataService.SelfVisible(TargetingData.EnemyMainBasePoint) || UnitCommanders.First().UnitCalculation.EnemiesThreateningDamage.Any())
+                    if (enemyStructures || scoutUnit.Health < scoutUnit.HealthMax || MapDataService.SelfVisible(TargetingData.EnemyMainBasePoint) || UnitCommanders.First().UnitCalculation.EnemiesInRangeOf.Any())
                     {
                         CurrentScoutTargetPoint = OverlordSafeSpot;
                         lastNatCheckFrame = frame;
@@ -106,7 +106,7 @@ namespace Sharky.MicroTasks
                 else if (CurrentScoutTargetPoint == BaseData.EnemyNaturalBase.Location)
                 {
                     // If we see enemy natural or are attacked, get to safety
-                    if (scoutUnit.Health < scoutUnit.HealthMax || MapDataService.SelfVisible(BaseData.EnemyNaturalBase.Location) || UnitCommanders.First().UnitCalculation.EnemiesThreateningDamage.Any())
+                    if (scoutUnit.Health < scoutUnit.HealthMax || MapDataService.SelfVisible(BaseData.EnemyNaturalBase.Location) || UnitCommanders.First().UnitCalculation.EnemiesInRangeOf.Any())
                     {
                         CurrentScoutTargetPoint = OverlordSafeSpot;
                         lastNatCheckFrame = frame;

@@ -39,7 +39,7 @@ namespace Sharky.MicroTasks
                     // Remove from other microtasks
                     if (commander.Value.Claimed)
                     {
-                        foreach (var task in MicroTaskData.MicroTasks.Values)
+                        foreach (var task in MicroTaskData.Values)
                         {
                             task.StealUnit(commander.Value);
                         }

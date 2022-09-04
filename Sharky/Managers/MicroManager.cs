@@ -24,7 +24,7 @@ namespace Sharky.Managers
             var frame = (int)observation.Observation.GameLoop;
 
             var actions = new List<Action>();
-            foreach (var microTask in MicroTaskData.MicroTasks.Values.Where(m => m.Enabled).OrderBy(m => m.Priority))
+            foreach (var microTask in MicroTaskData.Values.Where(m => m.Enabled).OrderBy(m => m.Priority))
             {
                 var begin = System.DateTime.UtcNow;
                 microTask.RemoveDeadUnits(ActiveUnitData.DeadUnits);

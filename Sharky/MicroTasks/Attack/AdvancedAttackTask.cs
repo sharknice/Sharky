@@ -413,16 +413,16 @@ namespace Sharky.MicroTasks.Attack
             if (!hiddenBase && TargetingData.HiddenEnemyBase)
             {
                 ResetClaimedUnits();
-                if (MicroTaskData.MicroTasks.ContainsKey(typeof(FindHiddenBaseTask).Name))
+                if (MicroTaskData.ContainsKey(typeof(FindHiddenBaseTask).Name))
                 {
-                    MicroTaskData.MicroTasks[typeof(FindHiddenBaseTask).Name].Enable();
+                    MicroTaskData[typeof(FindHiddenBaseTask).Name].Enable();
                 }
             }
             else if (hiddenBase && !TargetingData.HiddenEnemyBase)
             {
-                if (MicroTaskData.MicroTasks.ContainsKey(typeof(FindHiddenBaseTask).Name))
+                if (MicroTaskData.ContainsKey(typeof(FindHiddenBaseTask).Name))
                 {
-                    MicroTaskData.MicroTasks[typeof(FindHiddenBaseTask).Name].Disable();
+                    MicroTaskData[typeof(FindHiddenBaseTask).Name].Disable();
                 }
             }
         }
