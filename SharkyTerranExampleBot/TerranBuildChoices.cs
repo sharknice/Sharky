@@ -68,7 +68,7 @@ namespace SharkyTerranExampleBot
         void AddTerranTasks(DefaultSharkyBot defaultSharkyBot)
         {
             var vikingDropTask = new VikingDropTask(defaultSharkyBot, .5f, false);
-            defaultSharkyBot.MicroTaskData.MicroTasks[vikingDropTask.GetType().Name] = vikingDropTask;
+            defaultSharkyBot.MicroTaskData[vikingDropTask.GetType().Name] = vikingDropTask;
         }
     }
 }

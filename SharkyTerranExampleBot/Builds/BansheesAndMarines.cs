@@ -26,13 +26,13 @@ namespace SharkyTerranExampleBot.Builds
 
             BuildOptions.StrictGasCount = true;
 
-            if (MicroTaskData.MicroTasks.ContainsKey("WorkerScoutTask"))
+            if (MicroTaskData.ContainsKey("WorkerScoutTask"))
             {
-                WorkerScoutTask = (WorkerScoutTask)MicroTaskData.MicroTasks["WorkerScoutTask"];
+                WorkerScoutTask = (WorkerScoutTask)MicroTaskData["WorkerScoutTask"];
             }
-            if (MicroTaskData.MicroTasks.ContainsKey("ProxyScoutTask"))
+            if (MicroTaskData.ContainsKey("ProxyScoutTask"))
             {
-                ProxyScoutTask = (ProxyScoutTask)MicroTaskData.MicroTasks["ProxyScoutTask"];
+                ProxyScoutTask = (ProxyScoutTask)MicroTaskData["ProxyScoutTask"];
             }
         }
 

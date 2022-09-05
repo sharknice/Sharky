@@ -51,11 +51,11 @@ namespace SharkyProtossExampleBot.Builds
                 UnitTypes.PROTOSS_VOIDRAY,
             };
 
-            var defenseSquadTask = (DefenseSquadTask)MicroTaskData.MicroTasks["DefenseSquadTask"];
+            var defenseSquadTask = (DefenseSquadTask)MicroTaskData["DefenseSquadTask"];
             defenseSquadTask.DesiredUnitsClaims = new List<DesiredUnitsClaim> { new DesiredUnitsClaim(UnitTypes.PROTOSS_STALKER, 1) };
             defenseSquadTask.Enable();
 
-            MicroTaskData.MicroTasks[ProxyTask.ProxyName] = ProxyTask;
+            MicroTaskData[ProxyTask.ProxyName] = ProxyTask;
             var proxyLocation = ProxyLocationService.GetCliffProxyLocation();
             MacroData.Proxies[ProxyTask.ProxyName] = new ProxyData(proxyLocation, MacroData);
 

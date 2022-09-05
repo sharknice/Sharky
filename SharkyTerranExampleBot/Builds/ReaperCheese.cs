@@ -36,11 +36,11 @@ namespace SharkyTerranExampleBot.Builds
 
             MacroData.DesiredUnitCounts[UnitTypes.TERRAN_SCV] = 15;
 
-            var defenseSquadTask = (DefenseSquadTask)MicroTaskData.MicroTasks["DefenseSquadTask"];
+            var defenseSquadTask = (DefenseSquadTask)MicroTaskData["DefenseSquadTask"];
             defenseSquadTask.DesiredUnitsClaims = new List<DesiredUnitsClaim> { new DesiredUnitsClaim(UnitTypes.TERRAN_REAPER, 1) };
             defenseSquadTask.Enable();
 
-            MicroTaskData.MicroTasks[GetType().Name] = ProxyTask;
+            MicroTaskData[GetType().Name] = ProxyTask;
             var proxyLocation = ProxyLocationService.GetCliffProxyLocation();
             MacroData.Proxies[ProxyTask.ProxyName] = new ProxyData(proxyLocation, MacroData);
             ProxyTask.Enable();
