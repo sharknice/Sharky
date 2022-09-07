@@ -6,7 +6,6 @@ using Sharky.Pathing;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.ComponentModel.Design;
 using System.Linq;
 using System.Numerics;
 
@@ -167,7 +166,7 @@ namespace Sharky.MicroTasks
 
             if (DestroyWall)
             {
-                UpdateDestroyWall(frame);
+                commands.AddRange(UpdateDestroyWall(frame));
             }
             else
             {
@@ -458,14 +457,19 @@ namespace Sharky.MicroTasks
             }      
         }
 
-        void UpdateDestroyWall(int frame)
+        IEnumerable<SC2APIProtocol.Action> UpdateDestroyWall(int frame)
         {
-            if (!DestroyWall) { return; }
+            if (!DestroyWall) { return new List<SC2APIProtocol.Action>(); }
 
             if (BasesCountDuringBlock != BaseData.SelfBases.Count())
             {
                 StopDestroyingWall();
-                return;
+                var actions = new List<SC2APIProtocol.Action>();
+                foreach (var commander in UnitCommanders.Where(c => c.UnitRole == UnitRole.Attack))
+                {
+                    actions.AddRange(commander.Order(frame, Abilities.STOP));
+                }
+                return actions;
             }
 
             if (!ActiveUnitData.Commanders.Any(u => u.Value.UnitRole == UnitRole.Die))
@@ -487,6 +491,8 @@ namespace Sharky.MicroTasks
                     UnitCommanders.Add(commander);
                 }
             }
+
+            return new List<SC2APIProtocol.Action>();
         }
 
         public void UnblockWall()
@@ -519,7 +525,7 @@ namespace Sharky.MicroTasks
             }
             else
             {
-                var closestStructure = ActiveUnitData.Commanders.Values.Where(u => u.UnitCalculation.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && !WallData.Pylons.Any(p => u.UnitCalculation.Position.X == p.X && u.UnitCalculation.Position.Y == p.Y)).OrderBy(c => Vector2.DistanceSquared(c.UnitCalculation.Position, vector)).FirstOrDefault();
+                var closestStructure = ActiveUnitData.Commanders.Values.Where(u => u.UnitCalculation.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && !WallData.Pylons.Any(p => u.UnitCalculation.Position.X == p.X && u.UnitCalculation.Position.Y == p.Y) && !WallData.Production.Any(p => u.UnitCalculation.Position.X == p.X && u.UnitCalculation.Position.Y == p.Y)).OrderBy(c => Vector2.DistanceSquared(c.UnitCalculation.Position, vector)).FirstOrDefault();
                 if (closestStructure != null)
                 {
                     closestStructure.UnitRole = UnitRole.Die;

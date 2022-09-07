@@ -260,8 +260,11 @@ namespace Sharky.Builds.BuildingPlacement
                             {
                                 if (Vector2.DistanceSquared(new Vector2(target.X, target.Y), new Vector2(point.X, point.Y)) <= maxDistance * maxDistance && Vector2.DistanceSquared(vector, powerSource.UnitCalculation.Position) <= 36)
                                 {
-                                    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
-                                    return point;
+                                    if (!BlocksWall(vector))
+                                    {
+                                        DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
+                                        return point;
+                                    }
                                 }
                             }
                         }
@@ -272,6 +275,23 @@ namespace Sharky.Builds.BuildingPlacement
                 }
             }
             return FindProductionPlacementTryHarder(target, size, maxDistance, minimumMineralProximinity, allowBlockBase);
+        }
+
+        bool BlocksWall(Vector2 vector)
+        {
+            foreach (var wallData in MapDataService.MapData.WallData.Where(b => BaseData.BaseLocations.Take(2).Any(l => l.Location.X == b.BasePosition.X && l.Location.Y == b.BasePosition.Y)))
+            {
+                if (wallData.Block != null)
+                {
+                    var blockVector = new Vector2(wallData.Block.X, wallData.Block.Y);
+                    if (Vector2.DistanceSquared(blockVector, vector) < 16)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         Point2D FindProductionPlacementTryHarder(Point2D target, float size, float maxDistance, float minimumMineralProximinity, bool allowBlockBase)
@@ -347,8 +367,11 @@ namespace Sharky.Builds.BuildingPlacement
                             {
                                 if (Vector2.DistanceSquared(new Vector2(target.X, target.Y), new Vector2(point.X, point.Y)) <= maxDistance * maxDistance && Vector2.DistanceSquared(vector, powerSource.UnitCalculation.Position) <= (6.5 - size/2f) * (6.5 - size/2f))
                                 {
-                                    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
-                                    return point;
+                                    if (!BlocksWall(vector))
+                                    {
+                                        DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
+                                        return point;
+                                    }
                                 }
                             }
                         }

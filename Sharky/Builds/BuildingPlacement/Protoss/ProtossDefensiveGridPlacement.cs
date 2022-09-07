@@ -136,6 +136,11 @@ namespace Sharky.Builds.BuildingPlacement
                     return null;
                 }
 
+                if (!BuildOptions.AllowBlockWall && MapDataService.MapData?.WallData != null && MapDataService.MapData.WallData.Any(d => d.Block != null && Vector2.DistanceSquared(new Vector2(d.Block.X, d.Block.Y), vector) < 16))
+                {
+                    return null;
+                }
+
                 if (!allowBlockBase && BuildingService.BlocksResourceCenter(x, y, size / 2f))
                 {
                     return null;
