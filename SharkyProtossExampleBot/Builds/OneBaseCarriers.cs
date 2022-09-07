@@ -39,13 +39,13 @@ namespace SharkyProtossExampleBot.Builds
                 Upgrades.PROTOSSAIRWEAPONSLEVEL1
             };
 
-            if (!MicroTaskData.MicroTasks["OracleWorkerHarassTask"].Enabled)
+            if (!MicroTaskData["OracleWorkerHarassTask"].Enabled)
             {
-                MicroTaskData.MicroTasks["OracleWorkerHarassTask"].Enable();
+                MicroTaskData["OracleWorkerHarassTask"].Enable();
             }
 
-            WallOffTask = (PermanentWallOffTask)MicroTaskData.MicroTasks["PermanentWallOffTask"];
-            DestroyWallOffTask = (DestroyWallOffTask)MicroTaskData.MicroTasks["DestroyWallOffTask"];
+            WallOffTask = (PermanentWallOffTask)MicroTaskData["PermanentWallOffTask"];
+            DestroyWallOffTask = (DestroyWallOffTask)MicroTaskData["DestroyWallOffTask"];
         }
 
         public override void OnFrame(ResponseObservation observation)

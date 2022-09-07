@@ -70,7 +70,7 @@ namespace Sharky.MicroTasks
                 var pos = GetPoint(scoutedPos, commander.UnitCalculation.Position.ToPoint2D());
 
                 // Retreat on damage or seeing enemy attacker unit
-                if ((commander.UnitCalculation.Unit.Health < commander.UnitCalculation.Unit.HealthMax * 0.8f) || commander.UnitCalculation.EnemiesThreateningDamage.Any())
+                if ((commander.UnitCalculation.Unit.Health < commander.UnitCalculation.Unit.HealthMax * 0.8f) || commander.UnitCalculation.EnemiesInRangeOf.Any())
                 {
                     var action = IndividualMicroController.Retreat(commander, BaseData.MainBase.Location, null, frame);
                     if (action != null)

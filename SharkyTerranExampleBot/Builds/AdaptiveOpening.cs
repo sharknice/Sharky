@@ -21,8 +21,8 @@ namespace SharkyTerranExampleBot.Builds
 
             BuildOptions.StrictGasCount = true;
 
-            MicroTaskData.MicroTasks["WorkerScoutTask"].Enable();
-            MicroTaskData.MicroTasks["ProxyScoutTask"].Enable();
+            MicroTaskData["WorkerScoutTask"].Enable();
+            MicroTaskData["ProxyScoutTask"].Enable();
         }
 
         public override List<string> CounterTransition(int frame)

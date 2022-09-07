@@ -27,13 +27,13 @@ namespace Sharky.Builds.Terran
             MacroData.DesiredUnitCounts[UnitTypes.ZERG_DRONE] = 10;
             MacroData.DesiredUnitCounts[UnitTypes.ZERG_OVERLORD] = 1;
 
-            if (MicroTaskData.MicroTasks.ContainsKey("WorkerScoutTask"))
+            if (MicroTaskData.ContainsKey("WorkerScoutTask"))
             {
-                WorkerScoutTask = (WorkerScoutTask)MicroTaskData.MicroTasks["WorkerScoutTask"];
+                WorkerScoutTask = (WorkerScoutTask)MicroTaskData["WorkerScoutTask"];
             }
-            if (MicroTaskData.MicroTasks.ContainsKey("ProxyScoutTask"))
+            if (MicroTaskData.ContainsKey("ProxyScoutTask"))
             {
-                ProxyScoutTask = (ProxyScoutTask)MicroTaskData.MicroTasks["ProxyScoutTask"];
+                ProxyScoutTask = (ProxyScoutTask)MicroTaskData["ProxyScoutTask"];
             }
         }
 

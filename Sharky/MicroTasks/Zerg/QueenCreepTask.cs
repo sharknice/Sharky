@@ -83,7 +83,7 @@ namespace Sharky.MicroTasks
 
         private bool PlaceCreep(int frame, List<SC2APIProtocol.Action> actions, UnitCommander queen, Point2D pos)
         {
-            if (queen.UnitCalculation.Unit.Energy < 25 || queen.UnitCalculation.Position.DistanceSquared(pos.ToVector2()) > 1 || queen.UnitCalculation.EnemiesThreateningDamage.Count > 0)
+            if (queen.UnitCalculation.Unit.Energy < 25 || queen.UnitCalculation.Position.DistanceSquared(pos.ToVector2()) > 1 || queen.UnitCalculation.EnemiesInRangeOf.Count > 0)
                 return false;
 
             if (frame - queen.LastOrderFrame > 5)

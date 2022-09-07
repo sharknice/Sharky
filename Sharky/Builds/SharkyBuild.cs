@@ -45,9 +45,9 @@ namespace Sharky.Builds
             BuildingRequestCancellingService = defaultSharkyBot.BuildingRequestCancellingService;
             UpgradeRequestCancellingService = defaultSharkyBot.UpgradeRequestCancellingService;
 
-            if (defaultSharkyBot.MicroTaskData.MicroTasks.ContainsKey(typeof(PrePositionBuilderTask).Name))
+            if (defaultSharkyBot.MicroTaskData.ContainsKey(typeof(PrePositionBuilderTask).Name))
             {
-                PrePositionBuilderTask = (PrePositionBuilderTask)defaultSharkyBot.MicroTaskData.MicroTasks[typeof(PrePositionBuilderTask).Name];
+                PrePositionBuilderTask = (PrePositionBuilderTask)defaultSharkyBot.MicroTaskData[typeof(PrePositionBuilderTask).Name];
             }
 
             Started = false;
@@ -67,9 +67,9 @@ namespace Sharky.Builds
             MicroTaskData = microTaskData;
             FrameToTimeConverter = frameToTimeConverter;
 
-            if (microTaskData.MicroTasks.ContainsKey(typeof(PrePositionBuilderTask).Name))
+            if (MicroTaskData.ContainsKey(typeof(PrePositionBuilderTask).Name))
             {
-                PrePositionBuilderTask = (PrePositionBuilderTask)microTaskData.MicroTasks[typeof(PrePositionBuilderTask).Name];
+                PrePositionBuilderTask = (PrePositionBuilderTask)MicroTaskData[typeof(PrePositionBuilderTask).Name];
             }
         }
 
@@ -149,9 +149,9 @@ namespace Sharky.Builds
                 MacroData.DesiredProductionCounts[UnitTypes.ZERG_HATCHERY] = 1;
             }
 
-            if (MicroTaskData.MicroTasks.ContainsKey(typeof(AttackTask).Name))
+            if (MicroTaskData.ContainsKey(typeof(AttackTask).Name))
             {
-                MicroTaskData.MicroTasks[typeof(AttackTask).Name].Enable();
+                MicroTaskData[typeof(AttackTask).Name].Enable();
             }
         }
 

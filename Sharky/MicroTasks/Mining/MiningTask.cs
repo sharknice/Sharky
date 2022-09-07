@@ -398,7 +398,7 @@ namespace Sharky.MicroTasks
                 }
                 else if (worker.UnitCalculation.NearbyEnemies.Any(e => e.FrameFirstSeen == frame) && worker.UnitCalculation.NearbyAllies.Take(25).Any(a => a.Attributes.Contains(SC2APIProtocol.Attribute.Structure)))
                 {
-                    var attackTask = MicroTaskData.MicroTasks[typeof(AttackTask).Name];
+                    var attackTask = MicroTaskData[typeof(AttackTask).Name];
                     if (attackTask.Enabled)
                     {
                         if (!attackTask.UnitCommanders.Contains(worker))
@@ -430,9 +430,9 @@ namespace Sharky.MicroTasks
 
         private void AttackWithWorker(UnitCommander worker)
         {
-            if (MicroTaskData.MicroTasks.ContainsKey(typeof(AttackTask).Name))
+            if (MicroTaskData.ContainsKey(typeof(AttackTask).Name))
             {
-                var attackTask = MicroTaskData.MicroTasks[typeof(AttackTask).Name];
+                var attackTask = MicroTaskData[typeof(AttackTask).Name];
                 if (attackTask.Enabled)
                 {
                     if (!attackTask.UnitCommanders.Contains(worker))
@@ -446,9 +446,9 @@ namespace Sharky.MicroTasks
 
         private void StopAttackingWithSafeWorkers(int frame)
         {
-            if (MicroTaskData.MicroTasks.ContainsKey(typeof(AttackTask).Name))
+            if (MicroTaskData.ContainsKey(typeof(AttackTask).Name))
             {
-                var attackTask = MicroTaskData.MicroTasks[typeof(AttackTask).Name];
+                var attackTask = MicroTaskData[typeof(AttackTask).Name];
                 if (attackTask.Enabled)
                 {
                     var tags = new List<ulong>();

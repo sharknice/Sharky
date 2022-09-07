@@ -3,8 +3,19 @@ using System.Collections.Generic;
 
 namespace Sharky
 {
-    public class MicroTaskData
+    public class MicroTaskData : Dictionary<string, IMicroTask>
     {
-        public Dictionary<string, IMicroTask> MicroTasks { get; set; }
+        /// <summary>
+        /// Removes the unit from all unit commanders of all microtasks.
+        /// Does not change unit role or claimed.
+        /// </summary>
+        /// <param name="commander"></param>
+        public void StealCommanderFromAllTasks(UnitCommander commander)
+        {
+            foreach (var microTask in this)
+            {
+                microTask.Value.StealUnit(commander);
+            }
+        }
     }
 }

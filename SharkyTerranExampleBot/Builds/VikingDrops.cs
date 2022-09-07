@@ -23,9 +23,9 @@ namespace SharkyTerranExampleBot.Builds
             BuildOptions.StrictGasCount = true;
             MacroData.DesiredGases = 0;
 
-            if (!MicroTaskData.MicroTasks["VikingDropTask"].Enabled)
+            if (!MicroTaskData["VikingDropTask"].Enabled)
             {
-                MicroTaskData.MicroTasks["VikingDropTask"].Enable();
+                MicroTaskData["VikingDropTask"].Enable();
             }
         }
 
