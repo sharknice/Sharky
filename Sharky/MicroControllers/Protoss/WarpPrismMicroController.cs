@@ -232,6 +232,11 @@ namespace Sharky.MicroControllers.Protoss
 
         bool ShouldLoadUnit(UnitCalculation friendly, float healthLimit, int frame)
         {
+            if (ActiveUnitData.Commanders.ContainsKey(friendly.Unit.Tag) && ActiveUnitData.Commanders[friendly.Unit.Tag].UnitRole == UnitRole.Door)
+            {
+                return false;
+            }
+
             if (friendly.Unit.UnitType == (uint)UnitTypes.PROTOSS_ZEALOT)
             {
                 if (friendly.Unit.Shield > 0 || friendly.EnemiesInRange.Count() > 0)

@@ -14,6 +14,8 @@ namespace Sharky.Builds.BuildingPlacement
         BuildingService BuildingService;
         ActiveUnitData ActiveUnitData;
 
+        List<Point2D> LastLocations;
+
         public ProtossProductionGridPlacement(BaseData baseData, ActiveUnitData activeUnitData, MapDataService mapDataService, DebugService debugService, BuildingService buildingService)
         {
             BaseData = baseData;
@@ -22,6 +24,8 @@ namespace Sharky.Builds.BuildingPlacement
             DebugService = debugService;
             BuildingService = buildingService;
             ActiveUnitData = activeUnitData;
+
+            LastLocations = new List<Point2D>();
         }
 
         public Point2D FindPlacement(Point2D target, float size, float maxDistance, float minimumMineralProximinity)
@@ -62,6 +66,12 @@ namespace Sharky.Builds.BuildingPlacement
 
                 if (closest != null)
                 {
+                    LastLocations.Add(closest);
+                    if (LastLocations.Count() > 5)
+                    {
+                        LastLocations.RemoveAt(0);
+                    }
+
                     return closest;
                 }
             }
@@ -127,6 +137,11 @@ namespace Sharky.Builds.BuildingPlacement
 
         Point2D GetValidPoint(float x, float y, float size, int baseHeight, IEnumerable<Unit> mineralFields, List<Unit> vespeneGeysers, float maxDistance, Vector2 target)
         {
+            if (LastLocations.Any(l => l.X == x && l.Y == y))
+            {
+                return null;
+            }
+
             var vector = new Vector2(x, y);
             if (x >= 0 && y >= 0 && x < MapDataService.MapData.MapWidth && y < MapDataService.MapData.MapHeight &&
                 (Vector2.DistanceSquared(vector, target) < (maxDistance * maxDistance)) &&
