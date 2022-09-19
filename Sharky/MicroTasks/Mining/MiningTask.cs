@@ -145,6 +145,8 @@ namespace Sharky.MicroTasks
                     info.Workers.RemoveAll(w => w.UnitRole != UnitRole.Gas || !UnitCommanders.Any(c => c.UnitCalculation.Unit.Tag == w.UnitCalculation.Unit.Tag));
                 }
             }
+
+            UnitCommanders.RemoveAll(c => c.UnitRole == UnitRole.Wall);
         }
 
         IEnumerable<UnitCommander> GetIdleWorkers()

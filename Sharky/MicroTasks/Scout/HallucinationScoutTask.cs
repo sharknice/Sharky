@@ -1,5 +1,4 @@
 ﻿using SC2APIProtocol;
-using Sharky.MicroControllers;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,19 +10,24 @@ namespace Sharky.MicroTasks
     {
         TargetingData TargetingData;
         BaseData BaseData;
+        MicroTaskData MicroTaskData;
 
         bool started { get; set; }
+        public bool StealSentryFromAttackTask { get; set; }
         List<Point2D> ScoutLocations { get; set; }
         int ScoutLocationIndex { get; set; }
 
-        public HallucinationScoutTask(TargetingData targetingData, BaseData baseData, bool enabled, float priority)
+        public HallucinationScoutTask(TargetingData targetingData, BaseData baseData, MicroTaskData microTaskData, bool enabled, float priority)
         {
             TargetingData = targetingData;
             BaseData = baseData;
+            MicroTaskData = microTaskData;
             Priority = priority;
 
             UnitCommanders = new List<UnitCommander>();
             Enabled = enabled;
+
+            StealSentryFromAttackTask = false;
         }
 
         public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
@@ -38,13 +42,27 @@ namespace Sharky.MicroTasks
 
                 if (!UnitCommanders.Any(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_SENTRY))
                 {
+                    var gotOne = false;
                     foreach (var commander in commanders)
                     {
                         if (!commander.Value.Claimed && commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_SENTRY)
                         {
                             commander.Value.Claimed = true;
                             UnitCommanders.Add(commander.Value);
+                            gotOne = true;
                             break;
+                        }
+                    }
+                    if (!gotOne)
+                    {
+                        if (MicroTaskData.ContainsKey(typeof(AttackTask).Name))
+                        {
+                            var stolen = MicroTaskData[typeof(AttackTask).Name].UnitCommanders.FirstOrDefault(u => u.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_SENTRY);
+                            if (stolen != null)
+                            {
+                                MicroTaskData[typeof(AttackTask).Name].StealUnit(stolen);
+                                UnitCommanders.Add(stolen);
+                            }
                         }
                     }
                 }

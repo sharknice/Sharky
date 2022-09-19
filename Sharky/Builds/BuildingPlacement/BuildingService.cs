@@ -71,7 +71,7 @@ namespace Sharky.Builds.BuildingPlacement
 
         public bool Blocked(float x, float y, float radius, float padding = .5f, ulong tag = 0)
         {
-            if (ActiveUnitData.NeutralUnits.Any(u => Vector2.DistanceSquared(new Vector2(x, y), u.Value.Position) < (u.Value.Unit.Radius + padding + radius) * (u.Value.Unit.Radius + padding + radius)))
+            if (ActiveUnitData.NeutralUnits.Any(u => u.Value.Unit.UnitType != (uint)UnitTypes.NEUTRAL_CLEANINGBOT && Vector2.DistanceSquared(new Vector2(x, y), u.Value.Position) < (u.Value.Unit.Radius + padding + radius) * (u.Value.Unit.Radius + padding + radius)))
             {
                 return true;
             }

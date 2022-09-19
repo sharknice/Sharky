@@ -6,6 +6,7 @@ using Sharky.Pathing;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Linq;
 using System.Numerics;
 
@@ -39,8 +40,10 @@ namespace Sharky.MicroTasks
         bool NeedProbe;
         bool NeedDoor;
         bool NeedBackupDoor;
+        bool NeedAdept;
 
         bool DestroyWall;
+        bool DestroyBlock;
         int BasesCountDuringBlock;
 
         int LastWallKillAquireFrame;
@@ -48,6 +51,8 @@ namespace Sharky.MicroTasks
         UnitCommander DoorCommander;
         UnitCommander BackupDoorCommander;
         UnitCommander ProbeCommander;
+        UnitCommander AdeptCommander;
+        UnitCommander AdeptShadeCommander;
 
         UnitCommander BlockPylon;
 
@@ -77,6 +82,7 @@ namespace Sharky.MicroTasks
             NeedDoor = false;
             NeedBackupDoor = false;
             DestroyWall = false;
+            DestroyBlock = false;
             BasesDuringWallData = 1;
             LastWallKillAquireFrame = 0;
         }
@@ -86,7 +92,32 @@ namespace Sharky.MicroTasks
             if (DoorSpot != null)
             {
                 var vector = new Vector2(DoorSpot.X, DoorSpot.Y);
-                if (NeedDoor && DoorCommander == null)
+                
+                if (NeedAdept && AdeptCommander == null)
+                {
+                    foreach (var commander in commanders.Where(c => !c.Value.Claimed && c.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_ADEPT).OrderBy(u => Vector2.DistanceSquared(vector, u.Value.UnitCalculation.Position)))
+                    {
+                        commander.Value.UnitRole = UnitRole.Door;
+                        commander.Value.Claimed = true;
+                        UnitCommanders.Add(commander.Value);
+                        AdeptCommander = commander.Value;
+                        UpdateNeeds();
+                        break;
+                    }
+                }
+                if (NeedAdept && AdeptShadeCommander == null)
+                {
+                    foreach (var commander in commanders.Where(c => !c.Value.Claimed && c.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_ADEPTPHASESHIFT).OrderBy(u => Vector2.DistanceSquared(vector, u.Value.UnitCalculation.Position)).Where(u => Vector2.DistanceSquared(vector, u.Value.UnitCalculation.Position) < 64))
+                    {
+                        commander.Value.UnitRole = UnitRole.Door;
+                        commander.Value.Claimed = true;
+                        UnitCommanders.Add(commander.Value);
+                        AdeptShadeCommander = commander.Value;
+                        UpdateNeeds();
+                        break;
+                    }
+                }
+                if (NeedDoor && (DoorCommander == null && AdeptCommander == null))
                 {
                     foreach (var commander in commanders.Where(c => !c.Value.Claimed && (c.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_STALKER || c.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_ZEALOT || c.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_ADEPT)).OrderBy(u => Vector2.DistanceSquared(vector, u.Value.UnitCalculation.Position)))
                     {
@@ -114,7 +145,7 @@ namespace Sharky.MicroTasks
             if (NeedProbe && ProbeCommander == null && ProbeSpot != null)
             {
                 var vector = new Vector2(ProbeSpot.X, ProbeSpot.Y);
-                foreach (var commander in commanders.OrderBy(c => c.Value.Claimed).ThenBy(c => c.Value.UnitCalculation.Unit.BuffIds.Count()).ThenBy(u => Vector2.DistanceSquared(vector, u.Value.UnitCalculation.Position)))
+                foreach (var commander in commanders.Where(c => c.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE).OrderBy(c => c.Value.Claimed).ThenBy(c => c.Value.UnitCalculation.Unit.BuffIds.Count()).ThenBy(u => Vector2.DistanceSquared(vector, u.Value.UnitCalculation.Position)))
                 {
                     if (commander.Value.UnitRole != UnitRole.Gas && (!commander.Value.Claimed || commander.Value.UnitRole == UnitRole.Minerals) && commander.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && !commander.Value.UnitCalculation.Unit.BuffIds.Any(b => SharkyUnitData.CarryingResourceBuffs.Contains((Buffs)b)) && commander.Value.UnitRole != UnitRole.Build)
                     {
@@ -149,6 +180,16 @@ namespace Sharky.MicroTasks
                 {
                     commands.AddRange(PerformDoorActions(frame, BackupDoorCommander));
                 }
+
+                if (AdeptCommander != null)
+                {
+                    commands.AddRange(PerformDoorActions(frame, AdeptCommander));
+                }
+
+                if (AdeptShadeCommander != null)
+                {
+                    commands.AddRange(PerformShadeActions(frame, AdeptShadeCommander));
+                }
             }
 
             var wallToKill = UnitCommanders.FirstOrDefault(c => c.UnitRole == UnitRole.Die);
@@ -167,6 +208,10 @@ namespace Sharky.MicroTasks
             if (DestroyWall)
             {
                 commands.AddRange(UpdateDestroyWall(frame));
+            }
+            else if (DestroyBlock)
+            {
+                commands.AddRange(UpdateDestroyBlock(frame));
             }
             else
             {
@@ -278,6 +323,24 @@ namespace Sharky.MicroTasks
         List<SC2APIProtocol.Action> PerformDoorActions(int frame, UnitCommander commander)
         {
             var commands = new List<SC2APIProtocol.Action>();
+
+            if (commander.UnitCalculation.Unit.BuildProgress < 1)
+            {
+                return commands;
+            }
+
+            if (commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_ADEPT)
+            {
+                if (commander.UnitCalculation.NearbyEnemies.Any(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_ADEPTPHASESHIFT))
+                {
+                    NeedAdept = true;
+                    if (commander.AbilityOffCooldown(Abilities.EFFECT_ADEPTPHASESHIFT, frame, SharkyOptions.FramesPerSecond, SharkyUnitData))
+                    {
+                        return commander.Order(frame, Abilities.EFFECT_ADEPTPHASESHIFT, DoorSpot);
+                    }
+                }
+            }
+
             if (BlockPylon != null && BlockPylon.UnitRole == UnitRole.Die)
             {
                 return commander.Order(frame, Abilities.ATTACK, targetTag: BlockPylon.UnitCalculation.Unit.Tag);
@@ -285,7 +348,14 @@ namespace Sharky.MicroTasks
             var wallToKill = UnitCommanders.FirstOrDefault(c => c.UnitRole == UnitRole.Die);
             if (wallToKill != null)
             {
-                return commander.Order(frame, Abilities.ATTACK, targetTag: wallToKill.UnitCalculation.Unit.Tag);
+                if (!ActiveUnitData.Commanders.ContainsKey(wallToKill.UnitCalculation.Unit.Tag))
+                {
+                    UnitCommanders.Remove(wallToKill);
+                }
+                else
+                {
+                    return commander.Order(frame, Abilities.ATTACK, targetTag: wallToKill.UnitCalculation.Unit.Tag);
+                }
             }
 
             var vector = new Vector2(DoorSpot.X, DoorSpot.Y);
@@ -386,6 +456,23 @@ namespace Sharky.MicroTasks
             return commands;
         }
 
+        List<SC2APIProtocol.Action> PerformShadeActions(int frame, UnitCommander commander)
+        {
+            var vector = new Vector2(DoorSpot.X, DoorSpot.Y);
+            if (Vector2.DistanceSquared(commander.UnitCalculation.Position, vector) > .25f)
+            {
+                return commander.Order(frame, Abilities.MOVE, DoorSpot);
+            }
+            else if (commander.UnitCalculation.NearbyEnemies.Any(e => Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position) < 4))
+            {
+                return commander.Order(frame, Abilities.HOLDPOSITION);
+            }
+            else
+            {
+                return commander.Order(frame, Abilities.MOVE, DoorSpot);
+            }
+        }
+
         protected virtual void GetWallData()
         {
             if (!GotWallData || BasesDuringWallData != BaseData.SelfBases.Count())
@@ -433,6 +520,14 @@ namespace Sharky.MicroTasks
                 {
                     BackupDoorCommander = null;
                 }
+                if (AdeptCommander != null && AdeptCommander.UnitCalculation.Unit.Tag == tag)
+                {
+                    AdeptCommander = null;
+                }
+                if (AdeptShadeCommander != null && AdeptShadeCommander.UnitCalculation.Unit.Tag == tag)
+                {
+                    AdeptShadeCommander = null;
+                }
                 if (BlockPylon != null && BlockPylon.UnitCalculation.Unit.Tag == tag)
                 {
                     BlockPylon = null;
@@ -453,8 +548,33 @@ namespace Sharky.MicroTasks
             {
                 commander.UnitRole = UnitRole.None;
                 commander.Claimed = false;
-                UnitCommanders.Remove(commander);
-            }      
+            }
+            var ids = commanders.Select(c => c.UnitCalculation.Unit.Tag);
+            UnitCommanders.RemoveAll(c => ids.Contains(c.UnitCalculation.Unit.Tag));
+        }
+
+        IEnumerable<SC2APIProtocol.Action> UpdateDestroyBlock(int frame)
+        {
+            if (!ActiveUnitData.Commanders.Any(u => u.Value.UnitRole == UnitRole.Die))
+            {
+                DestroyBlock = false;
+                StopDestroyingWall();
+                return new List<SC2APIProtocol.Action>();
+            }
+
+            if (UnitCommanders.Count(c => c.UnitRole == UnitRole.Attack) < 5)
+            {
+                var vector = new Vector2(WallData.Block.X, WallData.Block.Y);
+                var commanders = MicroTaskData[typeof(AttackTask).Name].UnitCommanders.OrderBy(c => Vector2.DistanceSquared(c.UnitCalculation.Position, vector)).Take(5);
+                foreach (var commander in commanders)
+                {
+                    commander.UnitRole = UnitRole.Attack;
+                    MicroTaskData[typeof(AttackTask).Name].StealUnit(commander);
+                    UnitCommanders.Add(commander);
+                }
+            }
+
+            return new List<SC2APIProtocol.Action>();
         }
 
         IEnumerable<SC2APIProtocol.Action> UpdateDestroyWall(int frame)
@@ -512,6 +632,21 @@ namespace Sharky.MicroTasks
             }
         }
 
+        public void DestroyBlocker()
+        {
+            if (DestroyBlock) { return; }
+
+            DestroyBlock = true;
+            GetWallData();
+            var vector = new Vector2(WallData.Block.X, WallData.Block.Y);
+            var block = ActiveUnitData.Commanders.Values.FirstOrDefault(u => (u.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON || u.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_SHIELDBATTERY) && u.UnitCalculation.Position.X == WallData.Block.X && u.UnitCalculation.Position.Y == WallData.Block.Y);
+            if (block != null)
+            {
+                block.UnitRole = UnitRole.Die;
+                UnitCommanders.Add(block);
+            }
+        }
+
         void MarkNextBuildingForDeath(int frame)
         {
             LastWallKillAquireFrame = frame;
@@ -525,13 +660,18 @@ namespace Sharky.MicroTasks
             }
             else
             {
-                var closestStructure = ActiveUnitData.Commanders.Values.Where(u => u.UnitCalculation.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && !WallData.Pylons.Any(p => u.UnitCalculation.Position.X == p.X && u.UnitCalculation.Position.Y == p.Y) && !WallData.Production.Any(p => u.UnitCalculation.Position.X == p.X && u.UnitCalculation.Position.Y == p.Y)).OrderBy(c => Vector2.DistanceSquared(c.UnitCalculation.Position, vector)).FirstOrDefault();
+                var closestStructure = ActiveUnitData.Commanders.Values.Where(u => u.UnitCalculation.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && WallData?.Pylons != null && !WallData.Pylons.Any(p => u.UnitCalculation.Position.X == p.X && u.UnitCalculation.Position.Y == p.Y) && WallData?.Production != null && !WallData.Production.Any(p => u.UnitCalculation.Position.X == p.X && u.UnitCalculation.Position.Y == p.Y)).OrderBy(c => Vector2.DistanceSquared(c.UnitCalculation.Position, vector)).FirstOrDefault();
                 if (closestStructure != null)
                 {
                     closestStructure.UnitRole = UnitRole.Die;
                     UnitCommanders.Add(closestStructure);
                 }
             }
+        }
+
+        public void EnableShadeBlock()
+        {
+            NeedAdept = true;
         }
     }
 }

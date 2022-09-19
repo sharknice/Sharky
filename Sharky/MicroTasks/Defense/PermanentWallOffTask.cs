@@ -80,7 +80,7 @@ namespace Sharky.MicroTasks
                             {
                                 ability = Abilities.BUILD_PYLON;
                             }
-                            var probeCommand = probe.Order(frame, ability, WallData.Block);
+                            var probeCommand = probe.Order(frame, ability, WallData.Block, allowSpam: true);
                             if (probeCommand != null)
                             {
                                 commands.AddRange(probeCommand);

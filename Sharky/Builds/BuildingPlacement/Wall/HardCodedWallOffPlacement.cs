@@ -63,21 +63,18 @@ namespace Sharky.Builds.BuildingPlacement
             {
                 var placement = ProtossWallService.FindPylonPlacement(wallData, maxDistance, mineralProximity, wallOffType);
                 if (placement == null) { return null; }
-                if (Vector2.DistanceSquared(new Vector2(placement.X, placement.Y), new Vector2(target.X, target.Y)) > maxDistance * maxDistance) { return null; }
                 return placement;
             }
             else if (SharkyUnitData.TerranTypes.Contains(unitType))
             {
                 var placement = TerranWallService.FindTerranPlacement(wallData, unitType, wallOffType);
                 if (placement == null) { return null; }
-                if (Vector2.DistanceSquared(new Vector2(placement.X, placement.Y), new Vector2(target.X, target.Y)) > maxDistance * maxDistance) { return null; }
                 return placement;
             }
             else
             {
                 var placement = FindProductionPlacement(wallData, size, maxDistance, mineralProximity, wallOffType);
                 if (placement == null) { return null; }
-                if (Vector2.DistanceSquared(new Vector2(placement.X, placement.Y), new Vector2(target.X, target.Y)) > maxDistance * maxDistance) { return null; }
                 return placement;
             }
         }

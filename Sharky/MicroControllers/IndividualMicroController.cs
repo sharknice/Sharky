@@ -183,6 +183,11 @@ namespace Sharky.MicroControllers
             if (GetInBunker(commander, frame, out action)) { return action; }
             if (RechargeShieldsAtBattery(commander, defensivePoint, defensivePoint, frame, out action)) { return action; }
             if (HoldStillForRepair(commander, frame, out action)) { return action; }
+            var markedForDeath = commander.UnitCalculation.NearbyAllies.FirstOrDefault(a => ActiveUnitData.Commanders.ContainsKey(a.Unit.Tag) && ActiveUnitData.Commanders[a.Unit.Tag].UnitRole == UnitRole.Die);
+            if (markedForDeath != null)
+            {
+                action = commander.Order(frame, Abilities.ATTACK, targetTag: markedForDeath.Unit.Tag);
+            }
             return action;
         }
 
@@ -1327,7 +1332,12 @@ namespace Sharky.MicroControllers
                 }
                 if (WeaponReady(commander, frame))
                 {
-                    if (priorityEnemyMain)
+                    var markedForDeath = commander.UnitCalculation.NearbyAllies.FirstOrDefault(a => ActiveUnitData.Commanders.ContainsKey(a.Unit.Tag) && ActiveUnitData.Commanders[a.Unit.Tag].UnitRole == UnitRole.Die);
+                    if (markedForDeath != null)
+                    {
+                        action = commander.Order(frame, Abilities.ATTACK, targetTag: markedForDeath.Unit.Tag);
+                    }
+                    else if (priorityEnemyMain)
                     {
                         if (bestTarget.Unit.Tag == commander.UnitCalculation.Unit.Tag)
                         {
@@ -2128,6 +2138,12 @@ namespace Sharky.MicroControllers
                 if (cyclone != null)
                 {
                     action = commander.Order(frame, Abilities.ATTACK, null, cyclone.Unit.Tag);
+                    return true;
+                }
+                var prism = commander.UnitCalculation.NearbyAllies.FirstOrDefault(a => (a.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISM || a.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISMPHASING) && Vector2.DistanceSquared(a.Position, commander.UnitCalculation.Position) <= 25);
+                if (prism != null)
+                {
+                    action = commander.Order(frame, Abilities.SMART, null, prism.Unit.Tag);
                     return true;
                 }
                 if (Retreat(commander, defensivePoint, defensivePoint, frame, out action)) { return true; }

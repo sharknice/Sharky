@@ -458,7 +458,7 @@ namespace Sharky.DefaultBot
             var lateGameOracleHarassTask = new LateGameOracleHarassTask(BaseData, TargetingData, MapDataService, oracleHarassMicroController, 1, false);
             var reaperWorkerHarassTask = new ReaperWorkerHarassTask(BaseData, TargetingData, reaperHarassMicroController, 2, false);
             var bansheeHarassTask = new BansheeHarassTask(BaseData, TargetingData, MapDataService, bansheeMicroController, 2, false);
-            var hallucinationScoutTask = new HallucinationScoutTask(TargetingData, BaseData, false, .5f);
+            var hallucinationScoutTask = new HallucinationScoutTask(TargetingData, BaseData, MicroTaskData, false, .5f);
             var wallOffTask = new WallOffTask(SharkyUnitData, ActiveUnitData, MacroData, MapData, WallService, ChatService, false, .25f);
             var permanentWallOffTask = new PermanentWallOffTask(SharkyUnitData, ActiveUnitData, MacroData, MapData, WallService, ChatService, false, .25f);
             var fullPylonWallOffTask = new FullPylonWallOffTask(this, false, .25f);
@@ -479,7 +479,7 @@ namespace Sharky.DefaultBot
             var scoutForSpineTask = new ScoutForSpineTask(this, false, 0.5f);
             var protossDoorTask = new ProtossDoorTask(this, false, -0.5f);
             var zealotHarassTask = new ZealotHarassTask(this, false, 0.5f, zealotMicroController);
-
+            var clearFutureExpansionTask = new ClearFutureExpansionTask(this, new List<DesiredUnitsClaim>(), 0.1f, false);
             MicroTaskData[defenseSquadTask.GetType().Name] = defenseSquadTask;
             MicroTaskData[workerScoutGasStealTask.GetType().Name] = workerScoutGasStealTask;
             MicroTaskData[workerScoutTask.GetType().Name] = workerScoutTask;
@@ -520,6 +520,7 @@ namespace Sharky.DefaultBot
             MicroTaskData[burrowDronesFromHarras.GetType().Name] = burrowDronesFromHarras;
             MicroTaskData[protossDoorTask.GetType().Name] = protossDoorTask;
             MicroTaskData[zealotHarassTask.GetType().Name] = zealotHarassTask;
+            MicroTaskData[clearFutureExpansionTask.GetType().Name] = clearFutureExpansionTask;
 
             MicroManager = new MicroManager(ActiveUnitData, MicroTaskData, SharkyOptions);
             Managers.Add(MicroManager);

@@ -142,6 +142,11 @@ namespace Sharky.Builds.BuildingPlacement
                 return null;
             }
 
+            if (BuildingService.BlocksResourceCenter(x, y, size / 2f))
+            {
+                return null;
+            }
+
             var vector = new Vector2(x, y);
             if (x >= 0 && y >= 0 && x < MapDataService.MapData.MapWidth && y < MapDataService.MapData.MapHeight &&
                 (Vector2.DistanceSquared(vector, target) < (maxDistance * maxDistance)) &&

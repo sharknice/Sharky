@@ -105,6 +105,14 @@ namespace Sharky.Managers
                 if (entry.Value > 0 || amountHave > 0 || amountHaveInProgress > 0)
                     Console.WriteLine($"    [{entry.Key}]={entry.Value} ({amountHave} have, {amountHaveInProgress} in progress)");
             }
+            Console.WriteLine("  Desired defense:");
+            foreach (var entry in DefaultSharkyBot.MacroData.DesiredDefensiveBuildingsAtDefensivePoint.OrderBy(x => Enum.GetName(typeof(UnitTypes), x.Key)))
+            {
+                int amountHave = DefaultSharkyBot.UnitCountService.Completed(entry.Key);
+                int amountHaveInProgress = DefaultSharkyBot.UnitCountService.BuildingsInProgressCount(entry.Key);
+                if (entry.Value > 0 || amountHave > 0 || amountHaveInProgress > 0)
+                    Console.WriteLine($"    [{entry.Key}]={entry.Value} ({amountHave} have, {amountHaveInProgress} in progress)");
+            }
             Console.WriteLine("  Desired upgrades:");
             foreach (var entry in DefaultSharkyBot.MacroData.DesiredUpgrades.OrderBy(x => Enum.GetName(typeof(Upgrades), x.Key)))
             {
