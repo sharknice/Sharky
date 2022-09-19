@@ -1,8 +1,6 @@
-﻿using SC2APIProtocol;
-using Sharky.Builds;
+﻿using Sharky.Builds;
 using Sharky.Chat;
 using Sharky.DefaultBot;
-using Sharky.Extensions;
 using Sharky.Pathing;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -50,7 +48,8 @@ namespace Sharky.MicroTasks
                 return;
             }
 
-            foreach (var commander in commanders.Where(commander => (((commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.ZERG_DRONE || commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.ZERG_DRONEBURROWED) && (commander.Value.UnitRole == UnitRole.Minerals || commander.Value.UnitRole == UnitRole.Gas || commander.Value.UnitRole == UnitRole.Hide)))))
+            foreach (var commander in commanders.Where(commander => (commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.ZERG_DRONEBURROWED 
+                || (commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.ZERG_DRONE && (commander.Value.UnitRole == UnitRole.Minerals || commander.Value.UnitRole == UnitRole.Gas || commander.Value.UnitRole == UnitRole.Hide)))))
             {
                 if (!UnitCommanders.Contains(commander.Value) && BurrowWanted(commander.Value.UnitCalculation))
                 {
