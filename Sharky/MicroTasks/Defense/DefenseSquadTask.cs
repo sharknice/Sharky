@@ -23,6 +23,7 @@ namespace Sharky.MicroTasks
         float lastFrameTime;
 
         public bool OnlyDefendMain { get; set; }
+        public bool GroupAtMain { get; set; }
 
         List<UnitCommander> WorkerDefenders { get; set; }
 
@@ -50,6 +51,7 @@ namespace Sharky.MicroTasks
             WorkerDefenders = new List<UnitCommander>();
 
             OnlyDefendMain = false;
+            GroupAtMain = false;
 
             Enabled = true;
         }
@@ -119,7 +121,7 @@ namespace Sharky.MicroTasks
             else
             {
                 var defensePoint = TargetingData.ForwardDefensePoint;
-                if (OnlyDefendMain)
+                if (OnlyDefendMain || GroupAtMain)
                 {
                     defensePoint = TargetingData.SelfMainBasePoint;
                 }

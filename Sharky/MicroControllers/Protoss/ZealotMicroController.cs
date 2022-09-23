@@ -14,6 +14,19 @@ namespace Sharky.MicroControllers.Protoss
 
         }
 
+        protected override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
+
+            if (commander.UnitCalculation.EnemiesInRangeOf.Any(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED || e.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANK))
+            {
+                commander.UnitCalculation.TargetPriorityCalculation.Overwhelm = true;
+                return AttackBestTarget(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action);
+            }
+
+            return false;
+        }
+
         protected override bool AvoidTargettedDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;

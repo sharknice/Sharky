@@ -220,7 +220,7 @@ namespace Sharky.MicroControllers.Protoss
 
             if (commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISMPHASING)
             {
-                if (commander.UnitCalculation.Unit.Shield > 75 && commander.UnitCalculation.NearbyAllies.Take(25).Any(v => v.Unit.BuildProgress < 1 && Vector2.DistanceSquared(v.Position, commander.UnitCalculation.Position) < 49)) // and not warping any units in
+                if (commander.UnitCalculation.Unit.Shield > 75 && commander.UnitCalculation.NearbyAllies.Take(25).Any(v => v.Unit.BuildProgress < 1 && Vector2.DistanceSquared(v.Position, commander.UnitCalculation.Position) < 49 && v.FrameLastSeen == frame)) // and not warping any units in
                 {
                     return false;
                 }

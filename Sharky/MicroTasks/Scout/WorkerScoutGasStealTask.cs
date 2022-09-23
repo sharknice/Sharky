@@ -14,6 +14,7 @@ namespace Sharky.MicroTasks
     {
         public bool StealGas { get; set; }
         public bool BlockExpansion { get; set; }
+        public bool BlockLiftedExpansion { get; set; }
         public bool HidePylonInBase { get; set; }
         public bool BlockWall { get; set; }
 
@@ -26,6 +27,7 @@ namespace Sharky.MicroTasks
         MapData MapData;
         AreaService AreaService;
         BuildingService BuildingService;
+        UnitCountService UnitCountService;
         ActiveUnitData ActiveUnitData;
 
         MineralWalker MineralWalker;
@@ -47,6 +49,7 @@ namespace Sharky.MicroTasks
             BaseData = defaultSharkyBot.BaseData;
             AreaService = defaultSharkyBot.AreaService;
             BuildingService = defaultSharkyBot.BuildingService;
+            UnitCountService = defaultSharkyBot.UnitCountService;
             MapData = defaultSharkyBot.MapData;
             ActiveUnitData = defaultSharkyBot.ActiveUnitData;
             MineralWalker = defaultSharkyBot.MineralWalker;
@@ -58,6 +61,7 @@ namespace Sharky.MicroTasks
 
             StealGas = true;
             BlockExpansion = false;
+            BlockLiftedExpansion = false;
             HidePylonInBase = false;
             BlockWall = false;
         }
@@ -198,18 +202,21 @@ namespace Sharky.MicroTasks
                     }
 
                     var expansion = BaseData.EnemyBaseLocations.Skip(1).FirstOrDefault();
-                    if (BlockExpansion && expansion != null)
+                    if (expansion != null)
                     {
-                        var expansionVector = new Vector2(expansion.Location.X, expansion.Location.Y);
-                        if (Vector2.DistanceSquared(expansionVector, commander.UnitCalculation.Position) < 225)
+                        if (BlockExpansion || (BlockLiftedExpansion && UnitCountService.EquivalentEnemyTypeCount(UnitTypes.TERRAN_COMMANDCENTER) > 1))
                         {
-                            if (!commander.UnitCalculation.NearbyAllies.Any(a => Vector2.DistanceSquared(expansionVector, a.Position) < 9) && !commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ResourceCenter) && !e.Unit.IsFlying && Vector2.DistanceSquared(expansionVector, e.Position) < 2))
+                            var expansionVector = new Vector2(expansion.Location.X, expansion.Location.Y);
+                            if (Vector2.DistanceSquared(expansionVector, commander.UnitCalculation.Position) < 225)
                             {
-                                var expansionBlock = commander.Order(frame, Abilities.BUILD_PYLON, expansion.Location);
-                                if (expansionBlock != null)
+                                if (!commander.UnitCalculation.NearbyAllies.Any(a => Vector2.DistanceSquared(expansionVector, a.Position) < 9) && !commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ResourceCenter) && !e.Unit.IsFlying && Vector2.DistanceSquared(expansionVector, e.Position) < 2))
                                 {
-                                    commands.AddRange(expansionBlock);
-                                    return commands;
+                                    var expansionBlock = commander.Order(frame, Abilities.BUILD_PYLON, expansion.Location);
+                                    if (expansionBlock != null)
+                                    {
+                                        commands.AddRange(expansionBlock);
+                                        return commands;
+                                    }
                                 }
                             }
                         }

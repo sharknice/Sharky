@@ -549,6 +549,7 @@ namespace Sharky.DefaultBot
             EnemyData.EnemyStrategies = new Dictionary<string, IEnemyStrategy>
             {
                 [nameof(EnemyStrategies.Proxy)] = new EnemyStrategies.Proxy(this),
+                [nameof(CompletedProxy)] = new CompletedProxy(this),
                 [nameof(WorkerRush)] = new WorkerRush(this),
                 [nameof(InvisibleAttacks)] = new InvisibleAttacks(this),
                 [nameof(Air)] = new Air(this),

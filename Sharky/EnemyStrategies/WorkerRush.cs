@@ -1,7 +1,6 @@
 ﻿using Sharky.DefaultBot;
 using Sharky.Extensions;
 using System.Linq;
-using System.Numerics;
 
 namespace Sharky.EnemyStrategies
 {
@@ -20,7 +19,7 @@ namespace Sharky.EnemyStrategies
         {
             if (frame < SharkyOptions.FramesPerSecond * 60 * 2)
             {
-                if (ActiveUnitData.EnemyUnits.Values.Count(u => u.UnitClassifications.Contains(UnitClassification.Worker) && u.Position.DistanceSquared(TargetingData.EnemyMainBasePoint.ToVector2()) > (40 * 40)) >= 5)
+                if (ActiveUnitData.EnemyUnits.Values.Count(u => u.UnitClassifications.Contains(UnitClassification.Worker) && u.Position.DistanceSquared(TargetingData.EnemyMainBasePoint.ToVector2()) > (40 * 40)) > 5)
                 {
                     if (ActiveUnitData.EnemyUnits.Values.Count(u => u.UnitClassifications.Contains(UnitClassification.Worker) && u.Position.DistanceSquared(TargetingData.SelfMainBasePoint.ToVector2()) < (40 * 40)) < 5)
                     {

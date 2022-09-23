@@ -482,5 +482,10 @@ namespace Sharky
             var inProgress = ActiveUnitData.SelfUnits.Any(u => (unitData.ProducingUnits.Contains((UnitTypes)u.Value.Unit.UnitType)) && u.Value.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
             return inProgress;
         }
+
+        public bool UpgradeDone(Upgrades upgrade)
+        {
+            return SharkyUnitData.ResearchedUpgrades.Contains((uint)upgrade);
+        }
     }
 }

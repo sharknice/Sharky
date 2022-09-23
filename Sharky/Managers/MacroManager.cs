@@ -92,7 +92,10 @@ namespace Sharky.Managers
 
             if (LastRunFrame + RunFrequency > observation.Observation.GameLoop)
             {
-                actions.AddRange(EveryFrameProduction());
+                if (MacroData.Race == Race.Zerg)
+                {
+                    actions.AddRange(EveryFrameProduction());
+                }
                 return actions;
             }
             LastRunFrame = (int)observation.Observation.GameLoop;

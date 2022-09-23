@@ -2,9 +2,13 @@
 using Sharky.Builds.BuildingPlacement;
 using Sharky.DefaultBot;
 using Sharky.MicroControllers;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Linq;
+using System.Numerics;
+using static SC2APIProtocol.AbilityData.Types;
 
 namespace Sharky.MicroTasks
 {
@@ -66,8 +70,32 @@ namespace Sharky.MicroTasks
             {
                 var detectors = UnitCommanders.Where(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Detector) || c.UnitCalculation.UnitClassifications.Contains(UnitClassification.DetectionCaster));
                 var nonDetectors = UnitCommanders.Where(c => !c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Detector) && !c.UnitCalculation.UnitClassifications.Contains(UnitClassification.DetectionCaster));
-                actions.AddRange(MicroController.Attack(nonDetectors, NextBaseLocation, TargetingData.ForwardDefensePoint, NextBaseLocation, frame));
-                actions.AddRange(MicroController.Support(detectors, nonDetectors, NextBaseLocation, TargetingData.ForwardDefensePoint, NextBaseLocation, frame));
+
+                var vector = new Vector2(NextBaseLocation.X, NextBaseLocation.Y);
+
+                foreach (var nonDetector in nonDetectors)
+                {
+                    if (nonDetector.UnitCalculation.EnemiesInRangeOf.Any() || Vector2.DistanceSquared(nonDetector.UnitCalculation.Position, vector) < 25)
+                    {
+                        actions.AddRange(MicroController.Attack(new List<UnitCommander> { nonDetector }, NextBaseLocation, TargetingData.ForwardDefensePoint, NextBaseLocation, frame));
+                    }
+                    else
+                    {
+                        actions.AddRange(nonDetector.Order(frame, Abilities.MOVE, NextBaseLocation));
+                    }
+                }
+
+                foreach (var detector in detectors)
+                {
+                    if (detector.UnitCalculation.EnemiesInRangeOf.Any() || Vector2.DistanceSquared(detector.UnitCalculation.Position, vector) < 25)
+                    {
+                        actions.AddRange(MicroController.Support(new List<UnitCommander> { detector }, nonDetectors, NextBaseLocation, TargetingData.ForwardDefensePoint, NextBaseLocation, frame));
+                    }
+                    else
+                    {
+                        actions.AddRange(detector.Order(frame, Abilities.MOVE, NextBaseLocation));
+                    }
+                }
             }
             else
             {
