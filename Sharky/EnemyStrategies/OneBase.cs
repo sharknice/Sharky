@@ -40,7 +40,7 @@ namespace Sharky.EnemyStrategies
             }
             else if (EnemyData.EnemyRace == SC2APIProtocol.Race.Protoss)
             {
-                return elapsedTime.TotalMinutes >= 3f;
+                return elapsedTime.TotalMinutes >= 3.5f;
             }
             else if (EnemyData.EnemyRace == SC2APIProtocol.Race.Terran)
             {

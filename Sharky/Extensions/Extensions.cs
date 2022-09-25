@@ -93,6 +93,16 @@ namespace Sharky.Extensions
         }
 
         /// <summary>
+        /// Converts Vector2 to Points2D
+        /// </summary>
+        /// <param name="thisVec"></param>
+        /// <returns></returns>
+        public static Point ToPoint(this Vector2 thisVec)
+        {
+            return new Point { X = thisVec.X, Y = thisVec.Y };
+        }
+
+        /// <summary>
         /// Converts Point2D to Vector2
         /// </summary>
         /// <param name="thisPoint"></param>

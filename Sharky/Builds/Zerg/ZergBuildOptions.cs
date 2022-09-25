@@ -23,6 +23,11 @@
         public bool PrepositionDroneForNaturalHatch { get; set; } = true;
 
         /// <summary>
+        /// If true, drone is prepositioned for third hatchery. Works only when  <see cref="QuickBuildOrders">QuickBuildOrders</see> is used for build.
+        /// </summary>
+        public bool PrepositionDroneForThirdHatch { get; set; } = true;
+
+        /// <summary>
         /// Maximum count of queens simultaneously spreadiong creep.
         /// </summary>
         public int MaxCreepQueens { get; set; } = 6;

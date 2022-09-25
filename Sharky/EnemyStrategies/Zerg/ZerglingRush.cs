@@ -11,7 +11,9 @@ namespace Sharky.EnemyStrategies.Zerg
         {
             if (EnemyData.EnemyRace != SC2APIProtocol.Race.Zerg) { return false; }
 
-            if (ActiveUnitData.EnemyUnits.Values.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && e.Unit.UnitType != (uint)UnitTypes.ZERG_ZERGLING))
+            var lingCount = UnitCountService.EnemyCount(UnitTypes.ZERG_ZERGLING);
+
+            if (lingCount == 0)
             {
                 return false;
             }
@@ -26,12 +28,12 @@ namespace Sharky.EnemyStrategies.Zerg
                 return true;
             }
 
-            if (UnitCountService.EnemyCount(UnitTypes.ZERG_ZERGLING) >= 4 && frame < SharkyOptions.FramesPerSecond * 3 * 60)
+            if (lingCount > 6 && frame < SharkyOptions.FramesPerSecond * 3 * 60)
             {
                 return true;
             }
 
-            if (frame < SharkyOptions.FramesPerSecond * 4 * 60 && UnitCountService.EnemyCount(UnitTypes.ZERG_ZERGLING) >= 6 && UnitCountService.EnemyCount(UnitTypes.ZERG_EXTRACTOR) <= 1 && UnitCountService.EnemyCount(UnitTypes.ZERG_ROACHWARREN) == 0)
+            if (frame < SharkyOptions.FramesPerSecond * 4 * 60 && lingCount >= 6 && UnitCountService.EnemyCount(UnitTypes.ZERG_EXTRACTOR) <= 1 && UnitCountService.EnemyCount(UnitTypes.ZERG_ROACHWARREN) == 0)
             {
                 return true;
             }
