@@ -155,7 +155,7 @@ namespace Sharky.Builds.BuildingPlacement
                 !BuildingService.Blocked(x, y, size / 2.0f, -.5f) && !BuildingService.HasAnyCreep(x, y, size / 2f) &&
                 (mineralFields == null || !mineralFields.Any(m => Vector2.DistanceSquared(new Vector2(m.Pos.X, m.Pos.Y), vector) < 16)) &&
                 (vespeneGeysers == null || !vespeneGeysers.Any(m => Vector2.DistanceSquared(new Vector2(m.Pos.X, m.Pos.Y), vector) < 25)) &&
-                BuildingService.RoomBelowAndAbove(x, y, size))
+                BuildingService.RoomBelowAndAbove(x, y, size) && !BlocksWall(vector))
             {
                 if (ActiveUnitData.Commanders.Values.Any(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && c.UnitCalculation.Unit.BuildProgress == 1 && Vector2.DistanceSquared(c.UnitCalculation.Position, vector) < 42.25))
                 {
@@ -169,6 +169,23 @@ namespace Sharky.Builds.BuildingPlacement
         bool RoomForExitingUnits(float x, float y, float size)
         {
             return BuildingService.AreaBuildable(x, y, size / 2.0f);
+        }
+
+        bool BlocksWall(Vector2 vector)
+        {
+            foreach (var wallData in MapDataService.MapData.WallData.Where(b => BaseData.BaseLocations.Take(2).Any(l => l.Location.X == b.BasePosition.X && l.Location.Y == b.BasePosition.Y)))
+            {
+                if (wallData.Block != null)
+                {
+                    var blockVector = new Vector2(wallData.Block.X, wallData.Block.Y);
+                    if (Vector2.DistanceSquared(blockVector, vector) < 50)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
     }
 }

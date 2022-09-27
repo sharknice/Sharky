@@ -30,7 +30,7 @@ namespace Sharky.Builds.BuildingPlacement
 
         public Point2D FindPartialWallPylonPlacement(WallData wallData)
         {
-            if (wallData.Pylons == null) { return null; }
+            if (wallData?.Pylons == null) { return null; }
             var unitData = SharkyUnitData.BuildingData[UnitTypes.PROTOSS_PYLON];
             var pylonRadius = (unitData.Size / 2f) - .00000f;
             var existingPylons = ActiveUnitData.SelfUnits.Values.Where(u => u.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON);

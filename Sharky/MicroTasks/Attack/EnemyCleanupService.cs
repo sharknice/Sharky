@@ -12,10 +12,14 @@ namespace Sharky.MicroTasks.Attack
 
         DamageService DamageService;
 
-        public EnemyCleanupService(IMicroController microController, DamageService damageService)
+        float CleanUpRangeSquared;
+
+        public EnemyCleanupService(IMicroController microController, DamageService damageService, float cleanupRange = 10)
         {
             MicroController = microController;
             DamageService = damageService;
+
+            CleanUpRangeSquared = cleanupRange * cleanupRange;
         }
 
         public List<SC2APIProtocol.Action> CleanupEnemies(IEnumerable<UnitCommander> commanders, Point2D defensivePoint, Point2D armyPoint, int frame)
@@ -27,6 +31,12 @@ namespace Sharky.MicroTasks.Attack
             {
                 var defenseVector = new Vector2(defensivePoint.X, defensivePoint.Y);
                 var winner = winners.OrderBy(u => Vector2.DistanceSquared(u.UnitCalculation.Position, defenseVector)).FirstOrDefault();
+
+                if (Vector2.DistanceSquared(winner.UnitCalculation.Position, defenseVector) > CleanUpRangeSquared)
+                {
+                    return null;
+                }
+
                 var winPoint = winner.UnitCalculation.NearbyEnemies.FirstOrDefault().Position;
 
                 return MicroController.Attack(commanders, new Point2D { X = winPoint.X, Y = winPoint.Y }, defensivePoint, armyPoint, frame);

@@ -23,6 +23,8 @@ namespace Sharky.MicroTasks
         BuildOptions BuildOptions;
         MicroTaskData MicroTaskData;
 
+        public bool LongDistanceMiningEnabled { get; set; }
+
         bool LowMineralsHighGas;
 
         public MiningTask(DefaultSharkyBot defaultSharkyBot, float priority, MiningDefenseService miningDefenseService, MineralMiner mineralMiner, GasMiner gasMiner)
@@ -40,6 +42,7 @@ namespace Sharky.MicroTasks
             GasMiner = gasMiner;
 
             LowMineralsHighGas = false;
+            LongDistanceMiningEnabled = true;
 
             UnitCommanders = new List<UnitCommander>();
             Enabled = true;
@@ -98,7 +101,14 @@ namespace Sharky.MicroTasks
             commands.AddRange(GasMiner.MineGas(frame));
             commands.AddRange(RecallWorkers(frame));
 
-            commands.AddRange(DistanceMineWithExtraIdleWorkers(frame));
+            if (LongDistanceMiningEnabled)
+            {
+                commands.AddRange(DistanceMineWithExtraIdleWorkers(frame));
+            }
+            else
+            {
+                commands.AddRange(OverSaturatedWithExtraIdleWorkers(frame));
+            }
 
             return commands;
         }
@@ -382,6 +392,39 @@ namespace Sharky.MicroTasks
                 }
             }
 
+            return actions;
+        }
+
+        private IEnumerable<SC2APIProtocol.Action> OverSaturatedWithExtraIdleWorkers(int frame)
+        {
+            var actions = new List<SC2APIProtocol.Action>();
+            foreach (var worker in GetIdleWorkers())
+            {
+                if (worker.UnitCalculation.Unit.BuffIds.Any(b => SharkyUnitData.CarryingResourceBuffs.Contains((Buffs)b)))
+                {
+                    var action = worker.Order(frame, Abilities.HARVEST_RETURN, null, 0);
+                    if (action != null)
+                    {
+                        actions.AddRange(action);
+                    }
+                }
+                else if (worker.UnitCalculation.Unit.Orders.Count() == 0 || worker.UnitCalculation.Unit.Orders.Any(o => BaseData.SelfBases.Any(b => b.MineralMiningInfo.Any(m => m.ResourceUnit.Tag == o.TargetUnitTag))))
+                {
+                    var closestPatch = ActiveUnitData.NeutralUnits.Where(u => SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType) && BaseData.SelfBases.Any(b => b.ResourceCenter != null && b.ResourceCenter.BuildProgress == 1 && b.MineralFields.Any(m => m.Tag == u.Value.Unit.Tag))).OrderBy(m => Vector2.DistanceSquared(m.Value.Position, worker.UnitCalculation.Position)).FirstOrDefault().Value;
+                    if (closestPatch != null)
+                    {
+                        var action = worker.Order(frame, Abilities.HARVEST_GATHER, null, closestPatch.Unit.Tag);
+                        if (action != null)
+                        {
+                            actions.AddRange(action);
+                        }
+                    }
+                    else
+                    {
+                        AttackWithWorker(worker);
+                    }
+                }
+            }
             return actions;
         }
 

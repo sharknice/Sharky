@@ -95,7 +95,15 @@ namespace Sharky.MicroTasks.Attack
                 {
                     if (winnableDefense || defendToDeath)
                     {
-                        actions.AddRange(MicroController.Attack(AvailableCommanders, new Point2D { X = closerEnemies.FirstOrDefault().Unit.Pos.X, Y = closerEnemies.FirstOrDefault().Unit.Pos.Y }, TargetingData.ForwardDefensePoint, groupPoint, frame));
+                        var closerEnemy = closerEnemies.FirstOrDefault();
+                        if (closerEnemy.Unit.IsFlying)
+                        {
+                            actions.AddRange(MicroController.Attack(AvailableCommanders.Where(c => c.UnitCalculation.DamageAir), new Point2D { X = closerEnemies.FirstOrDefault().Unit.Pos.X, Y = closerEnemies.FirstOrDefault().Unit.Pos.Y }, TargetingData.ForwardDefensePoint, groupPoint, frame));
+                        }
+                        else
+                        {
+                            actions.AddRange(MicroController.Attack(AvailableCommanders.Where(c => c.UnitCalculation.DamageGround), new Point2D { X = closerEnemies.FirstOrDefault().Unit.Pos.X, Y = closerEnemies.FirstOrDefault().Unit.Pos.Y }, TargetingData.ForwardDefensePoint, groupPoint, frame));
+                        }
                     }
                     else
                     {

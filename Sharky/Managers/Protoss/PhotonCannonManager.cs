@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -52,10 +53,16 @@ namespace Sharky.Managers.Protoss
             }
 
             
-            var bestDpsReduction = commander.UnitCalculation.NearbyEnemies.OrderByDescending(enemy => enemy.Dps / enemy.SimulatedHitpoints).ThenBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+            var bestDpsReduction = commander.UnitCalculation.EnemiesInRange.OrderByDescending(enemy => enemy.Dps / enemy.SimulatedHitpoints).ThenBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position)).FirstOrDefault();
             if (bestDpsReduction != null)
             {
                 return commander.Order(frame, Abilities.ATTACK, null, bestDpsReduction.Unit.Tag);
+            }
+
+            var markedForDeath = commander.UnitCalculation.NearbyAllies.FirstOrDefault(a => ActiveUnitData.Commanders.ContainsKey(a.Unit.Tag) && ActiveUnitData.Commanders[a.Unit.Tag].UnitRole == UnitRole.Die);
+            if (markedForDeath != null)
+            {
+                return commander.Order(frame, Abilities.ATTACK, targetTag: markedForDeath.Unit.Tag);
             }
 
             return null;
