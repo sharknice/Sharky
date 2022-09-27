@@ -2279,9 +2279,9 @@ namespace Sharky.MicroControllers
             return true;
         }
 
-        protected bool InRange(Vector2 targetLocation, Vector2 unitLocation, float range)
+        protected bool InRange(Vector2 targetLocation, Vector2 unitLocation, float range, float? minRange = null)
         {
-            return Vector2.DistanceSquared(targetLocation, unitLocation) <= (range * range);
+            return Vector2.DistanceSquared(targetLocation, unitLocation) <= (range * range) && (minRange is null || Vector2.DistanceSquared(targetLocation, unitLocation) >= (minRange * minRange));
         }
 
         protected virtual bool Detected(UnitCommander commander)
