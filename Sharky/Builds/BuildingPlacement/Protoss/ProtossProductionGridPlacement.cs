@@ -30,7 +30,7 @@ namespace Sharky.Builds.BuildingPlacement
 
         public Point2D FindPlacement(Point2D target, float size, float maxDistance, float minimumMineralProximinity)
         {
-            foreach (var selfBase in BaseData.SelfBases)
+            foreach (var selfBase in BaseData.SelfBases.Take(1))
             {
                 //g1 0 + 6, 57.5 66.5
                 //g2 + 3 + 8, 60.5 68.5

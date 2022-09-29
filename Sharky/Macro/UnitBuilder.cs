@@ -87,7 +87,7 @@ namespace Sharky.Macro
                                 }
                                 else if (AttackData.Attacking)
                                 {
-                                    targetLocation = AttackData.ArmyPoint;
+                                    targetLocation = TargetingData.AttackPoint;
                                 }
 
                                 var location = WarpInPlacement.FindPlacement(targetLocation, unit.Key, 1);

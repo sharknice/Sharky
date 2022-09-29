@@ -75,7 +75,7 @@ namespace Sharky.Builds.BuildingPlacement
                 {
                     closest = point;
                 }
-                x += 1;
+                x += .25f;
             }
             x = xStart - 1;
             while (xStart - x < 7)
@@ -85,7 +85,7 @@ namespace Sharky.Builds.BuildingPlacement
                 {
                     closest = point;
                 }
-                x -= 1;
+                x -= .25f;
             }
 
             return closest;
@@ -117,7 +117,7 @@ namespace Sharky.Builds.BuildingPlacement
                 {
                     closest = point4;
                 }
-                y += 1;
+                y += .25f;
             }
             y = yStart - 1;
             while (yStart - y < 7)
@@ -142,7 +142,7 @@ namespace Sharky.Builds.BuildingPlacement
                 {
                     closest = point4;
                 }
-                y -= 1;
+                y -= .25f;
             }
             return closest;
         }
@@ -155,7 +155,7 @@ namespace Sharky.Builds.BuildingPlacement
             }
 
             if (x >= 0 && y >= 0 && x < MapDataService.MapData.MapWidth && y < MapDataService.MapData.MapHeight &&
-                BuildingService.AreaBuildable(x, y, .5f) && !BuildingService.Blocked(x, y, .75f, 0f) && Powered(powerSource, x, y))
+                BuildingService.AreaBuildable(x, y, .5f) && !BuildingService.Blocked(x, y, .75f, 0f) && !BuildingService.BlockedByUnits(x, y, .75f, 0f) && Powered(powerSource, x, y))
             {
                 return new Point2D { X = x, Y = y };
             }

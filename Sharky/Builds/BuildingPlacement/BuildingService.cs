@@ -102,6 +102,16 @@ namespace Sharky.Builds.BuildingPlacement
             return false;
         }
 
+        public bool BlockedByUnits(float x, float y, float radius, float padding = .5f, ulong tag = 0)
+        {
+            if (ActiveUnitData.Commanders.Any(c => c.Key != tag && !c.Value.UnitCalculation.Unit.IsFlying && BuildingBlocks(x, y, radius, c.Value.UnitCalculation.Unit)))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
         public bool BlockedByStructuresOrMinerals(float x, float y, float radius, float padding = .5f, ulong tag = 0)
         {
             foreach (var neutralUnit in ActiveUnitData.NeutralUnits.Where(u => Vector2.DistanceSquared(new Vector2(x, y), u.Value.Position) < (u.Value.Unit.Radius + padding + radius) * (u.Value.Unit.Radius + padding + radius)))

@@ -26,6 +26,29 @@ namespace Sharky.MicroControllers.Protoss
             {
                 commander.UnitCalculation.TargetPriorityCalculation.TargetPriority = TargetPriority.Attack;
             }
+            else if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.Retreat || commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.FullRetreat)
+            {
+                if (WeaponReady(commander, frame) && commander.UnitCalculation.EnemiesInRange.Any())
+                {
+                    return false;
+                }
+
+                if (commander.UnitCalculation.Unit.Shield < commander.UnitCalculation.Unit.ShieldMax && commander.UnitCalculation.EnemiesThreateningDamage.Any())
+                {
+                    var blinkReady = SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.DARKTEMPLARBLINKUPGRADE) && commander.AbilityOffCooldown(Abilities.EFFECT_SHADOWSTRIDE, frame, SharkyOptions.FramesPerSecond, SharkyUnitData);
+                    if (blinkReady)
+                    {
+                        var attack = commander.UnitCalculation.EnemiesThreateningDamage.OrderBy(e => Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position) - (e.Range * e.Range)).FirstOrDefault();
+                        if (attack != null)
+                        {
+                            var avoidPoint = GetGroundAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, attack.Unit.Pos, target, defensivePoint, attack.Range + attack.Unit.Radius + commander.UnitCalculation.Unit.Radius + AvoidDamageDistance + 4);
+                            action = commander.Order(frame, Abilities.EFFECT_SHADOWSTRIDE, avoidPoint);
+                            return true;
+                        }
+                        return false;
+                    }
+                }
+            }
 
             return false;
         }

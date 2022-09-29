@@ -1,6 +1,7 @@
 ﻿using SC2APIProtocol;
 using Sharky.Pathing;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
@@ -24,6 +25,8 @@ namespace Sharky.Builds.BuildingPlacement
         IBuildingPlacement ProtossDefensiveGridPlacement;
         IBuildingPlacement ProtossProxyGridPlacement;
 
+        List<Point2D> LastLocations;
+
         public ProtossBuildingPlacement(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, BaseData baseData, DebugService debugService, MapDataService mapDataService, BuildingService buildingService, IBuildingPlacement wallOffPlacement, ProtossPylonGridPlacement protossPylonGridPlacement, ProtossProductionGridPlacement protossProductionGridPlacement, IBuildingPlacement protectNexusPylonPlacement, TargetingData targetingData, IBuildingPlacement protectNexusCannonPlacement, BuildOptions buildOptions, IBuildingPlacement protossDefensiveGridPlacement, IBuildingPlacement protossProxyGridPlacement)
         {
             ActiveUnitData = activeUnitData;
@@ -41,6 +44,8 @@ namespace Sharky.Builds.BuildingPlacement
             BuildOptions = buildOptions;
             ProtossDefensiveGridPlacement = protossDefensiveGridPlacement;
             ProtossProxyGridPlacement = protossProxyGridPlacement;
+
+            LastLocations = new List<Point2D>();
         }
 
         public Point2D FindPlacement(Point2D target, UnitTypes unitType, int size, bool ignoreResourceProximity = false, float maxDistance = 50, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.None, bool requireVision = false, bool allowBlockBase = false)
@@ -262,8 +267,18 @@ namespace Sharky.Builds.BuildingPlacement
                                 {
                                     if (!BlocksWall(vector))
                                     {
-                                        DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
-                                        return point;
+                                        if (!LastLocations.Any(l => l.X == x && l.Y == y))
+                                        {
+                                            DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
+
+                                            LastLocations.Add(point);
+                                            if (LastLocations.Count() > 5)
+                                            {
+                                                LastLocations.RemoveAt(0);
+                                            }
+
+                                            return point;
+                                        }
                                     }
                                 }
                             }
@@ -369,8 +384,18 @@ namespace Sharky.Builds.BuildingPlacement
                                 {
                                     if (!BlocksWall(vector))
                                     {
-                                        DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
-                                        return point;
+                                        if (!LastLocations.Any(l => l.X == x && l.Y == y))
+                                        {
+                                            DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
+
+                                            LastLocations.Add(point);
+                                            if (LastLocations.Count() > 5)
+                                            {
+                                                LastLocations.RemoveAt(0);
+                                            }
+
+                                            return point;
+                                        }
                                     }
                                 }
                             }

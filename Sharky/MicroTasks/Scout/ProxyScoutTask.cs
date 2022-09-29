@@ -79,6 +79,7 @@ namespace Sharky.MicroTasks
                 foreach (var baseLocation in BaseData.BaseLocations.Where(b => !BaseData.SelfBases.Any(s => s.Location == b.Location) && !BaseData.EnemyBases.Any(s => s.Location == b.Location)))
                 {
                     ScoutLocations.Add(baseLocation.MineralLineLocation);
+                    ScoutLocations.Add(baseLocation.Location);
                 }
                 ScoutLocationIndex = 0;
             }
