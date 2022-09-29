@@ -12,6 +12,44 @@ namespace Sharky.MicroControllers.Zerg
     {
         private int lastBlindingCloudFrame = 0;
         private int lastParasiticBombFrame = 0;
+        private int lastAbductFrame = 0;
+
+        private Dictionary<UnitTypes, int> GroundAbductPriorities = new()
+            {
+                { UnitTypes.PROTOSS_DISRUPTOR, 200 },
+                { UnitTypes.PROTOSS_COLOSSUS, 190 },
+                { UnitTypes.PROTOSS_ARCHON, 180 },
+                { UnitTypes.PROTOSS_HIGHTEMPLAR, 170 },
+                { UnitTypes.PROTOSS_IMMORTAL, 160 },
+                { UnitTypes.TERRAN_SIEGETANKSIEGED, 200 },
+                { UnitTypes.TERRAN_THOR, 190 },
+                { UnitTypes.TERRAN_THORAP, 180 },
+                { UnitTypes.TERRAN_SIEGETANK, 170 },
+                { UnitTypes.TERRAN_CYCLONE, 160 },
+                { UnitTypes.TERRAN_GHOST, 150 },
+                { UnitTypes.TERRAN_WIDOWMINEBURROWED, 140 },
+                { UnitTypes.ZERG_LURKERMPBURROWED, 200 },
+                { UnitTypes.ZERG_LURKERMP, 190 },
+                { UnitTypes.ZERG_INFESTORBURROWED, 180 },
+                { UnitTypes.ZERG_INFESTOR, 170 },
+                { UnitTypes.ZERG_RAVAGERBURROWED, 160 },
+                { UnitTypes.ZERG_RAVAGER, 150 },
+            };
+
+        private Dictionary<UnitTypes, int> AirAbductPriorities = new()
+            {
+                { UnitTypes.PROTOSS_MOTHERSHIP, 200 },
+                { UnitTypes.PROTOSS_TEMPEST, 190 },
+                { UnitTypes.PROTOSS_CARRIER, 180 },
+                { UnitTypes.PROTOSS_VOIDRAY, 170 },
+                { UnitTypes.PROTOSS_ORACLE, 160 },
+                { UnitTypes.TERRAN_BATTLECRUISER, 200 },
+                { UnitTypes.TERRAN_RAVEN, 190 },
+                { UnitTypes.TERRAN_BANSHEE, 180 },
+                { UnitTypes.ZERG_VIPER, 200 },
+                { UnitTypes.ZERG_BROODLORD, 190 },
+                { UnitTypes.ZERG_BROODLORDCOCOON, 180 },
+            };
 
         public ViperMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled)
             : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled)
@@ -32,14 +70,16 @@ namespace Sharky.MicroControllers.Zerg
                 return true;
             }
 
+            if (Abduct(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action))
+            {
+                return true;
+            }
+
             action = BlindingCloud(commander, target, defensivePoint, groupCenter, bestTarget, frame);
             if (action != null)
             {
                 return true;
             }
-
-            // TODO: parasitic bomb
-            // TODO: abduct
 
             return false;
         }
@@ -81,13 +121,13 @@ namespace Sharky.MicroControllers.Zerg
 
             if (attacks.Count() > 0)
             {
-                var bestAttack = GetBestAttack(commander.UnitCalculation, attacks, attacks, 2);
+                var bestAttack = GetBestAttack(commander.UnitCalculation, attacks, attacks, 3);
                 if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.WinAir)
                 {
                     var airAttackers = attacks.Where(u => u.DamageAir);
                     if (airAttackers.Count() > 0)
                     {
-                        var air = GetBestAttack(commander.UnitCalculation, airAttackers, attacks, 2);
+                        var air = GetBestAttack(commander.UnitCalculation, airAttackers, attacks, 3);
                         if (air != null)
                         {
                             bestAttack = air;
@@ -99,7 +139,7 @@ namespace Sharky.MicroControllers.Zerg
                     var groundAttackers = attacks.Where(u => u.DamageGround);
                     if (groundAttackers.Count() > 0)
                     {
-                        var ground = GetBestAttack(commander.UnitCalculation, groundAttackers, attacks, 2);
+                        var ground = GetBestAttack(commander.UnitCalculation, groundAttackers, attacks, 3);
                         if (ground != null)
                         {
                             bestAttack = ground;
@@ -116,6 +156,61 @@ namespace Sharky.MicroControllers.Zerg
             }
 
             return null;
+        }
+
+        private bool Abduct(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<Action> action)
+        {
+            action = null;
+
+            if (commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.EFFECT_ABDUCT))
+            {
+                lastParasiticBombFrame = frame;
+                return true;
+            }
+
+            if (commander.UnitCalculation.Unit.Energy < 75 || frame < lastAbductFrame + 15)
+            {
+                return false;
+            }
+
+            var targets = commander.UnitCalculation.NearbyEnemies.Take(25).Where(enemyUnit =>
+                                InRange(enemyUnit.Position, commander.UnitCalculation.Position, 12 + enemyUnit.Unit.Radius + commander.UnitCalculation.Unit.Radius, 7));
+
+            var alliesInRange = commander.UnitCalculation.NearbyAllies.Take(25).Where(ally =>
+                InRange(ally.Position, commander.UnitCalculation.Position, 5));
+
+            ulong bestAttack = 0;
+
+            if (targets.Any())
+            {
+                if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.WinAir)
+                {
+                    var airAttackers = alliesInRange.Where(u => u.DamageAir);
+
+                    if (airAttackers.Count() >= 4)
+                    {
+                        bestAttack = GetBestAbductUnit(targets, AirAbductPriorities) ?? 0;
+                    }
+                }
+
+                if (bestAttack == 0 && (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.WinGround || commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.WinAir || commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.Attack))
+                {
+                    var groundAttackers = alliesInRange.Where(u => u.DamageGround);
+                    if (groundAttackers.Count() >= 6)
+                    {
+                        bestAttack = GetBestAbductUnit(targets, GroundAbductPriorities) ?? 0;
+                    }
+                }
+
+                if (bestAttack > 0)
+                {
+                    action = commander.Order(frame, Abilities.EFFECT_ABDUCT, targetTag: bestAttack);
+                    lastAbductFrame = frame;
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private bool ParasiticBomb(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<Action> action)
@@ -204,6 +299,26 @@ namespace Sharky.MicroControllers.Zerg
                 return null;
             }
             return new Point2D { X = best.Key.X, Y = best.Key.Y };
+        }
+
+        private ulong? GetBestAbductUnit(IEnumerable<UnitCalculation> enemies, Dictionary<UnitTypes, int> abductPriorities)
+        {
+            ulong? bestAbductUnit = null;
+
+            var enemy = enemies.OrderBy(x => AbductPriority((UnitTypes)x.Unit.UnitType, abductPriorities)).LastOrDefault();
+
+            if (enemy is not null && abductPriorities.ContainsKey((UnitTypes)enemy.Unit.UnitType))
+            {
+                bestAbductUnit = enemy.Unit.Tag;
+            }
+
+            return bestAbductUnit;
+        }
+
+        private int AbductPriority(UnitTypes type, Dictionary<UnitTypes, int> abductPriorities)
+        {
+            int priority = 0;
+            return AirAbductPriorities.TryGetValue(type, out priority) ? priority : 0;
         }
 
         private ulong GetBestAttackUnit(UnitCalculation unitCalculation, IEnumerable<UnitCalculation> enemies, IEnumerable<UnitCalculation> splashableEnemies, float splashRadius, int threshold = 1)
