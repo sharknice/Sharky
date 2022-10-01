@@ -10,7 +10,7 @@ namespace Sharky.EnemyStrategies.Zerg
         {
             if (EnemyData.EnemyRace != SC2APIProtocol.Race.Zerg) { return false; }
 
-            return UnitCountService.EquivalentEnemyTypeCount(UnitTypes.ZERG_QUEEN) >= 8 && (UnitCountService.EquivalentEnemyTypeCount(UnitTypes.ZERG_QUEEN) * 2 > UnitCountService.EquivalentEnemyTypeCount(UnitTypes.ZERG_HATCHERY));
+            return UnitCountService.EquivalentEnemyTypeCount(UnitTypes.ZERG_QUEEN) >= 10 && (UnitCountService.EquivalentEnemyTypeCount(UnitTypes.ZERG_QUEEN) * 2 > UnitCountService.EquivalentEnemyTypeCount(UnitTypes.ZERG_HATCHERY));
         }
     }
 }
