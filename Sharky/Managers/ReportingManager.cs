@@ -84,7 +84,7 @@ namespace Sharky.Managers
             Console.WriteLine($"  Desired units:");
             foreach (var entry in DefaultSharkyBot.MacroData.DesiredUnitCounts.OrderBy(x => Enum.GetName(typeof(UnitTypes), x.Key)))
             {
-                int amountHave = DefaultSharkyBot.UnitCountService.Completed(entry.Key);
+                int amountHave = DefaultSharkyBot.UnitCountService.EquivalentTypeCompleted(entry.Key);
                 int amountHaveInProgress = DefaultSharkyBot.UnitCountService.UnitsInProgressCount(entry.Key);
                 if (entry.Value > 0 || amountHave > 0 || amountHaveInProgress > 0)
                     Console.WriteLine($"    [{entry.Key}]={entry.Value} ({amountHave} have, {amountHaveInProgress} in progress)");
