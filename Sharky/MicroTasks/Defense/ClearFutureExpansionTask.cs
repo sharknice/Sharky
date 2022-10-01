@@ -2,8 +2,10 @@
 using Sharky.Builds.BuildingPlacement;
 using Sharky.DefaultBot;
 using Sharky.MicroControllers;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Linq;
 using System.Numerics;
 
@@ -16,6 +18,7 @@ namespace Sharky.MicroTasks
         MacroData MacroData;
         EnemyData EnemyData;
         MicroTaskData MicroTaskData;
+        ActiveUnitData ActiveUnitData;
         BuildingService BuildingService;
 
         IMicroController MicroController;
@@ -27,9 +30,11 @@ namespace Sharky.MicroTasks
         
         /// <summary>
         /// only uses units when the desired bases is less than the current, claims them from the attack class then unclaims them when done
+        /// will take workers and mine minerals blocking the expansion
         /// </summary>
         public bool OnlyActiveWhenNeeded { get; set; }
         bool Needed;
+        List<UnitCalculation> BlockingMinerals;
 
         public ClearFutureExpansionTask(DefaultSharkyBot defaultSharkyBot,
             List<DesiredUnitsClaim> desiredUnitsClaims, float priority, bool enabled = true)
@@ -39,6 +44,7 @@ namespace Sharky.MicroTasks
             MacroData = defaultSharkyBot.MacroData;
             EnemyData = defaultSharkyBot.EnemyData;
             MicroTaskData = defaultSharkyBot.MicroTaskData;
+            ActiveUnitData = defaultSharkyBot.ActiveUnitData;
             BuildingService = defaultSharkyBot.BuildingService;
 
             MicroController = defaultSharkyBot.MicroController;
@@ -52,6 +58,7 @@ namespace Sharky.MicroTasks
 
             OnlyActiveWhenNeeded = false;
             Needed = false;
+            BlockingMinerals = new List<UnitCalculation>();
         }
 
         public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
@@ -82,18 +89,22 @@ namespace Sharky.MicroTasks
 
             UpdateNeeded();
 
-            if (OnlyActiveWhenNeeded && !Needed) { return actions; }
-
             if (UpdateBaseLocation())
             {
+                if (OnlyActiveWhenNeeded && !Needed)
+                {
+                    MineOutBlockingMinerals(frame, actions);
+                    return actions;
+                }
+
                 var detectors = UnitCommanders.Where(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Detector) || c.UnitCalculation.UnitClassifications.Contains(UnitClassification.DetectionCaster));
-                var nonDetectors = UnitCommanders.Where(c => !c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Detector) && !c.UnitCalculation.UnitClassifications.Contains(UnitClassification.DetectionCaster));
+                var nonDetectors = UnitCommanders.Where(c => !c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Detector) && !c.UnitCalculation.UnitClassifications.Contains(UnitClassification.DetectionCaster) && !c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker));
 
                 var vector = new Vector2(NextBaseLocation.X, NextBaseLocation.Y);
 
                 foreach (var nonDetector in nonDetectors)
                 {
-                    if (nonDetector.UnitCalculation.EnemiesThreateningDamage.Any() || Vector2.DistanceSquared(nonDetector.UnitCalculation.Position, vector) < 25)
+                    if (nonDetector.UnitCalculation.EnemiesThreateningDamage.Any() || Vector2.DistanceSquared(nonDetector.UnitCalculation.Position, vector) < 33)
                     {
                         actions.AddRange(MicroController.Attack(new List<UnitCommander> { nonDetector }, NextBaseLocation, TargetingData.ForwardDefensePoint, NextBaseLocation, frame));
                     }
@@ -114,6 +125,8 @@ namespace Sharky.MicroTasks
                         actions.AddRange(detector.Order(frame, Abilities.MOVE, NextBaseLocation));
                     }
                 }
+
+                MineOutBlockingMinerals(frame, actions);
             }
             else
             {
@@ -121,6 +134,43 @@ namespace Sharky.MicroTasks
             }
 
             return actions;
+        }
+
+        private void MineOutBlockingMinerals(int frame, List<SC2APIProtocol.Action> actions)
+        {
+            var workers = UnitCommanders.Where(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker));
+            if (BlockingMinerals.Any())
+            {
+                var mineral = BlockingMinerals.FirstOrDefault();
+                var realMineral = ActiveUnitData.NeutralUnits.Values.FirstOrDefault(u => u.Position.X == mineral.Position.X && u.Position.Y == mineral.Position.Y);
+                if (realMineral != null)
+                {
+                    foreach (var worker in workers)
+                    {
+                        if (worker.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.CARRYMINERALFIELDMINERALS))
+                        {
+                            actions.AddRange(worker.Order(frame, Abilities.HARVEST_RETURN));
+                        }
+                        else
+                        {
+                            actions.AddRange(worker.Order(frame, Abilities.HARVEST_GATHER, null, realMineral.Unit.Tag));
+                        }
+                    }
+                }
+                else
+                {
+                    BlockingMinerals.Remove(mineral);
+                }
+            }
+            else
+            {
+                foreach (var commander in UnitCommanders.Where(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker)))
+                {
+                    commander.UnitRole = UnitRole.None;
+                    commander.Claimed = false;
+                }
+                UnitCommanders.RemoveAll(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker));
+            }
         }
 
         private void UpdateNeeded()
@@ -140,12 +190,12 @@ namespace Sharky.MicroTasks
             else
             {
                 Needed = false;
-                foreach (var commander in UnitCommanders)
+                foreach (var commander in UnitCommanders.Where(u => !u.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker)))
                 {
                     commander.UnitRole = UnitRole.None;
                     commander.Claimed = false;
                 }
-                UnitCommanders.Clear();
+                UnitCommanders.RemoveAll(u => !u.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker));
             }
         }
 
@@ -174,7 +224,30 @@ namespace Sharky.MicroTasks
                     MicroTaskData[typeof(AttackTask).Name].StealUnit(commander);
                 }
             }
-            
+        }
+
+        void StealFromMiningTask()
+        {
+            if (NextBaseLocation == null) { return; }
+            var vector = new Vector2(NextBaseLocation.X, NextBaseLocation.Y);
+            if (MicroTaskData.ContainsKey(typeof(MiningTask).Name))
+            {
+                foreach (var commander in MicroTaskData[typeof(MiningTask).Name].UnitCommanders.OrderBy(c => Vector2.DistanceSquared(c.UnitCalculation.Position, vector)))
+                {
+                    commander.Claimed = true;
+                    commander.UnitRole = UnitRole.Defend;
+                    UnitCommanders.Add(commander);
+                    if (UnitCommanders.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker)) > 1)
+                    {
+                        break;
+                    }
+                }
+
+                foreach (var commander in UnitCommanders)
+                {
+                    MicroTaskData[typeof(MiningTask).Name].StealUnit(commander);
+                }
+            }
         }
 
         private bool UpdateBaseLocation()
@@ -182,6 +255,11 @@ namespace Sharky.MicroTasks
             var baseCount = BaseData.SelfBases.Count();
             if (NextBaseLocation == null || BaseCountDuringLocation != baseCount)
             {
+                BlockingMinerals = BuildingService.GetMineralsBlockingNextBase().ToList();
+                if (BlockingMinerals.Any())
+                {
+                    StealFromMiningTask();
+                }
                 var nextBase = BuildingService.GetNextBaseLocation();
                 if (nextBase != null)
                 {

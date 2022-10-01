@@ -154,7 +154,7 @@ namespace Sharky.MicroControllers.Protoss
                 }
             }
 
-            var enemies = commander.UnitCalculation.NearbyEnemies.Take(25).Where(a => !a.Attributes.Contains(Attribute.Structure) && !a.Unit.BuffIds.Contains((uint)Buffs.PSISTORM) && !a.Unit.BuffIds.Contains((uint)Buffs.ORACLESTASISTRAPTARGET)).OrderBy(u => u.Unit.Health);
+            var enemies = commander.UnitCalculation.NearbyEnemies.Take(25).Where(a => !a.Attributes.Contains(Attribute.Structure) && !a.Unit.BuffIds.Contains((uint)Buffs.PSISTORM) && !a.Unit.BuffIds.Contains((uint)Buffs.ORACLESTASISTRAPTARGET) && a.Unit.UnitType != (uint)UnitTypes.PROTOSS_ADEPTPHASESHIFT).OrderByDescending(u => u.Unit.Health);
             if (enemies.Count() > 2)
             {
                 var bestAttack = GetBestAttack(commander.UnitCalculation, enemies);

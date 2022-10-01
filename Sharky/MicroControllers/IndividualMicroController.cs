@@ -881,7 +881,7 @@ namespace Sharky.MicroControllers
                     return true;
                 }
 
-                if (commander.RetreatPathFrame + 20 < frame)
+                if (commander.RetreatPathFrame + 2 < frame)
                 {
                     if (commander.UnitCalculation.Unit.IsFlying)
                     {
@@ -908,7 +908,7 @@ namespace Sharky.MicroControllers
         {
             action = null;
 
-            var attacks = commander.UnitCalculation.EnemiesThreateningDamage;
+            var attacks = commander.UnitCalculation.EnemiesThreateningDamage.Where(e => e.FrameLastSeen > frame - 5);
             if (AvoidDamageList(commander, target, defensivePoint, attacks, frame, alwaysRun, out action)) { return true; }
 
             return false;

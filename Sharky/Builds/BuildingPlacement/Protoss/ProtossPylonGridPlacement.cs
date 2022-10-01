@@ -143,6 +143,11 @@ namespace Sharky.Builds.BuildingPlacement
                             {
                                 if (!BuildingService.HasAnyCreep(x, y, size / 2.0f) && !BuildingService.BlocksResourceCenter(x, y, 1))
                                 {
+                                    if (BuildingService.InRangeOfEnemy(x, y, size))
+                                    {
+                                        return null;
+                                    }
+
                                     return new Point2D { X = x, Y = y };
                                 }
                             }

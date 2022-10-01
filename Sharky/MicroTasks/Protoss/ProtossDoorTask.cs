@@ -331,7 +331,7 @@ namespace Sharky.MicroTasks
 
             if (commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_ADEPT)
             {
-                if (commander.UnitCalculation.NearbyEnemies.Any(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_ADEPTPHASESHIFT))
+                if (commander.UnitCalculation.NearbyEnemies.Any(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_ADEPTPHASESHIFT && Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position) < 4))
                 {
                     NeedAdept = true;
                     if (commander.AbilityOffCooldown(Abilities.EFFECT_ADEPTPHASESHIFT, frame, SharkyOptions.FramesPerSecond, SharkyUnitData))

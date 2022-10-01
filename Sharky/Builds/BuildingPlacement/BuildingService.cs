@@ -102,9 +102,9 @@ namespace Sharky.Builds.BuildingPlacement
             return false;
         }
 
-        public bool BlockedByUnits(float x, float y, float radius, float padding = .5f, ulong tag = 0)
+        public bool BlockedByUnits(float x, float y, float radius, UnitCalculation unitCalculation)
         {
-            if (ActiveUnitData.Commanders.Any(c => c.Key != tag && !c.Value.UnitCalculation.Unit.IsFlying && BuildingBlocks(x, y, radius, c.Value.UnitCalculation.Unit)))
+            if (unitCalculation.NearbyAllies.Any(c => !c.Unit.IsFlying && BuildingBlocks(x, y, radius, c.Unit)))
             {
                 return true;
             }
@@ -145,6 +145,37 @@ namespace Sharky.Builds.BuildingPlacement
             }
 
             return false;
+        }
+
+        public bool BlockedByStructures(float x, float y, float radius, float padding = .5f, ulong tag = 0)
+        {
+            foreach (var neutralUnit in ActiveUnitData.NeutralUnits.Where(u => Vector2.DistanceSquared(new Vector2(x, y), u.Value.Position) < (u.Value.Unit.Radius + padding + radius) * (u.Value.Unit.Radius + padding + radius)))
+            {
+                if (!neutralUnit.Value.UnitTypeData.Name.Contains("MineralField"))
+                {
+                    return true;
+                }
+            }
+
+            if (ActiveUnitData.Commanders.Any(c => c.Key != tag && !c.Value.UnitCalculation.Attributes.Contains(SC2APIProtocol.Attribute.Structure) &&
+                (c.Value.UnitCalculation.Unit.BuildProgress < 1 || c.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED || c.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.ZERG_EGG || c.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.ZERG_LARVA) &&
+                BuildingBlocks(x, y, radius, c.Value.UnitCalculation.Unit)))
+            {
+                return true;
+            }
+
+            if (ActiveUnitData.Commanders.Any(c => c.Key != tag &&
+                (c.Value.UnitCalculation.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && !c.Value.UnitCalculation.Unit.IsFlying && BuildingBlocks(x, y, radius, c.Value.UnitCalculation.Unit))))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public IEnumerable<UnitCalculation> BlockedByMinerals(float x, float y, float radius, float padding = .5f, ulong tag = 0)
+        {
+            return ActiveUnitData.NeutralUnits.Values.Where(u => u.UnitTypeData.Name.Contains("MineralField") && MineralBlocks(x, y, radius, u.Unit));
         }
 
         bool MineralBlocks(float x, float y, float radius, Unit mineral)
@@ -204,6 +235,17 @@ namespace Sharky.Builds.BuildingPlacement
 
             if (blocked) { return true; }
             return !SameHeight(x, y, radius);
+        }
+
+        public bool InRangeOfEnemy(float x, float y, float radius)
+        {
+            if (x - radius < 0 || y - radius < 0 || x + radius >= MapData.MapWidth || y + radius >= MapData.MapHeight)
+            {
+                return false;
+            }
+            return MapData.Map[(int)x][(int)y].EnemyGroundDpsInRange == 0 && MapData.Map[(int)x][(int)y + (int)radius].EnemyGroundDpsInRange == 0 && MapData.Map[(int)x][(int)y - (int)radius].EnemyGroundDpsInRange == 0
+                && MapData.Map[(int)x + (int)radius][(int)y].EnemyGroundDpsInRange == 0 && MapData.Map[(int)x + (int)radius][(int)y + (int)radius].EnemyGroundDpsInRange == 0 && MapData.Map[(int)x + (int)radius][(int)y - (int)radius].EnemyGroundDpsInRange == 0
+                && MapData.Map[(int)x - (int)radius][(int)y].EnemyGroundDpsInRange == 0 && MapData.Map[(int)x - (int)radius][(int)y + (int)radius].EnemyGroundDpsInRange == 0 && MapData.Map[(int)x - (int)radius][(int)y - (int)radius].EnemyGroundDpsInRange == 0;
         }
 
         public bool HasCreep(float x, float y, float radius)
@@ -300,13 +342,33 @@ namespace Sharky.Builds.BuildingPlacement
 
             foreach (var openBase in openBases)
             {
-                if (AreaBuildable(openBase.Location.X, openBase.Location.Y, 2) && !Blocked(openBase.Location.X, openBase.Location.Y, 2.5f))
+                if (AreaBuildable(openBase.Location.X, openBase.Location.Y, 2))
                 {
+                    if (!Blocked(openBase.Location.X, openBase.Location.Y, 2.5f))
+                    {
+                        return openBase;
+                    }
                     return openBase;
                 }
 
             }
             return null;
+        }
+
+        public IEnumerable<UnitCalculation> GetMineralsBlockingNextBase()
+        {
+            var resourceCenters = ActiveUnitData.SelfUnits.Values.Where(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter));
+            var openBases = BaseData.BaseLocations.Where(b => !resourceCenters.Any(r => Vector2.DistanceSquared(r.Position, new Vector2(b.Location.X, b.Location.Y)) < 25));
+
+            foreach (var openBase in openBases)
+            {
+                if (AreaBuildable(openBase.Location.X, openBase.Location.Y, 2) && !BlockedByStructures(openBase.Location.X, openBase.Location.Y, 2.5f))
+                {
+                    return BlockedByMinerals(openBase.Location.X, openBase.Location.Y, 2.5f);
+                }
+
+            }
+            return new List<UnitCalculation>();
         }
     }
 }

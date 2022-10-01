@@ -162,6 +162,11 @@ namespace Sharky.Builds.BuildingPlacement
                     return null;
                 }
 
+                if (BuildingService.InRangeOfEnemy(x, y, size))
+                {
+                    return null;
+                }
+
                 if (ActiveUnitData.Commanders.Values.Any(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && c.UnitCalculation.Unit.BuildProgress == 1 && Vector2.DistanceSquared(c.UnitCalculation.Position, vector) < 42.25))
                 {
                     return new Point2D { X = x, Y = y };

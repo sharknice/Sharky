@@ -74,6 +74,7 @@ namespace Sharky.Builds.BuildingPlacement
                 if (closest == null || point != null && Vector2.DistanceSquared(new Vector2(point.X, point.Y), targetVector) < Vector2.DistanceSquared(new Vector2(closest.X, closest.Y), targetVector))
                 {
                     closest = point;
+                    if (closest != null) { return closest; }
                 }
                 x += .25f;
             }
@@ -84,6 +85,7 @@ namespace Sharky.Builds.BuildingPlacement
                 if (closest == null || point != null && Vector2.DistanceSquared(new Vector2(point.X, point.Y), targetVector) < Vector2.DistanceSquared(new Vector2(closest.X, closest.Y), targetVector))
                 {
                     closest = point;
+                    if (closest != null) { return closest; }
                 }
                 x -= .25f;
             }
@@ -101,21 +103,25 @@ namespace Sharky.Builds.BuildingPlacement
                 if (closest == null || point != null && Vector2.DistanceSquared(new Vector2(point.X, point.Y), target) < Vector2.DistanceSquared(new Vector2(closest.X, closest.Y), target))
                 {
                     closest = point;
+                    if (closest != null) { return closest; }
                 }
                 var point2 = GetValidPoint(x + 3, y + 2, baseHeight, target, powerSource);
                 if (closest == null || point2 != null && Vector2.DistanceSquared(new Vector2(point2.X, point2.Y), target) < Vector2.DistanceSquared(new Vector2(closest.X, closest.Y), target))
                 {
                     closest = point2;
+                    if (closest != null) { return closest; }
                 }
                 var point3 = GetValidPoint(x + 1, y + 5, baseHeight, target, powerSource);
                 if (closest == null || point3 != null && Vector2.DistanceSquared(new Vector2(point3.X, point3.Y), target) < Vector2.DistanceSquared(new Vector2(closest.X, closest.Y), target))
                 {
                     closest = point3;
+                    if (closest != null) { return closest; }
                 }
                 var point4 = GetValidPoint(x - 2, y + 4, baseHeight, target, powerSource);
                 if (closest == null || point4 != null && Vector2.DistanceSquared(new Vector2(point4.X, point4.Y), target) < Vector2.DistanceSquared(new Vector2(closest.X, closest.Y), target))
                 {
                     closest = point4;
+                    if (closest != null) { return closest; }
                 }
                 y += .25f;
             }
@@ -126,21 +132,25 @@ namespace Sharky.Builds.BuildingPlacement
                 if (closest == null || point != null && Vector2.DistanceSquared(new Vector2(point.X, point.Y), target) < Vector2.DistanceSquared(new Vector2(closest.X, closest.Y), target))
                 {
                     closest = point;
+                    if (closest != null) { return closest; }
                 }
                 var point2 = GetValidPoint(x + 3, y + 2, baseHeight, target, powerSource);
                 if (closest == null || point2 != null && Vector2.DistanceSquared(new Vector2(point2.X, point2.Y), target) < Vector2.DistanceSquared(new Vector2(closest.X, closest.Y), target))
                 {
                     closest = point2;
+                    if (closest != null) { return closest; }
                 }
                 var point3 = GetValidPoint(x + 1, y + 5, baseHeight, target, powerSource);
                 if (closest == null || point3 != null && Vector2.DistanceSquared(new Vector2(point3.X, point3.Y), target) < Vector2.DistanceSquared(new Vector2(closest.X, closest.Y), target))
                 {
                     closest = point3;
+                    if (closest != null) { return closest; }
                 }
                 var point4 = GetValidPoint(x - 2, y + 4, baseHeight, target, powerSource);
                 if (closest == null || point4 != null && Vector2.DistanceSquared(new Vector2(point4.X, point4.Y), target) < Vector2.DistanceSquared(new Vector2(closest.X, closest.Y), target))
                 {
                     closest = point4;
+                    if (closest != null) { return closest; }
                 }
                 y -= .25f;
             }
@@ -155,7 +165,7 @@ namespace Sharky.Builds.BuildingPlacement
             }
 
             if (x >= 0 && y >= 0 && x < MapDataService.MapData.MapWidth && y < MapDataService.MapData.MapHeight &&
-                BuildingService.AreaBuildable(x, y, .5f) && !BuildingService.Blocked(x, y, .75f, 0f) && !BuildingService.BlockedByUnits(x, y, .75f, 0f) && Powered(powerSource, x, y))
+                BuildingService.AreaBuildable(x, y, .5f) && !BuildingService.Blocked(x, y, .75f, 0f) && !BuildingService.BlockedByUnits(x, y, .75f, powerSource) && Powered(powerSource, x, y))
             {
                 return new Point2D { X = x, Y = y };
             }
