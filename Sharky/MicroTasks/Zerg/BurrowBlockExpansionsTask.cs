@@ -7,7 +7,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Sharky.MicroTasks
+namespace Sharky.MicroTasks.Zerg
 {
     public class BurrowBlockExpansionsTask : MicroTask
     {
@@ -17,7 +17,7 @@ namespace Sharky.MicroTasks
         SharkyUnitData UnitData;
         BaseData BaseData;
 
-        public BurrowBlockExpansionsTask(DefaultSharkyBot defaultSharkyBot, float priority, IndividualMicroController individualMicroController, SharkyUnitData unitData, bool enabled = true)
+        public BurrowBlockExpansionsTask(DefaultSharkyBot defaultSharkyBot, float priority, IndividualMicroController individualMicroController, SharkyUnitData unitData, bool enabled)
         {
             UnitCommanders = new List<UnitCommander>();
             EnemyData = defaultSharkyBot.EnemyData;

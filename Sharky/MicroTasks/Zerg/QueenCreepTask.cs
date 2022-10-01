@@ -8,7 +8,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Sharky.MicroTasks
+namespace Sharky.MicroTasks.Zerg
 {
     public class QueenCreepTask : MicroTask
     {
@@ -19,7 +19,7 @@ namespace Sharky.MicroTasks
 
         Dictionary<UnitCommander, Point2D> CreepPoints = new Dictionary<UnitCommander, Point2D>();
 
-        public QueenCreepTask(DefaultSharkyBot defaultSharkyBot, float priority, QueenMicroController queenMicroController, bool enabled = true)
+        public QueenCreepTask(DefaultSharkyBot defaultSharkyBot, float priority, QueenMicroController queenMicroController, bool enabled)
         {
             UnitCommanders = new List<UnitCommander>();
             EnemyData = defaultSharkyBot.EnemyData;

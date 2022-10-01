@@ -1,4 +1,4 @@
-﻿namespace Sharky.MicroTasks
+﻿namespace Sharky.MicroTasks.Zerg
 {
     public class InjectData
     {

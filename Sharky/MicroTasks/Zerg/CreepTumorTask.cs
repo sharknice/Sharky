@@ -1,11 +1,9 @@
-﻿using Sharky.Chat;
-using Sharky.DefaultBot;
-using Sharky.MicroTasks.Zerg;
+﻿using Sharky.DefaultBot;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Sharky.MicroTasks
+namespace Sharky.MicroTasks.Zerg
 {
     public class CreepTumorTask : MicroTask
     {
@@ -15,7 +13,7 @@ namespace Sharky.MicroTasks
 
         CreepTumorPlacementFinder CreepTumorPlacementFinder;
 
-        public CreepTumorTask(DefaultSharkyBot defaultSharkyBot, QueenCreepTask queenCreepAndDefendTask, int desiredCreepSpreaders, float priority, bool enabled = true)
+        public CreepTumorTask(DefaultSharkyBot defaultSharkyBot, QueenCreepTask queenCreepAndDefendTask, int desiredCreepSpreaders, float priority, bool enabled)
         {
             EnemyData = defaultSharkyBot.EnemyData;
             SharkyOptions = defaultSharkyBot.SharkyOptions;

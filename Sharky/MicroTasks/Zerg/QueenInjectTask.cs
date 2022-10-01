@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
-namespace Sharky.MicroTasks
+namespace Sharky.MicroTasks.Zerg
 {
     public class QueenInjectTask : MicroTask
     {
@@ -19,7 +19,7 @@ namespace Sharky.MicroTasks
 
         List<InjectData> HatcheryQueenPairing = new List<InjectData>();
 
-        public QueenInjectTask(DefaultSharkyBot defaultSharkyBot, float priority, QueenMicroController queenMicroController, bool enabled = true)
+        public QueenInjectTask(DefaultSharkyBot defaultSharkyBot, float priority, QueenMicroController queenMicroController, bool enabled)
         {
             UnitCommanders = new List<UnitCommander>();
             EnemyData = defaultSharkyBot.EnemyData;
