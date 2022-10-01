@@ -43,6 +43,14 @@ namespace Sharky.MicroTasks
             if (EnemyData.SelfRace != Race.Zerg)
                 return;
 
+            // Remove morphed overlords
+            foreach (var commander in UnitCommanders.Where(commander => commander.UnitCalculation.Unit.UnitType != (int)UnitTypes.ZERG_OVERLORD))
+            {
+                commander.UnitRole = UnitRole.None;
+                commander.Claimed = false;
+            }
+            UnitCommanders.RemoveAll(commander => commander.UnitRole != UnitRole.Scout);
+
             foreach (var commander in commanders)
             {
                 if (!commander.Value.Claimed && commander.Value.UnitCalculation.Unit.UnitType == (int)UnitTypes.ZERG_OVERLORD)
@@ -52,8 +60,6 @@ namespace Sharky.MicroTasks
                     UnitCommanders.Add(commander.Value);
                 }
             }
-
-            UnitCommanders.RemoveAll(u => u.UnitRole != UnitRole.Scout || u.UnitCalculation.Unit.UnitType != (int)UnitTypes.ZERG_OVERLORD);
         }
 
         public override IEnumerable<SC2APIProtocol.Action> PerformActions(int frame)

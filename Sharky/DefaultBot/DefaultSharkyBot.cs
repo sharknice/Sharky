@@ -452,6 +452,7 @@ namespace Sharky.DefaultBot
             var burrowBlockExpansions = new BurrowBlockExpansionsTask(this, 0.9f, new IndividualMicroController(this, SharkySimplePathFinder, MicroPriority.StayOutOfRange, false), SharkyUnitData);
             var burrowDronesFromHarras = new BurrowDronesFromHarras(this, 0.5f);
             var creepTumorTask = new CreepTumorTask(this, queenCreepTask, 1, 1.11f);
+            var changelingScout = new ChangelingScoutTask(this, false, 0.25f);
             var attackTask = new AttackTask(MicroController, TargetingData, ActiveUnitData, DefenseService, MacroData, AttackData, TargetingService, MicroTaskData, SharkyUnitData, new ArmySplitter(AttackData, TargetingData, ActiveUnitData, DefenseService, TargetingService, TerranWallService, MicroController), new EnemyCleanupService(MicroController, DamageService), 2);
             var adeptWorkerHarassTask = new AdeptWorkerHarassTask(BaseData, TargetingData, adeptMicroController, adeptShadeMicroController, false);
             var oracleWorkerHarassTask = new OracleWorkerHarassTask(this, oracleHarassMicroController, 1, false);
@@ -521,6 +522,7 @@ namespace Sharky.DefaultBot
             MicroTaskData[protossDoorTask.GetType().Name] = protossDoorTask;
             MicroTaskData[zealotHarassTask.GetType().Name] = zealotHarassTask;
             MicroTaskData[clearFutureExpansionTask.GetType().Name] = clearFutureExpansionTask;
+            MicroTaskData[changelingScout.GetType().Name] = changelingScout;
 
             MicroManager = new MicroManager(ActiveUnitData, MicroTaskData, SharkyOptions);
             Managers.Add(MicroManager);

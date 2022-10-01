@@ -56,7 +56,6 @@ namespace Sharky.MicroControllers.Zerg
                 return false;
             }
 
-            // TODO: transfuse target logic
             var transfuseTarget = FindTransfuseTarget(commander.UnitCalculation);
             if (transfuseTarget.Item1 != null)
             {

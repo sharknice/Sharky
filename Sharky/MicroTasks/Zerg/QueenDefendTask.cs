@@ -6,12 +6,12 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Sharky.MicroTasks
+namespace Sharky.MicroTasks.Zerg
 {
     public class QueenDefendTask : MicroTask
     {
         // Max distance larva queens would go to help defend
-        const float maxDistanceInjectingQueen = 20;
+        const float maxDistanceInjectingQueen = 25;
 
         // Max distance any queen would go to help defend
         const float maxDistance = 50;
@@ -20,7 +20,7 @@ namespace Sharky.MicroTasks
         ActiveUnitData ActiveUnitData;
         QueenMicroController QueenMicroController;
 
-        public QueenDefendTask(DefaultSharkyBot defaultSharkyBot, float priority, QueenMicroController queenMicroController, bool enabled = true)
+        public QueenDefendTask(DefaultSharkyBot defaultSharkyBot, float priority, QueenMicroController queenMicroController, bool enabled)
         {
             UnitCommanders = new List<UnitCommander>();
             EnemyData = defaultSharkyBot.EnemyData;
@@ -113,7 +113,7 @@ namespace Sharky.MicroTasks
 
             var enemiesDistances = ActiveUnitData.EnemyUnits.Values
                 .Select(u => new { unit = u, distance = u.Position.Distance(commander.UnitCalculation.Position) })
-                .Where(u => u.distance < defendDistance && (EnemyData.EnemyAggressivityData.DistanceGrid.GetDist(u.unit.Position.X, u.unit.Position.Y, true, false) < 12))
+                .Where(u => u.distance < defendDistance && (EnemyData.EnemyAggressivityData.DistanceGrid.GetDist(u.unit.Position.X, u.unit.Position.Y, true, false) <= 14))
                 .OrderBy(x => x.distance);
 
             return enemiesDistances.FirstOrDefault()?.unit.Position.ToPoint2D();

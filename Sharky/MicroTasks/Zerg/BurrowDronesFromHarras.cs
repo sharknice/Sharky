@@ -6,7 +6,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Sharky.MicroTasks
+namespace Sharky.MicroTasks.Zerg
 {
     public class BurrowDronesFromHarras : MicroTask
     {
@@ -20,7 +20,7 @@ namespace Sharky.MicroTasks
 
         private bool tagged = false;
 
-        public BurrowDronesFromHarras(DefaultSharkyBot defaultSharkyBot, float priority, bool enabled = true)
+        public BurrowDronesFromHarras(DefaultSharkyBot defaultSharkyBot, float priority, bool enabled)
         {
             UnitCommanders = new List<UnitCommander>();
             EnemyData = defaultSharkyBot.EnemyData;
@@ -51,7 +51,8 @@ namespace Sharky.MicroTasks
             foreach (var commander in commanders.Where(commander => (commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.ZERG_DRONEBURROWED 
                 || (commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.ZERG_DRONE && (commander.Value.UnitRole == UnitRole.Minerals || commander.Value.UnitRole == UnitRole.Gas || commander.Value.UnitRole == UnitRole.Hide)))))
             {
-                if (!UnitCommanders.Contains(commander.Value) && BurrowWanted(commander.Value.UnitCalculation))
+                if (!UnitCommanders.Contains(commander.Value)
+                    && (commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.ZERG_DRONEBURROWED || BurrowWanted(commander.Value.UnitCalculation)))
                 {
                     if (!tagged)
                     {

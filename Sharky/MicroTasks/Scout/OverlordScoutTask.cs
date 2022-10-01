@@ -55,6 +55,20 @@ namespace Sharky.MicroTasks
             if (EnemyData.SelfRace != Race.Zerg)
                 return;
 
+            // Remove morphed overlords
+            foreach (var commander in UnitCommanders.Where(commander => commander.UnitCalculation.Unit.UnitType != (int)UnitTypes.ZERG_OVERLORD))
+            {
+                commander.UnitRole = UnitRole.None;
+                commander.Claimed = false;
+                Enabled = false;
+            }
+            UnitCommanders.RemoveAll(commander => commander.UnitRole != UnitRole.Scout);
+
+            if (!Enabled)
+            {
+                return;
+            }
+
             if (UnitCommanders.Count == 0)
             {
                 foreach (var commander in commanders)
