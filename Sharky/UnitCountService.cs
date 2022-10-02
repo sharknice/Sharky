@@ -487,5 +487,17 @@ namespace Sharky
         {
             return SharkyUnitData.ResearchedUpgrades.Contains((uint)upgrade);
         }
+
+        public float UpgradeProgress(Upgrades upgrade)
+        {
+            if (SharkyUnitData.ResearchedUpgrades.Contains((uint)upgrade)) { return 1; }
+            var unitData = SharkyUnitData.UpgradeData[upgrade];
+            var upgrader = ActiveUnitData.SelfUnits.Values.FirstOrDefault(u => (unitData.ProducingUnits.Contains((UnitTypes)u.Unit.UnitType)) && u.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
+            if (upgrader != null)
+            {
+                return upgrader.Unit.Orders.FirstOrDefault(o => o.AbilityId == (uint)unitData.Ability).Progress;
+            }
+            return 0;
+        }
     }
 }
