@@ -10,7 +10,14 @@ namespace Sharky.EnemyStrategies.Zerg
         {
             if (EnemyData.EnemyRace != SC2APIProtocol.Race.Zerg) { return false; }
 
-            return UnitCountService.EquivalentEnemyTypeCount(UnitTypes.ZERG_QUEEN) >= 10 && (UnitCountService.EquivalentEnemyTypeCount(UnitTypes.ZERG_QUEEN) * 2 > UnitCountService.EquivalentEnemyTypeCount(UnitTypes.ZERG_HATCHERY));
+            var queens = UnitCountService.EquivalentEnemyTypeCount(UnitTypes.ZERG_QUEEN);
+
+            if (queens > 4 && queens > UnitCountService.EnemyCount(UnitTypes.ZERG_ZERGLING) + UnitCountService.EnemyCount(UnitTypes.ZERG_ROACH))
+            {
+                return true;
+            }
+
+            return queens >= 10 && (queens * 2 > UnitCountService.EquivalentEnemyTypeCount(UnitTypes.ZERG_HATCHERY));
         }
     }
 }

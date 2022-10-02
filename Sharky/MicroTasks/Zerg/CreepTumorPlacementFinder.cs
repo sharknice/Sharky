@@ -179,7 +179,7 @@ namespace Sharky.MicroTasks.Zerg
             if (highest == null)
                 return null;
 
-            return ZergBuildingPlacement.FindPlacement(highest, UnitTypes.ZERG_CREEPTUMORQUEEN, 1, maxDistance: 10, ignoreResourceProximity: true, allowBlockBase: false, requireVision: true);
+            return ZergBuildingPlacement.FindPlacement(highest, UnitTypes.ZERG_CREEPTUMORQUEEN, 3, maxDistance: 10, ignoreResourceProximity: true, allowBlockBase: false, requireVision: true);
         }
     }
 }

@@ -215,10 +215,17 @@ namespace Sharky.Builds.BuildingPlacement
 
         public bool BlocksResourceCenter(float x, float y, float radius)
         {
-            if (BaseData.BaseLocations.Any(b => System.Drawing.RectangleF.Intersect(new System.Drawing.RectangleF(x, y, radius * 2, radius * 2), new System.Drawing.RectangleF(b.Location.X, b.Location.Y, 5, 5)) != System.Drawing.RectangleF.Empty))
+            foreach (var baseLocation in BaseData.BaseLocations)
             {
-                return true;
+                var rectangle = new System.Drawing.RectangleF(x - radius, y - radius, (radius * 2), (radius * 2));
+                var existing = new System.Drawing.RectangleF(baseLocation.Location.X - 2.5f, baseLocation.Location.Y - 2.5f, 5, 5);
+                var intersection = System.Drawing.RectangleF.Intersect(rectangle, existing);
+                if (intersection.Width != 0 && intersection.Height != 0)
+                {
+                    return true;
+                }
             }
+
             return false;
         }
 
