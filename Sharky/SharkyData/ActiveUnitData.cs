@@ -24,13 +24,6 @@ namespace Sharky
         public ConcurrentDictionary<ulong, UnitCommander> Commanders { get; set; }
         public List<ulong> DeadUnits { get; set; }
 
-        /// <summary>
-        /// Gets highest finished status of units of given type. Useful when you want to know when your tech building finishes.
-        /// </summary>
-        /// <param name="unitType"></param>
-        /// <returns></returns>
-        public float TechBuildProgress(UnitTypes unitType) => SelfUnits.Values.Where(u => u.Unit.UnitType == (uint)unitType).Select(u => u.Unit.BuildProgress).DefaultIfEmpty().Max();
-
         public int EnemyDeaths { get; set; }
         public int SelfDeaths { get; set; }
         public int NeutralDeaths { get; set; }
