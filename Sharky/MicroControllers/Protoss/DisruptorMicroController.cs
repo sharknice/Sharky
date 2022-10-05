@@ -22,6 +22,11 @@ namespace Sharky.MicroControllers.Protoss
         {
             action = null;
 
+            if (OffensiveAbility(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action)) 
+            { 
+                return true; 
+            }
+
             if (AvoidDamage(commander, target, defensivePoint, frame, out action))
             {
                 return true;
@@ -39,14 +44,17 @@ namespace Sharky.MicroControllers.Protoss
                 return false;
             }
 
-            if (commander.UnitCalculation.NearbyAllies.Any(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_DISRUPTORPHASED && Vector2.DistanceSquared(a.Position, commander.UnitCalculation.Position) < PurificationNovaRange * PurificationNovaRange))
+            if (!commander.UnitCalculation.EnemiesThreateningDamage.Any())
             {
-                return false;
-            }
+                if (commander.UnitCalculation.NearbyAllies.Any(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_DISRUPTORPHASED && Vector2.DistanceSquared(a.Position, commander.UnitCalculation.Position) < PurificationNovaRange * PurificationNovaRange))
+                {
+                    return false;
+                }
 
-            if (lastPurificationFrame >= frame - 5)
-            {
-                return false;
+                if (lastPurificationFrame >= frame - 5)
+                {
+                    return false;
+                }
             }
 
             var attacks = new List<UnitCalculation>();
@@ -63,7 +71,7 @@ namespace Sharky.MicroControllers.Protoss
 
             if (attacks.Count > 0)
             {
-                var oneShotKills = attacks.OrderBy(a => GetPurificationNovaDamage(a.Unit, SharkyUnitData.UnitData[(UnitTypes)a.Unit.UnitType])).ThenByDescending(u => u.Dps);
+                var oneShotKills = attacks.OrderByDescending(a => GetPurificationNovaDamage(a.Unit, SharkyUnitData.UnitData[(UnitTypes)a.Unit.UnitType])).ThenByDescending(u => u.Dps);
                 if (oneShotKills.Count() > 0)
                 {
                     var bestAttack = GetBestAttack(commander.UnitCalculation, oneShotKills, attacks);
@@ -120,7 +128,7 @@ namespace Sharky.MicroControllers.Protoss
             return false;
         }
 
-        private float GetPurificationNovaDamage(Unit unit, UnitTypeData unitTypeData)
+        protected float GetPurificationNovaDamage(Unit unit, UnitTypeData unitTypeData)
         {
             float bonusDamage = 0;
             if (unit.Shield > 0)
@@ -131,7 +139,7 @@ namespace Sharky.MicroControllers.Protoss
             return 145 + bonusDamage - unitTypeData.Armor; // TODO: armor upgrades
         }
 
-        private Point2D GetBestAttack(UnitCalculation unitCalculation, IEnumerable<UnitCalculation> enemies, IList<UnitCalculation> splashableEnemies)
+        protected Point2D GetBestAttack(UnitCalculation unitCalculation, IEnumerable<UnitCalculation> enemies, IList<UnitCalculation> splashableEnemies)
         {
             float splashRadius = 1.5f;
             var killCounts = new Dictionary<Point, float>();
@@ -155,9 +163,18 @@ namespace Sharky.MicroControllers.Protoss
                 killCounts[enemyAttack.Unit.Pos] = killCount;
             }
 
+            if (killCounts.Count() == 0)
+            {
+                return null;
+            }
+
             var best = killCounts.OrderByDescending(x => x.Value).FirstOrDefault();
 
-            if (best.Value < 3 && unitCalculation.NearbyAllies.Take(25).Any(u => u.UnitClassifications.Contains(UnitClassification.ArmyUnit) && u.Unit.UnitType != (uint)UnitTypes.PROTOSS_DISRUPTOR)) // only attack if going to kill 3+ units or no army to help defend
+            // only go for 3+ unit clumps unless against queens, thors, or tanks, or if no other friendly army to kill enemy
+            if (!unitCalculation.EnemiesThreateningDamage.Any() &&
+                best.Value < 3 && 
+                unitCalculation.NearbyAllies.Take(25).Any(u => u.UnitClassifications.Contains(UnitClassification.ArmyUnit) && u.Unit.UnitType != (uint)UnitTypes.PROTOSS_DISRUPTOR) && 
+                !enemies.Any(e => e.Unit.UnitType == (uint)UnitTypes.ZERG_QUEEN || e.Unit.UnitType == (uint)UnitTypes.TERRAN_THOR || e.Unit.UnitType == (uint)UnitTypes.TERRAN_THORAP || e.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANK || e.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED))
             {
                 return null;
             }
@@ -174,6 +191,41 @@ namespace Sharky.MicroControllers.Protoss
             }
 
             return base.Retreat(commander, defensivePoint, groupCenter, frame);
+        }
+
+        protected override bool MaintainRange(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
+
+            if (MicroPriority == MicroPriority.JustLive || MicroPriority == MicroPriority.AttackForward || commander.UnitCalculation.Unit.IsHallucination)
+            {
+                return false;
+            }
+
+            if (commander.UnitCalculation.Unit.ShieldMax > 0 && commander.UnitCalculation.Unit.Shield < 1)
+            {
+                return false;
+            }
+
+            var range = 9f;
+            var enemiesInRange = commander.UnitCalculation.NearbyEnemies.Take(25).Where(enemyAttack => DamageService.CanDamage(enemyAttack, commander.UnitCalculation) && InRange(commander.UnitCalculation.Position, enemyAttack.Position, range + commander.UnitCalculation.Unit.Radius + enemyAttack.Unit.Radius + AvoidDamageDistance));
+
+            var closestEnemy = enemiesInRange.OrderBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+            if (closestEnemy == null)
+            {
+                return false;
+            }
+
+            var avoidPoint = GetPositionFromRange(commander, closestEnemy.Unit.Pos, commander.UnitCalculation.Unit.Pos, range + commander.UnitCalculation.Unit.Radius + closestEnemy.Unit.Radius);
+            if (!commander.UnitCalculation.Unit.IsFlying && commander.UnitCalculation.Unit.UnitType != (uint)UnitTypes.PROTOSS_COLOSSUS)
+            {
+                if (MapDataService.MapHeight(avoidPoint) != MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos))
+                {
+                    return false;
+                }
+            }
+            action = commander.Order(frame, Abilities.MOVE, avoidPoint);
+            return true;
         }
     }
 }

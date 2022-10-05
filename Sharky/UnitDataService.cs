@@ -84,6 +84,10 @@ namespace Sharky
             {
                 return SharkyUnitData.UnitData[UnitTypes.PROTOSS_ADEPT].Weapons[0];
             }
+            if (unitType == UnitTypes.PROTOSS_DISRUPTOR)
+            {
+                return new Weapon { Attacks = 1, Damage = 145, Range = 13, Type = Weapon.Types.TargetType.Ground, Speed = 20f };
+            }
 
             return null;
         }

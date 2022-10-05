@@ -173,6 +173,23 @@ namespace Sharky
             return action;
         }
 
+        public float AbilityCooldown(Abilities ability, int frame, float framesPerSecond, SharkyUnitData sharkyUnitData)
+        {
+            if (AbilityOrderTimes.ContainsKey(ability))
+            {
+                var time = (frame - AbilityOrderTimes[ability]) / framesPerSecond;
+                if (time > sharkyUnitData.AbilityCooldownTimes[ability])
+                {
+                    return 0;
+                }
+                else
+                {
+                    return time / sharkyUnitData.AbilityCooldownTimes[ability];
+                }
+            }
+            return 0;
+        }
+
         public bool AbilityOffCooldown(Abilities ability, int frame, float framesPerSecond, SharkyUnitData sharkyUnitData)
         {
             if (AbilityOrderTimes.ContainsKey(ability))

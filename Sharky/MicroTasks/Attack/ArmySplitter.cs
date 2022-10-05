@@ -64,7 +64,7 @@ namespace Sharky.MicroTasks.Attack
 
             if (LastSplitFrame + 25 < frame)
             {
-                ReSplitArmy(frame, closerEnemies, attackPoint, unitCommanders);
+                ReSplitArmy(frame, closerEnemies, attackPoint, unitCommanders, defendToDeath);
                 LastSplitFrame = frame;
             }
 
@@ -131,14 +131,14 @@ namespace Sharky.MicroTasks.Attack
             return actions;
         }
 
-        void ReSplitArmy(int frame, IEnumerable<UnitCalculation> closerEnemies, Point2D attackPoint, IEnumerable<UnitCommander> unitCommanders)
+        void ReSplitArmy(int frame, IEnumerable<UnitCalculation> closerEnemies, Point2D attackPoint, IEnumerable<UnitCommander> unitCommanders, bool defendToDeath)
         {
             ArmySplits = new List<ArmySplits>();
             var enemyGroups = DefenseService.GetEnemyGroups(closerEnemies);
             AvailableCommanders = unitCommanders.ToList();
             foreach (var enemyGroup in enemyGroups)
             {
-                var selfGroup = DefenseService.GetDefenseGroup(enemyGroup, AvailableCommanders);
+                var selfGroup = DefenseService.GetDefenseGroup(enemyGroup, AvailableCommanders, defendToDeath);
                 if (selfGroup.Count() > 0)
                 {
                     AvailableCommanders.RemoveAll(a => selfGroup.Any(s => a.UnitCalculation.Unit.Tag == s.UnitCalculation.Unit.Tag));

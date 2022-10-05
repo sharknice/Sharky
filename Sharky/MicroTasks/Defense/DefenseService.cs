@@ -16,7 +16,7 @@ namespace Sharky.MicroTasks
             TargetPriorityService = targetPriorityService;
         }
 
-        public List<UnitCommander> GetDefenseGroup(List<UnitCalculation> enemyGroup, List<UnitCommander> unitCommanders)
+        public List<UnitCommander> GetDefenseGroup(List<UnitCalculation> enemyGroup, List<UnitCommander> unitCommanders, bool defendToDeath)
         {
             var position = enemyGroup.FirstOrDefault().Unit.Pos;
             var enemyGroupLocation = new Vector2(position.X, position.Y);
@@ -53,6 +53,11 @@ namespace Sharky.MicroTasks
             if (ActiveUnitData.SelfUnits.Any(u => u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_SHIELDBATTERY && u.Value.Unit.IsPowered && u.Value.Unit.BuildProgress >= 1 && u.Value.Unit.Energy > 3 && Vector2.DistanceSquared(enemyGroupLocation, u.Value.Position) < 64))
             {
                 // always defend by shield batteries
+                return counterGroup;
+            }
+
+            if (defendToDeath)
+            {
                 return counterGroup;
             }
 

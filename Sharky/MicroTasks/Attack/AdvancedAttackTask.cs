@@ -89,7 +89,7 @@ namespace Sharky.MicroTasks.Attack
             {
                 if (!commander.Value.Claimed)
                 {
-                    if (commander.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.ArmyUnit) || commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_ADEPTPHASESHIFT)
+                    if (commander.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.ArmyUnit) || commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_ADEPTPHASESHIFT || commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_DISRUPTORPHASED)
                     {
                         commander.Value.Claimed = true;
                         UnitCommanders.Add(commander.Value);
@@ -287,7 +287,7 @@ namespace Sharky.MicroTasks.Attack
 
         private void RemoveTemporaryUnits()
         {
-            var undeadTypes = SharkyUnitData.UndeadTypes.Where(t => t != UnitTypes.PROTOSS_ADEPTPHASESHIFT);
+            var undeadTypes = SharkyUnitData.UndeadTypes.Where(t => t != UnitTypes.PROTOSS_ADEPTPHASESHIFT && t != UnitTypes.PROTOSS_DISRUPTORPHASED);
             UnitCommanders.RemoveAll(u => undeadTypes.Contains((UnitTypes)u.UnitCalculation.Unit.UnitType));
             SupportUnits.RemoveAll(u => undeadTypes.Contains((UnitTypes)u.UnitCalculation.Unit.UnitType));
             MainUnits.RemoveAll(u => undeadTypes.Contains((UnitTypes)u.UnitCalculation.Unit.UnitType));

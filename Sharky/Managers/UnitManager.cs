@@ -297,8 +297,12 @@ namespace Sharky.Managers
 
                 if (ActiveUnitData.Commanders.ContainsKey(allyAttack.Value.Unit.Tag))
                 {
-                    ActiveUnitData.Commanders[allyAttack.Value.Unit.Tag].ParentUnitCalculation = GetParentUnitCalculation(ActiveUnitData.Commanders[allyAttack.Value.Unit.Tag]);
-                    // TODO: set childunitcalculation and then set it back to null when it goes away
+                    var parent = GetParentUnitCalculation(ActiveUnitData.Commanders[allyAttack.Value.Unit.Tag]);
+                    ActiveUnitData.Commanders[allyAttack.Value.Unit.Tag].ParentUnitCalculation = parent;
+                    if (parent != null)
+                    {
+                        ActiveUnitData.Commanders[parent.Unit.Tag].ChildUnitCalculation = ActiveUnitData.Commanders[allyAttack.Value.Unit.Tag].UnitCalculation;
+                    }
                 }
 
                 allyAttack.Value.Attackers = GetTargettedAttacks(allyAttack.Value).ToList();
@@ -487,7 +491,10 @@ namespace Sharky.Managers
         {
             if (commander.ParentUnitCalculation != null)
             {
-                return commander.ParentUnitCalculation;
+                if (ActiveUnitData.Commanders.ContainsKey(commander.ParentUnitCalculation.Unit.Tag))
+                {
+                    return commander.ParentUnitCalculation;
+                }
             }
 
             if (commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_ADEPTPHASESHIFT)
@@ -496,6 +503,14 @@ namespace Sharky.Managers
                 if (closestAdept != null)
                 {
                     return closestAdept;
+                }
+            }
+            if (commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_DISRUPTORPHASED)
+            {
+                var closestDisruptor = commander.UnitCalculation.NearbyAllies.Where(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_DISRUPTOR).OrderBy(a => Vector2.DistanceSquared(a.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+                if (closestDisruptor != null)
+                {
+                    return closestDisruptor;
                 }
             }
 

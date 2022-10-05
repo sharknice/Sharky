@@ -21,12 +21,12 @@ namespace Sharky.MicroControllers.Protoss
         {
             List<SC2APIProtocol.Action> action = null;
 
-            if (PurificationNova(commander, frame, out action)) { return action; }
+            if (PurificationNova(commander, frame, target, out action)) { return action; }
 
             return null;
         }
 
-        private bool PurificationNova(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
+        private bool PurificationNova(UnitCommander commander, int frame, Point2D target, out List<SC2APIProtocol.Action> action)
         {
             action = null;
             var attacks = new List<UnitCalculation>();
@@ -79,19 +79,28 @@ namespace Sharky.MicroControllers.Protoss
                 }
             }
 
-            return AvoidFriendlyFire(commander, frame, out action);
+            if (AvoidFriendlyFire(commander, frame, out action))
+            {
+                return true;
+            }
+
+            action = commander.Order(frame, Abilities.MOVE, target);
+            return true;
         }
 
         private bool AvoidFriendlyFire(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
-            var closest = commander.UnitCalculation.NearbyAllies.OrderBy(a => Vector2.DistanceSquared(a.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+            var closest = commander.UnitCalculation.NearbyAllies.Where(a => !a.Unit.IsFlying && a.Unit.UnitType != (uint)UnitTypes.PROTOSS_DISRUPTOR && a.Unit.UnitType != (uint)UnitTypes.PROTOSS_DISRUPTORPHASED).OrderBy(a => Vector2.DistanceSquared(a.Position, commander.UnitCalculation.Position)).FirstOrDefault();
             if (closest != null)
             {
-                var avoidPoint = GetPositionFromRange(commander, closest.Unit.Pos, commander.UnitCalculation.Unit.Pos, 3f + commander.UnitCalculation.Unit.Radius + closest.Unit.Radius + .5f);
-                action = commander.Order(frame, Abilities.MOVE, avoidPoint);
-                return true;
+                if (Vector2.DistanceSquared(closest.Position, commander.UnitCalculation.Position) < 25)
+                {
+                    var avoidPoint = GetPositionFromRange(commander, closest.Unit.Pos, commander.UnitCalculation.Unit.Pos, 3f + commander.UnitCalculation.Unit.Radius + closest.Unit.Radius + .5f);
+                    action = commander.Order(frame, Abilities.MOVE, avoidPoint);
+                    return true;
+                }
             }
             return false;
         }

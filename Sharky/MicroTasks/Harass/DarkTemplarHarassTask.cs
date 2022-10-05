@@ -15,7 +15,7 @@ namespace Sharky.MicroTasks.Harass
         MapDataService MapDataService;
         IIndividualMicroController DarkTemplarMicroController;
 
-        int DesiredCount { get; set; }
+        public int DesiredCount { get; set; }
         List<HarassInfo> HarassInfos { get; set; }
 
         // TODO: if 5 dts have died, end the task

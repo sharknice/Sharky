@@ -80,6 +80,33 @@ namespace Sharky.Pathing
             return PathWalkable(x, y, x, y);
         }
 
+        public bool PathWalkable(float x, float y)
+        {
+            return PathWalkable(x, y, x, y);
+        }
+
+        public bool PathWalkable(Point2D point, int radius)
+        {
+            return PathWalkable(point.X, point.Y) &&
+                PathWalkable(point.X - radius, point.Y) &&
+                PathWalkable(point.X + radius, point.Y) &&
+                PathWalkable(point.X, point.Y - radius) &&
+                PathWalkable(point.X, point.Y + radius) &&
+                PathWalkable(point.X + radius, point.Y + radius) &&
+                PathWalkable(point.X - radius, point.Y - radius);
+        }
+
+        public bool PathWalkable(Point point, int radius)
+        {
+            return PathWalkable(point.X, point.Y) &&
+                PathWalkable(point.X - radius, point.Y) &&
+                PathWalkable(point.X + radius, point.Y) &&
+                PathWalkable(point.X, point.Y - radius) &&
+                PathWalkable(point.X, point.Y + radius) &&
+                PathWalkable(point.X + radius, point.Y + radius) &&
+                PathWalkable(point.X - radius, point.Y - radius);
+        }
+
         public bool PathFlyable(float startX, float startY, float endX, float endY)
         {
             if (endX < 0 || endY < 0 || endX >= MapData.MapWidth || endY >= MapData.MapHeight)

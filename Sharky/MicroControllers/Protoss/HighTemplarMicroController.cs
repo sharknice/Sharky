@@ -141,7 +141,7 @@ namespace Sharky.MicroControllers.Protoss
                 return false;
             }
 
-            if (!commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.EFFECT_PSISTORM))
+            if (!commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.EFFECT_PSISTORM) && !commander.UnitCalculation.EnemiesThreateningDamage.Any())
             {
                 if (!commander.AbilityOffCooldown(Abilities.EFFECT_PSISTORM, frame, SharkyOptions.FramesPerSecond, SharkyUnitData))
                 {
@@ -195,7 +195,7 @@ namespace Sharky.MicroControllers.Protoss
 
             var best = killCounts.OrderByDescending(x => x.Value).FirstOrDefault();
 
-            if (best.Value < 3) // only attack if going to hit >= 3 units
+            if (best.Value < 3 && !(potentialAttack.EnemiesThreateningDamage.Any() && potentialAttack.Unit.Shield < potentialAttack.Unit.ShieldMax)) // only attack if going to hit >= 3 units
             {
                 return null;
             }
