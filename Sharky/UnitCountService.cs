@@ -228,6 +228,10 @@ namespace Sharky
             {
                 count += Count(UnitTypes.TERRAN_THOR);
             }
+            else if (unitType == UnitTypes.TERRAN_VIKINGASSAULT)
+            {
+                count += Count(UnitTypes.TERRAN_VIKINGFIGHTER);
+            }
 
             else if (unitType == UnitTypes.PROTOSS_WARPPRISM)
             {
@@ -399,6 +403,10 @@ namespace Sharky
             else if (unitType == UnitTypes.TERRAN_LIBERATOR)
             {
                 count += EnemyCount(UnitTypes.TERRAN_LIBERATORAG);
+            }
+            else if (unitType == UnitTypes.TERRAN_VIKINGASSAULT)
+            {
+                count += Count(UnitTypes.TERRAN_VIKINGFIGHTER);
             }
 
             else if (unitType == UnitTypes.PROTOSS_WARPPRISM)
