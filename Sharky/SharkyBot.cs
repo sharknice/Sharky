@@ -106,7 +106,7 @@ namespace Sharky
                     var managerTime = (endManager - beginManager).TotalMilliseconds;
                     manager.TotalFrameTime += managerTime;
 
-                    if (managerTime > 1 && observation.Observation.GameLoop > 10)
+                    if (managerTime > 1 && observation.Observation.GameLoop > 100)
                     {
                         manager.SkipFrame = true;
 

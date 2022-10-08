@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using static SC2APIProtocol.AbilityData.Types;
 
 namespace Sharky.MicroControllers
 {
@@ -186,8 +187,9 @@ namespace Sharky.MicroControllers
             var markedForDeath = commander.UnitCalculation.NearbyAllies.FirstOrDefault(a => ActiveUnitData.Commanders.ContainsKey(a.Unit.Tag) && ActiveUnitData.Commanders[a.Unit.Tag].UnitRole == UnitRole.Die);
             if (markedForDeath != null)
             {
-                action = commander.Order(frame, Abilities.ATTACK, targetTag: markedForDeath.Unit.Tag);
+                return commander.Order(frame, Abilities.ATTACK, targetTag: markedForDeath.Unit.Tag);
             }
+            if (AvoidDeceleration(commander, defensivePoint, true, frame, out action)) { return action; }
             return action;
         }
 
@@ -1519,7 +1521,7 @@ namespace Sharky.MicroControllers
 
             if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.KillWorkers)
             {
-                var scvs = attacks.Where(u => u.Unit.UnitType == (uint)UnitTypes.TERRAN_SCV).OrderBy(u => u.Unit.Health).ThenBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position));
+                var scvs = attacks.Where(u => u.UnitClassifications.Contains(UnitClassification.Worker)).OrderBy(u => u.Unit.Health).ThenBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position));
                 if (existingAttackOrder != null)
                 {
                     var existing = scvs.FirstOrDefault(u => u.Unit.Tag == existingAttackOrder.TargetUnitTag);
@@ -2202,6 +2204,11 @@ namespace Sharky.MicroControllers
             return GetPositionFromRange(target.X, target.Y, position.X, position.Y, range, angleOffset);
         }
 
+        protected virtual Point2D GetPositionFromRange(UnitCommander commander, Point target, Vector2 position, float range, float angleOffset = 0)
+        {
+            return GetPositionFromRange(target.X, target.Y, position.X, position.Y, range, angleOffset);
+        }
+
         protected virtual Point2D GetPositionFromRange(Point2D target, Point position, float range, float angleOffset = 0)
         {
             return GetPositionFromRange(target.X, target.Y, position.X, position.Y, range, angleOffset);
@@ -2660,7 +2667,7 @@ namespace Sharky.MicroControllers
 
             if (commander.UnitCalculation.NearbyEnemies.Any(e => DamageService.CanDamage(e, commander.UnitCalculation)))
             {
-                if (commander.RetreatPathFrame + 20 < frame)
+                if (commander.RetreatPathFrame + 2 < frame)
                 {
                     if (commander.UnitCalculation.Unit.IsFlying)
                     {

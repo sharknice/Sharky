@@ -13,6 +13,7 @@ namespace Sharky
         /// TODO: currently only set for enemies, allies is just the same as the current
         /// </summary>
         public Unit PreviousUnit { get; set; }
+        public UnitCalculation PreviousUnitCalculation { get; set; }
         //public Dictionary<int, Unit> PreviousUnits { get; set; }
         public Vector2 Start { get; set; }
         public Vector2 End { get; set; }
@@ -343,6 +344,7 @@ namespace Sharky
 
             TargetPriorityCalculation = previous.TargetPriorityCalculation;
             PreviousUnit = previous.Unit;
+            PreviousUnitCalculation = previous;
             var vector = new Vector2(Unit.Pos.X - PreviousUnit.Pos.X, Unit.Pos.Y - PreviousUnit.Pos.Y);
 
             Vector = vector / (FrameLastSeen - frame);
@@ -350,23 +352,6 @@ namespace Sharky
             Velocity = Vector.LengthSquared();
             AverageVelocity = Velocity;
             FrameFirstSeen = previous.FrameFirstSeen;
-
-            //PreviousUnits = previous.PreviousUnits;
-            //PreviousUnits[frame] = Unit;
-
-            //var oneSecondAgo = frame - (int)oneSecondInFrames;
-            //if (PreviousUnits.Count() > 50)
-            //{
-            //    PreviousUnits.Remove(PreviousUnits.Keys.First());
-            //}
-
-            //Unit oneSecondOldUnit;
-            //if (PreviousUnits.TryGetValue(oneSecondAgo, out oneSecondOldUnit))
-            //{
-            //    vector = new Vector2(Unit.Pos.X - oneSecondOldUnit.Pos.X, Unit.Pos.Y - oneSecondOldUnit.Pos.Y);
-            //    AverageVector = vector / (oneSecondAgo - frame);
-            //    AverageVelocity = AverageVector.LengthSquared();
-            //}
         }
     }
 }

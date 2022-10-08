@@ -1,6 +1,5 @@
 ﻿using SC2APIProtocol;
 using Sharky.MicroControllers;
-using System;
 using System.Collections.Generic;
 
 namespace Sharky.MicroTasks.Attack
@@ -29,7 +28,7 @@ namespace Sharky.MicroTasks.Attack
             return MicroController.Retreat(UnitCommanders, defensePoint, armyPoint, frame);
         }
 
-        public virtual IEnumerable<SC2APIProtocol.Action> SplitArmy(int frame, IEnumerable<UnitCalculation> closerEnemies, Point2D attackPoint)
+        public virtual IEnumerable<SC2APIProtocol.Action> SplitArmy(int frame, IEnumerable<UnitCalculation> closerEnemies, Point2D attackPoint, Point2D defensePoint, Point2D armyPoint)
         {
             return ArmySplitter.SplitArmy(frame, closerEnemies, TargetingData.AttackPoint, UnitCommanders, false);
         }
@@ -44,7 +43,16 @@ namespace Sharky.MicroTasks.Attack
             return MicroController.Support(UnitCommanders, mainUnits, attackPoint, defensePoint, armyPoint, frame);
         }
 
-
+        public override void RemoveDeadUnits(List<ulong> deadUnits)
+        {
+            foreach (var tag in deadUnits)
+            {
+                if (UnitCommanders.RemoveAll(c => c.UnitCalculation.Unit.Tag == tag) > 0)
+                {
+                    Deaths++;
+                }
+            }
+        }
 
         protected void ResetAttackTaskClaims()
         {

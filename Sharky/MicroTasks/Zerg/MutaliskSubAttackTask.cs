@@ -1,8 +1,10 @@
 ﻿using SC2APIProtocol;
 using Sharky.DefaultBot;
-using Sharky.MicroControllers;
+using Sharky.Extensions;
+using Sharky.MicroControllers.Zerg;
 using Sharky.MicroTasks.Attack;
 using Sharky.Pathing;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,14 +16,21 @@ namespace Sharky.MicroTasks.Zerg
     {
         TargetingService TargetingService;
         BaseData BaseData;
+        ActiveUnitData ActiveUnitData;
+        AttackData AttackData;
+        SharkyUnitData SharkyUnitData;
         MapDataService MapDataService;
+        FrameToTimeConverter FrameToTimeConverter;
+        MacroData MacroData;
+        UnitCountService UnitCountService;
 
-        List<List<UnitCommander>> Groups;
+        List<MicroGroup> Groups;
 
-        IMicroController MutaliskMicroController;
+        MutaliskGroupMicroController MutaliskMicroController;
 
         private int groupSize;
 
+        public bool AllSupport { get; set; }
         public bool AlwaysAttack { get; set; }
         public int GroupSize
         {
@@ -33,9 +42,19 @@ namespace Sharky.MicroTasks.Zerg
             }
         }
 
+        /// <summary>
+        /// Units estimated to be killed by mutalisk group, enemy units that die within 7 range of any mutalisks in task
+        /// </summary>
+        public Dictionary<ulong, UnitCalculation> Kills { get; private set; }
+
         public int MinimumAttackSize { get; set; }
 
-        public MutaliskSubAttackTask(DefaultSharkyBot defaultSharkyBot, IAttackTask parentTask, IMicroController mutaliskMicroController, int minimumAttackSize,
+        public bool SwitchRolesAfterWorkersMassacred { get; set; }
+        public bool SwitchRolesAfterEnemyStaticDefenseEstablished { get; set; }
+
+        // TODO: distract role that attacks enemy furthest away from it's army
+
+        public MutaliskSubAttackTask(DefaultSharkyBot defaultSharkyBot, IAttackTask parentTask, MutaliskGroupMicroController mutaliskMicroController, int minimumAttackSize,
             float priority, bool enabled = false, bool alwaysAttack = true)
         {
             ParentTask = parentTask;
@@ -43,7 +62,13 @@ namespace Sharky.MicroTasks.Zerg
             MicroTaskData = defaultSharkyBot.MicroTaskData;
             TargetingData = defaultSharkyBot.TargetingData;
             BaseData = defaultSharkyBot.BaseData;
+            ActiveUnitData = defaultSharkyBot.ActiveUnitData;
+            AttackData = defaultSharkyBot.AttackData;
+            SharkyUnitData = defaultSharkyBot.SharkyUnitData;
             MapDataService = defaultSharkyBot.MapDataService;
+            FrameToTimeConverter = defaultSharkyBot.FrameToTimeConverter;
+            MacroData = defaultSharkyBot.MacroData;
+            UnitCountService = defaultSharkyBot.UnitCountService;
 
             MutaliskMicroController = mutaliskMicroController;
 
@@ -53,12 +78,16 @@ namespace Sharky.MicroTasks.Zerg
             Enabled = enabled;
 
             UnitCommanders = new List<UnitCommander>();
-            Groups = new List<List<UnitCommander>>();
+            Groups = new List<MicroGroup>();
             GroupSize = 20;
             MinimumAttackSize = minimumAttackSize;
 
             ArmySplitter = new ArmySplitter(defaultSharkyBot);
             AlwaysAttack = alwaysAttack;
+            AllSupport = false;
+            Kills = new Dictionary<ulong, UnitCalculation>();
+            SwitchRolesAfterWorkersMassacred = true;
+            SwitchRolesAfterEnemyStaticDefenseEstablished = true;
         }
 
         public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
@@ -81,23 +110,22 @@ namespace Sharky.MicroTasks.Zerg
                     {
                         commander.Claimed = true;
                         commander.UnitRole = UnitRole.Attack;
-                        commander.AlwaysSpam = true;
 
                         UnitCommanders.Add(commander);
 
                         var group = GetGroupLookingForMore();
-                        group.Add(commander);
+                        group.Commanders.Add(commander);
                     }
                 }
             }
         }
 
-        List<UnitCommander> GetGroupLookingForMore()
+        MicroGroup GetGroupLookingForMore()
         {
-            var group = Groups.FirstOrDefault(g => g.Count() < GroupSize);
+            var group = Groups.FirstOrDefault(g => g.Commanders.Count() < GroupSize);
             if (group == null)
             {
-                group = new List<UnitCommander>();
+                group = new MicroGroup { Commanders = new List<UnitCommander>(), GroupRole = GroupRole.None };
                 Groups.Add(group);
             }
             return group;
@@ -105,25 +133,49 @@ namespace Sharky.MicroTasks.Zerg
 
         public override void RemoveDeadUnits(List<ulong> deadUnits)
         {
-            var count = 0;
+            var deaths = 0;
+            var kills = 0;
             foreach (var tag in deadUnits)
             {
-                count = UnitCommanders.RemoveAll(c => c.UnitCalculation.Unit.Tag == tag);
-                foreach (var group in Groups)
+                if (UnitCommanders.RemoveAll(c => c.UnitCalculation.Unit.Tag == tag) > 0)
                 {
-                    if (group.Any(c => c.UnitCalculation.Unit.Tag == tag && c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISM))
+                    deaths++;
+                    foreach (var group in Groups)
                     {
-                        Disable();
-                        return;
+                        group.Commanders.RemoveAll(c => c.UnitCalculation.Unit.Tag == tag);
                     }
-                    group.RemoveAll(c => c.UnitCalculation.Unit.Tag == tag);
+                }
+                else
+                {
+                    var kill = UnitCommanders.SelectMany(c => c.UnitCalculation.PreviousUnitCalculation.NearbyEnemies.Where(e => Vector2.DistanceSquared(c.UnitCalculation.Position, e.Position) < 50)).FirstOrDefault(e => e.Unit.Tag == tag);
+                    if (kill != null && !SharkyUnitData.UndeadTypes.Contains((UnitTypes)kill.Unit.UnitType))
+                    {
+                        kills++;
+                        Kills[tag] = kill;
+                    }
                 }
             }
 
-            if (count > 0)
+            if (deaths > 0)
             {
-                Groups.RemoveAll(g => g.Count() == 0);
+                Deaths += deaths;
+                Groups.RemoveAll(g => g.Commanders.Count() == 0);
                 ReformGroups();
+            }
+            if (kills > 0 || deaths > 0)
+            {
+                ReportResults();
+
+                if (SwitchRolesAfterWorkersMassacred && Groups.Any(g => g.GroupRole == GroupRole.HarassMineralLines) && Kills.Values.Count(k => k.UnitClassifications.Contains(UnitClassification.Worker)) > 20 && ActiveUnitData.EnemyUnits.Values.Count(e => e.UnitClassifications.Contains(UnitClassification.Worker)) < 3)
+                {
+                    foreach (var group in Groups)
+                    {
+                        if (group.GroupRole == GroupRole.HarassMineralLines)
+                        {
+                            group.GroupRole = GroupRole.Attack;
+                        }
+                    }
+                }
             }
         }
 
@@ -138,29 +190,129 @@ namespace Sharky.MicroTasks.Zerg
             // TODO: combine or divide groups if needed
         }
 
+        private Point2D GetGroupAttackPoint(MicroGroup group, int frame)
+        {
+            if ((AllSupport || group.GroupRole == GroupRole.Support || group.Commanders.Any(c => c.UnitCalculation.NearbyEnemies.Any(e => e.FrameLastSeen > frame - 5 && (e.Unit.UnitType == (uint)UnitTypes.TERRAN_CYCLONE || e.Unit.UnitType == (uint)UnitTypes.TERRAN_VIKINGFIGHTER)))) && group.Commanders.Any())
+            {
+                var vector = group.Commanders.FirstOrDefault().UnitCalculation.Position;
+                var nearbyUnit = ActiveUnitData.Commanders.Values.Where(u => !u.UnitCalculation.Unit.IsHallucination && u.UnitCalculation.Unit.UnitType != (uint)UnitTypes.PROTOSS_OBSERVER && u.UnitCalculation.Unit.UnitType != (uint)UnitTypes.PROTOSS_ORACLE && u.UnitCalculation.Unit.UnitType != (uint)UnitTypes.PROTOSS_DARKTEMPLAR && u.UnitCalculation.NearbyEnemies.Any(e => e.Unit.UnitType != (uint)UnitTypes.PROTOSS_PHOENIX) && !UnitCommanders.Contains(u)).OrderBy(u => Vector2.DistanceSquared(vector, u.UnitCalculation.Position)).FirstOrDefault();
+                if (nearbyUnit != null)
+                {
+                    var position = nearbyUnit.UnitCalculation.NearbyEnemies.FirstOrDefault(e => e.Unit.UnitType != (uint)UnitTypes.PROTOSS_PHOENIX).Position;
+                    return new Point2D { X = position.X, Y = position.Y };
+                }
+                if (AttackData.ArmyPoint != null)
+                {
+                    return AttackData.ArmyPoint;
+                }
+                return TargetingData.MainDefensePoint;
+            }
+
+            if (group.GroupRole == GroupRole.HarassMineralLines)
+            {
+                var mineralLine = BaseData.EnemyBases.Select(b => b.MineralLineLocation).OrderBy(p => MapDataService.LastFrameVisibility(p)).FirstOrDefault();
+                if (mineralLine != null)
+                {
+                    return mineralLine;
+                }
+                if (MapDataService.LastFrameVisibility(BaseData.EnemyBaseLocations.FirstOrDefault().MineralLineLocation) < 100)
+                {
+                    return BaseData.EnemyBaseLocations.FirstOrDefault().MineralLineLocation;
+                }            
+            }
+
+            if (group.GroupRole == GroupRole.AttackMain)
+            {
+                if (MapDataService.LastFrameVisibility(TargetingData.EnemyMainBasePoint) == 0)
+                {
+                    return TargetingData.EnemyMainBasePoint;
+                }
+                else if (BaseData.EnemyBases.Any())
+                {
+                    return BaseData.EnemyBases.FirstOrDefault().Location;
+                }
+            }
+
+            return TargetingData.AttackPoint;
+        }
+
+        GroupRole GetNextRole()
+        {
+            if (AllSupport)
+            {
+                return GroupRole.Support;
+            }
+            if (!Groups.Any(g => g.GroupRole == GroupRole.HarassMineralLines))
+            {
+                return GroupRole.HarassMineralLines;
+            }
+            if (!Groups.Any(g => g.GroupRole == GroupRole.AttackMain))
+            {
+                return GroupRole.AttackMain;
+            }
+            if (!Groups.Any(g => g.GroupRole == GroupRole.Support))
+            {
+                return GroupRole.Support;
+            }
+            if (!Groups.Any(g => g.GroupRole == GroupRole.Attack))
+            {
+                return GroupRole.Attack;
+            }
+
+            return GroupRole.None;
+        }
+
         void UpdateStates()
         {
+            if (SwitchRolesAfterEnemyStaticDefenseEstablished && Groups.Any(g => g.GroupRole != GroupRole.Support) && UnitCountService.EnemyCompleted(UnitTypes.TERRAN_MISSILETURRET) + UnitCountService.EnemyCompleted(UnitTypes.ZERG_SPORECRAWLER) + UnitCountService.EnemyCompleted(UnitTypes.PROTOSS_PHOTONCANNON) > 1)
+            {
+                foreach (var group in Groups)
+                {
+                    group.GroupRole = GroupRole.Support;
+                }
+            }
+
             foreach (var group in Groups)
             {
-                if (group.Count() < MinimumAttackSize)
+                if (group.Commanders.Count() < MinimumAttackSize)
                 {
-                    foreach (var commander in group)
+                    foreach (var commander in group.Commanders)
                     {
                         commander.UnitRole = UnitRole.Hide;
                     }
                 }
-                else if (group.Sum(c => c.UnitCalculation.Unit.Health) < group.Sum(c => c.UnitCalculation.Unit.HealthMax) * .75f)
+                else if (group.Commanders.All(c => c.UnitRole == UnitRole.Regenerate))
                 {
-                    foreach (var commander in group)
+                    if (group.Commanders.All(c => c.UnitCalculation.Unit.Health > c.UnitCalculation.Unit.HealthMax * .9f))
+                    {
+                        foreach (var commander in group.Commanders)
+                        {
+                            commander.UnitRole = UnitRole.Attack;
+                        }
+                    }
+                }
+                else if (group.Commanders.Sum(c => c.UnitCalculation.Unit.Health) < group.Commanders.Sum(c => c.UnitCalculation.Unit.HealthMax) * .75f)
+                {
+                    ReportResults();
+                    foreach (var commander in group.Commanders)
                     {
                         commander.UnitRole = UnitRole.Regenerate;
                     }
                 }
                 else
                 {
-                    var groupCenter = TargetingService.GetArmyPoint(group);
+                    var groupCenter = TargetingService.GetArmyPoint(group.Commanders);
                     var groupVector = new Vector2(groupCenter.X, groupCenter.Y);
-                    foreach (var commander in group)
+                    var leader = group.Commanders.FirstOrDefault(c => c.UnitRole == UnitRole.Leader);
+                    if (leader == null)
+                    {
+                        leader = group.Commanders.Where(c => c.UnitCalculation.Unit.Health > c.UnitCalculation.Unit.HealthMax * .75f).OrderBy(c => Vector2.DistanceSquared(c.UnitCalculation.Position, groupVector)).FirstOrDefault();
+                        if (leader != null)
+                        {
+                            leader.UnitRole = UnitRole.Leader;
+                        }
+                    }
+                    foreach (var commander in group.Commanders)
                     {
                         if (commander.UnitCalculation.Unit.Health <= commander.UnitCalculation.Unit.HealthMax * .75f)
                         {
@@ -180,6 +332,15 @@ namespace Sharky.MicroTasks.Zerg
             }
         }
 
+        private void ReportResults()
+        {
+            Console.WriteLine($"{FrameToTimeConverter.GetTime(MacroData.Frame)} Mutalisk Report: Deaths:{Deaths}, Kills:{Kills.Count()}");
+            foreach (var killGroup in Kills.Values.GroupBy(k => k.Unit.UnitType))
+            {
+                Console.WriteLine($"{(UnitTypes)killGroup.Key}: {killGroup.Count()}");
+            }
+        }
+
         public override IEnumerable<SC2APIProtocol.Action> Attack(Point2D attackPoint, Point2D defensePoint, Point2D armyPoint, int frame)
         {
             UpdateStates();
@@ -188,47 +349,59 @@ namespace Sharky.MicroTasks.Zerg
 
             foreach (var group in Groups)
             {   
-                if (group?.FirstOrDefault() == null)
+                if (group?.Commanders.FirstOrDefault() == null)
                 {
                     continue;
                 }
 
-                var groupCenter = TargetingService.GetArmyPoint(group);
-
-                var retreatSpot = GetRegenerationSpot(group, defensePoint, armyPoint, frame);
-
-                if (group.FirstOrDefault().UnitCalculation.TargetPriorityCalculation.AirWinnability > 1)
+                if (group.GroupRole == GroupRole.None)
                 {
-                    if (group.Count(c => c.UnitRole == UnitRole.Attack) >= MinimumAttackSize)
+                    group.GroupRole = GetNextRole();
+                }
+                var groupAttackPoint = GetGroupAttackPoint(group, frame);
+                var retreatSpot = GetRegenerationSpot(group, defensePoint, armyPoint, frame);
+                var groupCenter = TargetingService.GetArmyPoint(group.Commanders.Where(c => c.UnitRole == UnitRole.Attack || c.UnitRole == UnitRole.Leader));
+
+
+                if (group.Commanders.FirstOrDefault().UnitCalculation.TargetPriorityCalculation.AirWinnability > .5f)
+                {
+                    if (group.Commanders.Count(c => c.UnitRole == UnitRole.Attack || c.UnitRole == UnitRole.Leader) >= MinimumAttackSize)
                     {
-                        actions.AddRange(MutaliskMicroController.Attack(group, attackPoint, retreatSpot, groupCenter, frame));
+                        if (!AllSupport && (group.GroupRole == GroupRole.HarassMineralLines || group.GroupRole == GroupRole.Harass))
+                        {
+                            actions.AddRange(MutaliskMicroController.Attack(group.Commanders, groupAttackPoint, retreatSpot, groupCenter, frame, true));
+                        }
+                        else
+                        {
+                            actions.AddRange(MutaliskMicroController.Attack(group.Commanders, groupAttackPoint, retreatSpot, groupCenter, frame, false));
+                        }
                     }
                     else
                     {
-                        actions.AddRange(MutaliskMicroController.Retreat(group, retreatSpot, groupCenter, frame));
+                        actions.AddRange(MutaliskMicroController.Retreat(group.Commanders, retreatSpot, groupCenter, frame));
                     }
                 }
                 else
                 {
-                    actions.AddRange(MutaliskMicroController.Retreat(group, retreatSpot, groupCenter, frame));
-                }
+                    actions.AddRange(MutaliskMicroController.Retreat(group.Commanders, retreatSpot, groupCenter, frame));
+                }            
             }
 
             return actions;
         }
 
-        Point2D GetRegenerationSpot(List<UnitCommander> group, Point2D defensePoint, Point2D armyPoint, int frame)
+        Point2D GetRegenerationSpot(MicroGroup group, Point2D defensePoint, Point2D armyPoint, int frame)
         {
             var retreatSpot = defensePoint;
-            var firstUnit = group.FirstOrDefault();
-            if (group.FirstOrDefault().UnitRole == UnitRole.Hide)
+            var firstUnit = group.Commanders.FirstOrDefault();
+            if (group.Commanders.FirstOrDefault().UnitRole == UnitRole.Hide)
             {
                 // TODO: find best hiding spot near own base
                 return BaseData.MainBase.BehindMineralLineLocation;
-            } 
+            }
             else
             {
-                var closestSafeBase = BaseData?.EnemyBaseLocations?.FirstOrDefault(b => b.ResourceCenter == null && !MapDataService.InEnemyVision(b.Location));
+                var closestSafeBase = BaseData?.EnemyBaseLocations?.OrderBy(b => Vector2.DistanceSquared(armyPoint.ToVector2(), b.Location.ToVector2())).FirstOrDefault(b => b.ResourceCenter == null && !MapDataService.InEnemyVision(b.Location));
                 if (closestSafeBase != null)
                 {
                     return closestSafeBase.Location;
@@ -249,14 +422,13 @@ namespace Sharky.MicroTasks.Zerg
             foreach (var group in Groups)
             {
                 var retreatPoint = defensePoint;
-                if (group.FirstOrDefault().UnitRole == UnitRole.Hide)
+                if (group.Commanders.FirstOrDefault().UnitRole == UnitRole.Hide)
                 {
-                    // TODO: find best hiding spot near own base
                     retreatPoint = BaseData.MainBase.BehindMineralLineLocation;
                 }
 
-                var groupCenter = TargetingService.GetArmyPoint(group);
-                actions.AddRange(MutaliskMicroController.Retreat(group, retreatPoint, groupCenter, frame));
+                var groupCenter = TargetingService.GetArmyPoint(group.Commanders);
+                actions.AddRange(MutaliskMicroController.Retreat(group.Commanders, retreatPoint, groupCenter, frame));
             }
 
             return actions;
@@ -270,8 +442,8 @@ namespace Sharky.MicroTasks.Zerg
 
             foreach (var group in Groups)
             {
-                var groupCenter = TargetingService.GetArmyPoint(group);
-                actions.AddRange(MutaliskMicroController.Support(group, mainUnits, attackPoint, defensivePoint, groupCenter, frame));
+                var groupCenter = TargetingService.GetArmyPoint(group.Commanders);
+                actions.AddRange(MutaliskMicroController.Support(group.Commanders, mainUnits, attackPoint, defensivePoint, groupCenter, frame));
             }
 
             return actions;
@@ -287,11 +459,16 @@ namespace Sharky.MicroTasks.Zerg
 
             foreach (var group in Groups)
             {
-                var groupCenter = TargetingService.GetArmyPoint(group);
-                actions.AddRange(MutaliskMicroController.Support(group, mainUnits, defensivePoint, defensivePoint, groupCenter, frame));
+                var groupCenter = TargetingService.GetArmyPoint(group.Commanders);
+                actions.AddRange(MutaliskMicroController.Support(group.Commanders, mainUnits, defensivePoint, defensivePoint, groupCenter, frame));
             }
 
             return actions;
+        }
+
+        public override IEnumerable<SC2APIProtocol.Action> SplitArmy(int frame, IEnumerable<UnitCalculation> closerEnemies, Point2D attackPoint, Point2D defensePoint, Point2D armyPoint)
+        {
+            return Attack(closerEnemies.FirstOrDefault().Position.ToPoint2D(), defensePoint, armyPoint, frame);
         }
     }
 }

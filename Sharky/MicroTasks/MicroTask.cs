@@ -7,6 +7,8 @@ namespace Sharky.MicroTasks
 {
     public abstract class MicroTask : IMicroTask
     {
+        public int Deaths { get; protected set; }
+
         public List<UnitCommander> UnitCommanders { get; set; }
         public float Priority { get; set; }
 
@@ -49,7 +51,7 @@ namespace Sharky.MicroTasks
         {
             foreach (var tag in deadUnits)
             {
-                UnitCommanders.RemoveAll(c => c.UnitCalculation.Unit.Tag == tag);
+                Deaths += UnitCommanders.RemoveAll(c => c.UnitCalculation.Unit.Tag == tag);
             }
         }
 

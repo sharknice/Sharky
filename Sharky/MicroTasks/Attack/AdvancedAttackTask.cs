@@ -237,7 +237,7 @@ namespace Sharky.MicroTasks.Attack
                     actions = DefenseArmySplitter.SplitArmy(frame, closerEnemies, TargetingData.AttackPoint, MainUnits.Concat(SupportUnits), false);
                     foreach (var subTask in SubTasks.Where(t => t.Value.Enabled).OrderBy(t => t.Value.Priority))
                     {
-                        var subActions = subTask.Value.SplitArmy(frame, closerEnemies, TargetingData.AttackPoint);
+                        var subActions = subTask.Value.SplitArmy(frame, closerEnemies, TargetingData.AttackPoint, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint);
                         actions.AddRange(subActions);
                     }
 

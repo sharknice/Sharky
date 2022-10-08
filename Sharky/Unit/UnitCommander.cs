@@ -79,7 +79,7 @@ namespace Sharky
             {
                 return new List<SC2APIProtocol.Action>(); // don't give a unit conflicting orders, only one order per frame
             }
-            if (!allowSpam || AlwaysSpam)
+            if (!allowSpam && !AlwaysSpam)
             {
                 if (ability == LastAbility && targetTag == LastTargetTag && ((targetLocation == null && LastTargetLocation == null) || (LastTargetLocation != null && targetLocation != null && targetLocation.X == LastTargetLocation.X && targetLocation.Y == LastTargetLocation.Y)) && AbilityOrderTimes[ability] > frame - SpamFrames)
                 {

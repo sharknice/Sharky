@@ -1,6 +1,7 @@
 ﻿using SC2APIProtocol;
 using Sharky.DefaultBot;
 using Sharky.Pathing;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -9,10 +10,109 @@ namespace Sharky.MicroControllers.Zerg
 {
     public class MutaliskInGroupMicroController : IndividualMicroController
     {
+        float MutaliskKiteDistance = 2.8f; // 5.6 movement speed / 2 = 2.8 
+        float HalfWeaponCooldown = 12f; // frames until half cooldown (SharkyOptions.FramesPerSecond * 1.09f) / 2f) = 12.208 frames
+
+
         public MutaliskInGroupMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled)
             : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled)
         {
             AvoidDamageDistance = 5;
+            LooseFormationDistance = 1;
+        }
+
+        public UnitCalculation GetBestTargetForGroup(UnitCommander commander, Point2D target, int frame)
+        {
+            var bestTarget = GetBestTarget(commander, target, frame);
+            if (commander.UnitCalculation.NearbyEnemies.Contains(bestTarget) && bestTarget.FrameLastSeen == frame)
+            {
+                return bestTarget;
+            }
+            return null;
+        }
+
+        public Point2D GetKiteSpot(UnitCommander commander, UnitCalculation bestTarget, Point2D target, Vector2 groupVector, int frame)
+        {
+            var range = MutaliskKiteDistance + commander.UnitCalculation.Range + commander.UnitCalculation.Unit.Radius + bestTarget.Unit.Radius;
+
+            var threat = commander.UnitCalculation.NearbyEnemies.Where(e => e.FrameLastSeen > frame - 5 && DamageService.CanDamage(e, commander.UnitCalculation)).OrderBy(e => Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position) - (e.Range * e.Range)).FirstOrDefault();
+            if (threat != null)
+            {
+                DebugService.DrawSphere(new Point { X = groupVector.X, Y = groupVector.Y, Z = commander.UnitCalculation.Unit.Pos.Z }, .5f, new Color { R = 250, B = 1, G = 250 });
+
+                if (threat == bestTarget)
+                {
+                    return GetPositionFromRange(commander, bestTarget.Unit.Pos, groupVector, range);
+                }
+
+                // kite away from the threat
+                var angle = Math.Atan2(threat.Position.Y - bestTarget.Position.Y, bestTarget.Position.X - threat.Position.X);
+                var x = range * Math.Cos(angle);
+                var y = range * Math.Sin(angle);
+                return new Point2D { X = bestTarget.Position.X + (float)x, Y = bestTarget.Position.Y - (float)y };
+            }
+
+            var secondBestTarget = GetSecondBestTarget(commander, target, frame, bestTarget);
+            if (secondBestTarget != null)
+            {
+                DebugService.DrawLine(bestTarget.Unit.Pos, secondBestTarget.Unit.Pos, new Color { R = 250, B = 1, G = 250 });
+                DebugService.DrawSphere(secondBestTarget.Unit.Pos, .5f, new Color { R = 250, B = 1, G = 250 });
+
+                // kite to next target
+                var angle = Math.Atan2(bestTarget.Position.Y - secondBestTarget.Position.Y, secondBestTarget.Position.X - bestTarget.Position.X);
+                var x = range * Math.Cos(angle);
+                var y = range * Math.Sin(angle);
+                return new Point2D { X = bestTarget.Position.X + (float)x, Y = bestTarget.Position.Y - (float)y };
+            }
+
+            // group up while kiting
+            return GetPositionFromRange(commander, bestTarget.Unit.Pos, groupVector, range);
+        }
+
+        public List<SC2APIProtocol.Action> AttackDesignatedTarget(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, Point2D kiteSpot, int frame)
+        {
+            List<SC2APIProtocol.Action> action = null;
+
+            var formation = GetDesiredFormation(commander);
+
+            if (SpecialCaseMove(commander, target, defensivePoint, groupCenter, bestTarget, formation, frame, out action)) 
+            { 
+                return action; 
+            }
+
+            if (formation == Formation.Loose)
+            {
+                if (commander.UnitCalculation.Unit.WeaponCooldown <= .1f)
+                {
+                    return commander.Order(frame, Abilities.ATTACK, targetTag: bestTarget.Unit.Tag);
+                }
+                var closestAlly = commander.UnitCalculation.NearbyAllies.Where(a => a.Unit.IsFlying).OrderBy(a => Vector2.DistanceSquared(commander.UnitCalculation.Position, a.Position)).FirstOrDefault();
+                if (closestAlly != null)
+                {
+                    if (Vector2.DistanceSquared(commander.UnitCalculation.Position, closestAlly.Position) < (LooseFormationDistance + commander.UnitCalculation.Unit.Radius + closestAlly.Unit.Radius) * (LooseFormationDistance + commander.UnitCalculation.Unit.Radius + closestAlly.Unit.Radius))
+                    {
+                        var avoidPoint = GetPositionFromRange(commander, closestAlly.Unit.Pos, commander.UnitCalculation.Unit.Pos, LooseFormationDistance + commander.UnitCalculation.Unit.Radius + closestAlly.Unit.Radius + .5f);
+                        return commander.Order(frame, Abilities.MOVE, avoidPoint);
+                    }
+                }
+            }
+
+            if (commander.UnitCalculation.Unit.WeaponCooldown < HalfWeaponCooldown)
+            {
+                return commander.Order(frame, Abilities.ATTACK, targetTag: bestTarget.Unit.Tag);
+            }
+
+            return commander.Order(frame, Abilities.MOVE, kiteSpot, allowSpam: true);
+        }
+
+        public List<SC2APIProtocol.Action> AttackInRange(UnitCommander commander, int frame)
+        {
+            var bestTarget = GetBestTargetFromList(commander, commander.UnitCalculation.EnemiesInRange, null);
+            if (bestTarget != null)
+            {
+                return commander.Order(frame, Abilities.ATTACK, targetTag: bestTarget.Unit.Tag);
+            }
+            return null;
         }
 
         protected override bool AttackBestTarget(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
@@ -113,7 +213,7 @@ namespace Sharky.MicroControllers.Zerg
         {
             action = null;
 
-            if (AvoidAllDamage(commander, target, defensivePoint, frame, out action)) { return true; }
+            if (AvoidEnemiesThreateningDamage(commander, target, defensivePoint, frame, false, out action)) { return true; }
 
             if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority != TargetPriority.FullRetreat && commander.UnitCalculation.EnemiesInRange.Any() && WeaponReady(commander, frame) && !SharkyUnitData.NoWeaponCooldownTypes.Contains((UnitTypes)commander.UnitCalculation.Unit.UnitType)) // keep shooting as you retreat
             {
@@ -125,8 +225,6 @@ namespace Sharky.MicroControllers.Zerg
                 }
             }
 
-            if (GetInBunker(commander, frame, out action)) { return true; }
-
             var closestEnemy = commander.UnitCalculation.NearbyEnemies.Take(25).Where(e => DamageService.CanDamage(e, commander.UnitCalculation)).OrderBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position)).FirstOrDefault();
             if (closestEnemy == null)
             {
@@ -136,7 +234,20 @@ namespace Sharky.MicroControllers.Zerg
 
             if (closestEnemy != null)
             {
-                if (DefendBehindWall(commander, defensivePoint, defensivePoint, frame, out action)) { return true; }
+                var formation = GetDesiredFormation(commander);
+                if (formation == Formation.Loose)
+                {
+                    var closestAlly = commander.UnitCalculation.NearbyAllies.Where(a => a.Unit.IsFlying).OrderBy(a => Vector2.DistanceSquared(commander.UnitCalculation.Position, a.Position)).FirstOrDefault();
+                    if (closestAlly != null)
+                    {
+                        if (Vector2.DistanceSquared(commander.UnitCalculation.Position, closestAlly.Position) < (LooseFormationDistance + commander.UnitCalculation.Unit.Radius + closestAlly.Unit.Radius) * (LooseFormationDistance + commander.UnitCalculation.Unit.Radius + closestAlly.Unit.Radius))
+                        {
+                            var avoidPoint = GetPositionFromRange(commander, closestAlly.Unit.Pos, commander.UnitCalculation.Unit.Pos, LooseFormationDistance + commander.UnitCalculation.Unit.Radius + closestAlly.Unit.Radius + .5f);
+                            action = commander.Order(frame, Abilities.MOVE, avoidPoint);
+                            return true;
+                        }
+                    }
+                }
 
                 if (commander.UnitCalculation.NearbyEnemies.Take(25).All(e => e.Range < commander.UnitCalculation.Range && e.UnitTypeData.MovementSpeed < commander.UnitCalculation.UnitTypeData.MovementSpeed))
                 {
@@ -163,7 +274,7 @@ namespace Sharky.MicroControllers.Zerg
                     }
                 }
 
-                if (commander.RetreatPathFrame + 20 < frame || commander.RetreatPathIndex >= commander.RetreatPath.Count())
+                if (commander.RetreatPathFrame + 1 < frame || commander.RetreatPathIndex >= commander.RetreatPath.Count())
                 {
                     if (commander.UnitCalculation.Unit.IsFlying)
                     {
@@ -186,7 +297,7 @@ namespace Sharky.MicroControllers.Zerg
 
         protected override bool WeaponReady(UnitCommander commander, int frame)
         {
-            return commander.UnitCalculation.Unit.WeaponCooldown < 2 || commander.UnitCalculation.Unit.WeaponCooldown > 20;
+            return commander.UnitCalculation.Unit.WeaponCooldown < 2;
         }
 
         protected override bool AvoidPointlessDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
@@ -203,6 +314,41 @@ namespace Sharky.MicroControllers.Zerg
                 return false; 
             }
             return base.IsDistraction(commander, target, enemy, frame);
+        }
+
+        public override List<SC2APIProtocol.Action> Idle(UnitCommander commander, Point2D defensivePoint, int frame)
+        {
+            List<SC2APIProtocol.Action> action = null;
+            var markedForDeath = commander.UnitCalculation.NearbyAllies.FirstOrDefault(a => ActiveUnitData.Commanders.ContainsKey(a.Unit.Tag) && ActiveUnitData.Commanders[a.Unit.Tag].UnitRole == UnitRole.Die);
+            if (markedForDeath != null)
+            {
+                return commander.Order(frame, Abilities.ATTACK, targetTag: markedForDeath.Unit.Tag);
+            }
+            return commander.Order(frame, Abilities.MOVE, defensivePoint, allowSpam: true);
+        }
+
+        protected override bool AvoidDeceleration(UnitCommander commander, Point2D target, bool attackMove, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = commander.Order(frame, Abilities.MOVE, target, allowSpam: true);
+            return true;
+        }
+
+        protected override UnitCalculation GetBestTarget(UnitCommander commander, Point2D target, int frame)
+        {
+            if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.KillWorkers && commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker)))
+            {
+                return base.GetBestHarassTarget(commander, target);
+            }
+            return base.GetBestTarget(commander, target, frame);
+        }
+
+        protected UnitCalculation GetSecondBestTarget(UnitCommander commander, Point2D target, int frame, UnitCalculation bestTarget)
+        {
+            if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.KillWorkers && commander.UnitCalculation.NearbyEnemies.Count(e => e.UnitClassifications.Contains(UnitClassification.Worker)) > 1)
+            {
+                return GetBestTargetFromList(commander, commander.UnitCalculation.NearbyEnemies.Where(e => bestTarget.Unit.Tag != e.Unit.Tag && e.UnitClassifications.Contains(UnitClassification.Worker)), null);
+            }
+            return GetBestTargetFromList(commander, commander.UnitCalculation.NearbyEnemies.Where(e => bestTarget.Unit.Tag != e.Unit.Tag), null);
         }
     }
 }
