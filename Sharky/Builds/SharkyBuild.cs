@@ -103,6 +103,7 @@ namespace Sharky.Builds
             BuildOptions.AllowBlockWall = false;
             BuildOptions.StrictGasCount = false;
             BuildOptions.StrictSupplyCount = false;
+            BuildOptions.OnlyBuildWorkersWithExtraMinerals = false;
             BuildOptions.StrictWorkerCount = false;
             BuildOptions.StrictWorkersPerGas = false;
             BuildOptions.StrictWorkersPerGasCount = 3;

@@ -5,6 +5,7 @@ namespace Sharky.Builds
 {
     public class BuildOptions
     {
+        public bool OnlyBuildWorkersWithExtraMinerals { get; set; }
         public bool StrictWorkerCount { get; set; }
         public bool StrictSupplyCount { get; set; }
         public bool EncroachEnemyMainWithExpansions { get; set; }
@@ -22,6 +23,7 @@ namespace Sharky.Builds
 
         public BuildOptions()
         {
+            OnlyBuildWorkersWithExtraMinerals = false;
             StrictWorkerCount = false;
             StrictSupplyCount = false;
             StrictGasCount = false;

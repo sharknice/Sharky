@@ -253,7 +253,7 @@ namespace Sharky.DefaultBot
             TargetingManager = new TargetingManager(this);
             Managers.Add(TargetingManager);
 
-            BuildOptions = new BuildOptions { StrictGasCount = false, StrictSupplyCount = false, StrictWorkerCount = false };
+            BuildOptions = new BuildOptions();
             MacroSetup = new MacroSetup();
             WallService = new WallService(this);
             TerranWallService = new TerranWallService(ActiveUnitData, MapData, BaseData, WallService);

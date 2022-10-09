@@ -178,6 +178,15 @@ namespace Sharky.Builds
                 BalanceZergProduction();
             }
 
+            var workerType = UnitTypes.PROTOSS_PROBE;
+            if (MacroData.Race == Race.Terran)
+            {
+                workerType = UnitTypes.TERRAN_SCV;
+            }
+            else if (MacroData.Race == Race.Zerg)
+            {
+                workerType = UnitTypes.ZERG_DRONE;
+            }
             if (!BuildOptions.StrictWorkerCount)
             {
                 var resourceCenters = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.ResourceCenter));
@@ -193,16 +202,6 @@ namespace Sharky.Builds
                     desiredWorkers = 90;
                 }
 
-                var workerType = UnitTypes.PROTOSS_PROBE;
-                if (MacroData.Race == Race.Terran)
-                {
-                    workerType = UnitTypes.TERRAN_SCV;
-                }
-                else if (MacroData.Race == Race.Zerg)
-                {
-                    workerType = UnitTypes.ZERG_DRONE;
-                }
-
                 MacroData.DesiredUnitCounts[workerType] = desiredWorkers;
 
                 if (UnitCountService.Count(workerType) < desiredWorkers && UnitCountService.Count(workerType) + UnitCountService.UnitsInProgressCount(workerType) < desiredWorkers)
@@ -212,6 +211,18 @@ namespace Sharky.Builds
                 else
                 {
                     MacroData.BuildUnits[workerType] = false;
+                }
+            }
+
+            if (BuildOptions.OnlyBuildWorkersWithExtraMinerals && MacroData.BuildUnits[workerType])
+            {
+                MacroData.BuildUnits[workerType] = false;
+                if (!MacroData.BuildAddOns.Any(e => e.Value) && !MacroData.BuildDefensiveBuildings.Any(e => e.Value) && !MacroData.BuildGas && !MacroData.BuildOverlord && !MacroData.BuildProduction.Any(e => e.Value) && !MacroData.BuildPylon && !MacroData.BuildSupplyDepot && !MacroData.BuildTech.Any(e => e.Value))
+                {
+                    if (!MacroData.BuildUnits.Any(e => e.Value) || MacroData.Minerals > 450)
+                    {
+                        MacroData.BuildUnits[workerType] = true;
+                    }
                 }
             }
         }
