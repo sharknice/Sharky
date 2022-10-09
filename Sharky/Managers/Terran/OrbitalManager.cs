@@ -47,6 +47,11 @@ namespace Sharky.Managers.Terran
         {
             var actions = new List<SC2APIProtocol.Action>();
 
+            if (EnemyData.SelfRace != Race.Terran)
+            {
+                return actions;
+            }
+
             var frame = (int)observation.Observation.GameLoop;
 
             var takeBaseAction = TakeBases(frame);

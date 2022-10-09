@@ -8,17 +8,24 @@ namespace Sharky.Managers.Terran
     public class SupplyDepotManager : SharkyManager
     {
         ActiveUnitData ActiveUnitData;
+        EnemyData EnemyData;
 
-        public SupplyDepotManager(ActiveUnitData activeUnitData)
+        public SupplyDepotManager(ActiveUnitData activeUnitData, EnemyData enemyData)
         {
             ActiveUnitData = activeUnitData;
+            EnemyData = enemyData;
         }
 
         public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
         {
-            var frame = (int)observation.Observation.GameLoop;
-
             var actions = new List<SC2APIProtocol.Action>();
+
+            if (EnemyData.SelfRace != Race.Terran)
+            {
+                return actions;
+            }
+
+            var frame = (int)observation.Observation.GameLoop;
 
             // TODO: need to improve the supply depot lower/raise logic
 

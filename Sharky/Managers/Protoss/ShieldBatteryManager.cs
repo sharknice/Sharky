@@ -8,18 +8,26 @@ namespace Sharky.Managers.Protoss
     public class ShieldBatteryManager : SharkyManager
     {
         ActiveUnitData ActiveUnitData;
+        EnemyData EnemyData;
 
         float RestoreRange;
 
-        public ShieldBatteryManager(ActiveUnitData activeUnitData)
+        public ShieldBatteryManager(ActiveUnitData activeUnitData, EnemyData enemyData)
         {
             ActiveUnitData = activeUnitData;
             RestoreRange = 6f + 1.125f; // 6 range and 1.125 radius
+            EnemyData = enemyData;
         }
 
         public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
         {
             var actions = new List<SC2APIProtocol.Action>();
+
+            if (EnemyData.SelfRace != Race.Protoss)
+            {
+                return actions;
+            }
+
             var shieldBatteries = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_SHIELDBATTERY && c.UnitCalculation.Unit.BuildProgress == 1 && c.UnitCalculation.Unit.IsPowered);
             var unitsBeingRestored = shieldBatteries.SelectMany(s => s.UnitCalculation.Unit.Orders);
             foreach (var shieldBattery in shieldBatteries)

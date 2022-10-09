@@ -10,19 +10,26 @@ namespace Sharky.Managers.Protoss
         ActiveUnitData ActiveUnitData;
         SharkyUnitData SharkyUnitData;
         ChronoData ChronoData;
+        EnemyData EnemyData;
         float OverchargeRangeSquared = 100;
         float RestoreRangeSquared = 36;
 
-        public NexusManager(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, ChronoData chronoData)
+        public NexusManager(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, ChronoData chronoData, EnemyData enemyData)
         {
             ActiveUnitData = activeUnitData;
             SharkyUnitData = sharkyUnitData;
             ChronoData = chronoData;
+            EnemyData = enemyData;
         }
 
         public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
         {
             var actions = new List<SC2APIProtocol.Action>();
+
+            if (EnemyData.SelfRace != Race.Protoss)
+            {
+                return actions;
+            }
 
             var nexuses = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS && c.UnitCalculation.Unit.BuildProgress == 1).OrderByDescending(c => c.UnitCalculation.Unit.Energy);
             foreach (var nexus in nexuses)

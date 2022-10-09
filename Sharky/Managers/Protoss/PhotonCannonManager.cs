@@ -1,5 +1,4 @@
 ﻿using SC2APIProtocol;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -9,15 +8,23 @@ namespace Sharky.Managers.Protoss
     public class PhotonCannonManager : SharkyManager
     {
         ActiveUnitData ActiveUnitData;
+        EnemyData EnemyData;
 
-        public PhotonCannonManager(ActiveUnitData activeUnitData)
+        public PhotonCannonManager(ActiveUnitData activeUnitData, EnemyData enemyData)
         {
             ActiveUnitData = activeUnitData;
+            EnemyData = enemyData;
         }
 
         public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
         {
             var actions = new List<SC2APIProtocol.Action>();
+
+            if (EnemyData.SelfRace != Race.Protoss)
+            {
+                return actions;
+            }
+
             var cannons = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PHOTONCANNON && c.UnitCalculation.Unit.BuildProgress == 1);
             foreach (var cannon in cannons)
             {

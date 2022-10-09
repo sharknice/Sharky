@@ -288,11 +288,11 @@ namespace Sharky.DefaultBot
             BuildDefenseService = new BuildDefenseService(MacroData, BuildingBuilder, SharkyUnitData, ActiveUnitData, BaseData, TargetingData, BuildOptions, BuildingService);
 
             ChronoData = new ChronoData();
-            NexusManager = new NexusManager(ActiveUnitData, SharkyUnitData, ChronoData);
+            NexusManager = new NexusManager(ActiveUnitData, SharkyUnitData, ChronoData, EnemyData);
             Managers.Add(NexusManager);
-            ShieldBatteryManager = new ShieldBatteryManager(ActiveUnitData);
+            ShieldBatteryManager = new ShieldBatteryManager(ActiveUnitData, EnemyData);
             Managers.Add(ShieldBatteryManager);
-            PhotonCannonManager = new PhotonCannonManager(ActiveUnitData);
+            PhotonCannonManager = new PhotonCannonManager(ActiveUnitData, EnemyData);
             Managers.Add(PhotonCannonManager);
 
             RallyPointManager = new RallyPointManager(ActiveUnitData, TargetingData, MapData, WallService);
@@ -300,7 +300,7 @@ namespace Sharky.DefaultBot
 
             OrbitalManager = new OrbitalManager(ActiveUnitData, BaseData, EnemyData, MacroData, UnitCountService, ChatService, ResourceCenterLocator, MapDataService, SharkyUnitData);
             Managers.Add(OrbitalManager);
-            SupplyDepotManager = new SupplyDepotManager(ActiveUnitData);
+            SupplyDepotManager = new SupplyDepotManager(ActiveUnitData, EnemyData);
             Managers.Add(SupplyDepotManager);
 
             ChatManager = new ChatManager(HttpClient, ChatHistory, SharkyOptions, ChatDataService, EnemyPlayerService, EnemyNameService, ChatService, ActiveChatData, FrameToTimeConverter, VersionService);
