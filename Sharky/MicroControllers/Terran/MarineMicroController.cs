@@ -51,5 +51,24 @@ namespace Sharky.MicroControllers.Terran
 
             return false;
         }
+
+        protected override float GetMovementSpeed(UnitCommander commander)
+        {
+            if (commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.STIMPACK))
+            {
+                return base.GetMovementSpeed(commander) + 1.57f;
+            }
+            return base.GetMovementSpeed(commander);
+        }
+
+        protected override float GetWeaponCooldown(UnitCommander commander, UnitCalculation enemy)
+        {
+            if (commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.STIMPACK))
+            {
+                return SharkyOptions.FramesPerSecond * 0.407f;
+            }
+
+            return base.GetWeaponCooldown(commander, enemy);
+        }
     }
 }

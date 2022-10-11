@@ -20,7 +20,7 @@ namespace Sharky.MicroControllers.Terran
 
             if (SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.STIMPACK))
             {
-                if (commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.STIMPACK)) // don't double stim
+                if (commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.STIMPACK) || commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.STIMPACKMARAUDER)) // don't double stim
                 {
                     return false;
                 }
@@ -50,6 +50,25 @@ namespace Sharky.MicroControllers.Terran
             }
 
             return false;
+        }
+
+        protected override float GetMovementSpeed(UnitCommander commander)
+        {
+            if (commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.STIMPACK) || commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.STIMPACKMARAUDER))
+            {
+                return base.GetMovementSpeed(commander) + 1.57f;
+            }
+            return base.GetMovementSpeed(commander);
+        }
+
+        protected override float GetWeaponCooldown(UnitCommander commander, UnitCalculation enemy)
+        {
+            if (commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.STIMPACK) || commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.STIMPACKMARAUDER))
+            {
+                return SharkyOptions.FramesPerSecond * 0.71f;
+            }
+
+            return base.GetWeaponCooldown(commander, enemy);       
         }
     }
 }

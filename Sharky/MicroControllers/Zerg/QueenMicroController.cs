@@ -93,5 +93,14 @@ namespace Sharky.MicroControllers.Zerg
 
             return ((unitToHeal != null && (healAnything || (unitToHeal.HealthMax - unitToHeal.Health > minMissingHealthNormal))) ? unitToHeal : null, walkToHeal);
         }
+
+        protected override float GetMovementSpeed(UnitCommander commander)
+        {
+            if (commander.UnitCalculation.IsOnCreep)
+            {
+                return 3.5f;
+            }
+            return base.GetMovementSpeed(commander);
+        }
     }
 }

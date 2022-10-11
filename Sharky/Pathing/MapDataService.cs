@@ -160,36 +160,64 @@ namespace Sharky.Pathing
 
         public int Visibility(Point2D point)
         {
+            if (point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
+            {
+                return 0;
+            }
             return MapData.Map[(int)point.X][(int)point.Y].Visibility;
         }
 
         public int LastFrameVisibility(Point2D point)
         {
+            if (point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
+            {
+                return 0;
+            }
             return MapData.Map[(int)point.X][(int)point.Y].LastFrameVisibility;
         }
 
         public bool InEnemyDetection(Point point)
         {
+            if (point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
+            {
+                return false;
+            }
             return MapData.Map[(int)point.X][(int)point.Y].InEnemyDetection;
         }
 
         public bool InEnemyDetection(Point2D point)
         {
+            if (point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
+            {
+                return false;
+            }
             return MapData.Map[(int)point.X][(int)point.Y].InEnemyDetection;
         }
 
         public bool InSelfDetection(Point point)
         {
+            if (point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
+            {
+                return false;
+            }
             return MapData.Map[(int)point.X][(int)point.Y].InSelfDetection;
         }
 
         public bool InSelfDetection(Point2D point)
         {
+            if (point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
+            {
+                return false;
+            }
             return MapData.Map[(int)point.X][(int)point.Y].InSelfDetection;
         }
 
         public int MapHeight(Point point)
         {
+            if (point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
+            {
+                return 0;
+            }
             return MapData.Map[(int)point.X][(int)point.Y].TerrainHeight;
         }
 
@@ -209,31 +237,55 @@ namespace Sharky.Pathing
 
         public bool IsOnCreep(Point point)
         {
+            if (point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
+            {
+                return false;
+            }
             return MapData.Map[(int)point.X][(int)point.Y].HasCreep;
         }
 
         public float EnemyAirDpsInRange(Point point)
         {
+            if (point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
+            {
+                return 0;
+            }
             return MapData.Map[(int)point.X][(int)point.Y].EnemyAirDpsInRange;
         }
 
         public float EnemyGroundSplashDpsInRange(Point point)
         {
+            if (point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
+            {
+                return 0;
+            }
             return MapData.Map[(int)point.X][(int)point.Y].EnemyGroundSplashDpsInRange;
         }
 
         public int LastFrameAlliesTouched(Point2D point)
         {
+            if (point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
+            {
+                return 0;
+            }
             return MapData.Map[(int)point.X][(int)point.Y].LastFrameAlliesTouched;
         }
 
         public bool InEnemyVision(Point point)
         {
+            if (point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
+            {
+                return false;
+            }
             return MapData.Map[(int)point.X][(int)point.Y].InEnemyVision;
         }
 
         public bool InEnemyVision(Point2D point)
         {
+            if (point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
+            {
+                return false;
+            }
             return MapData.Map[(int)point.X][(int)point.Y].InEnemyVision;
         }
     }

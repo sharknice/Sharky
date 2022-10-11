@@ -221,7 +221,8 @@ namespace Sharky.MicroControllers.Zerg
                 return target;
             }
 
-            if (Vector2.DistanceSquared(new Vector2(TargetingData.ForwardDefensePoint.X, TargetingData.ForwardDefensePoint.Y), new Vector2(midPoint.X, midPoint.Y)) > startDistance + 10)
+            if (Vector2.DistanceSquared(new Vector2(TargetingData.ForwardDefensePoint.X, TargetingData.ForwardDefensePoint.Y), new Vector2(midPoint.X, midPoint.Y)) > startDistance + 10 && 
+                (MapDataService.MapData.MapWidth - commander.UnitCalculation.Position.X > 4) && (commander.UnitCalculation.Position.X > 4) && (MapDataService.MapData.MapHeight - commander.UnitCalculation.Position.Y > 4) && (commander.UnitCalculation.Position.Y > 4))
             {
                 return midPoint;
             }

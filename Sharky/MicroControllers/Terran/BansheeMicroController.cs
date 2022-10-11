@@ -154,5 +154,14 @@ namespace Sharky.MicroControllers.Terran
             commander.BestTarget = bestAttack;
             return bestAttack;
         }
+
+        protected override float GetMovementSpeed(UnitCommander commander)
+        {
+            if (SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.BANSHEESPEED))
+            {
+                return 5.25f;
+            }
+            return base.GetMovementSpeed(commander);
+        }
     }
 }

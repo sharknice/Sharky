@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using static SC2APIProtocol.AbilityData.Types;
 
 namespace Sharky.MicroControllers
 {
@@ -40,7 +39,7 @@ namespace Sharky.MicroControllers
         protected float GroupUpStateDistanceSquared;
         protected float MaximumSupportDistanceSqaured;
 
-        public IndividualMicroController(MapDataService mapDataService, SharkyUnitData unitDataManager, ActiveUnitData activeUnitData, DebugService debugService, IPathFinder sharkyPathFinder, BaseData baseData, SharkyOptions sharkyOptions, DamageService damageService, UnitDataService unitDataService, TargetingData targetingData, TargetingService targetingService, MicroPriority microPriority, bool groupUpEnabled, float avoidDamageDistance = .5f, bool ignoreDistractions = true, bool targetEnemyMainFirst = false)
+        public IndividualMicroController(MapDataService mapDataService, SharkyUnitData unitDataManager, ActiveUnitData activeUnitData, DebugService debugService, IPathFinder sharkyPathFinder, BaseData baseData, SharkyOptions sharkyOptions, DamageService damageService, UnitDataService unitDataService, TargetingData targetingData, TargetingService targetingService, MicroPriority microPriority, bool groupUpEnabled, float avoidDamageDistance = 2f, bool ignoreDistractions = true, bool targetEnemyMainFirst = false)
         {
             MapDataService = mapDataService;
             SharkyUnitData = unitDataManager;
@@ -67,7 +66,7 @@ namespace Sharky.MicroControllers
             TargetEnemyMainFirst = targetEnemyMainFirst;
         }
 
-        public IndividualMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder pathFinder, MicroPriority microPriority, bool groupUpEnabled, float avoidDamageDistance = .5f, bool ignoreDistractions = true)
+        public IndividualMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder pathFinder, MicroPriority microPriority, bool groupUpEnabled, float avoidDamageDistance = 2f, bool ignoreDistractions = true)
         {
             MapDataService = defaultSharkyBot.MapDataService;
             SharkyUnitData = defaultSharkyBot.SharkyUnitData;
@@ -131,13 +130,91 @@ namespace Sharky.MicroControllers
 
             if (WeaponReady(commander, frame))
             {
+                if (AttackBestTargetInRange(commander, target, bestTarget, frame, out action)) { return action; }
+                if (GetInFormation(commander, formation, frame, out action)) { return action; }
                 if (AttackBestTarget(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
             }
+
+            if (MoveToAttackOnCooldown(commander, bestTarget, target, defensivePoint, frame, out action)) { return action; }
 
             if (Move(commander, target, defensivePoint, groupCenter, bestTarget, formation, frame, out action)) { return action; }
 
             if (AvoidDeceleration(commander, target, true, frame, out action)) { return action; }
             return commander.Order(frame, Abilities.ATTACK, target);
+        }
+
+        protected virtual bool MoveToAttackOnCooldown(UnitCommander commander, UnitCalculation bestTarget, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
+
+            if (bestTarget == null || bestTarget.FrameLastSeen != frame)
+            {
+                return false;
+            }
+
+            if (!commander.UnitCalculation.Unit.IsFlying && MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos) != MapDataService.MapHeight(bestTarget.Unit.Pos))
+            {
+                return false;
+            }
+
+            DebugService.DrawLine(commander.UnitCalculation.Unit.Pos, bestTarget.Unit.Pos, new Color { R = 250, B = 1, G = 250 });
+
+            if (AvoidTargettedDamage(commander, target, defensivePoint, frame, out action)) 
+            { 
+                return true; 
+            }
+
+            if (commander.UnitCalculation.Unit.ShieldMax > 0 && commander.UnitCalculation.Unit.Shield < 25 && AvoidDamage(commander, target, defensivePoint, frame, out action)) // TODO: this only works for protoss, if we want it to work for zerg and terran it needs to change
+            {
+                return true;
+            }
+
+            var rangeDistance = commander.UnitCalculation.Range + commander.UnitCalculation.Unit.Radius + bestTarget.Unit.Radius;
+            var actualDistance = Vector2.Distance(commander.UnitCalculation.Position, bestTarget.Position);
+            var gap = actualDistance - rangeDistance;
+            var framesToRange = gap / (GetMovementSpeed(commander) / SharkyOptions.FramesPerSecond);
+            var framesToShoot = commander.UnitCalculation.Unit.WeaponCooldown - 1;
+            if (framesToRange >= framesToShoot)
+            {
+                action = commander.Order(frame, Abilities.ATTACK, targetTag: bestTarget.Unit.Tag);
+                return true;
+            }
+
+            return false;
+        }
+
+        protected virtual float GetMovementSpeed(UnitCommander commander)
+        {
+            return commander.UnitCalculation.UnitTypeData.MovementSpeed * 1.4f; // always multiply by 1.4f because of gamespeed time conversion
+        }
+
+        /// <summary>
+        /// number of cooldown frames the weapon used on this enemy has for it's cooldown (not current cooldown commander.UnitCalculation.Unit.WeaponCooldown)
+        /// </summary>
+        protected virtual float GetWeaponCooldown(UnitCommander commander, UnitCalculation enemy)
+        {
+            var weapon = GetWeaponUsed(commander, enemy);
+            if (weapon == null)
+            {
+                return 0;
+            }
+            return SharkyOptions.FramesPerSecond * (weapon.Speed / 1.4f); //always divide by 1.4f because of gamespeed time conversion
+        }
+
+        protected Weapon GetWeaponUsed(UnitCommander commander, UnitCalculation enemy)
+        {
+            Weapon weapon;
+
+            if (enemy.Unit.IsFlying || enemy.Unit.UnitType == (uint)UnitTypes.PROTOSS_COLOSSUS || enemy.Unit.BuffIds.Contains((uint)Buffs.GRAVITONBEAM))
+            {
+                weapon = commander.UnitCalculation.Weapons.FirstOrDefault(w => w.Type == Weapon.Types.TargetType.Air || w.Type == Weapon.Types.TargetType.Any);
+            }
+            else
+            {
+                weapon = commander.UnitCalculation.Weapons.FirstOrDefault(w => w.Type == Weapon.Types.TargetType.Ground || w.Type == Weapon.Types.TargetType.Any);
+            }
+
+            return weapon;
         }
 
         public virtual List<SC2APIProtocol.Action> AttackStayOutOfRange(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, Formation formation, int frame)
@@ -1463,6 +1540,15 @@ namespace Sharky.MicroControllers
                     }
                     return true;
                 }
+                else if (WeaponReady(commander, frame) && commander.UnitCalculation.EnemiesInRange.Any(e => e.FrameLastSeen == frame))
+                {
+                    var bestInRange = GetBestTargetFromList(commander, commander.UnitCalculation.EnemiesInRange.Where(e => e.FrameLastSeen == frame), null);
+                    if (bestInRange != null)
+                    {
+                        action = commander.Order(frame, Abilities.ATTACK, null, bestInRange.Unit.Tag);
+                        return true;
+                    }
+                }
             }
 
             return false;
@@ -1854,7 +1940,7 @@ namespace Sharky.MicroControllers
             }
 
             var zerglingDps = commander.UnitCalculation.NearbyEnemies.Take(25).Where(e => e.Unit.UnitType == (uint)UnitTypes.ZERG_ZERGLING || e.Unit.UnitType == (uint)UnitTypes.ZERG_ZERGLINGBURROWED).Sum(e => e.Dps);
-            var splashDps = MapDataService.EnemyAirDpsInRange(commander.UnitCalculation.Unit.Pos);
+            var splashDps = MapDataService.EnemyGroundSplashDpsInRange(commander.UnitCalculation.Unit.Pos);
 
             if (zerglingDps > splashDps)
             {

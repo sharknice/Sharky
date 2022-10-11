@@ -52,5 +52,15 @@ namespace Sharky.MicroControllers.Protoss
 
             return commander.Order(frame, Abilities.MOVE, target);
         }
+
+        protected override float GetWeaponCooldown(UnitCommander commander, UnitCalculation enemy)
+        {
+            if (SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.ADEPTPIERCINGATTACK))
+            {
+                return SharkyOptions.FramesPerSecond * 1.11f;
+            }
+
+            return base.GetWeaponCooldown(commander, enemy);
+        }
     }
 }

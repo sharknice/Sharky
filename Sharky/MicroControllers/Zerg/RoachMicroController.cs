@@ -8,7 +8,6 @@ namespace Sharky.MicroControllers.Zerg
 {
     public class RoachMicroController : IndividualMicroController
     {
-        private int lastBurrowFrame = 0;
         private SharkyUnitData UnitData;
 
         public RoachMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled, SharkyUnitData unitData)
@@ -59,7 +58,6 @@ namespace Sharky.MicroControllers.Zerg
                     List<Action> actions;
                     base.Retreat(commander, defensivePoint, defensivePoint, frame, out actions);
                     return actions;
-
                 }
             }
             else
@@ -73,6 +71,20 @@ namespace Sharky.MicroControllers.Zerg
             }
 
             return null;
+        }
+
+        protected override float GetMovementSpeed(UnitCommander commander)
+        {
+            var speed = commander.UnitCalculation.UnitTypeData.MovementSpeed * 1.4f;
+            if (SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.GLIALRECONSTITUTION))
+            {
+                speed += 1.05f;
+            }
+            if (commander.UnitCalculation.IsOnCreep)
+            {
+                speed *= 1.3f;
+            }
+            return speed;
         }
     }
 }

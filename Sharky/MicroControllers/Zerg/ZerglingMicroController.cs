@@ -138,5 +138,34 @@ namespace Sharky.MicroControllers.Zerg
             commander.BestTarget = bestAttack;
             return bestAttack;
         }
+
+        protected override float GetMovementSpeed(UnitCommander commander)
+        {
+            if (SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.ZERGLINGMOVEMENTSPEED))
+            {
+                if (commander.UnitCalculation.IsOnCreep)
+                {
+                    return 8.55f;
+                }
+                return 6.58f;
+            }
+
+            if (commander.UnitCalculation.IsOnCreep)
+            {
+                return 5.37f;
+            }
+
+            return base.GetMovementSpeed(commander);
+        }
+
+        protected override float GetWeaponCooldown(UnitCommander commander, UnitCalculation enemy)
+        {
+            if (SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.ZERGLINGATTACKSPEED))
+            {
+                return SharkyOptions.FramesPerSecond * 0.35f;
+            }
+
+            return base.GetWeaponCooldown(commander, enemy);
+        }
     }
 }

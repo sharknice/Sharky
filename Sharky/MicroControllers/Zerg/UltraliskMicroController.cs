@@ -1,9 +1,5 @@
-﻿using SC2APIProtocol;
-using Sharky.DefaultBot;
+﻿using Sharky.DefaultBot;
 using Sharky.Pathing;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
 
 namespace Sharky.MicroControllers.Zerg
 {
@@ -12,6 +8,20 @@ namespace Sharky.MicroControllers.Zerg
         public UltraliskMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled)
             : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled)
         {
+        }
+
+        protected override float GetMovementSpeed(UnitCommander commander)
+        {
+            var speed = commander.UnitCalculation.UnitTypeData.MovementSpeed * 1.4f;
+            if (SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.ANABOLICSYNTHESIS))
+            {
+                speed += 0.82f;
+            }
+            if (commander.UnitCalculation.IsOnCreep)
+            {
+                return 5.37f;
+            }
+            return speed;
         }
     }
 }

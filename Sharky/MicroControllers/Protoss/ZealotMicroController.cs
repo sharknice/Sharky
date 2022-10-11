@@ -65,5 +65,14 @@ namespace Sharky.MicroControllers.Protoss
         {
             return commander.UnitCalculation.Unit.WeaponCooldown < 5 || commander.UnitCalculation.Unit.WeaponCooldown > 15; // a zealot has 2 attacks, so we do this because after one attack the cooldown starts over instead of both
         }
+
+        protected override float GetMovementSpeed(UnitCommander commander)
+        {
+            if (SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.CHARGE))
+            {
+                return 4.725f;
+            }
+            return base.GetMovementSpeed(commander);
+        }
     }
 }

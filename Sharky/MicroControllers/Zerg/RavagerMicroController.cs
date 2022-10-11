@@ -129,5 +129,16 @@ namespace Sharky.MicroControllers.Zerg
 
             return base.Retreat(commander, defensivePoint, groupCenter, frame);
         }
+
+        protected override float GetMovementSpeed(UnitCommander commander)
+        {
+            var speed = commander.UnitCalculation.UnitTypeData.MovementSpeed * 1.4f;
+
+            if (commander.UnitCalculation.IsOnCreep)
+            {
+                speed *= 1.3f;
+            }
+            return speed;
+        }
     }
 }

@@ -40,7 +40,7 @@ namespace Sharky.MicroControllers.Zerg
             {
                 DebugService.DrawSphere(new Point { X = groupVector.X, Y = groupVector.Y, Z = commander.UnitCalculation.Unit.Pos.Z }, .5f, new Color { R = 250, B = 1, G = 250 });
 
-                if (threat == bestTarget)
+                if (threat == bestTarget || Vector2.DistanceSquared(commander.UnitCalculation.Position, threat.Position) < Vector2.DistanceSquared(commander.UnitCalculation.Position, bestTarget.Position))
                 {
                     return GetPositionFromRange(commander, bestTarget.Unit.Pos, groupVector, range);
                 }

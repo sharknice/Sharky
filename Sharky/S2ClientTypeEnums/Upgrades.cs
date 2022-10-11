@@ -62,7 +62,13 @@
         ZERGMISSILEWEAPONSLEVEL3 = 61,
         OVERLORDSPEED = 62,
         BURROW = 64,
+        /// <summary>
+        /// aadrenal glands
+        /// </summary>
         ZERGLINGATTACKSPEED = 65,
+        /// <summary>
+        /// metabolic boost
+        /// </summary>
         ZERGLINGMOVEMENTSPEED = 66,
         ZERGFLYERWEAPONSLEVEL1 = 68,
         ZERGFLYERWEAPONSLEVEL2 = 69,
@@ -88,6 +94,9 @@
         TERRANVEHICLEANDSHIPARMORSLEVEL2 = 117,
         TERRANVEHICLEANDSHIPARMORSLEVEL3 = 118,
         DRILLCLAWS = 122,
+        /// <summary>
+        /// Resonating Glaives
+        /// </summary>
         ADEPTPIERCINGATTACK = 130,
         MAGFIELDLAUNCHERS = 133,
         EVOLVEGROOVEDSPINES = 134,
