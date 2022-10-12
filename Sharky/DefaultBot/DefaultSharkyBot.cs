@@ -194,7 +194,7 @@ namespace Sharky.DefaultBot
             VersionService = new VersionService();
             UnitTypeBuildClassifications = new UnitTypeBuildClassifications();
 
-            MineralWalker = new MineralWalker(BaseData);
+            MineralWalker = new MineralWalker(BaseData, SharkyUnitData, ActiveUnitData);
 
             Managers = new List<IManager>();
 
@@ -314,6 +314,8 @@ namespace Sharky.DefaultBot
 
             var individualMicroController = new IndividualMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
 
+            var individualWorkerMicroController = new IndividualWorkerMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
+
             var adeptMicroController = new AdeptMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
             var adeptShadeMicroController = new AdeptShadeMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
             var archonMicroController = new ArchonMicroController(this, SharkySimplePathFinder, MicroPriority.AttackForward, false);
@@ -374,6 +376,9 @@ namespace Sharky.DefaultBot
 
             var individualMicroControllers = new Dictionary<UnitTypes, IIndividualMicroController>
             {
+                { UnitTypes.PROTOSS_PROBE, individualWorkerMicroController },
+                { UnitTypes.ZERG_DRONE, individualWorkerMicroController },
+
                 { UnitTypes.PROTOSS_ADEPT, adeptMicroController },
                 { UnitTypes.PROTOSS_ADEPTPHASESHIFT, adeptShadeMicroController },
                 { UnitTypes.PROTOSS_ARCHON, archonMicroController },

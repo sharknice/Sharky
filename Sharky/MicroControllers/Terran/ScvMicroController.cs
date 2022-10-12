@@ -7,7 +7,7 @@ using System.Numerics;
 
 namespace Sharky.MicroControllers.Terran
 {
-    public class ScvMicroController : IndividualMicroController
+    public class ScvMicroController : IndividualWorkerMicroController
     {
         MacroData MacroData;
 
