@@ -108,6 +108,10 @@ namespace Sharky
                 count += Count(UnitTypes.ZERG_CREEPTUMORBURROWED);
                 count += Count(UnitTypes.ZERG_CREEPTUMORQUEEN);
             }
+            else if (unitType == UnitTypes.ZERG_EXTRACTOR)
+            {
+                count += Count(UnitTypes.ZERG_EXTRACTORRICH);
+            }
 
             else if (unitType == UnitTypes.ZERG_DRONE)
             {
