@@ -1,5 +1,6 @@
 ﻿using SC2APIProtocol;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
@@ -12,12 +13,16 @@ namespace Sharky.Builds.BuildingPlacement
         DebugService DebugService;
         BuildingService BuildingService;
 
+        List<Point2D> LastLocations;
+
         public ZergBuildingPlacement(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, DebugService debugService, BuildingService buildingService)
         {
             ActiveUnitData = activeUnitData;
             SharkyUnitData = sharkyUnitData;
             DebugService = debugService;
             BuildingService = buildingService;
+
+            LastLocations = new List<Point2D>();
         }
 
         public Point2D FindPlacement(Point2D target, UnitTypes unitType, int size, bool ignoreResourceProximity = false, float maxDistance = 50, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.None, bool requireVision = false, bool allowBlockBase = true)
@@ -62,8 +67,18 @@ namespace Sharky.Builds.BuildingPlacement
                                 {
                                     if (Vector2.DistanceSquared(new Vector2(reference.X, reference.Y), new Vector2(point.X, point.Y)) <= maxDistance * maxDistance)
                                     {
-                                        DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
-                                        return point;
+                                        if (!LastLocations.Any(l => l.X == x && l.Y == y))
+                                        {
+                                            DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
+
+                                            LastLocations.Add(point);
+                                            if (LastLocations.Count() > 5)
+                                            {
+                                                LastLocations.RemoveAt(0);
+                                            }
+
+                                            return point;
+                                        }
                                     }
                                 }
                             }

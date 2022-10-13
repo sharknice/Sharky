@@ -1,11 +1,14 @@
 ﻿using SC2APIProtocol;
 using Sharky.Builds;
+using Sharky.Builds.BuildingPlacement;
 using Sharky.DefaultBot;
 using Sharky.Extensions;
 using Sharky.MicroControllers.Zerg;
-using Sharky.MicroTasks.Zerg;
+using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Sharky.MicroTasks.Zerg
@@ -16,6 +19,8 @@ namespace Sharky.MicroTasks.Zerg
         CreepTumorPlacementFinder CreepTumorPlacementFinder;
         QueenMicroController QueenMicroController;
         BuildOptions BuildOptions;
+        IBuildingPlacement ZergBuildingPlacement;
+        BuildingService BuildingService;
 
         Dictionary<UnitCommander, Point2D> CreepPoints = new Dictionary<UnitCommander, Point2D>();
 
@@ -24,8 +29,10 @@ namespace Sharky.MicroTasks.Zerg
             UnitCommanders = new List<UnitCommander>();
             EnemyData = defaultSharkyBot.EnemyData;
             CreepTumorPlacementFinder = defaultSharkyBot.CreepTumorPlacementFinder;
+            ZergBuildingPlacement = defaultSharkyBot.ZergBuildingPlacement;
             QueenMicroController = queenMicroController;
             BuildOptions = defaultSharkyBot.BuildOptions;
+            BuildingService = defaultSharkyBot.BuildingService;
 
             Priority = priority;
             Enabled = enabled;
@@ -56,19 +63,22 @@ namespace Sharky.MicroTasks.Zerg
         {
             var actions = new List<SC2APIProtocol.Action>();
 
+            var pos = CreepTumorPlacementFinder.FindTumorPlacement(frame, UnitCommanders, UnitCommanders.Any(c => c.UnitCalculation.Unit.Energy >= 30));
+
+            if (pos == null)
+            {
+                return actions;
+            }
+
             foreach (var queen in UnitCommanders)
             {
-                var pos = CreepTumorPlacementFinder.FindTumorPlacement(frame, UnitCommanders, queen.UnitCalculation.Unit.Energy >= 30, UnitCommanders.Count <= 2 && frame < 22 * 60 * 5);
-
-                if (pos == null)
+                if (frame - queen.LastOrderFrame > 5)
                 {
-                    return actions;
-                }
-
-                if (PlaceCreep(frame, actions, queen, pos)) continue;
-                else
-                {
-                    MoveQueen(frame, actions, queen, pos);
+                    if (PlaceCreep(frame, actions, queen, pos)) continue;
+                    else
+                    {
+                        MoveQueen(frame, actions, queen, pos);
+                    }
                 }
             }
 
@@ -88,7 +98,15 @@ namespace Sharky.MicroTasks.Zerg
 
             if (frame - queen.LastOrderFrame > 5)
             {
-                actions.AddRange(queen.Order(frame, Abilities.BUILD_CREEPTUMOR_QUEEN, pos));
+                var spot = ZergBuildingPlacement.FindPlacement(pos, UnitTypes.ZERG_CREEPTUMORQUEEN, 3, maxDistance: 10, ignoreResourceProximity: true, allowBlockBase: false, requireVision: true);
+                if (spot != null)
+                {
+                    actions.AddRange(queen.Order(frame, Abilities.BUILD_CREEPTUMOR_QUEEN, spot));
+                }
+                else if (!BuildingService.BlocksResourceCenter(pos.X, pos.Y, 1))
+                {
+                    actions.AddRange(queen.Order(frame, Abilities.BUILD_CREEPTUMOR_QUEEN, pos));
+                }
             }
 
             return true;

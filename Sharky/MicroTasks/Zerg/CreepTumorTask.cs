@@ -59,7 +59,7 @@ namespace Sharky.MicroTasks.Zerg
 
             foreach (var commander in UnitCommanders)
             {
-                if ((commander.UnitCalculation.Unit.Orders.Count() == 0) && (frame - commander.UnitCalculation.FrameFirstSeen > SharkyOptions.FramesPerSecond * 22))
+                if (!commander.UnitCalculation.Unit.Orders.Any() && (frame - commander.UnitCalculation.FrameFirstSeen > SharkyOptions.FramesPerSecond * 22))
                 {
                     if (commander.UnitCalculation.EnemiesInRangeOf.Count() > 0)
                     {
@@ -68,17 +68,14 @@ namespace Sharky.MicroTasks.Zerg
 
                     var spot = CreepTumorPlacementFinder.FindTumorExtensionPlacement(frame, QueenCreepAndDefendTask.UnitCommanders, commander.UnitCalculation.Position, true, UnitCommanders.Count < 3);
 
-                    if (spot == null)
+                    if (spot != null)
                     {
-                        spot = new SC2APIProtocol.Point2D { X = commander.UnitCalculation.Position.X, Y = commander.UnitCalculation.Position.Y };
+                        var action = commander.Order(frame, Abilities.BUILD_CREEPTUMOR_TUMOR, spot);
+                        if (action != null)
+                        {
+                            actions.AddRange(action);
+                        }
                     }
-                    
-                    var action = commander.Order(frame, Abilities.BUILD_CREEPTUMOR_TUMOR, spot);
-                    if (action != null)
-                    {
-                        actions.AddRange(action);
-                    }
-
                 }
             }
 

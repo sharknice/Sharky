@@ -25,6 +25,8 @@ namespace Sharky.MicroTasks.Zerg
 
         float[,] CreepTumorPlacementMap;
 
+        int LastMapUpdate = 0;
+
         public CreepTumorPlacementFinder(DefaultSharkyBot defaultSharkyBot, IPathFinder pathFinder)
         {
             TargetingData = defaultSharkyBot.TargetingData;
@@ -66,7 +68,6 @@ namespace Sharky.MicroTasks.Zerg
                 {
                     bool valid = MapData.Map[x][y].HasCreep 
                         && MapData.Map[x][y].CurrentlyBuildable 
-                        && !BuildingService.BlocksResourceCenter(x, y, 1)
                         && MapData.Map[x][y].InSelfVision;
                     CreepTumorPlacementMap[x, y] = valid ? 0.0f : -1000.0f;
                 }
@@ -113,6 +114,8 @@ namespace Sharky.MicroTasks.Zerg
 
         private void ConsiderUpdatingMap(int frame, IEnumerable<UnitCommander> queens, bool forceUpdate = false)
         {
+            if (frame == LastMapUpdate) { return; }
+
             if (CreepTumorPlacementMap == null)
             {
                 CreepTumorPlacementMap = new float[MapData.MapWidth, MapData.MapHeight];
@@ -122,6 +125,8 @@ namespace Sharky.MicroTasks.Zerg
                 UpdateMap(queens.Where(x => x.UnitRole == UnitRole.SpreadCreep && x.UnitCalculation.Unit.Orders.Any() && x.UnitCalculation.Unit.Orders.First().AbilityId == (uint)Abilities.BUILD_CREEPTUMOR_QUEEN));
                 needsUpdate = false;
             }
+
+            LastMapUpdate = frame;
         }
 
         public Point2D FindTumorPlacement(int frame, IEnumerable<UnitCommander> queens, bool canFindSuboptimal = false, bool forceUpdate = false)
@@ -140,6 +145,7 @@ namespace Sharky.MicroTasks.Zerg
                     if (highest == null || CreepTumorPlacementMap[x, y] > CreepTumorPlacementMap[(int)highest.X, (int)highest.Y])
                         highest = new Point2D().Create(x, y);
                 }
+
 
             if (highest != null)
             {
@@ -179,7 +185,19 @@ namespace Sharky.MicroTasks.Zerg
             if (highest == null)
                 return null;
 
-            return ZergBuildingPlacement.FindPlacement(highest, UnitTypes.ZERG_CREEPTUMORQUEEN, 3, maxDistance: 10, ignoreResourceProximity: true, allowBlockBase: false, requireVision: true);
+            var placement = ZergBuildingPlacement.FindPlacement(highest, UnitTypes.ZERG_CREEPTUMORQUEEN, 3, maxDistance: 9, ignoreResourceProximity: true, allowBlockBase: false, requireVision: true);
+            if (placement != null)
+            {
+                return placement;
+            }
+            if (placement == null)
+            {
+                if (!BuildingService.BlocksResourceCenter(location.X, location.Y, 4))
+                {
+                    return location.ToPoint2D();
+                }
+            }
+            return null;
         }
     }
 }

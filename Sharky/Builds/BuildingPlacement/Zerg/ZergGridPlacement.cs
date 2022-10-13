@@ -2,7 +2,6 @@
 using Sharky.DefaultBot;
 using Sharky.Pathing;
 using System;
-using System.Linq;
 using System.Numerics;
 
 namespace Sharky.Builds.BuildingPlacement
@@ -11,15 +10,11 @@ namespace Sharky.Builds.BuildingPlacement
     {
         MapDataService MapDataService;
         BuildingService BuildingService;
-        ActiveUnitData ActiveUnitData;
-        BuildOptions BuildOptions;
 
         public ZergGridPlacement(DefaultSharkyBot defaultSharkyBot)
         {
             MapDataService = defaultSharkyBot.MapDataService;
             BuildingService = defaultSharkyBot.BuildingService;
-            ActiveUnitData = defaultSharkyBot.ActiveUnitData;
-            BuildOptions = defaultSharkyBot.BuildOptions;
         }
 
         public Point2D FindPlacement(Point2D originalTarget, UnitTypes unitType, int size, bool ignoreResourceProximity = false, float maxDistance = 50, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.None, bool requireVision = false, bool allowBlockBase = true)
