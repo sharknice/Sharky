@@ -11,6 +11,8 @@ namespace Sharky.MicroTasks
         TargetingData TargetingData;
         EnemyData EnemyData;
         MicroTaskData MicroTaskData;
+        MicroData MicroData;
+        SharkyOptions SharkyOptions;
 
         int framesSinceLastMainScout = 0;
         bool scoutMain = false;
@@ -20,6 +22,8 @@ namespace Sharky.MicroTasks
             TargetingData = defaultSharkyBot.TargetingData;
             EnemyData = defaultSharkyBot.EnemyData;
             MicroTaskData = defaultSharkyBot.MicroTaskData;
+            MicroData = defaultSharkyBot.MicroData;
+            SharkyOptions = defaultSharkyBot.SharkyOptions;
 
             Priority = priority;
 
@@ -76,18 +80,29 @@ namespace Sharky.MicroTasks
 
             foreach (var commander in UnitCommanders)
             {
-                if (framesSinceLastMainScout > 22.4f * 40)
+                if (framesSinceLastMainScout > SharkyOptions.FramesPerSecond * 40)
                 {
                     scoutMain = true;
                     framesSinceLastMainScout = 0;
                 }
 
-                Point2D scoutPos = scoutMain ? TargetingData.EnemyMainBasePoint : TargetingData.NaturalFrontScoutPoint;
-
-                var action = commander.Order(frame, Abilities.MOVE, scoutPos);
-                if (action != null)
+                if (scoutMain)
                 {
-                    commands.AddRange(action);
+                    var action = commander.Order(frame, Abilities.MOVE, TargetingData.EnemyMainBasePoint);
+                    if (action != null)
+                    {
+                        commands.AddRange(action);
+                    }
+                }
+                else
+                {
+                    var scoutPos = TargetingData.NaturalFrontScoutPoint;
+
+                    var action = MicroData.IndividualMicroControllers[UnitTypes.ZERG_ZERGLING].Scout(commander, scoutPos, TargetingData.MainDefensePoint, frame);
+                    if (action != null)
+                    {
+                        commands.AddRange(action);
+                    }
                 }
             }
 

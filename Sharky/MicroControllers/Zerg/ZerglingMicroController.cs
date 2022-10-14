@@ -167,5 +167,15 @@ namespace Sharky.MicroControllers.Zerg
 
             return base.GetWeaponCooldown(commander, enemy);
         }
+
+        public override List<Action> Scout(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, bool prioritizeVision = false)
+        {
+            if (commander.UnitCalculation.EnemiesThreateningDamage.Any())
+            {
+                return NavigateToPoint(commander, target, defensivePoint, null, frame);
+            }
+
+            return base.Scout(commander, target, defensivePoint, frame, prioritizeVision);
+        }
     }
 }
