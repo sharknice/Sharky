@@ -32,6 +32,14 @@ namespace Sharky.MicroControllers.Terran
 
             if (bestTarget != null && WeaponReady(commander, frame) && commander.UnitCalculation.EnemiesInRange.Any(e => e.Unit.Tag == bestTarget.Unit.Tag)) { return false; }
 
+            if (commander.UnitRole == UnitRole.Leader)
+            {
+                if (!commander.UnitCalculation.EnemiesThreateningDamage.Any() && commander.UnitCalculation.TargetPriorityCalculation.Overwhelm)
+                {
+                    return false;
+                }
+            }
+
             var friendlyDepots = commander.UnitCalculation.NearbyAllies.Take(25).Where(a => a.Unit.UnitType == (uint)UnitTypes.TERRAN_SUPPLYDEPOTLOWERED);
             if (friendlyDepots.Any(depot => Vector2.DistanceSquared(depot.Position, commander.UnitCalculation.Position) < 4 )) 
             { 

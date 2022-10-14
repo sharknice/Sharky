@@ -4,6 +4,7 @@ using Sharky.MicroControllers;
 using Sharky.MicroTasks.Scout;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
@@ -95,6 +96,7 @@ namespace Sharky.MicroTasks.Attack
                         UnitCommanders.Add(commander.Value);
                         if (MainAttackers.Count() == 0 && MainAttackers.Contains((UnitTypes)commander.Value.UnitCalculation.Unit.UnitType) && !commander.Value.UnitCalculation.Unit.IsHallucination) // TODO: need to move units over when they change from corruptor to broodlord
                         {
+                            commander.Value.UnitRole = UnitRole.Leader;
                             MainUnits.Add(commander.Value);
                         }
                         else
@@ -298,6 +300,7 @@ namespace Sharky.MicroTasks.Attack
                 if (mainUnit != null)
                 {
                     SupportUnits.Remove(mainUnit);
+                    mainUnit.UnitRole = UnitRole.Leader;
                     MainUnits.Add(mainUnit);
                 }
             }

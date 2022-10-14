@@ -10,20 +10,29 @@ namespace Sharky.MicroControllers.Terran
     public class HellionMicroController : IndividualMicroController
     {
         CollisionCalculator CollisionCalculator;
+        UnitCountService UnitCountService;
 
         public HellionMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled)
             : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled)
         {
             CollisionCalculator = defaultSharkyBot.CollisionCalculator;
+            UnitCountService = defaultSharkyBot.UnitCountService;
         }
 
         protected override bool OffensiveAbility(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
-            // TODO: hellbat morph logic
-            // action = commander.Order(frame, Abilities.MORPH_HELLBAT);
-            // return true;
+            if (UnitCountService.Completed(UnitTypes.TERRAN_ARMORY) == 0)
+            {
+                return false;
+            }
+
+            if (!commander.UnitCalculation.EnemiesInRangeOf.Any() && !commander.UnitCalculation.EnemiesInRange.Any() && commander.UnitCalculation.NearbyAllies.Any(a => a.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED))
+            {
+                action = commander.Order(frame, Abilities.MORPH_HELLBAT);
+                return true;
+            }
 
             return false;
         }

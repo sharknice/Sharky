@@ -74,8 +74,18 @@ namespace Sharky.MicroControllers.Terran
                 return false; // don't unseige more than one tank at a time
             }
 
+            if (commander.UnitRole == UnitRole.Leader)
+            {
+                if (!commander.UnitCalculation.EnemiesInRange.Any(e => e.FrameLastSeen > frame - 25))
+                {
+                    LastUnseigeFrame = frame;
+                    action = commander.Order(frame, Abilities.MORPH_UNSIEGE);
+                    return true;
+                }
+            }
+
             // if there are nearby enemies keep some tanks seieged to cover as the others move forward
-            if (commander.UnitCalculation.NearbyEnemies.Any(e => !e.Unit.IsFlying)) 
+            if (commander.UnitCalculation.NearbyEnemies.Any(e => !e.Unit.IsFlying && e.Damage > 0)) 
             {
                 var unseiged = commander.UnitCalculation.NearbyAllies.Count(u => u.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANK);
                 var seiged = commander.UnitCalculation.NearbyAllies.Count(u => u.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED);
