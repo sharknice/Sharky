@@ -790,16 +790,18 @@ namespace Sharky.MicroControllers
 
             if (formation == Formation.Tight && commander.UnitCalculation.NearbyEnemies.Count() > 0)
             {
-                var vectors = commander.UnitCalculation.NearbyAllies.Take(25).Where(a => (!a.Unit.IsFlying && !commander.UnitCalculation.Unit.IsFlying) || (commander.UnitCalculation.Unit.IsFlying && a.Unit.UnitType == commander.UnitCalculation.Unit.UnitType)).Select(u => u.Position);
+                var vectors = commander.UnitCalculation.NearbyAllies.Take(25).Where(a => (!a.Unit.IsFlying && !commander.UnitCalculation.Unit.IsFlying && a.UnitClassifications.Contains(UnitClassification.ArmyUnit)) || (commander.UnitCalculation.Unit.IsFlying && a.Unit.UnitType == commander.UnitCalculation.Unit.UnitType)).Where(a => Vector2.DistanceSquared(a.Position, commander.UnitCalculation.Position) < GroupUpDistance * GroupUpDistance).Select(u => u.Position);
                 if (vectors.Count() > 0)
                 {
-                    var max = 1;
-                    if (commander.UnitCalculation.Unit.IsFlying)
+                    var max = 1f;
+                    if (!commander.UnitCalculation.Unit.IsFlying)
                     {
-                        max = 4;
+                        max = commander.UnitCalculation.Unit.Radius * vectors.Count();
                     }
-                    var center = new Point2D { X = vectors.Average(v => v.X), Y = vectors.Average(v => v.Y) };
-                    if (Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(center.X, center.Y)) + commander.UnitCalculation.Unit.Radius > max)
+                    var vectorList = vectors.ToList();
+                    vectorList.Add(commander.UnitCalculation.Position);
+                    var center = new Point2D { X = vectorList.Average(v => v.X), Y = vectorList.Average(v => v.Y) };
+                    if (Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(center.X, center.Y)) > (max * max))
                     {
                         action = commander.Order(frame, Abilities.MOVE, center);
                         return true;

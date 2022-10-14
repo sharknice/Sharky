@@ -1,6 +1,7 @@
 ﻿using SC2APIProtocol;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace Sharky.Managers
 {
@@ -9,6 +10,9 @@ namespace Sharky.Managers
         GameConnection GameConnection;
         SharkyOptions SharkyOptions;
         DebugService DebugService;
+
+        bool SlowMode = false;
+        int SlowTime = 0;
 
         public DebugManager(GameConnection gameConnection, SharkyOptions sharkyOptions, DebugService debugService)
         {
@@ -36,6 +40,11 @@ namespace Sharky.Managers
                 catch(System.Exception e)
                 {
                     System.Console.WriteLine($"{e.Message}");
+                }
+
+                if (SlowMode)
+                {
+                    Thread.Sleep(SlowTime);
                 }
             }
 
@@ -115,6 +124,21 @@ namespace Sharky.Managers
                 {
                     var unitType = (UnitTypes)System.Enum.Parse(typeof(UnitTypes), match.Groups[1].Value, true);
                     DebugService.KillEnemyUnits(unitType);
+                    return;
+                }
+
+                match = Regex.Match(chatReceived.Message.ToLower(), @"slow (\d+)");
+                if (match.Success)
+                {
+                    SlowMode = true;
+                    SlowTime = int.Parse(match.Groups[1].Value);
+                    return;
+                }
+
+                match = Regex.Match(chatReceived.Message.ToLower(), @"slow off");
+                if (match.Success)
+                {
+                    SlowMode = false;
                     return;
                 }
             }
