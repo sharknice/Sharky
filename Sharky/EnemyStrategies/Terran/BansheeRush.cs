@@ -16,7 +16,7 @@ namespace Sharky.EnemyStrategies.Terran
                 return true;
             }
 
-            if ((frame <= SharkyOptions.FramesPerSecond * 60 * 6.0f) && UnitCountService.EnemyCount(UnitTypes.TERRAN_STARPORTTECHLAB) > 0 || UnitCountService.EnemyCount(UnitTypes.TERRAN_STARPORT) > 1)
+            if ((frame <= SharkyOptions.FramesPerSecond * 60 * 6.0f) && (UnitCountService.EnemyCount(UnitTypes.TERRAN_STARPORTTECHLAB) > 0 || UnitCountService.EnemyCount(UnitTypes.TERRAN_STARPORT) > 1))
             {
                 return true;
             }

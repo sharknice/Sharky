@@ -1,9 +1,7 @@
-﻿using Sharky.Chat;
-using Sharky.DefaultBot;
+﻿using Sharky.DefaultBot;
 using Sharky.Extensions;
 using Sharky.Pathing;
 using System.Linq;
-using System.Numerics;
 
 namespace Sharky.EnemyStrategies
 {
@@ -13,15 +11,20 @@ namespace Sharky.EnemyStrategies
         BaseData BaseData;
         MapDataService MapDataService;
 
+        bool Expired;
+
         public OneBase(DefaultSharkyBot defaultSharkyBot) : base(defaultSharkyBot)
         {
             TargetingData = defaultSharkyBot.TargetingData;
             BaseData = defaultSharkyBot.BaseData;
             MapDataService = defaultSharkyBot.MapDataService;
+            Expired = false;
         }
 
         protected override bool Detect(int frame)
         {
+            if (Expired) { return false; }
+
             var elapsedTime = FrameToTimeConverter.GetTime(frame);
 
             var enemyExpansions = ActiveUnitData.EnemyUnits.Values.Count(x => 
@@ -32,7 +35,9 @@ namespace Sharky.EnemyStrategies
                 return false;
 
             if (enemyExpansions > 0)
+            {
                 return false;
+            }
 
             if (EnemyData.EnemyRace == SC2APIProtocol.Race.Zerg)
             {
@@ -45,6 +50,11 @@ namespace Sharky.EnemyStrategies
             else if (EnemyData.EnemyRace == SC2APIProtocol.Race.Terran)
             {
                 return elapsedTime.TotalMinutes >= 3.5f;
+            }
+
+            if (enemyExpansions > 0 && elapsedTime.TotalMinutes >= 3.5f)
+            {
+                Expired = false;
             }
 
             return false;
