@@ -111,6 +111,7 @@ namespace Sharky.Chat
         {
             if (SharkyOptions.TagsEnabled)
             {
+                tag = new string(tag.Select(c => (char.IsLetterOrDigit(c) || c == '-') ? c : '_').ToArray());
                 SendInstantChatMessage($"Tag:{tag}", !SharkyOptions.TagsAllChat);
             }
         }

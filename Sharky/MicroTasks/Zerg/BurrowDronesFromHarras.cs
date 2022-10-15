@@ -56,7 +56,7 @@ namespace Sharky.MicroTasks.Zerg
                 {
                     if (!tagged)
                     {
-                        ChatService.Tag("burrow_drones");
+                        ChatService.Tag("self_burrow_drones");
                         tagged = true;
                     }
 
