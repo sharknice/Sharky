@@ -180,7 +180,7 @@ namespace Sharky.DefaultBot
             SharkyOptions = new SharkyOptions { Debug = debug, FramesPerSecond = framesPerSecond, TagsEnabled = true, BuildTagsEnabled = true, LogPerformance = false, GameStatusReportingEnabled = true, TagsAllChat = false };
             FrameToTimeConverter = new FrameToTimeConverter(SharkyOptions);
             MacroData = new MacroData();
-            AttackData = new AttackData { ArmyFoodAttack = 30, ArmyFoodRetreat = 25, Attacking = false, UseAttackDataManager = true, CustomAttackFunction = true, RetreatTrigger = 1f, AttackTrigger = 1.5f, RequireDetection = false, RequireMaxOut = false, AttackWhenMaxedOut = true, AttackWhenOverwhelm = true, ContainTrigger = 1.5f, KillTrigger = 3f };
+            AttackData = new AttackData { ArmyFoodAttack = 30, ArmyFoodRetreat = 25, Attacking = false, UseAttackDataManager = true, CustomAttackFunction = true, RetreatTrigger = 1f, AttackTrigger = 1.5f, RequireDetection = false, ContainBelowKill = true, RequireMaxOut = false, AttackWhenMaxedOut = true, AttackWhenOverwhelm = true, ContainTrigger = 1.5f, KillTrigger = 3f };
             TargetingData = new TargetingData { HiddenEnemyBase = false };
             BaseData = new BaseData();
             MapData = new MapData();
@@ -367,6 +367,7 @@ namespace Sharky.DefaultBot
             var vikingLandedMicroController = new VikingLandedMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
             var bansheeMicroController = new BansheeMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
             var ravenMicroController = new RavenMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
+            var medivacMicroController = new MedivacMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
 
             var workerDefenseMicroController = new IndividualMicroController(MapDataService, SharkyUnitData, ActiveUnitData, DebugService, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, UnitDataService, TargetingData, TargetingService, MicroPriority.LiveAndAttack, false, 3);
             var workerProxyScoutMicroController = new WorkerScoutMicroController(MapDataService, SharkyUnitData, ActiveUnitData, DebugService, SharkyAdvancedPathFinder, BaseData, SharkyOptions, DamageService, UnitDataService, TargetingData, TargetingService, MicroPriority.AttackForward, false);
@@ -433,7 +434,8 @@ namespace Sharky.DefaultBot
                 { UnitTypes.TERRAN_VIKINGFIGHTER, vikingMicroController },
                 { UnitTypes.TERRAN_VIKINGASSAULT, vikingLandedMicroController },
                 { UnitTypes.TERRAN_BANSHEE, bansheeMicroController },
-                { UnitTypes.TERRAN_RAVEN, ravenMicroController }
+                { UnitTypes.TERRAN_RAVEN, ravenMicroController },
+                { UnitTypes.TERRAN_MEDIVAC, medivacMicroController }
             };
 
             MicroData = new MicroData { IndividualMicroControllers = individualMicroControllers, IndividualMicroController = individualMicroController };

@@ -16,7 +16,7 @@ namespace Sharky.MicroControllers.Zerg
             UnitData = unitData;
         }
 
-        protected override bool AvoidPointlessDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<Action> action)
+        protected override bool AvoidPointlessDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, Formation formation, int frame, out List<Action> action)
         {
             action = null;
 
@@ -25,7 +25,7 @@ namespace Sharky.MicroControllers.Zerg
                 return false;
             }
 
-            return base.AvoidPointlessDamage(commander, target, defensivePoint, frame, out action);
+            return base.AvoidPointlessDamage(commander, target, defensivePoint, formation, frame, out action);
         }
 
         public override List<Action> Attack(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)

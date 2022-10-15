@@ -401,7 +401,7 @@ namespace Sharky.MicroControllers.Protoss
             return commander.Order(frame, Abilities.MOVE, target);
         }
 
-        protected override bool MoveToAttackTarget(UnitCommander commander, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
+        protected override bool MoveToAttackTarget(UnitCommander commander, UnitCalculation bestTarget, Formation formation, int frame, out List<SC2APIProtocol.Action> action)
         {
             if (WeaponReady(commander, frame))
             {

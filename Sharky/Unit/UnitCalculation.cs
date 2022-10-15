@@ -319,7 +319,7 @@ namespace Sharky
             }
             if (Unit.UnitType == (uint)UnitTypes.PROTOSS_COLOSSUS)
             {
-                damage *= 3;
+                damage *= 2;
             }
 
             if (Unit.UnitType == (uint)UnitTypes.ZERG_BANELING || Unit.UnitType == (uint)UnitTypes.ZERG_BANELINGBURROWED)
