@@ -18,6 +18,11 @@ namespace Sharky
         public float ArmyAggressivity { get; set; }
 
         /// <summary>
+        /// Enemy army supply size
+        /// </summary>
+        public float ArmySize { get; set; }
+
+        /// <summary>
         /// Grid with distances from enemy and self base.
         /// </summary>
         public DistanceGrid DistanceGrid { get; set; }

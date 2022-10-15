@@ -38,14 +38,16 @@ namespace Sharky
             float aggressivitySum = 0;
             var unitCount = 0;
 
-            var armyUnits = ActiveUnitData.EnemyUnits.Values.Where(u => u.UnitClassifications.Contains(UnitClassification.ArmyUnit));
+            var enemyArmyUnits = ActiveUnitData.EnemyUnits.Values.Where(u => u.UnitClassifications.Contains(UnitClassification.ArmyUnit));
 
-            foreach (var unit in armyUnits)
+            EnemyAgresivityData.ArmySize = 0;
+            foreach (var unit in enemyArmyUnits)
             {
                 var selfDist = grid.GetDist(unit.Unit.Pos.X, unit.Unit.Pos.Y, true, !unit.Unit.IsFlying);
                 var enemyDist = grid.GetDist(unit.Unit.Pos.X, unit.Unit.Pos.Y, false, !unit.Unit.IsFlying);
 
-                aggressivitySum += (float)enemyDist / (float)(selfDist + enemyDist + 1);
+                EnemyAgresivityData.ArmySize += unit.UnitTypeData.FoodRequired;
+                aggressivitySum += enemyDist / (selfDist + enemyDist + 1);
                 unitCount++;
             }
 
@@ -55,12 +57,12 @@ namespace Sharky
             }
             else
             {
-                EnemyAgresivityData.ArmyAggressivity = (float)aggressivitySum / (float)unitCount;
+                EnemyAgresivityData.ArmyAggressivity = aggressivitySum / unitCount;
             }
 
             if (frame - LastRecalc >= FrameSkip)
             {
-                UpdateHarassing(armyUnits, frame);
+                UpdateHarassing(enemyArmyUnits, frame);
                 LastRecalc = frame;
             }
         }
