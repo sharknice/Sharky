@@ -90,7 +90,7 @@ namespace Sharky.MicroTasks.Attack
                 {
                     TargetingData.AttackState = AttackState.Retreat;
                 }
-                else
+                else if (AttackData.ContainBelowKill)
                 {
                     var targetVector = new Vector2(TargetingData.AttackPoint.X, TargetingData.AttackPoint.Y);
                     var armyVector = new Vector2(AttackData.ArmyPoint.X, AttackData.ArmyPoint.Y);
@@ -99,6 +99,10 @@ namespace Sharky.MicroTasks.Attack
                     {
                         TargetingData.AttackState = AttackState.Regroup;
                     }
+                }
+                else if (targetPriority.OverallWinnability <= AttackData.RetreatTrigger)
+                {
+                    TargetingData.AttackState = AttackState.Retreat;
                 }
             }
             else if (TargetingData.AttackState == AttackState.Regroup)

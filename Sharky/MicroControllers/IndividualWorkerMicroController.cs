@@ -43,7 +43,7 @@ namespace Sharky.MicroControllers
             }
 
             if (GetHighGroundVision(commander, target, defensivePoint, bestTarget, frame, out action)) { return action; }
-            if (AvoidPointlessDamage(commander, target, defensivePoint, frame, out action)) { return action; }
+            if (AvoidPointlessDamage(commander, target, defensivePoint, formation, frame, out action)) { return action; }
 
             if (!EnemySpotted)
             {

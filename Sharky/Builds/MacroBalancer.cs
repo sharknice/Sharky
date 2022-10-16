@@ -202,6 +202,8 @@ namespace Sharky.Builds
                     desiredWorkers = 90;
                 }
 
+                var doneAndInProgress = UnitCountService.UnitsDoneAndInProgressCount(workerType);
+
                 MacroData.DesiredUnitCounts[workerType] = desiredWorkers;
 
                 if (UnitCountService.Count(workerType) < desiredWorkers && UnitCountService.Count(workerType) + UnitCountService.UnitsInProgressCount(workerType) < desiredWorkers)
@@ -334,7 +336,7 @@ namespace Sharky.Builds
 
             foreach (var u in unitTypes)
             {
-                var desiredRatio = MacroData.DesiredUnitCounts[u] / (double)desiredTotal;
+                var desiredRatio = (MacroData.DesiredUnitCounts[u] + 1) / (double)desiredTotal;
 
                 var count = UnitCountService.EquivalentTypeCount(u) + UnitCountService.UnitsInProgressCount(u);
                 if (u == UnitTypes.PROTOSS_ARCHON || u == UnitTypes.ZERG_QUEEN)
@@ -353,14 +355,7 @@ namespace Sharky.Builds
                 }
                 else if (actualRatio > desiredRatio || count >= MacroData.DesiredUnitCounts[u])
                 {
-                    if (MacroData.DesiredUnitCounts[u] < MacroData.DesiredUnitCounts[u] && MacroData.Minerals > 350 && SharkyUnitData.UnitData[u].VespeneCost == 0) // TODO: this has got to be wrong
-                    {
-                        MacroData.BuildUnits[u] = true;
-                    }
-                    else
-                    {
-                        MacroData.BuildUnits[u] = false;
-                    }
+                    MacroData.BuildUnits[u] = false;
                 }
                 else
                 {

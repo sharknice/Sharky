@@ -14,6 +14,7 @@ namespace Sharky
         public float AttackTrigger { get; set; }
         public float ContainTrigger { get; set; }
         public float KillTrigger { get; set; }
+        public bool ContainBelowKill { get; set; }
         public bool RequireDetection { get; set; }
         public bool RequireMaxOut { get; set; }
         public bool AttackWhenMaxedOut { get; set; }
