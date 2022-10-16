@@ -324,7 +324,7 @@ namespace Sharky
 
             if (Unit.UnitType == (uint)UnitTypes.ZERG_BANELING || Unit.UnitType == (uint)UnitTypes.ZERG_BANELINGBURROWED)
             {
-                damage *= 2;
+                damage *= 3.5f;
             }
             if (Unit.UnitType == (uint)UnitTypes.ZERG_ULTRALISK)
             {
