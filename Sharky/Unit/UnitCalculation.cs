@@ -345,6 +345,7 @@ namespace Sharky
             TargetPriorityCalculation = previous.TargetPriorityCalculation;
             PreviousUnit = previous.Unit;
             PreviousUnitCalculation = previous;
+            PreviousUnitCalculation.PreviousUnitCalculation = null;
             var vector = new Vector2(Unit.Pos.X - PreviousUnit.Pos.X, Unit.Pos.Y - PreviousUnit.Pos.Y);
 
             Vector = vector / (FrameLastSeen - frame);
@@ -352,6 +353,11 @@ namespace Sharky
             Velocity = Vector.LengthSquared();
             AverageVelocity = Velocity;
             FrameFirstSeen = previous.FrameFirstSeen;
+        }
+
+        public override string ToString()
+        {
+            return $"UnitCalculation: {(UnitTypes)Unit.UnitType}, tag: {Unit.Tag}, last seen: {FrameLastSeen}";
         }
     }
 }
