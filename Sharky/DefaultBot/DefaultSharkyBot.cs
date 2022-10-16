@@ -224,7 +224,7 @@ namespace Sharky.DefaultBot
             SharkyAdvancedPathFinder = new SharkyAdvancedPathFinder(new Roy_T.AStar.Paths.PathFinder(), MapData, MapDataService, DebugService);
             NoPathFinder = new SharkyNoPathFinder();
 
-            UnitCountService = new UnitCountService(ActiveUnitData, SharkyUnitData);
+            UnitCountService = new UnitCountService(ActiveUnitData, SharkyUnitData, FrameToTimeConverter, SharkyOptions);
             DamageService = new DamageService();
             BuildingService = new BuildingService(MapData, ActiveUnitData, TargetingData, BaseData, SharkyUnitData);
 
@@ -587,6 +587,8 @@ namespace Sharky.DefaultBot
                 [nameof(ThreeRax)] = new ThreeRax(this),
                 [nameof(BansheeRush)] = new BansheeRush(this),
 
+                [nameof(ZerglingFlood)] = new ZerglingFlood(this),
+                [nameof(EarlyPool)] = new EarlyPool(this),
                 [nameof(ZerglingRush)] = new ZerglingRush(this),
                 [nameof(RoachRavager)] = new RoachRavager(this),
                 [nameof(ZerglingDroneRush)] = new ZerglingDroneRush(this),

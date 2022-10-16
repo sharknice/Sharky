@@ -1,6 +1,7 @@
 ﻿using SC2APIProtocol;
 using Sharky.Chat;
 using Sharky.DefaultBot;
+using Sharky.TypeData;
 using System;
 using System.Linq;
 

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 
 namespace Sharky
 {
@@ -6,11 +7,15 @@ namespace Sharky
     {
         ActiveUnitData ActiveUnitData;
         SharkyUnitData SharkyUnitData;
+        FrameToTimeConverter FrameToTimeConverter;
+        SharkyOptions SharkyOptions;
 
-        public UnitCountService(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData)
+        public UnitCountService(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, FrameToTimeConverter frameToTimeConverter, SharkyOptions sharkyOptions)
         {
             ActiveUnitData = activeUnitData;
             SharkyUnitData = sharkyUnitData;
+            FrameToTimeConverter = frameToTimeConverter;
+            SharkyOptions = sharkyOptions;
         }
 
         public int Count(UnitTypes unitType)
@@ -58,14 +63,14 @@ namespace Sharky
         public int UnitsInProgressCount(UnitTypes unitType)
         {
             var unitData = SharkyUnitData.TrainingData[unitType];
-            var inProgress = ActiveUnitData.SelfUnits.Count(u => (unitData.ProducingUnits.Contains((UnitTypes)u.Value.Unit.UnitType) 
-            || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_EGG 
+            var inProgress = ActiveUnitData.SelfUnits.Count(u => (unitData.ProducingUnits.Contains((UnitTypes)u.Value.Unit.UnitType)
+            || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_EGG
             || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_OVERLORDCOCOON
             || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_BANELINGCOCOON
             || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_LURKERMPEGG
             || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_BROODLORDCOCOON
             || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_RAVAGERCOCOON
-            || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_TRANSPORTOVERLORDCOCOON) 
+            || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_TRANSPORTOVERLORDCOCOON)
             && u.Value.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
             if (unitType == UnitTypes.ZERG_ZERGLING)
             {
@@ -252,7 +257,7 @@ namespace Sharky
             {
                 count += EnemyCount(UnitTypes.PROTOSS_WARPGATE);
             }
-            
+
             else if (unitType == UnitTypes.ZERG_HATCHERY)
             {
                 count += EnemyCount(UnitTypes.ZERG_HIVE);
@@ -423,7 +428,7 @@ namespace Sharky
 
         public int Completed(UnitTypes unitType)
         {
-            return ActiveUnitData.SelfUnits.Count(u => !u.Value.Unit.IsHallucination && u.Value.Unit.UnitType == (uint)unitType && 
+            return ActiveUnitData.SelfUnits.Count(u => !u.Value.Unit.IsHallucination && u.Value.Unit.UnitType == (uint)unitType &&
                 (u.Value.Unit.BuildProgress == 1 ||
                 (u.Value.Unit.BuildProgress > .99f && (u.Value.Unit.UnitType == (uint)UnitTypes.TERRAN_ORBITALCOMMAND || u.Value.Unit.UnitType == (uint)UnitTypes.TERRAN_PLANETARYFORTRESS))));
         }
@@ -515,8 +520,16 @@ namespace Sharky
         /// <summary>
         /// Gets highest finished status of units of given type. Useful when you want to know when your tech building finishes.
         /// </summary>
-        /// <param name="unitType"></param>
-        /// <returns></returns>
         public float TechBuildingProgress(UnitTypes unitType) => ActiveUnitData.SelfUnits.Values.Where(u => u.Unit.UnitType == (uint)unitType).Select(u => u.Unit.BuildProgress).DefaultIfEmpty().Max();
+
+        /// <summary>
+        /// Gets ingame elapsed time when the given unit started being produced if it is still in progress.
+        /// </summary>
+        public TimeSpan BuildingStarted(UnitCalculation unit)
+        {
+            var buildTime = SharkyUnitData.UnitData[(UnitTypes)unit.Unit.UnitType].BuildTime;
+            float startFrame = unit.FrameLastSeen - unit.Unit.BuildProgress * buildTime;
+            return FrameToTimeConverter.GetTime(Math.Min(unit.FrameFirstSeen, (int)startFrame));
+        }
     }
 }
