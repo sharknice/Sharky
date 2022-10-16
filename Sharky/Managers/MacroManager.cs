@@ -33,6 +33,7 @@ namespace Sharky.Managers
         int LastRunFrame;
 
         public int RunFrequency { get; set; }
+        public int SlowRunFrequency { get; set; }
 
         public override bool NeverSkip { get => true; }
 
@@ -63,6 +64,7 @@ namespace Sharky.Managers
 
             LastRunFrame = -10;
             RunFrequency = 5;
+            SlowRunFrequency = 25;
         }
 
         public override void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)
@@ -90,7 +92,7 @@ namespace Sharky.Managers
             MacroData.VespeneGas = (int)observation.Observation.PlayerCommon.Vespene;
             MacroData.Frame = (int)observation.Observation.GameLoop;
 
-            if (LastRunFrame + RunFrequency > observation.Observation.GameLoop)
+            if (!CanRunFullProduction(observation))
             {
                 if (MacroData.Race == Race.Zerg)
                 {
@@ -137,6 +139,21 @@ namespace Sharky.Managers
             actions.AddRange(EveryFrameProduction());
 
             return actions;
+        }
+
+        private bool CanRunFullProduction(ResponseObservation observation)
+        {
+            var runFrequency = RunFrequency;
+            if (observation.Observation.GameLoop > 6720 && TotalFrameTime / observation.Observation.GameLoop > 1)
+            {
+                runFrequency = SlowRunFrequency;
+            }
+
+            if (LastRunFrame + runFrequency > observation.Observation.GameLoop)
+            {
+                return false;
+            }
+            return true;
         }
 
         IEnumerable<SC2APIProtocol.Action> EveryFrameProduction()
