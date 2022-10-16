@@ -22,7 +22,7 @@ namespace Sharky.Managers
 
         public virtual void OnEnd(ResponseObservation observation, Result result)
         {
-
+            System.Console.WriteLine($"{observation.Observation.GameLoop} {GetType().Name} {TotalFrameTime} ms, average: {TotalFrameTime / observation.Observation.GameLoop} ms");
         }
     }
 }

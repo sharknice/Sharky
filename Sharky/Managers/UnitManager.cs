@@ -59,6 +59,8 @@ namespace Sharky.Managers
             Console.WriteLine($"Enemy Deaths: {ActiveUnitData.EnemyDeaths}");
             Console.WriteLine($"Self Deaths: {ActiveUnitData.SelfDeaths}");
             Console.WriteLine($"Neutral Deaths: {ActiveUnitData.NeutralDeaths}");
+
+            base.OnEnd(observation, result);
         }
 
         public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
