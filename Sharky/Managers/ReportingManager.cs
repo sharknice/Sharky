@@ -131,7 +131,7 @@ namespace Sharky.Managers
             foreach (var entry in DefaultSharkyBot.EnemyData.EnemyStrategies.OrderBy(x => x.Key))
             {
                 if (entry.Value.Detected)
-                    Console.WriteLine($"    [{entry.Key}] is {(entry.Value.Active ? "active" : "inactive")}");
+                    Console.WriteLine($"    [{entry.Key}] is {(entry.Value.Active ? "active" : "inactive")} ({FormatElapsedTime(entry.Value.FirstActiveFrame)} to {FormatElapsedTime(entry.Value.LastActiveFrame)})");
             }
             PrintEnemyUnits();
             if (DefaultSharkyBot.AttackData.UseAttackDataManager)
@@ -144,6 +144,11 @@ namespace Sharky.Managers
             }
             CheckCommanders();
             Console.WriteLine(new String('=', 20));
+        }
+
+        private string FormatElapsedTime(int frames)
+        {
+            return DefaultSharkyBot.FrameToTimeConverter.GetTime(frames).ToString(@"mm\:ss");
         }
 
         private void PrintEnemyUnits()

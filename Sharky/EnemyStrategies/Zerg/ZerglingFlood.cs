@@ -13,7 +13,7 @@ namespace Sharky.EnemyStrategies.Zerg
             var lingCount = UnitCountService.EnemyCount(UnitTypes.ZERG_ZERGLING);
             var elapsedTime = FrameToTimeConverter.GetTime(frame);
 
-            if (elapsedTime.TotalMinutes > 5)
+            if (elapsedTime.TotalMinutes > 6)
                 return false;
 
             bool enemytech = UnitCountService.EquivalentEnemyTypeCount(UnitTypes.ZERG_BANELINGNEST) > 0 || UnitCountService.EquivalentEnemyTypeCount(UnitTypes.ZERG_LAIR) > 0 || UnitCountService.EquivalentEnemyTypeCount(UnitTypes.ZERG_ROACHWARREN) > 0;
@@ -21,7 +21,7 @@ namespace Sharky.EnemyStrategies.Zerg
             if (enemytech && lingCount < 12)
                 return false;
 
-            return lingCount >= 8 || (lingCount > 6 && elapsedTime.TotalMinutes < 4);
+            return lingCount >= 8 || (lingCount > 6 && elapsedTime.TotalMinutes < 6);
         }
     }
 }

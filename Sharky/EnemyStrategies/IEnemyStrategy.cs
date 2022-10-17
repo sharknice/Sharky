@@ -8,5 +8,7 @@ namespace Sharky.EnemyStrategies
         void OnFrame(int frame);
         bool Active { get; }
         bool Detected { get; }
+        int FirstActiveFrame { get; }
+        int LastActiveFrame { get; }
     }
 }

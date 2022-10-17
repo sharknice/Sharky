@@ -1,7 +1,5 @@
-﻿using SC2APIProtocol;
-using Sharky.Chat;
+﻿using Sharky.Chat;
 using Sharky.DefaultBot;
-using Sharky.TypeData;
 using System;
 using System.Linq;
 
@@ -11,6 +9,8 @@ namespace Sharky.EnemyStrategies
     {
         public bool Active { get; private set; }
         public bool Detected { get; private set; }
+        public int FirstActiveFrame { get; private set; }
+        public int LastActiveFrame { get; private set; }
 
         protected ChatService ChatService;
         protected EnemyStrategyHistory EnemyStrategyHistory;
@@ -45,6 +45,12 @@ namespace Sharky.EnemyStrategies
             if (detected)
             {
                 Active = true;
+                LastActiveFrame = frame;
+
+                if (FirstActiveFrame == 0)
+                {
+                    FirstActiveFrame = frame;
+                }
 
                 if (!Detected)
                 {
