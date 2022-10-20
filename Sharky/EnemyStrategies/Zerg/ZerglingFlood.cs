@@ -18,10 +18,10 @@ namespace Sharky.EnemyStrategies.Zerg
 
             bool enemytech = UnitCountService.EquivalentEnemyTypeCount(UnitTypes.ZERG_BANELINGNEST) > 0 || UnitCountService.EquivalentEnemyTypeCount(UnitTypes.ZERG_LAIR) > 0 || UnitCountService.EquivalentEnemyTypeCount(UnitTypes.ZERG_ROACHWARREN) > 0;
 
-            if (enemytech && lingCount < 12)
+            if (enemytech && lingCount < 8)
                 return false;
 
-            return lingCount >= 8 || (lingCount > 6 && elapsedTime.TotalMinutes < 6);
+            return lingCount > 6;
         }
     }
 }
