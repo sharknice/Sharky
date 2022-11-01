@@ -170,5 +170,10 @@ namespace Sharky.Builds
         {
             return null;
         }
+
+        public override string ToString()
+        {
+            return $"{Name()} {(Started ? ("Started at " + FrameToTimeConverter.GetTime(StartFrame).ToString(@"mm\:ss")) : string.Empty)}";
+        }
     }
 }

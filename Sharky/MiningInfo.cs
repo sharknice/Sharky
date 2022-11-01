@@ -26,5 +26,10 @@ namespace Sharky
         public Unit ResourceUnit { get; set; }
         public Point2D DropOffPoint { get; set; }
         public Point2D HarvestPoint { get; set; }
+
+        public override string ToString()
+        {
+            return $"Mining from {HarvestPoint} to {DropOffPoint} ({Workers.Count})";
+        }
     }
 }

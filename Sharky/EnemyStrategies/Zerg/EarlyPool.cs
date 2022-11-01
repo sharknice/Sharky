@@ -1,4 +1,5 @@
 ﻿using Sharky.DefaultBot;
+using System;
 using System.Linq;
 
 namespace Sharky.EnemyStrategies.Zerg
@@ -15,7 +16,7 @@ namespace Sharky.EnemyStrategies.Zerg
 
             var elapsedTime = FrameToTimeConverter.GetTime(frame);
 
-            if (elapsedTime.TotalMinutes >= 3.0f)
+            if (elapsedTime.TotalMinutes >= 3.5f)
             {
                 return false;
             }
@@ -23,15 +24,10 @@ namespace Sharky.EnemyStrategies.Zerg
             if (!earlyPool)
             {
                 var enemyPool = ActiveUnitData.EnemyUnits.Where(x => x.Value.Unit.UnitType == (int)UnitTypes.ZERG_SPAWNINGPOOL).Select(x => x.Value).FirstOrDefault();
+                var lingCount = UnitCountService.EnemyCount(UnitTypes.ZERG_ZERGLING);
 
-                if (enemyPool is not null)
-                {
-                    var lingCount = UnitCountService.EnemyCount(UnitTypes.ZERG_ZERGLING);
-                    var enemyPoolStartedAt = UnitCountService.BuildingStarted(enemyPool);
-
-                    // 17gas 16pool or faster -> pool starts before 50 secs, pool takes 46secs, ling takes 17 secs, +1s tolerance
-                    earlyPool = enemyPoolStartedAt.TotalSeconds < 50 || (lingCount > 0 && elapsedTime.TotalSeconds < 50 + 46 + 17 + 1);
-                }
+                earlyPool = (lingCount > 0 && elapsedTime < TimeSpan.FromMinutes(2.08f))
+                    || (enemyPool is not null && UnitCountService.BuildingStarted(enemyPool).TotalMinutes < 1.0f);
             }
 
             return earlyPool;

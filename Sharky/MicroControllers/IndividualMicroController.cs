@@ -318,7 +318,7 @@ namespace Sharky.MicroControllers
 
             if (!MapDataService.SelfVisible(target))
             {
-               return commander.Order(frame, Abilities.MOVE, target);
+                return commander.Order(frame, Abilities.MOVE, target);
             }
             else
             {
@@ -577,7 +577,7 @@ namespace Sharky.MicroControllers
         {
             action = null;
             if (commander.UnitCalculation.Repairers > 0 && commander.UnitCalculation.Unit.Health < commander.UnitCalculation.Unit.HealthMax && commander.UnitCalculation.PreviousUnit.Health < commander.UnitCalculation.Unit.Health)
-            {               
+            {
                 action = commander.Order(frame, Abilities.STOP);
                 return true;
             }
@@ -1064,7 +1064,7 @@ namespace Sharky.MicroControllers
                 {
                     action = commander.Order(frame, Abilities.ATTACK, null, bestTarget.Unit.Tag);
                     return true;
-                }               
+                }
             }
 
             if (GetInBunker(commander, frame, out action)) { return true; }
@@ -1371,7 +1371,7 @@ namespace Sharky.MicroControllers
             }
 
             if (bestTarget != null && commander.UnitCalculation.NearbyEnemies.Any(e => e.Unit.Tag == bestTarget.Unit.Tag) && MicroPriority != MicroPriority.NavigateToLocation)
-            {              
+            {
                 if (GetHighGroundVision(commander, target, defensivePoint, bestTarget, frame, out action)) { return true; }
 
                 var enemyPosition = GetBestTargetAttackPoint(commander, bestTarget);
@@ -2814,12 +2814,17 @@ namespace Sharky.MicroControllers
                 t = t1;
             }
 
-            return  targetPosition + targetVelocity * t;
+            return targetPosition + targetVelocity * t;
         }
 
         protected virtual void UpdateState(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, Formation formation, int frame)
         {
 
+        }
+
+        public override string ToString()
+        {
+            return $"{MicroPriority} {(GroupUpEnabled ? "group up" : string.Empty)}";
         }
     }
 }
