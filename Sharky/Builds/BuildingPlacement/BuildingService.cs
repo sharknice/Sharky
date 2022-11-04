@@ -250,9 +250,9 @@ namespace Sharky.Builds.BuildingPlacement
             {
                 return false;
             }
-            return MapData.Map[(int)x][(int)y].EnemyGroundDpsInRange == 0 && MapData.Map[(int)x][(int)y + (int)radius].EnemyGroundDpsInRange == 0 && MapData.Map[(int)x][(int)y - (int)radius].EnemyGroundDpsInRange == 0
-                && MapData.Map[(int)x + (int)radius][(int)y].EnemyGroundDpsInRange == 0 && MapData.Map[(int)x + (int)radius][(int)y + (int)radius].EnemyGroundDpsInRange == 0 && MapData.Map[(int)x + (int)radius][(int)y - (int)radius].EnemyGroundDpsInRange == 0
-                && MapData.Map[(int)x - (int)radius][(int)y].EnemyGroundDpsInRange == 0 && MapData.Map[(int)x - (int)radius][(int)y + (int)radius].EnemyGroundDpsInRange == 0 && MapData.Map[(int)x - (int)radius][(int)y - (int)radius].EnemyGroundDpsInRange == 0;
+            return MapData.Map[(int)x][(int)y].EnemyGroundDpsInRange > 0 || MapData.Map[(int)x][(int)y + (int)radius].EnemyGroundDpsInRange > 0 || MapData.Map[(int)x][(int)y - (int)radius].EnemyGroundDpsInRange > 0
+                || MapData.Map[(int)x + (int)radius][(int)y].EnemyGroundDpsInRange > 0 || MapData.Map[(int)x + (int)radius][(int)y + (int)radius].EnemyGroundDpsInRange > 0 || MapData.Map[(int)x + (int)radius][(int)y - (int)radius].EnemyGroundDpsInRange > 0
+                || MapData.Map[(int)x - (int)radius][(int)y].EnemyGroundDpsInRange > 0 || MapData.Map[(int)x - (int)radius][(int)y + (int)radius].EnemyGroundDpsInRange > 0 || MapData.Map[(int)x - (int)radius][(int)y - (int)radius].EnemyGroundDpsInRange > 0;
         }
 
         public bool HasCreep(float x, float y, float radius)
@@ -335,7 +335,7 @@ namespace Sharky.Builds.BuildingPlacement
 
         public bool BlocksGas(float x, float y, float radius)
         {
-            if (BaseData.BaseLocations.Any(b => b.VespeneGeysers.Any(g => Vector2.DistanceSquared(new Vector2(x, y), new Vector2(g.Pos.X, g.Pos.Y)) < (4 + radius) * (4 + radius))))
+            if (BaseData.BaseLocations.Any(b => b.VespeneGeysers.Any(g => Vector2.DistanceSquared(new Vector2(x, y), new Vector2(b.Location.X, b.Location.Y)) < 16)))
             {
                 return true;
             }

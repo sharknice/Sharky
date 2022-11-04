@@ -1,5 +1,6 @@
 ﻿using SC2APIProtocol;
 using Sharky.Builds;
+using Sharky.Builds.BuildingPlacement;
 using Sharky.DefaultBot;
 using Sharky.MicroTasks.Mining;
 using System;
@@ -23,6 +24,8 @@ namespace Sharky.MicroTasks
         BuildOptions BuildOptions;
         MicroTaskData MicroTaskData;
 
+        BuildingService BuildingService;
+
         public bool LongDistanceMiningEnabled { get; set; }
 
         bool LowMineralsHighGas;
@@ -37,6 +40,7 @@ namespace Sharky.MicroTasks
             MacroData = defaultSharkyBot.MacroData;
             BuildOptions = defaultSharkyBot.BuildOptions;
             MicroTaskData = defaultSharkyBot.MicroTaskData;
+            BuildingService = defaultSharkyBot.BuildingService;
 
             MineralMiner = mineralMiner;
             GasMiner = gasMiner;
@@ -455,10 +459,20 @@ namespace Sharky.MicroTasks
                 }
                 else if (worker.UnitCalculation.Unit.Orders.Count() == 0 || worker.UnitCalculation.Unit.Orders.Any(o => BaseData.SelfBases.Any(b => b.MineralMiningInfo.Any(m => m.ResourceUnit.Tag == o.TargetUnitTag))))
                 {
-                    var closestPatch = ActiveUnitData.NeutralUnits.Where(u => SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType) && !BaseData.SelfBases.Any(b => b.ResourceCenter != null && b.ResourceCenter.BuildProgress == 1 && b.MineralFields.Any(m => m.Tag == u.Value.Unit.Tag))).OrderBy(m => Vector2.DistanceSquared(m.Value.Position, worker.UnitCalculation.Position)).FirstOrDefault().Value;
-                    if (closestPatch != null)
+                    var nextBase = BuildingService.GetNextBaseLocation();
+                    var progressPatch = ActiveUnitData.NeutralUnits.Where(u => SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType) && BaseData.SelfBases.Any(b => b.ResourceCenter != null && b.ResourceCenter.BuildProgress < 1 && b.MineralFields.Any(m => m.Tag == u.Value.Unit.Tag))).OrderBy(m => Vector2.DistanceSquared(m.Value.Position, worker.UnitCalculation.Position)).FirstOrDefault().Value;
+                    if (progressPatch != null)
                     {
-                        var action = worker.Order(frame, Abilities.HARVEST_GATHER, null, closestPatch.Unit.Tag);
+                        var action = worker.Order(frame, Abilities.HARVEST_GATHER, null, progressPatch.Unit.Tag);
+                        if (action != null)
+                        {
+                            actions.AddRange(action);
+                        }
+                    }
+                    else if (nextBase?.MineralFields?.FirstOrDefault() != null)
+                    {
+                        var field = ActiveUnitData.NeutralUnits.Values.FirstOrDefault(f => f.Unit.Pos.X == nextBase.MineralFields.FirstOrDefault().Pos.X && f.Unit.Pos.Y == nextBase.MineralFields.FirstOrDefault().Pos.Y);
+                        var action = worker.Order(frame, Abilities.SMART, null, field.Unit.Tag);
                         if (action != null)
                         {
                             actions.AddRange(action);
@@ -466,7 +480,19 @@ namespace Sharky.MicroTasks
                     }
                     else
                     {
-                        AttackWithWorker(worker);
+                        var closestPatch = ActiveUnitData.NeutralUnits.Where(u => SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType) && !BaseData.SelfBases.Any(b => b.ResourceCenter != null && b.ResourceCenter.BuildProgress == 1 && b.MineralFields.Any(m => m.Tag == u.Value.Unit.Tag))).OrderBy(m => Vector2.DistanceSquared(m.Value.Position, worker.UnitCalculation.Position)).FirstOrDefault().Value;
+                        if (closestPatch != null)
+                        {
+                            var action = worker.Order(frame, Abilities.HARVEST_GATHER, null, closestPatch.Unit.Tag);
+                            if (action != null)
+                            {
+                                actions.AddRange(action);
+                            }
+                        }
+                        else
+                        {
+                            AttackWithWorker(worker);
+                        }
                     }
                 }
             }

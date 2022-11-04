@@ -149,6 +149,8 @@ namespace Sharky.MicroTasks.Attack
                 var scv = UnitCommanders.FirstOrDefault(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_SCV);
                 if (scv != null)
                 {
+                    MainUnits.Remove(scv);
+                    SupportUnits.Remove(scv);
                     UnitCommanders.Remove(scv);
                     scv.Claimed = false;
                     scv.UnitRole = UnitRole.None;
@@ -376,7 +378,7 @@ namespace Sharky.MicroTasks.Attack
                         actions.AddRange(subTask.Value.Support(mainUnits, TargetingData.AttackPoint, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame));
                     }
                 }
-                else if (TargetingData.AttackState == AttackState.Contain)
+                else
                 {
                     actions.AddRange(MicroController.Retreat(mainUnits, TargetingData.AttackPoint, AttackData.ArmyPoint, frame));
                     actions.AddRange(MicroController.Support(supportUnits, mainUnits, supportAttackPoint, TargetingData.ForwardDefensePoint, supportAttackPoint, frame));

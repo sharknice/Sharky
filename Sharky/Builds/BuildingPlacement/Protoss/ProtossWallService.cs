@@ -32,7 +32,7 @@ namespace Sharky.Builds.BuildingPlacement
         {
             if (wallData?.Pylons == null) { return null; }
             var unitData = SharkyUnitData.BuildingData[UnitTypes.PROTOSS_PYLON];
-            var pylonRadius = (unitData.Size / 2f) - .00000f;
+            var pylonRadius = (unitData.Size / 2f) - .00001f;
             var existingPylons = ActiveUnitData.SelfUnits.Values.Where(u => u.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON);
             foreach (var pylon in wallData.Pylons)
             {

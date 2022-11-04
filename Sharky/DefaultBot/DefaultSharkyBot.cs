@@ -451,7 +451,7 @@ namespace Sharky.DefaultBot
             var reaperScoutTask = new ReaperScoutTask(this, false, 0.5f);
             var findHiddenBaseTask = new FindHiddenBaseTask(BaseData, TargetingData, MapDataService, individualMicroController, 15, false, 0.5f);
             var proxyScoutTask = new ProxyScoutTask(SharkyUnitData, TargetingData, BaseData, SharkyOptions, false, 0.5f, workerProxyScoutMicroController);
-            var miningDefenseService = new MiningDefenseService(BaseData, ActiveUnitData, workerDefenseMicroController, DebugService, DamageService);
+            var miningDefenseService = new MiningDefenseService(this, workerDefenseMicroController);
             var miningTask = new MiningTask(SharkyUnitData, BaseData, ActiveUnitData, 1, miningDefenseService, MacroData, BuildOptions, MicroTaskData, new MineralMiner(this), new GasMiner(this));
             var queenInjectTask = new QueenInjectTask(this, 1.0f, queenMicroController, false);
             var queenCreepTask = new QueenCreepTask(this, 1.1f, queenMicroController, false);

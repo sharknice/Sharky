@@ -360,9 +360,29 @@ namespace Sharky.MicroTasks
             var vector = new Vector2(DoorSpot.X, DoorSpot.Y);
             if (Vector2.DistanceSquared(commander.UnitCalculation.Position, vector) > .25f)
             {
+                var doorVector = new Vector2(DoorSpot.X, DoorSpot.Y);
+                if (DoorCommander == commander &&commander.UnitCalculation.NearbyEnemies.Any(e => Vector2.DistanceSquared(e.Position, doorVector) < 4))
+                {
+                    var betterDoor = commander.UnitCalculation.NearbyAllies.Where(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && Vector2.DistanceSquared(e.Position, doorVector) < 1).OrderBy(e => Vector2.DistanceSquared(e.Position, doorVector)).FirstOrDefault();
+                    if (betterDoor != null)
+                    {
+                        var betterDoorCommander = ActiveUnitData.Commanders.Values.FirstOrDefault(c => c.UnitCalculation.Unit.Tag == betterDoor.Unit.Tag);
+                        if (betterDoorCommander != null && !UnitCommanders.Contains(betterDoorCommander))
+                        {
+                            commander.Claimed = false;
+                            commander.UnitRole = UnitRole.None;
+                            UnitCommanders.Remove(commander);
+                            betterDoorCommander.Claimed = true;
+                            betterDoorCommander.UnitRole = UnitRole.Door;
+                            MicroTaskData[typeof(AttackTask).Name].StealUnit(betterDoorCommander);
+                            UnitCommanders.Add(betterDoorCommander);
+                            DoorCommander = betterDoorCommander;
+                        }
+                    }
+                }
                 return commander.Order(frame, Abilities.MOVE, DoorSpot);
             }
-            else if (commander.UnitCalculation.NearbyEnemies.Any(e => Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position) < 4))
+            else if (commander.UnitCalculation.NearbyEnemies.Any(e => e.FrameLastSeen > frame - 5 && Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position) < 4))
             {
                 return commander.Order(frame, Abilities.HOLDPOSITION);
             }

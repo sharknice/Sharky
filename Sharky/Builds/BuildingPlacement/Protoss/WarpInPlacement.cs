@@ -40,6 +40,10 @@ namespace Sharky.Builds.BuildingPlacement
                 if (closest == null || point != null && Vector2.DistanceSquared(new Vector2(point.X, point.Y), targetVector) < Vector2.DistanceSquared(new Vector2(closest.X, closest.Y), targetVector))
                 {
                     closest = point;
+                    if (closest != null)
+                    {
+                        break;
+                    }
                 }
             }
 

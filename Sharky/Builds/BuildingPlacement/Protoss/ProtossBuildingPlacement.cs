@@ -372,35 +372,46 @@ namespace Sharky.Builds.BuildingPlacement
                             tooClose = true;
                         }
 
-                        if (!tooClose && (minimumMineralProximinity == 0 || !BuildingService.BlocksResourceCenter(point.X, point.Y, (size - .5f) / 2.0f)) && !BuildingService.BlocksPath(point.X, point.Y, size / 2f) && BuildingService.AreaBuildable(point.X, point.Y, size / 2.0f) && !BuildingService.Blocked(point.X, point.Y, size / 2.0f, 0) && !BuildingService.HasAnyCreep(point.X, point.Y, size / 2.0f) && !BuildingService.BlocksGas(point.X, point.Y, size / 2.0f))
+                        if (BuildingService.Blocked(point.X, point.Y, size / 2.0f, 0))
                         {
-                            var mineralFields = ActiveUnitData.NeutralUnits.Where(u => SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType));
-                            var squared = (minimumMineralProximinity + (size / 2f)) * (minimumMineralProximinity + (size / 2f));
-                            var clashes = mineralFields.Where(u => Vector2.DistanceSquared(u.Value.Position, new Vector2(point.X, point.Y)) < squared);
+                            tooClose = true;
+                        }
 
-                            if (clashes.Count() == 0)
+                        if (!tooClose)
+                        {
+                            if ((minimumMineralProximinity == 0 || !BuildingService.BlocksResourceCenter(point.X, point.Y, (size - .5f) / 2.0f)))
                             {
-                                if (Vector2.DistanceSquared(new Vector2(target.X, target.Y), new Vector2(point.X, point.Y)) <= maxDistance * maxDistance && Vector2.DistanceSquared(vector, powerSource.UnitCalculation.Position) <= (6.5 - size/2f) * (6.5 - size/2f))
+                                if (BuildingService.AreaBuildable(point.X, point.Y, size / 2.0f) && !BuildingService.HasAnyCreep(point.X, point.Y, size / 2.0f) && !BuildingService.BlocksGas(point.X, point.Y, size / 2.0f))
                                 {
-                                    if (!BlocksWall(vector))
+                                    var mineralFields = ActiveUnitData.NeutralUnits.Where(u => SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType));
+                                    var squared = (minimumMineralProximinity + (size / 2f)) * (minimumMineralProximinity + (size / 2f));
+                                    var clashes = mineralFields.Where(u => Vector2.DistanceSquared(u.Value.Position, new Vector2(point.X, point.Y)) < squared);
+
+                                    if (clashes.Count() == 0)
                                     {
-                                        if (!LastLocations.Any(l => l.X == x && l.Y == y))
+                                        if (Vector2.DistanceSquared(new Vector2(target.X, target.Y), new Vector2(point.X, point.Y)) <= maxDistance * maxDistance && Vector2.DistanceSquared(vector, powerSource.UnitCalculation.Position) <= (6.5 - size / 2f) * (6.5 - size / 2f))
                                         {
-                                            DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
-
-                                            LastLocations.Add(point);
-                                            if (LastLocations.Count() > 5)
+                                            if (BuildOptions.AllowBlockWall || !BlocksWall(vector))
                                             {
-                                                LastLocations.RemoveAt(0);
-                                            }
+                                                if (!LastLocations.Any(l => l.X == x && l.Y == y))
+                                                {
+                                                    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
 
-                                            return point;
+                                                    LastLocations.Add(point);
+                                                    if (LastLocations.Count() > 5)
+                                                    {
+                                                        LastLocations.RemoveAt(0);
+                                                    }
+
+                                                    return point;
+                                                }
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
-
+                      
                         angle += sliceSize;
                     }
                     radius += 1;

@@ -148,8 +148,14 @@ namespace Sharky.MicroControllers.Protoss
                     {
                         if (friendly.Unit.WeaponCooldown > 0)
                         {
-                            action = commander.Order(frame, Abilities.LOAD, null, friendly.Unit.Tag);
-                            return true;
+                            if (ActiveUnitData.Commanders.ContainsKey(friendly.Unit.Tag))
+                            {
+                                if (ActiveUnitData.Commanders[friendly.Unit.Tag].UnitRole != UnitRole.Door)
+                                {
+                                    action = commander.Order(frame, Abilities.LOAD, null, friendly.Unit.Tag);
+                                    return true;
+                                }
+                            }
                         }
                     }
                 }
@@ -459,8 +465,14 @@ namespace Sharky.MicroControllers.Protoss
 
                 if (friendly != null)
                 {
-                    action = commander.Order(frame, Abilities.LOAD, null, friendly.Unit.Tag);
-                    return true;
+                    if (ActiveUnitData.Commanders.ContainsKey(friendly.Unit.Tag))
+                    {
+                        if (ActiveUnitData.Commanders[friendly.Unit.Tag].UnitRole != UnitRole.Door)
+                        {
+                            action = commander.Order(frame, Abilities.LOAD, null, friendly.Unit.Tag);
+                            return true;
+                        }
+                    }
                 }
             }
 

@@ -72,8 +72,14 @@ namespace Sharky.MicroTasks.Attack
                 return;
             }
 
-            if (AttackData.RequireMaxOut && MacroData.FoodUsed < 190)
+            if (AttackData.RequireMaxOut)
             {
+                if (TargetingData.AttackState == AttackState.Kill && (MacroData.FoodUsed >= AttackData.ArmyFoodRetreat || targetPriority.Overwhelm || targetPriority.OverallWinnability > AttackData.KillTrigger))
+                {
+                    DebugService.DrawText("Attacking: continuing maxout attack");
+                    return;
+                }
+
                 TargetingData.AttackState = AttackState.Retreat;
                 DebugService.DrawText("Retreating: require maxed out supply");
                 return;

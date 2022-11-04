@@ -25,6 +25,7 @@ namespace Sharky.MicroTasks
         DebugService DebugService;
         BaseData BaseData;
         MapData MapData;
+        EnemyData EnemyData;
         AreaService AreaService;
         BuildingService BuildingService;
         UnitCountService UnitCountService;
@@ -47,6 +48,7 @@ namespace Sharky.MicroTasks
             MapDataService = defaultSharkyBot.MapDataService;
             DebugService = defaultSharkyBot.DebugService;
             BaseData = defaultSharkyBot.BaseData;
+            EnemyData = defaultSharkyBot.EnemyData;
             AreaService = defaultSharkyBot.AreaService;
             BuildingService = defaultSharkyBot.BuildingService;
             UnitCountService = defaultSharkyBot.UnitCountService;
@@ -232,6 +234,44 @@ namespace Sharky.MicroTasks
                             {
                                 commands.AddRange(hidenPylonOrder);
                                 return commands;
+                            }
+                        }
+                    }
+                }
+
+                if (EnemyData.EnemyRace == SC2APIProtocol.Race.Terran)
+                {
+                    var wallData = MapData.WallData.FirstOrDefault(w => w.BasePosition.X == TargetingData.EnemyMainBasePoint.X && w.BasePosition.Y == TargetingData.EnemyMainBasePoint.Y);
+                    if (wallData != null)
+                    {
+                        var production = wallData?.Production?.FirstOrDefault();
+                        if (production != null)
+                        {
+                            var vector = new Vector2(production.X, production.Y);
+                            if (Vector2.DistanceSquared(vector, commander.UnitCalculation.Position) < 25)
+                            {
+                                if (wallData.Depots != null && wallData.Depots.All(d => commander.UnitCalculation.NearbyEnemies.Any(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_SUPPLYDEPOT && e.Unit.Pos.X == d.X && e.Unit.Pos.Y == d.Y)))
+                                {
+                                    var prodBuilding = commander.UnitCalculation.NearbyEnemies.FirstOrDefault(e => e.Attributes.Contains(Attribute.Structure) && !e.Unit.IsFlying && e.Unit.Pos.X == production.X && e.Unit.Pos.Y == production.Y);
+                                    if (prodBuilding != null)
+                                    {
+                                        commands.AddRange(commander.Order(frame, Abilities.ATTACK, targetTag: prodBuilding.Unit.Tag));
+                                        return commands;
+                                    }
+                                    else
+                                    {
+                                        if (MacroData.Minerals >= 100 && Vector2.DistanceSquared(vector, commander.UnitCalculation.Position) < 4 && !commander.UnitCalculation.NearbyAllies.Any(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && a.Unit.Pos.X == production.X && a.Unit.Pos.Y == production.Y))
+                                        {
+                                            commands.AddRange(commander.Order(frame, Abilities.BUILD_PYLON, new Point2D { X = production.X, Y = production.Y }));
+                                            return commands;
+                                        }
+                                        else
+                                        {
+                                            commands.AddRange(commander.Order(frame, Abilities.MOVE, new Point2D { X = production.X, Y = production.Y }));
+                                            return commands;
+                                        }
+                                    }
+                                }
                             }
                         }
                     }

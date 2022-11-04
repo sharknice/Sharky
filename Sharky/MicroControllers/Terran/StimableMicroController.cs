@@ -66,6 +66,29 @@ namespace Sharky.MicroControllers.Terran
             return base.GetMovementSpeed(commander);
         }
 
+        protected override bool Move(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, Formation formation, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
+            if (!commander.UnitCalculation.TargetPriorityCalculation.Overwhelm && MicroPriority != MicroPriority.AttackForward && (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.Retreat || commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.FullRetreat))
+            {
+                if (Retreat(commander, target, defensivePoint, frame, out action)) { return true; }
+            }
+
+            if (SpecialCaseMove(commander, target, defensivePoint, groupCenter, bestTarget, formation, frame, out action)) { return true; }
+
+            if (bestTarget != null && Stiming(commander))
+            {
+                if (MoveToAttackTarget(commander, bestTarget, formation, frame, out action)) { return true; }
+                return NavigateToTarget(commander, target, groupCenter, bestTarget, formation, frame, out action);
+            }
+
+            if (!(formation == Formation.Loose && commander.UnitCalculation.NearbyAllies.Count() > 5))
+            {
+                if (MoveAway(commander, target, defensivePoint, frame, out action)) { return true; }
+            }
+
+            return NavigateToTarget(commander, target, groupCenter, bestTarget, formation, frame, out action);
+        }
 
         protected override bool MoveToAttackTarget(UnitCommander commander, UnitCalculation bestTarget, Formation formation, int frame, out List<SC2APIProtocol.Action> action)
         {

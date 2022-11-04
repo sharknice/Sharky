@@ -42,10 +42,12 @@ namespace Sharky.Builds
             if (EnemyData.EnemyRace == Race.Terran)
             {
                 BuildOptions.WallOffType = BuildingPlacement.WallOffType.None;
+                BuildOptions.AllowBlockWall = true;
             }
             else
             {
                 BuildOptions.WallOffType = BuildingPlacement.WallOffType.Partial;
+                BuildOptions.AllowBlockWall = false;
                 if (EnemyData.EnemyRace == Race.Zerg || EnemyData.EnemyRace == Race.Random && !MicroTaskData[typeof(ProtossDoorTask).Name].Enabled)
                 {
                     MicroTaskData[typeof(ProtossDoorTask).Name].Enable();

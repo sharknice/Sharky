@@ -1,4 +1,7 @@
-﻿using Sharky.MicroControllers;
+﻿using SC2APIProtocol;
+using Sharky.DefaultBot;
+using Sharky.MicroControllers;
+using Sharky.Pathing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,18 +16,24 @@ namespace Sharky.MicroTasks.Mining
         IIndividualMicroController WorkerMicroController;
         DebugService DebugService;
         DamageService DamageService;
+        MapDataService MapDataService;
+        TargetingData TargetingData;
+        MineralWalker MineralWalker;
 
         public bool Enabled { get; set; }
 
         // TODO: run away from oracles with weapon active
 
-        public MiningDefenseService(BaseData baseData, ActiveUnitData activeUnitData, IIndividualMicroController workerMicroController, DebugService debugService, DamageService damageService)
+        public MiningDefenseService(DefaultSharkyBot defaultSharkyBot, IIndividualMicroController workerMicroController)
         {
-            BaseData = baseData;
-            ActiveUnitData = activeUnitData;
+            BaseData = defaultSharkyBot.BaseData;
+            ActiveUnitData = defaultSharkyBot.ActiveUnitData;
             WorkerMicroController = workerMicroController;
-            DebugService = debugService;
-            DamageService = damageService;
+            DebugService = defaultSharkyBot.DebugService;
+            DamageService = defaultSharkyBot.DamageService;
+            MapDataService = defaultSharkyBot.MapDataService;
+            TargetingData = defaultSharkyBot.TargetingData;
+            MineralWalker = defaultSharkyBot.MineralWalker;
             Enabled = true;
         }
 
@@ -292,9 +301,18 @@ namespace Sharky.MicroTasks.Mining
             var otherBase = BaseData.BaseLocations.FirstOrDefault(b => b.Location.X != selfBase.Location.X && b.Location.Y != selfBase.Location.Y);
             if (otherBase != null)
             {
+                var wallData = MapDataService.MapData?.WallData?.FirstOrDefault(b => b.BasePosition.X == TargetingData.NaturalBasePoint.X && b.BasePosition.Y == TargetingData.NaturalBasePoint.Y);
                 foreach (var commander in unitCommanders)
                 {
-                    if (commander.UnitCalculation.EnemiesThreateningDamage.Count() > 0 && (commander.UnitCalculation.Unit.Health < commander.UnitCalculation.Unit.HealthMax || commander.UnitCalculation.Unit.Shield < commander.UnitCalculation.Unit.ShieldMax))
+                    if (wallData != null && Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(wallData.Door.X, wallData.Door.Y)) < 9)
+                    {
+                        if (MineralWalker.MineralWalkHome(commander, frame, out List<SC2APIProtocol.Action> action))
+                        {
+                            actions.AddRange(action);
+                            continue;
+                        }
+                    }
+                    else if (commander.UnitCalculation.EnemiesThreateningDamage.Count() > 0 && (commander.UnitCalculation.Unit.Health < commander.UnitCalculation.Unit.HealthMax || commander.UnitCalculation.Unit.Shield < commander.UnitCalculation.Unit.ShieldMax))
                     {
                         if (commander.UnitCalculation.Unit.Health + commander.UnitCalculation.Unit.Shield <= (commander.UnitCalculation.EnemiesThreateningDamage.First().Damage * 2) || commander.UnitCalculation.UnitTypeData.MovementSpeed < commander.UnitCalculation.EnemiesThreateningDamage.First().UnitTypeData.MovementSpeed)
                         {
@@ -357,7 +375,6 @@ namespace Sharky.MicroTasks.Mining
                         }
                     }
                 }
-
             }
 
             return actions;

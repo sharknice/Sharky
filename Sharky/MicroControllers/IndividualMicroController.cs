@@ -2005,7 +2005,7 @@ namespace Sharky.MicroControllers
                     }
                 }
 
-                if (commander.RetreatPathFrame + 20 < frame)
+                if (commander.RetreatPathFrame + 2 < frame)
                 {
                     if (commander.UnitCalculation.Unit.IsFlying)
                     {
@@ -2546,6 +2546,11 @@ namespace Sharky.MicroControllers
 
         protected virtual Point2D GetSupportSpot(UnitCommander commander, UnitCommander unitToSupport, Point2D target, Point2D defensivePoint)
         {
+            if (commander.UnitCalculation.Unit.UnitType == unitToSupport.UnitCalculation.Unit.UnitType && commander.UnitCalculation.Unit.IsFlying)
+            {
+                return new Point2D { X = unitToSupport.UnitCalculation.Position.X, Y = unitToSupport.UnitCalculation.Position.Y };
+            }
+
             if (commander.UnitCalculation.Range < unitToSupport.UnitCalculation.Range)
             {
                 return new Point2D { X = unitToSupport.UnitCalculation.Position.X, Y = unitToSupport.UnitCalculation.Position.Y };
