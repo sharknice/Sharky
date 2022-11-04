@@ -91,5 +91,11 @@ namespace Sharky.EnemyStrategies
         }
 
         protected abstract bool Detect(int frame);
+
+        public override string ToString()
+        {
+            var activeTime = Detected ? $" ({FrameToTimeConverter.GetTime(FirstActiveFrame).ToString(@"mm\:ss")} to {FrameToTimeConverter.GetTime(LastActiveFrame).ToString(@"mm\:ss")})" : string.Empty;
+            return $"{Name()} {(Active ? "active" : (Detected ? "detected" : "inactive"))}{activeTime}";
+        }
     }
 }
