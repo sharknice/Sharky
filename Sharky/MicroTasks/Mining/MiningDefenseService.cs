@@ -19,6 +19,7 @@ namespace Sharky.MicroTasks.Mining
         MapDataService MapDataService;
         TargetingData TargetingData;
         MineralWalker MineralWalker;
+        EnemyData EnemyData;
 
         public bool Enabled { get; set; }
 
@@ -34,6 +35,7 @@ namespace Sharky.MicroTasks.Mining
             MapDataService = defaultSharkyBot.MapDataService;
             TargetingData = defaultSharkyBot.TargetingData;
             MineralWalker = defaultSharkyBot.MineralWalker;
+            EnemyData = defaultSharkyBot.EnemyData;
             Enabled = true;
         }
 
@@ -190,16 +192,19 @@ namespace Sharky.MicroTasks.Mining
                                     }
                                     foreach (var enemyWorker in workers.OrderBy(u => Vector2.DistanceSquared(u.Position, baseVector)))
                                     {
-                                        var closestDefenders = defenders.Where(d => !sentWorkers.Contains(d.Key)).OrderBy(d => Vector2.DistanceSquared(d.Value.UnitCalculation.Position, enemyWorker.Position)).Take(1);
-                                        foreach (var defender in closestDefenders)
+                                        if (!defenders.Any(d => d.Value.LastTargetTag == enemyWorker.Unit.Tag))
                                         {
-                                            var action = defender.Value.Order(frame, Abilities.ATTACK, null, enemyWorker.Unit.Tag);
-                                            if (action != null)
+                                            var closestDefenders = defenders.Where(d => !sentWorkers.Contains(d.Key)).OrderBy(d => Vector2.DistanceSquared(d.Value.UnitCalculation.Position, enemyWorker.Position)).Take(1);
+                                            foreach (var defender in closestDefenders)
                                             {
-                                                actions.AddRange(action);
+                                                var action = defender.Value.Order(frame, Abilities.ATTACK, null, enemyWorker.Unit.Tag);
+                                                if (action != null)
+                                                {
+                                                    actions.AddRange(action);
+                                                }
                                             }
+                                            sentWorkers.AddRange(closestDefenders.Select(d => d.Key));
                                         }
-                                        sentWorkers.AddRange(closestDefenders.Select(d => d.Key));
                                     }
                                 }
                                 else if (commanders.Count() < desiredWorkers)
@@ -304,7 +309,7 @@ namespace Sharky.MicroTasks.Mining
                 var wallData = MapDataService.MapData?.WallData?.FirstOrDefault(b => b.BasePosition.X == TargetingData.NaturalBasePoint.X && b.BasePosition.Y == TargetingData.NaturalBasePoint.Y);
                 foreach (var commander in unitCommanders)
                 {
-                    if (wallData != null && Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(wallData.Door.X, wallData.Door.Y)) < 9)
+                    if (EnemyData.SelfRace == Race.Protoss && wallData != null && commander.UnitCalculation.NearbyEnemies.Any(e => e.FrameLastSeen == frame) && Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(wallData.Door.X, wallData.Door.Y)) < 9)
                     {
                         if (MineralWalker.MineralWalkHome(commander, frame, out List<SC2APIProtocol.Action> action))
                         {

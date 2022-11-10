@@ -481,6 +481,7 @@ namespace Sharky.DefaultBot
             var darkTemplarHarassTask = new DarkTemplarHarassTask(BaseData, TargetingData, MapDataService, darkTemplarMicroController, 2, false);
             var defensiveZealotWarpInTask = new DefensiveZealotWarpInTask(this, false, .5f);
             var reaperMiningDefenseTask = new ReaperMiningDefenseTask(this, true, .5f);
+            var cannonRushDefenseTask = new CannonRushDefenseTask(this, true, .5f);
             var overlordScoutTask = new OverlordScoutTask(this, true, 0.9f);
             var overlordProxyScoutTask = new SecondaryOverlordScoutingTask(this, true, 1.0f, new IndividualMicroController(this, SharkySimplePathFinder, MicroPriority.StayOutOfRange, false));
             var zerglingScoutTask = new ZerglingScoutTask(this, false, 1.0f);
@@ -520,6 +521,7 @@ namespace Sharky.DefaultBot
             MicroTaskData[darkTemplarHarassTask.GetType().Name] = darkTemplarHarassTask;
             MicroTaskData[defensiveZealotWarpInTask.GetType().Name] = defensiveZealotWarpInTask;
             MicroTaskData[reaperMiningDefenseTask.GetType().Name] = reaperMiningDefenseTask;
+            MicroTaskData[cannonRushDefenseTask.GetType().Name] = cannonRushDefenseTask;
             MicroTaskData[overlordScoutTask.GetType().Name] = overlordScoutTask;
             MicroTaskData[overlordProxyScoutTask.GetType().Name] = overlordProxyScoutTask;
             MicroTaskData[zerglingScoutTask.GetType().Name] = zerglingScoutTask;
