@@ -73,32 +73,37 @@ namespace Sharky
             AlwaysSpam = false;
         }
 
-        public List<SC2APIProtocol.Action> Order(int frame, Abilities ability, Point2D targetLocation = null, ulong targetTag = 0, bool allowSpam = false, bool queue = false)
+        public List<SC2APIProtocol.Action> Order(int frame, Abilities ability, Point2D targetLocation = null, ulong targetTag = 0, bool allowSpam = false, bool queue = false, bool allowConflict = false)
         {
-            if (!queue && LastOrderFrame == frame)
+            if (!allowConflict)
             {
-                return new List<SC2APIProtocol.Action>(); // don't give a unit conflicting orders, only one order per frame
-            }
-            if (!allowSpam && !AlwaysSpam)
-            {
-                if (ability == LastAbility && targetTag == LastTargetTag && ((targetLocation == null && LastTargetLocation == null) || (LastTargetLocation != null && targetLocation != null && targetLocation.X == LastTargetLocation.X && targetLocation.Y == LastTargetLocation.Y)) && AbilityOrderTimes[ability] > frame - SpamFrames)
+                if (!queue && LastOrderFrame == frame)
                 {
-                    return new List<SC2APIProtocol.Action>(); // if new action is exactly the same, don't do anything to prevent apm spam
+                    return new List<SC2APIProtocol.Action>(); // don't give a unit conflicting orders, only one order per frame
                 }
-                else
+                if (!allowSpam && !AlwaysSpam)
                 {
-                    UnitOrder unitOrder;
-                    if (queue)
+                    if (ability == LastAbility && targetTag == LastTargetTag && ((targetLocation == null && LastTargetLocation == null) || (LastTargetLocation != null && targetLocation != null && targetLocation.X == LastTargetLocation.X && targetLocation.Y == LastTargetLocation.Y)) && AbilityOrderTimes[ability] > frame - SpamFrames)
                     {
-                        unitOrder = UnitCalculation.Unit.Orders.FirstOrDefault(o => EquivalentAbility(ability, o.AbilityId));
+                        LastOrderFrame = frame;
+                        return new List<SC2APIProtocol.Action>(); // if new action is exactly the same, don't do anything to prevent apm spam
                     }
                     else
                     {
-                        unitOrder = UnitCalculation.Unit.Orders.FirstOrDefault();
-                    }
-                    if (unitOrder != null && EquivalentAbility(ability, unitOrder.AbilityId) && targetTag == unitOrder.TargetUnitTag && ((targetLocation == null && unitOrder.TargetWorldSpacePos == null) || (targetLocation != null && Math.Abs(targetLocation.X - unitOrder.TargetWorldSpacePos.X) < .01 && Math.Abs(targetLocation.Y - unitOrder.TargetWorldSpacePos.Y) < .01)))
-                    {
-                        return new List<SC2APIProtocol.Action>(); // if new action is exactly the same, don't do anything to prevent apm spam
+                        UnitOrder unitOrder;
+                        if (queue)
+                        {
+                            unitOrder = UnitCalculation.Unit.Orders.FirstOrDefault(o => EquivalentAbility(ability, o.AbilityId));
+                        }
+                        else
+                        {
+                            unitOrder = UnitCalculation.Unit.Orders.FirstOrDefault();
+                        }
+                        if (unitOrder != null && EquivalentAbility(ability, unitOrder.AbilityId) && targetTag == unitOrder.TargetUnitTag && ((targetLocation == null && unitOrder.TargetWorldSpacePos == null) || (targetLocation != null && Math.Abs(targetLocation.X - unitOrder.TargetWorldSpacePos.X) < .01 && Math.Abs(targetLocation.Y - unitOrder.TargetWorldSpacePos.Y) < .01)))
+                        {
+                            LastOrderFrame = frame;
+                            return new List<SC2APIProtocol.Action>(); // if new action is exactly the same, don't do anything to prevent apm spam
+                        }
                     }
                 }
             }

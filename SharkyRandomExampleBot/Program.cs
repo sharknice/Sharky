@@ -1,6 +1,7 @@
 ﻿using SC2APIProtocol;
 using Sharky;
 using Sharky.DefaultBot;
+using Sharky.MicroTasks.Zerg;
 using SharkyProtossExampleBot;
 using SharkyTerranExampleBot;
 using SharkyZergExampleBot;
@@ -19,6 +20,14 @@ defaultSharkyBot.BuildChoices[Race.Terran] = terranBuildChoices.BuildChoices;
 
 var zergBuildChoices = new ZergBuildChoices(defaultSharkyBot);
 defaultSharkyBot.BuildChoices[Race.Zerg] = zergBuildChoices.BuildChoices;
+
+defaultSharkyBot.MicroTaskData[typeof(BurrowBlockExpansionsTask).Name].Enable();
+defaultSharkyBot.MicroTaskData[typeof(BurrowDronesFromHarras).Name].Enable();
+defaultSharkyBot.MicroTaskData[typeof(CreepTumorTask).Name].Enable();
+defaultSharkyBot.MicroTaskData[typeof(ChangelingScoutTask).Name].Enable();
+defaultSharkyBot.MicroTaskData[typeof(QueenCreepTask).Name].Enable();
+defaultSharkyBot.MicroTaskData[typeof(QueenDefendTask).Name].Enable();
+defaultSharkyBot.MicroTaskData[typeof(QueenInjectTask).Name].Enable();
 
 var sharkyExampleBot = defaultSharkyBot.CreateBot(defaultSharkyBot.Managers, defaultSharkyBot.DebugService);
 

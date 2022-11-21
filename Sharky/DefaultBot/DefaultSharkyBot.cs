@@ -189,6 +189,7 @@ namespace Sharky.DefaultBot
             PerformanceData = new PerformanceData();
             SharkyUnitData = new SharkyUnitData { CorrosiveBiles = new Dictionary<Point2D, uint>() };
             ActiveUnitData = new ActiveUnitData();
+            MicroTaskData = new MicroTaskData();
 
             UnitDataService = new UnitDataService(SharkyUnitData, SharkyOptions, MacroData);
             VersionService = new VersionService();
@@ -279,7 +280,7 @@ namespace Sharky.DefaultBot
             StasisWardPlacement = new StasisWardPlacement(this);
             WorkerBuilderService = new WorkerBuilderService(this);
             SimCityService = new SimCityService(this);
-            BuildingBuilder = new BuildingBuilder(ActiveUnitData, TargetingData, BuildingPlacement, SharkyUnitData, BaseData, BuildingService, MapDataService, WorkerBuilderService);
+            BuildingBuilder = new BuildingBuilder(ActiveUnitData, TargetingData, BuildingPlacement, SharkyUnitData, BaseData, MicroTaskData, BuildingService, MapDataService, WorkerBuilderService);
 
             WarpInPlacement = new WarpInPlacement(ActiveUnitData, DebugService, MapData, MapDataService, BuildingService);
             
@@ -443,8 +444,6 @@ namespace Sharky.DefaultBot
             DefenseService = new DefenseService(ActiveUnitData, TargetPriorityService);
             MicroController = new MicroController(MicroData);
 
-            MicroTaskData = new MicroTaskData();
-
             var defenseSquadTask = new DefenseSquadTask(ActiveUnitData, TargetingData, DefenseService, MicroController, new ArmySplitter(AttackData, TargetingData, ActiveUnitData, DefenseService, TargetingService, TerranWallService, MicroController), new List<DesiredUnitsClaim>(), 0, false);
             var workerScoutTask = new WorkerScoutTask(this, false, 0.5f);
             var workerScoutGasStealTask = new WorkerScoutGasStealTask(this, false, 0.5f);
@@ -467,6 +466,7 @@ namespace Sharky.DefaultBot
             var reaperWorkerHarassTask = new ReaperWorkerHarassTask(BaseData, TargetingData, reaperHarassMicroController, 2, false);
             var bansheeHarassTask = new BansheeHarassTask(BaseData, TargetingData, MapDataService, bansheeMicroController, 2, false);
             var hallucinationScoutTask = new HallucinationScoutTask(TargetingData, BaseData, MicroTaskData, false, .5f);
+            var hallucinationScoutEmptyBasesTask = new HallucinationScoutEmptyBasesTask(this, false, .51f);
             var wallOffTask = new WallOffTask(SharkyUnitData, ActiveUnitData, MacroData, MapData, WallService, ChatService, false, .25f);
             var permanentWallOffTask = new PermanentWallOffTask(SharkyUnitData, ActiveUnitData, MacroData, MapData, WallService, ChatService, false, .25f);
             var fullPylonWallOffTask = new FullPylonWallOffTask(this, false, .25f);
@@ -507,6 +507,7 @@ namespace Sharky.DefaultBot
             MicroTaskData[reaperWorkerHarassTask.GetType().Name] = reaperWorkerHarassTask;
             MicroTaskData[bansheeHarassTask.GetType().Name] = bansheeHarassTask;
             MicroTaskData[hallucinationScoutTask.GetType().Name] = hallucinationScoutTask;
+            MicroTaskData[hallucinationScoutEmptyBasesTask.GetType().Name] = hallucinationScoutEmptyBasesTask;
             MicroTaskData[wallOffTask.GetType().Name] = wallOffTask;
             MicroTaskData[permanentWallOffTask.GetType().Name] = permanentWallOffTask;
             MicroTaskData[fullPylonWallOffTask.GetType().Name] = fullPylonWallOffTask;

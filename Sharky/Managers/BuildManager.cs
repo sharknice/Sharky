@@ -23,7 +23,7 @@ namespace Sharky.Managers
 
         protected IMacroBalancer MacroBalancer;
         protected ISharkyBuild CurrentBuild;
-        protected List<string> BuildSequence;
+        public List<string> BuildSequence { get; protected set; }
         protected List<string> PlannedBuildSequence;
 
         protected SimCityService SimCityService;

@@ -125,6 +125,11 @@ namespace Sharky.MicroControllers
                 return AttackStayOutOfRange(commander, target, defensivePoint, groupCenter, bestTarget, formation, frame);
             }
 
+            if (TargetEnemyMainFirst && MapDataService.LastFrameVisibility(TargetingData.EnemyMainBasePoint) < 5 * 60 * SharkyOptions.FramesPerSecond)
+            {
+                target = TargetingData.EnemyMainBasePoint;
+            }
+
             if (GetHighGroundVision(commander, target, defensivePoint, bestTarget, frame, out action)) { return action; }
             if (AvoidPointlessDamage(commander, target, defensivePoint, formation, frame, out action)) { return action; }
 
@@ -174,7 +179,7 @@ namespace Sharky.MicroControllers
             var gap = actualDistance - rangeDistance;
             var framesToRange = gap / (GetMovementSpeed(commander) / SharkyOptions.FramesPerSecond);
             var framesToShoot = commander.UnitCalculation.Unit.WeaponCooldown - 1;
-            if (framesToRange >= framesToShoot)
+            if (framesToRange >= framesToShoot && commander.UnitCalculation.Unit.Tag != bestTarget.Unit.Tag)
             {
                 action = commander.Order(frame, Abilities.ATTACK, targetTag: bestTarget.Unit.Tag);
                 return true;
@@ -1258,7 +1263,7 @@ namespace Sharky.MicroControllers
             if (!MapDataService.SelfVisible(target)) // if enemy main is unexplored, march to enemy main
             {
                 var fakeMainBase = new Unit(commander.UnitCalculation.Unit);
-                fakeMainBase.Pos = new Point { X = target.X, Y = target.Y, Z = 1 };
+                fakeMainBase.Pos = new Point { X = TargetingData.EnemyMainBasePoint.X, Y = TargetingData.EnemyMainBasePoint.Y, Z = 1 };
                 fakeMainBase.Alliance = Alliance.Enemy;
                 return new UnitCalculation(fakeMainBase, 0, SharkyUnitData, SharkyOptions, UnitDataService, MapDataService.IsOnCreep(fakeMainBase.Pos), frame);
             }
@@ -1357,15 +1362,18 @@ namespace Sharky.MicroControllers
             }
 
             bool priorityEnemyMain = false;
-            if (TargetEnemyMainFirst && TargetingData.AttackPoint.X == TargetingData.EnemyMainBasePoint.X && TargetingData.AttackPoint.Y == TargetingData.EnemyMainBasePoint.Y)
+            if (TargetEnemyMainFirst)
             {
-                if (Vector2.DistanceSquared(new Vector2(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y), commander.UnitCalculation.Position) > 100)
+                if (MapDataService.LastFrameVisibility(TargetingData.EnemyMainBasePoint) < 5 * 60 * SharkyOptions.FramesPerSecond || (TargetingData.AttackPoint.X == TargetingData.EnemyMainBasePoint.X && TargetingData.AttackPoint.Y == TargetingData.EnemyMainBasePoint.Y))
                 {
-                    priorityEnemyMain = true;
-                    if (bestTarget == null) { return false; }
-                    if (!bestTarget.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !bestTarget.UnitClassifications.Contains(UnitClassification.DefensiveStructure) && !bestTarget.UnitClassifications.Contains(UnitClassification.Worker))
+                    if (Vector2.DistanceSquared(new Vector2(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y), commander.UnitCalculation.Position) > 100)
                     {
-                        return false;
+                        priorityEnemyMain = true;
+                        if (bestTarget == null || bestTarget.Unit.Tag == commander.UnitCalculation.Unit.Tag) { return false; }
+                        if ((!bestTarget.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !bestTarget.UnitClassifications.Contains(UnitClassification.DefensiveStructure) && !bestTarget.UnitClassifications.Contains(UnitClassification.Worker)))
+                        {
+                            return false;
+                        }
                     }
                 }
             }
@@ -2350,7 +2358,7 @@ namespace Sharky.MicroControllers
 
         protected virtual bool GroundAttackersFilter(UnitCommander commander, UnitCalculation enemyAttack)
         {
-            if (PredictedHealth(enemyAttack) <= 0)
+            if (PredictedHealth(enemyAttack) <= 0 || AvoidedUnitTypes.Contains((UnitTypes)enemyAttack.Unit.UnitType))
             {
                 return false;
             }
@@ -2360,7 +2368,7 @@ namespace Sharky.MicroControllers
 
         protected virtual bool AttackersFilter(UnitCommander commander, UnitCalculation enemyAttack)
         {
-            if (PredictedHealth(enemyAttack) <= 0)
+            if (PredictedHealth(enemyAttack) <= 0 || AvoidedUnitTypes.Contains((UnitTypes)enemyAttack.Unit.UnitType))
             {
                 return false;
             }
@@ -2369,7 +2377,7 @@ namespace Sharky.MicroControllers
 
         protected virtual bool AirAttackersFilter(UnitCommander commander, UnitCalculation enemyAttack)
         {
-            if (PredictedHealth(enemyAttack) <= 0)
+            if (PredictedHealth(enemyAttack) <= 0 || AvoidedUnitTypes.Contains((UnitTypes)enemyAttack.Unit.UnitType))
             {
                 return false;
             }
@@ -2413,7 +2421,7 @@ namespace Sharky.MicroControllers
                 return Attack(commander, target, defensivePoint, groupCenter, frame);
             }
 
-            if (commander.UnitCalculation.NearbyEnemies.Count() == 0)
+            if (commander.UnitCalculation.NearbyEnemies.Count(e => e.FrameLastSeen == frame) == 0)
             {
                 if (commander.UnitCalculation.Unit.IsFlying)
                 {

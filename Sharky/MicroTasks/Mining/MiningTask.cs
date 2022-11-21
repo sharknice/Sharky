@@ -457,6 +457,18 @@ namespace Sharky.MicroTasks
                         }
                     }
                 }
+                else if (worker.UnitCalculation.EnemiesThreateningDamage.Any(e => e.FrameFirstSeen == frame))
+                {
+                    var attackTask = MicroTaskData[typeof(AttackTask).Name];
+                    if (attackTask.Enabled)
+                    {
+                        if (!attackTask.UnitCommanders.Contains(worker))
+                        {
+                            worker.UnitRole = UnitRole.Attack;
+                            attackTask.UnitCommanders.Add(worker);
+                        }
+                    }
+                }
                 else if (worker.UnitCalculation.Unit.Orders.Count() == 0 || worker.UnitCalculation.Unit.Orders.Any(o => BaseData.SelfBases.Any(b => b.MineralMiningInfo.Any(m => m.ResourceUnit.Tag == o.TargetUnitTag))))
                 {
                     var nextBase = BuildingService.GetNextBaseLocation();
@@ -536,6 +548,22 @@ namespace Sharky.MicroTasks
                     attackTask.UnitCommanders.RemoveAll(u => u.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && u.UnitRole == UnitRole.Minerals || u.UnitRole == UnitRole.Gas);
                 }
             }
+        }
+
+        public override void StealUnit(UnitCommander commander)
+        {
+            foreach (var selfBase in BaseData.SelfBases)
+            {
+                foreach (var info in selfBase.MineralMiningInfo)
+                {
+                    info.Workers.Remove(commander);
+                }
+                foreach (var info in selfBase.GasMiningInfo)
+                {
+                    info.Workers.Remove(commander);
+                }
+            }
+            UnitCommanders.Remove(commander);
         }
     }
 }

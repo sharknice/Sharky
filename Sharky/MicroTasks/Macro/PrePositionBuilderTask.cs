@@ -10,6 +10,7 @@ namespace Sharky.MicroTasks.Macro
     public class PrePositionBuilderTask : MicroTask
     {
         SharkyUnitData SharkyUnitData;
+        MicroTaskData MicroTaskData;
 
         public Point2D BuildPosition { get; set; }
 
@@ -22,6 +23,7 @@ namespace Sharky.MicroTasks.Macro
             Priority = priority;
 
             SharkyUnitData = defaultSharkyBot.SharkyUnitData;
+            MicroTaskData = defaultSharkyBot.MicroTaskData;
 
             UnitCommanders = new List<UnitCommander>();
             LastSendFrame = -1000;
@@ -56,6 +58,10 @@ namespace Sharky.MicroTasks.Macro
                     {
                         commander.Value.UnitRole = UnitRole.PreBuild;
                         commander.Value.Claimed = true;
+                        foreach(var task in MicroTaskData)
+                        {
+                            task.Value.StealUnit(commander.Value);
+                        }
                         UnitCommanders.Add(commander.Value);
                         started = true;
                         return;
@@ -116,8 +122,9 @@ namespace Sharky.MicroTasks.Macro
             foreach (var commander in UnitCommanders)
             {
                 commander.Claimed = false;
+                commander.UnitRole = UnitRole.None;
             }
-            UnitCommanders = new List<UnitCommander>();
+            UnitCommanders.Clear();
 
             Enabled = false;
         }

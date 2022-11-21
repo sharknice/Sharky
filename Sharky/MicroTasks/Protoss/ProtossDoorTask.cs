@@ -363,7 +363,7 @@ namespace Sharky.MicroTasks
                 var doorVector = new Vector2(DoorSpot.X, DoorSpot.Y);
                 if (DoorCommander == commander &&commander.UnitCalculation.NearbyEnemies.Any(e => Vector2.DistanceSquared(e.Position, doorVector) < 4))
                 {
-                    var betterDoor = commander.UnitCalculation.NearbyAllies.Where(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && Vector2.DistanceSquared(e.Position, doorVector) < 1).OrderBy(e => Vector2.DistanceSquared(e.Position, doorVector)).FirstOrDefault();
+                    var betterDoor = commander.UnitCalculation.NearbyAllies.Where(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !e.Unit.IsFlying && Vector2.DistanceSquared(e.Position, doorVector) < 1).OrderBy(e => Vector2.DistanceSquared(e.Position, doorVector)).FirstOrDefault();
                     if (betterDoor != null)
                     {
                         var betterDoorCommander = ActiveUnitData.Commanders.Values.FirstOrDefault(c => c.UnitCalculation.Unit.Tag == betterDoor.Unit.Tag);
@@ -563,12 +563,12 @@ namespace Sharky.MicroTasks
                 commander.Value.UnitRole = UnitRole.None;
             }
             var commanders = UnitCommanders.Where(c => c.UnitRole == UnitRole.Attack);
+            var ids = commanders.ToList().Select(c => c.UnitCalculation.Unit.Tag);
             foreach (var commander in commanders)
             {
                 commander.UnitRole = UnitRole.None;
                 commander.Claimed = false;
-            }
-            var ids = commanders.Select(c => c.UnitCalculation.Unit.Tag);
+            }  
             UnitCommanders.RemoveAll(c => ids.Contains(c.UnitCalculation.Unit.Tag));
         }
 

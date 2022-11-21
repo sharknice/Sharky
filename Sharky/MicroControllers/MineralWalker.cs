@@ -25,7 +25,7 @@ namespace Sharky.MicroControllers
             if (selfBase != null)
             {
                 var mineralPatch = selfBase.MineralFields.FirstOrDefault();
-                if (mineralPatch != null)
+                if (mineralPatch != null && Vector2.DistanceSquared(new Vector2(mineralPatch.Pos.X, mineralPatch.Pos.Y), commander.UnitCalculation.Position) > 9)
                 {
                     action = commander.Order(frame, Abilities.HARVEST_GATHER, null, mineralPatch.Tag);
                     return true;

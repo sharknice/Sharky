@@ -24,7 +24,7 @@ namespace Sharky.MicroControllers.Protoss
         {
             if (commander.UnitCalculation.Unit.Shield < commander.UnitCalculation.Unit.ShieldMax && commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.BUILD_INTERCEPTORS))
             {
-                if (commander.UnitCalculation.EnemiesInRangeOf.Any())
+                if (commander.UnitCalculation.EnemiesThreateningDamage.Any())
                 {
                     return Retreat(commander, target, defensivePoint, frame, out action);
                 }
@@ -78,7 +78,7 @@ namespace Sharky.MicroControllers.Protoss
                 }
             }
 
-            if (closestEnemy != null && commander.RetreatPathFrame + 20 < frame)
+            if (closestEnemy != null && commander.RetreatPathFrame + 1 < frame)
             {
                 commander.RetreatPath = SharkyPathFinder.GetSafeAirPath(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y, defensivePoint.X, defensivePoint.Y, frame);
 

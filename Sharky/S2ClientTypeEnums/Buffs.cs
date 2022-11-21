@@ -32,6 +32,9 @@
         BLINDINGCLOUD = 83,
         MEDIVACSPEEDBOOST = 89,
         PURIFY = 97,
+        /// <summary>
+        /// Pulsar Beam
+        /// </summary>
         ORACLEWEAPON = 99,
         IMMORTALOVERLOAD = 102,
         LOCKON = 116,

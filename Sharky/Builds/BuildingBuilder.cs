@@ -15,18 +15,20 @@ namespace Sharky.Builds
         IBuildingPlacement BuildingPlacement;
         SharkyUnitData SharkyUnitData;
         BaseData BaseData;
+        MicroTaskData MicroTaskData;
         WorkerBuilderService WorkerBuilderService;
 
         BuildingService BuildingService;
         MapDataService MapDataService;
 
-        public BuildingBuilder(ActiveUnitData activeUnitData, TargetingData targetingData, IBuildingPlacement buildingPlacement, SharkyUnitData sharkyUnitData, BaseData baseData, BuildingService buildingService, MapDataService mapDataService, WorkerBuilderService workerBuilderService)
+        public BuildingBuilder(ActiveUnitData activeUnitData, TargetingData targetingData, IBuildingPlacement buildingPlacement, SharkyUnitData sharkyUnitData, BaseData baseData, MicroTaskData microTaskData, BuildingService buildingService, MapDataService mapDataService, WorkerBuilderService workerBuilderService)
         {
             ActiveUnitData = activeUnitData;
             TargetingData = targetingData;
             BuildingPlacement = buildingPlacement;
             SharkyUnitData = sharkyUnitData;
             BaseData = baseData;
+            MicroTaskData = microTaskData;
 
             BuildingService = buildingService;
             MapDataService = mapDataService;
@@ -79,7 +81,7 @@ namespace Sharky.Builds
                             worker.UnitRole = UnitRole.Build;
                         }
                         
-                        return worker.Order(macroData.Frame, unitData.Ability, placementLocation);
+                        return worker.Order(macroData.Frame, unitData.Ability, placementLocation, allowConflict: true);
                     }
                 }
              }
@@ -168,7 +170,7 @@ namespace Sharky.Builds
                 if (worker != null)
                 {
                     worker.UnitRole = UnitRole.Build;
-                    return worker.Order(macroData.Frame, unitData.Ability, null, geyser.Tag);
+                    return worker.Order(macroData.Frame, unitData.Ability, null, geyser.Tag, allowConflict: true);
                 }
             }
 

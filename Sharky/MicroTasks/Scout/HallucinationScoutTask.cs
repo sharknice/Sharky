@@ -8,14 +8,14 @@ namespace Sharky.MicroTasks
 {
     public class HallucinationScoutTask : MicroTask
     {
-        TargetingData TargetingData;
-        BaseData BaseData;
-        MicroTaskData MicroTaskData;
+        protected TargetingData TargetingData;
+        protected BaseData BaseData;
+        protected MicroTaskData MicroTaskData;
 
         bool started { get; set; }
         public bool StealSentryFromAttackTask { get; set; }
-        List<Point2D> ScoutLocations { get; set; }
-        int ScoutLocationIndex { get; set; }
+        protected List<Point2D> ScoutLocations { get; set; }
+        protected int ScoutLocationIndex { get; set; }
 
         public HallucinationScoutTask(TargetingData targetingData, BaseData baseData, MicroTaskData microTaskData, bool enabled, float priority)
         {
@@ -75,6 +75,7 @@ namespace Sharky.MicroTasks
                             commander.Value.Claimed = true;
                             commander.Value.UnitRole = UnitRole.Scout;
                             UnitCommanders.Add(commander.Value);
+                            GetScoutLocations();
                             break;
                         }
                     }
@@ -88,11 +89,6 @@ namespace Sharky.MicroTasks
 
         public override IEnumerable<SC2APIProtocol.Action> PerformActions(int frame)
         {
-            if (ScoutLocations == null)
-            {
-                GetScoutLocations();
-            }
-
             var commands = new List<SC2APIProtocol.Action>();
 
             if (!UnitCommanders.Any(c => c.UnitCalculation.Unit.IsHallucination && c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PHOENIX))
@@ -126,6 +122,10 @@ namespace Sharky.MicroTasks
                 {
                     if (commander.UnitCalculation.Unit.IsHallucination)
                     {
+                        if (ScoutLocations == null)
+                        {
+                            GetScoutLocations();
+                        }
                         if (Vector2.DistanceSquared(new Vector2(ScoutLocations[ScoutLocationIndex].X, ScoutLocations[ScoutLocationIndex].Y), commander.UnitCalculation.Position) < 2)
                         {
                             ScoutLocationIndex++;
@@ -160,7 +160,7 @@ namespace Sharky.MicroTasks
             return commands;
         }
 
-        private void GetScoutLocations()
+        protected virtual void GetScoutLocations()
         {
             ScoutLocations = new List<Point2D>();
 

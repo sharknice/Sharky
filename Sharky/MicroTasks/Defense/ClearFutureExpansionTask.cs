@@ -114,13 +114,42 @@ namespace Sharky.MicroTasks
 
                 foreach (var detector in detectors)
                 {
-                    if (detector.UnitCalculation.EnemiesThreateningDamage.Any() || Vector2.DistanceSquared(detector.UnitCalculation.Position, vector) < 4)
+                    if (detector.UnitCalculation.EnemiesThreateningDamage.Any())
                     {
                         actions.AddRange(MicroController.Support(new List<UnitCommander> { detector }, nonDetectors, NextBaseLocation, TargetingData.ForwardDefensePoint, NextBaseLocation, frame));
                     }
                     else
                     {
-                        actions.AddRange(detector.Order(frame, Abilities.MOVE, NextBaseLocation));
+                        if (detector.UnitCalculation.UnitClassifications.Contains(UnitClassification.DetectionCaster))
+                        {
+                            if (detector.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_ORACLE)
+                            {
+                                if (detector.UnitCalculation.Unit.Energy > 25 && !detector.UnitCalculation.NearbyEnemies.Any(e => e.Unit.BuffIds.Contains((uint)Buffs.ORACLEREVELATION)))
+                                {
+                                    actions.AddRange(detector.Order(frame, Abilities.EFFECT_ORACLEREVELATION, NextBaseLocation));
+                                    continue;
+                                }
+                                if (detector.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.ORACLEWEAPON))
+                                {
+                                    actions.AddRange(detector.Order(frame, Abilities.ATTACK, NextBaseLocation));
+                                    continue;
+                                }
+                                else if (detector.UnitCalculation.EnemiesInRange.Any())
+                                {
+                                    actions.AddRange(detector.Order(frame, Abilities.BEHAVIOR_PULSARBEAMON));
+                                    continue;
+                                }
+                            }
+                        }
+
+                        if (Vector2.DistanceSquared(detector.UnitCalculation.Position, vector) < 4)
+                        {
+                            actions.AddRange(MicroController.Support(new List<UnitCommander> { detector }, nonDetectors, NextBaseLocation, TargetingData.ForwardDefensePoint, NextBaseLocation, frame));
+                        }
+                        else
+                        {
+                            actions.AddRange(detector.Order(frame, Abilities.MOVE, NextBaseLocation));
+                        }
                     }
                 }
 
