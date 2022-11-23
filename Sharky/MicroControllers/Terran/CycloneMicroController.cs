@@ -88,7 +88,7 @@ namespace Sharky.MicroControllers.Terran
                     return true;
                 }
 
-                if (commander.RetreatPathFrame + 20 < frame)
+                if (commander.RetreatPathFrame + 2 < frame)
                 {
                     if (commander.UnitCalculation.Unit.IsFlying)
                     {

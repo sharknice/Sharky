@@ -143,6 +143,7 @@ namespace Sharky.Managers
                 Console.WriteLine($"Attack State: {DefaultSharkyBot.TargetingData.AttackState}");
             }
             CheckCommanders();
+            PrintTaskCommanders();
             Console.WriteLine(new String('=', 20));
         }
 
@@ -172,6 +173,20 @@ namespace Sharky.Managers
             foreach (var group in workers)
             {
                 Console.WriteLine($"    [{(UnitTypes)group.Key}]={group.Count()}");
+            }
+        }
+
+        private void PrintTaskCommanders()
+        {
+            Console.WriteLine("Tasks:");
+            foreach (var task in DefaultSharkyBot.MicroTaskData.Where(t => t.Value.Enabled))
+            {
+                Console.WriteLine($"  {task.Key}:");
+                var unitGroups = task.Value.UnitCommanders.GroupBy(x => x.UnitCalculation.Unit.UnitType);
+                foreach (var group in unitGroups.OrderBy(x => Enum.GetName(typeof(UnitTypes), x.Key)))
+                {
+                    Console.WriteLine($"    [{(UnitTypes)group.Key}]={group.Count()}");
+                }
             }
         }
 

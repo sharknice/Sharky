@@ -104,7 +104,7 @@ namespace Sharky.MicroControllers.Protoss
 
             if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Detector)))
             {
-                if (commander.RetreatPathFrame + 20 < frame)
+                if (commander.RetreatPathFrame + 2 < frame)
                 {
                     commander.RetreatPath = SharkyPathFinder.GetUndetectedGroundPath(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y, target.X, target.Y, frame);
                     commander.RetreatPathFrame = frame;

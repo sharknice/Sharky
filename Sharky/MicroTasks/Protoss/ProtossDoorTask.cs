@@ -100,6 +100,7 @@ namespace Sharky.MicroTasks
                         commander.Value.Claimed = true;
                         UnitCommanders.Add(commander.Value);
                         AdeptCommander = commander.Value;
+                        Console.WriteLine("added door adept as needed");
                         UpdateNeeds();
                         break;
                     }
@@ -112,6 +113,7 @@ namespace Sharky.MicroTasks
                         commander.Value.Claimed = true;
                         UnitCommanders.Add(commander.Value);
                         AdeptShadeCommander = commander.Value;
+                        Console.WriteLine("added door adept shade as needed");
                         UpdateNeeds();
                         break;
                     }
@@ -124,6 +126,7 @@ namespace Sharky.MicroTasks
                         commander.Value.Claimed = true;
                         UnitCommanders.Add(commander.Value);
                         DoorCommander = commander.Value;
+                        Console.WriteLine("added door as needed");
                         UpdateNeeds();
                         break;
                     }
@@ -136,6 +139,7 @@ namespace Sharky.MicroTasks
                         commander.Value.Claimed = true;
                         UnitCommanders.Add(commander.Value);
                         BackupDoorCommander = commander.Value;
+                        Console.WriteLine("added backup door as needed");
                         break;
                     }
                 }
@@ -154,6 +158,7 @@ namespace Sharky.MicroTasks
                             commander.Value.Claimed = true;
                             UnitCommanders.Add(commander.Value);
                             ProbeCommander = commander.Value;
+                            Console.WriteLine("added probe door as needed");
                             break;
                         }
                     }
@@ -262,6 +267,7 @@ namespace Sharky.MicroTasks
                         commander.Claimed = true;
                         UnitCommanders.Add(commander);
                         BackupDoorCommander = commander;
+                        Console.WriteLine("added backup door in updateneeds");
                     }
                 }
                 else
@@ -377,6 +383,7 @@ namespace Sharky.MicroTasks
                             MicroTaskData[typeof(AttackTask).Name].StealUnit(betterDoorCommander);
                             UnitCommanders.Add(betterDoorCommander);
                             DoorCommander = betterDoorCommander;
+                            Console.WriteLine("added better door");
                         }
                     }
                 }
@@ -590,6 +597,7 @@ namespace Sharky.MicroTasks
                     commander.UnitRole = UnitRole.Attack;
                     MicroTaskData[typeof(AttackTask).Name].StealUnit(commander);
                     UnitCommanders.Add(commander);
+                    Console.WriteLine("added destroyer for door");
                 }
             }
 
@@ -628,6 +636,7 @@ namespace Sharky.MicroTasks
                     commander.UnitRole = UnitRole.Attack;
                     MicroTaskData[typeof(AttackTask).Name].StealUnit(commander);
                     UnitCommanders.Add(commander);
+                    Console.WriteLine("added destoyer door");
                 }
             }
 

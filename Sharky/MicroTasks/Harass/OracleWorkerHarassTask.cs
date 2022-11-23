@@ -21,6 +21,7 @@ namespace Sharky.MicroTasks
         OracleMicroController OracleMicroController;
         StasisWardPlacement BuildingPlacement;
         DebugService DebugService;
+        SharkyOptions SharkyOptions;
 
         bool started { get; set; }
         int DesiredCount { get; set; }
@@ -34,6 +35,7 @@ namespace Sharky.MicroTasks
         bool Bottom;
         bool CheeseChatSent;
         int TargetIndex;
+        int TargetAquisitionFrame;
 
         public bool StasisTrapWorkers { get; set; }
 
@@ -47,6 +49,7 @@ namespace Sharky.MicroTasks
             OracleMicroController = oracleMicroController;
             BuildingPlacement = defaultSharkyBot.StasisWardPlacement;
             DebugService = defaultSharkyBot.DebugService;
+            SharkyOptions = defaultSharkyBot.SharkyOptions;
 
             DesiredCount = desiredCount;
             Enabled = enabled;
@@ -78,6 +81,7 @@ namespace Sharky.MicroTasks
                         commander.Value.Claimed = true;
                         commander.Value.UnitRole = UnitRole.Harass;
                         UnitCommanders.Add(commander.Value);
+                        TargetAquisitionFrame = commander.Value.UnitCalculation.FrameLastSeen;
                     }
                     if (UnitCommanders.Count() == DesiredCount)
                     {
@@ -95,7 +99,7 @@ namespace Sharky.MicroTasks
             if (Target == null)
             {
                 Target = BaseData.EnemyBaseLocations.FirstOrDefault().MiddleMineralLocation;
-                GetTargetPath(Target);
+                GetTargetPath(Target, frame);
             }
 
             DebugService.DrawSphere(new Point { X = Target.X, Y = Target.Y, Z = 10 }, .5f);
@@ -123,6 +127,7 @@ namespace Sharky.MicroTasks
                                 {
                                     commands.AddRange(stasis);
                                 }
+                                continue;
                             }
                         }
                     }
@@ -151,6 +156,7 @@ namespace Sharky.MicroTasks
                         {
                             commands.AddRange(action);
                         }
+                        continue;
                     }
                     var canHarass = CanHarass(commander, Target);
                     if (canHarass)
@@ -176,11 +182,12 @@ namespace Sharky.MicroTasks
                         if (action != null)
                         {
                             commands.AddRange(action);
-                        }     
+                        }
+                        continue;
                     }
                     else
                     {
-                        GetNextTarget();
+                        GetNextTarget(frame);
                     }
                     continue;
                 }
@@ -201,7 +208,7 @@ namespace Sharky.MicroTasks
                     if (Left || Right)
                     {
                         var side = new Point2D { X = StagingPoint.X, Y = commander.UnitCalculation.Unit.Pos.Y };
-                        if (commander.RetreatPathFrame + 20 < frame && Vector2.DistanceSquared(commanderVector, new Vector2(side.X, side.Y)) > 4)
+                        if (commander.RetreatPathFrame + 2 < frame && Vector2.DistanceSquared(commanderVector, new Vector2(side.X, side.Y)) > 4)
                         {
                             var action = OracleMicroController.NavigateToPoint(commander, side, defensivePoint, side, frame);
                             if (action != null)
@@ -214,7 +221,7 @@ namespace Sharky.MicroTasks
                     else if (Top || Bottom)
                     {
                         var side = new Point2D { X = commander.UnitCalculation.Unit.Pos.X, Y = StagingPoint.Y };
-                        if (commander.RetreatPathFrame + 20 < frame && Vector2.DistanceSquared(commanderVector, new Vector2(side.X, side.Y)) > 4)
+                        if (commander.RetreatPathFrame + 2 < frame && Vector2.DistanceSquared(commanderVector, new Vector2(side.X, side.Y)) > 4)
                         {
                             var action = OracleMicroController.NavigateToPoint(commander, side, defensivePoint, side, frame);
                             if (action != null)
@@ -233,13 +240,17 @@ namespace Sharky.MicroTasks
                     {
                         commands.AddRange(action);
                     }
-                    GetNextTarget();
+                    GetNextTarget(frame);
                     continue;
                 }
                 var navigateAction = OracleMicroController.NavigateToPoint(commander, StagingPoint, defensivePoint, StagingPoint, frame);
                 if (navigateAction != null)
                 {
                     commands.AddRange(navigateAction);
+                    if (frame - TargetAquisitionFrame > 60 * SharkyOptions.FramesPerSecond)
+                    {
+                        GetNextTarget(frame);
+                    }
                 }
             }
 
@@ -268,7 +279,7 @@ namespace Sharky.MicroTasks
             return true;
         }
 
-        void GetNextTarget()
+        void GetNextTarget(int frame)
         {
             var target = BaseData.BaseLocations.OrderBy(b => Vector2.DistanceSquared(new Vector2(b.Location.X, b.Location.Y), new Vector2(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y))).Skip(TargetIndex + 1).FirstOrDefault();
             if (target == null)
@@ -283,12 +294,13 @@ namespace Sharky.MicroTasks
                 {
                     TargetIndex = 0;
                 }
-                GetTargetPath(Target);
+                GetTargetPath(Target, frame);
             }
         }
 
-        void GetTargetPath(Point2D target)
+        void GetTargetPath(Point2D target, int frame)
         {
+            TargetAquisitionFrame = frame;
             var closestDistance = target.X - 0;
             Left = true;
             MidPoint = new Point2D { X = 0, Y = (target.Y + TargetingData.ForwardDefensePoint.Y) / 2f };

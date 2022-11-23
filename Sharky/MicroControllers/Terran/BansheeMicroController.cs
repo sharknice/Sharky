@@ -45,7 +45,7 @@ namespace Sharky.MicroControllers.Terran
             {
                 if (commander.UnitCalculation.NearbyEnemies.Any(e => e.DamageAir))
                 {
-                    if (commander.RetreatPathFrame + 20 < frame)
+                    if (commander.RetreatPathFrame + 2 < frame)
                     {
                         commander.RetreatPath = SharkyPathFinder.GetSafeAirPath(target.X, target.Y, commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y, frame);
                         commander.RetreatPathFrame = frame;

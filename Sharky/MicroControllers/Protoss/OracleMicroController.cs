@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using Sharky.Builds.BuildingPlacement;
 using Sharky.DefaultBot;
 using Sharky.Pathing;
 using System;
@@ -13,10 +14,14 @@ namespace Sharky.MicroControllers.Protoss
         float RevelationRange = 9;
         float RevelationRadius = 6;
 
-        public OracleMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled, float avoidDamageDistance = .5f)
+        AttackData AttackData;
+        StasisWardPlacement StasisWardPlacement;
+
+        public OracleMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled, float avoidDamageDistance = 3f)
             : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled, avoidDamageDistance)
         {
-
+            AttackData = defaultSharkyBot.AttackData;
+            StasisWardPlacement = defaultSharkyBot.StasisWardPlacement;
         }
 
         protected override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
@@ -251,7 +256,31 @@ namespace Sharky.MicroControllers.Protoss
         bool StasisWard(UnitCommander commander, int frame, UnitCalculation bestTarget, out List<SC2APIProtocol.Action> action)
         {
             action = null;
-            return false; // TODO:  stasis ward, put stasis wards on the tops of ramps
+
+            if (commander.UnitCalculation.Unit.Energy < 50 || commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.ORACLEWEAPON))
+            {
+                return false;
+            }
+
+            if (commander.UnitCalculation.NearbyAllies.Count() > 10 && commander.UnitCalculation.NearbyEnemies.Count(e => !e.Unit.IsFlying && e.UnitClassifications.Contains(UnitClassification.ArmyUnit)) > 10)
+            {
+                var existingStasisWard = commander.UnitCalculation.NearbyAllies.FirstOrDefault(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_ORACLESTASISTRAP);
+                if (existingStasisWard == null)
+                {
+                    var location = StasisWardPlacement.FindPlacement(AttackData.ArmyPoint);
+                    if (location != null)
+                    {
+                        var stasis = commander.Order(frame, Abilities.BUILD_STASISTRAP, location, allowSpam: true);
+                        if (stasis != null)
+                        {
+                            action = stasis;
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false; // TODO: put stasis wards on the tops of ramps
         }
 
         protected override bool AttackBestTarget(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
@@ -321,7 +350,7 @@ namespace Sharky.MicroControllers.Protoss
 
             if (commander.UnitCalculation.NearbyEnemies.Count(e => e.DamageAir) > 0)
             {
-                if (commander.RetreatPathFrame + 20 < frame)
+                if (commander.RetreatPathFrame + 1 < frame)
                 {
                     commander.RetreatPath = SharkyPathFinder.GetSafeAirPath(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y, target.X, target.Y, frame);
                     commander.RetreatPathFrame = frame;
@@ -359,7 +388,7 @@ namespace Sharky.MicroControllers.Protoss
             if (commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.LOCKON) || enemyCyclones.Any(c => c.EnemiesInRange.Count() < 2))
             {
                 var avoidPoint = GetPositionFromRange(commander, enemyCyclones.FirstOrDefault().Unit.Pos, commander.UnitCalculation.Unit.Pos, 20);
-                if (commander.RetreatPathFrame + 5 < frame || commander.RetreatPathIndex >= commander.RetreatPath.Count())
+                if (commander.RetreatPathFrame + 1 < frame || commander.RetreatPathIndex >= commander.RetreatPath.Count())
                 {
                     commander.RetreatPath = SharkyPathFinder.GetSafeAirPath(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y, defensivePoint.X, defensivePoint.Y, frame);
                     commander.RetreatPathFrame = frame;
