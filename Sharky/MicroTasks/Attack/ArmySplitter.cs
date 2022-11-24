@@ -77,6 +77,10 @@ namespace Sharky.MicroTasks.Attack
                     {
                         groupPoint = null;
                     }
+                    foreach (var commander in split.SelfGroup)
+                    {
+                        commander.UnitCalculation.TargetPriorityCalculation.Overwhelm = true;
+                    }
                     var defensePoint = new Point2D { X = split.EnemyGroup.FirstOrDefault().Unit.Pos.X, Y = split.EnemyGroup.FirstOrDefault().Unit.Pos.Y };
                     actions.AddRange(MicroController.Attack(split.SelfGroup, defensePoint, TargetingData.ForwardDefensePoint, groupPoint, frame));
 
@@ -95,6 +99,7 @@ namespace Sharky.MicroTasks.Attack
                 {
                     if (winnableDefense || defendToDeath)
                     {
+                        
                         var closerEnemy = closerEnemies.FirstOrDefault();
                         if (closerEnemy.Unit.IsFlying)
                         {

@@ -60,7 +60,7 @@ namespace Sharky.MicroTasks.Mining
 
                             if (distanceSquared > 25 || distanceSquared < 10 || !onPath)
                             {
-                                var action = worker.Order(frame, Abilities.HARVEST_RETURN, null, 0, true);
+                                var action = worker.Order(frame, Abilities.HARVEST_RETURN, null, 0);
                                 if (action != null)
                                 {
                                     actions.AddRange(action);

@@ -79,7 +79,7 @@ namespace Sharky.MicroTasks.Mining
 
             if (distanceSquared > 20 || !onPath)
             {
-                return worker.Order(frame, Abilities.SMART, null, baseTag, true);
+                return worker.Order(frame, Abilities.SMART, null, baseTag);
             }
             else if (distanceSquared < 10)
             {

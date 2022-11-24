@@ -232,12 +232,15 @@ namespace Sharky
                 if (observation == null)
                 {
                     Console.WriteLine($"Ended at {DateTime.UtcNow} UTC");
+                    Console.WriteLine($"total actions: {actionCount}");
                     bot.OnEnd(observation, Result.Undecided);
                     break;
                 }
                 if (response.Status == Status.Ended || response.Status == Status.Quit)
                 {
                     Console.WriteLine($"Ended at {DateTime.UtcNow} UTC");
+                    Console.WriteLine($"total actions: {actionCount}, APM: {response.Observation.Observation.Score.ScoreDetails.CurrentApm}");
+                    
                     bot.OnEnd(observation, observation.PlayerResult[(int)playerId - 1].Result);
                     break;
                 }

@@ -258,16 +258,19 @@ namespace Sharky.MicroTasks
                 if (DoorCommander != null && DoorCommander.UnitCalculation.Unit.Health < DoorCommander.UnitCalculation.Unit.HealthMax)
                 {
                     NeedBackupDoor = true;
-                    var vector = new Vector2(WallData.Block.X, WallData.Block.Y);
-                    var commander = MicroTaskData[typeof(AttackTask).Name].UnitCommanders.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_STALKER || c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_ZEALOT || c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_ADEPT).OrderBy(c => Vector2.DistanceSquared(c.UnitCalculation.Position, vector)).FirstOrDefault();
-                    if (commander != null)
+                    if (BackupDoorCommander == null)
                     {
-                        MicroTaskData[typeof(AttackTask).Name].StealUnit(commander);
-                        commander.UnitRole = UnitRole.Door;
-                        commander.Claimed = true;
-                        UnitCommanders.Add(commander);
-                        BackupDoorCommander = commander;
-                        Console.WriteLine("added backup door in updateneeds");
+                        var vector = new Vector2(WallData.Block.X, WallData.Block.Y);
+                        var commander = MicroTaskData[typeof(AttackTask).Name].UnitCommanders.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_STALKER || c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_ZEALOT || c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_ADEPT).OrderBy(c => Vector2.DistanceSquared(c.UnitCalculation.Position, vector)).FirstOrDefault();
+                        if (commander != null)
+                        {
+                            MicroTaskData[typeof(AttackTask).Name].StealUnit(commander);
+                            commander.UnitRole = UnitRole.Door;
+                            commander.Claimed = true;
+                            UnitCommanders.Add(commander);
+                            BackupDoorCommander = commander;
+                            Console.WriteLine("added backup door in updateneeds");
+                        }
                     }
                 }
                 else
