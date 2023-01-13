@@ -147,6 +147,16 @@ namespace Sharky.Builds.BuildingPlacement
             return false;
         }
 
+        public bool BlockedByEnemyUnits(float x, float y, float radius, float padding = .5f, ulong tag = 0)
+        {
+            if (ActiveUnitData.EnemyUnits.Any(c => c.Key != tag && !c.Value.Unit.IsFlying && BuildingBlocks(x, y, radius, c.Value.Unit)))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
         public bool BlockedByStructures(float x, float y, float radius, float padding = .5f, ulong tag = 0)
         {
             foreach (var neutralUnit in ActiveUnitData.NeutralUnits.Where(u => Vector2.DistanceSquared(new Vector2(x, y), u.Value.Position) < (u.Value.Unit.Radius + padding + radius) * (u.Value.Unit.Radius + padding + radius)))

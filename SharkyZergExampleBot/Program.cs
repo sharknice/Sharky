@@ -13,6 +13,7 @@ var defaultSharkyBot = new DefaultSharkyBot(gameConnection);
 var zergBuildChoices = new ZergBuildChoices(defaultSharkyBot);
 defaultSharkyBot.BuildChoices[Race.Zerg] = zergBuildChoices.BuildChoices;
 
+// Enable zerg specific tasks by default.  These can also be enabled or disabled for specific builds in the OnFrame or StartBuild methods
 defaultSharkyBot.MicroTaskData[typeof(BurrowBlockExpansionsTask).Name].Enable();
 defaultSharkyBot.MicroTaskData[typeof(BurrowDronesFromHarras).Name].Enable();
 defaultSharkyBot.MicroTaskData[typeof(CreepTumorTask).Name].Enable();
@@ -21,12 +22,12 @@ defaultSharkyBot.MicroTaskData[typeof(QueenCreepTask).Name].Enable();
 defaultSharkyBot.MicroTaskData[typeof(QueenDefendTask).Name].Enable();
 defaultSharkyBot.MicroTaskData[typeof(QueenInjectTask).Name].Enable();
 
-var sharkyExampleBot = defaultSharkyBot.CreateBot(defaultSharkyBot.Managers, defaultSharkyBot.DebugService);
+var sharkyExampleBot = defaultSharkyBot.CreateBot();
 
 var myRace = Race.Zerg;
 if (args.Length == 0)
 {
-    gameConnection.RunSinglePlayer(sharkyExampleBot, @"GlitteringAshesAIE.SC2Map", myRace, Race.Random, Difficulty.VeryHard, AIBuild.RandomBuild).Wait();
+    gameConnection.RunSinglePlayer(sharkyExampleBot, @"InsideAndOutAIE.SC2Map", myRace, Race.Random, Difficulty.VeryHard, AIBuild.RandomBuild).Wait();
 }
 else
 {

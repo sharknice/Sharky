@@ -28,7 +28,7 @@ namespace Sharky.Managers
 
         protected SimCityService SimCityService;
 
-        protected Dictionary<int, string> BuildHistory { get; set; }
+        public Dictionary<int, string> BuildHistory { get; protected set; }
 
         protected Race SelectedRace;
         protected Race ActualRace;
@@ -103,9 +103,13 @@ namespace Sharky.Managers
                 }
                 else
                 {
-                    if (playerInfo.PlayerName != null)
+                    if (!string.IsNullOrEmpty(playerInfo.PlayerName))
                     {
                         enemyName = playerInfo.PlayerName;
+                        if (enemyName == "HUMAN")
+                        {
+                            enemyName = Environment.UserName;
+                        }
                     }
                     EnemyRace = playerInfo.RaceRequested;
                     EnemySelectedRace = playerInfo.RaceRequested;
@@ -116,6 +120,10 @@ namespace Sharky.Managers
             if (opponentId == "test" && EnemyPlayer == null)
             {
                 EnemyPlayer = new EnemyPlayer.EnemyPlayer { ChatMatches = new List<string>(), Games = new List<Game>(), Id = opponentId, Name = "test" };
+            }
+            if (opponentId == "HUMAN" && EnemyPlayer == null)
+            {
+                EnemyPlayer = new EnemyPlayer.EnemyPlayer { ChatMatches = new List<string>(), Games = new List<Game>(), Id = opponentId, Name = enemyName };
             }
             if (EnemyPlayer == null)
             {

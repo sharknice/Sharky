@@ -63,7 +63,18 @@ namespace Sharky.Managers
             base.OnEnd(observation, result);
         }
 
+        public override void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)
+        {
+            ProcessObservation(observation);
+        }
+
         public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
+        {
+            ProcessObservation(observation);
+            return null;
+        }
+
+        private void ProcessObservation(ResponseObservation observation)
         {
             var frame = (int)observation.Observation.GameLoop;
 
@@ -398,8 +409,6 @@ namespace Sharky.Managers
                     DebugService.DrawLine(enemyUnit.Value.Unit.Pos, new Point { X = enemyUnit.Value.End.X, Y = enemyUnit.Value.End.Y, Z = enemyUnit.Value.Unit.Pos.Z + 1f }, new SC2APIProtocol.Color { R = 255, B = 0, G = 0 });
                 }
             }
-
-            return null;
         }
 
         void ClearUnitCalculations(KeyValuePair<ulong, UnitCalculation> attack)

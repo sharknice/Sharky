@@ -17,7 +17,7 @@ namespace Sharky.EnemyStrategies
 
         protected override bool Detect(int frame)
         {
-            if (frame < SharkyOptions.FramesPerSecond * 60 * 2)
+            if (frame < SharkyOptions.FramesPerSecond * 60 * 1.75)
             {
                 if (ActiveUnitData.EnemyUnits.Values.Count(u => u.UnitClassifications.Contains(UnitClassification.Worker) && u.Position.DistanceSquared(TargetingData.EnemyMainBasePoint.ToVector2()) > (40 * 40)) > 5)
                 {

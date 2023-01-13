@@ -2,6 +2,7 @@
 using Sharky.Builds.BuildingPlacement;
 using Sharky.Chat;
 using Sharky.DefaultBot;
+using Sharky.Extensions;
 using Sharky.MicroControllers.Protoss;
 using Sharky.Pathing;
 using System.Collections.Concurrent;
@@ -22,6 +23,8 @@ namespace Sharky.MicroTasks
         StasisWardPlacement BuildingPlacement;
         DebugService DebugService;
         SharkyOptions SharkyOptions;
+        MacroData MacroData;
+        ActiveUnitData ActiveUnitData;
 
         bool started { get; set; }
         int DesiredCount { get; set; }
@@ -37,7 +40,11 @@ namespace Sharky.MicroTasks
         int TargetIndex;
         int TargetAquisitionFrame;
 
+        int StasisedFrame;
+
         public bool StasisTrapWorkers { get; set; }
+
+        bool YoloChatSent;
 
         public OracleWorkerHarassTask(DefaultSharkyBot defaultSharkyBot, OracleMicroController oracleMicroController, int desiredCount = 1, bool enabled = true, float priority = -1f)
         {
@@ -50,12 +57,16 @@ namespace Sharky.MicroTasks
             BuildingPlacement = defaultSharkyBot.StasisWardPlacement;
             DebugService = defaultSharkyBot.DebugService;
             SharkyOptions = defaultSharkyBot.SharkyOptions;
+            MacroData = defaultSharkyBot.MacroData;
+            ActiveUnitData = defaultSharkyBot.ActiveUnitData;
 
             DesiredCount = desiredCount;
             Enabled = enabled;
             Priority = priority;
 
             UnitCommanders = new List<UnitCommander>();
+            StasisedFrame = 0;
+            YoloChatSent = false;
         }
 
         public override void Enable()
@@ -66,7 +77,7 @@ namespace Sharky.MicroTasks
 
         public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
         {
-            if (UnitCommanders.Count() < DesiredCount)
+            if (UnitCommanders.Count(u => u.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_ORACLE) < DesiredCount)
             {
                 if (started)
                 {
@@ -82,11 +93,22 @@ namespace Sharky.MicroTasks
                         commander.Value.UnitRole = UnitRole.Harass;
                         UnitCommanders.Add(commander.Value);
                         TargetAquisitionFrame = commander.Value.UnitCalculation.FrameLastSeen;
+
+                        if (UnitCommanders.Count(u => u.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_ORACLE) == DesiredCount)
+                        {
+                            started = true;
+                            return;
+                        }
                     }
-                    if (UnitCommanders.Count() == DesiredCount)
+                }
+            }
+            else if (started)
+            {
+                foreach (var commander in commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_ORACLESTASISTRAP))
+                {
+                    if (!UnitCommanders.Contains(commander))
                     {
-                        started = true;
-                        return;
+                        UnitCommanders.Add(commander);
                     }
                 }
             }
@@ -104,20 +126,19 @@ namespace Sharky.MicroTasks
 
             DebugService.DrawSphere(new Point { X = Target.X, Y = Target.Y, Z = 10 }, .5f);
 
-            foreach (var commander in UnitCommanders)
+            foreach (var commander in UnitCommanders.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_ORACLE))
             {
                 var defensivePoint = TargetingData.ForwardDefensePoint;
                 var commanderVector = commander.UnitCalculation.Position;
                 var targetVector = new Vector2(Target.X, Target.Y);
 
-                if ((commander.UnitCalculation.Unit.Energy > 50 || commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.ORACLEWEAPON))
-                    && commander.UnitCalculation.EnemiesInRangeOfAvoid.Count() == 0 &&
-                    (commander.UnitCalculation.EnemiesInRange.Take(25).Count(e => e.UnitClassifications.Contains(UnitClassification.Worker)) > 1 || (commander.UnitCalculation.NearbyEnemies.Take(25).Count(e => e.UnitClassifications.Contains(UnitClassification.Worker)) > 2 && !commander.UnitCalculation.NearbyEnemies.Take(25).Any(e => e.DamageAir && e.Unit.BuildProgress == 1))))
+                if ((commander.UnitCalculation.Unit.Energy > 50 || commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.ORACLEWEAPON) || commander.LastAbility == Abilities.BUILD_STASISTRAP) && commander.UnitCalculation.EnemiesInRangeOfAvoid.Count(e => e.Unit.UnitType != (uint)UnitTypes.TERRAN_BUNKER) == 0 && commander.UnitCalculation.NearbyEnemies.Count(e => e.UnitClassifications.Contains(UnitClassification.Worker)) > 0)
                 {
                     if (StasisTrapWorkers && commander.UnitCalculation.Unit.Energy >= 50 && !commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.ORACLEWEAPON))
                     {
                         var existingStasisWard = commander.UnitCalculation.NearbyAllies.FirstOrDefault(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_ORACLESTASISTRAP);
-                        if (existingStasisWard == null)
+                        var stasisedUnits = commander.UnitCalculation.NearbyEnemies.FirstOrDefault(a => a.FrameLastSeen == frame && a.Unit.BuffIds.Contains((uint)Buffs.ORACLESTASISTRAPTARGET));
+                        if (existingStasisWard == null && (stasisedUnits == null || (frame - StasisedFrame) > SharkyOptions.FramesPerSecond * (21.5-3.58)))
                         {
                             var location = BuildingPlacement.FindPlacement(Target);
                             if (location != null)
@@ -131,7 +152,7 @@ namespace Sharky.MicroTasks
                             }
                         }
                     }
-                    else
+                    else if (commander.UnitCalculation.EnemiesInRange.Take(25).Count(e => e.UnitClassifications.Contains(UnitClassification.Worker)) > 1 || (commander.UnitCalculation.NearbyEnemies.Take(25).Count(e => e.UnitClassifications.Contains(UnitClassification.Worker) && !e.Unit.BuffIds.Contains((uint)Buffs.ORACLESTASISTRAPTARGET)) > 2 && !commander.UnitCalculation.NearbyEnemies.Take(25).Any(e => e.DamageAir && e.Unit.BuildProgress == 1)))
                     {
                         var action = OracleMicroController.HarassWorkers(commander, Target, defensivePoint, frame);
                         if (action != null)
@@ -141,8 +162,9 @@ namespace Sharky.MicroTasks
                         continue;
                     }
                 }
+                
 
-                if ((commander.UnitCalculation.Unit.Energy > 50 || commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.ORACLEWEAPON)) && Vector2.DistanceSquared(commanderVector, targetVector) < 25)
+                if ((commander.UnitCalculation.Unit.Energy > 50 || commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.ORACLEWEAPON) || commander.LastAbility == Abilities.BUILD_STASISTRAP) && Vector2.DistanceSquared(commanderVector, targetVector) < 25)
                 {
                     if (!CheeseChatSent)
                     {
@@ -164,7 +186,8 @@ namespace Sharky.MicroTasks
                         if (StasisTrapWorkers && commander.UnitCalculation.Unit.Energy >= 50)
                         {
                             var existingStasisWard = commander.UnitCalculation.NearbyAllies.FirstOrDefault(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_ORACLESTASISTRAP);
-                            if (existingStasisWard == null)
+                            var stasisedUnits = commander.UnitCalculation.NearbyEnemies.FirstOrDefault(a => a.FrameLastSeen == frame && a.Unit.BuffIds.Contains((uint)Buffs.ORACLESTASISTRAPTARGET));
+                            if (existingStasisWard == null && (stasisedUnits == null || (frame - StasisedFrame) > SharkyOptions.FramesPerSecond * (21.5 - 3.58)))
                             {
                                 var location = BuildingPlacement.FindPlacement(Target);
                                 if (location != null)
@@ -190,6 +213,53 @@ namespace Sharky.MicroTasks
                         GetNextTarget(frame);
                     }
                     continue;
+                }
+
+                if (!commander.UnitCalculation.NearbyAllies.Any() && commander.UnitCalculation.EnemiesInRangeOf.Any(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_PHOENIX))
+                {
+                    // no escape, just kill as many workers as possible
+                    if ((commander.UnitCalculation.Unit.Energy > 30 || commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.ORACLEWEAPON)) && commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker) && !e.Unit.BuffIds.Contains((uint)Buffs.ORACLESTASISTRAPTARGET)))
+                    {
+                        var action = OracleMicroController.HarassWorkers(commander, Target, defensivePoint, frame);
+                        if (action != null)
+                        {
+                            commands.AddRange(action);
+                        }
+                        SendYoloChat();
+                        continue;
+                    }
+                    else if (commander.UnitCalculation.Unit.Energy >= 25)
+                    {
+                        var enemy = commander.UnitCalculation.NearbyEnemies.FirstOrDefault(e => e.Unit.BuffIds.Count() == 0);
+                        if (enemy != null)
+                        {
+                            var action = commander.Order(frame, Abilities.EFFECT_ORACLEREVELATION, enemy.Position.ToPoint2D());
+                            if (action != null)
+                            {
+                                commands.AddRange(action);
+                            }
+                            SendYoloChat();
+                            continue;
+                        }
+                    }
+                    
+                }
+
+                if (commander.UnitCalculation.NearbyAllies.Count() > 1)
+                {
+                    if (commander.UnitCalculation.Unit.Energy >= 25)
+                    {
+                        var invader = OracleMicroController.CloakedInvader(commander);
+                        if (invader != null)
+                        {
+                            var action = commander.Order(frame, Abilities.EFFECT_ORACLEREVELATION, invader);
+                            if (action != null)
+                            {
+                                commands.AddRange(action);
+                                continue;
+                            }
+                        }
+                    }
                 }
 
                 if (Vector2.DistanceSquared(commanderVector, targetVector) > Vector2.DistanceSquared(commanderVector, new Vector2(TargetingData.ForwardDefensePoint.X, TargetingData.ForwardDefensePoint.Y)))
@@ -233,7 +303,7 @@ namespace Sharky.MicroTasks
                     }
                 }
 
-                if (commander.UnitCalculation.EnemiesInRangeOfAvoid.Any() && Vector2.DistanceSquared(new Vector2(StagingPoint.X, StagingPoint.Y), commanderVector) < 10)
+                if (commander.UnitCalculation.EnemiesInRangeOfAvoid.Any(e => e.Unit.UnitType != (uint)UnitTypes.TERRAN_BUNKER) && Vector2.DistanceSquared(new Vector2(StagingPoint.X, StagingPoint.Y), commanderVector) < 10)
                 {
                     var action = OracleMicroController.Retreat(commander, defensivePoint, null, frame);
                     if (action != null)
@@ -256,6 +326,15 @@ namespace Sharky.MicroTasks
 
 
             return commands;
+        }
+
+        private void SendYoloChat()
+        {
+            if (!YoloChatSent)
+            {
+                ChatService.SendChatType("OracleHarass-Dying");
+                YoloChatSent = true;
+            }
         }
 
         bool CanHarass(UnitCommander commander, Point2D target)
@@ -282,6 +361,10 @@ namespace Sharky.MicroTasks
         void GetNextTarget(int frame)
         {
             var target = BaseData.BaseLocations.OrderBy(b => Vector2.DistanceSquared(new Vector2(b.Location.X, b.Location.Y), new Vector2(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y))).Skip(TargetIndex + 1).FirstOrDefault();
+            if (ActiveUnitData.SelfUnits.Values.Any(u => u.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS && u.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit))))
+            {
+                target = BaseData.EnemyBaseLocations.FirstOrDefault();
+            }
             if (target == null)
             {
                 TargetIndex = 0;
@@ -337,6 +420,17 @@ namespace Sharky.MicroTasks
                 Bottom = true;
                 MidPoint = new Point2D { X = (target.X + TargetingData.ForwardDefensePoint.X) / 2f, Y = MapData.MapHeight };
                 StagingPoint = new Point2D { X = target.X, Y = MapData.MapHeight - 0 };
+            }
+        }
+
+        public override void RemoveDeadUnits(List<ulong> deadUnits)
+        {
+            foreach (var tag in deadUnits)
+            {
+                if (UnitCommanders.RemoveAll(c => c.UnitCalculation.Unit.Tag == tag) > 0)
+                {
+                    StasisedFrame = MacroData.Frame;
+                }
             }
         }
     }

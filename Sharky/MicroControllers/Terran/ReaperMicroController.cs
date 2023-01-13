@@ -94,7 +94,7 @@ namespace Sharky.MicroControllers.Terran
             return false;
         }
 
-        public override List<Action> Scout(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, bool prioritizeVision = false)
+        public override List<Action> Scout(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, bool prioritizeVision = false, bool attack = true)
         {
             List<SC2APIProtocol.Action> action = null;
 

@@ -12,12 +12,12 @@ var defaultSharkyBot = new DefaultSharkyBot(gameConnection);
 var protossBuildChoices = new ProtossBuildChoices(defaultSharkyBot);
 defaultSharkyBot.BuildChoices[Race.Protoss] = protossBuildChoices.BuildChoices;
 
-var sharkyExampleBot = defaultSharkyBot.CreateBot(defaultSharkyBot.Managers, defaultSharkyBot.DebugService);
+var sharkyExampleBot = defaultSharkyBot.CreateBot();
 
 var myRace = Race.Protoss;
 if (args.Length == 0)
 {
-    gameConnection.RunSinglePlayer(sharkyExampleBot, @"2000AtmospheresAIE.SC2Map", myRace, Race.Random, Difficulty.VeryHard, AIBuild.RandomBuild).Wait();
+    gameConnection.RunSinglePlayer(sharkyExampleBot, @"InsideAndOutAIE.SC2Map", myRace, Race.Random, Difficulty.VeryHard, AIBuild.RandomBuild).Wait();
 }
 else
 {

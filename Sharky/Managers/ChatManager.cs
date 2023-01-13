@@ -37,7 +37,7 @@ namespace Sharky.Managers
         long LastFrameTime;
         double RuntimeFrameRate;
 
-        bool ApiEnabled;
+        bool RealTimeHumanGame;
 
         public ChatManager(HttpClient httpClient, ChatHistory chatHistory, SharkyOptions sharkyOptions, IChatDataService chatDataService, IEnemyPlayerService enemyPlayerManager, IEnemyNameService enemyNameService, ChatService chatService, ActiveChatData activeChatData, FrameToTimeConverter frameToTimeConverter, VersionService versionService)
         {
@@ -51,8 +51,6 @@ namespace Sharky.Managers
             VersionService = versionService;
             ActiveChatData = activeChatData;
             FrameToTimeConverter = frameToTimeConverter;
-
-            ApiEnabled = false;
             
             LastResponseTimes = new Dictionary<TypeEnum, int>();
             ChatTypeFrequencies = new Dictionary<TypeEnum, int>();
@@ -60,6 +58,8 @@ namespace Sharky.Managers
             {
                 ChatTypeFrequencies[chatType] = 3;
             }
+
+            RealTimeHumanGame = false;
         }
 
         public override void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)
@@ -75,14 +75,23 @@ namespace Sharky.Managers
             Self = gameInfo.PlayerInfo[(int)observation.Observation.PlayerCommon.PlayerId - 1];
             Enemy = gameInfo.PlayerInfo[2 - (int)observation.Observation.PlayerCommon.PlayerId];
 
-            ConversationName = $"starcraft-{Enemy.PlayerId}-{DateTimeOffset.Now.ToUnixTimeMilliseconds()}";
-
-            ActiveChatData.EnemyName = EnemyNameService.GetEnemyNameFromId(opponentId, EnemyPlayerManager.Enemies);
+            if (opponentId == "HUMAN")
+            {
+                RealTimeHumanGame = true;
+                ConversationName = $"starcraft-{Environment.UserName}-{DateTimeOffset.Now.ToUnixTimeMilliseconds()}";
+                ActiveChatData.EnemyName = Environment.UserName;
+                Enemy.PlayerName = Environment.UserName;
+            }
+            else
+            {
+                ConversationName = $"starcraft-{Enemy.PlayerId}-{DateTimeOffset.Now.ToUnixTimeMilliseconds()}";
+                ActiveChatData.EnemyName = EnemyNameService.GetEnemyNameFromId(opponentId, EnemyPlayerManager.Enemies);
+            }
 
             ChatHistory.EnemyChatHistory = new Dictionary<int, string>();
             ChatHistory.MyChatHistory = new Dictionary<int, string>();
 
-            ChatService.Tag($"b-{VersionService.BuildDate.ToString("yyyy-MM-dd__HH-mm-ss")}");
+            ChatService.Tag($"b-{VersionService.BuildDate.ToString("yyyy-MM-dd__HH-mm-ss")}"); 
         }
 
         public override IEnumerable<Action> OnFrame(ResponseObservation observation)
@@ -107,6 +116,11 @@ namespace Sharky.Managers
                 ActiveChatData.TimeModulation = RuntimeFrameRate / SharkyOptions.FramesPerSecond;
             }
             LastFrameTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+
+            if (RealTimeHumanGame)
+            {
+                ActiveChatData.TimeModulation = 1;
+            }
         }
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
@@ -118,9 +132,10 @@ namespace Sharky.Managers
                 var chat = new Chat.Chat { botName = Self.PlayerName, message = chatReceived.Message, time = DateTimeOffset.Now.ToUnixTimeMilliseconds(), user = Enemy.PlayerName };
                 if (chatReceived.PlayerId == Self.PlayerId)
                 {
+                    chat.user = Self.PlayerName;
                     Console.WriteLine($"{frame} {FrameToTimeConverter.GetTime(frame)} my chat: {chatReceived.Message}");
                     ChatHistory.MyChatHistory[frame] = chatReceived.Message;
-                    if (ApiEnabled)
+                    if (SharkyOptions.ApiChatEnabled)
                     {
                         UpdateChatAsync(chat);
                     }
@@ -199,19 +214,23 @@ namespace Sharky.Managers
         {
             if (GetGameResponse(chat, frame))
             {
+                if (SharkyOptions.ApiChatEnabled)
+                {
+                    UpdateChatAsync(chat);
+                }
                 return;
             }
 
-            if (ApiEnabled)
+            if (SharkyOptions.ApiChatEnabled)
             {
-                var chatRequest = new ChatRequest { chat = chat, type = "starcraft", conversationName = ConversationName, requestTime = DateTime.Now };
+                var chatRequest = new ChatRequest { chat = chat, type = "starcraft", conversationName = ConversationName, requestTime = DateTime.Now, excludedTypes = new List<string>(), exclusiveTypes = new List<string>(), metadata = "", requiredPropertyMatches = new List<string>(), subjectGoals = new List<string>() };
 
                 var jsonString = JsonConvert.SerializeObject(chatRequest);
                 var httpContent = new StringContent(jsonString, Encoding.UTF8, "application/json");
 
                 try
                 {
-                    var response = await HttpClient.PutAsync("https://localhost:44311/api/chat", httpContent); // TODO: load url from configuration
+                    var response = await HttpClient.PutAsync($"{SharkyOptions.ChatApiUrl}/chat", httpContent);
 
                     response.EnsureSuccessStatusCode();
 
@@ -232,14 +251,14 @@ namespace Sharky.Managers
 
         private async void UpdateChatAsync(Chat.Chat chat)
         {
-            var chatRequest = new ChatRequest { chat = chat, type = "starcraft", conversationName = ConversationName, requestTime = DateTime.Now };
+            var chatRequest = new ChatRequest { chat = chat, type = "starcraft", conversationName = ConversationName, requestTime = DateTime.Now, excludedTypes = new List<string>(), exclusiveTypes = new List<string>(), metadata = "", requiredPropertyMatches = new List<string>(), subjectGoals = new List<string>() };
 
             var jsonString = JsonConvert.SerializeObject(chatRequest);
             var httpContent = new StringContent(jsonString, Encoding.UTF8, "application/json");
 
             try
             {
-                var response = await HttpClient.PutAsync("https://localhost:44311/api/chatupdate", httpContent); // TODO: load url from configuration, have option to disable
+                var response = await HttpClient.PutAsync($"{SharkyOptions.ChatApiUrl}/chatupdate", httpContent);
 
                 response.EnsureSuccessStatusCode();
             }

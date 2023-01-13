@@ -369,7 +369,7 @@ namespace Sharky.MicroTasks.Attack
 
             if (AttackData.Attacking)
             {
-                if (TargetingData.AttackState == AttackState.Kill)
+                if (TargetingData.AttackState == AttackState.Kill || TargetingData.AttackState == AttackState.None)
                 {
                     actions.AddRange(MicroController.Attack(mainUnits, TargetingData.AttackPoint, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame));
                     actions.AddRange(MicroController.Support(supportUnits, mainUnits, supportAttackPoint, TargetingData.ForwardDefensePoint, supportAttackPoint, frame));
@@ -380,8 +380,8 @@ namespace Sharky.MicroTasks.Attack
                 }
                 else
                 {
-                    actions.AddRange(MicroController.Retreat(mainUnits, TargetingData.AttackPoint, AttackData.ArmyPoint, frame));
-                    actions.AddRange(MicroController.Support(supportUnits, mainUnits, supportAttackPoint, TargetingData.ForwardDefensePoint, supportAttackPoint, frame));
+                    actions.AddRange(MicroController.Retreat(mainUnits, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame));
+                    actions.AddRange(MicroController.Support(supportUnits, mainUnits, supportAttackPoint, supportAttackPoint, supportAttackPoint, frame));
                     foreach (var subTask in SubTasks.Where(t => t.Value.Enabled).OrderBy(t => t.Value.Priority))
                     {
                         actions.AddRange(subTask.Value.Support(mainUnits, supportAttackPoint, TargetingData.ForwardDefensePoint, supportAttackPoint, frame));
@@ -415,20 +415,22 @@ namespace Sharky.MicroTasks.Attack
 
         void HandleHiddenBuildings(bool hiddenBase)
         {
+            if (!MicroTaskData.ContainsKey(typeof(FindHiddenBaseTask).Name))
+            {
+                return;
+            }
             if (!hiddenBase && TargetingData.HiddenEnemyBase)
             {
                 ResetClaimedUnits();
-                if (MicroTaskData.ContainsKey(typeof(FindHiddenBaseTask).Name))
-                {
-                    MicroTaskData[typeof(FindHiddenBaseTask).Name].Enable();
-                }
+                MicroTaskData[typeof(FindHiddenBaseTask).Name].Enable();
             }
-            else if (hiddenBase && !TargetingData.HiddenEnemyBase)
+            else if (hiddenBase && !TargetingData.HiddenEnemyBase && ActiveUnitData.EnemyUnits.Any())
             {
-                if (MicroTaskData.ContainsKey(typeof(FindHiddenBaseTask).Name))
-                {
-                    MicroTaskData[typeof(FindHiddenBaseTask).Name].Disable();
-                }
+                MicroTaskData[typeof(FindHiddenBaseTask).Name].Disable();
+            }
+            if (MicroTaskData[typeof(FindHiddenBaseTask).Name].Enabled && ActiveUnitData.EnemyUnits.Any(e => e.Value.Attributes.Contains(Attribute.Structure)))
+            {
+                MicroTaskData[typeof(FindHiddenBaseTask).Name].Disable();
             }
         }
 
@@ -440,7 +442,7 @@ namespace Sharky.MicroTasks.Attack
                 SupportUnits.RemoveAll(c => c.UnitCalculation.Unit.Tag == tag);
                 MainUnits.RemoveAll(c => c.UnitCalculation.Unit.Tag == tag);
             }
-            foreach (var subTask in SubTasks)
+            foreach (var subTask in SubTasks.Where(s => s.Value.Enabled))
             {
                 subTask.Value.RemoveDeadUnits(deadUnits);
             }

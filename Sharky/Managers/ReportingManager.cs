@@ -134,6 +134,11 @@ namespace Sharky.Managers
                     Console.WriteLine($"    [{entry.Key}] is {(entry.Value.Active ? "active" : "inactive")} ({FormatElapsedTime(entry.Value.FirstActiveFrame)} to {FormatElapsedTime(entry.Value.LastActiveFrame)})");
             }
             PrintEnemyUnits();
+
+            var targetingPriority = DefaultSharkyBot.TargetPriorityService.CalculateGeneralTargetPriority();
+            Console.WriteLine($"Target Calculation Winnablility: {targetingPriority.OverallWinnability}");
+            Console.WriteLine($"Attack Point: {DefaultSharkyBot.TargetingData.AttackPoint}");
+
             if (DefaultSharkyBot.AttackData.UseAttackDataManager)
             {
                 Console.WriteLine($"Attacking: {DefaultSharkyBot.AttackData.Attacking}");

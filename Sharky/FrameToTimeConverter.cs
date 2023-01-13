@@ -1,5 +1,4 @@
-﻿using Sharky.DefaultBot;
-using System;
+﻿using System;
 
 namespace Sharky
 {

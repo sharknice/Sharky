@@ -30,13 +30,15 @@ namespace Sharky.Pathing
         MapData MapData;
         MapDataService MapDataService;
         DebugService DebugService;
+        ActiveUnitData ActiveUnitData;
 
-        public SharkyPathFinder(PathFinder pathFinder, MapData mapData, MapDataService mapDataService, DebugService debugService)
+        public SharkyPathFinder(PathFinder pathFinder, MapData mapData, MapDataService mapDataService, DebugService debugService, ActiveUnitData activeUnitData)
         {
             PathFinder = pathFinder;
             MapData = mapData;
             MapDataService = mapDataService;
             DebugService = debugService;
+            ActiveUnitData = activeUnitData;
 
             GroundDamageLastUpdate = -1;
             GroundDetectionLastUpdate = -1;
@@ -191,8 +193,14 @@ namespace Sharky.Pathing
                         {
                             //DebugService.DrawSphere(new Point { X = x, Y = y, Z = MapData.Map[x][y].TerrainHeight + 1 }, 2, new Color { R = 255, G = 0, B = 0 });
                         }
+                        var vector = new Vector2(x, y);
+                        if (ActiveUnitData.NeutralUnits.Values.Any(u => u.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && !u.UnitTypeData.Name.Contains("Unbuildable") && Vector2.DistanceSquared(u.Position, vector) <= u.Unit.Radius * u.Unit.Radius))
+                        {
+                            WalkGrid.DisconnectNode(new GridPosition(x, y));
+                        }
                     }
                 }
+                MapLastUpdate = frame;
             }
             return WalkGrid;
         }

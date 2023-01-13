@@ -1,5 +1,6 @@
 ﻿using SC2APIProtocol;
 using Sharky.Extensions;
+using Sharky.Pathing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,9 @@ namespace Sharky
 
         public UnitCalculation BestTarget { get; set; }
         public UnitRole UnitRole { get; set; }
+
+        public PathData CurrentPath { get; set; }
+        public int CurrentPathIndex { get; set; }
 
         public int RetreatPathFrame { get; set; }
         public List<Vector2> RetreatPath { get; set; }

@@ -167,7 +167,7 @@ namespace Sharky.MicroControllers
             }
 
             // no allies that already have a friendly observer within 4 range
-            var otherDetectors = ActiveUnitData.SelfUnits.Values.Where(u => u.Unit.Tag != commander.UnitCalculation.Unit.Tag && u.Unit.UnitType == commander.UnitCalculation.Unit.UnitType);
+            var otherDetectors = ActiveUnitData.SelfUnits.Values.Where(u => u.Unit.Tag != commander.UnitCalculation.Unit.Tag && (u.Unit.UnitType == commander.UnitCalculation.Unit.UnitType || u.UnitClassifications.Contains(UnitClassification.DetectionCaster) || u.UnitClassifications.Contains(UnitClassification.Detector)));
 
             var friendlies = supportableUnits.Where(u => u.UnitClassifications.Contains(UnitClassification.ArmyUnit)
                 && !otherDetectors.Any(o => DistanceSquared(o, u) < 16)

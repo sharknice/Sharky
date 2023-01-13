@@ -220,6 +220,21 @@
     <None Update="StaticData\opponents\zUnkP.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="StaticData\pathing\Hardwire AIE.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="StaticData\pathing\Inside and OutAIE.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="StaticData\pathing\MoondanceAIE.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="StaticData\pathing\StargazersAIE.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="StaticData\pathing\WaterfallAIE.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="StaticData\wall\terran\berlingrad.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

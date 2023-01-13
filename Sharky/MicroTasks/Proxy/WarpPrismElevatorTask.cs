@@ -18,7 +18,7 @@ namespace Sharky.MicroTasks.Proxy
     public class WarpPrismElevatorTask : MicroTask
     {
         TargetingData TargetingData;
-        IMicroController MicroController;
+        AdvancedMicroController MicroController;
         WarpPrismMicroController WarpPrismMicroController;
         ProxyLocationService ProxyLocationService;
         MapDataService MapDataService;
@@ -43,7 +43,9 @@ namespace Sharky.MicroTasks.Proxy
         int PickupRangeSquared { get; set; }
         List<Point2D> DropArea { get; set; }
 
-        public WarpPrismElevatorTask(DefaultSharkyBot defaultSharkyBot, IMicroController microController, WarpPrismMicroController warpPrismMicroController, List<DesiredUnitsClaim> desiredUnitsClaims, float priority, bool enabled = true)
+        bool StartElevating { get; set; }
+
+        public WarpPrismElevatorTask(DefaultSharkyBot defaultSharkyBot, AdvancedMicroController microController, WarpPrismMicroController warpPrismMicroController, List<DesiredUnitsClaim> desiredUnitsClaims, float priority, bool enabled = true)
         {
             TargetingData = defaultSharkyBot.TargetingData;
             ProxyLocationService = defaultSharkyBot.ProxyLocationService;
@@ -63,9 +65,9 @@ namespace Sharky.MicroTasks.Proxy
             Enabled = enabled;
             UnitCommanders = new List<UnitCommander>();
 
-            Enabled = true;
-
             PickupRangeSquared = 25;
+
+            StartElevating = false;
         }
 
         public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
@@ -128,25 +130,15 @@ namespace Sharky.MicroTasks.Proxy
                         actions.AddRange(action);
                     }
                 }
-                //actions.AddRange(MicroController.Retreat(unDroppedAttackers, LoadingLocation, null, frame));
             }
             else
             {
-                if (droppedAttackers.Count() > 0)
-                {
-                    // don't wait for another warp prism, just attack
-                    var groupPoint = TargetingService.GetArmyPoint(unDroppedAttackers);
-                    actions.AddRange(MicroController.Attack(unDroppedAttackers, TargetLocation, DefensiveLocation, groupPoint, frame));
-                }
-                else
-                {
-                    // wait for a warp prism
-                    var groupPoint = TargetingService.GetArmyPoint(unDroppedAttackers);
-                    actions.AddRange(MicroController.Retreat(unDroppedAttackers, DefensiveLocation, groupPoint, frame));
-                }
+                // wait for a warp prism
+                var groupPoint = TargetingService.GetArmyPoint(unDroppedAttackers);
+                actions.AddRange(MicroController.Retreat(unDroppedAttackers, DefensiveLocation, groupPoint, frame));             
             }
 
-            actions.AddRange(MicroController.Attack(droppedAttackers, TargetLocation, DefensiveLocation, null, frame));
+            actions.AddRange(MicroController.AttackWithinArea(droppedAttackers, DropArea, TargetLocation, DefensiveLocation, null, frame));
 
             stopwatch.Stop();
             lastFrameTime = stopwatch.ElapsedMilliseconds;
@@ -165,6 +157,18 @@ namespace Sharky.MicroTasks.Proxy
         private List<SC2APIProtocol.Action> OrderWarpPrism(UnitCommander warpPrism, IEnumerable<UnitCommander> droppedAttackers, IEnumerable<UnitCommander> unDroppedAttackers, int frame)
         {
             var readyForPickup = unDroppedAttackers.Where(c => !c.UnitCalculation.Loaded && Vector2.DistanceSquared(c.UnitCalculation.Position, new Vector2(LoadingLocation.X, LoadingLocation.Y)) < 10);
+            if (!StartElevating && readyForPickup.Any())
+            {
+                StartElevating = true;
+            }
+
+            if (!StartElevating)
+            {
+                List<SC2APIProtocol.Action> action = null;
+                WarpPrismMicroController.SupportArmy(warpPrism, TargetLocation, DefensiveLocation, null, frame, out action, unDroppedAttackers.Select(c => c.UnitCalculation));
+                return action;
+            }
+
             foreach (var pickup in readyForPickup)
             {
                 if (warpPrism.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISMPHASING)
@@ -197,6 +201,11 @@ namespace Sharky.MicroTasks.Proxy
                 }
             }
 
+            if (warpPrism.UnitCalculation.EnemiesThreateningDamage.Any() || warpPrism.UnitCalculation.NearbyEnemies.Any(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_VIKINGFIGHTER))
+            {
+                return WarpPrismMicroController.Retreat(warpPrism, DefensiveLocation, null, frame);
+            }
+
             if (droppedAttackers.Count() > 0)
             {
                 List<SC2APIProtocol.Action> action = null;
@@ -220,6 +229,7 @@ namespace Sharky.MicroTasks.Proxy
             {
                 DefensiveLocation = ProxyLocationService.GetCliffProxyLocation();
                 TargetLocation = TargetingData.EnemyMainBasePoint;
+                DropArea = AreaService.GetTargetArea(TargetLocation);
 
                 var angle = Math.Atan2(TargetLocation.Y - DefensiveLocation.Y, DefensiveLocation.X - TargetLocation.X);
                 var x = -6 * Math.Cos(angle);
@@ -227,8 +237,10 @@ namespace Sharky.MicroTasks.Proxy
                 LoadingLocation = new Point2D { X = DefensiveLocation.X + (float)x, Y = DefensiveLocation.Y - (float)y };
                 LoadingLocationHeight = MapDataService.MapHeight(LoadingLocation);
 
-                var loadingVector = new Vector2(LoadingLocation.X, LoadingLocation.Y);
-                DropArea = AreaService.GetTargetArea(TargetLocation);
+                x = -7 * Math.Cos(angle);
+                y = -7 * Math.Sin(angle);
+                var loadingVector = new Vector2(LoadingLocation.X + (float)x, LoadingLocation.Y - (float)y);
+
                 var dropVector = DropArea.OrderBy(p => Vector2.DistanceSquared(new Vector2(p.X, p.Y), loadingVector)).First();
                 x = -2 * Math.Cos(angle);
                 y = -2 * Math.Sin(angle);
@@ -238,7 +250,9 @@ namespace Sharky.MicroTasks.Proxy
                 InsideBaseDistanceSquared = Vector2.DistanceSquared(new Vector2(LoadingLocation.X, LoadingLocation.Y), new Vector2(TargetLocation.X, TargetLocation.Y));
             }
             DebugService.DrawSphere(new Point { X = LoadingLocation.X, Y = LoadingLocation.Y, Z = 12 }, 3, new Color { R = 0, G = 0, B = 255 });
+            DebugService.DrawLine(new Point { X = LoadingLocation.X, Y = LoadingLocation.Y, Z = 16 }, new Point { X = LoadingLocation.X, Y = LoadingLocation.Y, Z = 0 }, new Color { R = 0, G = 0, B = 255 });
             DebugService.DrawSphere(new Point { X = DropLocation.X, Y = DropLocation.Y, Z = 12 }, 3, new Color { R = 0, G = 255, B = 0 });
+            DebugService.DrawLine(new Point { X = DropLocation.X, Y = DropLocation.Y, Z = 16 }, new Point { X = DropLocation.X, Y = DropLocation.Y, Z = 0 }, new Color { R = 0, G = 255, B = 0 });
         }
     }
 }

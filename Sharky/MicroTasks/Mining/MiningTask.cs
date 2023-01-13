@@ -2,6 +2,7 @@
 using Sharky.Builds;
 using Sharky.Builds.BuildingPlacement;
 using Sharky.DefaultBot;
+using Sharky.MicroTasks.Attack;
 using Sharky.MicroTasks.Mining;
 using System;
 using System.Collections.Concurrent;
@@ -25,6 +26,7 @@ namespace Sharky.MicroTasks
         MicroTaskData MicroTaskData;
 
         BuildingService BuildingService;
+        TargetingService TargetingService;
 
         public bool LongDistanceMiningEnabled { get; set; }
 
@@ -41,6 +43,7 @@ namespace Sharky.MicroTasks
             BuildOptions = defaultSharkyBot.BuildOptions;
             MicroTaskData = defaultSharkyBot.MicroTaskData;
             BuildingService = defaultSharkyBot.BuildingService;
+            TargetingService = defaultSharkyBot.TargetingService;
 
             MineralMiner = mineralMiner;
             GasMiner = gasMiner;
@@ -376,24 +379,28 @@ namespace Sharky.MicroTasks
             foreach (var selfBase in BaseData.SelfBases.Where(b => b.ResourceCenter != null && b.ResourceCenter.UnitType == (uint)UnitTypes.PROTOSS_NEXUS && b.ResourceCenter.Energy >= 50))
             {
                 var baseVector = new Vector2(selfBase.ResourceCenter.Pos.X, selfBase.ResourceCenter.Pos.Y);
-                foreach (var miningInfo in selfBase.MineralMiningInfo)
+                var workers = selfBase.MineralMiningInfo.SelectMany(m => m.Workers.Where(w => w.UnitRole == UnitRole.Minerals && Vector2.DistanceSquared(baseVector, w.UnitCalculation.Position) > 2500));
+                if (workers.Any())
                 {
-                    foreach (var worker in miningInfo.Workers.Where(w => w.UnitRole == UnitRole.Minerals))
+                    var centerPoint = TargetingService.GetArmyPoint(workers);
+                    var vector = new Vector2(centerPoint.X, centerPoint.Y);
+                    var probes = workers.Where(c => !c.UnitCalculation.NearbyAllies.Any(a => !workers.Select(w => w.UnitCalculation).Contains(a) && Vector2.DistanceSquared(a.Position, c.UnitCalculation.Position) <= (2.5f * a.Unit.Radius) * (2.5f * a.Unit.Radius)));
+                    //var probes = workers.Where(c => !c.UnitCalculation.NearbyAllies.Any(a => !workers.Any(w => w.UnitCalculation.Unit.Tag == a.Unit.Tag && Vector2.DistanceSquared(a.Position, c.UnitCalculation.Position) <= (2.5f * a.Unit.Radius) * (2.5f * a.Unit.Radius))));
+
+                    var closestProbe = probes.OrderBy(c => Vector2.DistanceSquared(c.UnitCalculation.Position, vector)).FirstOrDefault();
+                    if (closestProbe != null)
                     {
-                        if (Vector2.DistanceSquared(baseVector, worker.UnitCalculation.Position) > 2500)
+                        if (ActiveUnitData.Commanders.ContainsKey(selfBase.ResourceCenter.Tag))
                         {
-                            if (ActiveUnitData.Commanders.ContainsKey(selfBase.ResourceCenter.Tag))
+                            var action = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].Order(frame, Abilities.NEXUSMASSRECALL, new Point2D { X = closestProbe.UnitCalculation.Position.X, Y = closestProbe.UnitCalculation.Position.Y });
+                            if (action != null)
                             {
-                                var action = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].Order(frame, Abilities.NEXUSMASSRECALL, new Point2D { X = worker.UnitCalculation.Position.X, Y = worker.UnitCalculation.Position.Y });
-                                if (action != null)
-                                {
-                                    actions.AddRange(action);
-                                }
+                                actions.AddRange(action);
                             }
-                            
                         }
                     }
-                }
+
+                }                             
             }
 
             return actions;
@@ -484,10 +491,13 @@ namespace Sharky.MicroTasks
                     else if (nextBase?.MineralFields?.FirstOrDefault() != null)
                     {
                         var field = ActiveUnitData.NeutralUnits.Values.FirstOrDefault(f => f.Unit.Pos.X == nextBase.MineralFields.FirstOrDefault().Pos.X && f.Unit.Pos.Y == nextBase.MineralFields.FirstOrDefault().Pos.Y);
-                        var action = worker.Order(frame, Abilities.SMART, null, field.Unit.Tag);
-                        if (action != null)
+                        if (field != null)
                         {
-                            actions.AddRange(action);
+                            var action = worker.Order(frame, Abilities.SMART, null, field.Unit.Tag);
+                            if (action != null)
+                            {
+                                actions.AddRange(action);
+                            }
                         }
                     }
                     else

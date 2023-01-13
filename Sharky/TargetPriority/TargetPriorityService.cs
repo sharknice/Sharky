@@ -1,15 +1,21 @@
-﻿using System.Collections.Generic;
+﻿using Sharky.DefaultBot;
+using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace Sharky
 {
     public class TargetPriorityService
     {
         SharkyUnitData SharkyUnitData;
+        TargetingData TargetingData;
+        ActiveUnitData ActiveUnitData;
 
-        public TargetPriorityService(SharkyUnitData sharkyUnitData)
+        public TargetPriorityService(DefaultSharkyBot defaultSharkyBot)
         {
-            SharkyUnitData = sharkyUnitData;
+            SharkyUnitData = defaultSharkyBot.SharkyUnitData;
+            TargetingData = defaultSharkyBot.TargetingData;
+            ActiveUnitData = defaultSharkyBot.ActiveUnitData;
         }
 
         public TargetPriorityCalculation CalculateTargetPriority(UnitCalculation unitCalculation, int frame)
@@ -202,11 +208,21 @@ namespace Sharky
             var groundHealth = groundedGroundAttackingEnemies.Sum(e => e.SimulatedHitpoints);
 
             var groundAttackingAllies = allies.Where(e => e.DamageGround || e.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISM || e.Unit.UnitType == (uint)UnitTypes.TERRAN_MEDIVAC);
+            var liftsAvailable = allies.Count(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_PHOENIX && a.Unit.Energy >= 50) > 1;
+            if (liftsAvailable)
+            {
+                groundAttackingAllies = allies;
+            }
+
             var airAttackingAllies = allies.Where(e => e.DamageAir);
             var bothAttackingAllies = allies.Where(e => e.DamageAir || e.DamageGround);
             var groundAttackDps = groundAttackingAllies.Sum(e => e.SimulatedDamagePerSecond(groundedGroundAttackingEnemiesAttributes, false, true));
             var airAttackDps = airAttackingAllies.Sum(e => e.SimulatedDamagePerSecond(flyingGroundAttackingEnemiesAttributes, true, false));
             var bothAttackingDps = bothAttackingAllies.Sum(e => e.SimulatedDamagePerSecond(groundAttackingEnemiesAttributes, true, true));
+            if (liftsAvailable)
+            {
+                groundAttackDps = bothAttackingDps;
+            }
 
             var secondsToKillAirGroundAttackingEnemies = 600f;
             if (airAttackDps - airHps > 0)
@@ -268,6 +284,14 @@ namespace Sharky
             }
 
             return groundKillSeconds;
+        }
+
+        public TargetPriorityCalculation CalculateGeneralTargetPriority()
+        {
+            var attackVector = new Vector2(TargetingData.AttackPoint.X, TargetingData.AttackPoint.Y);
+            var enemyUnits = ActiveUnitData.EnemyUnits.Values.Where(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) || e.Unit.UnitType == (uint)UnitTypes.ZERG_QUEEN || (e.UnitClassifications.Contains(UnitClassification.DefensiveStructure) && Vector2.DistanceSquared(attackVector, e.Position) < 625)); // every enemy unit no matter where it is, defensive structures within 25 range of attack point
+            var friendlyUnits = ActiveUnitData.SelfUnits.Values.Where(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit));
+            return CalculateTargetPriority(friendlyUnits, enemyUnits);
         }
     }
 }

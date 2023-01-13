@@ -1,5 +1,7 @@
 ﻿using SC2APIProtocol;
+using Sharky.Pathing;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 
@@ -10,15 +12,21 @@ namespace Sharky.Managers
         GameConnection GameConnection;
         SharkyOptions SharkyOptions;
         DebugService DebugService;
+        MapData MapData;
+        TargetingData TargetingData;
+        ActiveUnitData ActiveUnitData;
 
         bool SlowMode = false;
         int SlowTime = 0;
 
-        public DebugManager(GameConnection gameConnection, SharkyOptions sharkyOptions, DebugService debugService)
+        public DebugManager(GameConnection gameConnection, SharkyOptions sharkyOptions, DebugService debugService, MapData mapData, TargetingData targetingData, ActiveUnitData activeUnitData)
         {
             GameConnection = gameConnection;
             SharkyOptions = sharkyOptions;
             DebugService = debugService;
+            MapData = mapData;
+            TargetingData = targetingData;
+            ActiveUnitData = activeUnitData;
         }
 
         public override bool NeverSkip { get => true; }
@@ -58,7 +66,36 @@ namespace Sharky.Managers
         {
             foreach (var chatReceived in chatsReceived)
             {
-                var match = Regex.Match(chatReceived.Message.ToLower(), @"spawn (\d+) friendly (.*)");
+                var match = Regex.Match(chatReceived.Message.ToLower(), "spawn enemy wall");
+                if (match.Success)
+                {
+                    foreach (var wallData in MapData.WallData.Where(w => w.BasePosition.X == TargetingData.EnemyMainBasePoint.X && w.BasePosition.Y == TargetingData.EnemyMainBasePoint.Y && w.Pylons != null))
+                    {
+                        foreach (var spot in wallData.Pylons)
+                        {
+                            DebugService.SpawnUnits(UnitTypes.PROTOSS_PYLON, spot, 2, 1);
+                        }
+                        foreach (var spot in wallData.WallSegments)
+                        {
+                            if (spot.Size == 3)
+                            {
+                                DebugService.SpawnUnits(UnitTypes.PROTOSS_GATEWAY, spot.Position, 2, 1);
+                            }
+                            if (spot.Size == 2)
+                            {
+                                DebugService.SpawnUnits(UnitTypes.PROTOSS_SHIELDBATTERY, spot.Position, 2, 1);
+                            }
+                        }
+                        if (wallData.Block != null)
+                        {
+                            DebugService.SpawnUnits(UnitTypes.PROTOSS_SHIELDBATTERY, wallData.Block, 2, 1);
+                        }
+                    }
+
+                    return;
+                }
+
+                match = Regex.Match(chatReceived.Message.ToLower(), @"spawn (\d+) friendly (.*)");
                 if (match.Success)
                 {
                     var quantity = match.Groups[1].Value;
@@ -124,6 +161,28 @@ namespace Sharky.Managers
                 {
                     var unitType = (UnitTypes)System.Enum.Parse(typeof(UnitTypes), match.Groups[1].Value, true);
                     DebugService.KillEnemyUnits(unitType);
+                    return;
+                }
+
+                match = Regex.Match(chatReceived.Message.ToLower(), "energize friendly (.*)");
+                if (match.Success)
+                {
+                    var unitType = (UnitTypes)System.Enum.Parse(typeof(UnitTypes), match.Groups[1].Value, true);
+                    foreach (var unit in ActiveUnitData.SelfUnits.Where(u => u.Value.Unit.UnitType == (uint)unitType))
+                    {
+                        DebugService.SetEnergy(unit.Key, unit.Value.Unit.EnergyMax);
+                    }
+                    return;
+                }
+
+                match = Regex.Match(chatReceived.Message.ToLower(), "energize enemy (.*)");
+                if (match.Success)
+                {
+                    var unitType = (UnitTypes)System.Enum.Parse(typeof(UnitTypes), match.Groups[1].Value, true);
+                    foreach (var unit in ActiveUnitData.EnemyUnits.Where(u => u.Value.Unit.UnitType == (uint)unitType))
+                    {
+                        DebugService.SetEnergy(unit.Key, unit.Value.Unit.EnergyMax);
+                    }
                     return;
                 }
 

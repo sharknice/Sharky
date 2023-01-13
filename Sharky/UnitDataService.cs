@@ -56,6 +56,10 @@ namespace Sharky
             {
                 return new Weapon { Attacks = 1, Damage = 6, Range = 5, Type = Weapon.Types.TargetType.Any, Speed = 1 };
             }
+            if (unitType == UnitTypes.TERRAN_WIDOWMINEBURROWED)
+            {
+                return new Weapon { Attacks = 1, Damage = 125, Range = 5, Type = Weapon.Types.TargetType.Any, Speed = 29f };
+            }
             if (unitType == UnitTypes.PROTOSS_VOIDRAY)
             {
                 return new Weapon { Attacks = 1, Damage = 6, Range = 6, Type = Weapon.Types.TargetType.Any, Speed = 0.36f };

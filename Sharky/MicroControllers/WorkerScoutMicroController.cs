@@ -1,5 +1,5 @@
 ﻿using SC2APIProtocol;
-using Sharky.MicroTasks.Attack;
+using Sharky.DefaultBot;
 using Sharky.Pathing;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,8 +9,8 @@ namespace Sharky.MicroControllers
 {
     class WorkerScoutMicroController : IndividualMicroController
     {
-        public WorkerScoutMicroController(MapDataService mapDataService, SharkyUnitData sharkyUnitData, ActiveUnitData activeUnitData, DebugService debugService, IPathFinder sharkyPathFinder, BaseData baseData, SharkyOptions sharkyOptions, DamageService damageService, UnitDataService unitDataService, TargetingData targetingData, TargetingService targetingService, MicroPriority microPriority, bool groupUpEnabled)
-            : base(mapDataService, sharkyUnitData, activeUnitData, debugService, sharkyPathFinder, baseData, sharkyOptions, damageService, unitDataService, targetingData, targetingService, microPriority, groupUpEnabled)
+        public WorkerScoutMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled)
+            : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled)
         {
         }
 
@@ -23,7 +23,7 @@ namespace Sharky.MicroControllers
                 var buildings = commander.UnitCalculation.NearbyEnemies.Where(u => u.Attributes.Contains(Attribute.Structure) && u.Unit.BuildProgress < 1);
                 var builders = enemyWorkers.Where(w => buildings.Any(b => Vector2.DistanceSquared(w.Position, b.Position) <= b.Unit.Radius + w.Unit.Radius)).OrderBy(w => w.Unit.Health);
 
-                if (builders.Count() > 0) // TODO: if barracks almost finished build a pylon where the addon would go LUL
+                if (builders.Count() > 0)
                 {
                     return commander.Order(frame, Abilities.ATTACK, null, builders.First().Unit.Tag);
                 }

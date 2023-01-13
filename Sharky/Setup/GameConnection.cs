@@ -45,7 +45,7 @@ namespace Sharky
             throw new Exception("Unable to make a connection.");
         }
 
-        public async Task CreateGame(String mapName, Race opponentRace, Difficulty opponentDifficulty, AIBuild aIBuild, int randomSeed = -1, bool realTime = false)
+        public async Task CreateGame(String mapName, Race opponentRace, Difficulty opponentDifficulty, AIBuild aIBuild, int randomSeed = -1, bool realTime = false, string botName = "")
         {
             var createGame = new RequestCreateGame();
             createGame.Realtime = realTime;
@@ -64,6 +64,10 @@ namespace Sharky
             createGame.LocalMap.MapPath = mapPath;
 
             var player1 = new PlayerSetup();
+            if (!string.IsNullOrEmpty(botName))
+            {
+                player1.PlayerName = botName;
+            }
             createGame.PlayerSetup.Add(player1);
             player1.Type = PlayerType.Participant;
 
@@ -122,10 +126,11 @@ namespace Sharky
             return response.JoinGame.PlayerId;
         }
 
-        public async Task<uint> JoinGameLadder(Race race, int startPort)
+        public async Task<uint> JoinGameLadder(Race race, int startPort, string botName = "")
         {
             var joinGame = new RequestJoinGame();
             joinGame.Race = race;
+            joinGame.PlayerName = botName;
             
             joinGame.SharedPort = startPort + 1;
             joinGame.ServerPorts = new PortSet();
@@ -176,7 +181,7 @@ namespace Sharky
             return response.Query;
         }
 
-        public async Task Run(ISharkyBot bot, uint playerId, string opponentID)
+        public async Task Run(ISharkyBot bot, uint playerId, string opponentID, string botName = "")
         {
             var gameInfoReq = new Request();
             gameInfoReq.GameInfo = new RequestGameInfo();
@@ -239,7 +244,7 @@ namespace Sharky
                 if (response.Status == Status.Ended || response.Status == Status.Quit)
                 {
                     Console.WriteLine($"Ended at {DateTime.UtcNow} UTC");
-                    Console.WriteLine($"total actions: {actionCount}, APM: {response.Observation.Observation.Score.ScoreDetails.CurrentApm}");
+                    Console.WriteLine($"total actions: {actionCount}, APM: {Math.Round(actionCount / (frames / (22.4*60)))}");
                     
                     bot.OnEnd(observation, observation.PlayerResult[(int)playerId - 1].Result);
                     break;
@@ -247,6 +252,20 @@ namespace Sharky
 
                 if (start)
                 {
+                    foreach (var playerInfo in gameInfoResponse.GameInfo.PlayerInfo)
+                    {
+                        if (string.IsNullOrEmpty(playerInfo.PlayerName))
+                        {
+                            if (playerInfo.PlayerId == playerId)
+                            {
+                                playerInfo.PlayerName = botName;
+                            }
+                            else
+                            {
+                                playerInfo.PlayerName = opponentID;
+                            }
+                        }
+                    }
                     Console.WriteLine($"Started at {DateTime.UtcNow} UTC");
                     start = false;
                     bot.OnStart(gameInfoResponse.GameInfo, dataResponse.Data, pingResponse, observation, playerId, opponentID);
@@ -307,27 +326,27 @@ namespace Sharky
             }
         }
         
-        public async Task RunSinglePlayer(ISharkyBot bot, string map, Race myRace, Race opponentRace, Difficulty opponentDifficulty, AIBuild aIBuild, int randomSeed = -1, string opponentID = "test", bool realTime = false)
+        public async Task RunSinglePlayer(ISharkyBot bot, string map, Race myRace, Race opponentRace, Difficulty opponentDifficulty, AIBuild aIBuild, int randomSeed = -1, string opponentID = "test", bool realTime = false, string botName = "bot")
         {
             readSettings();
             StartSC2Instance(5678);
             await Connect(5678);
             await CreateGame(map, opponentRace, opponentDifficulty, aIBuild, randomSeed, realTime);
             var playerId = await JoinGame(myRace);
-            await Run(bot, playerId, opponentID);
+            await Run(bot, playerId, opponentID, botName);
         }
 
-        public async Task RunLadder(ISharkyBot bot, Race myRace, int gamePort, int startPort, String opponentID)
+        public async Task RunLadder(ISharkyBot bot, Race myRace, int gamePort, int startPort, String opponentID, string botName = "")
         {
             await Connect(gamePort);
-            var playerId = await JoinGameLadder(myRace, startPort);
-            await Run(bot, playerId, opponentID);
+            var playerId = await JoinGameLadder(myRace, startPort, botName);
+            await Run(bot, playerId, opponentID, botName);
         }
 
-        public async Task RunLadder(ISharkyBot bot, Race myRace, string[] args)
+        public async Task RunLadder(ISharkyBot bot, Race myRace, string[] args, string botName = "")
         {
             var clargs = new CLArgs(args);
-            await RunLadder(bot, myRace, clargs.GamePort, clargs.StartPort, clargs.OpponentID);
+            await RunLadder(bot, myRace, clargs.GamePort, clargs.StartPort, clargs.OpponentID, botName);
         }
     }
 }

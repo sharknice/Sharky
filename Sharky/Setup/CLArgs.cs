@@ -5,7 +5,7 @@ namespace Sharky
 {
     /* This class is used to load the CommandLine arguments for the bot.
      */
-    class CLArgs
+    public class CLArgs
     {
         private int gamePort;
         private int startPort;

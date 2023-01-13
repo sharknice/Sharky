@@ -19,6 +19,7 @@ namespace Sharky
         public bool RequireMaxOut { get; set; }
         public bool AttackWhenMaxedOut { get; set; }
         public bool AttackWhenOverwhelm { get; set; }
+        public bool GroupUpEnabled { get; set; }
 
         public TargetPriorityCalculation TargetPriorityCalculation { get; set; }
     }

@@ -59,7 +59,7 @@ namespace Sharky.MicroTasks.Mining
 
             foreach (var commander in UnitCommanders)
             {
-                if (EnemyReaper == null || commander.UnitCalculation.Unit.Health + commander.UnitCalculation.Unit.Shield <= 25 || !commander.UnitCalculation.NearbyAllies.Any(a => a.UnitClassifications.Contains(UnitClassification.ResourceCenter)))
+                if (EnemyReaper == null || commander.UnitCalculation.Unit.Health + commander.UnitCalculation.Unit.Shield <= 35 || !commander.UnitCalculation.NearbyAllies.Any(a => a.UnitClassifications.Contains(UnitClassification.ResourceCenter)))
                 {
                     commander.UnitRole = UnitRole.None;
                     List<SC2APIProtocol.Action> action;
@@ -97,7 +97,7 @@ namespace Sharky.MicroTasks.Mining
 
         private void GetEnemyReaper()
         {
-            EnemyReaper = ActiveUnitData.EnemyUnits.Values.FirstOrDefault(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_REAPER && e.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ResourceCenter)));
+            EnemyReaper = ActiveUnitData.EnemyUnits.Values.FirstOrDefault(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_REAPER && e.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ResourceCenter)) && !e.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !e.Unit.IsFlying));
         }
 
         public override void RemoveDeadUnits(List<ulong> deadUnits)

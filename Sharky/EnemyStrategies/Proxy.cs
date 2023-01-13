@@ -18,7 +18,7 @@ namespace Sharky.EnemyStrategies
         {
             if (frame < SharkyOptions.FramesPerSecond * 60 * 5)
             {
-                if (ActiveUnitData.EnemyUnits.Values.Any(u => u.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && u.Unit.UnitType != (uint)UnitTypes.TERRAN_KD8CHARGE && Vector2.DistanceSquared(new Vector2(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y), u.Position) > (75 * 75)))
+                if (ActiveUnitData.EnemyUnits.Values.Any(u => u.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && u.Unit.UnitType != (uint)UnitTypes.TERRAN_KD8CHARGE && u.Unit.UnitType != (uint)UnitTypes.PROTOSS_ORACLESTASISTRAP && u.Unit.UnitType != (uint)UnitTypes.TERRAN_AUTOTURRET && Vector2.DistanceSquared(new Vector2(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y), u.Position) > (75 * 75)))
                 {
                     return true;
                 }

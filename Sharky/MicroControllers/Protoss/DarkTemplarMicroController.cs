@@ -145,7 +145,7 @@ namespace Sharky.MicroControllers.Protoss
             var formation = GetDesiredFormation(commander);
             if (Move(commander, target, defensivePoint, null, bestTarget, formation, frame, out action)) { return action; }
 
-            return commander.Order(frame, Abilities.MOVE, target);
+            return MoveToTarget(commander, target, frame);
         }
     }
 }

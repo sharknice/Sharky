@@ -59,6 +59,7 @@ namespace Sharky.Managers
         public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
         {
             //DrawGrid(observation.Observation.RawData.Player.Camera);
+            //DrawPaths();
 
             if (FramesPerUpdate > observation.Observation.GameLoop - LastUpdateFrame) { return null; }
             LastUpdateFrame = (int)observation.Observation.GameLoop;
@@ -93,6 +94,27 @@ namespace Sharky.Managers
 
 
             return null;
+        }
+
+        private void DrawPaths()
+        {
+            var height = 12;
+            var color = new Color { R = 255, G = 255, B = 255 };
+
+            foreach (var path in MapData.PathData.Take(20))
+            {
+                DebugService.DrawSphere(new Point { X = path.StartPosition.X, Y = path.StartPosition.Y, Z = height }, .25f, new Color { R = 1, G = 255, B = 1 });
+                DebugService.DrawSphere(new Point { X = path.EndPosition.X, Y = path.EndPosition.Y, Z = height }, .25f, new Color { R = 255, G = 1, B = 1 });
+                var previousPoint = new Point { X = path.StartPosition.X, Y = path.StartPosition.Y, Z = height };
+                foreach (var vector in path.Path)
+                {
+                    var point = new Point { X = vector.X, Y = vector.Y, Z = height };
+                    DebugService.DrawLine(previousPoint, point, color);
+                    DebugService.DrawLine(point, new Point { X = point.X, Y = point.Y, Z = 1 }, color);
+
+                    previousPoint = point;
+                }
+            }
         }
 
         private void DrawGrid(Point camera)
@@ -157,7 +179,7 @@ namespace Sharky.Managers
                 }
             }
 
-            foreach (var enemy in ActiveUnitData.EnemyUnits.Where(e => e.Value.Unit.BuildProgress == 1))
+            foreach (var enemy in ActiveUnitData.EnemyUnits.Where(e => e.Value.Unit.BuildProgress == 1 && !e.Value.Unit.BuffIds.Contains((uint)Buffs.ORACLESTASISTRAPTARGET)))
             {
                 if (enemy.Value.DamageAir)
                 {

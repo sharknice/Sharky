@@ -39,7 +39,7 @@ namespace Sharky.MicroControllers
         {
             action = null;
 
-            var mineralFields = ActiveUnitData.NeutralUnits.Values.Where(u => SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)u.Unit.UnitType) || SharkyUnitData.GasGeyserTypes.Contains((UnitTypes)u.Unit.UnitType));
+            var mineralFields = ActiveUnitData.NeutralUnits.Values.Where(u => SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)u.Unit.UnitType));
             var mineralPatch = mineralFields.OrderBy(m => Vector2.DistanceSquared(new Vector2(BaseData.EnemyBaseLocations.FirstOrDefault().Location.X, BaseData.EnemyBaseLocations.FirstOrDefault().Location.Y), m.Position)).FirstOrDefault();
             if (mineralPatch != null)
             {

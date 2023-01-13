@@ -104,6 +104,11 @@ namespace Sharky.Builds.BuildingPlacement
                 }
             }
 
+            if (PointOk(reference, minimumMineralProximinity, reference, requireSameHeight, allowBlockBase, maxDistance))
+            {
+                return reference;
+            }
+
             var x = reference.X;
             var y = reference.Y;
             var radius = 1f;
@@ -118,41 +123,51 @@ namespace Sharky.Builds.BuildingPlacement
                 {
                     var point = new Point2D { X = x + (float)(radius * Math.Cos(angle)), Y = y + (float)(radius * Math.Sin(angle)) };
 
-                    if (BuildingService.AreaBuildable(point.X, point.Y, 1.25f) && 
-                        (minimumMineralProximinity == 0 || !BuildingService.BlocksResourceCenter(point.X, point.Y, 1.25f)) && 
-                        !BuildingService.Blocked(point.X, point.Y, 1.25f, .1f) && !BuildingService.HasAnyCreep(point.X, point.Y, 1.5f) && 
-                        (!requireSameHeight || MapDataService.MapHeight(point) == MapDataService.MapHeight(reference)) &&
-                        (minimumMineralProximinity == 0 || !BuildingService.BlocksPath(point.X, point.Y, 1.25f)))
+                    if (PointOk(point, minimumMineralProximinity, reference, requireSameHeight, allowBlockBase, maxDistance))
                     {
-                        var mineralFields = ActiveUnitData.NeutralUnits.Where(u => SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType) || SharkyUnitData.GasGeyserTypes.Contains((UnitTypes)u.Value.Unit.UnitType));
-                        var squared = (1 + minimumMineralProximinity + .5) * (1 + minimumMineralProximinity + .5);
-                        var nexusDistanceSquared = 16f;
-                        if (minimumMineralProximinity == 0) { nexusDistanceSquared = 0; }
-                        var vector = new Vector2(point.X, point.Y);
-
-                        if (allowBlockBase || !BaseData.BaseLocations.Any(b => Vector2.DistanceSquared(new Vector2(b.Location.X, b.Location.Y), vector) < 25))
-                        {
-                            var nexusClashes = ActiveUnitData.SelfUnits.Where(u => (u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS || u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON) && Vector2.DistanceSquared(u.Value.Position, vector) < squared + nexusDistanceSquared);
-                            if (nexusClashes.Count() == 0)
-                            {
-                                var clashes = mineralFields.Where(u => Vector2.DistanceSquared(u.Value.Position, new Vector2(point.X, point.Y)) < squared);
-                                if (clashes.Count() == 0)
-                                {
-                                    if (Vector2.DistanceSquared(new Vector2(reference.X, reference.Y), new Vector2(point.X, point.Y)) <= maxDistance * maxDistance)
-                                    {
-                                        DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
-                                        return point;
-                                    }
-                                }
-                            }
-                        }
+                        return point;
                     }
+
                     angle += sliceSize;
                 }
                 radius += 1;
             }
 
             return null;
+        }
+
+        bool PointOk(Point2D point, float minimumMineralProximinity, Point2D reference, bool requireSameHeight, bool allowBlockBase, float maxDistance)
+        {
+            if (BuildingService.AreaBuildable(point.X, point.Y, 1.25f) &&
+                        (minimumMineralProximinity == 0 || !BuildingService.BlocksResourceCenter(point.X, point.Y, 1.25f)) &&
+                        !BuildingService.Blocked(point.X, point.Y, 1.25f, .1f) && !BuildingService.HasAnyCreep(point.X, point.Y, 1.5f) &&
+                        (!requireSameHeight || MapDataService.MapHeight(point) == MapDataService.MapHeight(reference)) &&
+                        (minimumMineralProximinity == 0 || !BuildingService.BlocksPath(point.X, point.Y, 1.25f)))
+            {
+                var mineralFields = ActiveUnitData.NeutralUnits.Where(u => SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType) || SharkyUnitData.GasGeyserTypes.Contains((UnitTypes)u.Value.Unit.UnitType));
+                var squared = (1 + minimumMineralProximinity + .5) * (1 + minimumMineralProximinity + .5);
+                var nexusDistanceSquared = 16f;
+                if (minimumMineralProximinity == 0) { nexusDistanceSquared = 0; }
+                var vector = new Vector2(point.X, point.Y);
+
+                if (allowBlockBase || !BaseData.BaseLocations.Any(b => Vector2.DistanceSquared(new Vector2(b.Location.X, b.Location.Y), vector) < 25))
+                {
+                    var nexusClashes = ActiveUnitData.SelfUnits.Where(u => (u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS || u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON) && Vector2.DistanceSquared(u.Value.Position, vector) < squared + nexusDistanceSquared);
+                    if (nexusClashes.Count() == 0)
+                    {
+                        var clashes = mineralFields.Where(u => Vector2.DistanceSquared(u.Value.Position, new Vector2(point.X, point.Y)) < squared);
+                        if (clashes.Count() == 0)
+                        {
+                            if (Vector2.DistanceSquared(new Vector2(reference.X, reference.Y), new Vector2(point.X, point.Y)) <= maxDistance * maxDistance)
+                            {
+                                DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+            return false;
         }
 
         public Point2D FindProductionPlacement(Point2D target, float size, float maxDistance, float minimumMineralProximinity = 2, WallOffType wallOffType = WallOffType.None, bool requireVision = false, bool allowBlockBase = true)

@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using Sharky.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -107,6 +108,28 @@ namespace Sharky.Pathing
                 PathWalkable(point.X - radius, point.Y - radius);
         }
 
+        public bool AnyPathWalkable(Point point, int radius)
+        {
+            return PathWalkable(point.X, point.Y) ||
+                PathWalkable(point.X - radius, point.Y) ||
+                PathWalkable(point.X + radius, point.Y) ||
+                PathWalkable(point.X, point.Y - radius) ||
+                PathWalkable(point.X, point.Y + radius) ||
+                PathWalkable(point.X + radius, point.Y + radius) ||
+                PathWalkable(point.X - radius, point.Y - radius);
+        }
+
+        public bool AnyPathWalkable(Point2D point, int radius)
+        {
+            return PathWalkable(point.X, point.Y) ||
+                PathWalkable(point.X - radius, point.Y) ||
+                PathWalkable(point.X + radius, point.Y) ||
+                PathWalkable(point.X, point.Y - radius) ||
+                PathWalkable(point.X, point.Y + radius) ||
+                PathWalkable(point.X + radius, point.Y + radius) ||
+                PathWalkable(point.X - radius, point.Y - radius);
+        }
+
         public bool PathFlyable(float startX, float startY, float endX, float endY)
         {
             if (endX < 0 || endY < 0 || endX >= MapData.MapWidth || endY >= MapData.MapHeight)
@@ -138,6 +161,20 @@ namespace Sharky.Pathing
                 return false;
             }
             return MapData.Map[(int)endX][(int)endY].Buildable;
+        }
+
+        public bool SelfVisible(Vector2 point, float radius)
+        {
+            return SelfVisible(point.X, point.Y) && SelfVisible(point.X - radius, point.Y - radius) && SelfVisible(point.X + radius, point.Y + radius) && SelfVisible(point.X - radius, point.Y + radius) && SelfVisible(point.X + radius, point.Y - radius);
+        }
+
+        public bool SelfVisible(float x, float y)
+        {
+            if (x < 0 || y < 0 || x >= MapData.MapWidth || y >= MapData.MapHeight)
+            {
+                return false;
+            }
+            return MapData.Map[(int)x][(int)y].InSelfVision;
         }
 
         public bool SelfVisible(Point2D point)
@@ -222,6 +259,15 @@ namespace Sharky.Pathing
         }
 
         public int MapHeight(Point2D point)
+        {
+            if (point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
+            {
+                return 0;
+            }
+            return MapData.Map[(int)point.X][(int)point.Y].TerrainHeight;
+        }
+
+        public int MapHeight(Vector2 point)
         {
             if (point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
             {

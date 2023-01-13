@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using Sharky.Builds;
 using Sharky.Pathing;
 using System;
 using System.Linq;
@@ -132,6 +133,11 @@ namespace Sharky.Proxy
             var orderedLocations = BaseData.BaseLocations.OrderBy(b => PathFinder.GetGroundPath(TargetingData.SelfMainBasePoint.X + 4, TargetingData.SelfMainBasePoint.Y + 4, b.Location.X, b.Location.Y, 0).Count());
 
             return orderedLocations.Take(proxyBase).Last();
+        }
+
+        public ProxyData? GetProxyData()
+        {
+            return null;
         }
     }
 }

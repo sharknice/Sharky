@@ -25,6 +25,13 @@ namespace Sharky.Builds.BuildingPlacement
         {
             var targetVector = new Vector2(target.X, target.Y);
             var powerSources = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && c.UnitCalculation.Unit.BuildProgress == 1).OrderBy(c => Vector2.DistanceSquared(c.UnitCalculation.Position, targetVector));
+
+            var startingPoint = GetValidPoint(target.X, target.Y, size, MapDataService.MapHeight(target), maxDistance, new Vector2(target.X, target.Y), allowBlockBase);
+            if (startingPoint != null)
+            {
+                return startingPoint;
+            }
+
             foreach (var powerSource in powerSources)
             {
                 if (Vector2.DistanceSquared(new Vector2(target.X, target.Y), powerSource.UnitCalculation.Position) > (maxDistance + 14) * (maxDistance + 14))
@@ -129,7 +136,7 @@ namespace Sharky.Builds.BuildingPlacement
                 (Vector2.DistanceSquared(vector, target) < (maxDistance * maxDistance)) &&
                 MapDataService.MapHeight((int)x, (int)y) == baseHeight &&
                 !BuildingService.Blocked(x, y, size / 2.0f, 0) && !BuildingService.HasAnyCreep(x, y, size / 2f) &&
-                BuildingService.SameHeight(x, y, .5f + (size / 2.0f)) &&
+                BuildingService.SameHeight(x, y, .25f + (size / 2.0f)) &&
                 (allowBlockBase || BuildingService.RoomBelowAndAbove(x, y, size)))
             {
                 if (!BuildOptions.AllowBlockWall && MapDataService.MapData?.WallData != null && MapDataService.MapData.WallData.Any(d => d.FullDepotWall != null && d.FullDepotWall.Any(p => Vector2.DistanceSquared(new Vector2(p.X, p.Y), vector) < 16)))

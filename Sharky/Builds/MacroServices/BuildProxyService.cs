@@ -40,7 +40,20 @@ namespace Sharky.Builds.MacroServices
                 {
                     if (ActiveUnitData.SelfUnits.Count(u => u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && Vector2.DistanceSquared(u.Value.Position, new Vector2(proxy.Value.Location.X, proxy.Value.Location.Y)) < proxy.Value.MaximumBuildingDistance * proxy.Value.MaximumBuildingDistance) + orderedBuildings < proxy.Value.DesiredPylons)
                     {
-                        var command = BuildingBuilder.BuildBuilding(MacroData, UnitTypes.PROTOSS_PYLON, unitData, proxy.Value.Location, true, proxy.Value.MaximumBuildingDistance, MicroTaskData[proxy.Key].UnitCommanders, allowBlockBase: true);
+                        var location = proxy.Value.Location;
+                        if (proxy.Value.HardCodedBuildingData?.Pylons != null)
+                        {
+                            foreach (var spot in proxy.Value.HardCodedBuildingData.Pylons)
+                            {
+                                if (!ActiveUnitData.SelfUnits.Any(u => u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && u.Value.Position.X == spot.X && u.Value.Position.Y == spot.Y))
+                                {
+                                    location = spot;
+                                    break;
+                                }
+                            }                      
+                        }
+
+                        var command = BuildingBuilder.BuildBuilding(MacroData, UnitTypes.PROTOSS_PYLON, unitData, location, true, proxy.Value.MaximumBuildingDistance, MicroTaskData[proxy.Key].UnitCommanders, allowBlockBase: true);
                         if (command != null)
                         {
                             commands.AddRange(command);
@@ -131,7 +144,20 @@ namespace Sharky.Builds.MacroServices
                             {
                                 if (MicroTaskData[proxy.Key].UnitCommanders.Any(c => c.UnitCalculation.Unit.Orders.Count() == 0 || c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId != (uint)unitData.Ability)))
                                 {
-                                    var command = BuildingBuilder.BuildBuilding(MacroData, unit.Key, unitData, proxy.Value.Location, true, proxy.Value.MaximumBuildingDistance, MicroTaskData[proxy.Key].UnitCommanders, allowBlockBase: true);
+                                    var location = proxy.Value.Location;
+                                    if (proxy.Value.HardCodedBuildingData?.Production != null)
+                                    {
+                                        foreach (var spot in proxy.Value.HardCodedBuildingData.Production)
+                                        {
+                                            if (!ActiveUnitData.SelfUnits.Any(u => u.Value.Unit.UnitType == (uint)unit.Key && u.Value.Position.X == spot.X && u.Value.Position.Y == spot.Y))
+                                            {
+                                                location = spot;
+                                                break;
+                                            }
+                                        }
+                                    }
+
+                                    var command = BuildingBuilder.BuildBuilding(MacroData, unit.Key, unitData, location, true, proxy.Value.MaximumBuildingDistance, MicroTaskData[proxy.Key].UnitCommanders, allowBlockBase: true);
                                     if (command != null)
                                     {
                                         commands.AddRange(command);

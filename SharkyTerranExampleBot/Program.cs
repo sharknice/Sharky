@@ -12,12 +12,12 @@ var defaultSharkyBot = new DefaultSharkyBot(gameConnection);
 var terranBuildChoices = new TerranBuildChoices(defaultSharkyBot);
 defaultSharkyBot.BuildChoices[Race.Terran] = terranBuildChoices.BuildChoices;
 
-var sharkyExampleBot = defaultSharkyBot.CreateBot(defaultSharkyBot.Managers, defaultSharkyBot.DebugService);
+var sharkyExampleBot = defaultSharkyBot.CreateBot();
 
 var myRace = Race.Terran;
 if (args.Length == 0)
 {
-    gameConnection.RunSinglePlayer(sharkyExampleBot, @"GlitteringAshesAIE.SC2Map", myRace, Race.Random, Difficulty.VeryHard, AIBuild.RandomBuild).Wait();
+    gameConnection.RunSinglePlayer(sharkyExampleBot, @"InsideAndOutAIE.SC2Map", myRace, Race.Random, Difficulty.VeryHard, AIBuild.RandomBuild).Wait();
 }
 else
 {

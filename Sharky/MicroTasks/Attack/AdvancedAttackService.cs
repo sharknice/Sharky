@@ -10,15 +10,15 @@ namespace Sharky.MicroTasks.Attack
     {
         public IMicroTask AttackTask { get; set; }
 
-        AttackData AttackData;
-        ActiveUnitData ActiveUnitData;
-        TargetPriorityService TargetPriorityService;
-        TargetingData TargetingData;
-        MacroData MacroData;
-        BaseData BaseData;
-        TargetingService TargetingService;
-        DebugService DebugService;
-        MapDataService MapDataService;
+        protected AttackData AttackData;
+        protected ActiveUnitData ActiveUnitData;
+        protected TargetPriorityService TargetPriorityService;
+        protected TargetingData TargetingData;
+        protected MacroData MacroData;
+        protected BaseData BaseData;
+        protected TargetingService TargetingService;
+        protected DebugService DebugService;
+        protected MapDataService MapDataService;
 
         IEnumerable<UnitCalculation>? EnemiesNearArmy;
 
@@ -65,6 +65,7 @@ namespace Sharky.MicroTasks.Attack
             }
 
             var targetPriority = CalculateTargetPriority();
+            AttackData.TargetPriorityCalculation = targetPriority;
             if (AttackData.RequireDetection && !AttackTask.UnitCommanders.Any(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Detector) || c.UnitCalculation.UnitClassifications.Contains(UnitClassification.DetectionCaster)))
             {
                 TargetingData.AttackState = AttackState.Retreat;
@@ -80,9 +81,12 @@ namespace Sharky.MicroTasks.Attack
                     return;
                 }
 
-                TargetingData.AttackState = AttackState.Retreat;
-                DebugService.DrawText("Retreating: require maxed out supply");
-                return;
+                if (MacroData.FoodUsed < 190)
+                {
+                    TargetingData.AttackState = AttackState.Retreat;
+                    DebugService.DrawText("Retreating: require maxed out supply");
+                    return;
+                }
             }
 
             if (TargetingData.AttackState == AttackState.Contain)
@@ -141,7 +145,7 @@ namespace Sharky.MicroTasks.Attack
             DebugService.DrawText($"{TargetingData.AttackState}: O:{targetPriority.OverallWinnability:0.00}, G:{targetPriority.GroundWinnability:0.00}, A:{targetPriority.AirWinnability:0.00}");
         }
 
-        bool AttackEdgeCase()
+        protected virtual bool AttackEdgeCase()
         {
             if (AttackData.AttackWhenMaxedOut && MacroData.FoodUsed > 185)
             {

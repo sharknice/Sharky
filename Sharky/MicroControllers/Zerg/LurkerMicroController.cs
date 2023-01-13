@@ -29,7 +29,7 @@ namespace Sharky.MicroControllers.Zerg
             }
             else
             {
-                action = commander.Order(frame, Abilities.MOVE, target);
+                action = MoveToTarget(commander, target, frame);
                 return true;
             }
         }

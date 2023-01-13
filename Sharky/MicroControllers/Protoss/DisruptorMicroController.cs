@@ -60,9 +60,9 @@ namespace Sharky.MicroControllers.Protoss
             var attacks = new List<UnitCalculation>();
             var center = commander.UnitCalculation.Position;
 
-            foreach (var enemyAttack in commander.UnitCalculation.NearbyEnemies)
+            foreach (var enemyAttack in commander.UnitCalculation.NearbyEnemies.Where(e => !e.Unit.IsFlying && !e.Unit.BuffIds.Contains((uint)Buffs.ORACLESTASISTRAPTARGET)))
             {
-                if (!enemyAttack.Unit.IsFlying && enemyAttack.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELING && enemyAttack.Unit.UnitType != (uint)UnitTypes.ZERG_CREEPTUMORBURROWED && 
+                if (enemyAttack.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELING && enemyAttack.Unit.UnitType != (uint)UnitTypes.ZERG_CREEPTUMORBURROWED && 
                     InRange(enemyAttack.Position, commander.UnitCalculation.Position, PurificationNovaRange + enemyAttack.Unit.Radius + commander.UnitCalculation.Unit.Radius)) // TODO: do actual pathing to see if the shot can make it there, if a wall is in the way it can't
                 {
                     attacks.Add(enemyAttack);
@@ -224,6 +224,7 @@ namespace Sharky.MicroControllers.Protoss
                     return false;
                 }
             }
+
             action = commander.Order(frame, Abilities.MOVE, avoidPoint);
             return true;
         }

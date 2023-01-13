@@ -12,5 +12,7 @@ namespace Sharky
         public Race SelfRace { get; set; }
         public EnemyPlayer.EnemyPlayer EnemyPlayer { get; set; }
         public EnemyAggressivityData EnemyAggressivityData { get; set; }
+        public Race SelfRaceRequested { get; set; }
+        public Race EnemyRaceRequested { get; set; }
     }
 }

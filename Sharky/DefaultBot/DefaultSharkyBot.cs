@@ -102,6 +102,7 @@ namespace Sharky.DefaultBot
         public UnitCountService UnitCountService { get; set; }
         public DamageService DamageService { get; set; }
         public TargetingService TargetingService { get; set; }
+        public AttackPathingService AttackPathingService { get; set; }
         public ChatService ChatService { get; set; }
         public DebugService DebugService { get; set; }
         public VersionService VersionService { get; set; }
@@ -109,8 +110,10 @@ namespace Sharky.DefaultBot
         public BuildingCancelService BuildingCancelService { get; set; }
         public BuildingRequestCancellingService BuildingRequestCancellingService { get; set; }
         public UpgradeRequestCancellingService UpgradeRequestCancellingService { get; set; }
+        public UnitRequestCancellingService UnitRequestCancellingService { get; set; }
         public AreaService AreaService { get; set; }
         public WallDataService WallDataService { get; set; }
+        public BaseToBasePathingService BaseToBasePathingService { get; set; }
         public SimCityService SimCityService { get; set; }
         public WorkerBuilderService WorkerBuilderService { get; set; }
         public CreepTumorPlacementFinder CreepTumorPlacementFinder { get; set; }
@@ -147,6 +150,7 @@ namespace Sharky.DefaultBot
         public ChatHistory ChatHistory { get; set; }
         public IPathFinder SharkyPathFinder { get; set; }
         public IPathFinder SharkySimplePathFinder { get; set; }
+        public IPathFinder SharkyNearPathFinder { get; set; }
         public IPathFinder SharkyAdvancedPathFinder { get; set; }
         public IPathFinder NoPathFinder { get; set; }
         public EnemyStrategyHistory EnemyStrategyHistory { get; set; }
@@ -177,10 +181,10 @@ namespace Sharky.DefaultBot
 
             var framesPerSecond = 22.4f;
 
-            SharkyOptions = new SharkyOptions { Debug = debug, FramesPerSecond = framesPerSecond, TagsEnabled = true, BuildTagsEnabled = true, LogPerformance = false, GameStatusReportingEnabled = true, TagsAllChat = false };
+            SharkyOptions = new SharkyOptions { Debug = debug, FramesPerSecond = framesPerSecond, TagsEnabled = true, BuildTagsEnabled = true, LogPerformance = false, GameStatusReportingEnabled = true, GeneratePathing = false, TagsAllChat = false };
             FrameToTimeConverter = new FrameToTimeConverter(SharkyOptions);
             MacroData = new MacroData();
-            AttackData = new AttackData { ArmyFoodAttack = 30, ArmyFoodRetreat = 25, Attacking = false, UseAttackDataManager = true, CustomAttackFunction = true, RetreatTrigger = 1f, AttackTrigger = 1.5f, RequireDetection = false, ContainBelowKill = true, RequireMaxOut = false, AttackWhenMaxedOut = true, AttackWhenOverwhelm = true, ContainTrigger = 1.5f, KillTrigger = 3f };
+            AttackData = new AttackData { ArmyFoodAttack = 30, ArmyFoodRetreat = 25, Attacking = false, UseAttackDataManager = true, CustomAttackFunction = true, RetreatTrigger = 1f, AttackTrigger = 1.5f, RequireDetection = false, ContainBelowKill = true, RequireMaxOut = false, AttackWhenMaxedOut = true, AttackWhenOverwhelm = true, GroupUpEnabled = true, ContainTrigger = 1.5f, KillTrigger = 3f };
             TargetingData = new TargetingData { HiddenEnemyBase = false };
             BaseData = new BaseData();
             MapData = new MapData();
@@ -200,7 +204,7 @@ namespace Sharky.DefaultBot
             Managers = new List<IManager>();
 
             DebugService = new DebugService(SharkyOptions, ActiveUnitData);
-            DebugManager = new DebugManager(gameConnection, SharkyOptions, DebugService);
+            DebugManager = new DebugManager(gameConnection, SharkyOptions, DebugService, MapData, TargetingData, ActiveUnitData);
             Managers.Add(DebugManager);
 
             ReportingManager = new ReportingManager(this);
@@ -217,11 +221,12 @@ namespace Sharky.DefaultBot
 
             MapDataService = new MapDataService(MapData);
             AreaService = new AreaService(MapDataService);
-            TargetPriorityService = new TargetPriorityService(SharkyUnitData);
+            TargetPriorityService = new TargetPriorityService(this);
             CollisionCalculator = new CollisionCalculator();
 
-            SharkyPathFinder = new SharkyPathFinder(new Roy_T.AStar.Paths.PathFinder(), MapData, MapDataService, DebugService);
+            SharkyPathFinder = new SharkyPathFinder(new Roy_T.AStar.Paths.PathFinder(), MapData, MapDataService, DebugService, ActiveUnitData);
             SharkySimplePathFinder = new SharkySimplePathFinder(MapDataService);
+            SharkyNearPathFinder = new SharkyNearPathFinder(new Roy_T.AStar.Paths.PathFinder(), MapData, MapDataService, DebugService);
             SharkyAdvancedPathFinder = new SharkyAdvancedPathFinder(new Roy_T.AStar.Paths.PathFinder(), MapData, MapDataService, DebugService);
             NoPathFinder = new SharkyNoPathFinder();
 
@@ -245,6 +250,7 @@ namespace Sharky.DefaultBot
             ChokePointsService = new ChokePointsService(SharkyPathFinder, ChokePointService);
 
             WallDataService = new WallDataService(this);
+            BaseToBasePathingService = new BaseToBasePathingService(this);
             MapManager = new MapManager(MapData, ActiveUnitData, SharkyOptions, SharkyUnitData, DebugService, WallDataService);
             Managers.Add(MapManager);
 
@@ -309,6 +315,7 @@ namespace Sharky.DefaultBot
 
             ProxyLocationService = new ProxyLocationService(BaseData, TargetingData, SharkyPathFinder, MapDataService, AreaService);
             TargetingService = new TargetingService(ActiveUnitData, MapDataService, BaseData, TargetingData);
+            AttackPathingService = new AttackPathingService(this);
             CreepTumorPlacementFinder = new CreepTumorPlacementFinder(this, SharkyPathFinder);
 
             EnemyAggressivityService = new EnemyAggressivityService(this);
@@ -370,8 +377,8 @@ namespace Sharky.DefaultBot
             var ravenMicroController = new RavenMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
             var medivacMicroController = new MedivacMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
 
-            var workerDefenseMicroController = new IndividualMicroController(MapDataService, SharkyUnitData, ActiveUnitData, DebugService, SharkySimplePathFinder, BaseData, SharkyOptions, DamageService, UnitDataService, TargetingData, TargetingService, MicroPriority.LiveAndAttack, false, 3);
-            var workerProxyScoutMicroController = new WorkerScoutMicroController(MapDataService, SharkyUnitData, ActiveUnitData, DebugService, SharkyAdvancedPathFinder, BaseData, SharkyOptions, DamageService, UnitDataService, TargetingData, TargetingService, MicroPriority.AttackForward, false);
+            var workerDefenseMicroController = new IndividualMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false, 3);
+            var workerProxyScoutMicroController = new WorkerScoutMicroController(this, SharkyAdvancedPathFinder, MicroPriority.AttackForward, false);
 
             var oracleHarassMicroController = new OracleMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
             var reaperHarassMicroController = new ReaperMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
@@ -446,10 +453,10 @@ namespace Sharky.DefaultBot
 
             var defenseSquadTask = new DefenseSquadTask(ActiveUnitData, TargetingData, DefenseService, MicroController, new ArmySplitter(AttackData, TargetingData, ActiveUnitData, DefenseService, TargetingService, TerranWallService, MicroController), new List<DesiredUnitsClaim>(), 0, false);
             var workerScoutTask = new WorkerScoutTask(this, false, 0.5f);
-            var workerScoutGasStealTask = new WorkerScoutGasStealTask(this, false, 0.5f);
+            var workerScoutGasStealTask = new WorkerScoutGasStealTask(this, false, 0.5f, workerDefenseMicroController);
             var reaperScoutTask = new ReaperScoutTask(this, false, 0.5f);
             var findHiddenBaseTask = new FindHiddenBaseTask(BaseData, TargetingData, MapDataService, individualMicroController, 15, false, 0.5f);
-            var proxyScoutTask = new ProxyScoutTask(SharkyUnitData, TargetingData, BaseData, SharkyOptions, false, 0.5f, workerProxyScoutMicroController);
+            var proxyScoutTask = new ProxyScoutTask(SharkyUnitData, TargetingData, BaseData, MacroData, SharkyOptions, BuildingBuilder, false, 0.5f, workerProxyScoutMicroController);
             var miningDefenseService = new MiningDefenseService(this, workerDefenseMicroController);
             var miningTask = new MiningTask(SharkyUnitData, BaseData, ActiveUnitData, 1, miningDefenseService, MacroData, BuildOptions, MicroTaskData, new MineralMiner(this), new GasMiner(this));
             var queenInjectTask = new QueenInjectTask(this, 1.0f, queenMicroController, false);
@@ -544,6 +551,7 @@ namespace Sharky.DefaultBot
             BuildAddOnSwapService = new BuildAddOnSwapService(MacroData, ActiveUnitData, SharkyUnitData, BuildingService, BuildingPlacement);
             BuildingCancelService = new BuildingCancelService(ActiveUnitData, MacroData);
             UpgradeRequestCancellingService = new UpgradeRequestCancellingService(this);
+            UnitRequestCancellingService = new UnitRequestCancellingService(this);
             BuildingRequestCancellingService = new BuildingRequestCancellingService(ActiveUnitData, MacroData, UnitCountService);
             VespeneGasBuilder = new VespeneGasBuilder(this, BuildingBuilder);
             UnitBuilder = new UnitBuilder(this, WarpInPlacement);
@@ -589,6 +597,8 @@ namespace Sharky.DefaultBot
                 [nameof(MassRavens)] = new MassRavens(this),
                 [nameof(ThreeRax)] = new ThreeRax(this),
                 [nameof(BansheeRush)] = new BansheeRush(this),
+                [nameof(ProxyMaurauders)] = new ProxyMaurauders(this),
+                [nameof(SuspectedTerranProxy)] = new SuspectedTerranProxy(this),
 
                 [nameof(ZerglingFlood)] = new ZerglingFlood(this),
                 [nameof(EarlyPool)] = new EarlyPool(this),
@@ -698,9 +708,15 @@ namespace Sharky.DefaultBot
             BuildManager = new BuildManager(this);
             Managers.Add(BuildManager);
         }
+
         public SharkyBot CreateBot(List<IManager> managers, DebugService debugService)
         {
             return new SharkyBot(managers, debugService, FrameToTimeConverter, SharkyOptions, PerformanceData);
+        }
+
+        public SharkyBot CreateBot()
+        {
+            return new SharkyBot(Managers, DebugService, FrameToTimeConverter, SharkyOptions, PerformanceData);
         }
     }
 }

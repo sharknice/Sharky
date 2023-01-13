@@ -282,16 +282,16 @@ namespace Sharky.MicroTasks
             var baseCount = BaseData.SelfBases.Count();
             if (NextBaseLocation == null || BaseCountDuringLocation != baseCount)
             {
-                BlockingMinerals = BuildingService.GetMineralsBlockingNextBase().ToList();
-                if (BlockingMinerals.Any())
-                {
-                    StealFromMiningTask();
-                }
                 var nextBase = BuildingService.GetNextBaseLocation();
                 if (nextBase != null)
                 {
                     NextBaseLocation = nextBase.Location;
                     BaseCountDuringLocation = baseCount;
+                    BlockingMinerals = BuildingService.GetMineralsBlockingNextBase().ToList();
+                    if (BlockingMinerals.Any())
+                    {
+                        StealFromMiningTask();
+                    }
                     return true;
                 }
                 return false;

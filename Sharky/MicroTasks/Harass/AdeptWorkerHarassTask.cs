@@ -17,6 +17,8 @@ namespace Sharky.MicroTasks
         Point2D EnemyMain { get; set; }
         Point2D EnemyExpansion { get; set; }
 
+        public int MaxAdeptCount { get; set; }
+
         public AdeptWorkerHarassTask(BaseData baseData, TargetingData targetingData, IIndividualMicroController adeptMicroController, IIndividualMicroController adeptShadeMicroController, bool enabled = false, float priority = -1f)
         {
             BaseData = baseData;
@@ -34,8 +36,16 @@ namespace Sharky.MicroTasks
             {
                 if (!commander.Value.Claimed && (commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_ADEPT || commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_ADEPTPHASESHIFT))
                 {
-                    commander.Value.Claimed = true;
-                    UnitCommanders.Add(commander.Value);
+                    if (commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_ADEPT && UnitCommanders.Count(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_ADEPT) < MaxAdeptCount)
+                    {
+                        commander.Value.Claimed = true;
+                        UnitCommanders.Add(commander.Value);
+                    }
+                    else if (commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_ADEPTPHASESHIFT)
+                    {
+                        commander.Value.Claimed = true;
+                        UnitCommanders.Add(commander.Value);
+                    }
                 }
             }
         }

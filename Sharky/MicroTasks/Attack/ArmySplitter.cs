@@ -98,8 +98,7 @@ namespace Sharky.MicroTasks.Attack
                 else
                 {
                     if (winnableDefense || defendToDeath)
-                    {
-                        
+                    {                     
                         var closerEnemy = closerEnemies.FirstOrDefault();
                         if (closerEnemy.Unit.IsFlying)
                         {

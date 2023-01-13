@@ -54,7 +54,7 @@ namespace Sharky.MicroControllers.Protoss
                 return false;
             }
 
-            if (commander.UnitCalculation.EnemiesInRangeOf.Count(e => e.Range > 1) > 3)
+            if (commander.UnitCalculation.NearbyEnemies.Count(e => e.Range > 1 && e.FrameLastSeen == frame && e.EnemiesInRange.Any()) > 5)
             {
                 action = commander.Order(frame, Abilities.EFFECT_GUARDIANSHIELD);
                 return true;

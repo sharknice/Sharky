@@ -58,7 +58,7 @@ namespace Sharky.MicroControllers.Zerg
                 return true;
             }
 
-            action = commander.Order(frame, Abilities.MOVE, target); // no damaging targets in range, attack towards the main target
+            action = MoveToTarget(commander, target, frame); // no damaging targets in range, attack towards the main target
             return true;
         }
 

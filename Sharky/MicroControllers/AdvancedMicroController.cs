@@ -203,5 +203,36 @@ namespace Sharky.MicroControllers
                 commander.CommanderState = CommanderState.Grouping;
             }
         }
+
+        public List<SC2APIProtocol.Action> AttackWithinArea(IEnumerable<UnitCommander> commanders, List<Point2D> area, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
+        {
+            var actions = new List<SC2APIProtocol.Action>();
+            Vector2 groupVector = Vector2.Zero;
+            var centerHeight = -1;
+            if (groupCenter != null && frame > SharkyOptions.FramesPerSecond * 3 * 60)
+            {
+                centerHeight = MapDataService.MapHeight(groupCenter);
+                groupVector = new Vector2(groupCenter.X, groupCenter.Y);
+            }
+
+            var groupThreshold = commanders.Count() / 2;
+            foreach (var commander in commanders)
+            {
+                if (commander.LastOrderFrame == frame) { continue; }
+                List<SC2APIProtocol.Action> action;
+                SetState(commander, groupVector, groupThreshold, centerHeight);
+                if (MicroData.IndividualMicroControllers.TryGetValue((UnitTypes)commander.UnitCalculation.Unit.UnitType, out var individualMicroController))
+                {
+                    action = individualMicroController.AttackWithinArea(commander, area, target, defensivePoint, groupCenter, frame);
+                }
+                else
+                {
+                    action = MicroData.IndividualMicroController.AttackWithinArea(commander, area, target, defensivePoint, groupCenter, frame);
+                }
+                if (action != null) { actions.AddRange(action); }
+            }
+
+            return actions;
+        }
     }
 }

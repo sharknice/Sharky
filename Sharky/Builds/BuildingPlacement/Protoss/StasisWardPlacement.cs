@@ -115,7 +115,7 @@ namespace Sharky.Builds.BuildingPlacement
         Point2D GetValidPoint(float x, float y, int baseHeight, Vector2 target)
         {          
             if (x >= 0 && y >= 0 && x < MapDataService.MapData.MapWidth && y < MapDataService.MapData.MapHeight &&
-                BuildingService.AreaBuildable(x, y, .5f) && !BuildingService.BlockedByStructuresOrMinerals(x, y, .5f, 0f))
+                BuildingService.AreaBuildable(x, y, .5f) && !BuildingService.BlockedByStructuresOrMinerals(x, y, .5f, 0f) && !BuildingService.BlockedByEnemyUnits(x, y, .5f))
             {
                 return new Point2D { X = x, Y = y };
             }

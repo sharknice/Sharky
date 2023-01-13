@@ -31,10 +31,12 @@ namespace Sharky.Managers
                 if (playerInfo.PlayerId != playerId)
                 {
                     EnemyData.EnemyRace = playerInfo.RaceRequested;
+                    EnemyData.EnemyRaceRequested = playerInfo.RaceRequested;
                 }
                 else
                 {
                     EnemyData.SelfRace = playerInfo.RaceActual;
+                    EnemyData.SelfRaceRequested = playerInfo.RaceRequested;
                 }
             }
         }

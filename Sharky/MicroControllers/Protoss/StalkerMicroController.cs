@@ -21,21 +21,29 @@ namespace Sharky.MicroControllers.Protoss
             action = null;
             if (bestTarget != null)
             {
-                if (commander.UnitCalculation.EnemiesInRange.Any(e => e.Unit.Tag == bestTarget.Unit.Tag) && bestTarget.Unit.DisplayType == DisplayType.Visible)
+                if (commander.UnitCalculation.EnemiesInRange.Any(e => e.Unit.Tag == bestTarget.Unit.Tag) && bestTarget.Unit.DisplayType == DisplayType.Visible && MapDataService.SelfVisible(bestTarget.Unit.Pos))
                 {
-                    action = commander.Order(frame, Abilities.ATTACK, null, bestTarget.Unit.Tag);
+                    bestTarget.IncomingDamage += GetDamage(commander.UnitCalculation.Weapons, bestTarget.Unit, bestTarget.UnitTypeData);
+                    if (WeaponReady(commander, frame))
+                    {
+                        action = commander.Order(frame, Abilities.ATTACK, null, bestTarget.Unit.Tag);
+                    }
+                    else
+                    {
+                        action = commander.Order(frame, Abilities.ATTACK, null, bestTarget.Unit.Tag);
+                    }
                     return true;
                 }
 
-                if (commander.UnitCalculation.TargetPriorityCalculation.Overwhelm)
+                if (WeaponReady(commander, frame) && commander.UnitCalculation.TargetPriorityCalculation.Overwhelm)
                 {
                     var blinkReady = SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.BLINKTECH) && commander.AbilityOffCooldown(Abilities.EFFECT_BLINK_STALKER, frame, SharkyOptions.FramesPerSecond, SharkyUnitData);
                     if (blinkReady && bestTarget.FrameLastSeen == frame)
                     {
                         // only blink if can see all around unit, don't blink when entire army is hidden behind first unit
                         var point = new Point2D { X = bestTarget.Unit.Pos.X, Y = bestTarget.Unit.Pos.Y };
-                        if (MapDataService.SelfVisible(point) && 
-                            MapDataService.SelfVisible(new Point2D { X = bestTarget.Unit.Pos.X + 7, Y = bestTarget.Unit.Pos.Y }) && MapDataService.SelfVisible(new Point2D { X = bestTarget.Unit.Pos.X - 7, Y = bestTarget.Unit.Pos.Y }) && 
+                        if (MapDataService.SelfVisible(point) &&
+                            MapDataService.SelfVisible(new Point2D { X = bestTarget.Unit.Pos.X + 7, Y = bestTarget.Unit.Pos.Y }) && MapDataService.SelfVisible(new Point2D { X = bestTarget.Unit.Pos.X - 7, Y = bestTarget.Unit.Pos.Y }) &&
                             MapDataService.SelfVisible(new Point2D { X = bestTarget.Unit.Pos.X, Y = bestTarget.Unit.Pos.Y + 7 }) && MapDataService.SelfVisible(new Point2D { X = bestTarget.Unit.Pos.X, Y = bestTarget.Unit.Pos.Y - 7 }))
                         {
                             action = commander.Order(frame, Abilities.EFFECT_BLINK_STALKER, point);

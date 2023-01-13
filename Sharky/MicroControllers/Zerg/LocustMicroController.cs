@@ -45,7 +45,7 @@ namespace Sharky.MicroControllers.Zerg
             return Attack(commander, defensivePoint, defensivePoint, null, frame);
         }
 
-        public override List<Action> Scout(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, bool prioritizeVision = false)
+        public override List<Action> Scout(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, bool prioritizeVision = false, bool attack = true)
         {
             return Attack(commander, target, defensivePoint, null, frame);
         }

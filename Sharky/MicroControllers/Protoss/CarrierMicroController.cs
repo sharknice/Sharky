@@ -15,6 +15,26 @@ namespace Sharky.MicroControllers.Protoss
             MaximumSupportDistanceSqaured = 9;
         }
 
+        public override List<SC2APIProtocol.Action> Support(UnitCommander commander, IEnumerable<UnitCommander> supportTargets, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
+        {
+            List<SC2APIProtocol.Action> action = null;
+            if (commander.UnitCalculation.Loaded) { return action; }
+
+            var unitToSupport = GetSupportTarget(commander, supportTargets, target, defensivePoint);
+
+            if (unitToSupport == null)
+            {
+                return Attack(commander, target, defensivePoint, groupCenter, frame);
+            }
+
+            if (commander.UnitCalculation.NearbyEnemies.Count(e => e.FrameLastSeen == frame) == 0 || Vector2.DistanceSquared(commander.UnitCalculation.Position, unitToSupport.UnitCalculation.Position) > 9)
+            {
+                return commander.Order(frame, Abilities.MOVE, new Point2D { X = unitToSupport.UnitCalculation.Position.X, Y = unitToSupport.UnitCalculation.Position.Y });          
+            }
+
+            return base.Support(commander, supportTargets, target, defensivePoint, groupCenter, frame);
+        }
+
         protected override bool WeaponReady(UnitCommander commander, int frame)
         {
             return true;

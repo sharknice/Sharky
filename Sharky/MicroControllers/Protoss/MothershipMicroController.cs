@@ -20,6 +20,30 @@ namespace Sharky.MicroControllers.Protoss
 
         }
 
+        public override List<SC2APIProtocol.Action> Support(UnitCommander commander, IEnumerable<UnitCommander> supportTargets, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
+        {
+            List<SC2APIProtocol.Action> action = null;
+            if (commander.UnitCalculation.Loaded) { return action; }
+
+            var unitToSupport = GetSupportTarget(commander, supportTargets, target, defensivePoint);
+
+            if (unitToSupport == null)
+            {
+                unitToSupport = ActiveUnitData.Commanders.Values.FirstOrDefault(c => c.UnitRole == UnitRole.Leader);
+                if (unitToSupport == null)
+                {
+                    return base.Support(commander, supportTargets, target, defensivePoint, groupCenter, frame);
+                }
+            }
+
+            if (commander.UnitCalculation.NearbyEnemies.Count(e => e.FrameLastSeen == frame) == 0 || !unitToSupport.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.CLOAKFIELDEFFECT))
+            {
+                return commander.Order(frame, Abilities.MOVE, new Point2D { X = unitToSupport.UnitCalculation.Position.X, Y = unitToSupport.UnitCalculation.Position.Y });
+            }
+
+            return base.Support(commander, supportTargets, target, defensivePoint, groupCenter, frame);
+        }
+
         protected override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
@@ -140,7 +164,11 @@ namespace Sharky.MicroControllers.Protoss
 
             if (unitToSupport == null)
             {
-                return false;
+                unitToSupport = ActiveUnitData.Commanders.Values.FirstOrDefault(c => c.UnitRole == UnitRole.Leader);
+                if (unitToSupport == null)
+                {
+                    return false;
+                }
             }
 
             var moveTo = GetSupportSpot(commander, unitToSupport, target, defensivePoint);

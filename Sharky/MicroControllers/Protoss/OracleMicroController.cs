@@ -48,7 +48,6 @@ namespace Sharky.MicroControllers.Protoss
                 {
                     return true;
                 }
-
             }
 
             if (AvoidTargettedDamage(commander, target, defensivePoint, frame, out action))
@@ -64,13 +63,13 @@ namespace Sharky.MicroControllers.Protoss
             return false;
         }
 
-        Point2D CloakedInvader(UnitCommander commander)
+        public Point2D CloakedInvader(UnitCommander commander)
         {
             var pos = commander.UnitCalculation.Position;
 
             if (commander.UnitRole != UnitRole.Defend)
             {
-                var hiddenUnits = ActiveUnitData.EnemyUnits.Values.Where(e => e.Unit.DisplayType == DisplayType.Hidden).OrderBy(e => Vector2.DistanceSquared(pos, e.Position));
+                var hiddenUnits = ActiveUnitData.EnemyUnits.Values.Where(e => (e.Unit.DisplayType == DisplayType.Hidden || e.UnitClassifications.Contains(UnitClassification.Cloakable)) && !e.Unit.BuffIds.Contains((uint)Buffs.ORACLEREVELATION)).OrderBy(e => Vector2.DistanceSquared(pos, e.Position));
                 var hiddenByAllies = hiddenUnits.FirstOrDefault(e => e.NearbyEnemies.Any(e => !e.Unit.IsHallucination));
                 if (hiddenByAllies != null)
                 {
@@ -350,7 +349,7 @@ namespace Sharky.MicroControllers.Protoss
 
             if (commander.UnitCalculation.NearbyEnemies.Count(e => e.DamageAir) > 0)
             {
-                if (commander.RetreatPathFrame + 1 < frame)
+                if (commander.RetreatPathFrame < frame)
                 {
                     commander.RetreatPath = SharkyPathFinder.GetSafeAirPath(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y, target.X, target.Y, frame);
                     commander.RetreatPathFrame = frame;
@@ -425,9 +424,6 @@ namespace Sharky.MicroControllers.Protoss
             }
 
             return NavigateToPoint(commander, target, defensivePoint, null, frame);
-            if (Move(commander, target, defensivePoint, null, bestTarget, formation, frame, out action)) { return action; }
-
-            return commander.Order(frame, Abilities.MOVE, target);
         }
 
         protected override bool MoveToAttackTarget(UnitCommander commander, UnitCalculation bestTarget, Formation formation, int frame, out List<SC2APIProtocol.Action> action)

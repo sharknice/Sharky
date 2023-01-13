@@ -24,6 +24,7 @@ namespace Sharky.Managers
         ChokePointsService ChokePointsService;
         DebugService DebugService;
         WallDataService WallDataService;
+        BaseToBasePathingService BaseToBasePathingService;
 
         int baseCount;
 
@@ -40,6 +41,7 @@ namespace Sharky.Managers
             MapData = defaultSharkyBot.MapData;
             ActiveUnitData = defaultSharkyBot.ActiveUnitData;
             EnemyData = defaultSharkyBot.EnemyData;
+            BaseToBasePathingService = defaultSharkyBot.BaseToBasePathingService;
 
             ChokePointService = defaultSharkyBot.ChokePointService;
             ChokePointsService = defaultSharkyBot.ChokePointsService;
@@ -105,6 +107,7 @@ namespace Sharky.Managers
 
 
                 MapData.WallData = WallDataService.GetWallData(gameInfo.MapName);
+                MapData.PathData = BaseToBasePathingService.GetBaseToBasePathingData(gameInfo.MapName);
 
                 return;
             }

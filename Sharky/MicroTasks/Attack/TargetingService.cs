@@ -42,9 +42,7 @@ namespace Sharky.MicroTasks.Attack
                 TargetingData.HiddenEnemyBase = false;
                 EnemyBuildingCount = currentEnemyBuildingCount;
 
-                var armyVector = new Vector2(armyPoint.X, armyPoint.Y);
-
-                var enemyBuilding = ActiveUnitData.EnemyUnits.Where(e => e.Value.Unit.UnitType != (uint)UnitTypes.ZERG_CREEPTUMORBURROWED && e.Value.Unit.UnitType != (uint)UnitTypes.ZERG_CREEPTUMOR && e.Value.UnitTypeData.Attributes.Contains(SC2APIProtocol.Attribute.Structure)).OrderBy(e => Vector2.DistanceSquared(e.Value.Position, armyVector)).FirstOrDefault().Value;
+                var enemyBuilding = ActiveUnitData.EnemyUnits.Where(e => e.Value.Unit.UnitType != (uint)UnitTypes.ZERG_CREEPTUMORBURROWED && e.Value.Unit.UnitType != (uint)UnitTypes.ZERG_CREEPTUMOR && e.Value.UnitTypeData.Attributes.Contains(SC2APIProtocol.Attribute.Structure)).OrderByDescending(e => Vector2.DistanceSquared(e.Value.Position, TargetingData.EnemyArmyCenter)).FirstOrDefault().Value;
                 if (enemyBuilding != null)
                 {
                     return new Point2D { X = enemyBuilding.Unit.Pos.X, Y = enemyBuilding.Unit.Pos.Y };

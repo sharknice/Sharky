@@ -63,7 +63,7 @@ namespace Sharky.MicroTasks.Scout
                 {
                     if (Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(scoutInfo.Location.X, scoutInfo.Location.Y)) < 4)
                     {
-                        var action = IndividualMicroController.Attack(commander, scoutInfo.Location, TargetingData.ForwardDefensePoint, null, frame);
+                        var action = IndividualMicroController.Scout(commander, scoutInfo.Location, TargetingData.ForwardDefensePoint, frame);
                         if (action != null)
                         {
                             commands.AddRange(action);
@@ -72,18 +72,20 @@ namespace Sharky.MicroTasks.Scout
                         if (!commander.UnitCalculation.NearbyEnemies.Take(25).Any(e => Vector2.DistanceSquared(new Vector2(scoutInfo.Location.X, scoutInfo.Location.Y), e.Position) < 100))
                         {
                             scoutInfo.LastClearedFrame = frame;
-                            scoutInfo.Harassers.Remove(commander);
-                            return commands;
                         }
                     }
                     else
                     {
-                        var action = IndividualMicroController.Attack(commander, scoutInfo.Location, TargetingData.ForwardDefensePoint, null, frame);
+                        var action = IndividualMicroController.Scout(commander, scoutInfo.Location, TargetingData.ForwardDefensePoint, frame);
                         if (action != null)
                         {
                             commands.AddRange(action);
                         }
                     }
+                }
+                if (scoutInfo.LastClearedFrame == frame)
+                {
+                    scoutInfo.Harassers.Clear();
                 }
             }
             foreach (var harassInfo in HarassInfos)
@@ -92,7 +94,7 @@ namespace Sharky.MicroTasks.Scout
                 {
                     if (Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(harassInfo.BaseLocation.MineralLineLocation.X, harassInfo.BaseLocation.MineralLineLocation.Y)) < 4)
                     {
-                        var action = IndividualMicroController.Attack(commander, harassInfo.BaseLocation.MineralLineLocation, TargetingData.ForwardDefensePoint, null, frame);
+                        var action = IndividualMicroController.Scout(commander, harassInfo.BaseLocation.MineralLineLocation, TargetingData.ForwardDefensePoint, frame);
                         if (action != null)
                         {
                             commands.AddRange(action);
@@ -101,18 +103,20 @@ namespace Sharky.MicroTasks.Scout
                         if (!commander.UnitCalculation.NearbyEnemies.Take(25).Any(e => Vector2.DistanceSquared(new Vector2(harassInfo.BaseLocation.MineralLineLocation.X, harassInfo.BaseLocation.MineralLineLocation.Y), e.Position) < 100))
                         {
                             harassInfo.LastClearedFrame = frame;
-                            harassInfo.Harassers.Remove(commander);
-                            return commands;
                         }
                     }
                     else
                     {
-                        var action = IndividualMicroController.Attack(commander, harassInfo.BaseLocation.MineralLineLocation, TargetingData.ForwardDefensePoint, null, frame);
+                        var action = IndividualMicroController.Scout(commander, harassInfo.BaseLocation.MineralLineLocation, TargetingData.ForwardDefensePoint, frame);
                         if (action != null)
                         {
                             commands.AddRange(action);
                         }
                     }
+                }
+                if (harassInfo.LastClearedFrame == frame)
+                {
+                    harassInfo.Harassers.Clear();
                 }
             }
 
@@ -163,7 +167,7 @@ namespace Sharky.MicroTasks.Scout
             {
                 if (unasignedCommanders.Count() > 0)
                 {
-                    foreach (var info in ScoutInfos.Where(h => h.Harassers.Count() == 0))
+                    foreach (var info in ScoutInfos.Where(h => h.Harassers.Count() == 0).OrderBy(i => i.LastClearedFrame))
                     {
                         var commander = unasignedCommanders.FirstOrDefault(c => c.UnitCalculation.Unit.IsFlying);
                         if (commander != null)

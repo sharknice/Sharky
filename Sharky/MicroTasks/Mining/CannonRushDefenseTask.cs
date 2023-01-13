@@ -43,8 +43,8 @@ namespace Sharky.MicroTasks.Mining
 
             var commands = new List<SC2APIProtocol.Action>();
 
-            var enemyCannons = ActiveUnitData.EnemyUnits.Values.Where(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_PHOTONCANNON).OrderBy(c => Vector2.DistanceSquared(new Vector2(TargetingData.SelfMainBasePoint.X, TargetingData.SelfMainBasePoint.Y), c.Position)).Where(c => Vector2.DistanceSquared(new Vector2(TargetingData.SelfMainBasePoint.X, TargetingData.SelfMainBasePoint.Y), c.Position) < 2500);
-            var enemyPylons = ActiveUnitData.EnemyUnits.Values.Where(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON).OrderBy(c => Vector2.DistanceSquared(new Vector2(TargetingData.SelfMainBasePoint.X, TargetingData.SelfMainBasePoint.Y), c.Position)).Where(c => Vector2.DistanceSquared(new Vector2(TargetingData.SelfMainBasePoint.X, TargetingData.SelfMainBasePoint.Y), c.Position) < 2500);
+            var enemyCannons = ActiveUnitData.EnemyUnits.Values.Where(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_PHOTONCANNON && !e.NearbyAllies.Any(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS)).OrderBy(c => Vector2.DistanceSquared(new Vector2(TargetingData.SelfMainBasePoint.X, TargetingData.SelfMainBasePoint.Y), c.Position)).Where(c => Vector2.DistanceSquared(new Vector2(TargetingData.SelfMainBasePoint.X, TargetingData.SelfMainBasePoint.Y), c.Position) < 2500);
+            var enemyPylons = ActiveUnitData.EnemyUnits.Values.Where(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && !e.NearbyAllies.Any(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS)).OrderBy(c => Vector2.DistanceSquared(new Vector2(TargetingData.SelfMainBasePoint.X, TargetingData.SelfMainBasePoint.Y), c.Position)).Where(c => Vector2.DistanceSquared(new Vector2(TargetingData.SelfMainBasePoint.X, TargetingData.SelfMainBasePoint.Y), c.Position) < 2500);
 
             if (!enemyCannons.Any(e => e.Unit.BuildProgress == 1 && e.Unit.Shield > 5) && (enemyPylons.Any() || enemyCannons.Any(e => e.Unit.BuildProgress < 1 || e.Unit.Shield <= 5)))
             {

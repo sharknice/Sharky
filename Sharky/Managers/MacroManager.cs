@@ -19,6 +19,7 @@ namespace Sharky.Managers
         BuildingCancelService BuildingCancelService;
         BuildingRequestCancellingService BuildingRequestCancellingService;
         UpgradeRequestCancellingService UpgradeRequestCancellingService;
+        UnitRequestCancellingService UnitRequestCancellingService;
 
         VespeneGasBuilder VespeneGasBuilder;
         UnitBuilder UnitBuilder;
@@ -49,6 +50,7 @@ namespace Sharky.Managers
             BuildingCancelService = defaultSharkyBot.BuildingCancelService;
             BuildingRequestCancellingService = defaultSharkyBot.BuildingRequestCancellingService;
             UpgradeRequestCancellingService = defaultSharkyBot.UpgradeRequestCancellingService;
+            UnitRequestCancellingService = defaultSharkyBot.UnitRequestCancellingService;
 
             VespeneGasBuilder = defaultSharkyBot.VespeneGasBuilder;
             UnitBuilder = defaultSharkyBot.UnitBuilder;
@@ -166,6 +168,7 @@ namespace Sharky.Managers
             actions.AddRange(BuildingCancelService.CancelBuildings());
             actions.AddRange(BuildingRequestCancellingService.CancelBuildings());
             actions.AddRange(UpgradeRequestCancellingService.CancelUpgrades());
+            actions.AddRange(UnitRequestCancellingService.CancelUnits());
 
             return actions;
         }

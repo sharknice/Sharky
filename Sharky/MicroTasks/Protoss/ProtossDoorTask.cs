@@ -594,7 +594,7 @@ namespace Sharky.MicroTasks
             if (UnitCommanders.Count(c => c.UnitRole == UnitRole.Attack) < 5)
             {
                 var vector = new Vector2(WallData.Block.X, WallData.Block.Y);
-                var commanders = MicroTaskData[typeof(AttackTask).Name].UnitCommanders.OrderBy(c => Vector2.DistanceSquared(c.UnitCalculation.Position, vector)).Take(5);
+                var commanders = MicroTaskData[typeof(AttackTask).Name].UnitCommanders.Where(c => c.UnitCalculation.DamageGround).OrderBy(c => Vector2.DistanceSquared(c.UnitCalculation.Position, vector)).Take(5);
                 foreach (var commander in commanders)
                 {
                     commander.UnitRole = UnitRole.Attack;
@@ -633,7 +633,7 @@ namespace Sharky.MicroTasks
             if (UnitCommanders.Count(c => c.UnitRole == UnitRole.Attack) < 5)
             {
                 var vector = new Vector2(WallData.Block.X, WallData.Block.Y);
-                var commanders = MicroTaskData[typeof(AttackTask).Name].UnitCommanders.OrderBy(c => Vector2.DistanceSquared(c.UnitCalculation.Position, vector)).Take(5);
+                var commanders = MicroTaskData[typeof(AttackTask).Name].UnitCommanders.Where(c => c.UnitCalculation.DamageGround).OrderBy(c => Vector2.DistanceSquared(c.UnitCalculation.Position, vector)).Take(5);
                 foreach (var commander in commanders)
                 {
                     commander.UnitRole = UnitRole.Attack;
