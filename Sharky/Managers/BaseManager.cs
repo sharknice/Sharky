@@ -135,12 +135,28 @@ namespace Sharky.Managers
             Console.WriteLine("Calculating base expansion order");
             var closerBases = BaseData.BaseLocations.Where(b => PathFinder.GetGroundPath(startingUnit.Pos.X + 4, startingUnit.Pos.Y + 4, b.Location.X, b.Location.Y, 0).Count() <= PathFinder.GetGroundPath(enemystartingLocation.X + 4, enemystartingLocation.Y + 4, b.Location.X, b.Location.Y, 0).Count()).ToList();
             var fartherBases = BaseData.BaseLocations.Where(b => PathFinder.GetGroundPath(startingUnit.Pos.X + 4, startingUnit.Pos.Y + 4, b.Location.X, b.Location.Y, 0).Count() > PathFinder.GetGroundPath(enemystartingLocation.X + 4, enemystartingLocation.Y + 4, b.Location.X, b.Location.Y, 0).Count()).ToList();
-            BaseData.BaseLocations = closerBases.OrderBy(b => PathFinder.GetGroundPath(startingUnit.Pos.X + 4, startingUnit.Pos.Y + 4, b.Location.X, b.Location.Y, 0).Count()).ToList();
+            BaseData.BaseLocations = GetOrderedBaseLocations(startingUnit, closerBases, enemystartingLocation);
             BaseData.BaseLocations.AddRange(fartherBases.OrderByDescending(b => PathFinder.GetGroundPath(enemystartingLocation.X + 4, enemystartingLocation.Y + 4, b.Location.X, b.Location.Y, 0).Count()));
             BaseData.EnemyBaseLocations = fartherBases.OrderBy(b => PathFinder.GetGroundPath(enemystartingLocation.X + 4, enemystartingLocation.Y + 4, b.Location.X, b.Location.Y, 0).Count()).ToList();
             BaseData.EnemyBaseLocations.AddRange(closerBases.OrderByDescending(b => PathFinder.GetGroundPath(startingUnit.Pos.X + 4, startingUnit.Pos.Y + 4, b.Location.X, b.Location.Y, 0).Count()));
             stopwatch.Stop();
             Console.WriteLine($"Calculating base expansion order in {stopwatch.ElapsedMilliseconds} ms");
+        }
+
+        private List<BaseLocation> GetOrderedBaseLocations(Unit startingUnit, List<BaseLocation> closerBases, Point2D enemystartingLocation)
+        {
+            var ordered = closerBases.OrderBy(b => PathFinder.GetGroundPath(startingUnit.Pos.X + 4, startingUnit.Pos.Y + 4, b.Location.X, b.Location.Y, 0).Count()).ToList();
+            var first = ordered.FirstOrDefault();
+            var firstDistance = PathFinder.GetGroundPath(enemystartingLocation.X + 4, enemystartingLocation.Y + 4, first.Location.X, first.Location.Y, 0).Count();
+            var natural = ordered.FirstOrDefault(b => PathFinder.GetGroundPath(enemystartingLocation.X + 4, enemystartingLocation.Y + 4, b.Location.X, b.Location.Y, 0).Count() < firstDistance);
+
+            var desiredOrder = new List<BaseLocation> { first };
+            if (natural != null)
+            {
+                desiredOrder.Add(natural);
+                desiredOrder.AddRange(ordered.Where(b => !(b.Location.X == first.Location.X && b.Location.Y == first.Location.Y) && !(b.Location.X == natural.Location.X && b.Location.Y == natural.Location.Y)));
+            }
+            return desiredOrder;
         }
 
         private void SaveBaseLocationData(string folder, string fileName, BaseData baseData)

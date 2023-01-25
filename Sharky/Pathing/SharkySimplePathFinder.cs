@@ -59,5 +59,10 @@ namespace Sharky.Pathing
             }
             return new List<Vector2>();
         }
+
+        public List<Vector2> GetGroundPath(float startX, float startY, float endX, float endY, int frame, float radius)
+        {
+            return GetGroundPath(startX, startY, endX, endY, frame);
+        }
     }
 }

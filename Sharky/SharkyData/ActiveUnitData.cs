@@ -1,6 +1,5 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Sharky
 {
@@ -16,6 +15,8 @@ namespace Sharky
             EnemyDeaths = 0;
             SelfDeaths = 0;
             NeutralDeaths = 0;
+            SelfResourcesLost = 0;
+            EnemyResourcesLost = 0;
         }
 
         public ConcurrentDictionary<ulong, UnitCalculation> EnemyUnits { get; set; }
@@ -27,5 +28,8 @@ namespace Sharky
         public int EnemyDeaths { get; set; }
         public int SelfDeaths { get; set; }
         public int NeutralDeaths { get; set; }
+
+        public int SelfResourcesLost { get; set; }
+        public int EnemyResourcesLost { get; set; }
     }
 }

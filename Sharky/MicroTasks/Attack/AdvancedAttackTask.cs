@@ -76,6 +76,22 @@ namespace Sharky.MicroTasks.Attack
             }
         }
 
+        public override List<UnitCommander> ResetNonEssentialClaims()
+        {
+            var removals = UnitCommanders.Where(c => c.UnitRole != UnitRole.Leader && !SubTasks.Any(s => s.Value.UnitCommanders.Contains(c))).ToList();
+
+            foreach (var removal in removals)
+            {
+                UnitCommanders.Remove(removal);
+                MainUnits.Remove(removal);
+                SupportUnits.Remove(removal);
+                removal.UnitRole = UnitRole.None;
+                removal.Claimed = false;
+            }
+
+            return removals;
+        }
+
         public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
         {
             foreach (var subTask in SubTasks.Where(t => t.Value.Enabled).OrderBy(t => t.Value.Priority))

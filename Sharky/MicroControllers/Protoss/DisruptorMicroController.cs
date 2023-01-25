@@ -11,11 +11,12 @@ namespace Sharky.MicroControllers.Protoss
     {
         int PurificationNovaRange = 13;
         private int lastPurificationFrame = 0;
+        protected IPathFinder NovaPathFinder;
 
-        public DisruptorMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled)
+        public DisruptorMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled, IPathFinder novaPathFinder)
             : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled)
         {
-
+            NovaPathFinder = novaPathFinder;
         }
 
         protected override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
@@ -74,13 +75,13 @@ namespace Sharky.MicroControllers.Protoss
                 var oneShotKills = attacks.OrderByDescending(a => GetPurificationNovaDamage(a.Unit, SharkyUnitData.UnitData[(UnitTypes)a.Unit.UnitType])).ThenByDescending(u => u.Dps);
                 if (oneShotKills.Count() > 0)
                 {
-                    var bestAttack = GetBestAttack(commander.UnitCalculation, oneShotKills, attacks);
+                    var bestAttack = GetBestAttack(commander.UnitCalculation, oneShotKills, attacks, frame);
                     if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.WinAir)
                     {
                         var airAttackers = oneShotKills.Where(u => u.DamageAir);
                         if (airAttackers.Count() > 0)
                         {
-                            var air = GetBestAttack(commander.UnitCalculation, airAttackers, attacks);
+                            var air = GetBestAttack(commander.UnitCalculation, airAttackers, attacks, frame);
                             if (air != null)
                             {
                                 bestAttack = air;
@@ -92,7 +93,7 @@ namespace Sharky.MicroControllers.Protoss
                         var groundAttackers = oneShotKills.Where(u => u.DamageGround);
                         if (groundAttackers.Count() > 0)
                         {
-                            var ground = GetBestAttack(commander.UnitCalculation, groundAttackers, attacks);
+                            var ground = GetBestAttack(commander.UnitCalculation, groundAttackers, attacks, frame);
                             if (ground != null)
                             {
                                 bestAttack = ground;
@@ -103,7 +104,7 @@ namespace Sharky.MicroControllers.Protoss
                     {
                         if (oneShotKills.Count() > 0)
                         {
-                            var any = GetBestAttack(commander.UnitCalculation, oneShotKills, attacks);
+                            var any = GetBestAttack(commander.UnitCalculation, oneShotKills, attacks, frame);
                             if (any != null)
                             {
                                 bestAttack = any;
@@ -139,7 +140,7 @@ namespace Sharky.MicroControllers.Protoss
             return 145 + bonusDamage - unitTypeData.Armor; // TODO: armor upgrades
         }
 
-        protected Point2D GetBestAttack(UnitCalculation unitCalculation, IEnumerable<UnitCalculation> enemies, IList<UnitCalculation> splashableEnemies)
+        protected Point2D GetBestAttack(UnitCalculation unitCalculation, IEnumerable<UnitCalculation> enemies, IList<UnitCalculation> splashableEnemies, int frame)
         {
             float splashRadius = 1.5f;
             var killCounts = new Dictionary<Point, float>();
@@ -178,6 +179,13 @@ namespace Sharky.MicroControllers.Protoss
             {
                 return null;
             }
+
+            var path = NovaPathFinder.GetGroundPath(unitCalculation.Position.X, unitCalculation.Position.Y, best.Key.X, best.Key.Y, frame, PurificationNovaRange);
+            if (path == null || path.Count > PurificationNovaRange)
+            {
+                return null;
+            }
+
             return new Point2D { X = best.Key.X, Y = best.Key.Y };
         }
 

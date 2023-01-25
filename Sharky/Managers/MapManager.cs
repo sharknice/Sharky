@@ -101,7 +101,7 @@ namespace Sharky.Managers
             var height = 12;
             var color = new Color { R = 255, G = 255, B = 255 };
 
-            foreach (var path in MapData.PathData.Take(20))
+            foreach (var path in MapData.PathData.Skip(50).Take(100))
             {
                 DebugService.DrawSphere(new Point { X = path.StartPosition.X, Y = path.StartPosition.Y, Z = height }, .25f, new Color { R = 1, G = 255, B = 1 });
                 DebugService.DrawSphere(new Point { X = path.EndPosition.X, Y = path.EndPosition.Y, Z = height }, .25f, new Color { R = 255, G = 1, B = 1 });

@@ -135,6 +135,9 @@ namespace Sharky.Managers
             }
             PrintEnemyUnits();
 
+            Console.WriteLine($"Losses:");
+            Console.WriteLine($"  Self: {DefaultSharkyBot.ActiveUnitData.SelfDeaths} units, {DefaultSharkyBot.ActiveUnitData.SelfResourcesLost} resources");
+            Console.WriteLine($"  Enemy: {DefaultSharkyBot.ActiveUnitData.EnemyDeaths} units, {DefaultSharkyBot.ActiveUnitData.EnemyResourcesLost} resources");
             var targetingPriority = DefaultSharkyBot.TargetPriorityService.CalculateGeneralTargetPriority();
             Console.WriteLine($"Target Calculation Winnablility: {targetingPriority.OverallWinnability}");
             Console.WriteLine($"Attack Point: {DefaultSharkyBot.TargetingData.AttackPoint}");

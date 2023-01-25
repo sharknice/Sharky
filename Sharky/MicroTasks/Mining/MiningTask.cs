@@ -452,7 +452,7 @@ namespace Sharky.MicroTasks
                         actions.AddRange(action);
                     }
                 }
-                else if (worker.UnitCalculation.NearbyEnemies.Any(e => e.FrameFirstSeen == frame) && worker.UnitCalculation.NearbyAllies.Take(25).Any(a => a.Attributes.Contains(SC2APIProtocol.Attribute.Structure)))
+                else if (worker.UnitCalculation.NearbyEnemies.Any(e => e.FrameFirstSeen == frame && !e.Unit.IsFlying) && worker.UnitCalculation.NearbyAllies.Any(a => a.Attributes.Contains(SC2APIProtocol.Attribute.Structure)))
                 {
                     var attackTask = MicroTaskData[typeof(AttackTask).Name];
                     if (attackTask.Enabled)

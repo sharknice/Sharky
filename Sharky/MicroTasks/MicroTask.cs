@@ -36,6 +36,19 @@ namespace Sharky.MicroTasks
             UnitCommanders = new List<UnitCommander>();
         }
 
+        public virtual List<UnitCommander> ResetNonEssentialClaims()
+        {
+            var unlcaimed = new List<UnitCommander>();
+            foreach (var commander in UnitCommanders)
+            {
+                commander.Claimed = false;
+                commander.UnitRole = UnitRole.None;
+                unlcaimed.Add(commander);
+            }
+            UnitCommanders = new List<UnitCommander>();
+            return unlcaimed;
+        }
+
         public virtual void Enable()
         {
             Enabled = true;

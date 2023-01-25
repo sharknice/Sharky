@@ -56,8 +56,8 @@ namespace Sharky.Managers
 
         public override void OnEnd(ResponseObservation observation, Result result)
         {
-            Console.WriteLine($"Enemy Deaths: {ActiveUnitData.EnemyDeaths}");
-            Console.WriteLine($"Self Deaths: {ActiveUnitData.SelfDeaths}");
+            Console.WriteLine($"Enemy Deaths: {ActiveUnitData.EnemyDeaths}, {ActiveUnitData.EnemyResourcesLost} resources lost");
+            Console.WriteLine($"Self Deaths: {ActiveUnitData.SelfDeaths}, {ActiveUnitData.SelfResourcesLost} resources lost");
             Console.WriteLine($"Neutral Deaths: {ActiveUnitData.NeutralDeaths}");
 
             base.OnEnd(observation, result);
@@ -134,11 +134,19 @@ namespace Sharky.Managers
             {
                 if (ActiveUnitData.EnemyUnits.TryRemove(tag, out UnitCalculation removedEnemy))
                 {
-                    ActiveUnitData.EnemyDeaths++;
+                    if (!removedEnemy.Unit.IsHallucination)
+                    {
+                        ActiveUnitData.EnemyDeaths++;
+                        ActiveUnitData.EnemyResourcesLost += (int)removedEnemy.UnitTypeData.MineralCost + (int)removedEnemy.UnitTypeData.VespeneCost;
+                    }
                 }
                 else if (ActiveUnitData.SelfUnits.TryRemove(tag, out UnitCalculation removedAlly))
                 {
-                    ActiveUnitData.SelfDeaths++;
+                    if (!removedAlly.Unit.IsHallucination)
+                    {
+                        ActiveUnitData.SelfDeaths++;
+                        ActiveUnitData.SelfResourcesLost += (int)removedAlly.UnitTypeData.MineralCost + (int)removedAlly.UnitTypeData.VespeneCost;
+                    }
                 }
                 else if (ActiveUnitData.NeutralUnits.TryRemove(tag, out UnitCalculation removedNeutral))
                 {
@@ -272,6 +280,10 @@ namespace Sharky.Managers
                     var range = GetRange(allyAttack, enemyAttack);
                     if (DamageService.CanDamage(allyAttack.Value, enemyAttack.Value) && Vector2.DistanceSquared(allyAttack.Value.Position, enemyAttack.Value.Position) <= (range + allyAttack.Value.Unit.Radius + enemyAttack.Value.Unit.Radius) * (range + allyAttack.Value.Unit.Radius + enemyAttack.Value.Unit.Radius))
                     {
+                        if (allyAttack.Value.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED && Vector2.DistanceSquared(allyAttack.Value.Position, enemyAttack.Value.Position) < 4)
+                        {
+                            continue;
+                        }
                         allyAttack.Value.EnemiesInRange.Add(enemyAttack.Value);
                         enemyAttack.Value.EnemiesInRangeOf.Add(allyAttack.Value);
                     }
@@ -281,6 +293,10 @@ namespace Sharky.Managers
                         var distanceSquared = Vector2.DistanceSquared(allyAttack.Value.Position, enemyAttack.Value.Position);
                         if (distanceSquared <= (AvoidRange + range + allyAttack.Value.Unit.Radius + enemyAttack.Value.Unit.Radius) * (AvoidRange + range + allyAttack.Value.Unit.Radius + enemyAttack.Value.Unit.Radius))
                         {
+                            if (enemyAttack.Value.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED && distanceSquared < 4)
+                            {
+                                continue;
+                            }
                             allyAttack.Value.EnemiesInRangeOfAvoid.Add(enemyAttack.Value);
                             if (distanceSquared <= (range + allyAttack.Value.Unit.Radius + enemyAttack.Value.Unit.Radius) * (range + allyAttack.Value.Unit.Radius + enemyAttack.Value.Unit.Radius))
                             {
@@ -339,6 +355,10 @@ namespace Sharky.Managers
                                 var range = GetRange(selfAttack, enemyAttack);
                                 if (DamageService.CanDamage(selfAttack, enemyAttack) && Vector2.DistanceSquared(selfAttack.Position, enemyAttack.Position) <= (range + selfAttack.Unit.Radius + enemyAttack.Unit.Radius) * (range + selfAttack.Unit.Radius + enemyAttack.Unit.Radius))
                                 {
+                                    if (selfAttack.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED && Vector2.DistanceSquared(selfAttack.Position, enemyAttack.Position) < 4)
+                                    {
+                                        continue;
+                                    }
                                     selfAttack.EnemiesInRange.Add(enemyAttack);
                                 }
                                 if (DamageService.CanDamage(enemyAttack, selfAttack))
@@ -347,6 +367,10 @@ namespace Sharky.Managers
                                     var distanceSquared = Vector2.DistanceSquared(selfAttack.Position, enemyAttack.Position);
                                     if (distanceSquared <= (AvoidRange + range + selfAttack.Unit.Radius + enemyAttack.Unit.Radius) * (AvoidRange + range + selfAttack.Unit.Radius + enemyAttack.Unit.Radius))
                                     {
+                                        if (selfAttack.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED && distanceSquared < 4)
+                                        {
+                                            continue;
+                                        }
                                         selfAttack.EnemiesInRangeOfAvoid.Add(enemyAttack);
                                         if (distanceSquared <= (range + selfAttack.Unit.Radius + enemyAttack.Unit.Radius) * (range + selfAttack.Unit.Radius + enemyAttack.Unit.Radius))
                                         {
@@ -485,6 +509,10 @@ namespace Sharky.Managers
                         fireTime = weapon.Speed/10f; // TODO: need to get the actual fire times for weapons
                     }
                     var distance = Vector2.Distance(unitCalculation.Position, enemyAttack.Position);
+                    if (enemyAttack.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED && distance < 2)
+                    {
+                        continue;                   
+                    }
                     var avoidDistance = AvoidRange + enemyAttack.Range + unitCalculation.Unit.Radius + enemyAttack.Unit.Radius;
                     var distanceToInRange = distance - avoidDistance;
                     var timeToGetInRange = distanceToInRange / unitCalculation.UnitTypeData.MovementSpeed; // TODO: factor in speed buffs like creep
@@ -522,6 +550,14 @@ namespace Sharky.Managers
                 if (closestDisruptor != null)
                 {
                     return closestDisruptor;
+                }
+            }
+            if (commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_INTERCEPTOR)
+            {
+                var closestCarrier = commander.UnitCalculation.NearbyAllies.Where(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_CARRIER).OrderBy(a => Vector2.DistanceSquared(a.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+                if (closestCarrier != null)
+                {
+                    return closestCarrier;
                 }
             }
 

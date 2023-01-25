@@ -257,6 +257,7 @@ namespace Sharky.DefaultBot
             BaseManager = new BaseManager(SharkyUnitData, ActiveUnitData, SharkyPathFinder, UnitCountService, BaseData);
             Managers.Add(BaseManager);
 
+            AttackPathingService = new AttackPathingService(this);
             TargetingManager = new TargetingManager(this);
             Managers.Add(TargetingManager);
 
@@ -315,7 +316,6 @@ namespace Sharky.DefaultBot
 
             ProxyLocationService = new ProxyLocationService(BaseData, TargetingData, SharkyPathFinder, MapDataService, AreaService);
             TargetingService = new TargetingService(ActiveUnitData, MapDataService, BaseData, TargetingData);
-            AttackPathingService = new AttackPathingService(this);
             CreepTumorPlacementFinder = new CreepTumorPlacementFinder(this, SharkyPathFinder);
 
             EnemyAggressivityService = new EnemyAggressivityService(this);
@@ -329,8 +329,8 @@ namespace Sharky.DefaultBot
             var archonMicroController = new ArchonMicroController(this, SharkySimplePathFinder, MicroPriority.AttackForward, false);
             var colossusMicroController = new ColossusMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
             var darkTemplarMicroController = new DarkTemplarMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
-            var disruptorMicroController = new DisruptorMicroController(this, SharkySimplePathFinder, MicroPriority.StayOutOfRange, false);
-            var disruptorPhasedMicroController = new DisruptorPhasedMicroController(this, SharkySimplePathFinder, MicroPriority.AttackForward, false);
+            var disruptorMicroController = new DisruptorMicroController(this, SharkySimplePathFinder, MicroPriority.StayOutOfRange, false, SharkyPathFinder);
+            var disruptorPhasedMicroController = new DisruptorPhasedMicroController(this, SharkySimplePathFinder, MicroPriority.AttackForward, false, SharkyPathFinder);
             var highTemplarMicroController = new HighTemplarMicroController(this, SharkySimplePathFinder, MicroPriority.StayOutOfRange, false);
             var mothershipMicroController = new MothershipMicroController(this, SharkySimplePathFinder, MicroPriority.StayOutOfRange, false);
             var oracleMicroController = new OracleMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
@@ -482,6 +482,7 @@ namespace Sharky.DefaultBot
             var repairTask = new RepairTask(this, .6f, true);
             var saveLiftableBuildingTask = new SaveLiftableBuildingTask(this, BuildingPlacement, .6f, true);
             var hellbatMorphTask = new HellbatMorphTask(this, false, 0.5f);
+            var salvageMainBunkerTask = new SalvageMainBunkerTask(this, false, 0.5f);
             var nexusRecallTask = new NexusRecallTask(this, false, 0.5f);
             var forceFieldRampTask = new ForceFieldRampTask(TargetingData, ActiveUnitData, MapData, WallService, MapDataService, false, 0.5f);
             var denyExpansionsTask = new DenyExpansionsTask(this, false, 1.1f);
@@ -523,6 +524,7 @@ namespace Sharky.DefaultBot
             MicroTaskData[repairTask.GetType().Name] = repairTask;
             MicroTaskData[saveLiftableBuildingTask.GetType().Name] = saveLiftableBuildingTask;
             MicroTaskData[hellbatMorphTask.GetType().Name] = hellbatMorphTask;
+            MicroTaskData[salvageMainBunkerTask.GetType().Name] = salvageMainBunkerTask;
             MicroTaskData[nexusRecallTask.GetType().Name] = nexusRecallTask;
             MicroTaskData[forceFieldRampTask.GetType().Name] = forceFieldRampTask;
             MicroTaskData[denyExpansionsTask.GetType().Name] = denyExpansionsTask;

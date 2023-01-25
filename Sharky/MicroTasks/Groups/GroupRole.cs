@@ -14,6 +14,7 @@
         Bait,
         Scout,
         Harass,
-        Support
+        Support,
+        Disband
     }
 }

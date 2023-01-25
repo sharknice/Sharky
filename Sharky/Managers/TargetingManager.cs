@@ -5,8 +5,10 @@ using Sharky.Extensions;
 using Sharky.Pathing;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Linq;
 using System.Numerics;
+using static SC2APIProtocol.AbilityData.Types;
 
 namespace Sharky.Managers
 {
@@ -25,6 +27,7 @@ namespace Sharky.Managers
         DebugService DebugService;
         WallDataService WallDataService;
         BaseToBasePathingService BaseToBasePathingService;
+        AttackPathingService AttackPathingService;
 
         int baseCount;
 
@@ -47,6 +50,7 @@ namespace Sharky.Managers
             ChokePointsService = defaultSharkyBot.ChokePointsService;
             DebugService = defaultSharkyBot.DebugService;
             WallDataService = defaultSharkyBot.WallDataService;
+            AttackPathingService = defaultSharkyBot.AttackPathingService;
 
             baseCount = 0;
             LastUpdateFrame = -10000;
@@ -256,7 +260,8 @@ namespace Sharky.Managers
             if (baseCount != BaseData.SelfBases.Count())
             {
                 var resourceCenters = ActiveUnitData.SelfUnits.Values.Where(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter) && !u.Unit.IsFlying);
-                var ordered = BaseData.BaseLocations.Where(b => resourceCenters.Any(r => Vector2.DistanceSquared(r.Position, new Vector2(b.Location.X, b.Location.Y)) < 25)).OrderBy(b => Vector2.DistanceSquared(new Vector2(b.Location.X, b.Location.Y), new Vector2(TargetingData.AttackPoint.X, TargetingData.AttackPoint.Y)));
+                var ordered = BaseData.BaseLocations.Where(b => resourceCenters.Any(r => Vector2.DistanceSquared(r.Position, new Vector2(b.Location.X, b.Location.Y)) < 25)).OrderBy(b => GetDistance(b));
+                //var ordered = BaseData.BaseLocations.Where(b => resourceCenters.Any(r => Vector2.DistanceSquared(r.Position, new Vector2(b.Location.X, b.Location.Y)) < 25)).OrderBy(b => Vector2.DistanceSquared(new Vector2(b.Location.X, b.Location.Y), new Vector2(TargetingData.AttackPoint.X, TargetingData.AttackPoint.Y)));
                 var closestBase = ordered.FirstOrDefault();
                 if (TargetingData.WallOffBasePosition == WallOffBasePosition.Natural && resourceCenters.Count() <= 2)
                 {
@@ -310,6 +315,25 @@ namespace Sharky.Managers
                     TargetingData.ForwardDefensePoint = task.Value.Location;
                 }
             }
+        }
+
+        float GetDistance(BaseLocation baseLocation)
+        {
+            // TODO: make sure this works and fixes the Stargazers trying to defend the pocket instead of front base
+            if (MapData.PathData.Count > 1)
+            {
+                var path = AttackPathingService.GetNearestPath(baseLocation.Location.ToVector2(), TargetingData.AttackPoint.ToVector2());
+                if (path?.Path == null || path.Path.Count < 2)
+                {
+                    path = AttackPathingService.GetNearestPath(baseLocation.Location.ToVector2(), TargetingData.EnemyMainBasePoint.ToVector2());
+                    if (path?.Path == null || path.Path.Count < 2)
+                    {
+                        return 10000;
+                    }
+                }
+                return path.Path.Count;
+            }
+            return Vector2.DistanceSquared(baseLocation.Location.ToVector2(), TargetingData.AttackPoint.ToVector2());
         }
     }
 }

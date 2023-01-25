@@ -1,4 +1,5 @@
-﻿using SC2APIProtocol;
+﻿using Roy_T.AStar.Paths;
+using SC2APIProtocol;
 using Sharky.DefaultBot;
 using Sharky.Pathing;
 using System.Collections.Generic;
@@ -10,11 +11,12 @@ namespace Sharky.MicroControllers.Protoss
     public class DisruptorPhasedMicroController : IndividualMicroController
     {
         float PurificationNovaSpeed = 5.95f;
+        IPathFinder NovaPathFinder;
 
-        public DisruptorPhasedMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled)
+        public DisruptorPhasedMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled, IPathFinder novaPathFinder)
             : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled)
         {
-
+            NovaPathFinder = novaPathFinder;
         }
 
         public override List<SC2APIProtocol.Action> Attack(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
@@ -32,9 +34,10 @@ namespace Sharky.MicroControllers.Protoss
             var attacks = new List<UnitCalculation>();
             var center = commander.UnitCalculation.Position;
 
+            var range = ((PurificationNovaSpeed / SharkyOptions.FramesPerSecond) * commander.UnitCalculation.Unit.BuffDurationRemain) + 3f + 1f + commander.UnitCalculation.Unit.Radius;
             foreach (var enemyAttack in commander.UnitCalculation.NearbyEnemies)
             {
-                if (!enemyAttack.Unit.IsFlying && InRange(enemyAttack.Position, commander.UnitCalculation.Position, ((PurificationNovaSpeed / SharkyOptions.FramesPerSecond) * commander.UnitCalculation.Unit.BuffDurationRemain) + 3f + enemyAttack.Unit.Radius + commander.UnitCalculation.Unit.Radius)) // TODO: do actual pathing to see if the shot can make it there, if a wall is in the way it can't
+                if (!enemyAttack.Unit.IsFlying && InRange(enemyAttack.Position, commander.UnitCalculation.Position, range)) // TODO: may not need to do this on the nova itself since it's proven it can hit something already, but would be good to if performance allows it
                 {
                     attacks.Add(enemyAttack);
                 }
@@ -45,13 +48,13 @@ namespace Sharky.MicroControllers.Protoss
                 var oneShotKills = attacks.OrderBy(a => GetPurificationNovaDamage(a.Unit, SharkyUnitData.UnitData[(UnitTypes)a.Unit.UnitType])).ThenByDescending(u => u.Dps);
                 if (oneShotKills.Count() > 0)
                 {
-                    var bestAttack = GetBestAttack(commander.UnitCalculation, oneShotKills, attacks);
+                    var bestAttack = GetBestAttack(commander.UnitCalculation, oneShotKills, attacks, range, frame);
                     if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.WinAir)
                     {
                         var airAttackers = oneShotKills.Where(u => u.DamageAir);
                         if (airAttackers.Count() > 0)
                         {
-                            var air = GetBestAttack(commander.UnitCalculation, airAttackers, attacks);
+                            var air = GetBestAttack(commander.UnitCalculation, airAttackers, attacks, range, frame);
                             if (air != null)
                             {
                                 bestAttack = air;
@@ -63,7 +66,7 @@ namespace Sharky.MicroControllers.Protoss
                         var groundAttackers = oneShotKills.Where(u => u.DamageGround);
                         if (groundAttackers.Count() > 0)
                         {
-                            var ground = GetBestAttack(commander.UnitCalculation, groundAttackers, attacks);
+                            var ground = GetBestAttack(commander.UnitCalculation, groundAttackers, attacks, range, frame);
                             if (ground != null)
                             {
                                 bestAttack = ground;
@@ -116,7 +119,7 @@ namespace Sharky.MicroControllers.Protoss
             return 145 + bonusDamage - unitTypeData.Armor; // TODO: armor upgrades
         }
 
-        private Point2D GetBestAttack(UnitCalculation potentialAttack, IEnumerable<UnitCalculation> enemies, IList<UnitCalculation> splashableEnemies)
+        private Point2D GetBestAttack(UnitCalculation potentialAttack, IEnumerable<UnitCalculation> enemies, IList<UnitCalculation> splashableEnemies, float range, int frame)
         {
             float splashRadius = 1.5f;
             var killCounts = new Dictionary<Point, float>();
@@ -152,6 +155,13 @@ namespace Sharky.MicroControllers.Protoss
             {
                 return null;
             }
+
+            var path = NovaPathFinder.GetGroundPath(potentialAttack.Position.X, potentialAttack.Position.Y, best.Key.X, best.Key.Y, frame, range);
+            if (path == null || path.Count > range)
+            {
+                return null;
+            }
+
             return new Point2D { X = best.Key.X, Y = best.Key.Y };
         }
 

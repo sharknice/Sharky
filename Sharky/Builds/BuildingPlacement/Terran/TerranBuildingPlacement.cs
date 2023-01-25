@@ -99,7 +99,7 @@ namespace Sharky.Builds.BuildingPlacement
         public Point2D FindProductionPlacement(Point2D reference, UnitTypes unitType, float size, float maxDistance, WallOffType wallOffType, float minimumMineralProximinity = 5)
         {
             Point2D spot;
-            if (wallOffType == WallOffType.Terran)
+            if (wallOffType == WallOffType.Terran && unitType != UnitTypes.TERRAN_COMMANDCENTER)
             {
                 spot = TerranWallService.FindProductionWallPlacement(reference, unitType, size, maxDistance, minimumMineralProximinity);
                 if (spot != null) { return spot; }

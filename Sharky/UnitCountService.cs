@@ -204,6 +204,12 @@ namespace Sharky
             {
                 count += Count(UnitTypes.TERRAN_STARPORTFLYING);
             }
+            else if (unitType == UnitTypes.TERRAN_TECHLAB)
+            {
+                count += Count(UnitTypes.TERRAN_BARRACKSTECHLAB);
+                count += Count(UnitTypes.TERRAN_FACTORYTECHLAB);
+                count += Count(UnitTypes.TERRAN_STARPORTTECHLAB);
+            }
 
             else if (unitType == UnitTypes.TERRAN_HELLION)
             {

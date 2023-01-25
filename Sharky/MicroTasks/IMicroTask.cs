@@ -11,6 +11,7 @@ namespace Sharky.MicroTasks
         void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders);
         IEnumerable<Action> PerformActions(int frame);
         void ResetClaimedUnits();
+        List<UnitCommander> ResetNonEssentialClaims();
         void Enable();
         void Disable();
         bool Enabled { get; }

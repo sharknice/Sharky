@@ -59,7 +59,7 @@ namespace Sharky.MicroTasks.Mining
 
             foreach (var commander in UnitCommanders)
             {
-                if (EnemyReaper == null || commander.UnitCalculation.Unit.Health + commander.UnitCalculation.Unit.Shield <= 35 || !commander.UnitCalculation.NearbyAllies.Any(a => a.UnitClassifications.Contains(UnitClassification.ResourceCenter)))
+                if (EnemyReaper == null || commander.UnitCalculation.Unit.Health + commander.UnitCalculation.Unit.Shield <= 15 || !commander.UnitCalculation.NearbyAllies.Any(a => a.UnitClassifications.Contains(UnitClassification.ResourceCenter)))
                 {
                     commander.UnitRole = UnitRole.None;
                     List<SC2APIProtocol.Action> action;

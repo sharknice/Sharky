@@ -40,6 +40,9 @@
     <None Update="StaticData\opponents\Xena.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="StaticData\opponents\XenaP.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="StaticData\opponents\XenaZ.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

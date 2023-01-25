@@ -29,6 +29,7 @@
         Hide,
         Regroup,
         BlockExpansion,
-        Leader
+        Leader,
+        Disband
     }
 }

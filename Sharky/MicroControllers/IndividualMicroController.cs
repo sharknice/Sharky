@@ -479,7 +479,7 @@ namespace Sharky.MicroControllers
 
             if (HoldStillForRepair(commander, frame, out action)) { return true; }
 
-            if (GetInBunker(commander, frame, out action)) { return true; }
+            if (commander.UnitCalculation.NearbyEnemies.Any() && GetInBunker(commander, frame, out action)) { return true; }
 
             // TODO: special case movement
             //if (ChargeBlindly(commander, target))
@@ -1249,7 +1249,7 @@ namespace Sharky.MicroControllers
                     }
                 }
 
-                bestAttack = GetBestTargetFromList(commander, attacks, existingAttackOrder);
+                bestAttack = GetBestTargetFromList(commander, attacks.Where(a => a.Unit.UnitType != (uint)UnitTypes.PROTOSS_INTERCEPTOR), existingAttackOrder);
                 if (bestAttack != null && (bestAttack.UnitClassifications.Contains(UnitClassification.ArmyUnit) || bestAttack.UnitClassifications.Contains(UnitClassification.DefensiveStructure) || (bestAttack.UnitClassifications.Contains(UnitClassification.Worker) && bestAttack.EnemiesInRange.Any(e => e.Unit.Tag == commander.UnitCalculation.Unit.Tag))))
                 {
                     commander.BestTarget = bestAttack;
@@ -1333,6 +1333,119 @@ namespace Sharky.MicroControllers
             return bestAttack;
         }
 
+        protected UnitCalculation GetBestTarget(UnitCommander commander, List<UnitTypes> targetPriorityList, Point2D target, int frame, float range = -1)
+        {
+            var existingAttackOrder = commander.UnitCalculation.Unit.Orders.Where(o => o.AbilityId == (uint)Abilities.ATTACK || o.AbilityId == (uint)Abilities.ATTACK_ATTACK).FirstOrDefault();
+
+            if (range < 0)
+            {
+                range = commander.UnitCalculation.Range;
+            }
+
+            // damaging units in priority in range or not
+            // non damaging units in priority in range, then not in range
+            // other stuff in range, then not in range
+
+            var priorityAttacks = commander.UnitCalculation.NearbyEnemies.Where(e => e.Unit.DisplayType == DisplayType.Visible && targetPriorityList.Contains((UnitTypes)e.Unit.UnitType));
+            var priorityDamagers = priorityAttacks.Where(e => e.Damage > 0);
+            var priorityOther = priorityAttacks.Where(e => e.Damage == 0);
+
+            var attacks = commander.UnitCalculation.EnemiesInRange.Where(e => priorityDamagers.Any(p => p.Unit.Tag == e.Unit.Tag));
+
+            UnitCalculation bestAttack = null;
+            if (attacks.Count() > 0)
+            {
+                var oneShotKills = attacks.Where(a => a.Unit.Health + a.Unit.Shield < GetDamage(commander.UnitCalculation.Weapons, a.Unit, a.UnitTypeData) && !a.Unit.BuffIds.Contains((uint)Buffs.IMMORTALOVERLOAD));
+                if (oneShotKills.Count() > 0)
+                {
+                    if (existingAttackOrder != null)
+                    {
+                        var existing = oneShotKills.FirstOrDefault(o => o.Unit.Tag == existingAttackOrder.TargetUnitTag);
+                        if (existing != null)
+                        {
+                            return existing; // just keep attacking the same unit
+                        }
+                    }
+
+                    var oneShotKill = GetBestTargetFromList(commander, oneShotKills, existingAttackOrder);
+                    if (oneShotKill != null)
+                    {
+                        return oneShotKill;
+                    }
+                    else
+                    {
+                        commander.BestTarget = oneShotKills.OrderBy(o => o.Dps).FirstOrDefault();
+                        return commander.BestTarget;
+                    }
+                }
+
+                bestAttack = GetBestTargetFromList(commander, attacks, existingAttackOrder);
+                if (bestAttack != null)
+                {
+                    commander.BestTarget = bestAttack;
+                    return bestAttack;
+                }
+            }
+
+            attacks = priorityDamagers;
+            if (attacks.Count() > 0)
+            {
+                bestAttack = GetBestTargetFromList(commander, attacks, existingAttackOrder);
+                if (bestAttack != null)
+                {
+                    commander.BestTarget = bestAttack;
+                    return bestAttack;
+                }
+            }
+
+            // defend proxy units/buildings
+            attacks = commander.UnitCalculation.NearbyEnemies.Where(e => e.EnemiesInRange.Count() > 0);
+            if (attacks.Count() > 0)
+            {
+                bestAttack = GetBestTargetFromList(commander, attacks, existingAttackOrder);
+                if (bestAttack != null)
+                {
+                    commander.BestTarget = bestAttack;
+                    return bestAttack;
+                }
+            }
+
+            attacks = commander.UnitCalculation.EnemiesInRange.Where(e => priorityOther.Any(p => p.Unit.Tag == e.Unit.Tag));
+            if (attacks.Count() > 0)
+            {
+                bestAttack = GetBestTargetFromList(commander, attacks, existingAttackOrder);
+                if (bestAttack != null)
+                {
+                    commander.BestTarget = bestAttack;
+                    return bestAttack;
+                }
+            }
+
+            attacks = commander.UnitCalculation.EnemiesInRange.Where(e => priorityOther.Any(p => p.Unit.Tag == e.Unit.Tag));
+            if (attacks.Count() > 0)
+            {
+                bestAttack = GetBestTargetFromList(commander, attacks, existingAttackOrder);
+                if (bestAttack != null)
+                {
+                    commander.BestTarget = bestAttack;
+                    return bestAttack;
+                }
+            }
+
+            attacks = priorityOther;
+            if (attacks.Count() > 0)
+            {
+                bestAttack = GetBestTargetFromList(commander, attacks, existingAttackOrder);
+                if (bestAttack != null)
+                {
+                    commander.BestTarget = bestAttack;
+                    return bestAttack;
+                }
+            }
+
+            return null;
+        }
+
         protected Point2D GetBestTargetAttackPoint(UnitCommander commander, UnitCalculation bestTarget)
         {
             var enemyPosition = new Point2D { X = bestTarget.Unit.Pos.X, Y = bestTarget.Unit.Pos.Y };
@@ -1394,6 +1507,11 @@ namespace Sharky.MicroControllers
                 return true;
             }
 
+            if (bestTarget != null && bestTarget.Unit.Tag != commander.UnitCalculation.Unit.Tag && bestTarget.Unit.UnitType == (uint)UnitTypes.PROTOSS_CARRIER && bestTarget.FrameLastSeen == frame && commander.UnitCalculation.EnemiesThreateningDamage.Any(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_INTERCEPTOR))
+            {
+                action = commander.Order(frame, Abilities.ATTACK, targetTag: bestTarget.Unit.Tag);
+                return true;
+            }
             if (commander.UnitCalculation.EnemiesThreateningDamage.Count() > 0 && !commander.UnitCalculation.TargetPriorityCalculation.Overwhelm && MicroPriority != MicroPriority.AttackForward && commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.Retreat)
             {
                 return false;
@@ -1624,9 +1742,9 @@ namespace Sharky.MicroControllers
                     }
                     return true;
                 }
-                else if (WeaponReady(commander, frame) && commander.UnitCalculation.EnemiesInRange.Any(e => e.FrameLastSeen == frame))
+                else if (WeaponReady(commander, frame) && commander.UnitCalculation.EnemiesInRange.Any(e => e.FrameLastSeen == frame && e.Unit.UnitType != (uint)UnitTypes.PROTOSS_INTERCEPTOR))
                 {
-                    var bestInRange = GetBestTargetFromList(commander, commander.UnitCalculation.EnemiesInRange.Where(e => e.FrameLastSeen == frame), null);
+                    var bestInRange = GetBestTargetFromList(commander, commander.UnitCalculation.EnemiesInRange.Where(e => e.FrameLastSeen == frame && e.Unit.UnitType != (uint)UnitTypes.PROTOSS_INTERCEPTOR), null);
                     if (bestInRange != null)
                     {
                         action = commander.Order(frame, Abilities.ATTACK, null, bestInRange.Unit.Tag);

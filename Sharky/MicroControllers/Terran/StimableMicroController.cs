@@ -1,8 +1,10 @@
 ﻿using SC2APIProtocol;
 using Sharky.DefaultBot;
+using Sharky.Extensions;
 using Sharky.Pathing;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace Sharky.MicroControllers.Terran
 {
@@ -12,6 +14,35 @@ namespace Sharky.MicroControllers.Terran
             : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled)
         {
 
+        }
+
+        public override List<SC2APIProtocol.Action> Attack(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
+        {
+            if (GetOutOfBunker(commander, target, frame, out List<Action> action)) { return action; }
+            return base.Attack(commander, target, defensivePoint, groupCenter, frame);
+        }
+
+        public override List<SC2APIProtocol.Action> Support(UnitCommander commander, IEnumerable<UnitCommander> supportTargets, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
+        {
+            if (GetOutOfBunker(commander, target, frame, out List<Action> action)) { return action; }
+            return base.Support(commander, supportTargets, target, defensivePoint, groupCenter, frame);
+        }
+
+        protected bool GetOutOfBunker(UnitCommander commander, Point2D target, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
+
+            if (commander.UnitCalculation.Loaded)
+            {
+                var bunker = ActiveUnitData.Commanders.Values.FirstOrDefault(a => a.UnitCalculation.Unit.Passengers.Any(p => p.Tag == commander.UnitCalculation.Unit.Tag));
+                if (Vector2.DistanceSquared(bunker.UnitCalculation.Position, target.ToVector2()) > 100)
+                {
+                    action = bunker.UnloadSpecificUnit(frame, Abilities.UNLOADALLAT, commander.UnitCalculation.Unit.Tag);
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         protected bool Stiming(UnitCommander commander)
@@ -44,7 +75,7 @@ namespace Sharky.MicroControllers.Terran
         {
             action = null;
 
-            var nearbyBunkers = commander.UnitCalculation.NearbyAllies.Take(25).Where(u => u.Unit.UnitType == (uint)UnitTypes.TERRAN_BUNKER && u.Unit.BuildProgress == 1);
+            var nearbyBunkers = commander.UnitCalculation.NearbyAllies.Where(u => u.Unit.UnitType == (uint)UnitTypes.TERRAN_BUNKER && u.Unit.BuildProgress == 1);
             foreach (var bunker in nearbyBunkers)
             {
                 if (bunker.Unit.CargoSpaceMax - bunker.Unit.CargoSpaceTaken >= UnitDataService.CargoSize((UnitTypes)commander.UnitCalculation.Unit.UnitType))

@@ -172,6 +172,7 @@ namespace Sharky.MicroTasks
             UpdateNeeds();
 
             var commands = new List<SC2APIProtocol.Action>();
+            if (WallData == null) { return commands; }
 
             if (DoorSpot != null)
             {
@@ -394,10 +395,20 @@ namespace Sharky.MicroTasks
             }
             else if (commander.UnitCalculation.NearbyEnemies.Any(e => e.FrameLastSeen > frame - 5 && Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position) < 4))
             {
+                var changeling = commander.UnitCalculation.EnemiesInRange.FirstOrDefault(e => e.Unit.UnitType == (uint)UnitTypes.ZERG_CHANGELINGZEALOT);
+                if (changeling != null)
+                {
+                    return commander.Order(frame, Abilities.ATTACK, targetTag: changeling.Unit.Tag);
+                }
                 return commander.Order(frame, Abilities.HOLDPOSITION);
             }
             else if (commander.UnitCalculation.NearbyEnemies.Any())
             {
+                var changeling = commander.UnitCalculation.EnemiesInRange.FirstOrDefault(e => e.Unit.UnitType == (uint)UnitTypes.ZERG_CHANGELINGZEALOT);
+                if (changeling != null)
+                {
+                    return commander.Order(frame, Abilities.ATTACK, targetTag: changeling.Unit.Tag);
+                }
                 return commander.Order(frame, Abilities.ATTACK, DoorSpot);
             }
             else
@@ -591,7 +602,7 @@ namespace Sharky.MicroTasks
                 return new List<SC2APIProtocol.Action>();
             }
 
-            if (UnitCommanders.Count(c => c.UnitRole == UnitRole.Attack) < 5)
+            if (UnitCommanders.Count(c => c.UnitRole == UnitRole.Attack) < 5 && WallData != null)
             {
                 var vector = new Vector2(WallData.Block.X, WallData.Block.Y);
                 var commanders = MicroTaskData[typeof(AttackTask).Name].UnitCommanders.Where(c => c.UnitCalculation.DamageGround).OrderBy(c => Vector2.DistanceSquared(c.UnitCalculation.Position, vector)).Take(5);
@@ -630,7 +641,7 @@ namespace Sharky.MicroTasks
                 }
             }
             
-            if (UnitCommanders.Count(c => c.UnitRole == UnitRole.Attack) < 5)
+            if (UnitCommanders.Count(c => c.UnitRole == UnitRole.Attack) < 5 && WallData != null)
             {
                 var vector = new Vector2(WallData.Block.X, WallData.Block.Y);
                 var commanders = MicroTaskData[typeof(AttackTask).Name].UnitCommanders.Where(c => c.UnitCalculation.DamageGround).OrderBy(c => Vector2.DistanceSquared(c.UnitCalculation.Position, vector)).Take(5);
@@ -669,6 +680,7 @@ namespace Sharky.MicroTasks
 
             DestroyBlock = true;
             GetWallData();
+            if (WallData == null) { return; }
             var vector = new Vector2(WallData.Block.X, WallData.Block.Y);
             var block = ActiveUnitData.Commanders.Values.FirstOrDefault(u => (u.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON || u.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_SHIELDBATTERY) && u.UnitCalculation.Position.X == WallData.Block.X && u.UnitCalculation.Position.Y == WallData.Block.Y);
             if (block != null)
@@ -682,6 +694,7 @@ namespace Sharky.MicroTasks
         {
             LastWallKillAquireFrame = frame;
             GetWallData();
+            if (WallData == null) { return; }
             var vector = new Vector2(WallData.Block.X, WallData.Block.Y);
             var closestShieldBatteryOrPylon = ActiveUnitData.Commanders.Values.Where(u => (u.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON || u.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_SHIELDBATTERY) && !WallData.Pylons.Any(p => u.UnitCalculation.Position.X == p.X && u.UnitCalculation.Position.Y == p.Y)).OrderBy(c => Vector2.DistanceSquared(c.UnitCalculation.Position, vector)).FirstOrDefault();
             if (closestShieldBatteryOrPylon != null && Vector2.DistanceSquared(closestShieldBatteryOrPylon.UnitCalculation.Position, vector) < 16)

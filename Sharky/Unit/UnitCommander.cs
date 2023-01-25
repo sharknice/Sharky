@@ -37,6 +37,8 @@ namespace Sharky
         public bool RallyPointSet { get; set; }
         public bool AlwaysSpam { get; set; }
 
+        public StuckCheck StuckCheck { get; set; } 
+
         /// <summary>
         /// The adept for an adept shade, etc.
         /// </summary>
@@ -75,6 +77,8 @@ namespace Sharky
             AutoCastOff = false;
             RallyPointSet = false;
             AlwaysSpam = false;
+
+            StuckCheck = new StuckCheck { AttemptFrame = 0, StuckPosition = unitCalculation.Position };
         }
 
         public List<SC2APIProtocol.Action> Order(int frame, Abilities ability, Point2D targetLocation = null, ulong targetTag = 0, bool allowSpam = false, bool queue = false, bool allowConflict = false)
@@ -143,8 +147,26 @@ namespace Sharky
             }
 
             LastOrderFrame = frame;
+            PerformStuckCheck(frame, targetLocation);
 
             return new List<SC2APIProtocol.Action> { action };
+        }
+
+        private void PerformStuckCheck(int frame, Point2D targetLocation)
+        {
+            if (targetLocation == null || Vector2.DistanceSquared(UnitCalculation.Position, StuckCheck.StuckPosition) > 4 || Vector2.DistanceSquared(UnitCalculation.Position, targetLocation.ToVector2()) < 4)
+            {
+                StuckCheck.AttemptFrame = 0;
+                StuckCheck.StuckPosition = UnitCalculation.Position;
+            }
+            else if (StuckCheck.AttemptFrame == 0)
+            {
+                if (targetLocation != null && Vector2.DistanceSquared(UnitCalculation.Position, targetLocation.ToVector2()) > 4)
+                {
+                    StuckCheck.AttemptFrame = frame;
+                    StuckCheck.StuckPosition = UnitCalculation.Position;
+                }
+            }
         }
 
         public List<SC2APIProtocol.Action> ToggleAutoCast(Abilities ability)

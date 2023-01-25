@@ -309,9 +309,9 @@ namespace Sharky.MicroTasks.Mining
                 var wallData = MapDataService.MapData?.WallData?.FirstOrDefault(b => b.BasePosition.X == TargetingData.NaturalBasePoint.X && b.BasePosition.Y == TargetingData.NaturalBasePoint.Y);
                 foreach (var commander in unitCommanders)
                 {
-                    if (EnemyData.SelfRace == Race.Protoss && wallData != null && commander.UnitCalculation.NearbyEnemies.Any(e => e.FrameLastSeen == frame) && Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(wallData.Door.X, wallData.Door.Y)) < 9)
+                    if (EnemyData.SelfRace == Race.Protoss && wallData != null && commander.UnitCalculation.NearbyEnemies.Any(e => e.FrameLastSeen == frame && !e.Unit.IsFlying) && Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(wallData.Door.X, wallData.Door.Y)) < 9)
                     {
-                        if (MineralWalker.MineralWalkHome(commander, frame, out List<SC2APIProtocol.Action> action))
+                        if (commander.UnitRole != UnitRole.Build && MineralWalker.MineralWalkHome(commander, frame, out List<SC2APIProtocol.Action> action))
                         {
                             actions.AddRange(action);
                             continue;
@@ -371,7 +371,7 @@ namespace Sharky.MicroTasks.Mining
                             actions.AddRange(action);
                         }
                     }
-                    else if (commander.UnitCalculation.Unit.WeaponCooldown == 0 && commander.UnitCalculation.EnemiesInRange.Count() > 0) // TODO: test this, attack any units if they walk by
+                    else if (commander.UnitRole != UnitRole.Build && commander.UnitCalculation.Unit.WeaponCooldown == 0 && commander.UnitCalculation.EnemiesInRange.Count() > 0)
                     {
                         var action = commander.Order(frame, Abilities.ATTACK, null, commander.UnitCalculation.EnemiesInRange.OrderBy(e => e.Unit.Health + e.Unit.Shield).FirstOrDefault().Unit.Tag);
                         if (action != null)
