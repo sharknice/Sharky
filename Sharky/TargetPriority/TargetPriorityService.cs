@@ -42,6 +42,9 @@ namespace Sharky
                 TargetPriority = TargetPriority.Attack
             };
 
+            allies = allies.Where(a => a.Unit.UnitType != (uint)UnitTypes.PROTOSS_INTERCEPTOR);
+            enemies = enemies.Where(a => a.Unit.UnitType != (uint)UnitTypes.PROTOSS_INTERCEPTOR);
+
             var allyHealth = allies.Sum(e => e.SimulatedHitpoints);
             var enemyHealth = enemies.Sum(e => e.SimulatedHitpoints);
 

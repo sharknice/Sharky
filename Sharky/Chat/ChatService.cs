@@ -12,12 +12,16 @@ namespace Sharky.Chat
         ActiveChatData ActiveChatData;
         EnemyData EnemyData;
 
+        bool ExceptionTagged;
+
         public ChatService(IChatDataService chatDataService, SharkyOptions sharkyOptions, ActiveChatData activeChatData, EnemyData enemyData)
         {
             ChatDataService = chatDataService;
             SharkyOptions = sharkyOptions;
             ActiveChatData = activeChatData;
             EnemyData = enemyData;
+
+            ExceptionTagged = false;
         }
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
@@ -113,6 +117,15 @@ namespace Sharky.Chat
             {
                 tag = new string(tag.Select(c => (char.IsLetterOrDigit(c) || c == '-') ? c : '_').ToArray());
                 SendInstantChatMessage($"Tag:{tag}", !SharkyOptions.TagsAllChat);
+            }
+        }
+
+        public void TagException()
+        {
+            if (SharkyOptions.TagsEnabled && !ExceptionTagged)
+            {
+                SendInstantChatMessage($"Tag:Exception", !SharkyOptions.TagsAllChat);
+                ExceptionTagged = true;
             }
         }
 

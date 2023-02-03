@@ -460,6 +460,8 @@ namespace Sharky.MicroControllers
 
         protected virtual bool SpecialCaseMove(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, Formation formation, int frame, out List<SC2APIProtocol.Action> action)
         {
+
+            if (DealWithInterferenceMatrix(commander, target, defensivePoint, frame, out action)) { return true; }
             if (DealWithParasiticBomb(commander, target, defensivePoint, frame, out action)) { return true; }
             if (AvoidPurificationNovas(commander, target, defensivePoint, frame, out action)) { return true; }
 
@@ -1270,7 +1272,7 @@ namespace Sharky.MicroControllers
             var outOfRangeAttacks = commander.UnitCalculation.NearbyEnemies.Take(25).Where(enemyAttack => !commander.UnitCalculation.EnemiesInRange.Any(e => e.Unit.Tag == enemyAttack.Unit.Tag)
                 && enemyAttack.Unit.DisplayType == DisplayType.Visible && DamageService.CanDamage(commander.UnitCalculation, enemyAttack) && !AvoidedUnitTypes.Contains((UnitTypes)enemyAttack.Unit.UnitType) && AttackersFilter(commander, enemyAttack));
 
-            attacks = outOfRangeAttacks.Where(enemyAttack => enemyAttack.EnemiesInRange.Count() > 0);
+            attacks = outOfRangeAttacks.Where(enemyAttack => enemyAttack.EnemiesInRange.Count() > 0 && enemyAttack.Unit.UnitType != (uint)UnitTypes.PROTOSS_INTERCEPTOR);
             if (attacks.Count() > 0)
             {
                 var bestOutOfRangeAttack = GetBestTargetFromList(commander, attacks, existingAttackOrder);
@@ -2258,6 +2260,14 @@ namespace Sharky.MicroControllers
             }
 
             return false;
+        }
+
+        protected virtual bool DealWithInterferenceMatrix(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
+            if (!commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.INTERFERENCEMATRIX)) { return false; }
+
+            return AvoidAllDamage(commander, target, defensivePoint, frame, out action);
         }
 
         protected virtual bool DealWithParasiticBomb(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)

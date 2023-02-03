@@ -46,11 +46,11 @@ namespace Sharky.MicroTasks
             }
 
             var finalTargetPriority = TargetPriorityService.CalculateTargetPriority(counterGroup.Select(c => c.UnitCalculation), enemyGroup);
-            if (finalTargetPriority.OverallWinnability > 1)
+            if (finalTargetPriority.OverallWinnability > .5)
             {
                 return counterGroup;
             }
-            if (ActiveUnitData.SelfUnits.Any(u => u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_SHIELDBATTERY && u.Value.Unit.IsPowered && u.Value.Unit.BuildProgress >= 1 && u.Value.Unit.Energy > 3 && Vector2.DistanceSquared(enemyGroupLocation, u.Value.Position) < 64))
+            if (ActiveUnitData.SelfUnits.Any(u => u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_SHIELDBATTERY && u.Value.Unit.IsPowered && u.Value.Unit.BuildProgress >= 1 && (u.Value.Unit.Energy > 3 || u.Value.Unit.BuffIds.Contains((uint)Buffs.BATTERYOVERCHARGE)) && Vector2.DistanceSquared(enemyGroupLocation, u.Value.Position) < 64))
             {
                 // always defend by shield batteries
                 return counterGroup;

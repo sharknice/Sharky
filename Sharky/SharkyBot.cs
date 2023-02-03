@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using Sharky.Chat;
 using Sharky.Managers;
 using System;
 using System.Collections.Generic;
@@ -14,13 +15,14 @@ namespace Sharky
         FrameToTimeConverter FrameToTimeConverter;
         SharkyOptions SharkyOptions;
         PerformanceData PerformanceData;
+        ChatService ChatService;
 
         List<SC2APIProtocol.Action> Actions;
 
         Stopwatch Stopwatch;
         Stopwatch ManagerStopwatch;
 
-        public SharkyBot(List<IManager> managers, DebugService debugService, FrameToTimeConverter frameToTimeConverter, SharkyOptions sharkyOptions, PerformanceData performanceData)
+        public SharkyBot(List<IManager> managers, DebugService debugService, FrameToTimeConverter frameToTimeConverter, SharkyOptions sharkyOptions, PerformanceData performanceData, ChatService chatService)
         {
             Managers = managers;
             DebugService = debugService;
@@ -30,6 +32,7 @@ namespace Sharky
             Stopwatch = new Stopwatch();
             ManagerStopwatch = new Stopwatch();
             SharkyOptions = sharkyOptions;
+            ChatService = chatService;
         }
 
         public void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)
@@ -82,25 +85,34 @@ namespace Sharky
                         continue;
                     }
                     var beginManager = DateTime.UtcNow;
-                    var actions = manager.OnFrame(observation);
-                    if (actions != null)
+                    try
                     {
-                        Actions.AddRange(actions);
-                        
-                        foreach (var action in actions)
+                        var actions = manager.OnFrame(observation);
+                        if (actions != null)
                         {
-                            if (action?.ActionRaw?.UnitCommand?.UnitTags != null)
+                            Actions.AddRange(actions);
+
+                            foreach (var action in actions)
                             {
-                                foreach (var tag in action.ActionRaw.UnitCommand.UnitTags)
+                                if (action?.ActionRaw?.UnitCommand?.UnitTags != null)
                                 {
-                                    if (!observation.Observation.RawData.Units.Any(u => u.Tag == tag))
+                                    foreach (var tag in action.ActionRaw.UnitCommand.UnitTags)
                                     {
-                                        Console.WriteLine($"{observation.Observation.GameLoop} {manager.GetType().Name}, order {action.ActionRaw.UnitCommand.AbilityId}");
+                                        if (!observation.Observation.RawData.Units.Any(u => u.Tag == tag))
+                                        {
+                                            Console.WriteLine($"{observation.Observation.GameLoop} {manager.GetType().Name}, order {action.ActionRaw.UnitCommand.AbilityId}");
+                                        }
                                     }
                                 }
                             }
                         }
                     }
+                    catch (Exception exception)
+                    {
+                        ChatService.TagException();
+                        Console.WriteLine(exception.ToString());
+                    }
+
 
                     var endManager = DateTime.UtcNow;
                     var managerTime = (endManager - beginManager).TotalMilliseconds;

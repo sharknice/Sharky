@@ -713,12 +713,12 @@ namespace Sharky.DefaultBot
 
         public SharkyBot CreateBot(List<IManager> managers, DebugService debugService)
         {
-            return new SharkyBot(managers, debugService, FrameToTimeConverter, SharkyOptions, PerformanceData);
+            return new SharkyBot(managers, debugService, FrameToTimeConverter, SharkyOptions, PerformanceData, ChatService);
         }
 
         public SharkyBot CreateBot()
         {
-            return new SharkyBot(Managers, DebugService, FrameToTimeConverter, SharkyOptions, PerformanceData);
+            return new SharkyBot(Managers, DebugService, FrameToTimeConverter, SharkyOptions, PerformanceData, ChatService);
         }
     }
 }
