@@ -18,6 +18,11 @@ namespace Sharky.MicroControllers.Protoss
         {
             action = null;
 
+            if (WeaponReady(commander, frame) && commander.UnitCalculation.EnemiesInRangeOf.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) || e.UnitClassifications.Contains(UnitClassification.Worker) || e.UnitClassifications.Contains(UnitClassification.DefensiveStructure)))
+            {
+                return AttackBestTargetInRange(commander, target, bestTarget, frame, out action);
+            }
+
             if (commander.UnitCalculation.EnemiesInRangeOf.Any(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED || e.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANK))
             {
                 commander.UnitCalculation.TargetPriorityCalculation.Overwhelm = true;

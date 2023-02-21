@@ -17,6 +17,7 @@ namespace Sharky
         //public Dictionary<int, Unit> PreviousUnits { get; set; }
         public Vector2 Start { get; set; }
         public Vector2 End { get; set; }
+        public Vector2 EndPlusFive { get; set; }
         public float DamageRadius { get; set; }
         public float EstimatedCooldown { get; set; }
         public bool DamageGround { get; set; }
@@ -68,6 +69,11 @@ namespace Sharky
         /// </summary>
         public List<UnitCalculation> Attackers { get; set; }
 
+        /// <summary>
+        /// list of units Targeting this unit
+        /// </summary>
+        public List<UnitCalculation> Targeters { get; set; }
+
         public List<UnitClassification> UnitClassifications { get; set; }
         public TargetPriorityCalculation TargetPriorityCalculation { get; set; }
         public UnitTypeData UnitTypeData { get; set; }
@@ -117,12 +123,16 @@ namespace Sharky
                 || unit.UnitType == (uint)UnitTypes.ZERG_SPORECRAWLER || unit.UnitType == (uint)UnitTypes.ZERG_SPINECRAWLER)
             {
                 End = Start; // facing is always 0 for these units, can't calculate where they're aiming
+                EndPlusFive = Start;
             }
             else
             {
                 var endX = (float)(Range * Math.Sin(unit.Facing + (Math.PI / 2)));
                 var endY = (float)(Range * Math.Cos(unit.Facing + (Math.PI / 2)));
                 End = new Vector2(endX + unit.Pos.X, unit.Pos.Y - endY);
+                var endFiveX = (float)((Range + 5) * Math.Sin(unit.Facing + (Math.PI / 2)));
+                var endFiveY = (float)((Range + 5) * Math.Cos(unit.Facing + (Math.PI / 2)));
+                EndPlusFive = new Vector2(endFiveX + unit.Pos.X, unit.Pos.Y - endFiveY);
             }
 
             DamageRadius = 1; // TODO: get damage radius
@@ -245,6 +255,7 @@ namespace Sharky
             NearbyAllies = new List<UnitCalculation>();
             NearbyEnemies = new List<UnitCalculation>();
             Attackers = new List<UnitCalculation>();
+            Targeters = new List<UnitCalculation>();
             IncomingDamage = 0;
             Loaded = false;
         }

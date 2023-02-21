@@ -43,7 +43,12 @@ namespace Sharky.MicroTasks.Mining
           
             commands = DefendAgainstReaper(frame);
 
-            UnitCommanders.RemoveAll(c => c.UnitRole != UnitRole.ChaseReaper);
+            if (EnemyReaper == null)
+            {
+                UnitCommanders.ForEach(c => c.UnitRole = UnitRole.None);
+            }
+
+            UnitCommanders.RemoveAll(c => c.UnitRole != UnitRole.ChaseReaper && c.UnitRole != UnitRole.RunAway);
 
             return commands;
         }
@@ -59,9 +64,14 @@ namespace Sharky.MicroTasks.Mining
 
             foreach (var commander in UnitCommanders)
             {
-                if (EnemyReaper == null || commander.UnitCalculation.Unit.Health + commander.UnitCalculation.Unit.Shield <= 15 || !commander.UnitCalculation.NearbyAllies.Any(a => a.UnitClassifications.Contains(UnitClassification.ResourceCenter)))
+                var healthRequired = 15;
+                if (UnitCommanders.Count(c => c.UnitRole == UnitRole.ChaseReaper) < 3)
                 {
-                    commander.UnitRole = UnitRole.None;
+                    healthRequired = 25;
+                }
+                if (EnemyReaper == null || commander.UnitCalculation.Unit.Health + commander.UnitCalculation.Unit.Shield <= healthRequired || !commander.UnitCalculation.NearbyAllies.Any(a => a.UnitClassifications.Contains(UnitClassification.ResourceCenter)))
+                {
+                    commander.UnitRole = UnitRole.RunAway;
                     List<SC2APIProtocol.Action> action;
                     if (MineralWalker.MineralWalkHome(commander, frame, out action))
                     {
@@ -97,7 +107,7 @@ namespace Sharky.MicroTasks.Mining
 
         private void GetEnemyReaper()
         {
-            EnemyReaper = ActiveUnitData.EnemyUnits.Values.FirstOrDefault(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_REAPER && e.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ResourceCenter)) && !e.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !e.Unit.IsFlying));
+            EnemyReaper = ActiveUnitData.EnemyUnits.Values.FirstOrDefault(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_REAPER && e.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ResourceCenter)) && !e.NearbyAllies.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit)) && !e.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !e.Unit.IsFlying));
         }
 
         public override void RemoveDeadUnits(List<ulong> deadUnits)

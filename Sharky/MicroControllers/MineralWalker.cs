@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using SC2APIProtocol;
+using Sharky.Extensions;
+using Sharky.Pathing;
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
@@ -9,12 +12,16 @@ namespace Sharky.MicroControllers
         BaseData BaseData;
         SharkyUnitData SharkyUnitData;
         ActiveUnitData ActiveUnitData;
+        MapDataService MapDataService;
 
-        public MineralWalker(BaseData baseData, SharkyUnitData sharkyUnitData, ActiveUnitData activeUnitData)
+        BaseLocation DistractionBase;
+
+        public MineralWalker(BaseData baseData, SharkyUnitData sharkyUnitData, ActiveUnitData activeUnitData, MapDataService mapDataService)
         {
             BaseData = baseData;
             SharkyUnitData = sharkyUnitData;
             ActiveUnitData = activeUnitData;
+            MapDataService = mapDataService;
         }
 
         public bool MineralWalkHome(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
@@ -35,15 +42,39 @@ namespace Sharky.MicroControllers
             return false;
         }
 
+        public UnitCalculation GetTargetMineralPatch(UnitCommander commander, int skip = 4)
+        {
+            var mineralFields = ActiveUnitData.NeutralUnits.Values.Where(u => SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)u.Unit.UnitType));
+            var ordered = mineralFields.OrderBy(m => Vector2.DistanceSquared(new Vector2(BaseData.EnemyBaseLocations.FirstOrDefault().MiddleMineralLocation.X, BaseData.EnemyBaseLocations.FirstOrDefault().MiddleMineralLocation.Y), m.Position));
+            var mineralPatch = ordered.Skip(skip).FirstOrDefault();
+            if (mineralPatch != null)
+            {
+                return mineralPatch;
+            }
+            return ordered.FirstOrDefault();
+        }
+
+        public bool MineralWalkPatch(UnitCommander commander, UnitCalculation mineralPatch, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
+
+            if (mineralPatch != null)
+            {
+                action = commander.Order(frame, Abilities.HARVEST_GATHER, null, mineralPatch.Unit.Tag, allowSpam: true);
+                return true;
+            }
+
+            return false;
+        }
+
         public bool MineralWalkTarget(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
-            var mineralFields = ActiveUnitData.NeutralUnits.Values.Where(u => SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)u.Unit.UnitType));
-            var mineralPatch = mineralFields.OrderBy(m => Vector2.DistanceSquared(new Vector2(BaseData.EnemyBaseLocations.FirstOrDefault().Location.X, BaseData.EnemyBaseLocations.FirstOrDefault().Location.Y), m.Position)).FirstOrDefault();
+            var mineralPatch = GetTargetMineralPatch(commander);
             if (mineralPatch != null)
             {
-                action = commander.Order(frame, Abilities.HARVEST_GATHER, null, mineralPatch.Unit.Tag);
+                action = commander.Order(frame, Abilities.HARVEST_GATHER, null, mineralPatch.Unit.Tag, allowSpam: true);
                 return true;
             }
 
@@ -54,14 +85,10 @@ namespace Sharky.MicroControllers
         {
             action = null;
 
-            var selfLocation = BaseData.BaseLocations.FirstOrDefault().Location;
-            var enemyLocation = BaseData.EnemyBaseLocations.FirstOrDefault().Location;
-            var selfVector = new Vector2(selfLocation.X, selfLocation.Y);
-            var enemyVector = new Vector2(enemyLocation.X, enemyLocation.Y);
-            var selfBase = BaseData.BaseLocations.OrderByDescending(x => Vector2.Distance(selfVector, new Vector2(x.Location.X, x.Location.Y)) + Vector2.Distance(enemyVector, new Vector2(x.Location.X, x.Location.Y))).Where(x => Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(x.Location.X, x.Location.Y)) > 100).FirstOrDefault();
-            if (selfBase != null)
-            {
-                var mineralPatch = selfBase.MineralFields.FirstOrDefault();
+            var distractionBase = GetNextDistractionBase();
+            if (distractionBase != null)
+            {              
+                var mineralPatch = distractionBase.MineralFields.FirstOrDefault();
                 if (mineralPatch != null)
                 {
                     action = commander.Order(frame, Abilities.HARVEST_GATHER, null, mineralPatch.Tag);
@@ -70,6 +97,51 @@ namespace Sharky.MicroControllers
             }
 
             return false;
+        }
+
+        BaseLocation GetNextDistractionBase()
+        {
+            var selfBase = BaseData.BaseLocations.FirstOrDefault();
+            var enemyBase = BaseData.EnemyBaseLocations.FirstOrDefault();
+
+            if (DistractionBase == null)
+            {
+                var selfVector = selfBase.Location.ToVector2();
+                var enemyVector = enemyBase.Location.ToVector2();
+                DistractionBase = BaseData.BaseLocations.OrderByDescending(b => Vector2.Distance(selfVector, b.Location.ToVector2()) + Vector2.Distance(enemyVector, b.Location.ToVector2())).FirstOrDefault();
+            }
+            var distractionBaseLastSeen = MapDataService.LastFrameVisibility(DistractionBase.Location);
+
+            List<BaseLocation> alreadyUsed = new List<BaseLocation>
+            {
+                BaseData.BaseLocations.Skip(1).FirstOrDefault(),
+                BaseData.EnemyBaseLocations.Skip(1).FirstOrDefault()
+            };
+
+            var currentBase = DistractionBase;
+            for (int count = 0; count < 10; count++)
+            {
+                var currentBaseLastSeen = MapDataService.LastFrameVisibility(currentBase.Location);
+                if (currentBaseLastSeen < 100)
+                {
+                    return currentBase;
+                }
+                alreadyUsed.Add(currentBase);
+                var nextClosest = BaseData.BaseLocations.OrderBy(b => Vector2.Distance(currentBase.Location.ToVector2(), b.Location.ToVector2())).FirstOrDefault(b => b != currentBase && b != selfBase && b != enemyBase && !alreadyUsed.Contains(b));
+                if (nextClosest == null)
+                {
+                    return DistractionBase;
+                }
+                var nextBaseLastSeen = MapDataService.LastFrameVisibility(nextClosest.Location);
+                if (nextBaseLastSeen <= currentBaseLastSeen && nextBaseLastSeen <= distractionBaseLastSeen)
+                {
+                    return nextClosest;
+                }
+                alreadyUsed.Add(nextClosest);
+                currentBase = nextClosest;
+            }
+
+            return DistractionBase;
         }
     }
 }

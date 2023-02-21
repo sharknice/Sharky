@@ -30,6 +30,7 @@
         Regroup,
         BlockExpansion,
         Leader,
-        Disband
+        Disband,
+        RunAway
     }
 }

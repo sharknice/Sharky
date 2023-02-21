@@ -20,6 +20,7 @@ namespace Sharky.Managers
         DebugService DebugService;
         DamageService DamageService;
         UnitDataService UnitDataService;
+        BaseData BaseData;
 
         float NearbyDistance = 18;
         float AvoidRange = 1;
@@ -28,11 +29,12 @@ namespace Sharky.Managers
 
         int TargetPriorityCalculationFrame;
 
-        public UnitManager(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, SharkyOptions sharkyOptions, TargetPriorityService targetPriorityService, CollisionCalculator collisionCalculator, MapDataService mapDataService, DebugService debugService, DamageService damageService, UnitDataService unitDataService)
+        public UnitManager(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, BaseData baseData, SharkyOptions sharkyOptions, TargetPriorityService targetPriorityService, CollisionCalculator collisionCalculator, MapDataService mapDataService, DebugService debugService, DamageService damageService, UnitDataService unitDataService)
         {
             ActiveUnitData = activeUnitData;
 
             SharkyUnitData = sharkyUnitData;
+            BaseData = baseData;
             SharkyOptions = sharkyOptions;
             TargetPriorityService = targetPriorityService;
             CollisionCalculator = collisionCalculator;
@@ -224,6 +226,31 @@ namespace Sharky.Managers
                     {
                         attack.SetPreviousUnit(existing, existing.FrameLastSeen);
                     }
+                    else if (frame > 0 && attack.UnitTypeData.Name.Contains("MineralField"))
+                    {
+                        var existingMatch = ActiveUnitData.NeutralUnits.FirstOrDefault(m => m.Value.Unit.Pos.X == attack.Unit.Pos.X && m.Value.Unit.Pos.Y == attack.Unit.Pos.Y);
+                        if (existingMatch.Value != null)
+                        {
+                            UnitCalculation foo;
+                            if (ActiveUnitData.NeutralUnits.TryRemove(existingMatch.Key, out foo))
+                            {
+                                foreach (var baseLocation in BaseData.BaseLocations)
+                                {
+                                    if (baseLocation.MineralFields.RemoveAll(m => m.Pos.X == attack.Unit.Pos.X && m.Pos.Y == attack.Unit.Pos.Y) > 0)
+                                    {
+                                        baseLocation.MineralFields.Add(unit);
+                                    }
+                                }
+                                foreach (var baseLocation in BaseData.EnemyBaseLocations)
+                                {
+                                    if (baseLocation.MineralFields.RemoveAll(m => m.Pos.X == attack.Unit.Pos.X && m.Pos.Y == attack.Unit.Pos.Y) > 0)
+                                    {
+                                        baseLocation.MineralFields.Add(unit);
+                                    }
+                                }
+                            }
+                        }
+                    }
                     ActiveUnitData.NeutralUnits[unit.Tag] = attack;
                 }
             }
@@ -334,7 +361,8 @@ namespace Sharky.Managers
                     }
                 }
 
-                allyAttack.Value.Attackers = GetTargettedAttacks(allyAttack.Value).ToList();
+                allyAttack.Value.Attackers = GetTargetedAttacks(allyAttack.Value).ToList();
+                allyAttack.Value.Targeters = GetTargeters(allyAttack.Value).ToList();
                 allyAttack.Value.EnemiesThreateningDamage = GetEnemiesThreateningDamage(allyAttack.Value);
 
                 if (allyAttack.Value.Unit.Passengers != null)
@@ -444,6 +472,7 @@ namespace Sharky.Managers
             attack.Value.EnemiesInRangeOfAvoid.Clear();
             attack.Value.EnemiesThreateningDamage.Clear();
             attack.Value.Attackers.Clear();
+            attack.Value.Targeters.Clear();
         }
 
         float GetRange(UnitCalculation allyAttack, UnitCalculation enemyAttack)
@@ -477,13 +506,28 @@ namespace Sharky.Managers
             return GetRange(allyAttack.Value, enemyAttack.Value);
         }
 
-        ConcurrentBag<UnitCalculation> GetTargettedAttacks(UnitCalculation unitCalculation)
+        ConcurrentBag<UnitCalculation> GetTargetedAttacks(UnitCalculation unitCalculation)
         {
             var attacks = new ConcurrentBag<UnitCalculation>();
 
             Parallel.ForEach(unitCalculation.EnemiesInRangeOfAvoid, (enemyAttack) =>
             {
                 if (DamageService.CanDamage(enemyAttack, unitCalculation) && CollisionCalculator.Collides(unitCalculation.Position, unitCalculation.Unit.Radius, enemyAttack.Start, enemyAttack.End))
+                {
+                    attacks.Add(enemyAttack);
+                }
+            });
+
+            return attacks;
+        }
+
+        ConcurrentBag<UnitCalculation> GetTargeters(UnitCalculation unitCalculation)
+        {
+            var attacks = new ConcurrentBag<UnitCalculation>();
+
+            Parallel.ForEach(unitCalculation.NearbyEnemies, (enemyAttack) =>
+            {
+                if (DamageService.CanDamage(enemyAttack, unitCalculation) && CollisionCalculator.Collides(unitCalculation.Position, unitCalculation.Unit.Radius, enemyAttack.Start, enemyAttack.EndPlusFive))
                 {
                     attacks.Add(enemyAttack);
                 }

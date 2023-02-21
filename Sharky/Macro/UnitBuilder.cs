@@ -90,7 +90,7 @@ namespace Sharky.Macro
                                     targetLocation = TargetingData.AttackPoint;
                                 }
 
-                                var location = WarpInPlacement.FindPlacement(targetLocation, unit.Key, 1);
+                                var location = WarpInPlacement.FindPlacement(targetLocation, unit.Key, 1, maxDistance: 0);
                                 if (location != null)
                                 {
                                     var action = building.First().Value.Order(MacroData.Frame, unitData.WarpInAbility, location);

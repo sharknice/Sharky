@@ -168,7 +168,7 @@ namespace Sharky.MicroTasks.Attack
                 return true;
             }
 
-            if (BaseData.SelfBases.All(b => !b.GasMiningInfo.Any(m => m.Workers.Count() > 0) && !b.MineralMiningInfo.Any(m => m.Workers.Count() > 0)))
+            if (BaseData.SelfBases.All(b => !b.MineralMiningInfo.Any(m => m.Workers.Count() > 0)))
             {
                 TargetingData.AttackState = AttackState.Kill;
                 DebugService.DrawText("Attacking: not mining");

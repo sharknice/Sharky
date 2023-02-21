@@ -34,6 +34,8 @@ namespace Sharky.MicroTasks.Attack
 
         public Dictionary<string, IAttackSubTask> SubTasks { get; set; }
 
+        List<UnitCalculation> EnemyAttackers { get; set; }
+
         public AdvancedAttackTask(DefaultSharkyBot defaultSharkyBot, EnemyCleanupService enemyCleanupService, List<UnitTypes> mainAttackerTypes, float priority, bool enabled = true)
         {
             AttackData = defaultSharkyBot.AttackData;
@@ -57,6 +59,8 @@ namespace Sharky.MicroTasks.Attack
             UnitCommanders = new List<UnitCommander>();
             MainUnits = new List<UnitCommander>();
             SupportUnits = new List<UnitCommander>();
+
+            EnemyAttackers = new List<UnitCalculation>();
 
             SubTasks = new Dictionary<string, IAttackSubTask>();
         }
@@ -241,7 +245,9 @@ namespace Sharky.MicroTasks.Attack
             }
             stopwatch.Restart();
 
-            var attackingEnemies = ActiveUnitData.SelfUnits.Where(u => u.Value.UnitClassifications.Contains(UnitClassification.ResourceCenter) || u.Value.UnitClassifications.Contains(UnitClassification.ProductionStructure) || u.Value.UnitClassifications.Contains(UnitClassification.DefensiveStructure)).SelectMany(u => u.Value.NearbyEnemies).Distinct();
+            var attackedAllies = ActiveUnitData.SelfUnits.Where(u => u.Value.UnitClassifications.Contains(UnitClassification.ResourceCenter) || u.Value.UnitClassifications.Contains(UnitClassification.ProductionStructure) || u.Value.UnitClassifications.Contains(UnitClassification.DefensiveStructure))
+               .SelectMany(u => u.Value.NearbyAllies.Where(a => !a.UnitClassifications.Contains(UnitClassification.ArmyUnit) && a.EnemiesThreateningDamage.Any())).Distinct();
+            var attackingEnemies = attackedAllies.SelectMany(u => u.NearbyEnemies.Where(e => e.FrameLastSeen == frame)).Concat(ActiveUnitData.EnemyUnits.Where(e => EnemyAttackers.Any(ea => ea.Unit.Tag == e.Key) && e.Value.FrameLastSeen == frame && e.Value.NearbyEnemies.Any(selfs => selfs.TargetPriorityCalculation.OverallWinnability > 2)).Select(e => e.Value)).Distinct();
             if (attackingEnemies.Count() > 0)
             {
                 var armyVector = new Vector2(AttackData.ArmyPoint.X, AttackData.ArmyPoint.Y);
@@ -268,6 +274,7 @@ namespace Sharky.MicroTasks.Attack
                     stopwatch.Restart();
 
                     RemoveTemporaryUnits();
+                    EnemyAttackers = attackingEnemies.ToList();
                     return actions;
                 }
                 else
@@ -287,6 +294,7 @@ namespace Sharky.MicroTasks.Attack
                 }
                 stopwatch.Restart();
             }
+            EnemyAttackers = attackingEnemies.ToList();
 
             HandleHiddenBuildings(hiddenBase);
 

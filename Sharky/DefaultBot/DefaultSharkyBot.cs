@@ -198,8 +198,9 @@ namespace Sharky.DefaultBot
             UnitDataService = new UnitDataService(SharkyUnitData, SharkyOptions, MacroData);
             VersionService = new VersionService();
             UnitTypeBuildClassifications = new UnitTypeBuildClassifications();
+            MapDataService = new MapDataService(MapData);
 
-            MineralWalker = new MineralWalker(BaseData, SharkyUnitData, ActiveUnitData);
+            MineralWalker = new MineralWalker(BaseData, SharkyUnitData, ActiveUnitData, MapDataService);
 
             Managers = new List<IManager>();
 
@@ -219,7 +220,6 @@ namespace Sharky.DefaultBot
             UnitDataManager = new UnitDataManager(UpgradeDataService, BuildingDataService, TrainingDataService, AddOnDataService, MorphDataService, SharkyUnitData);
             Managers.Add(UnitDataManager);
 
-            MapDataService = new MapDataService(MapData);
             AreaService = new AreaService(MapDataService);
             TargetPriorityService = new TargetPriorityService(this);
             CollisionCalculator = new CollisionCalculator();
@@ -234,7 +234,7 @@ namespace Sharky.DefaultBot
             DamageService = new DamageService();
             BuildingService = new BuildingService(MapData, ActiveUnitData, TargetingData, BaseData, SharkyUnitData);
 
-            UnitManager = new UnitManager(ActiveUnitData, SharkyUnitData, SharkyOptions, TargetPriorityService, CollisionCalculator, MapDataService, DebugService, DamageService, UnitDataService);
+            UnitManager = new UnitManager(ActiveUnitData, SharkyUnitData, BaseData, SharkyOptions, TargetPriorityService, CollisionCalculator, MapDataService, DebugService, DamageService, UnitDataService);
             Managers.Add(UnitManager);
 
             HttpClient = new HttpClient();

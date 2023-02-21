@@ -388,7 +388,7 @@ namespace Sharky.MicroControllers
             {
                 if (!commander.UnitCalculation.NearbyEnemies.Any(e => DamageService.CanDamage(e, commander.UnitCalculation) && (e.UnitTypeData.MovementSpeed >= commander.UnitCalculation.UnitTypeData.MovementSpeed || e.Range >= commander.UnitCalculation.Range)))
                 {
-                    if (commander.UnitCalculation.NearbyEnemies.Any(e => DamageService.CanDamage(commander.UnitCalculation, e) && e.Unit.DisplayType == DisplayType.Visible))
+                    if (commander.UnitCalculation.NearbyEnemies.Any(e => DamageService.CanDamage(commander.UnitCalculation, e) && e.FrameLastSeen == frame && e.Unit.DisplayType == DisplayType.Visible))
                     {
                         if (AttackBestTarget(commander, target, defensivePoint, target, bestTarget, frame, out action))
                         {
@@ -1736,6 +1736,7 @@ namespace Sharky.MicroControllers
                     if (WeaponReady(commander, frame))
                     {
                         action = commander.Order(frame, Abilities.ATTACK, null, bestTarget.Unit.Tag);
+                        commander.LastInRangeAttackFrame = frame;
                     }
                     else
                     {
@@ -1750,6 +1751,7 @@ namespace Sharky.MicroControllers
                     if (bestInRange != null)
                     {
                         action = commander.Order(frame, Abilities.ATTACK, null, bestInRange.Unit.Tag);
+                        commander.LastInRangeAttackFrame = frame;
                         return true;
                     }
                 }
@@ -2467,12 +2469,12 @@ namespace Sharky.MicroControllers
 
             if (commander.UnitCalculation.Unit.IsFlying) { return false; }
 
-            if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.FullRetreat || commander.UnitCalculation.Unit.IsFlying || !MapDataService.InEnemyVision(commander.UnitCalculation.Unit.Pos))
+            if (!commander.UnitCalculation.Unit.IsHallucination && (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.FullRetreat || !MapDataService.InEnemyVision(commander.UnitCalculation.Unit.Pos)))
             {
                 return false;
             }
 
-            if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.Retreat)
+            if (!commander.UnitCalculation.Unit.IsHallucination && commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.Retreat)
             {
                 // if only siege tanks, just go on them
                 if (commander.UnitCalculation.NearbyEnemies.Any(e => e.Damage > 0 && e.Unit.UnitType != (uint)UnitTypes.TERRAN_SIEGETANKSIEGED))
@@ -2481,7 +2483,7 @@ namespace Sharky.MicroControllers
                 }
             }
 
-            if (WeaponReady(commander, frame)) { return false; }
+            if (!commander.UnitCalculation.Unit.IsHallucination && WeaponReady(commander, frame)) { return false; }
 
             var enemySiegedTanks = commander.UnitCalculation.EnemiesInRangeOf.Where(u => u.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED);
 
@@ -2496,7 +2498,7 @@ namespace Sharky.MicroControllers
             var otherEnemyAttacks = commander.UnitCalculation.EnemiesInRangeOf.Where(u => u.Unit.UnitType != (uint)UnitTypes.TERRAN_SIEGETANKSIEGED);
             var otherDps = otherEnemyAttacks.Sum(e => e.Dps);
 
-            if (estimatedSiegeDps > otherDps)
+            if (commander.UnitCalculation.Unit.IsHallucination || estimatedSiegeDps > otherDps)
             {
                 var closestSiegePosition = enemySiegedTanks.OrderBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position)).FirstOrDefault();
                 action = commander.Order(frame, Abilities.MOVE, new Point2D { X = closestSiegePosition.Unit.Pos.X, Y = closestSiegePosition.Unit.Pos.Y });
@@ -3112,6 +3114,38 @@ namespace Sharky.MicroControllers
 
             if (AvoidDeceleration(commander, target, true, frame, out action)) { return action; }
             return commander.Order(frame, Abilities.ATTACK, target);
+        }
+
+        protected bool ContinueInRangeAttack(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
+
+            if (WeaponReady(commander, frame) && commander.LastTargetTag > 0 && commander.LastAbility == Abilities.ATTACK && commander.LastInRangeAttackFrame == commander.LastOrderFrame)
+            {
+                var enemy = commander.UnitCalculation.NearbyEnemies.FirstOrDefault(e => e.Unit.Tag == commander.LastTargetTag);
+
+                var attackOrder = commander.UnitCalculation.Unit.Orders.FirstOrDefault(o => o.AbilityId == (uint)Abilities.ATTACK_ATTACK);
+                if (attackOrder == null && frame - commander.LastOrderFrame < 3)
+                {
+                    if (enemy != null)
+                    {
+                        enemy.IncomingDamage += GetDamage(commander.UnitCalculation.Weapons, enemy.Unit, enemy.UnitTypeData);
+                    }
+                    return true;
+                }
+
+                if (attackOrder != null && frame - commander.LastOrderFrame < 6)
+                {
+                    if (enemy != null)
+                    {
+                        enemy.IncomingDamage += GetDamage(commander.UnitCalculation.Weapons, enemy.Unit, enemy.UnitTypeData);
+                    }
+
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

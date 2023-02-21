@@ -274,7 +274,15 @@ namespace Sharky.Managers
 
                     if (chokePoint != null)
                     {
-                        TargetingData.ForwardDefensePoint = chokePoint;
+                        if (((TargetingData.NaturalBasePoint != null && closestBase.Location.X == TargetingData.NaturalBasePoint.X && closestBase.Location.Y == TargetingData.NaturalBasePoint.Y) || (TargetingData.SelfMainBasePoint != null && closestBase.Location.X == TargetingData.SelfMainBasePoint.X && closestBase.Location.Y == TargetingData.SelfMainBasePoint.Y)))
+                        {
+                            TargetingData.ForwardDefensePoint = chokePoint;
+                        }
+                        else
+                        {
+                            var angle = Math.Atan2(closestBase.Location.Y - TargetingData.EnemyMainBasePoint.Y, TargetingData.EnemyMainBasePoint.X - closestBase.Location.X);
+                            TargetingData.ForwardDefensePoint = new Point2D { X = closestBase.Location.X + (float)(6 * Math.Cos(angle)), Y = closestBase.Location.Y - (float)(6 * Math.Sin(angle)) };
+                        }
                         var chokePoints = ChokePointService.GetEntireChokePoint(chokePoint);
                         if (chokePoints != null)
                         {

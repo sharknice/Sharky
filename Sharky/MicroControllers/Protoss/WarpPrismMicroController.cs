@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using static SC2APIProtocol.AbilityData.Types;
 
 namespace Sharky.MicroControllers.Protoss
 {
@@ -253,9 +254,9 @@ namespace Sharky.MicroControllers.Protoss
 
             if (friendly.Unit.UnitType == (uint)UnitTypes.PROTOSS_DISRUPTOR)
             {
-                if (friendly.Unit.Shield != friendly.Unit.ShieldMax && ActiveUnitData.Commanders.ContainsKey(friendly.Unit.Tag) && (!friendly.NearbyAllies.Take(25).Any(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_DISRUPTORPHASED) || ActiveUnitData.Commanders[friendly.Unit.Tag].AbilityOffCooldown(Abilities.EFFECT_PURIFICATIONNOVA, frame, SharkyOptions.FramesPerSecond, SharkyUnitData)))
+                if (ActiveUnitData.Commanders.ContainsKey(friendly.Unit.Tag) && ActiveUnitData.Commanders[friendly.Unit.Tag].ChildUnitCalculation != null)
                 {
-                    return true;
+                    return false;
                 }
             }
             else if (friendly.Unit.WeaponCooldown > 0 && (friendly.Unit.Health + friendly.Unit.Shield) < healthLimit && friendly.Unit.Shield != friendly.Unit.ShieldMax) // TODO: or could die in one hit
@@ -491,7 +492,10 @@ namespace Sharky.MicroControllers.Protoss
         {
             List<SC2APIProtocol.Action> action = null;
 
-            // TODO: pick up nearby units that are retreating to help them retreat faster
+            if (SupportArmy(commander, defensivePoint, defensivePoint, groupCenter, frame, out action))
+            {
+                return action;
+            }
             if (commander.UnitCalculation.NearbyEnemies.Count() > 0)
             {
                 if (Retreat(commander, defensivePoint, defensivePoint, frame, out action)) { return action; }
@@ -518,7 +522,7 @@ namespace Sharky.MicroControllers.Protoss
                 return false;
             }
 
-            var nexuses = BaseData.SelfBases.Where(u => u.ResourceCenter.BuildProgress == 1 && u.MineralMiningInfo.Count() > 0).OrderBy(u => u.MineralMiningInfo.Sum(m => m.Workers.Count) / u.MineralMiningInfo.Count()).ThenBy(u => Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(u.Location.X, u.Location.Y)));
+            var nexuses = BaseData.SelfBases.Where(u => u.ResourceCenter != null && u.ResourceCenter.BuildProgress == 1 && u.MineralMiningInfo.Count() > 0).OrderBy(u => u.MineralMiningInfo.Sum(m => m.Workers.Count) / u.MineralMiningInfo.Count()).ThenBy(u => Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(u.Location.X, u.Location.Y)));
 
             //foreach (var nexusBase in BaseData.Bases)
             //{
