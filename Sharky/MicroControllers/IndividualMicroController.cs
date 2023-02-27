@@ -460,7 +460,7 @@ namespace Sharky.MicroControllers
 
         protected virtual bool SpecialCaseMove(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, Formation formation, int frame, out List<SC2APIProtocol.Action> action)
         {
-
+            if (GetUnstuck(commander, target, defensivePoint, frame, out action)) { return true; }
             if (DealWithInterferenceMatrix(commander, target, defensivePoint, frame, out action)) { return true; }
             if (DealWithParasiticBomb(commander, target, defensivePoint, frame, out action)) { return true; }
             if (AvoidPurificationNovas(commander, target, defensivePoint, frame, out action)) { return true; }
@@ -502,6 +502,20 @@ namespace Sharky.MicroControllers
             return false;
         }
 
+        private bool GetUnstuck(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
+            if (commander.CommanderState != CommanderState.Stuck) { return false; }
+
+            var loader = commander.UnitCalculation.NearbyAllies.Where(a => a.Unit.CargoSpaceMax > 0).OrderBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+            if (loader != null)
+            {
+                action = commander.Order(frame, Abilities.SMART, targetTag: loader.Unit.Tag, allowSpam: true);
+                return true;
+            }
+            return false;
+        }
+
         protected virtual bool SpecialCaseRetreat(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             if (AvoidPurificationNovas(commander, target, defensivePoint, frame, out action)) { return true; }
@@ -538,6 +552,7 @@ namespace Sharky.MicroControllers
                                 {
                                     return false;
                                 }
+                                commander.CurrentPath = null;
                                 action = commander.Order(frame, Abilities.MOVE, new Point2D { X = chokePoint.Center.X, Y = chokePoint.Center.Y });
                                 return true;
                             }
@@ -3051,7 +3066,20 @@ namespace Sharky.MicroControllers
 
         protected virtual void UpdateState(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, Formation formation, int frame)
         {
-
+            if (commander.CommanderState == CommanderState.Stuck)
+            {
+                if (Vector2.DistanceSquared(commander.StuckCheck.StuckPosition, commander.UnitCalculation.Position) > 4)
+                {
+                    commander.CommanderState = CommanderState.None;
+                }
+            }
+            else
+            {
+                if (commander.StuckCheck.AttemptFrame != 0 && commander.StuckCheck.AttemptFrame + 500 < frame && Vector2.DistanceSquared(commander.StuckCheck.StuckPosition, commander.UnitCalculation.Position) < 4)
+                {
+                    commander.CommanderState = CommanderState.Stuck;
+                }
+            }
         }
 
         public override string ToString()

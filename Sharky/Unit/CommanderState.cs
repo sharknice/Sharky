@@ -6,6 +6,7 @@
         Attacking,
         RegeneratingShields,
         Grouping,
-        MaintainLockon
+        MaintainLockon,
+        Stuck
     }
 }

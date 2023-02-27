@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using SC2APIProtocol;
+using Sharky.Extensions;
 using Sharky.Pathing;
 using System;
 using System.Collections.Generic;
@@ -124,6 +125,10 @@ namespace Sharky.Managers
             BaseData.SelfBases = new List<BaseLocation> { BaseData.MainBase };
             BaseData.EnemyBases = new List<BaseLocation> { BaseData.EnemyBaseLocations.FirstOrDefault() };
             BaseData.EnemyNaturalBase = BaseData.EnemyBaseLocations.Skip(1).FirstOrDefault();
+            if (ActiveUnitData.NeutralUnits.Values.Any(u => Vector2.DistanceSquared(u.Position,BaseData.EnemyNaturalBase.Location.ToVector2()) < 4))
+            {
+                BaseData.EnemyNaturalBase = BaseData.EnemyBaseLocations.Skip(2).FirstOrDefault();
+            }
 
             SetupMiningInfo();
         }

@@ -170,6 +170,10 @@ namespace Sharky.MicroControllers.Terran
                     commander.CommanderState = CommanderState.MaintainLockon;
                 }
             }
+            else
+            {
+                base.UpdateState(commander, target, defensivePoint, groupCenter, bestTarget, formation, frame);
+            }
         }
 
         protected override UnitCalculation GetBestTarget(UnitCommander commander, Point2D target, int frame)

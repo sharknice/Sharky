@@ -136,7 +136,7 @@ namespace Sharky.Builds.BuildingPlacement
             return null;
         }
 
-        bool PointOk(Point2D point, float minimumMineralProximinity, Point2D reference, bool requireSameHeight, bool allowBlockBase, float maxDistance)
+        protected bool PointOk(Point2D point, float minimumMineralProximinity, Point2D reference, bool requireSameHeight, bool allowBlockBase, float maxDistance)
         {
             if (BuildingService.AreaBuildable(point.X, point.Y, 1.25f) &&
                         (minimumMineralProximinity == 0 || !BuildingService.BlocksResourceCenter(point.X, point.Y, 1.25f)) &&
