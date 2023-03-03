@@ -7,6 +7,8 @@
         RegeneratingShields,
         Grouping,
         MaintainLockon,
-        Stuck
+        Stuck,
+        Clockwise,
+        CounterClockwise
     }
 }

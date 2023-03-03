@@ -108,7 +108,7 @@ namespace Sharky.MicroControllers
             {
                 var selfVector = selfBase.Location.ToVector2();
                 var enemyVector = enemyBase.Location.ToVector2();
-                DistractionBase = BaseData.BaseLocations.OrderByDescending(b => Vector2.Distance(selfVector, b.Location.ToVector2()) + Vector2.Distance(enemyVector, b.Location.ToVector2())).FirstOrDefault();
+                DistractionBase = BaseData.BaseLocations.OrderByDescending(b => Vector2.Distance(selfVector, b.Location.ToVector2()) + Vector2.Distance(enemyVector, b.Location.ToVector2())).FirstOrDefault(b => !ActiveUnitData.NeutralUnits.Values.Any(u => u.UnitTypeData.Name.Contains("MineralField") && Vector2.DistanceSquared(u.Position, b.Location.ToVector2()) < 4));
             }
             var distractionBaseLastSeen = MapDataService.LastFrameVisibility(DistractionBase.Location);
 
@@ -117,7 +117,7 @@ namespace Sharky.MicroControllers
                 BaseData.BaseLocations.Skip(1).FirstOrDefault(),
                 BaseData.EnemyBaseLocations.Skip(1).FirstOrDefault()
             };
-
+            alreadyUsed.AddRange(BaseData.BaseLocations.Where(b => ActiveUnitData.NeutralUnits.Values.Any(u => u.UnitTypeData.Name.Contains("MineralField") && Vector2.DistanceSquared(u.Position, b.Location.ToVector2()) < 4)));
             var currentBase = DistractionBase;
             for (int count = 0; count < 10; count++)
             {

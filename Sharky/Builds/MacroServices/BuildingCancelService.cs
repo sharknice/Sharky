@@ -1,6 +1,7 @@
 ﻿using SC2APIProtocol;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace Sharky.Builds.MacroServices
 {
@@ -33,6 +34,18 @@ namespace Sharky.Builds.MacroServices
 
                         if (unitCalculation.Unit.BuildProgress > 0.1f && unitCalculation.Unit.Shield < 1 && unitCalculation.Unit.Health < 100 && unitCalculation.Unit.Health <= unitCalculation.EnemiesThreateningDamage.Sum(e => e.Damage))
                         {
+                            var action = commander.Value.Order(MacroData.Frame, Abilities.CANCEL);
+                            if (action != null)
+                            {
+                                commands.AddRange(action);
+                            }
+                        }
+                        if (unitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && unitCalculation.Unit.BuildProgress > .9f && unitCalculation.Unit.Shield < 1 && unitCalculation.EnemiesThreateningDamage.Sum(e => e.Damage) >= 25)
+                        {
+                            if (unitCalculation.NearbyAllies.Any(c => c.Unit.BuildProgress > .9f && (c.Unit.UnitType == (uint)UnitTypes.PROTOSS_PHOTONCANNON || c.Unit.UnitType == (uint)UnitTypes.PROTOSS_SHIELDBATTERY) && Vector2.DistanceSquared(c.Position, unitCalculation.Position) < 50))
+                            {
+                                continue;
+                            }
                             var action = commander.Value.Order(MacroData.Frame, Abilities.CANCEL);
                             if (action != null)
                             {

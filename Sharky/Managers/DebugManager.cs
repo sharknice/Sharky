@@ -15,11 +15,12 @@ namespace Sharky.Managers
         MapData MapData;
         TargetingData TargetingData;
         ActiveUnitData ActiveUnitData;
+        EnemyData EnemyData;
 
         bool SlowMode = false;
         int SlowTime = 0;
 
-        public DebugManager(GameConnection gameConnection, SharkyOptions sharkyOptions, DebugService debugService, MapData mapData, TargetingData targetingData, ActiveUnitData activeUnitData)
+        public DebugManager(GameConnection gameConnection, SharkyOptions sharkyOptions, DebugService debugService, MapData mapData, TargetingData targetingData, ActiveUnitData activeUnitData, EnemyData enemyData)
         {
             GameConnection = gameConnection;
             SharkyOptions = sharkyOptions;
@@ -27,6 +28,7 @@ namespace Sharky.Managers
             MapData = mapData;
             TargetingData = targetingData;
             ActiveUnitData = activeUnitData;
+            EnemyData = enemyData;
         }
 
         public override bool NeverSkip { get => true; }
@@ -71,25 +73,53 @@ namespace Sharky.Managers
                 {
                     foreach (var wallData in MapData.WallData.Where(w => w.BasePosition.X == TargetingData.EnemyMainBasePoint.X && w.BasePosition.Y == TargetingData.EnemyMainBasePoint.Y && w.Pylons != null))
                     {
-                        foreach (var spot in wallData.Pylons)
+                        if (EnemyData.EnemyRace == Race.Protoss)
                         {
-                            DebugService.SpawnUnits(UnitTypes.PROTOSS_PYLON, spot, 2, 1);
-                        }
-                        foreach (var spot in wallData.WallSegments)
-                        {
-                            if (spot.Size == 3)
+                            foreach (var spot in wallData.Pylons)
                             {
-                                DebugService.SpawnUnits(UnitTypes.PROTOSS_GATEWAY, spot.Position, 2, 1);
+                                DebugService.SpawnUnits(UnitTypes.PROTOSS_PYLON, spot, 2, 1);
                             }
-                            if (spot.Size == 2)
+                            foreach (var spot in wallData.WallSegments)
                             {
-                                DebugService.SpawnUnits(UnitTypes.PROTOSS_SHIELDBATTERY, spot.Position, 2, 1);
+                                if (spot.Size == 3)
+                                {
+                                    DebugService.SpawnUnits(UnitTypes.PROTOSS_GATEWAY, spot.Position, 2, 1);
+                                }
+                                if (spot.Size == 2)
+                                {
+                                    DebugService.SpawnUnits(UnitTypes.PROTOSS_SHIELDBATTERY, spot.Position, 2, 1);
+                                }
+                            }
+                            if (wallData.Block != null)
+                            {
+                                DebugService.SpawnUnits(UnitTypes.PROTOSS_SHIELDBATTERY, wallData.Block, 2, 1);
                             }
                         }
-                        if (wallData.Block != null)
+                        else
                         {
-                            DebugService.SpawnUnits(UnitTypes.PROTOSS_SHIELDBATTERY, wallData.Block, 2, 1);
+                            foreach (var spot in wallData.Depots)
+                            {
+                                DebugService.SpawnUnits(UnitTypes.TERRAN_SUPPLYDEPOTLOWERED, spot, 2, 1);
+                            }
+                            foreach (var spot in wallData.Production)
+                            {
+
+                                DebugService.SpawnUnits(UnitTypes.TERRAN_BARRACKS, spot, 2, 1);                             
+                            }
                         }
+                    }
+
+                    return;
+                }
+
+                match = Regex.Match(chatReceived.Message.ToLower(), "spawn enemy depot");
+                if (match.Success)
+                {
+                    foreach (var wallData in MapData.WallData.Where(w => w.BasePosition.X == TargetingData.EnemyMainBasePoint.X && w.BasePosition.Y == TargetingData.EnemyMainBasePoint.Y && w.Pylons != null))
+                    {
+                        var spot = wallData.Depots.FirstOrDefault();
+
+                        DebugService.SpawnUnits(UnitTypes.TERRAN_SUPPLYDEPOTLOWERED, spot, 2, 1);                      
                     }
 
                     return;

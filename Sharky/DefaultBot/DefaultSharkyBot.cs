@@ -205,7 +205,7 @@ namespace Sharky.DefaultBot
             Managers = new List<IManager>();
 
             DebugService = new DebugService(SharkyOptions, ActiveUnitData);
-            DebugManager = new DebugManager(gameConnection, SharkyOptions, DebugService, MapData, TargetingData, ActiveUnitData);
+            DebugManager = new DebugManager(gameConnection, SharkyOptions, DebugService, MapData, TargetingData, ActiveUnitData, EnemyData);
             Managers.Add(DebugManager);
 
             ReportingManager = new ReportingManager(this);
