@@ -30,9 +30,35 @@ namespace Sharky.Builds.BuildingPlacement
             {
                 return false;
             }
-            return MapData.Map[(int)x][(int)y].CurrentlyBuildable && MapData.Map[(int)x][(int)y + (int)radius].CurrentlyBuildable && MapData.Map[(int)x][(int)y - (int)radius].CurrentlyBuildable
-                && MapData.Map[(int)x + (int)radius][(int)y].CurrentlyBuildable && MapData.Map[(int)x + (int)radius][(int)y + (int)radius].CurrentlyBuildable && MapData.Map[(int)x + (int)radius][(int)y - (int)radius].CurrentlyBuildable
-                && MapData.Map[(int)x - (int)radius][(int)y].CurrentlyBuildable && MapData.Map[(int)x - (int)radius][(int)y + (int)radius].CurrentlyBuildable && MapData.Map[(int)x - (int)radius][(int)y - (int)radius].CurrentlyBuildable;
+
+            radius = radius - .01f;
+
+            var rectangle = new System.Drawing.RectangleF(x - radius, y - radius, (radius * 2), (radius * 2));
+            
+            var currentX = x - radius - 1;
+            var currentY = y - radius - 1;
+            while (currentX <= x + radius + 1)
+            {
+                while (currentY <= y + radius + 1)
+                {
+                    if (currentX < 0 || currentY < 0 || currentX >= MapData.MapWidth || currentY >= MapData.MapHeight)
+                    {
+
+                    }
+                    else if (!MapData.Map[(int)currentX][(int)currentY].CurrentlyBuildable)
+                    {
+                        if (rectangle.Contains(currentX, currentY))
+                        {
+                            return false;
+                        }
+                    }
+                    currentY++;
+                }
+                currentY = y - radius - 1;
+                currentX++;
+            }
+
+            return true;
         }
 
         public bool AreaVisible(float x, float y, float radius)
@@ -71,12 +97,17 @@ namespace Sharky.Builds.BuildingPlacement
 
         public bool Blocked(float x, float y, float radius, float padding = .5f, ulong tag = 0)
         {
-            if (ActiveUnitData.NeutralUnits.Any(u => u.Value.Unit.UnitType != (uint)UnitTypes.NEUTRAL_CLEANINGBOT && Vector2.DistanceSquared(new Vector2(x, y), u.Value.Position) < (u.Value.Unit.Radius + padding + radius) * (u.Value.Unit.Radius + padding + radius)))
+            if (ActiveUnitData.NeutralUnits.Any(u => !u.Value.UnitTypeData.Name.Contains("MineralField") && u.Value.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && BuildingBlocks(x, y, radius, u.Value.Unit)))
             {
                 return true;
             }
 
-            if (ActiveUnitData.NeutralUnits.Where(u => u.Value.Unit.Health == 400).Any(u => Vector2.DistanceSquared(new Vector2(x, y), u.Value.Position) < (u.Value.Unit.Radius + padding + radius + 1.5) * (u.Value.Unit.Radius + padding + radius + 1.5)))
+            if (ActiveUnitData.NeutralUnits.Any(u => u.Value.UnitTypeData.Name.Contains("MineralField") && MineralBlocks(x, y, radius, u.Value.Unit)))
+            {
+                return true;
+            }
+
+            if (ActiveUnitData.NeutralUnits.Where(u => u.Value.Unit.HealthMax == 400).Any(u => Vector2.DistanceSquared(new Vector2(x, y), u.Value.Position) < (u.Value.Unit.Radius + padding + radius + 1.5) * (u.Value.Unit.Radius + padding + radius + 1.5)))
             {
                 return true;
             }

@@ -40,6 +40,11 @@ namespace Sharky.Managers.Protoss
 
         List<SC2APIProtocol.Action> Attack(UnitCommander commander, int frame)
         {
+            if (ContinueInRangeAttack(commander, frame, out List<Action> action))
+            {
+                return action;
+            }
+
             var existingAttackOrder = commander.UnitCalculation.Unit.Orders.Where(o => o.AbilityId == (uint)Abilities.ATTACK || o.AbilityId == (uint)Abilities.ATTACK_ATTACK).FirstOrDefault();
 
             var oneShotKills = commander.UnitCalculation.EnemiesInRange.Where(a => a.Unit.Health + a.Unit.Shield < 20);
@@ -73,6 +78,38 @@ namespace Sharky.Managers.Protoss
             }
 
             return null;
+        }
+
+        protected bool ContinueInRangeAttack(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
+
+            if (commander.UnitCalculation.Unit.WeaponCooldown == 0 && commander.LastTargetTag > 0 && commander.LastAbility == Abilities.ATTACK && commander.LastInRangeAttackFrame == commander.LastOrderFrame)
+            {
+                var enemy = commander.UnitCalculation.NearbyEnemies.FirstOrDefault(e => e.Unit.Tag == commander.LastTargetTag);
+
+                var attackOrder = commander.UnitCalculation.Unit.Orders.FirstOrDefault(o => o.AbilityId == (uint)Abilities.ATTACK_ATTACK);
+                if (attackOrder == null && frame - commander.LastOrderFrame < 3)
+                {
+                    if (enemy != null)
+                    {
+                        enemy.IncomingDamage += 20;
+                    }
+                    return true;
+                }
+
+                if (attackOrder != null && frame - commander.LastOrderFrame < 6)
+                {
+                    if (enemy != null)
+                    {
+                        enemy.IncomingDamage += 20;
+                    }
+
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

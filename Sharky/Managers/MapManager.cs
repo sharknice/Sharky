@@ -328,9 +328,14 @@ namespace Sharky.Managers
                 }
             }
 
-            foreach (var enemy in ActiveUnitData.EnemyUnits.Where(e => e.Value.Unit.BuildProgress == 1))
+            foreach (var enemy in ActiveUnitData.EnemyUnits)
             {
-                var nodes = GetNodesInRange(enemy.Value.Unit.Pos, 12, MapData.MapWidth, MapData.MapHeight);
+                var radius = 12;
+                if (enemy.Value.Unit.BuildProgress < 1)
+                {
+                    radius = 6;
+                }
+                var nodes = GetNodesInRange(enemy.Value.Unit.Pos, radius, MapData.MapWidth, MapData.MapHeight);
                 foreach (var node in nodes)
                 {
                     MapData.Map[(int)node.X][(int)node.Y].InEnemyVision = true;
