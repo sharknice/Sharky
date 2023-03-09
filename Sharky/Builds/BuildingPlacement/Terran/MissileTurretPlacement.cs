@@ -45,6 +45,10 @@ namespace Sharky.Builds.BuildingPlacement
 
                     right = rights.OrderByDescending(m => AngleDifference(nearestBase.Location, m.Pos, referenceAngle)).FirstOrDefault();
                     left = lefts.OrderBy(m => AngleDifference(nearestBase.Location, m.Pos, referenceAngle)).FirstOrDefault();
+                    if (right == null || left == null)
+                    {
+                        return null;
+                    }
                 }
 
                 var rightAngle = GetAngle(nearestBase.Location.X, nearestBase.Location.Y, right.Pos.X, right.Pos.Y) + .25;              
