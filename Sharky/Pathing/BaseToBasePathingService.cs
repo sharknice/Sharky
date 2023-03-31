@@ -1,11 +1,15 @@
 ﻿using Newtonsoft.Json;
 using Sharky.DefaultBot;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
+using System.Linq;
 using System.Numerics;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Sharky.Pathing
 {
@@ -43,11 +47,30 @@ namespace Sharky.Pathing
         {
             foreach (var fileName in Directory.GetFiles(folder))
             {
-                using (StreamReader file = File.OpenText(fileName))
+                if (fileName.EndsWith(".zip"))
                 {
-                    var serializer = new JsonSerializer { TypeNameHandling = TypeNameHandling.Auto };
-                    var pathData = (List<PathData>)serializer.Deserialize(file, typeof(List<PathData>));
-                    dictionary[Path.GetFileNameWithoutExtension(fileName)] = pathData;
+                    using (var file = File.OpenRead(fileName))
+                    using (var zip = new ZipArchive(file, ZipArchiveMode.Read))
+                    {
+                        foreach (var entry in zip.Entries)
+                        {
+                            using (var stream = new StreamReader(entry.Open()))
+                            {
+                                var serializer = new JsonSerializer { TypeNameHandling = TypeNameHandling.Auto };
+                                var pathData = (List<PathData>)serializer.Deserialize(stream, typeof(List<PathData>));
+                                dictionary[Path.GetFileNameWithoutExtension(fileName)] = pathData;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    using (StreamReader file = File.OpenText(fileName))
+                    {
+                        var serializer = new JsonSerializer { TypeNameHandling = TypeNameHandling.Auto };
+                        var pathData = (List<PathData>)serializer.Deserialize(file, typeof(List<PathData>));
+                        dictionary[Path.GetFileNameWithoutExtension(fileName)] = pathData;
+                    }
                 }
             }
         }
@@ -59,7 +82,7 @@ namespace Sharky.Pathing
 
         private string GetGeneratedPathingDataFolder()
         {
-            return Directory.GetCurrentDirectory() + "/Data/pathing/";
+            return Directory.GetCurrentDirectory() + "/data/pathing/";
         }
 
         private static string GetGeneratedPathDataFileName(string map, string pathingFolder)
@@ -107,31 +130,37 @@ namespace Sharky.Pathing
 
         public List<PathData> CalcultedPathData()
         {
-            var pathData = new List<PathData>();
+            var pathData = new ConcurrentBag<PathData>();
 
-            for (int x = 10; x <= MapData.MapWidth - 10; x += 10)
+            var numbers = new List<int>();
+            for (int x = 5; x <= MapData.MapWidth - 5; x += 5)
             {
-                for (int y = 10; y <= MapData.MapHeight - 10; y += 10)
-                {
-                    var start = new Vector2(x, y);
-
-                    for (int endX = 5; endX <= MapData.MapWidth - 10; endX += 10)
-                    {
-                        for (int endY = 5; endY <= MapData.MapHeight - 10; endY += 10)
-                        {
-                            var end = new Vector2(endX, endY);
-                            if (end.X == start.X && end.Y == start.Y) { continue; }
-
-                            var path = PathFinder.GetGroundPath(start.X, start.Y, end.X, end.Y, 0);
-                            if (path.Count == 0) { continue; }
-                            var data = new PathData { StartPosition = start, EndPosition = end, Path = path };
-                            pathData.Add(data);
-                        }
-                    }
-                }
+                numbers.Add(x);
             }
 
-            return pathData;
+            Parallel.ForEach(numbers, x =>
+                   {
+                       var pathFinder = new Roy_T.AStar.Paths.PathFinder();
+                       for (int y = 5; y <= MapData.MapHeight - 5; y += 5)
+                       {
+                           var start = new Vector2(x, y);
+
+                           for (int endX = 5; endX <= MapData.MapWidth - 10; endX += 10)
+                           {
+                               for (int endY = 5; endY <= MapData.MapHeight - 10; endY += 10)
+                               {
+                                   var end = new Vector2(endX, endY);
+                                   if (end.X == start.X && end.Y == start.Y) { continue; }
+
+                                   var path = PathFinder.GetGroundPath(start.X, start.Y, end.X, end.Y, 0, pathFinder);
+                                   if (path.Count == 0) { continue; }
+                                   var data = new PathData { StartPosition = start, EndPosition = end, Path = path };
+                                   pathData.Add(data);
+                               }
+                           }
+                       }
+                   });
+            return pathData.ToList();
         }
     }
 }

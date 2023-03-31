@@ -154,7 +154,7 @@ namespace Sharky
                 return calculation;
             }
 
-            if (enemies.Sum(e => e.Repairers) >= 5)
+            if (enemies.Sum(e => e.Repairers.Count()) >= 5)
             {
                 calculation.TargetPriority = TargetPriority.KillWorkers;
                 return calculation;
@@ -165,7 +165,7 @@ namespace Sharky
                 var bunker = groundAttackingEnemies.Where(b => b.Unit.UnitType == (uint)UnitTypes.TERRAN_BUNKER).FirstOrDefault();
                 if (bunker != null && groundAttackingEnemies.Count() < 10)
                 {
-                    if (bunker.Unit.BuildProgress < 1 || (bunker.Unit.Health > 100 && enemyHps > enemyDps && bunker.Repairers > 2))
+                    if (bunker.Unit.BuildProgress < 1 || (bunker.Unit.Health > 100 && enemyHps > enemyDps && bunker.Repairers.Count() > 2))
                     {
                         calculation.TargetPriority = TargetPriority.KillWorkers;
                         return calculation;

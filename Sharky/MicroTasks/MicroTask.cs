@@ -81,5 +81,10 @@ namespace Sharky.MicroTasks
         {
             return !Enabled ? "<Disabled>" : $"Commanders: ({UnitCommanders.Count}) {string.Join(", ", UnitCommanders.Select(x => x.ToString()))}";
         }
+
+        public virtual void PrintReport(int frame)
+        {
+            Console.WriteLine($"     Deaths: {Deaths}, Frames - Longest: {LongestFrame}, Average: {TotalFrameTime/frame}, Total: {TotalFrameTime}");
+        }
     }
 }

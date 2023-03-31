@@ -229,7 +229,11 @@ namespace Sharky.MicroTasks.Mining
                                     var defenders = commanders.Where(c => c.Value.UnitRole == UnitRole.Defend);
                                     foreach (var defender in defenders)
                                     {
-                                        actions.AddRange(WorkerMicroController.Attack(defender.Value, selfBase.Location, selfBase.MineralLineLocation, null, frame));
+                                        var action = WorkerMicroController.Attack(defender.Value, selfBase.Location, selfBase.MineralLineLocation, null, frame);
+                                        if (action != null)
+                                        {
+                                            actions.AddRange(action);
+                                        }
                                     }
                                 }
                             }

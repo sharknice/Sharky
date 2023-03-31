@@ -47,10 +47,14 @@ namespace Sharky.Pathing
             MapLastUpdate = -1;
         }
 
-        public List<Vector2> GetGroundPath(float startX, float startY, float endX, float endY, int frame)
+        public List<Vector2> GetGroundPath(float startX, float startY, float endX, float endY, int frame, PathFinder pathFinder = null)
         {
+            if (pathFinder == null)
+            {
+                pathFinder = PathFinder;
+            }
             var grid = GetMapGrid(frame);
-            return GetPath(grid, startX, startY, endX, endY);
+            return GetPath(grid, startX, startY, endX, endY, pathFinder);
         }
 
         public List<Vector2> GetSafeGroundPath(float startX, float startY, float endX, float endY, int frame)
@@ -404,6 +408,11 @@ namespace Sharky.Pathing
 
         private List<Vector2> GetPath(Grid grid, float startX, float startY, float endX, float endY)
         {
+            return GetPath(grid, startX, startY, endX, endY, PathFinder);
+        }
+
+        private List<Vector2> GetPath(Grid grid, float startX, float startY, float endX, float endY, PathFinder pathFinder)
+        {
             if (startX >= grid.GridSize.Columns)
             {
                 startX = grid.GridSize.Columns - 1;
@@ -422,7 +431,7 @@ namespace Sharky.Pathing
             }
             try
             {
-                var path = PathFinder.FindPath(new GridPosition((int)startX, (int)startY), new GridPosition((int)endX, (int)endY), grid);
+                var path = pathFinder.FindPath(new GridPosition((int)startX, (int)startY), new GridPosition((int)endX, (int)endY), grid);
                 return path.Edges.Select(e => new Vector2(e.End.Position.X, e.End.Position.Y)).ToList();
             }
             catch (Exception)

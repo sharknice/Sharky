@@ -151,7 +151,7 @@ namespace Sharky.Managers
                 Console.WriteLine($"Attack State: {DefaultSharkyBot.TargetingData.AttackState}");
             }
             CheckCommanders();
-            PrintTaskCommanders();
+            PrintTasks(frame);
             Console.WriteLine(new String('=', 20));
         }
 
@@ -184,7 +184,7 @@ namespace Sharky.Managers
             }
         }
 
-        private void PrintTaskCommanders()
+        private void PrintTasks(int frame)
         {
             Console.WriteLine("Tasks:");
             foreach (var task in DefaultSharkyBot.MicroTaskData.Where(t => t.Value.Enabled))
@@ -195,6 +195,7 @@ namespace Sharky.Managers
                 {
                     Console.WriteLine($"    [{(UnitTypes)group.Key}]={group.Count()}");
                 }
+                task.Value.PrintReport(frame);
             }
         }
 

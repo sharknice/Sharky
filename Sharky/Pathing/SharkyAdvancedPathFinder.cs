@@ -46,7 +46,7 @@ namespace Sharky.Pathing
             AirGridLastUpdate = -1;
         }
 
-        public List<Vector2> GetGroundPath(float startX, float startY, float endX, float endY, int frame)
+        public List<Vector2> GetGroundPath(float startX, float startY, float endX, float endY, int frame, PathFinder pathFinder = null)
         {
             var cells = MapDataService.GetCells(startX, startY, MaxDistance);
             var end = new Vector2(endX, endY);

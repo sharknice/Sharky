@@ -20,5 +20,6 @@ namespace Sharky.MicroTasks
 
         void RemoveDeadUnits(List<ulong> deadUnits);
         void StealUnit(UnitCommander commander);
+        void PrintReport(int frame);
     }
 }

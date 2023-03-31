@@ -49,6 +49,10 @@ namespace Sharky.Managers
                     microTask.LongestFrame = time;
                     System.Console.WriteLine($"{frame} {microTask.GetType().Name} {time} ms, average: {microTask.TotalFrameTime / frame} ms");
                 }
+                if (frame > 10 && SharkyOptions.LogPerformance && time > 100)
+                {
+                    System.Console.WriteLine($"{frame} {microTask.GetType().Name} {time} ms, average: {microTask.TotalFrameTime / frame} ms");
+                }
             }
             if (SkipFrame)
             {

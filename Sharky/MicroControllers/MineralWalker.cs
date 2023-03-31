@@ -42,10 +42,22 @@ namespace Sharky.MicroControllers
             return false;
         }
 
-        public UnitCalculation GetTargetMineralPatch(UnitCommander commander, int skip = 4)
+        public UnitCalculation GetTargetMineralPatch(int skip = 4)
         {
             var mineralFields = ActiveUnitData.NeutralUnits.Values.Where(u => SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)u.Unit.UnitType));
             var ordered = mineralFields.OrderBy(m => Vector2.DistanceSquared(new Vector2(BaseData.EnemyBaseLocations.FirstOrDefault().MiddleMineralLocation.X, BaseData.EnemyBaseLocations.FirstOrDefault().MiddleMineralLocation.Y), m.Position));
+            var mineralPatch = ordered.Skip(skip).FirstOrDefault();
+            if (mineralPatch != null)
+            {
+                return mineralPatch;
+            }
+            return ordered.FirstOrDefault();
+        }
+
+        public UnitCalculation GetEnemyNaturalMineralPatch(int skip = 4)
+        {
+            var mineralFields = ActiveUnitData.NeutralUnits.Values.Where(u => SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)u.Unit.UnitType));
+            var ordered = mineralFields.OrderBy(m => Vector2.DistanceSquared(new Vector2(BaseData.EnemyBaseLocations.Skip(1).FirstOrDefault().MiddleMineralLocation.X, BaseData.EnemyBaseLocations.Skip(1).FirstOrDefault().MiddleMineralLocation.Y), m.Position));
             var mineralPatch = ordered.Skip(skip).FirstOrDefault();
             if (mineralPatch != null)
             {
@@ -71,7 +83,7 @@ namespace Sharky.MicroControllers
         {
             action = null;
 
-            var mineralPatch = GetTargetMineralPatch(commander);
+            var mineralPatch = GetTargetMineralPatch();
             if (mineralPatch != null)
             {
                 action = commander.Order(frame, Abilities.HARVEST_GATHER, null, mineralPatch.Unit.Tag, allowSpam: true);

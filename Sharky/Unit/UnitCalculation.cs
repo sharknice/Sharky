@@ -87,11 +87,11 @@ namespace Sharky
         /// </summary>
         public float IncomingDamage { get; set; }
 
-        public int Repairers { get; set; }
+        public List<Unit> Repairers { get; set; }
 
         public bool Loaded { get; set; }
 
-        public UnitCalculation(Unit unit, int repairers, SharkyUnitData sharkyUnitData, SharkyOptions sharkyOptions, UnitDataService unitDataService, bool isOnCreep, int frame)
+        public UnitCalculation(Unit unit, List<Unit> repairers, SharkyUnitData sharkyUnitData, SharkyOptions sharkyOptions, UnitDataService unitDataService, bool isOnCreep, int frame)
         {
             TargetPriorityCalculation = new TargetPriorityCalculation();
 
@@ -175,9 +175,9 @@ namespace Sharky
             {
                 SimulatedHealPerSecond = 0.38f;
             }
-            else if (repairers > 0 && UnitTypeData.Attributes.Contains(SC2APIProtocol.Attribute.Mechanical))
+            else if (repairers.Any() && UnitTypeData.Attributes.Contains(SC2APIProtocol.Attribute.Mechanical))
             {
-                SimulatedHealPerSecond = (float)(unit.HealthMax / (UnitTypeData.BuildTime / sharkyOptions.FramesPerSecond)) * repairers;
+                SimulatedHealPerSecond = (float)(unit.HealthMax / (UnitTypeData.BuildTime / sharkyOptions.FramesPerSecond)) * repairers.Count();
             }
             else if (Unit.UnitType == (uint)UnitTypes.TERRAN_MEDIVAC && Unit.Energy > 10)
             {

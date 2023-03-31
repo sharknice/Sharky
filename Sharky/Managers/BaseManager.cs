@@ -197,7 +197,7 @@ namespace Sharky.Managers
 
         private string GetGneratedBaseDataFolder()
         {
-            return Directory.GetCurrentDirectory() + "/Data/base/";
+            return Directory.GetCurrentDirectory() + "/data/base/";
         }
 
         private static string GetGeneratedBaseDataFileName(string map, string folder, Point2D startLocation)

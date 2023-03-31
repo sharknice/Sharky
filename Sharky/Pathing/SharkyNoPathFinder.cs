@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Roy_T.AStar.Paths;
+using System.Collections.Generic;
 using System.Numerics;
 
 namespace Sharky.Pathing
@@ -19,7 +20,7 @@ namespace Sharky.Pathing
             return new List<Vector2>();
         }
 
-        public List<Vector2> GetGroundPath(float startX, float startY, float endX, float endY, int frame)
+        public List<Vector2> GetGroundPath(float startX, float startY, float endX, float endY, int frame, PathFinder pathFinder = null)
         {
             return new List<Vector2>();
         }

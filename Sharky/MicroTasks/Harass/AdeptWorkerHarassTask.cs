@@ -28,6 +28,7 @@ namespace Sharky.MicroTasks
             Priority = priority;
             Enabled = enabled;
             UnitCommanders = new List<UnitCommander>();
+            MaxAdeptCount = 100;
         }
 
         public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
@@ -43,8 +44,11 @@ namespace Sharky.MicroTasks
                     }
                     else if (commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_ADEPTPHASESHIFT)
                     {
-                        commander.Value.Claimed = true;
-                        UnitCommanders.Add(commander.Value);
+                        if (commander.Value.ParentUnitCalculation != null && UnitCommanders.Any(c => c.UnitCalculation.Unit.Tag == commander.Value.ParentUnitCalculation.Unit.Tag))
+                        {
+                            commander.Value.Claimed = true;
+                            UnitCommanders.Add(commander.Value);
+                        }
                     }
                 }
             }
@@ -61,7 +65,7 @@ namespace Sharky.MicroTasks
                 {
                     if (Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(EnemyMain.X, EnemyMain.Y)) < 100)
                     {
-                        if (commander.UnitCalculation.NearbyEnemies.Take(25).Any(e => e.UnitClassifications.Contains(UnitClassification.Worker)))
+                        if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker)))
                         {
                             var action = AdeptMicroController.HarassWorkers(commander, EnemyMain, EnemyExpansion, frame);
                             if (action != null)
@@ -78,7 +82,7 @@ namespace Sharky.MicroTasks
                             }
                         }
                     }
-                    else if (Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(EnemyExpansion.X, EnemyExpansion.Y)) < 100 && commander.UnitCalculation.NearbyEnemies.Take(25).Any(e => e.UnitClassifications.Contains(UnitClassification.Worker)))
+                    else if (Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(EnemyExpansion.X, EnemyExpansion.Y)) < 100 && commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker)))
                     {
                         var action = AdeptMicroController.HarassWorkers(commander, EnemyExpansion, EnemyMain, frame);
                         if (action != null)
@@ -131,6 +135,15 @@ namespace Sharky.MicroTasks
                 {
                     EnemyExpansion = expansionBase.MineralLineBuildingLocation;
                 }
+            }
+        }
+
+        public override void RemoveDeadUnits(List<ulong> deadUnits)
+        {
+            foreach (var tag in deadUnits)
+            {
+                Deaths += UnitCommanders.RemoveAll(c => c.UnitCalculation.Unit.Tag == tag && c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_ADEPT);
+                UnitCommanders.RemoveAll(c => c.UnitCalculation.Unit.Tag == tag);
             }
         }
     }

@@ -31,6 +31,7 @@
         BlockExpansion,
         Leader,
         Disband,
-        RunAway
+        RunAway,
+        Chase
     }
 }

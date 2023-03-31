@@ -248,8 +248,16 @@ namespace Sharky.MicroTasks.Attack
             var attackedAllies = ActiveUnitData.SelfUnits.Where(u => u.Value.UnitClassifications.Contains(UnitClassification.ResourceCenter) || u.Value.UnitClassifications.Contains(UnitClassification.ProductionStructure) || u.Value.UnitClassifications.Contains(UnitClassification.DefensiveStructure))
                .SelectMany(u => u.Value.NearbyAllies.Where(a => !a.UnitClassifications.Contains(UnitClassification.ArmyUnit) && a.EnemiesThreateningDamage.Any())).Distinct();
             var attackingEnemies = attackedAllies.SelectMany(u => u.NearbyEnemies.Where(e => e.FrameLastSeen == frame)).Concat(ActiveUnitData.EnemyUnits.Where(e => EnemyAttackers.Any(ea => ea.Unit.Tag == e.Key) && e.Value.FrameLastSeen == frame && e.Value.NearbyEnemies.Any(selfs => selfs.TargetPriorityCalculation.OverallWinnability > 2)).Select(e => e.Value)).Distinct();
+            if (stopwatch.ElapsedMilliseconds > 100)
+            {
+                System.Console.WriteLine($"AdvancedAttackTask closerenemies queries {stopwatch.ElapsedMilliseconds}");
+            }
             if (attackingEnemies.Count() > 0)
             {
+                if (stopwatch.ElapsedMilliseconds > 100)
+                {
+                    System.Console.WriteLine($"AdvancedAttackTask closerenemies count {stopwatch.ElapsedMilliseconds}");
+                }
                 var armyVector = new Vector2(AttackData.ArmyPoint.X, AttackData.ArmyPoint.Y);
                 var distanceToAttackPoint = Vector2.DistanceSquared(armyVector, new Vector2(TargetingData.AttackPoint.X, TargetingData.AttackPoint.Y));
                 var closerEnemies = attackingEnemies;
@@ -259,6 +267,10 @@ namespace Sharky.MicroTasks.Attack
                 }
                 if (closerEnemies.Count() > 0)
                 {
+                    if (stopwatch.ElapsedMilliseconds > 100)
+                    {
+                        System.Console.WriteLine($"AdvancedAttackTask closerenemies second count {stopwatch.ElapsedMilliseconds}");
+                    }
                     actions = DefenseArmySplitter.SplitArmy(frame, closerEnemies, TargetingData.AttackPoint, MainUnits.Concat(SupportUnits), false);
                     foreach (var subTask in SubTasks.Where(t => t.Value.Enabled).OrderBy(t => t.Value.Priority))
                     {

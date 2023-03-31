@@ -47,7 +47,7 @@ namespace Sharky.Managers.Protoss
 
             var existingAttackOrder = commander.UnitCalculation.Unit.Orders.Where(o => o.AbilityId == (uint)Abilities.ATTACK || o.AbilityId == (uint)Abilities.ATTACK_ATTACK).FirstOrDefault();
 
-            var oneShotKills = commander.UnitCalculation.EnemiesInRange.Where(a => a.Unit.Health + a.Unit.Shield < 20);
+            var oneShotKills = commander.UnitCalculation.EnemiesInRange.Where(a => a.FrameLastSeen == frame && a.Unit.Health + a.Unit.Shield < 20);
             if (oneShotKills.Count() > 0)
             {
                 if (existingAttackOrder != null)
@@ -65,7 +65,7 @@ namespace Sharky.Managers.Protoss
             }
 
             
-            var bestDpsReduction = commander.UnitCalculation.EnemiesInRange.OrderByDescending(enemy => enemy.Dps / enemy.SimulatedHitpoints).ThenBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+            var bestDpsReduction = commander.UnitCalculation.EnemiesInRange.Where(e => e.FrameLastSeen == frame).OrderByDescending(enemy => enemy.Dps / enemy.SimulatedHitpoints).ThenBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position)).FirstOrDefault();
             if (bestDpsReduction != null)
             {
                 return commander.Order(frame, Abilities.ATTACK, null, bestDpsReduction.Unit.Tag);
@@ -86,7 +86,7 @@ namespace Sharky.Managers.Protoss
 
             if (commander.UnitCalculation.Unit.WeaponCooldown == 0 && commander.LastTargetTag > 0 && commander.LastAbility == Abilities.ATTACK && commander.LastInRangeAttackFrame == commander.LastOrderFrame)
             {
-                var enemy = commander.UnitCalculation.NearbyEnemies.FirstOrDefault(e => e.Unit.Tag == commander.LastTargetTag);
+                var enemy = commander.UnitCalculation.NearbyEnemies.Where(e => e.FrameLastSeen == frame).FirstOrDefault(e => e.Unit.Tag == commander.LastTargetTag);
 
                 var attackOrder = commander.UnitCalculation.Unit.Orders.FirstOrDefault(o => o.AbilityId == (uint)Abilities.ATTACK_ATTACK);
                 if (attackOrder == null && frame - commander.LastOrderFrame < 3)

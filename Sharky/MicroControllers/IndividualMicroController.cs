@@ -6,6 +6,8 @@ using Sharky.Pathing;
 using Sharky.S2ClientTypeEnums;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
+using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 
@@ -87,6 +89,8 @@ namespace Sharky.MicroControllers
             var bestTarget = GetBestTarget(commander, target, frame);
 
             UpdateState(commander, target, defensivePoint, groupCenter, bestTarget, formation, frame);
+
+            if (ContinueInRangeAttack(commander, frame, out action)) { return action; }
 
             if (GroupUpBasedOnState(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
 
@@ -244,15 +248,7 @@ namespace Sharky.MicroControllers
             if (GetInBunker(commander, frame, out action)) { return action; }
             if (RechargeShieldsAtBattery(commander, defensivePoint, defensivePoint, frame, out action)) { return action; }
             if (HoldStillForRepair(commander, frame, out action)) { return action; }
-            var markedForDeath = ActiveUnitData.Commanders.Values.FirstOrDefault(c => c.UnitRole == UnitRole.Die);
-            if (markedForDeath != null)
-            {
-                if (commander.UnitCalculation.NearbyAllies.Any(a => a.Unit.Tag == markedForDeath.UnitCalculation.Unit.Tag))
-                {
-                    return commander.Order(frame, Abilities.ATTACK, targetTag: markedForDeath.UnitCalculation.Unit.Tag);
-
-                }
-            }
+            if (AttackUnitsMarkedForDeath(commander, frame, out action)) { return action; }
             if (AvoidDeceleration(commander, defensivePoint, true, frame, out action)) { return action; }
             return action;
         }
@@ -584,7 +580,7 @@ namespace Sharky.MicroControllers
         protected virtual bool HoldStillForRepair(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
-            if (commander.UnitCalculation.Repairers > 0 && commander.UnitCalculation.Unit.Health < commander.UnitCalculation.Unit.HealthMax && commander.UnitCalculation.PreviousUnit.Health < commander.UnitCalculation.Unit.Health)
+            if (commander.UnitCalculation.Repairers.Any() && commander.UnitCalculation.Unit.Health < commander.UnitCalculation.Unit.HealthMax && commander.UnitCalculation.PreviousUnit.Health < commander.UnitCalculation.Unit.Health)
             {
                 action = commander.Order(frame, Abilities.STOP);
                 return true;
@@ -1269,6 +1265,18 @@ namespace Sharky.MicroControllers
                 bestAttack = GetBestTargetFromList(commander, attacks.Where(a => a.Unit.UnitType != (uint)UnitTypes.PROTOSS_INTERCEPTOR), existingAttackOrder);
                 if (bestAttack != null && (bestAttack.UnitClassifications.Contains(UnitClassification.ArmyUnit) || bestAttack.UnitClassifications.Contains(UnitClassification.DefensiveStructure) || (bestAttack.UnitClassifications.Contains(UnitClassification.Worker) && bestAttack.EnemiesInRange.Any(e => e.Unit.Tag == commander.UnitCalculation.Unit.Tag))))
                 {
+                    if (bestAttack.Unit.UnitType != (uint)UnitTypes.TERRAN_SCV && bestAttack.Unit.UnitType != (uint)UnitTypes.TERRAN_MULE && bestAttack.Repairers.Any())
+                    {
+                        if (bestAttack.Repairers.Any(r => r.Health < bestAttack.SimulatedHitpoints))
+                        {
+                            var ids = bestAttack.Repairers.Select(r => r.Tag);
+                            var repairer = GetBestTargetFromList(commander, bestAttack.NearbyAllies.Where(a => ids.Contains(a.Unit.Tag)), existingAttackOrder);
+                            if (repairer != null)
+                            {
+                                bestAttack = repairer;
+                            }
+                        }
+                    }
                     commander.BestTarget = bestAttack;
                     return bestAttack;
                 }
@@ -1325,7 +1333,7 @@ namespace Sharky.MicroControllers
                 var fakeMainBase = new Unit(commander.UnitCalculation.Unit);
                 fakeMainBase.Pos = new Point { X = TargetingData.EnemyMainBasePoint.X, Y = TargetingData.EnemyMainBasePoint.Y, Z = 1 };
                 fakeMainBase.Alliance = Alliance.Enemy;
-                return new UnitCalculation(fakeMainBase, 0, SharkyUnitData, SharkyOptions, UnitDataService, MapDataService.IsOnCreep(fakeMainBase.Pos), frame);
+                return new UnitCalculation(fakeMainBase, new List<Unit>(), SharkyUnitData, SharkyOptions, UnitDataService, MapDataService.IsOnCreep(fakeMainBase.Pos), frame);
             }
             var unitsNearEnemyMain = ActiveUnitData.EnemyUnits.Values.Where(e => !AvoidedUnitTypes.Contains((UnitTypes)e.Unit.UnitType) && e.Unit.UnitType != (uint)UnitTypes.ZERG_LARVA && InRange(new Vector2(target.X, target.Y), e.Position, 20));
             if (unitsNearEnemyMain.Count() > 0 && InRange(new Vector2(target.X, target.Y), commander.UnitCalculation.Position, 100))
@@ -1633,15 +1641,7 @@ namespace Sharky.MicroControllers
                 return true;
             }
 
-            var markedForDeath = ActiveUnitData.Commanders.Values.FirstOrDefault(c => c.UnitRole == UnitRole.Die);
-            if (markedForDeath != null)
-            {
-                if (commander.UnitCalculation.NearbyAllies.Any(a => a.Unit.Tag == markedForDeath.UnitCalculation.Unit.Tag))
-                {
-                    action = commander.Order(frame, Abilities.ATTACK, targetTag: markedForDeath.UnitCalculation.Unit.Tag);
-                    return true;
-                }
-            }
+            if (AttackUnitsMarkedForDeath(commander, frame, out action)) { return true; }
 
             if (AvoidDeceleration(commander, target, true, frame, out action)) { return true; }
 
@@ -2634,6 +2634,32 @@ namespace Sharky.MicroControllers
             return commander.UnitCalculation.NearbyEnemies.Any(e => SharkyUnitData.DetectionTypes.Contains((UnitTypes)e.Unit.UnitType)) || commander.UnitCalculation.Unit.BuffIds.Any(b => b == (uint)Buffs.ORACLEREVELATION || b == (uint)Buffs.FUNGALGROWTH || b == (uint)Buffs.EMPDECLOAK);
         }
 
+        protected virtual bool AttackUnitsMarkedForDeath(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
+            if (!commander.UnitCalculation.DamageGround) { return false; }
+
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
+            var markedForDeath = ActiveUnitData.Commanders.Values.FirstOrDefault(c => c.UnitRole == UnitRole.Die);
+            if (markedForDeath != null)
+            {
+                if (commander.UnitCalculation.NearbyAllies.Any(a => a.Unit.Tag == markedForDeath.UnitCalculation.Unit.Tag))
+                {
+                    action = commander.Order(frame, Abilities.ATTACK, targetTag: markedForDeath.UnitCalculation.Unit.Tag);
+                    return true;
+                }
+            }
+            stopwatch.Stop();
+            if (stopwatch.ElapsedMilliseconds > 25)
+            {
+                Console.WriteLine($"markedForDeathSearch {stopwatch.ElapsedMilliseconds}");
+            }
+
+            return false;
+        }
+
         public virtual List<SC2APIProtocol.Action> Support(UnitCommander commander, IEnumerable<UnitCommander> supportTargets, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
             List<SC2APIProtocol.Action> action = null;
@@ -2652,15 +2678,9 @@ namespace Sharky.MicroControllers
                 {
                     return commander.Order(frame, Abilities.MOVE, new Point2D { X = unitToSupport.UnitCalculation.Position.X, Y = unitToSupport.UnitCalculation.Position.Y });
                 }
-                var markedForDeath = ActiveUnitData.Commanders.Values.FirstOrDefault(c => c.UnitRole == UnitRole.Die);
-                if (markedForDeath != null)
-                {
-                    if (commander.UnitCalculation.NearbyAllies.Any(a => a.Unit.Tag == markedForDeath.UnitCalculation.Unit.Tag))
-                    {
-                        return commander.Order(frame, Abilities.ATTACK, targetTag: markedForDeath.UnitCalculation.Unit.Tag);
 
-                    }
-                }
+                if (AttackUnitsMarkedForDeath(commander, frame, out action)) { return action; }
+
                 return commander.Order(frame, Abilities.MOVE, targetTag: unitToSupport.UnitCalculation.Unit.Tag);
             }
 
@@ -2901,6 +2921,8 @@ namespace Sharky.MicroControllers
 
             var bestTarget = GetBestHarassTarget(commander, target);
 
+            if (ContinueInRangeAttack(commander, frame, out action)) { return action; }
+
             if (SpecialCaseMove(commander, target, defensivePoint, null, bestTarget, Formation.Normal, frame, out action)) { return action; }
             if (PreOffenseOrder(commander, target, defensivePoint, null, bestTarget, frame, out action)) { return action; }
             if (AvoidTargettedOneHitKills(commander, target, defensivePoint, frame, out action)) { return action; }
@@ -2917,7 +2939,8 @@ namespace Sharky.MicroControllers
                 }
             }
 
-            if (AvoidAllDamage(commander, target, defensivePoint, frame, out action)) { return action; }
+            if (AvoidEnemiesThreateningDamage(commander, target, defensivePoint, frame, true, out action)) { return action; }
+            if (AvoidArmyEnemies(commander, target, defensivePoint, frame, true, out action)) { return action; }
 
             var formation = GetDesiredFormation(commander);
             if (Move(commander, target, defensivePoint, null, bestTarget, formation, frame, out action)) { return action; }

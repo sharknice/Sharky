@@ -90,7 +90,10 @@ namespace Sharky.Pathing
 
             if (commander.CurrentPath != null && commander.CurrentPathIndex < commander.CurrentPath.Path.Count - 1 && commander.CurrentPath.EndPosition.X == target.X && commander.CurrentPath.EndPosition.Y == target.Y)
             {
-                if (Vector2.DistanceSquared(commander.UnitCalculation.Position, commander.CurrentPath.Path[commander.CurrentPathIndex]) < 4)
+                var distance = 4;
+                if (commander.UnitRole == UnitRole.Leader) { distance = 16; }
+                if (commander.CommanderState == CommanderState.Stuck) { distance = 100; }
+                if (Vector2.DistanceSquared(commander.UnitCalculation.Position, commander.CurrentPath.Path[commander.CurrentPathIndex]) < distance)
                 {
                     commander.CurrentPathIndex++;
                     if (commander.CurrentPathIndex >= commander.CurrentPath.Path.Count)

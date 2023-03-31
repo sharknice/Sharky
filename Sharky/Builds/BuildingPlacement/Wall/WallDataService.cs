@@ -116,7 +116,7 @@ namespace Sharky.Builds.BuildingPlacement
 
         private string GetGneratedWallDataFolder()
         {
-            return Directory.GetCurrentDirectory() + "/Data/wall/";
+            return Directory.GetCurrentDirectory() + "/data/wall/";
         }
 
         private static string GetGeneratedWallDataFileName(string map, string wallFolder)
@@ -250,49 +250,50 @@ namespace Sharky.Builds.BuildingPlacement
                     {
                         if (chokePoint.Center.Y < wallCenter.Y) // top to bottom
                         {
-                            var baseX = wallPoints.Last().X;
-                            var baseY = wallPoints.Last().Y;
+                            // start at left side of the top of the ramp
+                            var baseX = wallPoints.OrderBy(w => w.X).First().X;
+                            var baseY = wallPoints.OrderBy(w => w.X).First().Y;
 
                             if (data.FullDepotWall == null)
                             {
-                                data.FullDepotWall = new List<Point2D> { new Point2D { X = baseX, Y = baseY + 1 }, new Point2D { X = baseX - 2, Y = baseY }, new Point2D { X = baseX - 3, Y = baseY - 2 } };
+                                data.FullDepotWall = new List<Point2D> { new Point2D { X = baseX + 3, Y = baseY + 4 }, new Point2D { X = baseX, Y = baseY + 1 }, new Point2D { X = baseX + 1, Y = baseY + 3 } };
                             }
                             if (data.Depots == null)
                             {
-                                data.Depots = new List<Point2D> { new Point2D { X = baseX - 3, Y = baseY - 2 }, new Point2D { X = baseX, Y = baseY + 1 } };
+                                data.Depots = new List<Point2D> { new Point2D { X = baseX + 3, Y = baseY + 4 }, new Point2D { X = baseX, Y = baseY + 1 } };
                             }
                             if (data.Production == null)
                             {
-                                data.Production = new List<Point2D> { new Point2D { X = baseX - 2.5f, Y = baseY + .5f } };
+                                data.Production = new List<Point2D> { new Point2D { X = baseX + .5f, Y = baseY + 3.5f } };
                             }
                             if (data.ProductionWithAddon == null)
                             {
-                                data.ProductionWithAddon = new List<Point2D> { new Point2D { X = baseX - 4.5f, Y = baseY + .5f } };
+                                data.ProductionWithAddon = new List<Point2D> { new Point2D { X = baseX - 1.5f, Y = baseY + 3.5f } };
                             }
                             if (data.RampCenter == null)
                             {
-                                data.RampCenter = new Point2D { X = baseX + .5f, Y = baseY - 2.5f };
+                                data.RampCenter = new Point2D { X = baseX + 3, Y = baseY + 1 };
                             }
 
                             if (data.Pylons == null)
                             {
-                                data.Pylons = new List<Point2D> { new Point2D { X = baseX - 3, Y = baseY + 3 } };
+                                data.Pylons = new List<Point2D> { new Point2D { X = baseX - 2, Y = baseY + 6 } };
                             }
                             if (data.WallSegments == null)
                             {
                                 data.WallSegments = new List<WallSegment>
                                 {
-                                    new WallSegment { Position = new Point2D { X = baseX - .5f, Y = baseY + 1.5f }, Size = 3 },
-                                    new WallSegment { Position = new Point2D { X = baseX - 3.5f, Y = baseY - .5f }, Size = 3 }
+                                    new WallSegment { Position = new Point2D { X = baseX + 2.5f, Y = baseY + 4.5f }, Size = 3 },
+                                    new WallSegment { Position = new Point2D { X = baseX - .5f, Y = baseY + 2.5f }, Size = 3 }
                                 };
                             }
                             if (data.Block == null)
                             {
-                                data.Block = new Point2D { X = baseX - 4, Y = baseY - 3 };
+                                data.Block = new Point2D { X = baseX - 1, Y = baseY };
                             }
                             if (data.Door == null)
                             {
-                                data.Door = new Point2D { X = baseX - 3, Y = baseY - 2 };
+                                data.Door = new Point2D { X = baseX + .5f, Y = baseY + .5f };
                             }
                         }
                         else // bottom to top
@@ -390,45 +391,46 @@ namespace Sharky.Builds.BuildingPlacement
                         }
                         else // bottom to top
                         {
-                            var baseX = wallPoints.First().X;
-                            var baseY = wallPoints.First().Y;
+                            // TODO: set these numbers based on this orderd position, also need to do it for terran wall
+                            var baseX = wallPoints.OrderByDescending(w => w.X).First().X;
+                            var baseY = wallPoints.OrderByDescending(w => w.X).First().Y;
 
                             if (data.FullDepotWall == null)
                             {
-                                data.FullDepotWall = new List<Point2D> { new Point2D { X = baseX + 1, Y = baseY }, new Point2D { X = baseX + 3, Y = baseY + 1 }, new Point2D { X = baseX + 4, Y = baseY + 3 } };
+                                data.FullDepotWall = new List<Point2D> { new Point2D { X = baseX - 2, Y = baseY - 3 }, new Point2D { X = baseX + 1, Y = baseY }, new Point2D { X = baseX, Y = baseY - 2 } };
                             }
                             if (data.RampCenter == null)
                             {
-                                data.RampCenter = new Point2D { X = baseX + .5f, Y = baseY + 3.5f };
+                                data.RampCenter = new Point2D { X = baseX - 2, Y = baseY };
                             }
                             if (data.Depots == null)
                             {
-                                data.Depots = new List<Point2D> { new Point2D { X = baseX + 1, Y = baseY }, new Point2D { X = baseX + 4, Y = baseY + 3 } };
+                                data.Depots = new List<Point2D> { new Point2D { X = baseX - 2, Y = baseY - 3 }, new Point2D { X = baseX + 1, Y = baseY } };
                             }
                             if (data.Production == null)
                             {
-                                data.Production = new List<Point2D> { new Point2D { X = baseX + 3.5f, Y = baseY + .5f } };
+                                data.Production = new List<Point2D> { new Point2D { X = baseX + .5f, Y = baseY - 2.5f } };
                             }
 
                             if (data.Pylons == null)
                             {
-                                data.Pylons = new List<Point2D> { new Point2D { X = baseX + 4, Y = baseY - 2 } };
+                                data.Pylons = new List<Point2D> { new Point2D { X = baseX + 3, Y = baseY - 5 } };
                             }
                             if (data.WallSegments == null)
                             {
                                 data.WallSegments = new List<WallSegment>
                                 {
-                                    new WallSegment { Position = new Point2D { X = baseX + 1.5f, Y = baseY - .5f }, Size = 3 },
-                                    new WallSegment { Position = new Point2D { X = baseX + 4.5f, Y = baseY + 1.5f }, Size = 3 }
+                                    new WallSegment { Position = new Point2D { X = baseX - 1.5f, Y = baseY - 3.5f }, Size = 3 },
+                                    new WallSegment { Position = new Point2D { X = baseX + 1.5f, Y = baseY - 1.5f }, Size = 3 }
                                 };
                             }
                             if (data.Block == null)
                             {
-                                data.Block = new Point2D { X = baseX + 5, Y = baseY + 4 };
+                                data.Block = new Point2D { X = baseX + 2, Y = baseY + 1 };
                             }
                             if (data.Door == null)
                             {
-                                data.Door = new Point2D { X = baseX + 3, Y = baseY + 3 };
+                                data.Door = new Point2D { X = baseX + .5f, Y = baseY + .5f };
                             }
                         }
                     }
