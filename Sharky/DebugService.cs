@@ -13,7 +13,7 @@ namespace Sharky
 
         public Request DrawRequest { get; set; }
         public Request SpawnRequest { get; set; }
-        public bool Surrender { get; private set; }
+        public bool Surrender { get; set; }
 
         public DebugService(SharkyOptions sharkyOptions, ActiveUnitData activeUnitData)
         {

@@ -451,7 +451,7 @@ namespace Sharky.DefaultBot
             DefenseService = new DefenseService(ActiveUnitData, TargetPriorityService);
             MicroController = new MicroController(MicroData);
 
-            var defenseSquadTask = new DefenseSquadTask(ActiveUnitData, TargetingData, DefenseService, MicroController, new ArmySplitter(AttackData, TargetingData, ActiveUnitData, DefenseService, TargetingService, TerranWallService, MicroController), new List<DesiredUnitsClaim>(), 0, false);
+            var defenseSquadTask = new DefenseSquadTask(ActiveUnitData, TargetingData, DefenseService, MicroController, new ArmySplitter(this), new List<DesiredUnitsClaim>(), 0, false);
             var workerScoutTask = new WorkerScoutTask(this, false, 0.5f);
             var workerScoutGasStealTask = new WorkerScoutGasStealTask(this, false, 0.5f, workerDefenseMicroController);
             var reaperScoutTask = new ReaperScoutTask(this, false, 0.5f);
@@ -466,7 +466,7 @@ namespace Sharky.DefaultBot
             var burrowBlockExpansions = new BurrowBlockExpansionsTask(this, 0.9f, new IndividualMicroController(this, SharkySimplePathFinder, MicroPriority.StayOutOfRange, false), SharkyUnitData, false);
             var burrowDronesFromHarras = new BurrowDronesFromHarras(this, 0.5f, false);
             var creepTumorTask = new CreepTumorTask(this, queenCreepTask, 1, 1.11f, false);
-            var attackTask = new AttackTask(MicroController, TargetingData, ActiveUnitData, DefenseService, MacroData, AttackData, TargetingService, MicroTaskData, SharkyUnitData, new ArmySplitter(AttackData, TargetingData, ActiveUnitData, DefenseService, TargetingService, TerranWallService, MicroController), new EnemyCleanupService(MicroController, DamageService), 2);
+            var attackTask = new AttackTask(MicroController, TargetingData, ActiveUnitData, DefenseService, MacroData, AttackData, TargetingService, MicroTaskData, SharkyUnitData, new ArmySplitter(this), new EnemyCleanupService(MicroController, DamageService), 2);
             var adeptWorkerHarassTask = new AdeptWorkerHarassTask(BaseData, TargetingData, adeptMicroController, adeptShadeMicroController, false);
             var oracleWorkerHarassTask = new OracleWorkerHarassTask(this, oracleHarassMicroController, 1, false);
             var lateGameOracleHarassTask = new LateGameOracleHarassTask(BaseData, TargetingData, MapDataService, oracleHarassMicroController, 1, false);

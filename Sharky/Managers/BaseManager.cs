@@ -110,6 +110,7 @@ namespace Sharky.Managers
             var fileName = GetGeneratedBaseDataFileName(gameInfo.MapName, folder, gameInfo.StartRaw.StartLocations.First());
             if (GeneratedBaseLocationData.ContainsKey(Path.GetFileNameWithoutExtension(fileName)))
             {
+                Console.WriteLine($"loading {fileName}");
                 var loadedData = GeneratedBaseLocationData[Path.GetFileNameWithoutExtension(fileName)];
                 BaseData.BaseLocations = BaseData.BaseLocations.OrderBy(b => loadedData.SelfBaseLocations.FindIndex(d => d.X == b.Location.X && d.Y == b.Location.Y)).ToList();
                 BaseData.EnemyBaseLocations = BaseData.BaseLocations.OrderBy(b => loadedData.EnemyBaseLocations.FindIndex(d => d.X == b.Location.X && d.Y == b.Location.Y)).ToList();
@@ -117,6 +118,7 @@ namespace Sharky.Managers
             else
             {
                 GenerateBaseLocations(startingUnit, enemystartingLocation);
+                Console.WriteLine($"saving {fileName}");
                 SaveBaseLocationData(folder, fileName, BaseData);
             }
 

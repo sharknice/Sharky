@@ -245,9 +245,8 @@ namespace Sharky.MicroTasks.Attack
             }
             stopwatch.Restart();
 
-            var attackedAllies = ActiveUnitData.SelfUnits.Where(u => u.Value.UnitClassifications.Contains(UnitClassification.ResourceCenter) || u.Value.UnitClassifications.Contains(UnitClassification.ProductionStructure) || u.Value.UnitClassifications.Contains(UnitClassification.DefensiveStructure))
-               .SelectMany(u => u.Value.NearbyAllies.Where(a => !a.UnitClassifications.Contains(UnitClassification.ArmyUnit) && a.EnemiesThreateningDamage.Any())).Distinct();
-            var attackingEnemies = attackedAllies.SelectMany(u => u.NearbyEnemies.Where(e => e.FrameLastSeen == frame)).Concat(ActiveUnitData.EnemyUnits.Where(e => EnemyAttackers.Any(ea => ea.Unit.Tag == e.Key) && e.Value.FrameLastSeen == frame && e.Value.NearbyEnemies.Any(selfs => selfs.TargetPriorityCalculation.OverallWinnability > 2)).Select(e => e.Value)).Distinct();
+            var attackingEnemies = ActiveUnitData.EnemyUnits.Values.Where(e => e.NearbyEnemies.Any(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter) || u.UnitClassifications.Contains(UnitClassification.ProductionStructure) || u.UnitClassifications.Contains(UnitClassification.DefensiveStructure)) ||
+                 (e.TargetPriorityCalculation.OverallWinnability < .5f && EnemyAttackers.Any(e => e.Unit.Tag == e.Unit.Tag)));
             if (stopwatch.ElapsedMilliseconds > 100)
             {
                 System.Console.WriteLine($"AdvancedAttackTask closerenemies queries {stopwatch.ElapsedMilliseconds}");
@@ -272,6 +271,10 @@ namespace Sharky.MicroTasks.Attack
                         System.Console.WriteLine($"AdvancedAttackTask closerenemies second count {stopwatch.ElapsedMilliseconds}");
                     }
                     actions = DefenseArmySplitter.SplitArmy(frame, closerEnemies, TargetingData.AttackPoint, MainUnits.Concat(SupportUnits), false);
+                    if (stopwatch.ElapsedMilliseconds > 100)
+                    {
+                        System.Console.WriteLine($"AdvancedAttackTask closerenemies splitarmy {stopwatch.ElapsedMilliseconds}");
+                    }
                     foreach (var subTask in SubTasks.Where(t => t.Value.Enabled).OrderBy(t => t.Value.Priority))
                     {
                         var subActions = subTask.Value.SplitArmy(frame, closerEnemies, TargetingData.AttackPoint, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint);

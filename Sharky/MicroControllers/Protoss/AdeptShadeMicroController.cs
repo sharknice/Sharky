@@ -58,17 +58,13 @@ namespace Sharky.MicroControllers.Protoss
                 return true;
             }
 
-            var nearestThreatToShade = commander.UnitCalculation.NearbyEnemies.Where(e => DamageService.CanDamage(e, commander.UnitCalculation) && !e.UnitClassifications.Contains(UnitClassification.Worker)).OrderBy(e => Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position)).FirstOrDefault();
-            var nearestThreatToAdept = commander.ParentUnitCalculation.NearbyEnemies.Where(e => DamageService.CanDamage(e, commander.UnitCalculation) && !e.UnitClassifications.Contains(UnitClassification.Worker)).OrderBy(e => Vector2.DistanceSquared(e.Position, commander.ParentUnitCalculation.Position)).FirstOrDefault();
-            if (nearestThreatToShade != null)
+            var threatToShade = commander.UnitCalculation.EnemiesThreateningDamage.Where(e => !e.UnitClassifications.Contains(UnitClassification.Worker)).Sum(e => e.Damage);
+            var threatToAdept = commander.ParentUnitCalculation.EnemiesThreateningDamage.Where(e => !e.UnitClassifications.Contains(UnitClassification.Worker)).Sum(e => e.Damage);
+            if (threatToShade > threatToAdept)
             {
-                if (nearestThreatToAdept == null || Vector2.DistanceSquared(commander.UnitCalculation.Position, nearestThreatToShade.Position) < Vector2.DistanceSquared(commander.ParentUnitCalculation.Position, nearestThreatToAdept.Position))
-                {
-                    action = commander.Order(frame, Abilities.CANCEL, allowSpam: true);
-                    return true;
-                }
+                action = commander.Order(frame, Abilities.CANCEL, allowSpam: true);
+                return true;               
             }
-
 
             return false;
         }

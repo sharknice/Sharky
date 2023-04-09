@@ -1,5 +1,6 @@
 ﻿using SC2APIProtocol;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Sharky.Managers
@@ -26,10 +27,17 @@ namespace Sharky.Managers
             var actions = new List<Action>();
             foreach (var microTask in MicroTaskData.Values.Where(m => m.Enabled).OrderBy(m => m.Priority))
             {
-                var begin = System.DateTime.UtcNow;
-                microTask.RemoveDeadUnits(ActiveUnitData.DeadUnits);
+                var stopwatch = new Stopwatch();
+                stopwatch.Start();
 
+                microTask.RemoveDeadUnits(ActiveUnitData.DeadUnits);
                 microTask.ClaimUnits(ActiveUnitData.Commanders);
+
+                if (frame > 10 && SharkyOptions.LogPerformance && stopwatch.ElapsedMilliseconds > 100)
+                {
+                    System.Console.WriteLine($"{frame} ClaimUnits {microTask.GetType().Name} {stopwatch.ElapsedMilliseconds} ms, average: {microTask.TotalFrameTime / frame} ms");
+                }
+
                 if (!SkipFrame)
                 {
                     LogMissingCommanders(observation, microTask);
@@ -40,8 +48,8 @@ namespace Sharky.Managers
 
                     actions.AddRange(taskActions);
                 }
-                var end = System.DateTime.UtcNow;
-                var time = (end - begin).TotalMilliseconds;
+                stopwatch.Stop();
+                var time = stopwatch.ElapsedMilliseconds;
                 microTask.TotalFrameTime += time;
 
                 if (frame > 10 && SharkyOptions.LogPerformance && time > 1 && time > microTask.LongestFrame)

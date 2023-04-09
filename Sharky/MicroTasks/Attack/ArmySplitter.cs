@@ -1,6 +1,7 @@
 ﻿using SC2APIProtocol;
 using Sharky.Builds.BuildingPlacement;
 using Sharky.DefaultBot;
+using Sharky.Extensions;
 using Sharky.MicroControllers;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,7 @@ namespace Sharky.MicroTasks.Attack
         AttackData AttackData;
         TargetingData TargetingData;
         ActiveUnitData ActiveUnitData;
+        EnemyData EnemyData;
 
         DefenseService DefenseService;
         TargetingService TargetingService;
@@ -30,28 +32,13 @@ namespace Sharky.MicroTasks.Attack
             AttackData = defaultSharkyBot.AttackData;
             TargetingData = defaultSharkyBot.TargetingData;
             ActiveUnitData = defaultSharkyBot.ActiveUnitData;
+            EnemyData = defaultSharkyBot.EnemyData;
 
             DefenseService = defaultSharkyBot.DefenseService;
             TargetingService = defaultSharkyBot.TargetingService;
             TerranWallService = defaultSharkyBot.TerranWallService;
 
             MicroController = defaultSharkyBot.MicroController;
-
-            LastSplitFrame = -1000;
-        }
-
-        public ArmySplitter(AttackData attackData, TargetingData targetingData, ActiveUnitData activeUnitData,
-            DefenseService defenseService, TargetingService targetingService, TerranWallService terranWallService, IMicroController microController)
-        {
-            AttackData = attackData;
-            TargetingData = targetingData;
-            ActiveUnitData = activeUnitData;
-
-            DefenseService = defenseService;
-            TargetingService = targetingService;
-            TerranWallService = terranWallService;
-
-            MicroController = microController;
 
             LastSplitFrame = -1000;
         }
@@ -72,8 +59,8 @@ namespace Sharky.MicroTasks.Attack
             {
                 if (split.SelfGroup.Count() > 0)
                 {
-                    var groupPoint = TargetingService.GetArmyPoint(AvailableCommanders);
-                    if (AvailableCommanders.Count() == 0)
+                    var groupPoint = TargetingService.GetArmyPoint(split.SelfGroup);
+                    if (split.SelfGroup.Count() == 0)
                     {
                         groupPoint = null;
                     }
@@ -81,8 +68,7 @@ namespace Sharky.MicroTasks.Attack
                     {
                         commander.UnitCalculation.TargetPriorityCalculation.Overwhelm = true;
                     }
-                    var defensePoint = new Point2D { X = split.EnemyGroup.FirstOrDefault().Unit.Pos.X, Y = split.EnemyGroup.FirstOrDefault().Unit.Pos.Y };
-                    actions.AddRange(MicroController.Attack(split.SelfGroup, defensePoint, TargetingData.ForwardDefensePoint, groupPoint, frame));
+                    actions.AddRange(MicroController.Attack(split.SelfGroup, split.EnemyGroup.FirstOrDefault().Position.ToPoint2D(), TargetingData.ForwardDefensePoint, groupPoint, frame));
 
                     winnableDefense = true;
                 }
@@ -100,14 +86,8 @@ namespace Sharky.MicroTasks.Attack
                     if (winnableDefense || defendToDeath)
                     {                     
                         var closerEnemy = closerEnemies.FirstOrDefault();
-                        if (closerEnemy.Unit.IsFlying)
-                        {
-                            actions.AddRange(MicroController.Attack(AvailableCommanders.Where(c => c.UnitCalculation.DamageAir), new Point2D { X = closerEnemies.FirstOrDefault().Unit.Pos.X, Y = closerEnemies.FirstOrDefault().Unit.Pos.Y }, TargetingData.ForwardDefensePoint, groupPoint, frame));
-                        }
-                        else
-                        {
-                            actions.AddRange(MicroController.Attack(AvailableCommanders.Where(c => c.UnitCalculation.DamageGround), new Point2D { X = closerEnemies.FirstOrDefault().Unit.Pos.X, Y = closerEnemies.FirstOrDefault().Unit.Pos.Y }, TargetingData.ForwardDefensePoint, groupPoint, frame));
-                        }
+                        var targetPoint = closerEnemy.Unit.Pos.ToPoint2D();
+                        actions.AddRange(MicroController.Attack(AvailableCommanders, targetPoint, TargetingData.ForwardDefensePoint, groupPoint, frame));
                     }
                     else
                     {
@@ -115,11 +95,11 @@ namespace Sharky.MicroTasks.Attack
                         var shieldBattery = ActiveUnitData.SelfUnits.Values.Where(u => u.Unit.UnitType == (uint)UnitTypes.PROTOSS_SHIELDBATTERY && u.Unit.IsPowered && u.Unit.BuildProgress == 1 && u.Unit.Energy > 5).OrderBy(u => Vector2.DistanceSquared(u.Position, defensiveVector)).FirstOrDefault();
                         if (shieldBattery != null)
                         {
-                            actions.AddRange(MicroController.Retreat(AvailableCommanders, new Point2D { X = shieldBattery.Position.X, Y = shieldBattery.Position.Y }, groupPoint, frame));
+                            actions.AddRange(MicroController.Retreat(AvailableCommanders, shieldBattery.Position.ToPoint2D(), groupPoint, frame));
                         }
                         else
                         {
-                            if (TerranWallService != null && TerranWallService.MainWallComplete())
+                            if (EnemyData.SelfRace == Race.Terran && TerranWallService != null && TerranWallService.MainWallComplete())
                             {
                                 actions.AddRange(MicroController.Retreat(AvailableCommanders, TargetingData.ForwardDefensePoint, groupPoint, frame));
                             }
