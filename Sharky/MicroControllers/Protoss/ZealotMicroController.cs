@@ -3,6 +3,7 @@ using Sharky.DefaultBot;
 using Sharky.Pathing;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace Sharky.MicroControllers.Protoss
 {
@@ -23,7 +24,7 @@ namespace Sharky.MicroControllers.Protoss
                 return AttackBestTargetInRange(commander, target, bestTarget, frame, out action);
             }
 
-            if (commander.UnitCalculation.EnemiesInRangeOf.Any(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED || e.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANK))
+            if (commander.UnitCalculation.NearbyEnemies.Any(e => (e.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED || e.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANK) && Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position) < 170))
             {
                 commander.UnitCalculation.TargetPriorityCalculation.Overwhelm = true;
                 return AttackBestTarget(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action);

@@ -141,6 +141,7 @@ namespace Sharky.Managers
             var targetingPriority = DefaultSharkyBot.TargetPriorityService.CalculateGeneralTargetPriority();
             Console.WriteLine($"Target Calculation Winnablility: {targetingPriority.OverallWinnability}");
             Console.WriteLine($"Attack Point: {DefaultSharkyBot.TargetingData.AttackPoint}");
+            Console.WriteLine($"Retreat Point: {DefaultSharkyBot.TargetingData.ForwardDefensePoint}");
 
             if (DefaultSharkyBot.AttackData.UseAttackDataManager)
             {

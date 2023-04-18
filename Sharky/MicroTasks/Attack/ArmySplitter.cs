@@ -24,7 +24,7 @@ namespace Sharky.MicroTasks.Attack
 
         float LastSplitFrame;
 
-        List<ArmySplits> ArmySplits;
+        public List<ArmySplits> ArmySplits { get; private set; }
         List<UnitCommander> AvailableCommanders;
 
         public ArmySplitter(DefaultSharkyBot defaultSharkyBot)
@@ -92,7 +92,7 @@ namespace Sharky.MicroTasks.Attack
                     else
                     {
                         var defensiveVector = new Vector2(TargetingData.ForwardDefensePoint.X, TargetingData.ForwardDefensePoint.Y);
-                        var shieldBattery = ActiveUnitData.SelfUnits.Values.Where(u => u.Unit.UnitType == (uint)UnitTypes.PROTOSS_SHIELDBATTERY && u.Unit.IsPowered && u.Unit.BuildProgress == 1 && u.Unit.Energy > 5).OrderBy(u => Vector2.DistanceSquared(u.Position, defensiveVector)).FirstOrDefault();
+                        var shieldBattery = ActiveUnitData.SelfUnits.Values.Where(u => ((u.Unit.UnitType == (uint)UnitTypes.PROTOSS_SHIELDBATTERY && u.Unit.Energy > 5) || (u.Unit.UnitType == (uint)UnitTypes.PROTOSS_PHOTONCANNON && u.Unit.Shield > 5)) && u.Unit.IsPowered && u.Unit.BuildProgress == 1).OrderBy(u => Vector2.DistanceSquared(u.Position, defensiveVector)).FirstOrDefault();
                         if (shieldBattery != null)
                         {
                             actions.AddRange(MicroController.Retreat(AvailableCommanders, shieldBattery.Position.ToPoint2D(), groupPoint, frame));

@@ -245,8 +245,12 @@ namespace Sharky.MicroTasks.Attack
             }
             stopwatch.Restart();
 
-            var attackingEnemies = ActiveUnitData.EnemyUnits.Values.Where(e => e.NearbyEnemies.Any(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter) || u.UnitClassifications.Contains(UnitClassification.ProductionStructure) || u.UnitClassifications.Contains(UnitClassification.DefensiveStructure)) ||
-                 (e.TargetPriorityCalculation.OverallWinnability < .5f && EnemyAttackers.Any(e => e.Unit.Tag == e.Unit.Tag)));
+            var attackingEnemies = ActiveUnitData.EnemyUnits.Values.Where(e => e.FrameLastSeen > frame - 100 &&
+                    (e.NearbyEnemies.Any(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter) || u.UnitClassifications.Contains(UnitClassification.ProductionStructure) || u.UnitClassifications.Contains(UnitClassification.DefensiveStructure)) ||
+                    (e.TargetPriorityCalculation.OverallWinnability < .5f && EnemyAttackers.Any(ea => ea.Unit.Tag == e.Unit.Tag))
+                )
+            );
+
             if (stopwatch.ElapsedMilliseconds > 100)
             {
                 System.Console.WriteLine($"AdvancedAttackTask closerenemies queries {stopwatch.ElapsedMilliseconds}");
@@ -501,6 +505,30 @@ namespace Sharky.MicroTasks.Attack
         public IEnumerable<UnitCommander> GetAvailableCommanders()
         {
             return SupportUnits.Concat(MainUnits);
+        }
+
+        public override void PrintReport(int frame)
+        {
+            base.PrintReport(frame);
+            if (DefenseArmySplitter.ArmySplits == null) { return; }
+
+            System.Console.WriteLine($"    Defensive Splits:");
+            foreach (var split in DefenseArmySplitter.ArmySplits)
+            {
+                System.Console.WriteLine($"    split:");
+                System.Console.WriteLine($"     enemies:");
+                var unitGroups = split.EnemyGroup.GroupBy(x => x.Unit.UnitType);
+                foreach (var group in unitGroups.OrderBy(x => System.Enum.GetName(typeof(UnitTypes), x.Key)))
+                {
+                    System.Console.WriteLine($"     [{(UnitTypes)group.Key}]={group.Count()}");
+                }
+                System.Console.WriteLine($"     allies:");
+                var commandGroups = split.SelfGroup.GroupBy(x => x.UnitCalculation.Unit.UnitType);
+                foreach (var group in commandGroups.OrderBy(x => System.Enum.GetName(typeof(UnitTypes), x.Key)))
+                {
+                    System.Console.WriteLine($"     [{(UnitTypes)group.Key}]={group.Count()}");
+                }
+            }
         }
     }
 }
