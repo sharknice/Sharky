@@ -58,6 +58,7 @@ namespace Sharky.MicroControllers.Terran
             {
                 if (Stiming(commander)) // don't double stim
                 {
+                    commander.UnitCalculation.TargetPriorityCalculation.Overwhelm = true;
                     return false;
                 }
 
@@ -119,6 +120,18 @@ namespace Sharky.MicroControllers.Terran
             }
 
             return NavigateToTarget(commander, target, groupCenter, bestTarget, formation, frame, out action);
+        }
+
+        protected override bool MoveToAttackOnCooldown(UnitCommander commander, UnitCalculation bestTarget, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
+
+            if (Stiming(commander))
+            {
+                return false;
+            }
+
+            return base.MoveToAttackOnCooldown(commander, bestTarget, target, defensivePoint, frame, out action);
         }
 
         protected override bool MoveToAttackTarget(UnitCommander commander, UnitCalculation bestTarget, Formation formation, int frame, out List<SC2APIProtocol.Action> action)

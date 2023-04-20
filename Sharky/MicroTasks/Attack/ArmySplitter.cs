@@ -68,7 +68,22 @@ namespace Sharky.MicroTasks.Attack
                     {
                         commander.UnitCalculation.TargetPriorityCalculation.Overwhelm = true;
                     }
-                    actions.AddRange(MicroController.Attack(split.SelfGroup, split.EnemyGroup.FirstOrDefault().Position.ToPoint2D(), TargetingData.ForwardDefensePoint, groupPoint, frame));
+                    var leaders = split.SelfGroup.Where(c => c.UnitRole == UnitRole.Leader);
+                    if (leaders.Any())
+                    {
+                        actions.AddRange(MicroController.Attack(leaders, split.EnemyGroup.FirstOrDefault().Position.ToPoint2D(), TargetingData.ForwardDefensePoint, groupPoint, frame));
+                        var others = split.SelfGroup.Where(c => c.UnitRole != UnitRole.Leader);
+                        if (others.Any())
+                        {
+                            var mainUnit = leaders.FirstOrDefault();
+                            var supportAttackPoint = new Point2D { X = mainUnit.UnitCalculation.Position.X, Y = mainUnit.UnitCalculation.Position.Y };
+                            actions.AddRange(MicroController.Support(others, leaders, supportAttackPoint, TargetingData.ForwardDefensePoint, supportAttackPoint, frame));
+                        }
+                    }
+                    else
+                    {
+                        actions.AddRange(MicroController.Attack(split.SelfGroup, split.EnemyGroup.FirstOrDefault().Position.ToPoint2D(), TargetingData.ForwardDefensePoint, groupPoint, frame));
+                    }
 
                     winnableDefense = true;
                 }
