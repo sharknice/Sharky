@@ -30,18 +30,18 @@ namespace Sharky.MicroControllers.Terran
             return false;
         }
 
-        protected override Point2D GetSupportSpot(UnitCommander commander, UnitCommander unitToSupport, Point2D target, Point2D defensivePoint)
+        protected override Point2D GetSupportSpot(UnitCommander commander, UnitCalculation unitToSupport, Point2D target, Point2D defensivePoint)
         {
-            var angle = Math.Atan2(unitToSupport.UnitCalculation.Position.Y - target.Y, target.X - unitToSupport.UnitCalculation.Position.X);
-            var nearestEnemy = unitToSupport.UnitCalculation.EnemiesInRange.FirstOrDefault();
+            var angle = Math.Atan2(unitToSupport.Position.Y - target.Y, target.X - unitToSupport.Position.X);
+            var nearestEnemy = unitToSupport.EnemiesInRange.FirstOrDefault();
             if (nearestEnemy != null)
             {
-                angle = Math.Atan2(unitToSupport.UnitCalculation.Position.Y - nearestEnemy.Position.Y, nearestEnemy.Position.X - unitToSupport.UnitCalculation.Position.X);
+                angle = Math.Atan2(unitToSupport.Position.Y - nearestEnemy.Position.Y, nearestEnemy.Position.X - unitToSupport.Position.X);
             }
             var x = 10f * Math.Cos(angle);
             var y = 10f * Math.Sin(angle);
 
-            var supportPoint = new Point2D { X = unitToSupport.UnitCalculation.Position.X + (float)x, Y = unitToSupport.UnitCalculation.Position.Y - (float)y };
+            var supportPoint = new Point2D { X = unitToSupport.Position.X + (float)x, Y = unitToSupport.Position.Y - (float)y };
 
             return supportPoint;
         }

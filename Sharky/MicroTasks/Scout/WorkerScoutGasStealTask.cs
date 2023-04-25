@@ -8,6 +8,7 @@ using Sharky.Pathing;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Linq;
 using System.Numerics;
 
@@ -91,22 +92,41 @@ namespace Sharky.MicroTasks
                     return;
                 }
 
-                foreach (var commander in commanders)
+                var workers = commanders.Where(commander => commander.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker));
+                var scouter = workers.FirstOrDefault(commander => !commander.Value.Claimed);
+                if (scouter.Value == null)
                 {
-                    if (!commander.Value.Claimed && commander.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && !commander.Value.UnitCalculation.Unit.BuffIds.Any(b => SharkyUnitData.CarryingResourceBuffs.Contains((Buffs)b)))
+                    var available = workers.Where(commander => !commander.Value.UnitCalculation.Unit.BuffIds.Any(b => SharkyUnitData.CarryingResourceBuffs.Contains((Buffs)b)));
+                    var finishedBuilder = available.FirstOrDefault(commander => commander.Value.UnitRole == UnitRole.Build && commander.Value.UnitCalculation.Unit.Orders.Any(o => !o.HasTargetUnitTag));
+                    if (finishedBuilder.Value != null)
                     {
-                        if (commander.Value.UnitCalculation.Unit.Orders.Any(o => !SharkyUnitData.MiningAbilities.Contains((Abilities)o.AbilityId)))
+                        var pos = finishedBuilder.Value.UnitCalculation.Unit.Orders.FirstOrDefault(o => o.TargetWorldSpacePos != null);
+                        if (pos != null)
                         {
-                        }
-                        else
-                        {
-                            commander.Value.Claimed = true;
-                            commander.Value.UnitRole = UnitRole.Scout;
-                            UnitCommanders.Add(commander.Value);
-                            started = true;
-                            return;
+                            var match = finishedBuilder.Value.UnitCalculation.NearbyAllies.Any(a => a.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && a.Unit.Pos.X == pos.TargetWorldSpacePos.X && a.Unit.Pos.Y == pos.TargetWorldSpacePos.Y);
+                            if (match)
+                            {
+                                finishedBuilder.Value.Claimed = true;
+                                finishedBuilder.Value.UnitRole = UnitRole.Scout;
+                                UnitCommanders.Add(finishedBuilder.Value);
+                                started = true;
+                                return;
+                            }
                         }
                     }
+                    if (scouter.Value == null)
+                    {
+                        scouter = available.FirstOrDefault();
+                    }
+                }
+
+                if (scouter.Value != null)
+                {
+                    scouter.Value.Claimed = true;
+                    scouter.Value.UnitRole = UnitRole.Scout;
+                    UnitCommanders.Add(scouter.Value);
+                    started = true;
+                    return;
                 }
             }
         }

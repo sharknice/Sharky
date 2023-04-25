@@ -249,7 +249,7 @@ namespace Sharky.MicroTasks.Attack
                     (e.NearbyEnemies.Any(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter) || u.UnitClassifications.Contains(UnitClassification.ProductionStructure) || u.UnitClassifications.Contains(UnitClassification.DefensiveStructure)) ||
                     (e.TargetPriorityCalculation.OverallWinnability < .5f && EnemyAttackers.Any(ea => ea.Unit.Tag == e.Unit.Tag))
                 ) && (e.NearbyEnemies.Count(b => b.Attributes.Contains(Attribute.Structure)) >= e.NearbyAllies.Count(b => b.Attributes.Contains(Attribute.Structure)))
-            );
+            ).Where(e => e.Unit.UnitType != (uint)UnitTypes.TERRAN_KD8CHARGE);
 
             if (stopwatch.ElapsedMilliseconds > 100)
             {

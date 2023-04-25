@@ -2684,7 +2684,7 @@ namespace Sharky.MicroControllers
                 return commander.Order(frame, Abilities.MOVE, targetTag: unitToSupport.UnitCalculation.Unit.Tag);
             }
 
-            var supportPoint = GetSupportSpot(commander, unitToSupport, target, defensivePoint);
+            var supportPoint = GetSupportSpot(commander, unitToSupport.UnitCalculation, target, defensivePoint);
 
             var formation = GetDesiredFormation(commander);
             var bestTarget = GetBestTarget(commander, unitToSupport, supportPoint, frame);
@@ -2806,26 +2806,26 @@ namespace Sharky.MicroControllers
             return null;
         }
 
-        protected virtual Point2D GetSupportSpot(UnitCommander commander, UnitCommander unitToSupport, Point2D target, Point2D defensivePoint)
+        protected virtual Point2D GetSupportSpot(UnitCommander commander, UnitCalculation unitToSupport, Point2D target, Point2D defensivePoint)
         {
-            if (commander.UnitCalculation.Unit.UnitType == unitToSupport.UnitCalculation.Unit.UnitType && commander.UnitCalculation.Unit.IsFlying)
+            if (commander.UnitCalculation.Unit.UnitType == unitToSupport.Unit.UnitType && commander.UnitCalculation.Unit.IsFlying)
             {
-                return new Point2D { X = unitToSupport.UnitCalculation.Position.X, Y = unitToSupport.UnitCalculation.Position.Y };
+                return new Point2D { X = unitToSupport.Position.X, Y = unitToSupport.Position.Y };
             }
 
-            if (commander.UnitCalculation.Range < unitToSupport.UnitCalculation.Range)
+            if (commander.UnitCalculation.Range < unitToSupport.Range)
             {
-                return new Point2D { X = unitToSupport.UnitCalculation.Position.X, Y = unitToSupport.UnitCalculation.Position.Y };
+                return new Point2D { X = unitToSupport.Position.X, Y = unitToSupport.Position.Y };
             }
 
-            var angle = Math.Atan2(unitToSupport.UnitCalculation.Position.Y - defensivePoint.Y, defensivePoint.X - unitToSupport.UnitCalculation.Position.X);
+            var angle = Math.Atan2(unitToSupport.Position.Y - defensivePoint.Y, defensivePoint.X - unitToSupport.Position.X);
             var x = commander.UnitCalculation.Range * Math.Cos(angle);
             var y = commander.UnitCalculation.Range * Math.Sin(angle);
 
-            var supportPoint = new Point2D { X = unitToSupport.UnitCalculation.Position.X + (float)x, Y = unitToSupport.UnitCalculation.Position.Y - (float)y };
-            if (MapDataService.MapHeight(supportPoint) != MapDataService.MapHeight(unitToSupport.UnitCalculation.Unit.Pos))
+            var supportPoint = new Point2D { X = unitToSupport.Position.X + (float)x, Y = unitToSupport.Position.Y - (float)y };
+            if (MapDataService.MapHeight(supportPoint) != MapDataService.MapHeight(unitToSupport.Unit.Pos))
             {
-                supportPoint = new Point2D { X = unitToSupport.UnitCalculation.Position.X, Y = unitToSupport.UnitCalculation.Position.Y };
+                supportPoint = new Point2D { X = unitToSupport.Position.X, Y = unitToSupport.Position.Y };
             }
 
             return supportPoint;
@@ -2933,7 +2933,7 @@ namespace Sharky.MicroControllers
                 if (AttackBestTargetInRange(commander, target, bestTarget, frame, out action)) { return action; }
                 if (bestTarget != null && bestTarget.UnitClassifications.Contains(UnitClassification.Worker))
                 {
-                    if (AvoidAllDamage(commander, target, defensivePoint, frame, out action)) { return action; }
+                    if (MicroPriority != MicroPriority.AttackForward && AvoidAllDamage(commander, target, defensivePoint, frame, out action)) { return action; }
 
                     if (AttackBestTarget(commander, target, defensivePoint, null, bestTarget, frame, out action)) { return action; }
                 }

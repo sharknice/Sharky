@@ -591,6 +591,7 @@ namespace Sharky.DefaultBot
                 [nameof(AirToss)] = new AirToss(this),
                 [nameof(FastForge)] = new FastForge(this),
                 [nameof(FastStargate)] = new FastStargate(this),
+                [nameof(SuspectedProtossProxy)] = new SuspectedProtossProxy(this),
 
                 [nameof(MarineRush)] = new MarineRush(this),
                 [nameof(BunkerRush)] = new BunkerRush(this),

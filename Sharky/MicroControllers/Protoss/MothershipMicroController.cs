@@ -158,16 +158,20 @@ namespace Sharky.MicroControllers.Protoss
 
 
             // follow behind at the range of cloak field
-            var armyUnits = ActiveUnitData.Commanders.Where(u => u.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.ArmyUnit)).Select(s => s.Value);
 
-            var unitToSupport = GetSupportTarget(commander, armyUnits, target, defensivePoint);
+            var unitToSupport = ActiveUnitData.Commanders.Values.FirstOrDefault(c => c.UnitRole == UnitRole.Leader && c.UnitCalculation.EnemiesThreateningDamage.Any())?.UnitCalculation;
 
             if (unitToSupport == null)
             {
-                unitToSupport = ActiveUnitData.Commanders.Values.FirstOrDefault(c => c.UnitRole == UnitRole.Leader);
+                unitToSupport = commander.UnitCalculation.NearbyAllies.Where(u => u.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !u.Unit.IsHallucination && u.EnemiesInRangeOf.Any()).OrderByDescending(u => u.EnemiesInRangeOf.Count()).FirstOrDefault();
+
                 if (unitToSupport == null)
                 {
-                    return false;
+                    unitToSupport = ActiveUnitData.Commanders.Values.FirstOrDefault(c => c.UnitRole == UnitRole.Leader)?.UnitCalculation;
+                    if (unitToSupport == null)
+                    {
+                        return false;
+                    }
                 }
             }
 
@@ -179,12 +183,12 @@ namespace Sharky.MicroControllers.Protoss
             return true;
         }
 
-        protected override Point2D GetSupportSpot(UnitCommander commander, UnitCommander unitToSupport, Point2D target, Point2D defensivePoint)
+        protected override Point2D GetSupportSpot(UnitCommander commander, UnitCalculation unitToSupport, Point2D target, Point2D defensivePoint)
         {
-            var angle = Math.Atan2(unitToSupport.UnitCalculation.Position.Y - defensivePoint.Y, defensivePoint.X - unitToSupport.UnitCalculation.Position.X);
+            var angle = Math.Atan2(unitToSupport.Position.Y - defensivePoint.Y, defensivePoint.X - unitToSupport.Position.X);
             var x = CloakRange * Math.Cos(angle);
             var y = CloakRange * Math.Sin(angle);
-            return new Point2D { X = unitToSupport.UnitCalculation.Position.X + (float)x, Y = unitToSupport.UnitCalculation.Position.Y - (float)y };
+            return new Point2D { X = unitToSupport.Position.X + (float)x, Y = unitToSupport.Position.Y - (float)y };
         }
     }
 }

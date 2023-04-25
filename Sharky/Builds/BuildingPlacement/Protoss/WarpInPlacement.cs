@@ -95,18 +95,27 @@ namespace Sharky.Builds.BuildingPlacement
             while (x - xStart < 7)
             {
                 var point = GetValidPointInColumn(x, baseHeight, yStart, targetVector, powerSource);
-                if (point != null) { return point; }
+                if (point != null) { UpdateUsedLocations(point); return point; }
                 x += .5f;
             }
             x = xStart - 1;
             while (xStart - x < 7)
             {
                 var point = GetValidPointInColumn(x, baseHeight, yStart, targetVector, powerSource);
-                if (point != null) { return point; }
+                if (point != null) { UpdateUsedLocations(point); return point; }
                 x -= .5f;
             }
 
             return closest;
+        }
+
+        void UpdateUsedLocations(Point2D point)
+        {
+            LastWarpInLocations.Add(point);
+            if (LastWarpInLocations.Count() > 5)
+            {
+                LastWarpInLocations.RemoveAt(0);
+            }
         }
 
         Point2D GetValidPointInColumn(float x, int baseHeight, float yStart, Vector2 target, UnitCalculation powerSource)

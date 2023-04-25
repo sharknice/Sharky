@@ -1,5 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.Builds.BuildingPlacement;
+﻿using Sharky.Builds.BuildingPlacement;
 using Sharky.DefaultBot;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
