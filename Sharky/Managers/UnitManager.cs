@@ -21,6 +21,7 @@ namespace Sharky.Managers
         DamageService DamageService;
         UnitDataService UnitDataService;
         BaseData BaseData;
+        EnemyData EnemyData;
 
         float NearbyDistance = 18;
         float AvoidRange = 1;
@@ -29,7 +30,7 @@ namespace Sharky.Managers
 
         int TargetPriorityCalculationFrame;
 
-        public UnitManager(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, BaseData baseData, SharkyOptions sharkyOptions, TargetPriorityService targetPriorityService, CollisionCalculator collisionCalculator, MapDataService mapDataService, DebugService debugService, DamageService damageService, UnitDataService unitDataService)
+        public UnitManager(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, BaseData baseData, EnemyData enemyData, SharkyOptions sharkyOptions, TargetPriorityService targetPriorityService, CollisionCalculator collisionCalculator, MapDataService mapDataService, DebugService debugService, DamageService damageService, UnitDataService unitDataService)
         {
             ActiveUnitData = activeUnitData;
 
@@ -42,6 +43,7 @@ namespace Sharky.Managers
             DebugService = debugService;
             DamageService = damageService;
             UnitDataService = unitDataService;
+            EnemyData = enemyData;
 
             ActiveUnitData.EnemyUnits = new ConcurrentDictionary<ulong, UnitCalculation>();
             ActiveUnitData.SelfUnits = new ConcurrentDictionary<ulong, UnitCalculation>();
@@ -114,21 +116,37 @@ namespace Sharky.Managers
                 }
             }
 
-            foreach (var unit in ActiveUnitData.Commanders.Where(commander => commander.Value.UnitRole == UnitRole.Build && commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.ZERG_DRONE)) // remove drones that morphed to a building
+            if (EnemyData.SelfRace == Race.Zerg)
             {
-                if (!observation.Observation.RawData.Units.Any(u => u.Tag == unit.Key))
+                foreach (var unit in ActiveUnitData.Commanders.Where(commander => commander.Value.UnitRole == UnitRole.Build && commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.ZERG_DRONE)) // remove drones that morphed to a building
                 {
-                    ActiveUnitData.DeadUnits.Add(unit.Key);
-                    ActiveUnitData.SelfDeaths--;
+                    if (!observation.Observation.RawData.Units.Any(u => u.Tag == unit.Key))
+                    {
+                        ActiveUnitData.DeadUnits.Add(unit.Key);
+                        ActiveUnitData.SelfDeaths--;
+                    }
                 }
             }
-
-            foreach (var unit in ActiveUnitData.Commanders.Where(commander => (commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_HIGHTEMPLAR || commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_DARKTEMPLAR) && (commander.Value.UnitRole == UnitRole.Morph || commander.Value.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.MORPH_ARCHON || o.AbilityId == (uint)Abilities.MORPH_ARCHON2)))) // remove templars that morphed to archons
+            else if (EnemyData.SelfRace == Race.Protoss)
             {
-                if (!observation.Observation.RawData.Units.Any(u => u.Tag == unit.Key))
+                foreach (var unit in ActiveUnitData.Commanders.Where(commander => (commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_HIGHTEMPLAR || commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_DARKTEMPLAR) && (commander.Value.UnitRole == UnitRole.Morph || commander.Value.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.MORPH_ARCHON || o.AbilityId == (uint)Abilities.MORPH_ARCHON2)))) // remove templars that morphed to archons
                 {
-                    ActiveUnitData.DeadUnits.Add(unit.Key);
-                    ActiveUnitData.SelfDeaths--;
+                    if (!observation.Observation.RawData.Units.Any(u => u.Tag == unit.Key))
+                    {
+                        ActiveUnitData.DeadUnits.Add(unit.Key);
+                        ActiveUnitData.SelfDeaths--;
+                    }
+                }
+            }
+            else if (EnemyData.SelfRace == Race.Terran)
+            {
+                foreach (var unit in ActiveUnitData.Commanders.Where(commander => commander.Value.UnitCalculation.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && commander.Value.UnitCalculation.FrameLastSeen < frame - 100))
+                {
+                    if (!observation.Observation.RawData.Units.Any(u => u.Tag == unit.Key))
+                    {
+                        ActiveUnitData.DeadUnits.Add(unit.Key);
+                        ActiveUnitData.SelfDeaths--;
+                    }
                 }
             }
 

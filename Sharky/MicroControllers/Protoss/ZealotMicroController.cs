@@ -80,5 +80,22 @@ namespace Sharky.MicroControllers.Protoss
             }
             return base.GetMovementSpeed(commander);
         }
+
+        public override List<SC2APIProtocol.Action> HarassWorkers(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame)
+        {
+            List<SC2APIProtocol.Action> action = null;
+
+            var bestTarget = GetBestHarassTarget(commander, target);
+
+            if (WeaponReady(commander, frame))
+            {
+                if (AttackBestTarget(commander, target, defensivePoint, null, bestTarget, frame, out action)) { return action; }
+            }
+
+            var formation = GetDesiredFormation(commander);
+            if (Move(commander, target, defensivePoint, null, bestTarget, formation, frame, out action)) { return action; }
+
+            return MoveToTarget(commander, target, frame);
+        }
     }
 }

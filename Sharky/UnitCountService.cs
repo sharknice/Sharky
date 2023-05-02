@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Sharky
@@ -63,20 +64,28 @@ namespace Sharky
         public int UnitsInProgressCount(UnitTypes unitType)
         {
             var unitData = SharkyUnitData.TrainingData[unitType];
-            var inProgress = ActiveUnitData.SelfUnits.Count(u => (unitData.ProducingUnits.Contains((UnitTypes)u.Value.Unit.UnitType)
-            || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_EGG
-            || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_OVERLORDCOCOON
-            || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_BANELINGCOCOON
-            || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_LURKERMPEGG
-            || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_BROODLORDCOCOON
-            || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_RAVAGERCOCOON
-            || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_TRANSPORTOVERLORDCOCOON)
-            && u.Value.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
+            var inProgress = ActiveUnitData.SelfUnits.Sum(u => GetInProgressCountForUnit(u, unitData));
             if (unitType == UnitTypes.ZERG_ZERGLING)
             {
                 return inProgress * 2;
             }
             return inProgress;
+        }
+
+        private int GetInProgressCountForUnit(KeyValuePair<ulong, UnitCalculation> u, TrainingTypeData unitData)
+        {
+            if (!unitData.ProducingUnits.Contains((UnitTypes)u.Value.Unit.UnitType)
+                || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_EGG
+                || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_OVERLORDCOCOON
+                || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_BANELINGCOCOON
+                || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_LURKERMPEGG
+                || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_BROODLORDCOCOON
+                || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_RAVAGERCOCOON
+                || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_TRANSPORTOVERLORDCOCOON)
+            {
+                return 0;
+            }
+            return u.Value.Unit.Orders.Count(o => o.AbilityId == (uint)unitData.Ability);
         }
 
         public int EquivalentTypeCount(UnitTypes unitType)
@@ -209,6 +218,12 @@ namespace Sharky
                 count += Count(UnitTypes.TERRAN_BARRACKSTECHLAB);
                 count += Count(UnitTypes.TERRAN_FACTORYTECHLAB);
                 count += Count(UnitTypes.TERRAN_STARPORTTECHLAB);
+            }
+            else if (unitType == UnitTypes.TERRAN_REACTOR)
+            {
+                count += Count(UnitTypes.TERRAN_BARRACKSREACTOR);
+                count += Count(UnitTypes.TERRAN_FACTORYREACTOR);
+                count += Count(UnitTypes.TERRAN_STARPORTREACTOR);
             }
 
             else if (unitType == UnitTypes.TERRAN_HELLION)

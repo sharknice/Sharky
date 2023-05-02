@@ -127,5 +127,10 @@ namespace Sharky.MicroControllers.Terran
 
             return commander.Order(frame, Abilities.MOVE, target);
         }
+
+        protected override List<SC2APIProtocol.Action> MoveToTarget(UnitCommander commander, Point2D target, int frame)
+        {
+            return commander.Order(frame, Abilities.MOVE, target);
+        }
     }
 }

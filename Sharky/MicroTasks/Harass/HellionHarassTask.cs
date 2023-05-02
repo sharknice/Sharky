@@ -8,23 +8,27 @@ using System.Numerics;
 
 namespace Sharky.MicroTasks
 {
-    public class ZealotHarassTask : MicroTask
+    public class HellionHarassTask : MicroTask
     {
         BaseData BaseData;
         TargetingData TargetingData;
 
-        IIndividualMicroController ZealotMicroController;
+        IIndividualMicroController HellionMicroController;
 
         bool started { get; set; }
 
-        public ZealotHarassTask(DefaultSharkyBot defaultSharkyBot, bool enabled, float priority, IIndividualMicroController zealotMicroController)
+        public int DesiredHellions { get; set; }
+
+        public HellionHarassTask(DefaultSharkyBot defaultSharkyBot, bool enabled, float priority, IIndividualMicroController hellionMicroController)
         {
             BaseData = defaultSharkyBot.BaseData;
             TargetingData = defaultSharkyBot.TargetingData;
 
-            ZealotMicroController = zealotMicroController;
+            HellionMicroController = hellionMicroController;
 
             UnitCommanders = new List<UnitCommander>();
+
+            DesiredHellions = 4;
 
             Enabled = enabled;
             Priority = priority;
@@ -32,23 +36,30 @@ namespace Sharky.MicroTasks
 
         public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
         {
-            if (UnitCommanders.Count() == 0)
+            if (UnitCommanders.Count() < DesiredHellions)
             {
                 if (started)
                 {
-                    Disable();
+                    if (!UnitCommanders.Any())
+                    {
+                        Disable();
+                    }
                     return;
                 }
 
                 foreach (var commander in commanders)
                 {
-                    if (!commander.Value.Claimed && commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_ZEALOT)
+                    if (!commander.Value.Claimed && commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_HELLION)
                     {
                         commander.Value.Claimed = true;
                         commander.Value.UnitRole = UnitRole.Harass;
                         UnitCommanders.Add(commander.Value);
-                        started = true;
-                        return;
+
+                        if (UnitCommanders.Count() >= DesiredHellions)
+                        {
+                            started = true;
+                            return;
+                        }
                     }
                 }
             }
@@ -66,7 +77,7 @@ namespace Sharky.MicroTasks
             {
                 if (commander.UnitCalculation.EnemiesInRange.Any(e => !e.Attributes.Contains(Attribute.Structure)) || Vector2.DistanceSquared(commander.UnitCalculation.Position, mainVector) < 100)
                 {
-                    var action = ZealotMicroController.HarassWorkers(commander, mainPoint, TargetingData.MainDefensePoint, frame);
+                    var action = HellionMicroController.HarassWorkers(commander, mainPoint, TargetingData.MainDefensePoint, frame);
                     if (action != null)
                     {
                         commands.AddRange(action);
@@ -74,7 +85,7 @@ namespace Sharky.MicroTasks
                 }
                 else
                 {
-                    var action = ZealotMicroController.NavigateToPoint(commander, mainPoint, TargetingData.MainDefensePoint, null, frame);
+                    var action = HellionMicroController.NavigateToPoint(commander, mainPoint, TargetingData.MainDefensePoint, null, frame);
                     if (action != null)
                     {
                         commands.AddRange(action);

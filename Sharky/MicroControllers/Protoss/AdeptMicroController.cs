@@ -50,7 +50,9 @@ namespace Sharky.MicroControllers.Protoss
 
             if (AvoidAllDamage(commander, target, defensivePoint, frame, out action)) { return action; }
 
-            return MoveToTarget(commander, target, frame);
+            NavigateToTarget(commander, target, groupCenter, null, Formation.Normal, frame, out action);
+
+            return action;
         }
 
         protected override float GetWeaponCooldown(UnitCommander commander, UnitCalculation enemy)

@@ -148,7 +148,7 @@ namespace Sharky.MicroTasks.Harass
 
                         if (commander.RetreatPath.Count() == 0)
                         {
-                            if (commander.UnitCalculation.NearbyEnemies.Take(25).Any(e => e.UnitClassifications.Contains(UnitClassification.Detector) && Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position) < 120))
+                            if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Detector) && Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position) < 120))
                             {
                                 harassInfo.LastPathFailedFrame = frame;
                                 harassInfo.Harassers.Remove(commander);

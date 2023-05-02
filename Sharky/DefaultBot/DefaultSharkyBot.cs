@@ -234,7 +234,7 @@ namespace Sharky.DefaultBot
             DamageService = new DamageService();
             BuildingService = new BuildingService(MapData, ActiveUnitData, TargetingData, BaseData, SharkyUnitData);
 
-            UnitManager = new UnitManager(ActiveUnitData, SharkyUnitData, BaseData, SharkyOptions, TargetPriorityService, CollisionCalculator, MapDataService, DebugService, DamageService, UnitDataService);
+            UnitManager = new UnitManager(ActiveUnitData, SharkyUnitData, BaseData, EnemyData, SharkyOptions, TargetPriorityService, CollisionCalculator, MapDataService, DebugService, DamageService, UnitDataService);
             Managers.Add(UnitManager);
 
             HttpClient = new HttpClient();
@@ -276,7 +276,7 @@ namespace Sharky.DefaultBot
             TerranTechGridPlacement = new TerranTechGridPlacement(BaseData, MapDataService, DebugService, BuildingService, TerranProductionGridPlacement);
             TerranSupplyDepotGridPlacement = new TerranSupplyDepotGridPlacement(BaseData, MapDataService, DebugService, BuildingService);
             MissileTurretPlacement = new MissileTurretPlacement(this);
-            TerranBuildingPlacement = new TerranBuildingPlacement(ActiveUnitData, SharkyUnitData, BaseData, DebugService, BuildingService, WallOffPlacement, TerranWallService, TerranSupplyDepotGridPlacement, TerranProductionGridPlacement, TerranTechGridPlacement, MissileTurretPlacement);
+            TerranBuildingPlacement = new TerranBuildingPlacement(ActiveUnitData, SharkyUnitData, BaseData, MacroData, DebugService, BuildingService, WallOffPlacement, TerranWallService, TerranSupplyDepotGridPlacement, TerranProductionGridPlacement, TerranTechGridPlacement, MissileTurretPlacement);
             ProtossDefensiveGridPlacement = new ProtossDefensiveGridPlacement(this);
             ProtossProxyGridPlacement = new ProtossProxyGridPlacement(this);
             ProtossBuildingPlacement = new ProtossBuildingPlacement(ActiveUnitData, SharkyUnitData, BaseData, DebugService, MapDataService, BuildingService, WallOffPlacement, ProtossPylonGridPlacement, ProtossProductionGridPlacement, ProtectNexusPylonPlacement, TargetingData, ProtectNexusCannonPlacement, BuildOptions, ProtossDefensiveGridPlacement, ProtossProxyGridPlacement);
@@ -472,6 +472,7 @@ namespace Sharky.DefaultBot
             var lateGameOracleHarassTask = new LateGameOracleHarassTask(BaseData, TargetingData, MapDataService, oracleHarassMicroController, 1, false);
             var reaperWorkerHarassTask = new ReaperWorkerHarassTask(BaseData, TargetingData, reaperHarassMicroController, 2, false);
             var bansheeHarassTask = new BansheeHarassTask(BaseData, TargetingData, MapDataService, bansheeMicroController, 2, false);
+            var hellionHarassTask = new HellionHarassTask(this, false, -1, hellionMicroController);
             var hallucinationScoutTask = new HallucinationScoutTask(TargetingData, BaseData, MicroTaskData, false, .5f);
             var hallucinationScoutEmptyBasesTask = new HallucinationScoutEmptyBasesTask(this, false, .51f);
             var wallOffTask = new WallOffTask(SharkyUnitData, ActiveUnitData, MacroData, MapData, WallService, ChatService, false, .25f);
@@ -514,6 +515,7 @@ namespace Sharky.DefaultBot
             MicroTaskData[lateGameOracleHarassTask.GetType().Name] = lateGameOracleHarassTask;
             MicroTaskData[reaperWorkerHarassTask.GetType().Name] = reaperWorkerHarassTask;
             MicroTaskData[bansheeHarassTask.GetType().Name] = bansheeHarassTask;
+            MicroTaskData[hellionHarassTask.GetType().Name] = hellionHarassTask;
             MicroTaskData[hallucinationScoutTask.GetType().Name] = hallucinationScoutTask;
             MicroTaskData[hallucinationScoutEmptyBasesTask.GetType().Name] = hallucinationScoutEmptyBasesTask;
             MicroTaskData[wallOffTask.GetType().Name] = wallOffTask;
@@ -592,6 +594,7 @@ namespace Sharky.DefaultBot
                 [nameof(FastForge)] = new FastForge(this),
                 [nameof(FastStargate)] = new FastStargate(this),
                 [nameof(SuspectedProtossProxy)] = new SuspectedProtossProxy(this),
+                [nameof(SuspectedFourGate)] = new SuspectedFourGate(this),           
 
                 [nameof(MarineRush)] = new MarineRush(this),
                 [nameof(BunkerRush)] = new BunkerRush(this),

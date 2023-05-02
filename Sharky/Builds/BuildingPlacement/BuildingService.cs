@@ -83,6 +83,17 @@ namespace Sharky.Builds.BuildingPlacement
                 && MapData.Map[(int)x - (int)radius][(int)y + (int)radius].CurrentlyBuildable && MapData.Map[(int)x - (int)radius][(int)y - (int)radius].CurrentlyBuildable;
         }
 
+        public bool RoomForAddonsOnOtherBuildings(float x, float y, float radius)
+        {
+            if (ActiveUnitData.SelfUnits.Values.Any(c => 
+                (c.Unit.UnitType == (uint)UnitTypes.TERRAN_BARRACKS || c.Unit.UnitType == (uint)UnitTypes.TERRAN_FACTORY || c.Unit.UnitType == (uint)UnitTypes.TERRAN_STARPORT) &&
+                CoordinatesBlocks(x, y, radius, c.Position.X + 2.5f, c.Position.Y - .5f, 1)))
+            {
+                return false;
+            }
+            return true;
+        }
+
         public bool SameHeight(float x, float y, float radius)
         {
             if (x - radius < 0 || y - radius < 0 || x + radius >= MapData.MapWidth || y + radius >= MapData.MapHeight)
@@ -236,6 +247,19 @@ namespace Sharky.Builds.BuildingPlacement
             var rectangle = new System.Drawing.RectangleF(x - radius, y - radius, (radius * 2), (radius * 2));
             var buildingRadius = BuildingPlacementRadius(building.Radius);
             var existing = new System.Drawing.RectangleF(building.Pos.X - buildingRadius, building.Pos.Y - buildingRadius, buildingRadius * 2, buildingRadius * 2);
+            var intersection = System.Drawing.RectangleF.Intersect(rectangle, existing);
+            if (intersection.Width == 0 || intersection.Height == 0)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        bool CoordinatesBlocks(float x, float y, float radius, float x2, float y2, float radius2)
+        {
+            var rectangle = new System.Drawing.RectangleF(x - radius, y - radius, (radius * 2), (radius * 2));
+            var buildingRadius = BuildingPlacementRadius(radius2);
+            var existing = new System.Drawing.RectangleF(x2 - buildingRadius, y2 - buildingRadius, buildingRadius * 2, buildingRadius * 2);
             var intersection = System.Drawing.RectangleF.Intersect(rectangle, existing);
             if (intersection.Width == 0 || intersection.Height == 0)
             {

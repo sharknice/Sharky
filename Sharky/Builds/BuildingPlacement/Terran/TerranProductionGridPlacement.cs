@@ -105,7 +105,8 @@ namespace Sharky.Builds.BuildingPlacement
                 !BuildingService.Blocked(x, y, size / 2.0f, -.5f) && !BuildingService.HasAnyCreep(x, y, size / 2f) &&
                 (mineralFields == null || !mineralFields.Any(m => Vector2.DistanceSquared(new Vector2(m.Pos.X, m.Pos.Y), vector) < 16)) &&
                 (vespeneGeysers == null || !vespeneGeysers.Any(m => Vector2.DistanceSquared(new Vector2(m.Pos.X, m.Pos.Y), vector) < 25)) &&
-                BuildingService.RoomBelowAndAbove(x, y, size))
+                BuildingService.RoomBelowAndAbove(x, y, size) &&
+                BuildingService.RoomForAddonsOnOtherBuildings(x, y, size))
             {
                 if (unitType == UnitTypes.TERRAN_BARRACKS || unitType == UnitTypes.TERRAN_FACTORY || unitType == UnitTypes.TERRAN_STARPORT)
                 {

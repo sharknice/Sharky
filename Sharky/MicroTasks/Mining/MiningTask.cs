@@ -117,7 +117,21 @@ namespace Sharky.MicroTasks
                 commands.AddRange(OverSaturatedWithExtraIdleWorkers(frame));
             }
 
+            if (MacroData.Minerals < 300 && UnitCommanders.Any() && !BaseData.SelfBases.Any() && !ActiveUnitData.SelfUnits.Values.Any(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter)))
+            {
+                AttackWithWorkers();
+            }
+
             return commands;
+        }
+
+        private void AttackWithWorkers()
+        {
+            foreach(var commander in UnitCommanders)
+            {
+                AttackWithWorker(commander);
+            }
+            UnitCommanders.Clear();
         }
 
         void ReclaimBuilders(int frame)
@@ -461,6 +475,10 @@ namespace Sharky.MicroTasks
                         {
                             worker.UnitRole = UnitRole.Attack;
                             attackTask.UnitCommanders.Add(worker);
+                            if (attackTask.GetType() == typeof(AdvancedAttackTask))
+                            {
+                                ((AdvancedAttackTask)attackTask).SupportUnits.Add(worker);
+                            }
                         }
                     }
                 }
@@ -473,6 +491,10 @@ namespace Sharky.MicroTasks
                         {
                             worker.UnitRole = UnitRole.Attack;
                             attackTask.UnitCommanders.Add(worker);
+                            if (attackTask.GetType() == typeof(AdvancedAttackTask))
+                            {
+                                ((AdvancedAttackTask)attackTask).SupportUnits.Add(worker);
+                            }
                         }
                     }
                 }
@@ -532,6 +554,10 @@ namespace Sharky.MicroTasks
                     {
                         attackTask.UnitCommanders.Add(worker);
                         worker.UnitRole = UnitRole.Attack;
+                        if (attackTask.GetType() == typeof(AdvancedAttackTask))
+                        {
+                            ((AdvancedAttackTask)attackTask).SupportUnits.Add(worker);
+                        }
                     }
                 }
             }
@@ -544,6 +570,9 @@ namespace Sharky.MicroTasks
                 var attackTask = MicroTaskData[typeof(AttackTask).Name];
                 if (attackTask.Enabled)
                 {
+                    var canWork = MacroData.Minerals < 300 && UnitCommanders.Any() && !BaseData.SelfBases.Any() && !ActiveUnitData.SelfUnits.Values.Any(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter));
+                    if (!canWork) { return; }
+
                     var tags = new List<ulong>();
                     foreach (var worker in attackTask.UnitCommanders.Where(u => u.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && (u.UnitCalculation.NearbyEnemies.Count(e => e.FrameFirstSeen == frame) == 0 || !u.UnitCalculation.NearbyAllies.Take(25).Any(a => a.Attributes.Contains(SC2APIProtocol.Attribute.Structure))) && u.UnitRole == UnitRole.Attack))
                     {
@@ -553,9 +582,8 @@ namespace Sharky.MicroTasks
                     }
                     foreach (var tag in tags)
                     {
-                        attackTask.UnitCommanders.RemoveAll(u => u.UnitCalculation.Unit.Tag == tag);
+                        attackTask.StealUnit(attackTask.UnitCommanders.FirstOrDefault(u => u.UnitCalculation.Unit.Tag == tag));
                     }
-                    attackTask.UnitCommanders.RemoveAll(u => u.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && u.UnitRole == UnitRole.Minerals || u.UnitRole == UnitRole.Gas);
                 }
             }
         }

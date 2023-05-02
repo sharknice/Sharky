@@ -1,5 +1,6 @@
 ﻿using SC2APIProtocol;
 using Sharky.Builds.BuildingPlacement;
+using Sharky.Builds.MacroServices;
 using Sharky.DefaultBot;
 using Sharky.Managers.Terran;
 using Sharky.Pathing;
@@ -10,11 +11,12 @@ namespace Sharky.Builds.Terran
 {
     public class TerranSharkyBuild : SharkyBuild
     {
-        TargetingData TargetingData;
-        MapDataService MapDataService;
-        OrbitalManager OrbitalManager;
-        SharkyUnitData SharkyUnitData;
-        BaseData BaseData;
+        protected TargetingData TargetingData;
+        protected MapDataService MapDataService;
+        protected OrbitalManager OrbitalManager;
+        protected SharkyUnitData SharkyUnitData;
+        protected BaseData BaseData;
+        protected UnitRequestCancellingService UnitRequestCancellingService;
 
         protected float ScanAttackPointTime { get; set; }
         protected float ScanNextEnemyBaseTime { get; set; }
@@ -27,6 +29,7 @@ namespace Sharky.Builds.Terran
             OrbitalManager = defaultSharkyBot.OrbitalManager;
             SharkyUnitData = defaultSharkyBot.SharkyUnitData;
             BaseData = defaultSharkyBot.BaseData;
+            UnitRequestCancellingService = defaultSharkyBot.UnitRequestCancellingService;
 
             ScanAttackPointTime = 120f;
             ScanNextEnemyBaseTime = 120f;
@@ -83,6 +86,20 @@ namespace Sharky.Builds.Terran
             }
 
             return false;
+        }
+
+        protected void StopScvProductionForOrbitals()
+        {
+            if (MacroData.DesiredMorphCounts[UnitTypes.TERRAN_ORBITALCOMMAND] > UnitCountService.BuildingsDoneAndInProgressCount(UnitTypes.TERRAN_ORBITALCOMMAND))
+            {
+                BuildOptions.StrictWorkerCount = true;
+                MacroData.DesiredUnitCounts[UnitTypes.TERRAN_SCV] = UnitCountService.Count(UnitTypes.TERRAN_SCV);
+                var commandCenterBuildingScv = ActiveUnitData.Commanders.Values.FirstOrDefault(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_COMMANDCENTER && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.TRAIN_SCV));
+                if (commandCenterBuildingScv != null)
+                {
+                    UnitRequestCancellingService.RequestCancel(commandCenterBuildingScv);
+                }
+            }
         }
 
         protected void ScanAttackPoint()

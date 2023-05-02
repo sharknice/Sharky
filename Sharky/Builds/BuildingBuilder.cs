@@ -102,12 +102,23 @@ namespace Sharky.Builds
                     }
                     if (building.Count() > 0)
                     {
+                        var addOnSwap = macroData.AddOnSwaps.Values.FirstOrDefault(a => a.Started && !a.Completed && (a.AddOnBuilder == null || a.AddOnBuilder.UnitCalculation.Unit.Tag == building.FirstOrDefault().Value.UnitCalculation.Unit.Tag) && a.AddOnTaker != null && (uint)a.DesiredAddOnBuilder == building.FirstOrDefault().Value.UnitCalculation.Unit.UnitType);
+
                         // is there room to build the addon?
                         var buildingWithRoom = building.FirstOrDefault(b => HasRoomForAddon(b.Value)).Value;
                         if (buildingWithRoom != null)
                         {
-                            var action = buildingWithRoom.Order(macroData.Frame, unitData.Ability);
-                            if (action != null) { return action; }
+                            if (addOnSwap != null && Vector2.DistanceSquared(addOnSwap.AddOnTaker.UnitCalculation.Position, buildingWithRoom.UnitCalculation.Position) > 36)
+                            {
+                                // get closer to target building
+                                var action = buildingWithRoom.Order(macroData.Frame, Abilities.LIFT);
+                                if (action != null) { return action; }
+                            }
+                            else
+                            {
+                                var action = buildingWithRoom.Order(macroData.Frame, unitData.Ability);
+                                if (action != null) { return action; }
+                            }
                         }
                         else
                         {
@@ -133,6 +144,11 @@ namespace Sharky.Builds
                     }
                     if (building.Count() > 0)
                     {
+                        var addOnSwap = macroData.AddOnSwaps.Values.FirstOrDefault(a => a.Started && !a.Completed && (a.AddOnBuilder == null || a.AddOnBuilder.UnitCalculation.Unit.Tag == building.FirstOrDefault().Value.UnitCalculation.Unit.Tag) && a.AddOnTaker != null && (uint)a.DesiredAddOnBuilder == building.FirstOrDefault().Value.UnitCalculation.Unit.UnitType);
+                        if (addOnSwap != null)
+                        {
+                            location = new Point2D { X = addOnSwap.AddOnTaker.UnitCalculation.Position.X, Y = addOnSwap.AddOnTaker.UnitCalculation.Position.Y };
+                        }
                         if (location == null)
                         {
                             location = new Point2D { X = building.First().Value.UnitCalculation.Position.X, Y = building.First().Value.UnitCalculation.Position.Y };

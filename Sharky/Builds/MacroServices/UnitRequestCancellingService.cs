@@ -15,6 +15,8 @@ namespace Sharky.Builds.MacroServices
         SharkyUnitData SharkyUnitData;
 
         private HashSet<UnitTypes> CancelRequests = new();
+        List<SC2APIProtocol.Action> CancelActions = new List<SC2APIProtocol.Action>();
+
 
         public UnitRequestCancellingService(DefaultSharkyBot defaultSharkyBot)
         {
@@ -30,6 +32,12 @@ namespace Sharky.Builds.MacroServices
         public void RequestCancel(UnitTypes unit)
         {
             CancelRequests.Add(unit);
+        }
+
+        public void RequestCancel(UnitCommander commander)
+        {
+            var action = commander.Order(MacroData.Frame, Abilities.CANCEL_LAST);
+            if (action != null) { CancelActions.AddRange(action); }
         }
 
         public List<SC2APIProtocol.Action> CancelUnits()
@@ -53,6 +61,9 @@ namespace Sharky.Builds.MacroServices
             }
 
             CancelRequests.Clear();
+
+            commands.AddRange(CancelActions);
+            CancelActions.Clear();
 
             return commands;
         }

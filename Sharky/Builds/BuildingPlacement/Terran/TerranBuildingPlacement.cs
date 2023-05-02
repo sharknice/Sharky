@@ -10,6 +10,7 @@ namespace Sharky.Builds.BuildingPlacement
         ActiveUnitData ActiveUnitData;
         SharkyUnitData SharkyUnitData;
         BaseData BaseData;
+        MacroData MacroData;
         DebugService DebugService;
         BuildingService BuildingService;
         IBuildingPlacement WallOffPlacement;
@@ -19,11 +20,12 @@ namespace Sharky.Builds.BuildingPlacement
         TerranTechGridPlacement TerranTechGridPlacement;
         IBuildingPlacement MissileTurretPlacement;
 
-        public TerranBuildingPlacement(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, BaseData baseData, DebugService debugService, BuildingService buildingService, IBuildingPlacement wallOffPlacement, TerranWallService terranWallService, TerranSupplyDepotGridPlacement terranBuildingGridPlacement, TerranProductionGridPlacement terranProductionGridPlacement, TerranTechGridPlacement terranTechGridPlacement, IBuildingPlacement missileTurretPlacement)
+        public TerranBuildingPlacement(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, BaseData baseData, MacroData macroData, DebugService debugService, BuildingService buildingService, IBuildingPlacement wallOffPlacement, TerranWallService terranWallService, TerranSupplyDepotGridPlacement terranBuildingGridPlacement, TerranProductionGridPlacement terranProductionGridPlacement, TerranTechGridPlacement terranTechGridPlacement, IBuildingPlacement missileTurretPlacement)
         {
             ActiveUnitData = activeUnitData;
             SharkyUnitData = sharkyUnitData;
             BaseData = baseData;
+            MacroData = macroData;
             DebugService = debugService;
             BuildingService = buildingService;
             WallOffPlacement = wallOffPlacement;
@@ -110,6 +112,13 @@ namespace Sharky.Builds.BuildingPlacement
                 size += 2;
             }
 
+            var addOnSwap = MacroData.AddOnSwaps.Values.FirstOrDefault(a => a.Started && !a.Completed && a.AddOnBuilder != null && a.AddOnTaker == null && a.DesiredAddOnTaker == unitType);
+            if (addOnSwap != null)
+            {
+                spot = FindTechPlacement(reference, size, maxDistance, minimumMineralProximinity);
+                if (spot != null) { return spot; }
+            }
+
             spot = TerranProductionGridPlacement.FindPlacement(reference, unitType, size, maxDistance, minimumMineralProximinity);
             if (spot != null) { return spot; }
 
@@ -118,7 +127,7 @@ namespace Sharky.Builds.BuildingPlacement
                 minimumMineralProximinity = 3;
             }
 
-            return FindTechPlacement(reference, size + 4f, maxDistance, minimumMineralProximinity); // add to the radius to make room for the addon and completed units to exist
+            return FindTechPlacement(reference, size + 4f, maxDistance, minimumMineralProximinity); // add to the radius to make room for the addon and completed units to exit
         }
 
         public Point2D FindTechPlacement(Point2D reference, float size, float maxDistance, float minimumMineralProximinity = 2)

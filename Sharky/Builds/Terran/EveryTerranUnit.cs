@@ -24,9 +24,6 @@ namespace Sharky.Builds.Terran
             BuildOptions.StrictSupplyCount = true;
             MacroData.DesiredGases = 0;
 
-            MacroData.DesiredUnitCounts[UnitTypes.ZERG_DRONE] = 10;
-            MacroData.DesiredUnitCounts[UnitTypes.ZERG_OVERLORD] = 1;
-
             if (MicroTaskData.ContainsKey("WorkerScoutTask"))
             {
                 WorkerScoutTask = (WorkerScoutTask)MicroTaskData["WorkerScoutTask"];

@@ -37,6 +37,9 @@
     <None Update="StaticData\opponents\Ku6ikRu6ika.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="StaticData\opponents\TyrT.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="StaticData\opponents\Xena.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

@@ -60,7 +60,6 @@ namespace Sharky.Builds.MacroServices
         List<Action> SwapBuildings(AddOnSwap addOnSwap)
         {
             var commands = new List<Action>();
-
             if (addOnSwap.Cancel)
             {
                 if (addOnSwap.AddOnBuilder.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.BUILD_REACTOR_BARRACKS || o.AbilityId == (uint)Abilities.BUILD_TECHLAB_BARRACKS || o.AbilityId == (uint)Abilities.BUILD_REACTOR_FACTORY || o.AbilityId == (uint)Abilities.BUILD_TECHLAB_FACTORY || o.AbilityId == (uint)Abilities.BUILD_REACTOR_STARPORT || o.AbilityId == (uint)Abilities.BUILD_TECHLAB_STARPORT))
@@ -73,26 +72,29 @@ namespace Sharky.Builds.MacroServices
             if (addOnSwap.AddOnBuilder != null && addOnSwap.AddOn != null && addOnSwap.AddOn.UnitCalculation.Unit.BuildProgress == 1)
             {
                 List<Action> command = null;
-                if (addOnSwap.AddOnBuilder.UnitCalculation.UnitTypeData.Name.Contains("Flying") && addOnSwap.TakerLocation != null)
+                if (addOnSwap.AddOnBuilder.UnitCalculation.UnitTypeData.Name.Contains("Flying"))
                 {
-                    if (addOnSwap.AddOnTaker != null &&
-                        (addOnSwap.AddOnTaker.UnitCalculation.UnitTypeData.Name.Contains("Flying") || addOnSwap.AddOnTaker.UnitCalculation.Position.X != addOnSwap.TakerLocation.X || addOnSwap.AddOnTaker.UnitCalculation.Position.Y != addOnSwap.TakerLocation.Y))
+                    if (addOnSwap.TakerLocation != null)
                     {
-                        if (BuildingService.Blocked(addOnSwap.TakerLocation.X, addOnSwap.TakerLocation.Y, 1.5f, -.5f, addOnSwap.AddOnBuilder.UnitCalculation.Unit.Tag) || BuildingService.HasAnyCreep(addOnSwap.TakerLocation.X, addOnSwap.TakerLocation.Y, 1.5f))
+                        if (addOnSwap.AddOnTaker != null &&
+                            (addOnSwap.AddOnTaker.UnitCalculation.UnitTypeData.Name.Contains("Flying") || addOnSwap.AddOnTaker.UnitCalculation.Position.X != addOnSwap.TakerLocation.X || addOnSwap.AddOnTaker.UnitCalculation.Position.Y != addOnSwap.TakerLocation.Y))
                         {
-                            var unitData = SharkyUnitData.BuildingData[addOnSwap.DesiredAddOnBuilder];
-                            addOnSwap.TakerLocation = BuildingPlacement.FindPlacement(addOnSwap.TakerLocation, addOnSwap.DesiredAddOnBuilder, unitData.Size);
+                            if (!addOnSwap.AddOnBuilder.UnitCalculation.NearbyAllies.Any(a => a.Unit.Pos.X == addOnSwap.TakerLocation.X + 2.5f && a.Unit.Pos.Y == addOnSwap.TakerLocation.Y - .5f) || BuildingService.Blocked(addOnSwap.TakerLocation.X, addOnSwap.TakerLocation.Y, 1.5f, -.5f, addOnSwap.AddOnBuilder.UnitCalculation.Unit.Tag) || BuildingService.HasAnyCreep(addOnSwap.TakerLocation.X, addOnSwap.TakerLocation.Y, 1.5f))
+                            {
+                                var unitData = SharkyUnitData.BuildingData[addOnSwap.DesiredAddOnBuilder];
+                                addOnSwap.TakerLocation = BuildingPlacement.FindPlacement(addOnSwap.TakerLocation, addOnSwap.DesiredAddOnBuilder, unitData.Size);
+                            }
+                            command = addOnSwap.AddOnBuilder.Order(MacroData.Frame, Abilities.LAND, addOnSwap.TakerLocation);
                         }
-                        command = addOnSwap.AddOnBuilder.Order(MacroData.Frame, Abilities.LAND, addOnSwap.TakerLocation);
-                    }
-                    else
-                    {
-                        command = addOnSwap.AddOnBuilder.Order(MacroData.Frame, Abilities.MOVE, addOnSwap.TakerLocation);
+                        else
+                        {
+                            command = addOnSwap.AddOnBuilder.Order(MacroData.Frame, Abilities.MOVE, addOnSwap.TakerLocation);
+                        }
                     }
                 }
                 else
                 {
-                    if (addOnSwap.AddOnBuilder.UnitCalculation.NearbyEnemies.Count(e => Vector2.DistanceSquared(e.Position, addOnSwap.AddOnBuilder.UnitCalculation.Position) < 25) == 0)
+                    if (!addOnSwap.AddOnBuilder.UnitCalculation.NearbyEnemies.Any(e => !e.Unit.IsFlying && MacroData.Frame == e.FrameLastSeen && Vector2.DistanceSquared(e.Position, addOnSwap.AddOnBuilder.UnitCalculation.Position) < 25))
                     {
                         command = addOnSwap.AddOnBuilder.Order(MacroData.Frame, Abilities.LIFT);
                     }
