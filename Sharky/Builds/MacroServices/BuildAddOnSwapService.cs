@@ -156,6 +156,10 @@ namespace Sharky.Builds.MacroServices
             if (addOnSwap.AddOnTaker == null)
             {
                 addOnSwap.AddOnTaker = ActiveUnitData.Commanders.Values.FirstOrDefault(c => c.UnitCalculation.Unit.UnitType == (uint)addOnSwap.DesiredAddOnTaker);
+                if (addOnSwap.AddOnTaker == null)
+                {
+                    addOnSwap.AddOnTaker = ActiveUnitData.Commanders.Values.FirstOrDefault(c => c.UnitCalculation.Unit.IsFlying && c.UnitCalculation.UnitTypeData.Name.Contains(addOnSwap.DesiredAddOnTaker.ToString()));
+                }
                 if (addOnSwap.AddOnTaker != null)
                 {
                     addOnSwap.TakerLocation = new Point2D { X = addOnSwap.AddOnTaker.UnitCalculation.Unit.Pos.X, Y = addOnSwap.AddOnTaker.UnitCalculation.Unit.Pos.Y };

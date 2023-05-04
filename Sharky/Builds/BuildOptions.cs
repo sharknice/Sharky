@@ -1,4 +1,5 @@
 ﻿using Sharky.Builds.BuildingPlacement;
+using Sharky.Builds.Terran;
 using Sharky.Builds.Zerg;
 
 namespace Sharky.Builds
@@ -14,6 +15,8 @@ namespace Sharky.Builds
         public int StrictWorkersPerGasCount { get; set; }
         public int MaxActiveGasCount { get; set; }
         public ZergBuildOptions ZergBuildOptions { get; set; }
+        public TerranBuildOptions TerranBuildOptions { get; set; }
+
         public WallOffType WallOffType { get; set; }
         
         /// <summary>
@@ -33,6 +36,7 @@ namespace Sharky.Builds
             MaxActiveGasCount = 8;
             StrictWorkersPerGasCount = 3;
             ZergBuildOptions = new ZergBuildOptions { ConnectMainWithNatWithCreep = false };
+            TerranBuildOptions = new TerranBuildOptions();
             WallOffType = WallOffType.None;
         }
     }

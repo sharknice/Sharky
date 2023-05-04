@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using Sharky.Builds;
 using Sharky.Builds.BuildingPlacement;
 using Sharky.DefaultBot;
 using System.Collections.Generic;
@@ -13,6 +14,7 @@ namespace Sharky.Macro
         SharkyUnitData SharkyUnitData;
         TargetingData TargetingData;
         AttackData AttackData;
+        BuildOptions BuildOptions;
 
         UnitCountService UnitCountService;
         SharkyOptions SharkyOptions;
@@ -28,6 +30,7 @@ namespace Sharky.Macro
             AttackData = defaultSharkyBot.AttackData;
             UnitCountService = defaultSharkyBot.UnitCountService;
             SharkyOptions = defaultSharkyBot.SharkyOptions;
+            BuildOptions = defaultSharkyBot.BuildOptions;
 
             WarpInPlacement = warpInPlacement;
         }
@@ -54,7 +57,7 @@ namespace Sharky.Macro
                             {
                                 building = ActiveUnitData.Commanders.Where(c => unitData.ProducingUnits.Contains((UnitTypes)c.Value.UnitCalculation.Unit.UnitType) && c.Value.UnitCalculation.Unit.BuildProgress == 1 && c.Value.UnitCalculation.Unit.HasAddOnTag && // reactors first
                                         SharkyUnitData.ReactorTypes.Contains((UnitTypes)ActiveUnitData.SelfUnits[c.Value.UnitCalculation.Unit.AddOnTag].Unit.UnitType) && c.Value.UnitCalculation.Unit.Orders.Count() <= 1);
-                                if (building.Count() == 0)
+                                if (building.Count() == 0 && !(unit.Key == UnitTypes.TERRAN_HELLION && BuildOptions.TerranBuildOptions.OnlyBuildHellionsWithReactors))
                                 {
                                     building = ActiveUnitData.Commanders.Where(c => unitData.ProducingUnits.Contains((UnitTypes)c.Value.UnitCalculation.Unit.UnitType) && !c.Value.UnitCalculation.Unit.IsActive && c.Value.UnitCalculation.Unit.BuildProgress == 1 && !c.Value.UnitCalculation.Unit.HasAddOnTag); // no add on second
                                     if (building.Count() == 0)
