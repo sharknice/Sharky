@@ -2727,6 +2727,11 @@ namespace Sharky.MicroControllers
                 bestTarget = null;
             }
 
+            if (distanceSquredToSupportUnit < 25 && !unitToSupport.UnitCalculation.Unit.IsFlying)
+            {
+                return new List<SC2APIProtocol.Action>(); // don't crowd the support unit
+            }
+
             if (Move(commander, supportPoint, defensivePoint, groupCenter, bestTarget, formation, frame, out action)) { return action; }
 
             if (AvoidDeceleration(commander, supportPoint, true, frame, out action)) { return action; }
@@ -2933,7 +2938,7 @@ namespace Sharky.MicroControllers
                 if (AttackBestTargetInRange(commander, target, bestTarget, frame, out action)) { return action; }
                 if (bestTarget != null && bestTarget.UnitClassifications.Contains(UnitClassification.Worker))
                 {
-                    if (MicroPriority != MicroPriority.AttackForward && AvoidAllDamage(commander, target, defensivePoint, frame, out action)) { return action; }
+                    if (MicroPriority == MicroPriority.StayOutOfRange && AvoidAllDamage(commander, target, defensivePoint, frame, out action)) { return action; }
 
                     if (AttackBestTarget(commander, target, defensivePoint, null, bestTarget, frame, out action)) { return action; }
                 }

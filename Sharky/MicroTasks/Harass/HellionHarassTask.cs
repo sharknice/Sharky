@@ -13,11 +13,13 @@ namespace Sharky.MicroTasks
         BaseData BaseData;
         TargetingData TargetingData;
 
-        IIndividualMicroController HellionMicroController;
+        public IIndividualMicroController HellionMicroController { get; set; }
 
         bool started { get; set; }
 
         public int DesiredHellions { get; set; }
+
+        Point2D AttackPoint { get; set; }
 
         public HellionHarassTask(DefaultSharkyBot defaultSharkyBot, bool enabled, float priority, IIndividualMicroController hellionMicroController)
         {
@@ -68,16 +70,24 @@ namespace Sharky.MicroTasks
         public override IEnumerable<SC2APIProtocol.Action> PerformActions(int frame)
         {
             var commands = new List<SC2APIProtocol.Action>();
-            if (BaseData?.EnemyBaseLocations?.FirstOrDefault() == null) { return commands; }
+            if (BaseData?.EnemyBaseLocations?.FirstOrDefault() == null || !started) { return commands; }
 
-            var mainPoint = BaseData.EnemyBaseLocations.FirstOrDefault().MineralLineLocation;
-            var mainVector = new Vector2(mainPoint.X, mainPoint.Y);
+            if (AttackPoint == null) 
+            {
+                AttackPoint = BaseData.EnemyBaseLocations.Skip(1).FirstOrDefault().MineralLineLocation;
+            }
+
+            var mainVector = new Vector2(AttackPoint.X, AttackPoint.Y);
 
             foreach (var commander in UnitCommanders)
             {
-                if (commander.UnitCalculation.EnemiesInRange.Any(e => !e.Attributes.Contains(Attribute.Structure)) || Vector2.DistanceSquared(commander.UnitCalculation.Position, mainVector) < 100)
+                if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker)) || Vector2.DistanceSquared(commander.UnitCalculation.Position, mainVector) < 100)
                 {
-                    var action = HellionMicroController.HarassWorkers(commander, mainPoint, TargetingData.MainDefensePoint, frame);
+                    if (Vector2.DistanceSquared(commander.UnitCalculation.Position, mainVector) < 36 && !commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker)))
+                    {
+                        AttackPoint = BaseData.EnemyBaseLocations.FirstOrDefault().MineralLineLocation;
+                    }
+                    var action = HellionMicroController.HarassWorkers(commander, AttackPoint, TargetingData.MainDefensePoint, frame);
                     if (action != null)
                     {
                         commands.AddRange(action);
@@ -85,14 +95,12 @@ namespace Sharky.MicroTasks
                 }
                 else
                 {
-                    var action = HellionMicroController.NavigateToPoint(commander, mainPoint, TargetingData.MainDefensePoint, null, frame);
+                    var action = HellionMicroController.NavigateToPoint(commander, AttackPoint, TargetingData.MainDefensePoint, null, frame);
                     if (action != null)
                     {
                         commands.AddRange(action);
                     }
                 }
-
-                
             }
 
             return commands;

@@ -10,7 +10,8 @@ namespace Sharky.Managers
     {
         AttackData AttackData;
         MacroData MacroData;
-        AdvancedAttackService AdvancedAttackService;
+
+        public AdvancedAttackService AdvancedAttackService { get; private set; }
 
         public AdvancedAttackDataManager(DefaultSharkyBot defaultSharkyBot, AdvancedAttackService advancedAttackService, IMicroTask attackTask) :
             base(defaultSharkyBot.AttackData, defaultSharkyBot.ActiveUnitData, attackTask, defaultSharkyBot.TargetPriorityService, defaultSharkyBot.TargetingData, defaultSharkyBot.MacroData, defaultSharkyBot.BaseData, defaultSharkyBot.DebugService)

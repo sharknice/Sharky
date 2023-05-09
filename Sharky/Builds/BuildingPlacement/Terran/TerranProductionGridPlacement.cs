@@ -120,7 +120,10 @@ namespace Sharky.Builds.BuildingPlacement
                         !BuildingService.Blocked(addonX, addonY, size / 2.0f, -.5f) && !BuildingService.HasAnyCreep(addonX, addonY, size / 2f) &&
                         (vespeneGeysers == null || !vespeneGeysers.Any(m => Vector2.DistanceSquared(new Vector2(m.Pos.X, m.Pos.Y), addonVector) < 25)))
                     {
-                        return new Point2D { X = x, Y = y };
+                        if (!BuildingService.BlocksResourceCenter(x, y, size / 2f) && !BuildingService.BlocksResourceCenter(addonX, addonY, size / 2f))
+                        {
+                            return new Point2D { X = x, Y = y };
+                        }
                     }
                 }
                 else

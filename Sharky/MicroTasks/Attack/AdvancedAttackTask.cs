@@ -153,6 +153,7 @@ namespace Sharky.MicroTasks.Attack
                     commander.Value.Claimed = true;
                     commander.Value.UnitRole = UnitRole.Support;
                     UnitCommanders.Add(commander.Value);
+                    SupportUnits.Add(commander.Value);
                     claimedScvs++;
                     if (claimedScvs >= desiredScvs)
                     {
