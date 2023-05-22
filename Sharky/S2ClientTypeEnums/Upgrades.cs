@@ -78,6 +78,9 @@
         ZERGFLYERARMORSLEVEL3 = 73,
         INFESTORENERGYUPGRADE = 74,
         CENTRIFICALHOOKS = 75,
+        /// <summary>
+        /// yamato cannon
+        /// </summary>
         BATTLECRUISERENABLESPECIALIZATIONS = 76,
         PROTOSSAIRWEAPONSLEVEL1 = 78,
         PROTOSSAIRWEAPONSLEVEL2 = 79,

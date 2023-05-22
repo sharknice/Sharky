@@ -1,4 +1,5 @@
-﻿using SC2APIProtocol;
+﻿using Google.Protobuf.WellKnownTypes;
+using SC2APIProtocol;
 using Sharky.DefaultBot;
 using Sharky.Extensions;
 using Sharky.MicroTasks.Attack;
@@ -1040,7 +1041,7 @@ namespace Sharky.MicroControllers
         {
             action = null;
 
-            var attacks = commander.UnitCalculation.NearbyEnemies.Take(25).Where(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && DamageService.CanDamage(e, commander.UnitCalculation));
+            var attacks = commander.UnitCalculation.NearbyEnemies.Where(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && DamageService.CanDamage(e, commander.UnitCalculation));
             if (AvoidDamageList(commander, target, defensivePoint, attacks, frame, alwaysRun, out action)) { return true; }
 
             return false;
@@ -1050,7 +1051,7 @@ namespace Sharky.MicroControllers
         {
             action = null;
 
-            var attacks = commander.UnitCalculation.NearbyEnemies.Take(25).Where(e => DamageService.CanDamage(e, commander.UnitCalculation));
+            var attacks = commander.UnitCalculation.NearbyEnemies.Where(e => DamageService.CanDamage(e, commander.UnitCalculation));
             if (AvoidDamageList(commander, target, defensivePoint, attacks, frame, alwaysRun, out action)) { return true; }
 
             return false;
@@ -1845,6 +1846,14 @@ namespace Sharky.MicroControllers
                         }
                     }
                 }
+
+                var buildingScv = scvs.FirstOrDefault(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_SCV &&
+                                e.NearbyAllies.Any(a => a.Unit.BuildProgress < 1 && Vector2.DistanceSquared(a.Position, e.Position) < ((e.Unit.Radius + a.Unit.Radius + 1) * (e.Unit.Radius + a.Unit.Radius + 1))));
+                if (buildingScv != null)
+                {
+                    return buildingScv;
+                }
+
                 var scv = scvs.FirstOrDefault();
                 if (scv != null)
                 {
@@ -3031,7 +3040,7 @@ namespace Sharky.MicroControllers
 
             if (PreOffenseOrder(commander, target, defensivePoint, groupCenter, null, frame, out action)) { return action; }
 
-            if (commander.UnitCalculation.NearbyEnemies.Any(e => DamageService.CanDamage(e, commander.UnitCalculation)))
+            if (commander.UnitCalculation.NearbyEnemies.Any(e => (e.FrameLastSeen > (frame - (SharkyOptions.FramesPerSecond * 60)) || e.Attributes.Contains(SC2APIProtocol.Attribute.Structure)) && DamageService.CanDamage(e, commander.UnitCalculation)))
             {
                 if (commander.RetreatPathFrame + 2 < frame)
                 {

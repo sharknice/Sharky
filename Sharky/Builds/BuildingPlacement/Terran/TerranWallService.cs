@@ -10,13 +10,15 @@ namespace Sharky.Builds.BuildingPlacement
         WallService WallService;
         MapData MapData;
         BaseData BaseData;
+        MacroData MacroData;
 
-        public TerranWallService(ActiveUnitData activeUnitData, MapData mapData, BaseData baseData, WallService wallService)
+        public TerranWallService(ActiveUnitData activeUnitData, MapData mapData, BaseData baseData, MacroData macroData, WallService wallService)
         {
             ActiveUnitData = activeUnitData;
             WallService = wallService;
             MapData = mapData;
             BaseData = baseData;
+            MacroData = macroData;
         }
 
         public Point2D FindTerranPlacement(WallData wallData, UnitTypes unitType, WallOffType wallOffType)
@@ -115,7 +117,10 @@ namespace Sharky.Builds.BuildingPlacement
                 {
                     if (!existingBuildings.Any(e => e.Position.X == spot.X && e.Position.Y == spot.Y) && WallService.Buildable(spot, .5f))
                     {
-                        return spot;
+                        if (!MacroData.AddOnSwaps.Values.Any(s => !s.Completed && s.Started && s.AddOn != null && s.AddOn.UnitCalculation.Position.X == spot.X + 2.5f && s.AddOn.UnitCalculation.Position.Y == spot.Y - .5f))
+                        {
+                            return spot;
+                        }
                     }
                 }
             }
@@ -131,7 +136,10 @@ namespace Sharky.Builds.BuildingPlacement
                 {
                     if (!existingBuildings.Any(e => e.Position.X == spot.X && e.Position.Y == spot.Y) && WallService.Buildable(spot, .5f))
                     {
-                        return spot;
+                        if (!MacroData.AddOnSwaps.Values.Any(s => !s.Completed && s.Started && s.AddOn != null && s.AddOn.UnitCalculation.Position.X == spot.X + 2.5f && s.AddOn.UnitCalculation.Position.Y == spot.Y - .5f))
+                        {
+                            return spot;
+                        }
                     }
                 }
             }

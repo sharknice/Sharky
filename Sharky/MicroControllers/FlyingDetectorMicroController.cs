@@ -29,7 +29,7 @@ namespace Sharky.MicroControllers
                 }
             }
 
-            if (SupportArmy(commander, target, defensivePoint, groupCenter, frame, out action))
+            if (AttackData.Attacking && SupportArmy(commander, target, defensivePoint, groupCenter, frame, out action))
             {
                 return true;
             }
@@ -44,7 +44,7 @@ namespace Sharky.MicroControllers
             if (commander.UnitRole != UnitRole.Defend)
             {
                 var hiddenUnits = ActiveUnitData.EnemyUnits.Values.Where(e => e.Unit.DisplayType == DisplayType.Hidden).OrderBy(e => Vector2.DistanceSquared(pos, e.Position));
-                var hiddenByAllies = hiddenUnits.FirstOrDefault(e => e.NearbyEnemies.Any(e => !e.Unit.IsHallucination));
+                var hiddenByAllies = hiddenUnits.FirstOrDefault(e => e.NearbyEnemies.Any(a => !a.Unit.IsHallucination && DamageService.CanDamage(a, e)));
                 if (hiddenByAllies != null)
                 {
                     return new Point2D { X = hiddenByAllies.Unit.Pos.X, Y = hiddenByAllies.Unit.Pos.Y };
@@ -163,7 +163,7 @@ namespace Sharky.MicroControllers
         {
             if (supportableUnits == null)
             {
-                supportableUnits = ActiveUnitData.SelfUnits.Values.Where(u => u.Unit.UnitType != commander.UnitCalculation.Unit.UnitType && u.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !u.Unit.IsHallucination).Take(25);
+                supportableUnits = ActiveUnitData.SelfUnits.Values.Where(u => u.Unit.UnitType != commander.UnitCalculation.Unit.UnitType && u.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !u.Unit.IsHallucination);
             }
 
             // no allies that already have a friendly observer within 4 range

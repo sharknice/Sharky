@@ -102,6 +102,8 @@ namespace Sharky.MicroControllers.Terran
 
             UpdateState(commander, target, defensivePoint, null, bestTarget, Formation.Normal, frame);
 
+            if (ContinueInRangeAttack(commander, frame, out action)) { return action; }
+
             if (SpecialCaseMove(commander, target, defensivePoint, null, bestTarget, Formation.Normal, frame, out action)) { return action; }
 
             if (PreOffenseOrder(commander, target, defensivePoint, null, bestTarget, frame, out action)) { return action; }
@@ -110,7 +112,7 @@ namespace Sharky.MicroControllers.Terran
 
             if (OffensiveAbility(commander, target, defensivePoint, null, bestTarget, frame, out action)) { return action; }
 
-            if (WeaponReady(commander, frame))
+            if (attack && WeaponReady(commander, frame))
             {
                 if (AttackBestTargetInRange(commander, target, bestTarget, frame, out action)) { return action; }
             }
@@ -119,9 +121,19 @@ namespace Sharky.MicroControllers.Terran
 
             if (commander.UnitCalculation.Unit.Health < commander.UnitCalculation.Unit.HealthMax)
             {
-                if (AvoidDamage(commander, target, defensivePoint, frame, out action))
+                if (attack)
                 {
-                    return action;
+                    if (AvoidDamage(commander, target, defensivePoint, frame, out action))
+                    {
+                        return action;
+                    }
+                }
+                else
+                {
+                    if (AvoidEnemiesThreateningDamage(commander, target, defensivePoint, frame, true, out action))
+                    {
+                        return action;
+                    }
                 }
             }
 

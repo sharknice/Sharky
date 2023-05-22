@@ -1,6 +1,8 @@
 ﻿using SC2APIProtocol;
+using Sharky.Builds.BuildingPlacement;
 using Sharky.Chat;
 using Sharky.DefaultBot;
+using Sharky.Extensions;
 using Sharky.MicroControllers;
 using Sharky.MicroControllers.Protoss;
 using Sharky.MicroTasks.Attack;
@@ -28,6 +30,12 @@ namespace Sharky.MicroTasks.Proxy
         ChatService ChatService;
         AreaService AreaService;
         TargetingService TargetingService;
+        MacroData MacroData;
+        SharkyUnitData SharkyUnitData;
+        MicroTaskData MicroTaskData;
+        EnemyData EnemyData;
+
+        IBuildingPlacement ProtossBuildingPlacement;
 
         float lastFrameTime;
 
@@ -42,8 +50,13 @@ namespace Sharky.MicroTasks.Proxy
         float InsideBaseDistanceSquared { get; set; }
         int PickupRangeSquared { get; set; }
         List<Point2D> DropArea { get; set; }
+        List<Point2D> AttackArea { get; set; }
+        Point2D EnemyRampCenter { get; set; }
+        int LastForceFieldFrame { get; set; }
 
         bool StartElevating { get; set; }
+        public bool Completed { get; private set; }
+        public bool AttackWithinArea { get; set; }
 
         public WarpPrismElevatorTask(DefaultSharkyBot defaultSharkyBot, AdvancedMicroController microController, WarpPrismMicroController warpPrismMicroController, List<DesiredUnitsClaim> desiredUnitsClaims, float priority, bool enabled = true)
         {
@@ -56,6 +69,11 @@ namespace Sharky.MicroTasks.Proxy
             AreaService = defaultSharkyBot.AreaService;
             ChatService = defaultSharkyBot.ChatService;
             TargetingService = defaultSharkyBot.TargetingService;
+            ProtossBuildingPlacement = defaultSharkyBot.ProtossBuildingPlacement;
+            MacroData = defaultSharkyBot.MacroData;
+            SharkyUnitData = defaultSharkyBot.SharkyUnitData;
+            MicroTaskData = defaultSharkyBot.MicroTaskData;
+            EnemyData = defaultSharkyBot.EnemyData;
 
             MicroController = microController;
             WarpPrismMicroController = warpPrismMicroController;
@@ -68,6 +86,9 @@ namespace Sharky.MicroTasks.Proxy
             PickupRangeSquared = 25;
 
             StartElevating = false;
+            Completed = false;
+            LastForceFieldFrame = 0;
+            AttackWithinArea = true;
         }
 
         public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
@@ -82,9 +103,28 @@ namespace Sharky.MicroTasks.Proxy
                         if ((uint)desiredUnitClaim.UnitType == unitType && UnitCommanders.Count(u => u.UnitCalculation.Unit.UnitType == (uint)desiredUnitClaim.UnitType) < desiredUnitClaim.Count)
                         {
                             commander.Value.Claimed = true;
+                            if (commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_SENTRY)
+                            {
+                                commander.Value.UnitRole = UnitRole.SaveEnergy;
+                            }
                             UnitCommanders.Add(commander.Value);
                         }
                     }
+                }
+            }
+
+            var probeClaim = DesiredUnitsClaims.FirstOrDefault(c => c.UnitType == UnitTypes.PROTOSS_PROBE);
+            if (probeClaim != null && probeClaim.Count > UnitCommanders.Count(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE))
+            {
+                var commander = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && !c.UnitCalculation.Unit.BuffIds.Any(b => SharkyUnitData.CarryingResourceBuffs.Contains((Buffs)b))).Where(c => (c.UnitRole == UnitRole.None || c.UnitRole == UnitRole.Minerals) && !c.UnitCalculation.Unit.Orders.Any(o => SharkyUnitData.BuildingData.Values.Any(b => (uint)b.Ability == o.AbilityId))).FirstOrDefault();
+
+                if (commander != null)
+                {
+                    commander.UnitRole = UnitRole.Proxy;
+                    commander.Claimed = true;
+                    UnitCommanders.Add(commander);
+                    MicroTaskData[typeof(MiningTask).Name].StealUnit(commander);
+                    return;
                 }
             }
         }
@@ -108,6 +148,8 @@ namespace Sharky.MicroTasks.Proxy
             var warpPrisms = UnitCommanders.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISM || c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISMPHASING);
             var attackers = UnitCommanders.Where(c => c.UnitCalculation.Unit.UnitType != (uint)UnitTypes.PROTOSS_WARPPRISM && c.UnitCalculation.Unit.UnitType != (uint)UnitTypes.PROTOSS_WARPPRISMPHASING);
             var droppedAttackers = attackers.Where(c => AreaService.InArea(c.UnitCalculation.Unit.Pos, DropArea));
+            var droppedSentries = droppedAttackers.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_SENTRY);
+            var droppedProbes = droppedAttackers.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE);
             var unDroppedAttackers = attackers.Where(c => !AreaService.InArea(c.UnitCalculation.Unit.Pos, DropArea));
 
             if (warpPrisms.Count() > 0)
@@ -135,14 +177,106 @@ namespace Sharky.MicroTasks.Proxy
             {
                 // wait for a warp prism
                 var groupPoint = TargetingService.GetArmyPoint(unDroppedAttackers);
-                actions.AddRange(MicroController.Retreat(unDroppedAttackers, DefensiveLocation, groupPoint, frame));             
+                actions.AddRange(MicroController.Retreat(unDroppedAttackers, DefensiveLocation, groupPoint, frame));
             }
 
-            actions.AddRange(MicroController.AttackWithinArea(droppedAttackers, DropArea, TargetLocation, DefensiveLocation, null, frame));
+            OrderSentries(frame, actions, droppedSentries);
+            OrderProbes(frame, actions, droppedProbes);
+
+            var mainAttackers = droppedAttackers.Where(c => c.UnitCalculation.Unit.UnitType != (uint)UnitTypes.PROTOSS_SENTRY && c.UnitCalculation.Unit.UnitType != (uint)UnitTypes.PROTOSS_PROBE);
+
+            if (AttackWithinArea)
+            {
+                actions.AddRange(MicroController.AttackWithinArea(mainAttackers, AttackArea, TargetLocation, DefensiveLocation, null, frame));
+            }
+            else
+            {
+                actions.AddRange(MicroController.Attack(mainAttackers, TargetLocation, DefensiveLocation, null, frame));
+            }
 
             stopwatch.Stop();
             lastFrameTime = stopwatch.ElapsedMilliseconds;
             return actions;
+        }
+
+        private void OrderProbes(int frame, List<SC2APIProtocol.Action> actions, IEnumerable<UnitCommander> droppedProbes)
+        {
+            foreach (var commander in droppedProbes)
+            {
+                if (commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.BUILD_PYLON) || (commander.LastAbility == Abilities.BUILD_PYLON && commander.LastOrderFrame + 20 > frame)) { continue; }
+
+                if (!commander.UnitCalculation.NearbyAllies.Any(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON))
+                {
+                    if (MacroData.Minerals >= 100)
+                    {
+                        var placement = ProtossBuildingPlacement.FindPlacement(DropLocation, UnitTypes.PROTOSS_PYLON, 1, true, 50, true);
+                        if (placement != null)
+                        {
+                            var action = commander.Order(frame, Abilities.BUILD_PYLON, placement);
+                            if (action != null)
+                            {
+                                actions.AddRange(action);
+                                continue;
+                            }
+                        }
+                    }
+                }
+
+                if (commander.UnitCalculation.EnemiesThreateningDamage.Any())
+                {
+                    actions.AddRange(MicroController.Retreat(new List<UnitCommander> { commander }, DropLocation, null, frame));
+                }
+                else
+                {
+                    var action = commander.Order(frame, Abilities.ATTACK, TargetLocation);
+                    if (action != null)
+                    {
+                        actions.AddRange(action);
+                    }
+                }
+            }
+        }
+
+        private void OrderSentries(int frame, List<SC2APIProtocol.Action> actions, IEnumerable<UnitCommander> droppedSentries)
+        {
+            var forceField = ActiveUnitData.NeutralUnits.Values.FirstOrDefault(u => u.Unit.UnitType == (uint)UnitTypes.NEUTRAL_FORCEFIELD && Vector2.DistanceSquared(EnemyRampCenter.ToVector2(), u.Position) < 1);
+            var someoneCastingFF = droppedSentries.Any(commander => commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.EFFECT_FORCEFIELD) || (commander.LastAbility == Abilities.EFFECT_FORCEFIELD && commander.LastOrderFrame + 20 > frame));
+            foreach (var commander in droppedSentries)
+            {
+                if (commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.EFFECT_FORCEFIELD) || (commander.LastAbility == Abilities.EFFECT_FORCEFIELD && commander.LastOrderFrame + 20 > frame)) { continue; }
+
+                if (forceField == null  && commander.UnitCalculation.Unit.Energy >= 50 && frame - LastForceFieldFrame > 20 && !someoneCastingFF)
+                {
+                    LastForceFieldFrame = frame;
+                    var ffAction = commander.Order(frame, Abilities.EFFECT_FORCEFIELD, EnemyRampCenter);
+                    if (ffAction != null)
+                    {
+                        actions.AddRange(ffAction);
+                    }
+                    continue;
+                }
+
+                if (commander.UnitCalculation.EnemiesThreateningDamage.Any())
+                {
+                    actions.AddRange(MicroController.Retreat(new List<UnitCommander> { commander }, DropLocation, null, frame));
+                }
+                else if (Vector2.DistanceSquared(commander.UnitCalculation.Position, EnemyRampCenter.ToVector2()) > 81)
+                {
+                    var action = commander.Order(frame, Abilities.MOVE, EnemyRampCenter);
+                    if (action != null)
+                    {
+                        actions.AddRange(action);
+                    }
+                }
+                else
+                {
+                    var action = commander.Order(frame, Abilities.ATTACK, TargetLocation);
+                    if (action != null)
+                    {
+                        actions.AddRange(action);
+                    }
+                }
+            }
         }
 
         private void CheckComplete()
@@ -150,6 +284,7 @@ namespace Sharky.MicroTasks.Proxy
             if (MapDataService.SelfVisible(TargetLocation) && !ActiveUnitData.EnemyUnits.Any(e => Vector2.DistanceSquared(new Vector2(TargetLocation.X, TargetLocation.Y), e.Value.Position) < 100))
             {
                 Disable();
+                Completed = true;
                 ChatService.SendChatType("WarpPrismElevatorTask-TaskCompleted");
             }
         }
@@ -248,6 +383,22 @@ namespace Sharky.MicroTasks.Proxy
                 DropLocationHeight = MapDataService.MapHeight(DropLocation);
 
                 InsideBaseDistanceSquared = Vector2.DistanceSquared(new Vector2(LoadingLocation.X, LoadingLocation.Y), new Vector2(TargetLocation.X, TargetLocation.Y));
+
+                var wallData = MapDataService.MapData.WallData.FirstOrDefault(b => b.BasePosition.X == TargetingData.EnemyMainBasePoint.X && b.BasePosition.Y == TargetingData.EnemyMainBasePoint.Y);
+                if (wallData?.RampCenter != null)
+                {
+                    EnemyRampCenter = wallData.RampCenter;
+                    var distanceSquaredToAvoid = 50;
+                    if (EnemyData.EnemyRace == Race.Terran)
+                    {
+                        distanceSquaredToAvoid = 144;
+                    }
+                    AttackArea = DropArea.Where(p => Vector2.DistanceSquared(p.ToVector2(), EnemyRampCenter.ToVector2()) > distanceSquaredToAvoid).ToList();
+                }
+                else
+                {
+                    AttackArea = DropArea;
+                }
             }
             DebugService.DrawSphere(new Point { X = LoadingLocation.X, Y = LoadingLocation.Y, Z = 12 }, 3, new Color { R = 0, G = 0, B = 255 });
             DebugService.DrawLine(new Point { X = LoadingLocation.X, Y = LoadingLocation.Y, Z = 16 }, new Point { X = LoadingLocation.X, Y = LoadingLocation.Y, Z = 0 }, new Color { R = 0, G = 0, B = 255 });

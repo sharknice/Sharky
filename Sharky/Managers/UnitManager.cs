@@ -578,7 +578,7 @@ namespace Sharky.Managers
                     var avoidDistance = AvoidRange + enemyAttack.Range + unitCalculation.Unit.Radius + enemyAttack.Unit.Radius;
                     var distanceToInRange = distance - avoidDistance;
                     var timeToGetInRange = distanceToInRange / unitCalculation.UnitTypeData.MovementSpeed; // TODO: factor in speed buffs like creep
-                    if (timeToGetInRange < fireTime)
+                    if (timeToGetInRange < fireTime || (enemyAttack.Unit.UnitType == (uint)UnitTypes.TERRAN_BATTLECRUISER && Vector2.DistanceSquared(enemyAttack.Position, unitCalculation.Position) < 100)) // in yamato range
                     {
                         attacks.Add(enemyAttack);
                     }

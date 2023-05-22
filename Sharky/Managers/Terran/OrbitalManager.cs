@@ -123,8 +123,11 @@ namespace Sharky.Managers.Terran
                 var undetectedEnemy = ActiveUnitData.EnemyUnits.Where(e => e.Value.Unit.DisplayType == DisplayType.Hidden).OrderByDescending(e => e.Value.EnemiesInRangeOf.Count()).FirstOrDefault();
                 if (undetectedEnemy.Value != null && undetectedEnemy.Value.EnemiesInRangeOf.Count() > 0)
                 {
-                    LastScanFrame = frame;
-                    return orbital.Order(frame, Abilities.EFFECT_SCAN, new Point2D { X = undetectedEnemy.Value.Position.X, Y = undetectedEnemy.Value.Position.Y });
+                    if (!undetectedEnemy.Value.EnemiesInRangeOf.All(a => a.Unit.UnitType == (uint)UnitTypes.TERRAN_BANSHEE && a.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker))))
+                    {
+                        LastScanFrame = frame;
+                        return orbital.Order(frame, Abilities.EFFECT_SCAN, new Point2D { X = undetectedEnemy.Value.Position.X, Y = undetectedEnemy.Value.Position.Y });
+                    }
                 }
 
                 foreach (var siegedTank in ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED))

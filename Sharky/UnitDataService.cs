@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using System.Linq;
 
 namespace Sharky
 {
@@ -27,28 +28,45 @@ namespace Sharky
                         weapon.Range = 7;
                     }
                 }
-                if (unitType == UnitTypes.TERRAN_CYCLONE)
+                else if (unitType == UnitTypes.TERRAN_CYCLONE)
                 {
                     weapon.Range = 7;
                 }
-                if (unitType == UnitTypes.PROTOSS_COLOSSUS)
+                else if (unitType == UnitTypes.PROTOSS_COLOSSUS)
                 {
                     if (SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.EXTENDEDTHERMALLANCE))
                     {
                         weapon.Range = 9;
                     }
                 }
-                if (unitType == UnitTypes.TERRAN_MISSILETURRET && MacroData.Frame > SharkyOptions.FramesPerSecond * 10 * 60)
+                else if (unitType == UnitTypes.TERRAN_MISSILETURRET && MacroData.Frame > SharkyOptions.FramesPerSecond * 10 * 60)
                 {
                     weapon.Range = 8;
                 }
-                if (unitType == UnitTypes.TERRAN_PLANETARYFORTRESS && MacroData.Frame > SharkyOptions.FramesPerSecond * 10 * 60)
+                else if (unitType == UnitTypes.TERRAN_PLANETARYFORTRESS && MacroData.Frame > SharkyOptions.FramesPerSecond * 10 * 60)
                 {
                     weapon.Range = 7;
                 }
-                if (unitType == UnitTypes.TERRAN_AUTOTURRET && MacroData.Frame > SharkyOptions.FramesPerSecond * 10 * 60)
+                else if (unitType == UnitTypes.TERRAN_AUTOTURRET && MacroData.Frame > SharkyOptions.FramesPerSecond * 10 * 60)
                 {
                     weapon.Range = 7;
+                }
+                else if (unitType == UnitTypes.TERRAN_HELLION)
+                {
+                    if (SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.HIGHCAPACITYBARRELS))
+                    {
+                        weapon.DamageBonus[0].Bonus = 11;
+                    }
+                }
+                else if (unitType == UnitTypes.TERRAN_HELLIONTANK)
+                {
+                    if (SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.HIGHCAPACITYBARRELS))
+                    {
+                        if (!weapon.DamageBonus.Any())
+                        {
+                            weapon.DamageBonus.Add(new DamageBonus { Attribute = Attribute.Light, Bonus = 12 });
+                        }
+                    }
                 }
                 return weapon;
             }

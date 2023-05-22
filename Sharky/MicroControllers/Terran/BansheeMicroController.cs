@@ -1,12 +1,13 @@
 ﻿using SC2APIProtocol;
 using Sharky.DefaultBot;
+using Sharky.Extensions;
 using Sharky.Pathing;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Sharky.MicroControllers.Terran
 {
-    class BansheeMicroController : IndividualMicroController
+    public class BansheeMicroController : IndividualMicroController
     {
         public BansheeMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled)
             : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled, 2)
@@ -22,10 +23,16 @@ namespace Sharky.MicroControllers.Terran
             {
                 if (commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.BANSHEECLOAK)) // already cloaked
                 {
+                    if (!commander.UnitCalculation.NearbyEnemies.Any() && commander.UnitCalculation.NearbyAllies.Any(a => a.Attributes.Contains(Attribute.Structure)))
+                    {
+                        action = commander.Order(frame, Abilities.BEHAVIOR_CLOAKOFF);
+                        return true;
+                    }
+
                     return false;
                 }
 
-                if (commander.UnitCalculation.EnemiesInRangeOf.Count() > 0) // if enemies can hit it, cloak
+                if (commander.UnitCalculation.Unit.Energy > 25 && (commander.UnitCalculation.EnemiesInRangeOf.Count() > 0 || commander.UnitCalculation.NearbyEnemies.Any(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_HIGHTEMPLAR))) // if enemies can hit it, cloak
                 {
                     action = commander.Order(frame, Abilities.BEHAVIOR_CLOAKON);
                     return true;
@@ -74,16 +81,28 @@ namespace Sharky.MicroControllers.Terran
         {
             List<SC2APIProtocol.Action> action = null;
 
+            if (ContinueInRangeAttack(commander, frame, out action)) { return action; }
+
             var bestTarget = GetBestHarassTarget(commander, target);
 
             if (PreOffenseOrder(commander, target, defensivePoint, null, bestTarget, frame, out action)) { return action; }
 
-            if (WeaponReady(commander, frame) && commander.UnitCalculation.EnemiesInRange.Count() > 0)
+            if (WeaponReady(commander, frame) && bestTarget != null && bestTarget.UnitClassifications.Contains(UnitClassification.Worker) && commander.UnitCalculation.EnemiesInRange.Any(e => e.Unit.Tag == bestTarget.Unit.Tag))
             {
                 if (AttackBestTarget(commander, target, defensivePoint, null, bestTarget, frame, out action)) { return action; }
             }
 
-            return NavigateToPoint(commander, target, defensivePoint, null, frame);
+            if (!CloakedAndUndetected(commander))
+            {
+                var formation = GetDesiredFormation(commander);
+                if (Move(commander, target, defensivePoint, null, bestTarget, formation, frame, out action)) { return action; }
+            }
+            else if (bestTarget != null && bestTarget.UnitClassifications.Contains(UnitClassification.Worker))
+            {
+                return MoveToTarget(commander, bestTarget.Unit.Pos.ToPoint2D(), frame);
+            }
+
+            return MoveToTarget(commander, target, frame);
         }
 
         protected override UnitCalculation GetBestHarassTarget(UnitCommander commander, Point2D target)
@@ -92,10 +111,10 @@ namespace Sharky.MicroControllers.Terran
 
             var range = commander.UnitCalculation.Range;
 
-            var attacks = new List<UnitCalculation>(commander.UnitCalculation.EnemiesInRange.Where(u => u.Unit.DisplayType != DisplayType.Hidden && u.UnitClassifications.Contains(UnitClassification.Worker))); // units that are in range right now
+            var attacks = commander.UnitCalculation.EnemiesInRange.Where(u => u.Unit.DisplayType != DisplayType.Hidden && u.UnitClassifications.Contains(UnitClassification.Worker)); // units that are in range right now
 
             UnitCalculation bestAttack = null;
-            if (attacks.Count > 0)
+            if (attacks.Any())
             {
                 var oneShotKills = attacks.Where(a => a.Unit.Health + a.Unit.Shield < GetDamage(commander.UnitCalculation.Weapons, a.Unit, a.UnitTypeData));
                 if (oneShotKills.Count() > 0)
@@ -129,15 +148,8 @@ namespace Sharky.MicroControllers.Terran
                 }
             }
 
-            attacks = new List<UnitCalculation>(); // nearby units not in range right now
-            foreach (var enemyAttack in commander.UnitCalculation.NearbyEnemies)
-            {
-                if (enemyAttack.Unit.DisplayType != DisplayType.Hidden && enemyAttack.UnitClassifications.Contains(UnitClassification.Worker) && !InRange(enemyAttack.Position, commander.UnitCalculation.Position, range + enemyAttack.Unit.Radius + commander.UnitCalculation.Unit.Radius))
-                {
-                    attacks.Add(enemyAttack);
-                }
-            }
-            if (attacks.Count > 0)
+            attacks = commander.UnitCalculation.NearbyEnemies.Where(enemyAttack => enemyAttack.Unit.DisplayType != DisplayType.Hidden && enemyAttack.UnitClassifications.Contains(UnitClassification.Worker) && !InRange(enemyAttack.Position, commander.UnitCalculation.Position, range + enemyAttack.Unit.Radius + commander.UnitCalculation.Unit.Radius)); // nearby units not in range right now
+            if (attacks.Any())
             {
                 var bestOutOfRangeAttack = GetBestTargetFromList(commander, attacks, existingAttackOrder);
                 if (bestOutOfRangeAttack != null && (bestOutOfRangeAttack.UnitClassifications.Contains(UnitClassification.ArmyUnit) || bestOutOfRangeAttack.UnitClassifications.Contains(UnitClassification.DefensiveStructure)))
@@ -162,6 +174,11 @@ namespace Sharky.MicroControllers.Terran
                 return 5.25f;
             }
             return base.GetMovementSpeed(commander);
+        }
+
+        protected bool CloakedAndUndetected(UnitCommander commander)
+        {
+            return (commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.BANSHEECLOAK) || (commander.UnitCalculation.Unit.Energy > 50 && SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.BANSHEECLOAK))) && !MapDataService.InEnemyDetection(commander.UnitCalculation.Unit.Pos);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using Sharky.MicroTasks.Attack;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -87,6 +88,41 @@ namespace Sharky.MicroTasks
                 }
             }
             return enemyGroups;
+        }
+
+        internal IEnumerable<UnitCommander> OverwhelmSplit(ArmySplits split, List<UnitCommander> availableCommanders)
+        {
+            var reinforcements = new List<UnitCommander>();
+            var targetPriority = TargetPriorityService.CalculateTargetPriority(split.SelfGroup.Select(c => c.UnitCalculation), split.EnemyGroup);
+            if (targetPriority.Overwhelm) { return reinforcements; }
+
+            var enemyHealth = split.EnemyGroup.Sum(e => e.SimulatedHitpoints);
+            var enemyDps = split.EnemyGroup.Sum(e => e.SimulatedDamagePerSecond(new List<Attribute>(), true, true));
+            var enemyHps = split.EnemyGroup.Sum(e => e.SimulatedHealPerSecond);
+            var enemyAttributes = split.EnemyGroup.SelectMany(e => e.Attributes).Distinct();
+            var hasGround = split.EnemyGroup.Any(e => !e.Unit.IsFlying);
+            var hasAir = split.EnemyGroup.Any(e => e.Unit.IsFlying);
+            var cloakable = split.EnemyGroup.Any(e => e.UnitClassifications.Contains(UnitClassification.Cloakable));
+
+            var counterGroup = new List<UnitCommander>();
+            counterGroup.AddRange(split.SelfGroup);
+
+            foreach (var commander in availableCommanders)
+            {
+                if ((hasGround && commander.UnitCalculation.DamageGround) || (hasAir && commander.UnitCalculation.DamageAir) || (cloakable && (commander.UnitCalculation.UnitClassifications.Contains(UnitClassification.Detector) || commander.UnitCalculation.UnitClassifications.Contains(UnitClassification.DetectionCaster))) || commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PHOENIX)
+                {
+                    reinforcements.Add(commander);
+                    counterGroup.Add(commander);
+
+                    targetPriority = TargetPriorityService.CalculateTargetPriority(counterGroup.Select(c => c.UnitCalculation), split.EnemyGroup);
+                    if (targetPriority.Overwhelm)
+                    {
+                        return reinforcements;
+                    }
+                }
+            }
+
+            return reinforcements;
         }
     }
 }

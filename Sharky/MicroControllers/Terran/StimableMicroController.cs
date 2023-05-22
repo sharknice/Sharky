@@ -35,6 +35,10 @@ namespace Sharky.MicroControllers.Terran
             if (commander.UnitCalculation.Loaded)
             {
                 var bunker = ActiveUnitData.Commanders.Values.FirstOrDefault(a => a.UnitCalculation.Unit.Passengers.Any(p => p.Tag == commander.UnitCalculation.Unit.Tag));
+                if (bunker.UnitCalculation.EnemiesThreateningDamage.Any() || bunker.UnitCalculation.NearbyEnemies.Count(e => e.DamageGround && e.FrameLastSeen == frame && e.UnitClassifications.Contains(UnitClassification.ArmyUnit)) > 3)
+                {
+                    return false;
+                }
                 if (Vector2.DistanceSquared(bunker.UnitCalculation.Position, target.ToVector2()) > 100)
                 {
                     action = bunker.UnloadSpecificUnit(frame, Abilities.UNLOADALLAT, commander.UnitCalculation.Unit.Tag);
@@ -75,6 +79,7 @@ namespace Sharky.MicroControllers.Terran
         protected override bool GetInBunker(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
+            if (commander.UnitCalculation.TargetPriorityCalculation.Overwhelm) { return false; }
 
             var nearbyBunkers = commander.UnitCalculation.NearbyAllies.Where(u => u.Unit.UnitType == (uint)UnitTypes.TERRAN_BUNKER && u.Unit.BuildProgress == 1);
             foreach (var bunker in nearbyBunkers)

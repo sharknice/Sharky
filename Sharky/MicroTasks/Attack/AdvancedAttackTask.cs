@@ -36,6 +36,9 @@ namespace Sharky.MicroTasks.Attack
 
         List<UnitCalculation> EnemyAttackers { get; set; }
 
+        public bool OnlyDefendBuildings { get; set; }
+
+
         public AdvancedAttackTask(DefaultSharkyBot defaultSharkyBot, EnemyCleanupService enemyCleanupService, List<UnitTypes> mainAttackerTypes, float priority, bool enabled = true)
         {
             AttackData = defaultSharkyBot.AttackData;
@@ -252,6 +255,11 @@ namespace Sharky.MicroTasks.Attack
                 ) && (e.NearbyEnemies.Count(b => b.Attributes.Contains(Attribute.Structure)) >= e.NearbyAllies.Count(b => b.Attributes.Contains(Attribute.Structure)))
             ).Where(e => e.Unit.UnitType != (uint)UnitTypes.TERRAN_KD8CHARGE);
 
+            if (OnlyDefendBuildings)
+            {
+                attackingEnemies = ActiveUnitData.EnemyUnits.Values.Where(e => e.FrameLastSeen > frame - 100 && e.NearbyEnemies.Any(u => (u.UnitClassifications.Contains(UnitClassification.ResourceCenter) || u.UnitClassifications.Contains(UnitClassification.ProductionStructure) || u.UnitClassifications.Contains(UnitClassification.DefensiveStructure)) && u.EnemiesThreateningDamage.Any()));
+            }
+
             if (stopwatch.ElapsedMilliseconds > 100)
             {
                 System.Console.WriteLine($"AdvancedAttackTask closerenemies queries {stopwatch.ElapsedMilliseconds}");
@@ -294,7 +302,7 @@ namespace Sharky.MicroTasks.Attack
                     stopwatch.Restart();
 
                     RemoveTemporaryUnits();
-                    EnemyAttackers = attackingEnemies.ToList();
+                    EnemyAttackers = attackingEnemies.Where(e => e.EnemiesInRangeOf.Any() || e.EnemiesInRange.Any()).ToList();
                     return actions;
                 }
                 else
@@ -314,11 +322,11 @@ namespace Sharky.MicroTasks.Attack
                 }
                 stopwatch.Restart();
             }
-            EnemyAttackers = attackingEnemies.ToList();
+            EnemyAttackers = attackingEnemies.Where(e => e.EnemiesInRangeOf.Any() || e.EnemiesInRange.Any()).ToList();
 
             HandleHiddenBuildings(hiddenBase);
 
-            if (MainUnits.Count() > 0)
+            if (MainUnits.Count(m => !m.UnitCalculation.Loaded) > 0)
             {
                 OrderMainUnitsWithSupportUnits(frame, actions, MainUnits, SupportUnits);
             }

@@ -184,7 +184,7 @@ namespace Sharky.DefaultBot
             SharkyOptions = new SharkyOptions { Debug = debug, FramesPerSecond = framesPerSecond, TagsEnabled = true, BuildTagsEnabled = true, LogPerformance = false, GameStatusReportingEnabled = true, GeneratePathing = false, TagsAllChat = false };
             FrameToTimeConverter = new FrameToTimeConverter(SharkyOptions);
             MacroData = new MacroData();
-            AttackData = new AttackData { ArmyFoodAttack = 30, ArmyFoodRetreat = 25, Attacking = false, UseAttackDataManager = true, CustomAttackFunction = true, RetreatTrigger = 1f, AttackTrigger = 1.5f, RequireDetection = false, ContainBelowKill = true, RequireMaxOut = false, AttackWhenMaxedOut = true, AttackWhenOverwhelm = true, GroupUpEnabled = true, ContainTrigger = 1.5f, KillTrigger = 3f };
+            AttackData = new AttackData { ArmyFoodAttack = 30, ArmyFoodRetreat = 25, Attacking = false, UseAttackDataManager = true, CustomAttackFunction = true, RetreatTrigger = 1f, AttackTrigger = 1.5f, RequireDetection = false, ContainBelowKill = true, RequireMaxOut = false, AttackWhenMaxedOut = true, RequireBank = false, AttackWhenOverwhelm = true, GroupUpEnabled = true, ContainTrigger = 1.5f, KillTrigger = 3f };
             TargetingData = new TargetingData { HiddenEnemyBase = false };
             BaseData = new BaseData();
             MapData = new MapData();
@@ -264,7 +264,7 @@ namespace Sharky.DefaultBot
             BuildOptions = new BuildOptions();
             MacroSetup = new MacroSetup();
             WallService = new WallService(this);
-            TerranWallService = new TerranWallService(ActiveUnitData, MapData, BaseData, WallService);
+            TerranWallService = new TerranWallService(ActiveUnitData, MapData, BaseData, MacroData, WallService);
             ProtossWallService = new ProtossWallService(SharkyUnitData, ActiveUnitData, WallService);
             WallOffPlacement = new HardCodedWallOffPlacement(ActiveUnitData, SharkyUnitData, MapData, BaseData, WallService, TerranWallService, ProtossWallService);
             ProtossPylonGridPlacement = new ProtossPylonGridPlacement(BaseData, MapDataService, DebugService, BuildingService);
@@ -371,9 +371,11 @@ namespace Sharky.DefaultBot
             var siegeTankMicroController = new SiegeTankMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
             var siegeTankSiegedMicroController = new SiegeTankSiegedMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
             var thorMicroController = new ThorMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
+            var thorApMicroController = new ThorApMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
             var vikingMicroController = new VikingMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
             var vikingLandedMicroController = new VikingLandedMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
             var bansheeMicroController = new BansheeMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
+            var battleCruiserMicroController = new BattleCruiserMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
             var ravenMicroController = new RavenMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
             var medivacMicroController = new MedivacMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
 
@@ -439,9 +441,11 @@ namespace Sharky.DefaultBot
                 { UnitTypes.TERRAN_SIEGETANK, siegeTankMicroController },
                 { UnitTypes.TERRAN_SIEGETANKSIEGED, siegeTankSiegedMicroController },
                 { UnitTypes.TERRAN_THOR, thorMicroController },
+                { UnitTypes.TERRAN_THORAP, thorApMicroController },
                 { UnitTypes.TERRAN_VIKINGFIGHTER, vikingMicroController },
                 { UnitTypes.TERRAN_VIKINGASSAULT, vikingLandedMicroController },
                 { UnitTypes.TERRAN_BANSHEE, bansheeMicroController },
+                { UnitTypes.TERRAN_BATTLECRUISER, battleCruiserMicroController },
                 { UnitTypes.TERRAN_RAVEN, ravenMicroController },
                 { UnitTypes.TERRAN_MEDIVAC, medivacMicroController }
             };
@@ -470,9 +474,9 @@ namespace Sharky.DefaultBot
             var adeptWorkerHarassTask = new AdeptWorkerHarassTask(BaseData, TargetingData, adeptMicroController, adeptShadeMicroController, false);
             var oracleWorkerHarassTask = new OracleWorkerHarassTask(this, oracleHarassMicroController, 1, false);
             var lateGameOracleHarassTask = new LateGameOracleHarassTask(BaseData, TargetingData, MapDataService, oracleHarassMicroController, 1, false);
-            var reaperWorkerHarassTask = new ReaperWorkerHarassTask(BaseData, TargetingData, reaperHarassMicroController, 2, false);
-            var bansheeHarassTask = new BansheeHarassTask(BaseData, TargetingData, MapDataService, bansheeMicroController, 2, false);
-            var hellionHarassTask = new HellionHarassTask(this, false, -1, hellionMicroController);
+            var reaperWorkerHarassTask = new ReaperWorkerHarassTask(this, reaperHarassMicroController, 2, false);
+            var bansheeHarassTask = new BansheeHarassTask(this, bansheeMicroController, 2, false);
+            var hellionHarassTask = new HellionHarassTask(this, false, -.9f, hellionMicroController, reaperHarassMicroController);
             var hallucinationScoutTask = new HallucinationScoutTask(TargetingData, BaseData, MicroTaskData, false, .5f);
             var hallucinationScoutEmptyBasesTask = new HallucinationScoutEmptyBasesTask(this, false, .51f);
             var wallOffTask = new WallOffTask(SharkyUnitData, ActiveUnitData, MacroData, MapData, WallService, ChatService, false, .25f);
@@ -498,6 +502,8 @@ namespace Sharky.DefaultBot
             var protossDoorTask = new ProtossDoorTask(this, false, -0.5f);
             var zealotHarassTask = new ZealotHarassTask(this, false, 0.5f, zealotMicroController);
             var clearFutureExpansionTask = new ClearFutureExpansionTask(this, new List<DesiredUnitsClaim>(), 0.1f, false);
+            var bunkerReadyToRepairTask = new BunkerReadyToRepairTask(this, false, 0.1f);
+
             MicroTaskData[defenseSquadTask.GetType().Name] = defenseSquadTask;
             MicroTaskData[workerScoutGasStealTask.GetType().Name] = workerScoutGasStealTask;
             MicroTaskData[workerScoutTask.GetType().Name] = workerScoutTask;
@@ -544,6 +550,7 @@ namespace Sharky.DefaultBot
             MicroTaskData[zealotHarassTask.GetType().Name] = zealotHarassTask;
             MicroTaskData[clearFutureExpansionTask.GetType().Name] = clearFutureExpansionTask;
             MicroTaskData[changelingScout.GetType().Name] = changelingScout;
+            MicroTaskData[bunkerReadyToRepairTask.GetType().Name] = bunkerReadyToRepairTask;
 
             MicroManager = new MicroManager(ActiveUnitData, MicroTaskData, SharkyOptions);
             Managers.Add(MicroManager);

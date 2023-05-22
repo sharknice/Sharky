@@ -33,6 +33,10 @@ namespace Sharky.MicroControllers.Protoss
 
         protected override bool OffensiveAbility(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
+            action = null;
+
+            if (commander.UnitRole == UnitRole.SaveEnergy) { return false; }
+
             if (GuardianShield(commander, frame, out action))
             {
                 return true;
@@ -71,16 +75,16 @@ namespace Sharky.MicroControllers.Protoss
             }
 
             var height = MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos);
-            if (!commander.UnitCalculation.NearbyAllies.Take(25).Any(a => a.Unit.IsFlying || a.Unit.UnitType == (uint)UnitTypes.PROTOSS_COLOSSUS))
+            if (!commander.UnitCalculation.NearbyAllies.Any(a => a.Unit.IsFlying || a.Unit.UnitType == (uint)UnitTypes.PROTOSS_COLOSSUS))
             {
-                if (commander.UnitCalculation.NearbyEnemies.Take(25).Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && MapDataService.MapHeight(e.Unit.Pos) > height))
+                if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && MapDataService.MapHeight(e.Unit.Pos) > height))
                 {
                     action = commander.Order(frame, Abilities.HALLUCINATION_COLOSSUS);
                     return true;
                 }
             }
 
-            if (commander.UnitCalculation.NearbyEnemies.Take(25).Count(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit)) > 3 && !commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Detector)))
+            if (commander.UnitCalculation.NearbyEnemies.Count(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit)) > 3 && !commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Detector)))
             {
                 action = commander.Order(frame, Abilities.HALLUCINATION_ARCHON);
                 return true;

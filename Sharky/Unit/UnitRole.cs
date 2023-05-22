@@ -32,6 +32,7 @@
         Leader,
         Disband,
         RunAway,
-        Chase
+        Chase,
+        SaveEnergy
     }
 }

@@ -64,6 +64,16 @@ namespace Sharky.MicroTasks.Attack
                 return;
             }
 
+            if (AttackData.RequireBank)
+            {
+                if (MacroData.Minerals < 2000 || MacroData.VespeneGas < 1000)
+                {
+                    TargetingData.AttackState = AttackState.Retreat;
+                    DebugService.DrawText("Retreating: require 2000 mineral and 1000 vespene gas bank");
+                    return;
+                }
+            }
+
             var targetPriority = CalculateTargetPriority();
             AttackData.TargetPriorityCalculation = targetPriority;
             if (AttackData.RequireDetection && !AttackTask.UnitCommanders.Any(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Detector) || c.UnitCalculation.UnitClassifications.Contains(UnitClassification.DetectionCaster)))

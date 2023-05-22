@@ -19,6 +19,7 @@ namespace Sharky.MicroTasks.Attack
         DefenseService DefenseService;
         TargetingService TargetingService;
         TerranWallService TerranWallService;
+        TargetPriorityService TargetPriorityService;
 
         IMicroController MicroController;
 
@@ -37,6 +38,7 @@ namespace Sharky.MicroTasks.Attack
             DefenseService = defaultSharkyBot.DefenseService;
             TargetingService = defaultSharkyBot.TargetingService;
             TerranWallService = defaultSharkyBot.TerranWallService;
+            TargetPriorityService = defaultSharkyBot.TargetPriorityService;
 
             MicroController = defaultSharkyBot.MicroController;
 
@@ -98,32 +100,23 @@ namespace Sharky.MicroTasks.Attack
                 }
                 else
                 {
-                    if (winnableDefense || defendToDeath)
-                    {                     
-                        var closerEnemy = closerEnemies.FirstOrDefault();
-                        var targetPoint = closerEnemy.Unit.Pos.ToPoint2D();
-                        actions.AddRange(MicroController.Attack(AvailableCommanders, targetPoint, TargetingData.ForwardDefensePoint, groupPoint, frame));
+                    var defensiveVector = new Vector2(TargetingData.ForwardDefensePoint.X, TargetingData.ForwardDefensePoint.Y);
+                    var shieldBattery = ActiveUnitData.SelfUnits.Values.Where(u => ((u.Unit.UnitType == (uint)UnitTypes.PROTOSS_SHIELDBATTERY && u.Unit.Energy > 5) || (u.Unit.UnitType == (uint)UnitTypes.PROTOSS_PHOTONCANNON && u.Unit.Shield > 5)) && u.Unit.IsPowered && u.Unit.BuildProgress == 1).OrderBy(u => Vector2.DistanceSquared(u.Position, defensiveVector)).FirstOrDefault();
+                    if (shieldBattery != null)
+                    {
+                        actions.AddRange(MicroController.Retreat(AvailableCommanders, shieldBattery.Position.ToPoint2D(), groupPoint, frame));
                     }
                     else
                     {
-                        var defensiveVector = new Vector2(TargetingData.ForwardDefensePoint.X, TargetingData.ForwardDefensePoint.Y);
-                        var shieldBattery = ActiveUnitData.SelfUnits.Values.Where(u => ((u.Unit.UnitType == (uint)UnitTypes.PROTOSS_SHIELDBATTERY && u.Unit.Energy > 5) || (u.Unit.UnitType == (uint)UnitTypes.PROTOSS_PHOTONCANNON && u.Unit.Shield > 5)) && u.Unit.IsPowered && u.Unit.BuildProgress == 1).OrderBy(u => Vector2.DistanceSquared(u.Position, defensiveVector)).FirstOrDefault();
-                        if (shieldBattery != null)
+                        if (EnemyData.SelfRace == Race.Terran && TerranWallService != null && TerranWallService.MainWallComplete())
                         {
-                            actions.AddRange(MicroController.Retreat(AvailableCommanders, shieldBattery.Position.ToPoint2D(), groupPoint, frame));
+                            actions.AddRange(MicroController.Retreat(AvailableCommanders, TargetingData.ForwardDefensePoint, groupPoint, frame));
                         }
                         else
                         {
-                            if (EnemyData.SelfRace == Race.Terran && TerranWallService != null && TerranWallService.MainWallComplete())
-                            {
-                                actions.AddRange(MicroController.Retreat(AvailableCommanders, TargetingData.ForwardDefensePoint, groupPoint, frame));
-                            }
-                            else
-                            {
-                                actions.AddRange(MicroController.Retreat(AvailableCommanders, TargetingData.MainDefensePoint, groupPoint, frame));
-                            }
+                            actions.AddRange(MicroController.Retreat(AvailableCommanders, TargetingData.MainDefensePoint, groupPoint, frame));
                         }
-                    }
+                    }                 
                 }
             }
 
@@ -143,6 +136,17 @@ namespace Sharky.MicroTasks.Attack
                     AvailableCommanders.RemoveAll(a => selfGroup.Any(s => a.UnitCalculation.Unit.Tag == s.UnitCalculation.Unit.Tag));
                 }
                 ArmySplits.Add(new ArmySplits { EnemyGroup = enemyGroup, SelfGroup = selfGroup });
+            }
+
+
+            if (!AttackData.Attacking && AvailableCommanders.Any())
+            {
+                foreach (var split in ArmySplits)
+                {
+                    var additions = DefenseService.OverwhelmSplit(split, AvailableCommanders);
+                    split.SelfGroup.AddRange(additions);
+                    AvailableCommanders.RemoveAll(a => additions.Any(s => s.UnitCalculation.Unit.Tag == a.UnitCalculation.Unit.Tag));
+                }
             }
         }
     }

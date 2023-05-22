@@ -1,5 +1,8 @@
-﻿using Sharky.MicroControllers;
+﻿using Sharky.DefaultBot;
+using Sharky.Extensions;
+using Sharky.MicroControllers;
 using Sharky.MicroTasks.Harass;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,19 +15,29 @@ namespace Sharky.MicroTasks
         BaseData BaseData;
         TargetingData TargetingData;
         IIndividualMicroController MicroController;
+        SharkyUnitData SharkyUnitData;
+        FrameToTimeConverter FrameToTimeConverter;
+        MacroData MacroData;
+
+        public Dictionary<ulong, UnitCalculation> Kills { get; private set; }
 
         int DesiredCount { get; set; }
         List<HarassInfo> HarassInfos { get; set; }
 
-        public ReaperWorkerHarassTask(BaseData baseData, TargetingData targetingData, IIndividualMicroController microController, int desiredCount = 2, bool enabled = false, float priority = -1f)
+        public ReaperWorkerHarassTask(DefaultSharkyBot defaultSharkyBot, IIndividualMicroController microController, int desiredCount = 2, bool enabled = false, float priority = -1f)
         {
-            BaseData = baseData;
-            TargetingData = targetingData;
+            BaseData = defaultSharkyBot.BaseData;
+            TargetingData = defaultSharkyBot.TargetingData;
+            SharkyUnitData = defaultSharkyBot.SharkyUnitData;
+            MacroData = defaultSharkyBot.MacroData;
+            FrameToTimeConverter = defaultSharkyBot.FrameToTimeConverter;
             MicroController = microController;
             DesiredCount = desiredCount;
             Priority = priority;
             Enabled = enabled;
             UnitCommanders = new List<UnitCommander>();
+
+            Kills = new Dictionary<ulong, UnitCalculation>();
         }
 
         public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
@@ -56,7 +69,30 @@ namespace Sharky.MicroTasks
             {
                 foreach (var commander in harassInfo.Harassers)
                 {
-                    if (Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(harassInfo.BaseLocation.MineralLineLocation.X, harassInfo.BaseLocation.MineralLineLocation.Y)) < 100)
+                    var enemyReaper = commander.UnitCalculation.NearbyEnemies.Where(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_REAPER).OrderBy(e => Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+                    if (enemyReaper != null)
+                    {
+                        if (commander.UnitCalculation.SimulatedHitpoints >= enemyReaper.SimulatedHitpoints)
+                        {
+                            var attack = MicroController.Attack(commander, enemyReaper.Position.ToPoint2D(), TargetingData.ForwardDefensePoint, null, frame);
+                            if (attack != null)
+                            {
+                                commands.AddRange(attack);
+                                continue;
+                            }
+                        }
+                    }
+
+                    if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker)) && !commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) || e.UnitClassifications.Contains(UnitClassification.DefensiveStructure)))
+                    {
+                        var action = MicroController.HarassWorkers(commander, harassInfo.BaseLocation.MineralLineLocation, TargetingData.ForwardDefensePoint, frame);
+                        if (action != null)
+                        {
+                            commands.AddRange(action);
+                            continue;
+                        }
+                    }
+                    else if (Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(harassInfo.BaseLocation.MineralLineLocation.X, harassInfo.BaseLocation.MineralLineLocation.Y)) < 100)
                     {
                         var action = MicroController.HarassWorkers(commander, harassInfo.BaseLocation.MineralLineLocation, TargetingData.ForwardDefensePoint, frame);
                         if (action != null)
@@ -64,13 +100,13 @@ namespace Sharky.MicroTasks
                             commands.AddRange(action);
                         }
 
-                        if (!commander.UnitCalculation.NearbyEnemies.Take(25).Any(e => Vector2.DistanceSquared(new Vector2(harassInfo.BaseLocation.MineralLineLocation.X, harassInfo.BaseLocation.MineralLineLocation.Y), e.Position) < 100))
+                        if (!commander.UnitCalculation.NearbyEnemies.Any(e => Vector2.DistanceSquared(new Vector2(harassInfo.BaseLocation.MineralLineLocation.X, harassInfo.BaseLocation.MineralLineLocation.Y), e.Position) < 100))
                         {
                             harassInfo.LastClearedFrame = frame;
                             harassInfo.Harassers.Remove(commander);
                             return commands;
                         }
-                        else if (commander.UnitCalculation.NearbyEnemies.Take(25).Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && e.DamageGround && Vector2.DistanceSquared(new Vector2(harassInfo.BaseLocation.MineralLineLocation.X, harassInfo.BaseLocation.MineralLineLocation.Y), e.Position) < 100))
+                        else if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && e.DamageGround && Vector2.DistanceSquared(new Vector2(harassInfo.BaseLocation.MineralLineLocation.X, harassInfo.BaseLocation.MineralLineLocation.Y), e.Position) < 100))
                         {
                             if (commander.UnitCalculation.TargetPriorityCalculation.GroundWinnability < 1 && commander.UnitCalculation.Unit.Health < commander.UnitCalculation.Unit.HealthMax)
                             {
@@ -79,15 +115,7 @@ namespace Sharky.MicroTasks
                                 return commands;
                             }
                         }
-                    }
-                    else if (commander.UnitCalculation.NearbyEnemies.Take(25).Any(e => e.UnitClassifications.Contains(UnitClassification.Worker)) && !commander.UnitCalculation.NearbyEnemies.Take(25).Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) || e.UnitClassifications.Contains(UnitClassification.DefensiveStructure)))
-                    {
-                        var action = MicroController.HarassWorkers(commander, harassInfo.BaseLocation.MineralLineLocation, TargetingData.ForwardDefensePoint, frame);
-                        if (action != null)
-                        {
-                            commands.AddRange(action);
-                            continue;
-                        }
+                        continue;
                     }
                     else
                     {
@@ -99,13 +127,14 @@ namespace Sharky.MicroTasks
 
                         if (commander.RetreatPath.Count() == 0)
                         {
-                            if (commander.UnitCalculation.NearbyEnemies.Take(25).Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && e.DamageGround && Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position) < 120))
+                            if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && e.DamageGround && Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position) < 120))
                             {
                                 harassInfo.LastPathFailedFrame = frame;
                                 harassInfo.Harassers.Remove(commander);
                                 return commands;
                             }
                         }
+                        continue;
                     }
                 }
             }
@@ -166,6 +195,58 @@ namespace Sharky.MicroTasks
                 highest = h.LastPathFailedFrame;
             }
             return highest;
+        }
+
+        public override void RemoveDeadUnits(List<ulong> deadUnits)
+        {
+            var deaths = 0;
+            var kills = 0;
+            foreach (var tag in deadUnits)
+            {
+                if (UnitCommanders.RemoveAll(c => c.UnitCalculation.Unit.Tag == tag) > 0)
+                {
+                    deaths++;
+                }
+                else
+                {
+                    var kill = UnitCommanders.SelectMany(c => c.UnitCalculation.PreviousUnitCalculation.NearbyEnemies.Where(e => Vector2.DistanceSquared(c.UnitCalculation.Position, e.Position) < 50)).FirstOrDefault(e => e.Unit.Tag == tag);
+                    if (kill != null && !SharkyUnitData.UndeadTypes.Contains((UnitTypes)kill.Unit.UnitType))
+                    {
+                        kills++;
+                        Kills[tag] = kill;
+                    }
+                }
+            }
+
+            if (deaths > 0)
+            {
+                Deaths += deaths;
+            }
+            if (kills > 0 || deaths > 0)
+            {
+                ReportResults();
+            }
+        }
+
+        private void ReportResults()
+        {
+            Console.WriteLine($"{FrameToTimeConverter.GetTime(MacroData.Frame)} HellionHarass Report: Deaths:{Deaths}, Kills:{Kills.Count()}");
+            foreach (var killGroup in Kills.Values.GroupBy(k => k.Unit.UnitType))
+            {
+                Console.WriteLine($"{(UnitTypes)killGroup.Key}: {killGroup.Count()}");
+            }
+        }
+
+        public override void PrintReport(int frame)
+        {
+            ReportResults();
+            base.PrintReport(frame);
+        }
+
+        public override void Disable()
+        {
+            ReportResults();
+            base.Disable();
         }
     }
 }

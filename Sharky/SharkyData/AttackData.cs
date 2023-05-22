@@ -18,6 +18,7 @@ namespace Sharky
         public bool RequireDetection { get; set; }
         public bool RequireMaxOut { get; set; }
         public bool AttackWhenMaxedOut { get; set; }
+        public bool RequireBank { get; set; }
         public bool AttackWhenOverwhelm { get; set; }
         public bool GroupUpEnabled { get; set; }
 

@@ -1,5 +1,6 @@
 ﻿using SC2APIProtocol;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
@@ -19,6 +20,7 @@ namespace Sharky.Builds.BuildingPlacement
         TerranProductionGridPlacement TerranProductionGridPlacement;
         TerranTechGridPlacement TerranTechGridPlacement;
         IBuildingPlacement MissileTurretPlacement;
+        List<Point2D> LastLocations;
 
         public TerranBuildingPlacement(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, BaseData baseData, MacroData macroData, DebugService debugService, BuildingService buildingService, IBuildingPlacement wallOffPlacement, TerranWallService terranWallService, TerranSupplyDepotGridPlacement terranBuildingGridPlacement, TerranProductionGridPlacement terranProductionGridPlacement, TerranTechGridPlacement terranTechGridPlacement, IBuildingPlacement missileTurretPlacement)
         {
@@ -34,6 +36,8 @@ namespace Sharky.Builds.BuildingPlacement
             TerranProductionGridPlacement = terranProductionGridPlacement;
             TerranTechGridPlacement = terranTechGridPlacement;
             MissileTurretPlacement = missileTurretPlacement;
+
+            LastLocations = new List<Point2D>();
         }
 
         public Point2D FindPlacement(Point2D target, UnitTypes unitType, int size, bool ignoreResourceProximity = false, float maxDistance = 50, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.None, bool requireVision = false, bool allowBlockBase = true)
@@ -107,11 +111,6 @@ namespace Sharky.Builds.BuildingPlacement
                 if (spot != null) { return spot; }
             }
 
-            if (unitType == UnitTypes.TERRAN_BARRACKSTECHLAB || unitType == UnitTypes.TERRAN_BARRACKSREACTOR || unitType == UnitTypes.TERRAN_FACTORYTECHLAB || unitType == UnitTypes.TERRAN_FACTORYREACTOR || unitType == UnitTypes.TERRAN_STARPORTTECHLAB || unitType == UnitTypes.TERRAN_STARPORTREACTOR)
-            {
-                size += 2;
-            }
-
             var addOnSwap = MacroData.AddOnSwaps.Values.FirstOrDefault(a => a.Started && !a.Completed && a.AddOnBuilder != null && a.AddOnTaker == null && a.DesiredAddOnTaker == unitType);
             if (addOnSwap != null)
             {
@@ -125,6 +124,11 @@ namespace Sharky.Builds.BuildingPlacement
             if (unitType == UnitTypes.TERRAN_COMMANDCENTER)
             {
                 minimumMineralProximinity = 3;
+            }
+
+            if (unitType == UnitTypes.TERRAN_BARRACKSTECHLAB || unitType == UnitTypes.TERRAN_BARRACKSREACTOR || unitType == UnitTypes.TERRAN_FACTORYTECHLAB || unitType == UnitTypes.TERRAN_FACTORYREACTOR || unitType == UnitTypes.TERRAN_STARPORTTECHLAB || unitType == UnitTypes.TERRAN_STARPORTREACTOR)
+            {
+                size += 2;
             }
 
             return FindTechPlacement(reference, size + 4f, maxDistance, minimumMineralProximinity); // add to the radius to make room for the addon and completed units to exit
@@ -168,7 +172,18 @@ namespace Sharky.Builds.BuildingPlacement
                                 if (Vector2.DistanceSquared(new Vector2(reference.X, reference.Y), new Vector2(point.X, point.Y)) <= maxDistance * maxDistance)
                                 {
                                     DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
-                                    return point;
+                                    if (!LastLocations.Any(l => l.X == x && l.Y == y))
+                                    {
+                                        DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
+
+                                        LastLocations.Add(point);
+                                        if (LastLocations.Count() > 5)
+                                        {
+                                            LastLocations.RemoveAt(0);
+                                        }
+
+                                        return point;
+                                    }
                                 }
                             }
                         }
