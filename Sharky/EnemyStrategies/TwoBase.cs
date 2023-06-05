@@ -44,6 +44,11 @@ namespace Sharky.EnemyStrategies
                 return false;
             }
 
+            if (!MapDataService.SelfVisible(BaseData.EnemyBaseLocations.Skip(2).FirstOrDefault().Location))
+            {
+                return false;
+            }
+
             if (EnemyData.EnemyRace == SC2APIProtocol.Race.Zerg)
             {
                 return elapsedTime.TotalMinutes >= 4f;

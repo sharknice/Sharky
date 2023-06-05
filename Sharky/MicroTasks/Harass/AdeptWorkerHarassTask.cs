@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using Sharky.Extensions;
 using Sharky.MicroControllers;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -19,6 +20,8 @@ namespace Sharky.MicroTasks
 
         public int MaxAdeptCount { get; set; }
 
+        public bool PrioritizeExpansion { get; set; }
+
         public AdeptWorkerHarassTask(BaseData baseData, TargetingData targetingData, IIndividualMicroController adeptMicroController, IIndividualMicroController adeptShadeMicroController, bool enabled = false, float priority = -1f)
         {
             BaseData = baseData;
@@ -29,6 +32,7 @@ namespace Sharky.MicroTasks
             Enabled = enabled;
             UnitCommanders = new List<UnitCommander>();
             MaxAdeptCount = 100;
+            PrioritizeExpansion = false;
         }
 
         public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
@@ -63,6 +67,16 @@ namespace Sharky.MicroTasks
             {
                 if (commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_ADEPT)
                 {
+                    if (PrioritizeExpansion && Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(EnemyMain.X, EnemyMain.Y)) < 225 && commander.UnitCalculation.EnemiesThreateningDamage.Any())
+                    {
+                        var action = commander.Order(frame, Abilities.MOVE, TargetingData.MainDefensePoint);
+                        if (action != null)
+                        {
+                            commands.AddRange(action);
+                        }
+                        continue;
+                    }
+
                     if (Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(EnemyMain.X, EnemyMain.Y)) < 100)
                     {
                         if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker)))
@@ -92,7 +106,16 @@ namespace Sharky.MicroTasks
                     }
                     else
                     {
-                        var action = AdeptMicroController.NavigateToPoint(commander, EnemyMain, TargetingData.ForwardDefensePoint, null, frame);
+                        var target = EnemyMain;
+                        if (PrioritizeExpansion)
+                        {
+                            target = BaseData.EnemyBaseLocations.Skip(3).FirstOrDefault().Location;
+                            if (Vector2.DistanceSquared(commander.UnitCalculation.Position, target.ToVector2()) < 100)
+                            {
+                                target = EnemyExpansion;
+                            }
+                        }
+                        var action = AdeptMicroController.NavigateToPoint(commander, target, TargetingData.ForwardDefensePoint, null, frame);
                         if (action != null)
                         {
                             commands.AddRange(action);
@@ -108,6 +131,11 @@ namespace Sharky.MicroTasks
                         {
                             target = EnemyExpansion;
                         }
+                    }
+
+                    if (PrioritizeExpansion)
+                    {
+                        target = EnemyExpansion;                     
                     }
 
                     var action = AdeptShadeMicroController.NavigateToPoint(commander, target, target, target, frame);

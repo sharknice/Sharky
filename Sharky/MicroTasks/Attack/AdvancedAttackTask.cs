@@ -302,7 +302,7 @@ namespace Sharky.MicroTasks.Attack
                     stopwatch.Restart();
 
                     RemoveTemporaryUnits();
-                    EnemyAttackers = attackingEnemies.Where(e => e.EnemiesInRangeOf.Any() || e.EnemiesInRange.Any()).ToList();
+                    EnemyAttackers = attackingEnemies.Where(e => e.FrameLastSeen > frame - 100 && (e.EnemiesInRangeOf.Any() || e.EnemiesInRange.Any())).ToList();
                     return actions;
                 }
                 else
@@ -322,7 +322,7 @@ namespace Sharky.MicroTasks.Attack
                 }
                 stopwatch.Restart();
             }
-            EnemyAttackers = attackingEnemies.Where(e => e.EnemiesInRangeOf.Any() || e.EnemiesInRange.Any()).ToList();
+            EnemyAttackers = attackingEnemies.Where(e => e.FrameLastSeen > frame - 100 && (e.EnemiesInRangeOf.Any() || e.EnemiesInRange.Any())).ToList();
 
             HandleHiddenBuildings(hiddenBase);
 

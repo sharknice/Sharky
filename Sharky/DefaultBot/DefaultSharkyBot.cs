@@ -333,6 +333,7 @@ namespace Sharky.DefaultBot
             var disruptorPhasedMicroController = new DisruptorPhasedMicroController(this, SharkySimplePathFinder, MicroPriority.AttackForward, false, SharkyPathFinder);
             var highTemplarMicroController = new HighTemplarMicroController(this, SharkySimplePathFinder, MicroPriority.StayOutOfRange, false);
             var mothershipMicroController = new MothershipMicroController(this, SharkySimplePathFinder, MicroPriority.StayOutOfRange, false);
+            var immortalMicroController = new ImmortalMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
             var oracleMicroController = new OracleMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
             var observerMicroController = new ObserverMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
             var phoenixMicroController = new PhoenixMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, true);
@@ -398,6 +399,7 @@ namespace Sharky.DefaultBot
                 { UnitTypes.PROTOSS_DISRUPTOR, disruptorMicroController },
                 { UnitTypes.PROTOSS_DISRUPTORPHASED, disruptorPhasedMicroController },
                 { UnitTypes.PROTOSS_HIGHTEMPLAR, highTemplarMicroController },
+                { UnitTypes.PROTOSS_IMMORTAL, immortalMicroController },
                 { UnitTypes.PROTOSS_MOTHERSHIP, mothershipMicroController },
                 { UnitTypes.PROTOSS_ORACLE, oracleMicroController },
                 { UnitTypes.PROTOSS_PHOENIX, phoenixMicroController },

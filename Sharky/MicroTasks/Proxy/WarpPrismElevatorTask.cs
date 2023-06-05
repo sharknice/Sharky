@@ -57,6 +57,8 @@ namespace Sharky.MicroTasks.Proxy
         bool StartElevating { get; set; }
         public bool Completed { get; private set; }
         public bool AttackWithinArea { get; set; }
+        public bool EndAfterMainBaseGone { get; set; }
+        public bool CancelWhenPrismDies { get; set; }
 
         public WarpPrismElevatorTask(DefaultSharkyBot defaultSharkyBot, AdvancedMicroController microController, WarpPrismMicroController warpPrismMicroController, List<DesiredUnitsClaim> desiredUnitsClaims, float priority, bool enabled = true)
         {
@@ -89,10 +91,13 @@ namespace Sharky.MicroTasks.Proxy
             Completed = false;
             LastForceFieldFrame = 0;
             AttackWithinArea = true;
+            EndAfterMainBaseGone = false;
+            CancelWhenPrismDies = true;
         }
 
         public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
         {
+            if (!Enabled) { return; }
             foreach (var commander in commanders)
             {
                 if (!commander.Value.Claimed)
@@ -120,10 +125,10 @@ namespace Sharky.MicroTasks.Proxy
 
                 if (commander != null)
                 {
+                    MicroTaskData[typeof(MiningTask).Name].StealUnit(commander);
                     commander.UnitRole = UnitRole.Proxy;
                     commander.Claimed = true;
                     UnitCommanders.Add(commander);
-                    MicroTaskData[typeof(MiningTask).Name].StealUnit(commander);
                     return;
                 }
             }
@@ -152,11 +157,45 @@ namespace Sharky.MicroTasks.Proxy
             var droppedProbes = droppedAttackers.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE);
             var unDroppedAttackers = attackers.Where(c => !AreaService.InArea(c.UnitCalculation.Unit.Pos, DropArea));
 
-            if (warpPrisms.Count() > 0)
+            var readyForPickup = unDroppedAttackers.Where(c => !c.UnitCalculation.Loaded && Vector2.DistanceSquared(c.UnitCalculation.Position, new Vector2(LoadingLocation.X, LoadingLocation.Y)) < 25);
+            if (!StartElevating && readyForPickup.Any())
+            {
+                StartElevating = true;
+            }
+
+            if (!StartElevating && attackers.Any())
+            {
+                var leader = attackers.FirstOrDefault(c => c.UnitRole == UnitRole.Leader);
+                if (leader == null)
+                {
+                    var immortal = attackers.FirstOrDefault(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_IMMORTAL);
+                    if (immortal != null)
+                    {
+                        immortal.UnitRole = UnitRole.Leader;
+                        leader = attackers.FirstOrDefault(c => c.UnitRole == UnitRole.Leader);
+                    }
+                    else
+                    {
+                        leader = attackers.FirstOrDefault(c => c.UnitRole == UnitRole.Leader);
+                    }
+                }
+
+                var leaders = attackers.Where(c => c.UnitRole == UnitRole.Leader);
+                if (leaders.Any())
+                {
+                    actions.AddRange(MicroController.Attack(leaders, LoadingLocation, LoadingLocation, null, frame));
+                    actions.AddRange(MicroController.Support(UnitCommanders.Where(c => c.UnitRole != UnitRole.Leader), leaders, LoadingLocation, LoadingLocation, null, frame));
+                }
+                else
+                {
+                    actions.AddRange(MicroController.Attack(attackers, LoadingLocation, LoadingLocation, null, frame));
+                }
+            }
+            else if (warpPrisms.Count() > 0)
             {
                 foreach (var commander in warpPrisms)
                 {
-                    var action = OrderWarpPrism(commander, droppedAttackers, unDroppedAttackers, frame);
+                    var action = OrderWarpPrism(commander, droppedAttackers, readyForPickup, unDroppedAttackers, frame);
                     if (action != null)
                     {
                         actions.AddRange(action);
@@ -164,13 +203,18 @@ namespace Sharky.MicroTasks.Proxy
                 }
 
                 // move into the loading position
-                foreach (var commander in unDroppedAttackers)
+                var threatenedAttackers = unDroppedAttackers.Where(c => c.UnitCalculation.EnemiesThreateningDamage.Any());
+                if (threatenedAttackers.Any())
+                {
+                    actions.AddRange(MicroController.Retreat(unDroppedAttackers, LoadingLocation, null, frame));
+                }
+                foreach (var commander in unDroppedAttackers.Where(c => !c.UnitCalculation.EnemiesThreateningDamage.Any()))
                 {
                     var action = commander.Order(frame, Abilities.ATTACK, LoadingLocation);
                     if (action != null)
                     {
                         actions.AddRange(action);
-                    }
+                    }                
                 }
             }
             else
@@ -184,6 +228,7 @@ namespace Sharky.MicroTasks.Proxy
             OrderProbes(frame, actions, droppedProbes);
 
             var mainAttackers = droppedAttackers.Where(c => c.UnitCalculation.Unit.UnitType != (uint)UnitTypes.PROTOSS_SENTRY && c.UnitCalculation.Unit.UnitType != (uint)UnitTypes.PROTOSS_PROBE);
+
 
             if (AttackWithinArea)
             {
@@ -256,7 +301,7 @@ namespace Sharky.MicroTasks.Proxy
                     continue;
                 }
 
-                if (commander.UnitCalculation.EnemiesThreateningDamage.Any())
+                if (commander.UnitCalculation.EnemiesThreateningDamage.Any() || commander.UnitCalculation.Unit.BuffIds.Any(b => b == (uint)Buffs.LOCKON))
                 {
                     actions.AddRange(MicroController.Retreat(new List<UnitCommander> { commander }, DropLocation, null, frame));
                 }
@@ -281,30 +326,27 @@ namespace Sharky.MicroTasks.Proxy
 
         private void CheckComplete()
         {
-            if (MapDataService.SelfVisible(TargetLocation) && !ActiveUnitData.EnemyUnits.Any(e => Vector2.DistanceSquared(new Vector2(TargetLocation.X, TargetLocation.Y), e.Value.Position) < 100))
+            if (MapDataService.SelfVisible(TargetLocation))
             {
-                Disable();
-                Completed = true;
-                ChatService.SendChatType("WarpPrismElevatorTask-TaskCompleted");
+                if (!ActiveUnitData.EnemyUnits.Any(e => Vector2.DistanceSquared(new Vector2(TargetLocation.X, TargetLocation.Y), e.Value.Position) < 100) || (EndAfterMainBaseGone && !ActiveUnitData.EnemyUnits.Any(e => e.Value.UnitClassifications.Contains(UnitClassification.ResourceCenter) && Vector2.DistanceSquared(new Vector2(TargetLocation.X, TargetLocation.Y), e.Value.Position) < 100)))
+                {
+                    Disable();
+                    Completed = true;
+                    ChatService.SendChatType("WarpPrismElevatorTask-TaskCompleted");
+                }
             }
         }
 
-        private List<SC2APIProtocol.Action> OrderWarpPrism(UnitCommander warpPrism, IEnumerable<UnitCommander> droppedAttackers, IEnumerable<UnitCommander> unDroppedAttackers, int frame)
+        private List<SC2APIProtocol.Action> OrderWarpPrism(UnitCommander warpPrism, IEnumerable<UnitCommander> droppedAttackers, IEnumerable<UnitCommander> readyForPickup, IEnumerable<UnitCommander> unDroppedAttackers, int frame)
         {
-            var readyForPickup = unDroppedAttackers.Where(c => !c.UnitCalculation.Loaded && Vector2.DistanceSquared(c.UnitCalculation.Position, new Vector2(LoadingLocation.X, LoadingLocation.Y)) < 10);
-            if (!StartElevating && readyForPickup.Any())
-            {
-                StartElevating = true;
-            }
-
-            if (!StartElevating)
+            if (!StartElevating || warpPrism.UnitCalculation.Unit.BuffIds.Any(b => b == (uint)Buffs.LOCKON))
             {
                 List<SC2APIProtocol.Action> action = null;
                 WarpPrismMicroController.SupportArmy(warpPrism, TargetLocation, DefensiveLocation, null, frame, out action, unDroppedAttackers.Select(c => c.UnitCalculation));
                 return action;
             }
 
-            foreach (var pickup in readyForPickup)
+            foreach (var pickup in readyForPickup.OrderByDescending(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISMPHASING).ThenByDescending(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_IMMORTAL).ThenByDescending(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_SENTRY))
             {
                 if (warpPrism.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISMPHASING)
                 {
@@ -369,7 +411,7 @@ namespace Sharky.MicroTasks.Proxy
                 var angle = Math.Atan2(TargetLocation.Y - DefensiveLocation.Y, DefensiveLocation.X - TargetLocation.X);
                 var x = -6 * Math.Cos(angle);
                 var y = -6 * Math.Sin(angle);
-                LoadingLocation = new Point2D { X = DefensiveLocation.X + (float)x, Y = DefensiveLocation.Y - (float)y };
+                LoadingLocation = DefensiveLocation;
                 LoadingLocationHeight = MapDataService.MapHeight(LoadingLocation);
 
                 x = -7 * Math.Cos(angle);
@@ -393,7 +435,7 @@ namespace Sharky.MicroTasks.Proxy
                     {
                         distanceSquaredToAvoid = 144;
                     }
-                    AttackArea = DropArea.Where(p => Vector2.DistanceSquared(p.ToVector2(), EnemyRampCenter.ToVector2()) > distanceSquaredToAvoid).ToList();
+                    AttackArea = DropArea; //.Where(p => Vector2.DistanceSquared(p.ToVector2(), EnemyRampCenter.ToVector2()) > distanceSquaredToAvoid).ToList();
                 }
                 else
                 {
@@ -404,6 +446,20 @@ namespace Sharky.MicroTasks.Proxy
             DebugService.DrawLine(new Point { X = LoadingLocation.X, Y = LoadingLocation.Y, Z = 16 }, new Point { X = LoadingLocation.X, Y = LoadingLocation.Y, Z = 0 }, new Color { R = 0, G = 0, B = 255 });
             DebugService.DrawSphere(new Point { X = DropLocation.X, Y = DropLocation.Y, Z = 12 }, 3, new Color { R = 0, G = 255, B = 0 });
             DebugService.DrawLine(new Point { X = DropLocation.X, Y = DropLocation.Y, Z = 16 }, new Point { X = DropLocation.X, Y = DropLocation.Y, Z = 0 }, new Color { R = 0, G = 255, B = 0 });
+        }
+
+        public override void RemoveDeadUnits(List<ulong> deadUnits)
+        {
+            foreach (var tag in deadUnits)
+            {
+                if (CancelWhenPrismDies && UnitCommanders.Any(c => c.UnitCalculation.Unit.Tag == tag && (c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISM || c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISMPHASING)))
+                {
+                    Disable();
+                    Console.WriteLine($"WarpPrismElevatorTask: Ending because Warp Prism died");
+                    return;
+                }
+                Deaths += UnitCommanders.RemoveAll(c => c.UnitCalculation.Unit.Tag == tag);
+            }
         }
     }
 }

@@ -18,8 +18,6 @@ namespace Sharky
         string starcraftExe;
         string starcraftDir;
 
-        // bool frameMismatchDetected = false;
-
         public GameConnection() { }
 
         public void StartSC2Instance(int port)

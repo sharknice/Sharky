@@ -5,13 +5,23 @@ namespace Sharky.EnemyStrategies.Terran
 {
     public class MarineRush : EnemyStrategy
     {
-        public MarineRush(DefaultSharkyBot defaultSharkyBot) : base(defaultSharkyBot) { }
+        BaseData BaseData;
+
+        public MarineRush(DefaultSharkyBot defaultSharkyBot) : base(defaultSharkyBot) 
+        {
+            BaseData = defaultSharkyBot.BaseData;
+        }
 
         protected override bool Detect(int frame)
         {
             if (EnemyData.EnemyRace != SC2APIProtocol.Race.Terran) { return false; }
 
             if (frame > SharkyOptions.FramesPerSecond * 4 * 60 || UnitCountService.EnemyCount(UnitTypes.TERRAN_REFINERY) > 0 || UnitCountService.EnemyCount(UnitTypes.TERRAN_FACTORY) > 0)
+            {
+                return false;
+            }
+
+            if (ActiveUnitData.EnemyUnits.Values.Any(e => e.UnitClassifications.Contains(UnitClassification.ResourceCenter) && e.Unit.Pos.X == BaseData.EnemyBaseLocations.Skip(1).FirstOrDefault().Location.X && e.Unit.Pos.Y == BaseData.EnemyBaseLocations.Skip(1).FirstOrDefault().Location.Y))
             {
                 return false;
             }

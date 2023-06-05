@@ -31,14 +31,16 @@ namespace Sharky.EnemyStrategies
                 x.UnitClassifications.Contains(UnitClassification.ResourceCenter)
                 && x.Unit.Pos.ToVector2().DistanceSquared(TargetingData.EnemyMainBasePoint.ToVector2()) > 16.0f);
 
-            if (MapDataService.LastFrameVisibility(BaseData.EnemyNaturalBase.Location) == 0)
-                return false;
-
             if (enemyExpansions > 0)
             {
+                Expired = true;
                 return false;
             }
 
+            if (!MapDataService.SelfVisible(BaseData.EnemyNaturalBase.Location))
+            {
+                return false;
+            }
             if (EnemyData.EnemyRace == SC2APIProtocol.Race.Zerg)
             {
                 return elapsedTime.TotalMinutes >= 2.5f;

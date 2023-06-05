@@ -37,6 +37,15 @@
     <None Update="StaticData\opponents\Ku6ikRu6ika.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="StaticData\opponents\SmoothBrain.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="StaticData\opponents\Nikolaj.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="StaticData\opponents\OctopusV3.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="StaticData\opponents\TyrT.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

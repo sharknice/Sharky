@@ -1,5 +1,6 @@
 ﻿using SC2APIProtocol;
 using Sharky.Builds;
+using Sharky.Extensions;
 using Sharky.Pathing;
 using System;
 using System.Linq;
@@ -48,6 +49,70 @@ namespace Sharky.Proxy
                 return location;
             }
             return baseLocation;
+        }
+
+        public Point2D GetFurthestCliffProxyLocation(float offsetDistance = 0)
+        {
+            var numberOfCloseLocations = NumberOfCloseBaseLocations();
+            if (MapDataService.MapData.MapName.ToLower().Contains("glittering") || MapDataService.MapData.MapName.ToLower().Contains("berlingrad"))
+            {
+                numberOfCloseLocations = 3;
+            }
+            if (MapDataService.MapData.MapName.ToLower().Contains("curious"))
+            {
+                numberOfCloseLocations = 5;
+            }
+            var closeAirLocations = BaseData.EnemyBaseLocations.Take(5).OrderBy(b => Vector2.DistanceSquared(new Vector2(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y), new Vector2(b.Location.X, b.Location.Y))).Take(numberOfCloseLocations);
+
+            var baseLocation = closeAirLocations.OrderBy(b => PathFinder.GetGroundPath(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y, b.Location.X, b.Location.Y, 0).Count()).Last().Location;
+
+
+            var bottomArea = AreaService.GetTargetArea(baseLocation, 40);
+            var bottomPoints = bottomArea.Where(p => MapDataService.PathWalkable(p, 1) && !MapDataService.PathWalkable(p, 2));
+
+            var topArea = AreaService.GetTargetArea(TargetingData.EnemyMainBasePoint, 40);
+            var topPoints = topArea.Where(p => MapDataService.PathWalkable(p, 1) && !MapDataService.PathWalkable(p, 2)).OrderByDescending(p => Vector2.DistanceSquared(p.ToVector2(), TargetingData.EnemyMainBasePoint.ToVector2()));
+
+            var touching = bottomPoints.Where(bp => topPoints.Any(tp => Vector2.DistanceSquared(bp.ToVector2(), tp.ToVector2()) <= 100));
+
+            var choke = TargetingData.ChokePoints.Bad.FirstOrDefault();
+            if (choke != null)
+            {
+                return touching.OrderByDescending(p => Vector2.DistanceSquared(p.ToVector2(), choke.Center)).FirstOrDefault();
+            }
+            return touching.FirstOrDefault();
+        }
+
+        public Point2D GetClosestCliffProxyLocation(float offsetDistance = 0)
+        {
+            var numberOfCloseLocations = NumberOfCloseBaseLocations();
+            if (MapDataService.MapData.MapName.ToLower().Contains("glittering") || MapDataService.MapData.MapName.ToLower().Contains("berlingrad"))
+            {
+                numberOfCloseLocations = 3;
+            }
+            if (MapDataService.MapData.MapName.ToLower().Contains("curious"))
+            {
+                numberOfCloseLocations = 5;
+            }
+            var closeAirLocations = BaseData.EnemyBaseLocations.Take(5).OrderBy(b => Vector2.DistanceSquared(new Vector2(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y), new Vector2(b.Location.X, b.Location.Y))).Take(numberOfCloseLocations);
+
+            var baseLocation = closeAirLocations.OrderBy(b => PathFinder.GetGroundPath(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y, b.Location.X, b.Location.Y, 0).Count()).Last().Location;
+
+
+            var bottomArea = AreaService.GetTargetArea(baseLocation, 40);
+            var bottomPoints = bottomArea.Where(p => MapDataService.PathWalkable(p, 1) && !MapDataService.PathWalkable(p, 2));
+
+            var topArea = AreaService.GetTargetArea(TargetingData.EnemyMainBasePoint, 40);
+            var topPoints = topArea.Where(p => MapDataService.PathWalkable(p, 1) && !MapDataService.PathWalkable(p, 2)).OrderByDescending(p => Vector2.DistanceSquared(p.ToVector2(), TargetingData.EnemyMainBasePoint.ToVector2()));
+
+            var touching = bottomPoints.Where(bp => topPoints.Any(tp => Vector2.DistanceSquared(bp.ToVector2(), tp.ToVector2()) <= 100));
+
+            var choke = TargetingData.ChokePoints.Bad.FirstOrDefault();
+            if (choke != null)
+            {
+                return touching.OrderBy(p => Vector2.DistanceSquared(p.ToVector2(), choke.Center)).FirstOrDefault();
+            }
+            return touching.FirstOrDefault();
         }
 
         public Point2D GetGroundProxyLocation(float offsetDistance = 6)

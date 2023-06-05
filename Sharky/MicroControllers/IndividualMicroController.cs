@@ -1268,7 +1268,7 @@ namespace Sharky.MicroControllers
                 {
                     if (bestAttack.Unit.UnitType != (uint)UnitTypes.TERRAN_SCV && bestAttack.Unit.UnitType != (uint)UnitTypes.TERRAN_MULE && bestAttack.Repairers.Any())
                     {
-                        if (bestAttack.Repairers.Any(r => r.Health < bestAttack.SimulatedHitpoints))
+                        if ((bestAttack.Unit.UnitType != (uint)UnitTypes.TERRAN_SIEGETANKSIEGED && bestAttack.Unit.UnitType != (uint)UnitTypes.TERRAN_SIEGETANK) && bestAttack.Repairers.Any(r => r.Health < bestAttack.SimulatedHitpoints))
                         {
                             var ids = bestAttack.Repairers.Select(r => r.Tag);
                             var repairer = GetBestTargetFromList(commander, bestAttack.NearbyAllies.Where(a => ids.Contains(a.Unit.Tag)), existingAttackOrder);
@@ -3132,17 +3132,10 @@ namespace Sharky.MicroControllers
             var formation = GetDesiredFormation(commander);
 
             var existingAttackOrder = commander.UnitCalculation.Unit.Orders.Where(o => o.AbilityId == (uint)Abilities.ATTACK || o.AbilityId == (uint)Abilities.ATTACK_ATTACK).FirstOrDefault();
-            var attacks = commander.UnitCalculation.NearbyEnemies.Where(e => DamageService.CanDamage(commander.UnitCalculation, e) && area.Any(point => Vector2.DistanceSquared(e.Position, point.ToVector2()) < 4));
+            var attacks = commander.UnitCalculation.NearbyEnemies.Where(e => DamageService.CanDamage(commander.UnitCalculation, e) && area.Any(point => Vector2.DistanceSquared(e.Position, point.ToVector2()) < commander.UnitCalculation.Range * commander.UnitCalculation.Range));
             var bestTarget = GetBestTargetFromList(commander, attacks, existingAttackOrder);
 
             UpdateState(commander, target, defensivePoint, groupCenter, bestTarget, formation, frame);
-
-            var outOfAreaAvoids = commander.UnitCalculation.EnemiesInRangeOfAvoid.Where(e => !area.Any(point => Vector2.DistanceSquared(e.Position, point.ToVector2()) < 4)).FirstOrDefault();
-            if (outOfAreaAvoids != null)
-            {
-                if (WeaponReady(commander,frame) && AttackBestTargetInRange(commander, target, bestTarget, frame, out action)) { return action; }
-                return commander.Order(frame, Abilities.MOVE, target);
-            }
 
             if (GroupUpBasedOnState(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
 
@@ -3171,6 +3164,12 @@ namespace Sharky.MicroControllers
                 if (AttackBestTargetInRange(commander, target, bestTarget, frame, out action)) { return action; }
                 if (GetInFormation(commander, formation, frame, out action)) { return action; }
                 if (AttackBestTarget(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; } // TODO: best target within area?
+            }
+
+            var outOfAreaAvoids = commander.UnitCalculation.EnemiesThreateningDamage.Where(e => !area.Any(point => Vector2.DistanceSquared(e.Position, point.ToVector2()) < commander.UnitCalculation.Range * commander.UnitCalculation.Range));
+            if (outOfAreaAvoids.Any())
+            {
+                if (AvoidDamageList(commander, target, target, outOfAreaAvoids, frame, false, out action)) { return action; }
             }
 
             if (MoveToAttackOnCooldown(commander, bestTarget, target, defensivePoint, frame, out action)) { return action; } // TODO: within area
