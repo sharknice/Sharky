@@ -2,6 +2,7 @@
 using Sharky.Builds;
 using Sharky.DefaultBot;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Sharky.Macro
 {
@@ -35,7 +36,7 @@ namespace Sharky.Macro
                 return commands;
             }
 
-            var begin = System.DateTime.UtcNow;
+            var begin = Stopwatch.GetTimestamp();
 
             if (MacroData.BuildPylon)
             {
@@ -65,7 +66,7 @@ namespace Sharky.Macro
                 MacroData.BuildUnits[UnitTypes.ZERG_OVERLORD] = true;
             }
 
-            var endTime = (System.DateTime.UtcNow - begin).TotalMilliseconds;
+            var endTime = (Stopwatch.GetTimestamp() - begin) / (double)Stopwatch.Frequency * 1000.0;
             if (endTime > 1)
             {
                 SkipSupply = true;

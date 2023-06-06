@@ -103,7 +103,7 @@ namespace Sharky
                 throw new Exception("Unable to find ExecuteInfo.txt at " + executeInfo);
             }
         }
-        
+
         public async Task<uint> JoinGame(Race race)
         {
             var joinGame = new RequestJoinGame();
@@ -129,7 +129,7 @@ namespace Sharky
             var joinGame = new RequestJoinGame();
             joinGame.Race = race;
             joinGame.PlayerName = botName;
-            
+
             joinGame.SharedPort = startPort + 1;
             joinGame.ServerPorts = new PortSet();
             joinGame.ServerPorts.GamePort = startPort + 2;
@@ -219,16 +219,16 @@ namespace Sharky
 
             while (true)
             {
-                var beginTotal = DateTime.UtcNow;
+                var beginTotal = Stopwatch.GetTimestamp();
 
                 if (!start)
                 {
                     await Proxy.SendRequest(stepRequest);
                 }
-                var begin = DateTime.UtcNow;
+                var begin = Stopwatch.GetTimestamp();
                 var response = await Proxy.SendRequest(observationRequest);
 
-                specificTime += (DateTime.UtcNow - begin).TotalMilliseconds;
+                specificTime += (Stopwatch.GetTimestamp() - begin) / (double)Stopwatch.Frequency * 1000.0;
 
                 var observation = response.Observation;
 
@@ -242,8 +242,8 @@ namespace Sharky
                 if (response.Status == Status.Ended || response.Status == Status.Quit)
                 {
                     Console.WriteLine($"Ended at {DateTime.UtcNow} UTC");
-                    Console.WriteLine($"total actions: {actionCount}, APM: {Math.Round(actionCount / (frames / (22.4*60)))}");
-                    
+                    Console.WriteLine($"total actions: {actionCount}, APM: {Math.Round(actionCount / (frames / (22.4 * 60)))}");
+
                     bot.OnEnd(observation, observation.PlayerResult[(int)playerId - 1].Result);
                     break;
                 }
@@ -273,7 +273,7 @@ namespace Sharky
 
                 var generatedActions = actions.Count();
                 actions = actions.Where(action => action?.ActionRaw?.UnitCommand?.UnitTags == null ||
-                    (action?.ActionRaw?.UnitCommand?.UnitTags != null && 
+                    (action?.ActionRaw?.UnitCommand?.UnitTags != null &&
                     !action.ActionRaw.UnitCommand.UnitTags.Any(tag => !observation.Observation.RawData.Units.Any(u => u.Tag == tag))));
                 var removedActions = generatedActions - actions.Count();
                 if (removedActions > 0)
@@ -313,17 +313,17 @@ namespace Sharky
                     actionCount += actionRequest.Action.Actions.Count;
                 }
 
-                var frameTotal = (DateTime.UtcNow - beginTotal).TotalMilliseconds;
+                var frameTotal = (Stopwatch.GetTimestamp() - beginTotal) / (double)Stopwatch.Frequency * 1000.0;
                 totalTime += frameTotal;
                 frames++;
                 if (frames > 1 && frameTotal > longestFrameTime)
                 {
                     longestFrameTime = frameTotal;
-                    Console.WriteLine($"Longest Frame: #{frames}: {longestFrameTime} ms, average: {totalTime/frames} ms");
+                    Console.WriteLine($"Longest Frame: #{frames}: {longestFrameTime} ms, average: {totalTime / frames} ms");
                 }
             }
         }
-        
+
         public async Task RunSinglePlayer(ISharkyBot bot, string map, Race myRace, Race opponentRace, Difficulty opponentDifficulty, AIBuild aIBuild, int randomSeed = -1, string opponentID = "test", bool realTime = false, string botName = "bot")
         {
             readSettings();
