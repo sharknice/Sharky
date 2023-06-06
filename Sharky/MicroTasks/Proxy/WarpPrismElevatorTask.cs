@@ -183,7 +183,7 @@ namespace Sharky.MicroTasks.Proxy
                 var leaders = attackers.Where(c => c.UnitRole == UnitRole.Leader);
                 if (leaders.Any())
                 {
-                    actions.AddRange(MicroController.Attack(leaders, LoadingLocation, LoadingLocation, null, frame));
+                    actions.AddRange(MicroController.Retreat(leaders, LoadingLocation, null, frame));
                     actions.AddRange(MicroController.Support(UnitCommanders.Where(c => c.UnitRole != UnitRole.Leader), leaders, LoadingLocation, LoadingLocation, null, frame));
                 }
                 else
