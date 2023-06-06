@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -49,15 +50,16 @@ namespace Sharky
 
         private async Task WriteMessage(Request request)
         {
-            byte[] sendBuf = new byte[1024 * 1024];
+            byte[] sendBuf = ArrayPool<byte>.Shared.Rent(1024 * 1024);
             CodedOutputStream outStream = new CodedOutputStream(sendBuf);
             request.WriteTo(outStream);
             await clientSocket.SendAsync(new ArraySegment<byte>(sendBuf, 0, (int)outStream.Position), WebSocketMessageType.Binary, true, token);
+            ArrayPool<byte>.Shared.Return(sendBuf);
         }
 
         private async Task<Response> ReadMessage()
         {
-            byte[] receiveBuf = new byte[1024 * 1024];
+            byte[] receiveBuf = ArrayPool<byte>.Shared.Rent(1024 * 1024);
             bool finished = false;
             int curPos = 0;
             while (!finished)
@@ -68,6 +70,7 @@ namespace Sharky
                     // No space left in the array, enlarge the array by doubling its size.
                     byte[] temp = new byte[receiveBuf.Length * 2];
                     Array.Copy(receiveBuf, temp, receiveBuf.Length);
+                    ArrayPool<byte>.Shared.Return(receiveBuf);
                     receiveBuf = temp;
                     left = receiveBuf.Length - curPos;
                 }
@@ -82,7 +85,8 @@ namespace Sharky
             }
 
             Response response = Response.Parser.ParseFrom(new System.IO.MemoryStream(receiveBuf, 0, curPos));
-            
+            ArrayPool<byte>.Shared.Return(receiveBuf);
+
             return response;
         }
     }
