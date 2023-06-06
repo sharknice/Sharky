@@ -19,8 +19,6 @@ namespace Sharky
 
         List<SC2APIProtocol.Action> Actions;
 
-        Stopwatch Stopwatch;
-        Stopwatch ManagerStopwatch;
 
         public SharkyBot(List<IManager> managers, DebugService debugService, FrameToTimeConverter frameToTimeConverter, SharkyOptions sharkyOptions, PerformanceData performanceData, ChatService chatService)
         {
@@ -29,8 +27,6 @@ namespace Sharky
             FrameToTimeConverter = frameToTimeConverter;
             PerformanceData = performanceData;
 
-            Stopwatch = new Stopwatch();
-            ManagerStopwatch = new Stopwatch();
             SharkyOptions = sharkyOptions;
             ChatService = chatService;
         }
@@ -73,7 +69,7 @@ namespace Sharky
         {
             Actions = new List<SC2APIProtocol.Action>();
 
-            var begin = DateTime.UtcNow;
+            var begin = Stopwatch.GetTimestamp();
 
             try
             {
@@ -84,7 +80,7 @@ namespace Sharky
                         manager.SkipFrame = false;
                         continue;
                     }
-                    var beginManager = DateTime.UtcNow;
+                    var beginManager = Stopwatch.GetTimestamp();
                     try
                     {
                         var actions = manager.OnFrame(observation);
@@ -114,8 +110,8 @@ namespace Sharky
                     }
 
 
-                    var endManager = DateTime.UtcNow;
-                    var managerTime = (endManager - beginManager).TotalMilliseconds;
+                    var endManager = Stopwatch.GetTimestamp();
+                    var managerTime = (endManager - beginManager) / (double)Stopwatch.Frequency * 1000.0;
                     manager.TotalFrameTime += managerTime;
 
                     if (managerTime > 1 && observation.Observation.GameLoop > 100)
@@ -130,8 +126,8 @@ namespace Sharky
                     }
                 }
 
-                var end = DateTime.UtcNow;
-                var endTime = (end - begin).TotalMilliseconds;
+                var end = Stopwatch.GetTimestamp();
+                var endTime = (end - begin) / (double)Stopwatch.Frequency * 1000.0;
                 PerformanceData.TotalFrameCalculationTime += endTime;
                 DebugService.DrawText($"OnFrame: {endTime}");
             }
