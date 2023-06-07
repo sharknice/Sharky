@@ -19,59 +19,67 @@ namespace Sharky.Pathing
         SharkyOptions SharkyOptions;
         IPathFinder PathFinder;
 
-        Dictionary<string, List<PathData>> GeneratedPathData;
-
         public BaseToBasePathingService(DefaultSharkyBot defaultSharkyBot)
         {
             MapData = defaultSharkyBot.MapData;
             SharkyOptions = defaultSharkyBot.SharkyOptions;
 
             PathFinder = defaultSharkyBot.SharkyPathFinder;
-            GeneratedPathData = LoadGeneratedMapPathData();
         }
 
-        private Dictionary<string, List<PathData>> LoadGeneratedMapPathData()
+        private List<PathData> LoadGeneratedMapPathData(string mapName)
         {
-            var dictionary = new Dictionary<string, List<PathData>>();
-
-            var folder = GetStaticPathingDataFolder();
-            LoadPathData(dictionary, folder);
-
-            folder = GetGeneratedPathingDataFolder();
-            Directory.CreateDirectory(folder);
-            LoadPathData(dictionary, folder);
-            return dictionary;
-        }
-
-        private static void LoadPathData(Dictionary<string, List<PathData>> dictionary, string folder)
-        {
-            foreach (var fileName in Directory.GetFiles(folder))
+            string[] folders = new string[]
             {
-                if (fileName.EndsWith(".zip"))
+                GetStaticPathingDataFolder(),
+                GetGeneratedPathingDataFolder()
+            };
+            foreach (var folder in folders)
+            {
+                string fileName = Path.Combine(folder, mapName);
+                if (File.Exists(fileName))
                 {
-                    using (var file = File.OpenRead(fileName))
-                    using (var zip = new ZipArchive(file, ZipArchiveMode.Read))
-                    {
-                        foreach (var entry in zip.Entries)
-                        {
-                            using (var stream = new StreamReader(entry.Open()))
-                            {
-                                var serializer = new JsonSerializer { TypeNameHandling = TypeNameHandling.Auto };
-                                var pathData = (List<PathData>)serializer.Deserialize(stream, typeof(List<PathData>));
-                                dictionary[Path.GetFileNameWithoutExtension(fileName)] = pathData;
-                            }
-                        }
-                    }
+                    return LoadPathDataJson(fileName);
                 }
-                else
+                fileName = Path.Combine(folder, mapName + ".json");
+                if (File.Exists(fileName))
                 {
-                    using (StreamReader file = File.OpenText(fileName))
+                    return LoadPathDataJson(fileName);
+                }
+                fileName = Path.Combine(folder, mapName + ".zip");
+                if (File.Exists(fileName))
+                {
+                    return LoadPathDataZip(fileName);
+                }
+            }
+            return null;
+        }
+
+        private static List<PathData> LoadPathDataZip(string fileName)
+        {
+            using (var file = File.OpenRead(fileName))
+            using (var zip = new ZipArchive(file, ZipArchiveMode.Read))
+            {
+                foreach (var entry in zip.Entries)
+                {
+                    using (var stream = new StreamReader(entry.Open()))
                     {
                         var serializer = new JsonSerializer { TypeNameHandling = TypeNameHandling.Auto };
-                        var pathData = (List<PathData>)serializer.Deserialize(file, typeof(List<PathData>));
-                        dictionary[Path.GetFileNameWithoutExtension(fileName)] = pathData;
+                        var pathData = serializer.Deserialize<List<PathData>>(new JsonTextReader(stream));
+                        return pathData;
                     }
                 }
+            }
+            return null;
+        }
+
+        private static List<PathData> LoadPathDataJson(string fileName)
+        {
+            using (StreamReader file = File.OpenText(fileName))
+            {
+                var serializer = new JsonSerializer { TypeNameHandling = TypeNameHandling.Auto };
+                var pathData = serializer.Deserialize<List<PathData>>(new JsonTextReader(file));
+                return pathData;
             }
         }
 
@@ -92,9 +100,10 @@ namespace Sharky.Pathing
 
         public List<PathData> GetBaseToBasePathingData(string mapName)
         {
-            if (GeneratedPathData.ContainsKey(mapName))
+            var pathData = LoadGeneratedMapPathData(mapName);
+            if (pathData != null)
             {
-                return GeneratedPathData[mapName];
+                return pathData;
             }
 
             if (!SharkyOptions.GeneratePathing)
@@ -105,7 +114,7 @@ namespace Sharky.Pathing
             var stopwatch = new Stopwatch();
             stopwatch.Start();
             Console.WriteLine("Calculating pathing data");
-            var pathData = CalcultedPathData();
+            pathData = CalcultedPathData();
             stopwatch.Stop();
             Console.WriteLine($"Calculated pathing data in {stopwatch.ElapsedMilliseconds} ms");
             SaveGeneratedMapPathData(mapName, pathData);
