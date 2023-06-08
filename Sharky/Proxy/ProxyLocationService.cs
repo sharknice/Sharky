@@ -156,7 +156,7 @@ namespace Sharky.Proxy
             return baseLocation;
         }
 
-        private int NumberOfCloseBaseLocations()
+        public int NumberOfCloseBaseLocations()
         {
             if (MapDataService.MapData.MapName.ToLower().Contains("blackburn")) { return 3; }
             if (MapDataService.MapData.MapName.ToLower().Contains("berlingrad")) { return 4; }

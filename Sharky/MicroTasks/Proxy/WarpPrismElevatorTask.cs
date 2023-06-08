@@ -22,7 +22,7 @@ namespace Sharky.MicroTasks.Proxy
         TargetingData TargetingData;
         AdvancedMicroController MicroController;
         WarpPrismMicroController WarpPrismMicroController;
-        ProxyLocationService ProxyLocationService;
+        public IProxyLocationService ProxyLocationService { get; set; }
         MapDataService MapDataService;
         DebugService DebugService;
         UnitDataService UnitDataService;
@@ -284,6 +284,11 @@ namespace Sharky.MicroTasks.Proxy
 
         private void OrderSentries(int frame, List<SC2APIProtocol.Action> actions, IEnumerable<UnitCommander> droppedSentries)
         {
+            if (EnemyRampCenter == null)
+            {
+                actions.AddRange(MicroController.Attack(droppedSentries, TargetLocation, DefensiveLocation, null, frame));
+                return;
+            }
             var forceField = ActiveUnitData.NeutralUnits.Values.FirstOrDefault(u => u.Unit.UnitType == (uint)UnitTypes.NEUTRAL_FORCEFIELD && Vector2.DistanceSquared(EnemyRampCenter.ToVector2(), u.Position) < 1);
             var someoneCastingFF = droppedSentries.Any(commander => commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.EFFECT_FORCEFIELD) || (commander.LastAbility == Abilities.EFFECT_FORCEFIELD && commander.LastOrderFrame + 20 > frame));
             foreach (var commander in droppedSentries)
@@ -355,7 +360,7 @@ namespace Sharky.MicroTasks.Proxy
 
                 if (warpPrism.UnitCalculation.Unit.CargoSpaceMax - warpPrism.UnitCalculation.Unit.CargoSpaceTaken >= UnitDataService.CargoSize((UnitTypes)pickup.UnitCalculation.Unit.UnitType) && !warpPrism.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.UNLOADALLAT_WARPPRISM))
                 {
-                    if (Vector2.DistanceSquared(warpPrism.UnitCalculation.Position, new Vector2(LoadingLocation.X, LoadingLocation.Y)) < PickupRangeSquared)
+                    if (Vector2.DistanceSquared(warpPrism.UnitCalculation.Position, pickup.UnitCalculation.Position) < PickupRangeSquared)
                     {
                         return warpPrism.Order(frame, Abilities.LOAD, null, pickup.UnitCalculation.Unit.Tag);
                     }
