@@ -1,6 +1,7 @@
 ﻿using SC2APIProtocol;
 using Sharky.MicroTasks.Attack;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Linq;
 using System.Numerics;
 
@@ -11,10 +12,14 @@ namespace Sharky.MicroTasks
         ActiveUnitData ActiveUnitData;
         TargetPriorityService TargetPriorityService;
 
+        public HashSet<UnitTypes> UnSplittableUnitTypes { get; set; }
+
         public DefenseService(ActiveUnitData activeUnitData, TargetPriorityService targetPriorityService)
         {
             ActiveUnitData = activeUnitData;
             TargetPriorityService = targetPriorityService;
+
+            UnSplittableUnitTypes = new HashSet<UnitTypes>();
         }
 
         public List<UnitCommander> GetDefenseGroup(List<UnitCalculation> enemyGroup, List<UnitCommander> unitCommanders, bool defendToDeath)
@@ -32,7 +37,7 @@ namespace Sharky.MicroTasks
 
             var counterGroup = new List<UnitCommander>();
 
-            foreach (var commander in unitCommanders)
+            foreach (var commander in unitCommanders.Where(c => CanSplitCommander(c)))
             {
                 if ((hasGround && commander.UnitCalculation.DamageGround) || (hasAir && commander.UnitCalculation.DamageAir) || (cloakable && (commander.UnitCalculation.UnitClassifications.Contains(UnitClassification.Detector) || commander.UnitCalculation.UnitClassifications.Contains(UnitClassification.DetectionCaster))) || commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PHOENIX)
                 {
@@ -47,6 +52,19 @@ namespace Sharky.MicroTasks
             }
 
             var finalTargetPriority = TargetPriorityService.CalculateTargetPriority(counterGroup.Select(c => c.UnitCalculation), enemyGroup);
+            if (finalTargetPriority.OverallWinnability < 1)
+            {
+                var unsplittables = unitCommanders.Where(c => !CanSplitCommander(c));
+                foreach (var unsplittable in unsplittables)
+                {
+                    counterGroup.Add(unsplittable);
+                }
+                if (unsplittables.Any())
+                {
+                    finalTargetPriority = TargetPriorityService.CalculateTargetPriority(counterGroup.Select(c => c.UnitCalculation), enemyGroup);
+                }
+            }
+
             if (finalTargetPriority.OverallWinnability > .5)
             {
                 return counterGroup;
@@ -90,7 +108,7 @@ namespace Sharky.MicroTasks
             return enemyGroups;
         }
 
-        internal IEnumerable<UnitCommander> OverwhelmSplit(ArmySplits split, List<UnitCommander> availableCommanders)
+        public IEnumerable<UnitCommander> OverwhelmSplit(ArmySplits split, List<UnitCommander> availableCommanders)
         {
             var reinforcements = new List<UnitCommander>();
             var targetPriority = TargetPriorityService.CalculateTargetPriority(split.SelfGroup.Select(c => c.UnitCalculation), split.EnemyGroup);
@@ -107,7 +125,7 @@ namespace Sharky.MicroTasks
             var counterGroup = new List<UnitCommander>();
             counterGroup.AddRange(split.SelfGroup);
 
-            foreach (var commander in availableCommanders)
+            foreach (var commander in availableCommanders.Where(c => CanSplitCommander(c)))
             {
                 if ((hasGround && commander.UnitCalculation.DamageGround) || (hasAir && commander.UnitCalculation.DamageAir) || (cloakable && (commander.UnitCalculation.UnitClassifications.Contains(UnitClassification.Detector) || commander.UnitCalculation.UnitClassifications.Contains(UnitClassification.DetectionCaster))) || commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PHOENIX)
                 {
@@ -122,7 +140,18 @@ namespace Sharky.MicroTasks
                 }
             }
 
+            var unsplittables = availableCommanders.Where(c => !CanSplitCommander(c));
+            foreach (var unsplittable in unsplittables)
+            {
+                counterGroup.Add(unsplittable);
+            }
+
             return reinforcements;
+        }
+
+        bool CanSplitCommander(UnitCommander commander)
+        {
+            return !UnSplittableUnitTypes.Contains((UnitTypes)commander.UnitCalculation.Unit.UnitType);
         }
     }
 }

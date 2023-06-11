@@ -1,5 +1,4 @@
-﻿using Google.Protobuf.WellKnownTypes;
-using SC2APIProtocol;
+﻿using SC2APIProtocol;
 using Sharky.DefaultBot;
 using Sharky.Extensions;
 using Sharky.MicroTasks.Attack;
@@ -7,7 +6,6 @@ using Sharky.Pathing;
 using Sharky.S2ClientTypeEnums;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
@@ -2321,16 +2319,41 @@ namespace Sharky.MicroControllers
             if (commander.UnitCalculation.Unit.IsFlying) { return false; }
 
             var nova = commander.UnitCalculation.NearbyEnemies.Where(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_DISRUPTORPHASED).OrderBy(a => Vector2.DistanceSquared(a.Position, commander.UnitCalculation.Position)).FirstOrDefault();
-            if (nova == null && commander.UnitCalculation.Unit.UnitType != (uint)UnitTypes.PROTOSS_DISRUPTOR)
-            {
-                nova = commander.UnitCalculation.NearbyAllies.Where(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_DISRUPTORPHASED && a.Unit.BuffDurationRemain < a.Unit.BuffDurationMax / 2 && Vector2.DistanceSquared(a.Position, commander.UnitCalculation.Position) < 25).OrderBy(a => Vector2.DistanceSquared(a.Position, commander.UnitCalculation.Position)).FirstOrDefault();
-            }
-
             if (nova != null)
             {
                 var avoidPoint = GetGroundAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, nova.Unit.Pos, target, defensivePoint, 5);
                 action = commander.Order(frame, Abilities.MOVE, avoidPoint);
                 return true;
+            }
+
+            if (commander.UnitCalculation.Unit.UnitType != (uint)UnitTypes.PROTOSS_DISRUPTOR)
+            {
+                nova = commander.UnitCalculation.NearbyAllies.Where(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_DISRUPTORPHASED && a.Unit.BuffDurationRemain < a.Unit.BuffDurationMax / 2 && Vector2.DistanceSquared(a.Position, commander.UnitCalculation.Position) < 25).OrderBy(a => Vector2.DistanceSquared(a.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+                if (nova != null)
+                {
+                    var novaAttackPoint = nova.Unit.Orders.FirstOrDefault(o => o.TargetWorldSpacePos != null);
+                    if (novaAttackPoint != null)
+                    {
+                        if (Vector2.DistanceSquared(novaAttackPoint.TargetWorldSpacePos.ToVector2(), commander.UnitCalculation.Position) < Vector2.DistanceSquared(nova.Position, commander.UnitCalculation.Position))
+                        {
+                            var avoidPoint = GetGroundAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, novaAttackPoint.TargetWorldSpacePos, target, defensivePoint, 5);
+                            action = commander.Order(frame, Abilities.MOVE, avoidPoint);
+                            return true;
+                        }
+                        else
+                        {
+                            var avoidPoint = GetGroundAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, nova.Unit.Pos, target, defensivePoint, 5);
+                            action = commander.Order(frame, Abilities.MOVE, avoidPoint);
+                            return true;
+                        }
+                    }
+                    else
+                    {
+                        var avoidPoint = GetGroundAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, nova.Unit.Pos, target, defensivePoint, 5);
+                        action = commander.Order(frame, Abilities.MOVE, avoidPoint);
+                        return true;
+                    }
+                }
             }
 
             return false;

@@ -2,6 +2,7 @@
 using Sharky.Builds.BuildingPlacement;
 using Sharky.Chat;
 using Sharky.DefaultBot;
+using Sharky.Extensions;
 using Sharky.Pathing;
 using System;
 using System.Collections.Concurrent;
@@ -195,6 +196,8 @@ namespace Sharky.MicroTasks
                 {
                     commands.AddRange(PerformShadeActions(frame, AdeptShadeCommander));
                 }
+
+                commands.AddRange(PerformPylonActions(frame));
             }
 
             var wallToKill = UnitCommanders.FirstOrDefault(c => c.UnitRole == UnitRole.Die);
@@ -444,6 +447,7 @@ namespace Sharky.MicroTasks
                     }
                     if (BlockPylon.UnitCalculation.Unit.BuildProgress < 1 && BlockPylon.UnitCalculation.Unit.BuildProgress > .95f && BlockPylon.UnitCalculation.EnemiesInRangeOf.Count() < 2)
                     {
+                        Console.WriteLine("ProtossDoorTask: Canceling Blocking Pylon");
                         var cancelCommand = BlockPylon.Order(frame, Abilities.CANCEL);
                         if (cancelCommand != null)
                         {
@@ -468,8 +472,9 @@ namespace Sharky.MicroTasks
                 }
                 else
                 {
-                    if (MacroData.Minerals >= 100 && ProbeCommander.UnitCalculation.NearbyEnemies.Any(e => (e.Unit.UnitType == (uint)UnitTypes.ZERG_ROACH || e.Unit.UnitType == (uint)UnitTypes.ZERG_ZERGLING) && e.FrameLastSeen > frame - 50))
+                    if (MacroData.Minerals >= 100 && ProbeCommander.UnitCalculation.NearbyEnemies.Any(e => (e.Unit.UnitType == (uint)UnitTypes.ZERG_ROACH || e.Unit.UnitType == (uint)UnitTypes.ZERG_ZERGLING) && e.FrameLastSeen > frame - 50 && Vector2.DistanceSquared(WallData.Block.ToVector2(), e.Position) < 25))
                     {
+                        Console.WriteLine("ProtossDoorTask: Blocking Wall with pylon");
                         var probeCommand = ProbeCommander.Order(frame, Abilities.BUILD_PYLON, WallData.Block);
                         if (probeCommand != null)
                         {
@@ -480,16 +485,49 @@ namespace Sharky.MicroTasks
                     }
                     else
                     {
-                        if (Vector2.DistanceSquared(ProbeCommander.UnitCalculation.Position, new Vector2(ProbeSpot.X, ProbeSpot.Y)) > 4)
+                        var spot = ProbeSpot;
+                        if (MacroData.Minerals < 100)
                         {
-                            var probeCommand = ProbeCommander.Order(frame, Abilities.MOVE, ProbeSpot);
-                            if (probeCommand != null)
-                            {
-                                commands.AddRange(probeCommand);
-                            }
-
-                            return commands;
+                            spot = WallData.Block;
                         }
+                        var probeCommand = ProbeCommander.Order(frame, Abilities.MOVE, spot);
+                        if (probeCommand != null)
+                        {
+                            commands.AddRange(probeCommand);
+                        }
+
+                        return commands;
+                    }
+                }
+            }
+            return commands;
+        }
+
+        List<SC2APIProtocol.Action> PerformPylonActions(int frame)
+        {
+            var commands = new List<SC2APIProtocol.Action>();
+
+            if (WallData == null || WallData.Block == null || WallData.Pylons == null)
+            {
+                return commands;
+            }
+
+            var pylonPosition = WallData.Pylons.FirstOrDefault();
+            if (pylonPosition != null)
+            {
+                BlockPylon = ActiveUnitData.Commanders.FirstOrDefault(u => u.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && u.Value.UnitCalculation.Unit.Pos.X == WallData.Block.X && u.Value.UnitCalculation.Unit.Pos.Y == WallData.Block.Y).Value;
+                if (BlockPylon != null)
+                {
+                    if (BlockPylon.UnitCalculation.Unit.BuildProgress < 1 && BlockPylon.UnitCalculation.Unit.BuildProgress > .95f && BlockPylon.UnitCalculation.EnemiesInRangeOf.Count() < 2)
+                    {
+                        Console.WriteLine("ProtossDoorTask: Canceling Blocking Pylon");
+                        var cancelCommand = BlockPylon.Order(frame, Abilities.CANCEL);
+                        if (cancelCommand != null)
+                        {
+                            commands.AddRange(cancelCommand);
+                        }
+
+                        return commands;
                     }
                 }
             }
