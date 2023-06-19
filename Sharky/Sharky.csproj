@@ -235,34 +235,55 @@
     <None Update="StaticData\opponents\zUnkP.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="StaticData\pathing\Ancient CisternAIE.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="StaticData\pathing\Dragon ScalesAIE.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="StaticData\pathing\GoldenauraAIE.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="StaticData\pathing\GresvanAIE.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="StaticData\pathing\Hardwire AIE.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="StaticData\pathing\Hardwire AIE.zip">
+    <None Update="StaticData\pathing\InfestationStationAIE.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="StaticData\pathing\Inside and OutAIE.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="StaticData\pathing\Inside and OutAIE.zip">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="StaticData\pathing\MoondanceAIE.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="StaticData\pathing\MoondanceAIE.zip">
+    <None Update="StaticData\pathing\Royal BloodAIE.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="StaticData\pathing\StargazersAIE.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="StaticData\pathing\StargazersAIE.zip">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="StaticData\pathing\WaterfallAIE.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="StaticData\pathing\WaterfallAIE.zip">
+    <None Update="StaticData\wall\partial\blood.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="StaticData\wall\partial\infestation.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="StaticData\wall\partial\gresvan.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="StaticData\wall\partial\goldenaura.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="StaticData\wall\partial\dragon.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="StaticData\wall\partial\cistern.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="StaticData\wall\terran\berlingrad.json">

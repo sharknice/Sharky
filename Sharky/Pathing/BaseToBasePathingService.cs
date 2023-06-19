@@ -142,7 +142,7 @@ namespace Sharky.Pathing
             var pathData = new ConcurrentBag<PathData>();
 
             var numbers = new List<int>();
-            for (int x = 5; x <= MapData.MapWidth - 5; x += 5)
+            for (int x = SharkyOptions.GeneratePathingPrecision.Item1; x <= MapData.MapWidth - SharkyOptions.GeneratePathingPrecision.Item1; x += SharkyOptions.GeneratePathingPrecision.Item1)
             {
                 numbers.Add(x);
             }
@@ -150,13 +150,13 @@ namespace Sharky.Pathing
             Parallel.ForEach(numbers, x =>
                    {
                        var pathFinder = new Roy_T.AStar.Paths.PathFinder();
-                       for (int y = 5; y <= MapData.MapHeight - 5; y += 5)
+                       for (int y = SharkyOptions.GeneratePathingPrecision.Item1; y <= MapData.MapHeight - SharkyOptions.GeneratePathingPrecision.Item1; y += SharkyOptions.GeneratePathingPrecision.Item1)
                        {
                            var start = new Vector2(x, y);
 
-                           for (int endX = 5; endX <= MapData.MapWidth - 10; endX += 10)
+                           for (int endX = SharkyOptions.GeneratePathingPrecision.Item1; endX <= MapData.MapWidth - SharkyOptions.GeneratePathingPrecision.Item2; endX += SharkyOptions.GeneratePathingPrecision.Item2)
                            {
-                               for (int endY = 5; endY <= MapData.MapHeight - 10; endY += 10)
+                               for (int endY = SharkyOptions.GeneratePathingPrecision.Item1; endY <= MapData.MapHeight - SharkyOptions.GeneratePathingPrecision.Item2; endY += SharkyOptions.GeneratePathingPrecision.Item2)
                                {
                                    var end = new Vector2(endX, endY);
                                    if (end.X == start.X && end.Y == start.Y) { continue; }
