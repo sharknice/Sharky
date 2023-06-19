@@ -117,5 +117,20 @@ namespace Sharky.Managers
                 System.Console.WriteLine($"{observation.Observation.GameLoop} {microTask.GetType().Name}, missing {missingCommander.UnitCalculation.Unit.UnitType}, tag {missingCommander.UnitCalculation.Unit.Tag}");
             }
         }
+
+        public override void OnEnd(ResponseObservation observation, Result result)
+        {
+            base.OnEnd(observation, result);
+
+            if (observation != null && SharkyOptions.LogPerformance)
+            {
+                foreach (var microTask in MicroTaskData.Values.Where(m => m.TotalFrameTime > 0).OrderBy(m => m.TotalFrameTime))
+                {
+                    System.Console.WriteLine($" {microTask.GetType().Name} {microTask.TotalFrameTime} ms, average: {microTask.TotalFrameTime / observation.Observation.GameLoop} ms");
+                }
+
+                System.Console.WriteLine($"{observation.Observation.GameLoop} {GetType().Name} {TotalFrameTime} ms, average: {TotalFrameTime / observation.Observation.GameLoop} ms");
+            }
+        }
     }
 }
