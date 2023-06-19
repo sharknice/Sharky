@@ -85,7 +85,11 @@ namespace Sharky.MicroTasks.Zerg
 
                     if (attackPos != null)
                     {
-                        actions.AddRange(QueenMicroController.Attack(queen, attackPos, attackPos, null, frame));
+                        var action = QueenMicroController.Attack(queen, attackPos, attackPos, null, frame);
+                        if (action != null)
+                        {
+                            actions.AddRange(action);
+                        }
                     }
                     else
                     {

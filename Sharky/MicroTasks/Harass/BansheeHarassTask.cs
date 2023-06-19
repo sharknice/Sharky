@@ -247,6 +247,21 @@ namespace Sharky.MicroTasks.Harass
                     GetNextTarget(frame);
                     continue;
                 }
+
+                if (Vector2.DistanceSquared(commander.UnitCalculation.Position, StagingPoint.ToVector2()) < 10)
+                {
+                    var action = IndividualMicroController.HarassWorkers(commander, Target, defensivePoint, frame);
+                    if (action != null)
+                    {
+                        commands.AddRange(action);
+                    }
+                    if (frame - TargetAquisitionFrame > 10 * SharkyOptions.FramesPerSecond && !commander.UnitCalculation.NearbyEnemies.Any())
+                    {
+                        GetNextTarget(frame);
+                    }
+                    continue;
+                }
+
                 var navigateAction = IndividualMicroController.NavigateToPoint(commander, StagingPoint, defensivePoint, StagingPoint, frame);
                 if (navigateAction != null)
                 {

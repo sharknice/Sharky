@@ -1,5 +1,4 @@
 ﻿using SC2APIProtocol;
-using Sharky.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -278,6 +277,10 @@ namespace Sharky.Pathing
 
         public int MapHeight(int x, int y)
         {
+            if (x < 0 || y < 0 || x >= MapData.MapWidth || y >= MapData.MapHeight)
+            {
+                return 0;
+            }
             return MapData.Map[x][y].TerrainHeight;
         }
 

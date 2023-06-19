@@ -74,7 +74,7 @@ namespace Sharky
 
         private int GetInProgressCountForUnit(KeyValuePair<ulong, UnitCalculation> u, TrainingTypeData unitData)
         {
-            if (!unitData.ProducingUnits.Contains((UnitTypes)u.Value.Unit.UnitType)
+            if (unitData.ProducingUnits.Contains((UnitTypes)u.Value.Unit.UnitType)
                 || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_EGG
                 || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_OVERLORDCOCOON
                 || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_BANELINGCOCOON
@@ -83,9 +83,9 @@ namespace Sharky
                 || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_RAVAGERCOCOON
                 || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_TRANSPORTOVERLORDCOCOON)
             {
-                return 0;
+                return u.Value.Unit.Orders.Count(o => o.AbilityId == (uint)unitData.Ability);
             }
-            return u.Value.Unit.Orders.Count(o => o.AbilityId == (uint)unitData.Ability);
+            return 0;
         }
 
         public int EquivalentTypeCount(UnitTypes unitType)
