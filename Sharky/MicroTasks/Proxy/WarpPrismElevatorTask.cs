@@ -54,6 +54,8 @@ namespace Sharky.MicroTasks.Proxy
         Point2D EnemyRampCenter { get; set; }
         int LastForceFieldFrame { get; set; }
 
+        ArmySplitter DefenseArmySplitter;
+
         bool StartElevating { get; set; }
         public bool Completed { get; private set; }
         public bool AttackWithinArea { get; set; }
@@ -93,6 +95,8 @@ namespace Sharky.MicroTasks.Proxy
             AttackWithinArea = true;
             EndAfterMainBaseGone = false;
             CancelWhenPrismDies = true;
+
+            DefenseArmySplitter = new ArmySplitter(defaultSharkyBot);
         }
 
         public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
@@ -150,8 +154,28 @@ namespace Sharky.MicroTasks.Proxy
 
             CheckComplete();
 
-            var warpPrisms = UnitCommanders.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISM || c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISMPHASING);
-            var attackers = UnitCommanders.Where(c => c.UnitCalculation.Unit.UnitType != (uint)UnitTypes.PROTOSS_WARPPRISM && c.UnitCalculation.Unit.UnitType != (uint)UnitTypes.PROTOSS_WARPPRISMPHASING);
+            IEnumerable<UnitCommander> defenders = new List<UnitCommander>();
+
+            var attackingEnemies = ActiveUnitData.EnemyUnits.Values.Where(e => e.FrameLastSeen > frame - 100 &&
+                (e.NearbyEnemies.Any(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter) || u.UnitClassifications.Contains(UnitClassification.ProductionStructure) || u.UnitClassifications.Contains(UnitClassification.DefensiveStructure))) 
+                && (e.NearbyEnemies.Count(b => b.Attributes.Contains(SC2APIProtocol.Attribute.Structure)) >= e.NearbyAllies.Count(b => b.Attributes.Contains(SC2APIProtocol.Attribute.Structure)))).Where(e => e.Unit.UnitType != (uint)UnitTypes.TERRAN_KD8CHARGE);
+
+            if (attackingEnemies.Count() > 0)
+            {
+                var attackingEnemyVector = TargetingService.GetArmyPoint(attackingEnemies).ToVector2();
+
+                if (attackingEnemies.Count() > 0)
+                {
+                    defenders = UnitCommanders.Where(c => Vector2.DistanceSquared(c.UnitCalculation.Position, attackingEnemyVector) < Vector2.DistanceSquared(c.UnitCalculation.Position, LoadingLocation.ToVector2()));
+                    if (defenders.Any())
+                    {
+                        actions = DefenseArmySplitter.SplitArmy(frame, attackingEnemies, TargetingData.AttackPoint, defenders, true);
+                    }
+                }
+            }
+
+            var warpPrisms = UnitCommanders.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISM || c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISMPHASING).Where(c => !defenders.Contains(c));
+            var attackers = UnitCommanders.Where(c => c.UnitCalculation.Unit.UnitType != (uint)UnitTypes.PROTOSS_WARPPRISM && c.UnitCalculation.Unit.UnitType != (uint)UnitTypes.PROTOSS_WARPPRISMPHASING).Where(c => !defenders.Contains(c));
             var droppedAttackers = attackers.Where(c => AreaService.InArea(c.UnitCalculation.Unit.Pos, DropArea));
             var droppedSentries = droppedAttackers.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_SENTRY);
             var droppedProbes = droppedAttackers.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE);

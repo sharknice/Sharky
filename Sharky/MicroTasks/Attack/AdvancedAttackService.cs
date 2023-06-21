@@ -51,6 +51,9 @@ namespace Sharky.MicroTasks.Attack
 
         void UpdateState()
         {
+            var targetPriority = CalculateTargetPriority();
+            AttackData.TargetPriorityCalculation = targetPriority;
+
             if (AttackTask.UnitCommanders.Count() < 1)
             {
                 TargetingData.AttackState = AttackState.Retreat;
@@ -74,8 +77,6 @@ namespace Sharky.MicroTasks.Attack
                 }
             }
 
-            var targetPriority = CalculateTargetPriority();
-            AttackData.TargetPriorityCalculation = targetPriority;
             if (AttackData.RequireDetection && !AttackTask.UnitCommanders.Any(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Detector) || c.UnitCalculation.UnitClassifications.Contains(UnitClassification.DetectionCaster)))
             {
                 TargetingData.AttackState = AttackState.Retreat;

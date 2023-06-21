@@ -12,7 +12,8 @@ namespace Sharky.EnemyStrategies
             {
                 return UnitCountService.EnemyCount(UnitTypes.ZERG_MUTALISK) > 0
                     || UnitCountService.EnemyCount(UnitTypes.ZERG_CORRUPTOR) > 0
-                    || UnitCountService.EnemyCount(UnitTypes.ZERG_BROODLORD) > 0;
+                    || UnitCountService.EnemyCount(UnitTypes.ZERG_BROODLORD) > 0
+                    || UnitCountService.EquivalentEnemyTypeCount(UnitTypes.ZERG_SPIRE) > 0;
             }
             else if (EnemyData.EnemyRace == SC2APIProtocol.Race.Protoss)
             {

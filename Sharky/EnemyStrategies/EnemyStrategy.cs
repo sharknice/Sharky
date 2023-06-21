@@ -69,7 +69,7 @@ namespace Sharky.EnemyStrategies
 
         protected void DetectedChat()
         {
-            ChatService.Tag($"EnemyStrategy-{Name()}");
+            ChatService.Tag($"es_{Name()}");
 
             var lastGame = EnemyData?.EnemyPlayer.Games.FirstOrDefault();
             if (lastGame != null)

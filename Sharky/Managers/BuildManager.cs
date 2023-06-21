@@ -98,7 +98,7 @@ namespace Sharky.Managers
                     SelectedRace = playerInfo.RaceRequested;
                     if (playerInfo.RaceRequested == Race.Random)
                     {
-                        ChatService.Tag($"SelfRandomRace-{playerInfo.RaceActual}");
+                        ChatService.Tag($"SelfRandomRace_{playerInfo.RaceActual}");
                     }
                 }
                 else

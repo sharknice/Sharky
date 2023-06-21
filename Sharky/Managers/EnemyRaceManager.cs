@@ -67,7 +67,7 @@ namespace Sharky.Managers
 
         void TagRace()
         {
-            ChatService.Tag($"EnemyRandomRace-{EnemyData.EnemyRace}");
+            ChatService.Tag($"EnemyRandomRace_{EnemyData.EnemyRace}");
         }
     }
 }

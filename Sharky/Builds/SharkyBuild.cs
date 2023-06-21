@@ -95,7 +95,7 @@ namespace Sharky.Builds
             {
                 if (SharkyOptions.BuildTagsEnabled)
                 {
-                    ChatService.Tag($"Build-{Name()}");
+                    ChatService.Tag($"b_{Name()}");
                 }
                 Started = true;
             }
