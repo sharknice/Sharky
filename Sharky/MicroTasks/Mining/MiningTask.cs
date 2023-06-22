@@ -5,7 +5,6 @@ using Sharky.DefaultBot;
 using Sharky.MicroTasks.Attack;
 using Sharky.MicroTasks.Mining;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -75,7 +74,7 @@ namespace Sharky.MicroTasks
             Enabled = true;
         }
 
-        public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
+        public override void ClaimUnits(Dictionary<ulong, UnitCommander> commanders)
         {
             foreach (var commander in commanders.Where(c => !c.Value.Claimed))
             {

@@ -2,9 +2,7 @@
 using Sharky.DefaultBot;
 using Sharky.EnemyStrategies.Zerg;
 using Sharky.Extensions;
-using Sharky.MicroControllers;
 using Sharky.Pathing;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -42,7 +40,7 @@ namespace Sharky.MicroTasks
             Enabled = enabled;
         }
 
-        public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
+        public override void ClaimUnits(Dictionary<ulong, UnitCommander> commanders)
         {
             if (EnemyData.EnemyRace != Race.Zerg || EnemyData.SelfRace != Race.Zerg)
                 return;

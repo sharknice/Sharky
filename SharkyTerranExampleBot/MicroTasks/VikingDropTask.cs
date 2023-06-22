@@ -1,7 +1,6 @@
 ﻿using Sharky;
 using Sharky.DefaultBot;
 using Sharky.MicroTasks;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -24,7 +23,7 @@ namespace SharkyTerranExampleBot.MicroTasks
             Enabled = enabled;
         }
 
-        public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
+        public override void ClaimUnits(Dictionary<ulong, UnitCommander> commanders)
         {
             foreach (var commander in commanders.Where(c => !c.Value.Claimed && (c.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_VIKINGFIGHTER || c.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_MEDIVAC)))
             {

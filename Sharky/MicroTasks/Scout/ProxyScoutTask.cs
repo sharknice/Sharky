@@ -1,7 +1,6 @@
 ﻿using SC2APIProtocol;
 using Sharky.Builds;
 using Sharky.MicroControllers;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -44,7 +43,7 @@ namespace Sharky.MicroTasks
             BlockAddons = false;
         }
 
-        public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
+        public override void ClaimUnits(Dictionary<ulong, UnitCommander> commanders)
         {
             if (UnitCommanders.Count() == 0)
             {

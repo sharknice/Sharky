@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -16,7 +15,7 @@ namespace Sharky.MicroTasks
         public double LongestFrame { get; set; }
         public double TotalFrameTime { get; set; }
 
-        public virtual void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
+        public virtual void ClaimUnits(Dictionary<ulong, UnitCommander> commanders)
         {
             throw new NotImplementedException();
         }

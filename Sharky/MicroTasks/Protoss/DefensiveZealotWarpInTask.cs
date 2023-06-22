@@ -1,6 +1,5 @@
 ﻿using Sharky.Builds.BuildingPlacement;
 using Sharky.DefaultBot;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -29,7 +28,7 @@ namespace Sharky.MicroTasks
             Enabled = enabled;
         }
 
-        public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
+        public override void ClaimUnits(Dictionary<ulong, UnitCommander> commanders)
         {
         }
 

@@ -5,7 +5,6 @@ using Sharky.MicroControllers.Zerg;
 using Sharky.MicroTasks.Attack;
 using Sharky.Pathing;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -90,7 +89,7 @@ namespace Sharky.MicroTasks.Zerg
             SwitchRolesAfterEnemyStaticDefenseEstablished = true;
         }
 
-        public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
+        public override void ClaimUnits(Dictionary<ulong, UnitCommander> commanders)
         {
             ClaimCommanders(commanders.Values);
         }

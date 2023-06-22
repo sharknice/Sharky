@@ -1,7 +1,6 @@
 ﻿using Sharky.MicroControllers;
 using Sharky.MicroTasks.Attack;
 using Sharky.MicroTasks.Scout;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -52,7 +51,7 @@ namespace Sharky.MicroTasks
             UnitCommanders.RemoveAll(u => SharkyUnitData.UndeadTypes.Contains((UnitTypes)u.UnitCalculation.Unit.UnitType));
         }
 
-        public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
+        public override void ClaimUnits(Dictionary<ulong, UnitCommander> commanders)
         {
             foreach (var commander in commanders)
             {

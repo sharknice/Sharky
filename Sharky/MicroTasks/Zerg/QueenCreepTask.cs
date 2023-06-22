@@ -4,11 +4,7 @@ using Sharky.Builds.BuildingPlacement;
 using Sharky.DefaultBot;
 using Sharky.Extensions;
 using Sharky.MicroControllers.Zerg;
-using System;
-using System.Collections;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 
 namespace Sharky.MicroTasks.Zerg
@@ -38,7 +34,7 @@ namespace Sharky.MicroTasks.Zerg
             Enabled = enabled;
         }
 
-        public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
+        public override void ClaimUnits(Dictionary<ulong, UnitCommander> commanders)
         {
             if (EnemyData.SelfRace != SC2APIProtocol.Race.Zerg)
             {

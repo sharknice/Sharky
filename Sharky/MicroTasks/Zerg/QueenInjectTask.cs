@@ -2,7 +2,6 @@
 using Sharky.DefaultBot;
 using Sharky.Extensions;
 using Sharky.MicroControllers.Zerg;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -32,7 +31,7 @@ namespace Sharky.MicroTasks.Zerg
             Enabled = enabled;
         }
 
-        public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
+        public override void ClaimUnits(Dictionary<ulong, UnitCommander> commanders)
         {
             if (EnemyData.SelfRace != SC2APIProtocol.Race.Zerg)
             {
@@ -127,7 +126,7 @@ namespace Sharky.MicroTasks.Zerg
             return false;
         }
 
-        private void UpdateHatcheriesList(ConcurrentDictionary<ulong, UnitCommander> commanders)
+        private void UpdateHatcheriesList(Dictionary<ulong, UnitCommander> commanders)
         {
             foreach (var hatchery in commanders.Values.Where(u => u.UnitCalculation.Unit.BuildProgress > 0.9 && u.UnitCalculation.UnitClassifications.Contains(UnitClassification.ResourceCenter)))
             {

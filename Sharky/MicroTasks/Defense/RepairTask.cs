@@ -1,7 +1,6 @@
 ﻿using Sharky.DefaultBot;
 using Sharky.MicroControllers;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -44,7 +43,7 @@ namespace Sharky.MicroTasks
             RepairData = new Dictionary<ulong, RepairData>();
         }
 
-        public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
+        public override void ClaimUnits(Dictionary<ulong, UnitCommander> commanders)
         {
             if (MacroData.Minerals > 10 && EnemyData.SelfRace == SC2APIProtocol.Race.Terran)
             {
