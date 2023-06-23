@@ -1,5 +1,6 @@
 ﻿using SC2APIProtocol;
 using Sharky.DefaultBot;
+using Sharky.Extensions;
 using Sharky.Pathing;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,6 +30,11 @@ namespace Sharky.MicroControllers.Terran
                 return true;
             }
 
+            if (TacticalJump(commander, frame, out action))
+            {
+                return true;
+            }
+
             return false;
         }
 
@@ -46,6 +52,26 @@ namespace Sharky.MicroControllers.Terran
             if (target != null)
             {
                 action = commander.Order(frame, Abilities.EFFECT_YAMATOGUN, null, target.Unit.Tag);
+                return true;
+            }
+
+            return false;
+        }
+
+        bool TacticalJump(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
+
+            if (commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.EFFECT_TACTICALJUMP) || commander.LastAbility == Abilities.EFFECT_TACTICALJUMP && commander.LastOrderFrame + 5 > frame) { return true; }
+
+            if (!commander.AbilityOffCooldown(Abilities.EFFECT_TACTICALJUMP, frame, SharkyOptions.FramesPerSecond, SharkyUnitData)) { return false; }
+
+            if (commander.UnitCalculation.Unit.Health > 150 || commander.UnitCalculation.EnemiesThreateningDamage.Sum(e => e.Dps) < (commander.UnitCalculation.Unit.Health / 4)) { return false; }
+
+            var target = BaseData.SelfBases.Where(b => b.MineralMiningInfo != null && b.ResourceCenter != null && b.MineralMiningInfo.Any(m => m.Workers.Any()) && Vector2.DistanceSquared(b.MineralLineLocation.ToVector2(), commander.UnitCalculation.Position) > 625).OrderBy(b => b.ResourceCenter.Health).FirstOrDefault();
+            if (target != null)
+            {
+                action = commander.Order(frame, Abilities.EFFECT_TACTICALJUMP, target.MineralLineLocation);
                 return true;
             }
 

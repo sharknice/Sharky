@@ -457,7 +457,7 @@ namespace Sharky.DefaultBot
             DefenseService = new DefenseService(ActiveUnitData, TargetPriorityService);
             MicroController = new MicroController(MicroData);
 
-            var defenseSquadTask = new DefenseSquadTask(ActiveUnitData, TargetingData, DefenseService, MicroController, new ArmySplitter(this), new List<DesiredUnitsClaim>(), 0, false);
+            var defenseSquadTask = new DefenseSquadTask(this, new ArmySplitter(this), new List<DesiredUnitsClaim>(), 0, false);
             var workerScoutTask = new WorkerScoutTask(this, false, 0.5f);
             var workerScoutGasStealTask = new WorkerScoutGasStealTask(this, false, 0.5f, workerDefenseMicroController);
             var reaperScoutTask = new ReaperScoutTask(this, false, 0.5f);

@@ -1,12 +1,10 @@
-﻿using SC2APIProtocol;
-using Sharky.DefaultBot;
+﻿using Sharky.DefaultBot;
 using Sharky.Extensions;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using static SC2APIProtocol.AbilityData.Types;
 
 namespace Sharky.MicroTasks
 {

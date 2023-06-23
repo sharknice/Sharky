@@ -149,6 +149,28 @@ namespace Sharky.Builds.BuildingPlacement
                 while (angle + (sliceSize / 2) < fullCircle)
                 {
                     var point = new Point2D { X = x + (float)(radius * Math.Cos(angle)), Y = y + (float)(radius * Math.Sin(angle)) };
+                    if (size == 3)
+                    {
+                        if (point.X % 1 != .5)
+                        {
+                            point.X -= .5f;
+                        }
+                        if (point.Y % 1 != .5)
+                        {
+                            point.Y -= .5f;
+                        }
+                    }
+                    else if (size == 2)
+                    {
+                        if (point.X % 1 != 0)
+                        {
+                            point.X -= .5f;
+                        }
+                        if (point.Y % 1 != 0)
+                        {
+                            point.Y -= .5f;
+                        }
+                    }
                     if (BuildingService.AreaBuildable(point.X, point.Y, size / 2.0f) && !BuildingService.Blocked(point.X, point.Y, size / 2.0f) && !BuildingService.HasAnyCreep(point.X, point.Y, size / 2.0f))
                     {
                         var mineralFields = ActiveUnitData.NeutralUnits.Where(u => SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType));

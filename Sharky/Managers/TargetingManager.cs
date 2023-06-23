@@ -5,10 +5,8 @@ using Sharky.Extensions;
 using Sharky.Pathing;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.Design;
 using System.Linq;
 using System.Numerics;
-using static SC2APIProtocol.AbilityData.Types;
 
 namespace Sharky.Managers
 {

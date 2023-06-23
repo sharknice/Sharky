@@ -1,6 +1,7 @@
 ﻿using Sharky.DefaultBot;
 using Sharky.Extensions;
 using Sharky.MicroControllers;
+using Sharky.MicroTasks.Attack;
 using Sharky.MicroTasks.Harass;
 using System;
 using System.Collections.Concurrent;
@@ -14,10 +15,13 @@ namespace Sharky.MicroTasks
     {
         BaseData BaseData;
         TargetingData TargetingData;
+        TargetingService TargetingService;
         IIndividualMicroController MicroController;
         SharkyUnitData SharkyUnitData;
         FrameToTimeConverter FrameToTimeConverter;
         MacroData MacroData;
+        ActiveUnitData ActiveUnitData;
+        ArmySplitter DefenseArmySplitter;
 
         public Dictionary<ulong, UnitCalculation> Kills { get; private set; }
 
@@ -28,8 +32,10 @@ namespace Sharky.MicroTasks
         {
             BaseData = defaultSharkyBot.BaseData;
             TargetingData = defaultSharkyBot.TargetingData;
+            TargetingService = defaultSharkyBot.TargetingService;
             SharkyUnitData = defaultSharkyBot.SharkyUnitData;
             MacroData = defaultSharkyBot.MacroData;
+            ActiveUnitData = defaultSharkyBot.ActiveUnitData;
             FrameToTimeConverter = defaultSharkyBot.FrameToTimeConverter;
             MicroController = microController;
             DesiredCount = desiredCount;
@@ -38,6 +44,8 @@ namespace Sharky.MicroTasks
             UnitCommanders = new List<UnitCommander>();
 
             Kills = new Dictionary<ulong, UnitCalculation>();
+
+            DefenseArmySplitter = new ArmySplitter(defaultSharkyBot);
         }
 
         public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
@@ -65,9 +73,30 @@ namespace Sharky.MicroTasks
 
             AssignHarassers();
 
+            IEnumerable<UnitCommander> defenders = new List<UnitCommander>();
+
+            var attackingEnemies = ActiveUnitData.EnemyUnits.Values.Where(e => e.FrameLastSeen > frame - 100 && !e.Unit.IsFlying && e.Range < 3 &&
+                (e.NearbyEnemies.Any(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter) || u.UnitClassifications.Contains(UnitClassification.ProductionStructure) || u.UnitClassifications.Contains(UnitClassification.DefensiveStructure))) && 
+                (e.NearbyEnemies.Count(b => b.Attributes.Contains(SC2APIProtocol.Attribute.Structure)) >= e.NearbyAllies.Count(b => b.Attributes.Contains(SC2APIProtocol.Attribute.Structure)))).Where(e => e.Unit.UnitType != (uint)UnitTypes.TERRAN_KD8CHARGE);
+
+            if (attackingEnemies.Count() > 0)
+            {
+                var attackingEnemyVector = TargetingService.GetArmyPoint(attackingEnemies).ToVector2();
+
+                if (attackingEnemies.Count() > 0)
+                {
+                    defenders = UnitCommanders.Where(c => Vector2.DistanceSquared(c.UnitCalculation.Position, attackingEnemyVector) < Vector2.DistanceSquared(c.UnitCalculation.Position, TargetingData.EnemyMainBasePoint.ToVector2()));
+                    if (defenders.Any())
+                    {
+                        var actions = DefenseArmySplitter.SplitArmy(frame, attackingEnemies, TargetingData.AttackPoint, defenders, true);
+                        commands.AddRange(actions);
+                    }
+                }
+            }
+
             foreach (var harassInfo in HarassInfos)
             {
-                foreach (var commander in harassInfo.Harassers)
+                foreach (var commander in harassInfo.Harassers.Where(c => !defenders.Contains(c)))
                 {
                     var enemyReaper = commander.UnitCalculation.NearbyEnemies.Where(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_REAPER).OrderBy(e => Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position)).FirstOrDefault();
                     if (enemyReaper != null)

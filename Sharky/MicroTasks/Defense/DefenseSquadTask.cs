@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using Sharky.DefaultBot;
 using Sharky.MicroControllers;
 using Sharky.MicroTasks.Attack;
 using System.Collections.Concurrent;
@@ -13,6 +14,8 @@ namespace Sharky.MicroTasks
     {
         ActiveUnitData ActiveUnitData;
         TargetingData TargetingData;
+        EnemyData EnemyData;
+        UnitDataService UnitDataService;
 
         DefenseService DefenseService;
 
@@ -24,23 +27,24 @@ namespace Sharky.MicroTasks
 
         public bool OnlyDefendMain { get; set; }
         public bool GroupAtMain { get; set; }
+        public bool AlwaysFillBunkers { get; set; }
 
         List<UnitCommander> WorkerDefenders { get; set; }
 
         public List<DesiredUnitsClaim> DesiredUnitsClaims { get; set; }
 
-        public DefenseSquadTask(ActiveUnitData activeUnitData, TargetingData targetingData, 
-            DefenseService defenseService, 
-            IMicroController microController,
+        public DefenseSquadTask(DefaultSharkyBot defaultSharkyBot,
             ArmySplitter armySplitter,
             List<DesiredUnitsClaim> desiredUnitsClaims, float priority, bool enabled = true)
         {
-            ActiveUnitData = activeUnitData;
-            TargetingData = targetingData;
+            ActiveUnitData = defaultSharkyBot.ActiveUnitData;
+            TargetingData = defaultSharkyBot.TargetingData;
+            EnemyData = defaultSharkyBot.EnemyData;
+            UnitDataService = defaultSharkyBot.UnitDataService;
 
-            DefenseService = defenseService;
+            DefenseService = defaultSharkyBot.DefenseService;
 
-            MicroController = microController;
+            MicroController = defaultSharkyBot.MicroController;
 
             ArmySplitter = armySplitter;
 
@@ -52,6 +56,7 @@ namespace Sharky.MicroTasks
 
             OnlyDefendMain = false;
             GroupAtMain = false;
+            AlwaysFillBunkers = true;
 
             Enabled = true;
         }
@@ -87,6 +92,8 @@ namespace Sharky.MicroTasks
             }
             var stopwatch = new Stopwatch();
             stopwatch.Start();
+
+            FillBunkers(frame, actions);
 
             var structures = ActiveUnitData.SelfUnits.Where(u => u.Value.Attributes.Contains(Attribute.Structure));
             if (OnlyDefendMain)
@@ -131,6 +138,26 @@ namespace Sharky.MicroTasks
             stopwatch.Stop();
             lastFrameTime = stopwatch.ElapsedMilliseconds;
             return actions;
+        }
+
+        private void FillBunkers(int frame, List<SC2APIProtocol.Action> actions)
+        {
+            if (AlwaysFillBunkers && EnemyData.SelfRace == Race.Terran)
+            {
+                foreach (var commander in UnitCommanders.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_MARINE))
+                {
+                    var nearbyBunkers = commander.UnitCalculation.NearbyAllies.Where(u => u.Unit.UnitType == (uint)UnitTypes.TERRAN_BUNKER && u.Unit.BuildProgress == 1);
+                    foreach (var bunker in nearbyBunkers)
+                    {
+                        if (bunker.Unit.CargoSpaceMax - bunker.Unit.CargoSpaceTaken >= UnitDataService.CargoSize((UnitTypes)commander.UnitCalculation.Unit.UnitType))
+                        {
+                            var action = commander.Order(frame, Abilities.SMART, targetTag: bunker.Unit.Tag);
+                            actions.AddRange(action);
+                            break;
+                        }
+                    }
+                }
+            }
         }
 
         private void StopDefendingWithWorkers()

@@ -1,5 +1,6 @@
 ﻿using SC2APIProtocol;
 using Sharky.Builds.BuildingPlacement;
+using Sharky.Extensions;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -40,6 +41,45 @@ namespace Sharky.Builds.MacroServices
                 }
             }
 
+            if (!MacroData.AddOnSwaps.Any(s => s.Value.Started && !s.Value.Completed))
+            {
+                commands.AddRange(LandFloatingBuildings());
+            }
+
+            return commands;
+        }
+
+        private IEnumerable<Action> LandFloatingBuildings()
+        {
+            var commands = new List<Action>();
+
+            var emptyAddons = ActiveUnitData.SelfUnits.Values.Where(a => a.Unit.UnitType == (uint)UnitTypes.TERRAN_TECHLAB || a.Unit.UnitType == (uint)UnitTypes.TERRAN_REACTOR);
+            List<UnitCalculation> usedAddons = new List<UnitCalculation>();
+
+            foreach (var floater in ActiveUnitData.Commanders.Values.Where(c => (c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_BARRACKSFLYING || c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_FACTORYFLYING || c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_STARPORTFLYING) && c.UnitRole == UnitRole.None))
+            {
+                if (!floater.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.LAND || o.AbilityId == (uint)Abilities.LAND_BARRACKS || o.AbilityId == (uint)Abilities.LAND_FACTORY || o.AbilityId == (uint)Abilities.LAND_STARPORT) && !(floater.LastAbility == Abilities.LAND && floater.LastOrderFrame > MacroData.Frame - 100))
+                {
+                    var freeAddon = emptyAddons.FirstOrDefault();
+                    if (freeAddon != null)
+                    {
+                        var command = floater.Order(MacroData.Frame, Abilities.LAND, new Point2D { X = freeAddon.Position.X - 2.5f, Y = freeAddon.Position.Y + .5f });
+                        if (command != null)
+                        {
+                            commands.AddRange(command);
+                        }
+                    }
+                    else
+                    {
+                        var location = BuildingPlacement.FindPlacement(floater.UnitCalculation.Position.ToPoint2D(), (UnitTypes)floater.UnitCalculation.Unit.UnitType, 3);
+                        var command = floater.Order(MacroData.Frame, Abilities.LAND, location);
+                        if (command != null)
+                        {
+                            commands.AddRange(command);
+                        }
+                    }
+                }
+            }
             return commands;
         }
 

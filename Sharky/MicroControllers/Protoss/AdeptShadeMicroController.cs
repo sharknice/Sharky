@@ -33,6 +33,12 @@ namespace Sharky.MicroControllers.Protoss
         {
             action = null;
 
+            if (commander.UnitRole == UnitRole.Cancel)
+            {
+                action = commander.Order(frame, Abilities.CANCEL, allowSpam: true);
+                return true;
+            }
+
             if (commander.UnitCalculation.Unit.BuffDurationRemain > 5 || commander.ParentUnitCalculation == null) { return false; }
 
             if (FakeHarass && commander.UnitCalculation.NearbyEnemies.Any())

@@ -33,6 +33,7 @@
         Disband,
         RunAway,
         Chase,
-        SaveEnergy
+        SaveEnergy,
+        Cancel
     }
 }
