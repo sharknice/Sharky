@@ -1,5 +1,4 @@
-﻿using System.Collections.Concurrent;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Sharky
 {
@@ -7,10 +6,10 @@ namespace Sharky
     {
         public ActiveUnitData()
         {
-            EnemyUnits = new ConcurrentDictionary<ulong, UnitCalculation>();
-            SelfUnits = new ConcurrentDictionary<ulong, UnitCalculation>();
-            NeutralUnits = new ConcurrentDictionary<ulong, UnitCalculation>();
-            Commanders = new ConcurrentDictionary<ulong, UnitCommander>();
+            EnemyUnits = new Dictionary<ulong, UnitCalculation>();
+            SelfUnits = new Dictionary<ulong, UnitCalculation>();
+            NeutralUnits = new Dictionary<ulong, UnitCalculation>();
+            Commanders = new Dictionary<ulong, UnitCommander>();
             DeadUnits = new List<ulong>();
             EnemyDeaths = 0;
             SelfDeaths = 0;
@@ -19,10 +18,10 @@ namespace Sharky
             EnemyResourcesLost = 0;
         }
 
-        public ConcurrentDictionary<ulong, UnitCalculation> EnemyUnits { get; set; }
-        public ConcurrentDictionary<ulong, UnitCalculation> SelfUnits { get; set; }
-        public ConcurrentDictionary<ulong, UnitCalculation> NeutralUnits { get; set; }
-        public ConcurrentDictionary<ulong, UnitCommander> Commanders { get; set; }
+        public Dictionary<ulong, UnitCalculation> EnemyUnits { get; set; }
+        public Dictionary<ulong, UnitCalculation> SelfUnits { get; set; }
+        public Dictionary<ulong, UnitCalculation> NeutralUnits { get; set; }
+        public Dictionary<ulong, UnitCommander> Commanders { get; set; }
         public List<ulong> DeadUnits { get; set; }
 
         public int EnemyDeaths { get; set; }

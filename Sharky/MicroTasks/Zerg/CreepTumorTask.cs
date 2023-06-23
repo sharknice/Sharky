@@ -1,5 +1,4 @@
 ﻿using Sharky.DefaultBot;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -26,7 +25,7 @@ namespace Sharky.MicroTasks.Zerg
             Enabled = enabled;
         }
 
-        public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
+        public override void ClaimUnits(Dictionary<ulong, UnitCommander> commanders)
         {
             foreach (var commander in commanders.Where(c => !c.Value.Claimed && c.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.ZERG_CREEPTUMORBURROWED && c.Value.UnitCalculation.Unit.BuildProgress == 1))
             {

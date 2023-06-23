@@ -5,7 +5,6 @@ using Sharky.DefaultBot;
 using Sharky.Extensions;
 using Sharky.MicroControllers.Protoss;
 using Sharky.Pathing;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -75,7 +74,7 @@ namespace Sharky.MicroTasks
             started = false;
         }
 
-        public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
+        public override void ClaimUnits(Dictionary<ulong, UnitCommander> commanders)
         {
             if (UnitCommanders.Count(u => u.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_ORACLE) < DesiredCount)
             {

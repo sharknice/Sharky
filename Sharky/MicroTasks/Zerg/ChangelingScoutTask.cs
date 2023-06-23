@@ -1,7 +1,6 @@
-﻿using Sharky.DefaultBot;
+﻿using SC2APIProtocol;
+using Sharky.DefaultBot;
 using System.Collections.Generic;
-using System.Collections.Concurrent;
-using SC2APIProtocol;
 using System.Linq;
 
 namespace Sharky.MicroTasks.Zerg
@@ -23,7 +22,7 @@ namespace Sharky.MicroTasks.Zerg
             Enabled = enabled;
         }
 
-        public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
+        public override void ClaimUnits(Dictionary<ulong, UnitCommander> commanders)
         {
             foreach (var changeling in commanders.Values.Where(u => IsChangeling(u.UnitCalculation.Unit.UnitType) && !UnitCommanders.Contains(u)))
             {

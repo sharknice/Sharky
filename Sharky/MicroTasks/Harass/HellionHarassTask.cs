@@ -4,7 +4,6 @@ using Sharky.Extensions;
 using Sharky.MicroControllers;
 using Sharky.Pathing;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -64,7 +63,7 @@ namespace Sharky.MicroTasks
             Kills = new Dictionary<ulong, UnitCalculation>();
         }
 
-        public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
+        public override void ClaimUnits(Dictionary<ulong, UnitCommander> commanders)
         {
             if (UnitCommanders.Count(e => e.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_HELLION) < DesiredHellions)
             {

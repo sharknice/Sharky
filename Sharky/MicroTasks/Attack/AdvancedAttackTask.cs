@@ -2,7 +2,6 @@
 using Sharky.DefaultBot;
 using Sharky.MicroControllers;
 using Sharky.MicroTasks.Scout;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -99,7 +98,7 @@ namespace Sharky.MicroTasks.Attack
             return removals;
         }
 
-        public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
+        public override void ClaimUnits(Dictionary<ulong, UnitCommander> commanders)
         {
             foreach (var subTask in SubTasks.Where(t => t.Value.Enabled).OrderBy(t => t.Value.Priority))
             {
@@ -146,7 +145,7 @@ namespace Sharky.MicroTasks.Attack
             }
         }
 
-        void ClaimBusyScvs(ConcurrentDictionary<ulong, UnitCommander> commanders, int desiredScvs, int claimedScvs)
+        void ClaimBusyScvs(Dictionary<ulong, UnitCommander> commanders, int desiredScvs, int claimedScvs)
         {
             if (claimedScvs < desiredScvs)
             {

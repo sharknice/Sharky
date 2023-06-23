@@ -9,7 +9,6 @@ using Sharky.MicroTasks.Attack;
 using Sharky.Pathing;
 using Sharky.Proxy;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -99,7 +98,7 @@ namespace Sharky.MicroTasks.Proxy
             DefenseArmySplitter = new ArmySplitter(defaultSharkyBot);
         }
 
-        public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
+        public override void ClaimUnits(Dictionary<ulong, UnitCommander> commanders)
         {
             if (!Enabled) { return; }
             foreach (var commander in commanders)

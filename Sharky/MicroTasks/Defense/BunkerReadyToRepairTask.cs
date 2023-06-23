@@ -1,7 +1,6 @@
 ﻿using Sharky.DefaultBot;
 using Sharky.Extensions;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -33,7 +32,7 @@ namespace Sharky.MicroTasks
             Priority = priority;
         }
 
-        public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
+        public override void ClaimUnits(Dictionary<ulong, UnitCommander> commanders)
         {
             var needed = DesiredScvs - UnitCommanders.Count(e => e.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_SCV);
             if (needed > 0)

@@ -1,6 +1,5 @@
 ﻿using SC2APIProtocol;
 using Sharky.DefaultBot;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -31,7 +30,7 @@ namespace Sharky.MicroTasks
             Enabled = enabled;
         }
 
-        private void Claim(ConcurrentDictionary<ulong, UnitCommander> commanders, bool allowSteal)
+        private void Claim(Dictionary<ulong, UnitCommander> commanders, bool allowSteal)
         {
             if (EnemyData.SelfRace != Race.Zerg)
                 return;
@@ -61,7 +60,7 @@ namespace Sharky.MicroTasks
             }
         }
 
-        public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
+        public override void ClaimUnits(Dictionary<ulong, UnitCommander> commanders)
         {
             if (UnitCommanders.Count() == 0)
             {

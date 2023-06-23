@@ -2,7 +2,6 @@
 using Sharky.Builds.BuildingPlacement;
 using Sharky.Pathing;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -36,7 +35,7 @@ namespace Sharky.MicroTasks
             LastForceFieldFrame = 0;
         }
 
-        public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
+        public override void ClaimUnits(Dictionary<ulong, UnitCommander> commanders)
         {
             foreach (var commander in commanders)
             {

@@ -3,7 +3,6 @@ using Sharky.Pathing;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
@@ -45,13 +44,6 @@ namespace Sharky.Managers
             UnitDataService = unitDataService;
             EnemyData = enemyData;
 
-            ActiveUnitData.EnemyUnits = new ConcurrentDictionary<ulong, UnitCalculation>();
-            ActiveUnitData.SelfUnits = new ConcurrentDictionary<ulong, UnitCalculation>();
-            ActiveUnitData.NeutralUnits = new ConcurrentDictionary<ulong, UnitCalculation>();
-
-            ActiveUnitData.Commanders = new ConcurrentDictionary<ulong, UnitCommander>();
-
-            ActiveUnitData.DeadUnits = new List<ulong>();
 
             TargetPriorityCalculationFrame = 0;
         }
@@ -103,7 +95,7 @@ namespace Sharky.Managers
             {
                 if (!observation.Observation.RawData.Units.Any(u => u.Tag == unit.Key))
                 {
-                    ActiveUnitData.DeadUnits.Add(unit.Key); 
+                    ActiveUnitData.DeadUnits.Add(unit.Key);
                     ActiveUnitData.EnemyDeaths--;
                 }
             }
@@ -152,7 +144,7 @@ namespace Sharky.Managers
 
             foreach (var tag in ActiveUnitData.DeadUnits)
             {
-                if (ActiveUnitData.EnemyUnits.TryRemove(tag, out UnitCalculation removedEnemy))
+                if (ActiveUnitData.EnemyUnits.Remove(tag, out UnitCalculation removedEnemy))
                 {
                     if (!removedEnemy.Unit.IsHallucination)
                     {
@@ -160,7 +152,7 @@ namespace Sharky.Managers
                         ActiveUnitData.EnemyResourcesLost += (int)removedEnemy.UnitTypeData.MineralCost + (int)removedEnemy.UnitTypeData.VespeneCost;
                     }
                 }
-                else if (ActiveUnitData.SelfUnits.TryRemove(tag, out UnitCalculation removedAlly))
+                else if (ActiveUnitData.SelfUnits.Remove(tag, out UnitCalculation removedAlly))
                 {
                     if (!removedAlly.Unit.IsHallucination)
                     {
@@ -168,17 +160,17 @@ namespace Sharky.Managers
                         ActiveUnitData.SelfResourcesLost += (int)removedAlly.UnitTypeData.MineralCost + (int)removedAlly.UnitTypeData.VespeneCost;
                     }
                 }
-                else if (ActiveUnitData.NeutralUnits.TryRemove(tag, out UnitCalculation removedNeutral))
+                else if (ActiveUnitData.NeutralUnits.Remove(tag, out UnitCalculation removedNeutral))
                 {
                     ActiveUnitData.NeutralDeaths++;
                 }
 
-                ActiveUnitData.Commanders.TryRemove(tag, out UnitCommander removedCommander);
+                ActiveUnitData.Commanders.Remove(tag, out UnitCommander removedCommander);
             }
 
             foreach (var unit in ActiveUnitData.NeutralUnits.Where(u => u.Value.Unit.DisplayType == DisplayType.Snapshot))
             {
-                ActiveUnitData.NeutralUnits.TryRemove(unit.Key, out UnitCalculation removed);
+                ActiveUnitData.NeutralUnits.Remove(unit.Key, out UnitCalculation removed);
             }
 
             var repairers = observation.Observation.RawData.Units.Where(u => u.UnitType == (uint)UnitTypes.TERRAN_SCV || u.UnitType == (uint)UnitTypes.TERRAN_MULE);
@@ -250,7 +242,7 @@ namespace Sharky.Managers
                         if (existingMatch.Value != null)
                         {
                             UnitCalculation foo;
-                            if (ActiveUnitData.NeutralUnits.TryRemove(existingMatch.Key, out foo))
+                            if (ActiveUnitData.NeutralUnits.Remove(existingMatch.Key, out foo))
                             {
                                 foreach (var baseLocation in BaseData.BaseLocations)
                                 {
@@ -275,7 +267,7 @@ namespace Sharky.Managers
 
             foreach (var unit in ActiveUnitData.EnemyUnits.Where(u => u.Value.FrameLastSeen != frame && u.Value.UnitTypeData.Attributes.Contains(SC2APIProtocol.Attribute.Structure))) // structures get replaced by snapshots if we can't see them, so just remove them and let them get readded
             {
-                ActiveUnitData.EnemyUnits.TryRemove(unit.Key, out UnitCalculation removed);
+                ActiveUnitData.EnemyUnits.Remove(unit.Key, out UnitCalculation removed);
             }
 
             var beforeFiveMinutes = frame < SharkyOptions.FramesPerSecond * 60 * 5;
@@ -288,7 +280,7 @@ namespace Sharky.Managers
                         enemy.Unit.DisplayType = DisplayType.Hidden;
                         continue; // it's still there but it's burrowed so we can't see it
                     }
-                    ActiveUnitData.EnemyUnits.TryRemove(enemy.Unit.Tag, out UnitCalculation removed);
+                    ActiveUnitData.EnemyUnits.Remove(enemy.Unit.Tag, out UnitCalculation removed);
                 }
                 else if (beforeFiveMinutes)
                 {
@@ -303,7 +295,7 @@ namespace Sharky.Managers
             {
                 if (unit.Value.Unit.Orders.Any(o => SharkyUnitData.BuildingData.Values.Any(b => (uint)b.Ability == o.AbilityId)))
                 {
-                    ActiveUnitData.SelfUnits.TryRemove(unit.Key, out UnitCalculation removed);
+                    ActiveUnitData.SelfUnits.Remove(unit.Key, out UnitCalculation removed);
                 }
             }
 
@@ -361,13 +353,15 @@ namespace Sharky.Managers
                 allyAttack.Value.NearbyAllies = ActiveUnitData.SelfUnits.Where(a => a.Key != allyAttack.Key && Vector2.DistanceSquared(allyAttack.Value.Position, a.Value.Position) <= NearbyDistance * NearbyDistance).Select(a => a.Value).ToList();
                 allyAttack.Value.Loaded = false;
 
-                var commander = new UnitCommander(allyAttack.Value);
-                ActiveUnitData.Commanders.AddOrUpdate(allyAttack.Value.Unit.Tag, commander, (tag, existingCommander) =>
+                if (ActiveUnitData.Commanders.TryGetValue(allyAttack.Value.Unit.Tag, out var commander))
                 {
-                    commander = existingCommander;
                     commander.UnitCalculation = allyAttack.Value;
-                    return commander;
-                });
+                }
+                else
+                {
+                    commander = new UnitCommander(allyAttack.Value);
+                    ActiveUnitData.Commanders[allyAttack.Value.Unit.Tag] = commander;
+                }
 
                 if (ActiveUnitData.Commanders.ContainsKey(allyAttack.Value.Unit.Tag))
                 {
@@ -449,7 +443,7 @@ namespace Sharky.Managers
             }
 
             if (TargetPriorityCalculationFrame + 10 < frame)
-            {            
+            {
                 foreach (var selfUnit in ActiveUnitData.SelfUnits)
                 {
                     if (selfUnit.Value.TargetPriorityCalculation == null || selfUnit.Value.TargetPriorityCalculation.FrameCalculated + 10 < frame)
@@ -568,12 +562,12 @@ namespace Sharky.Managers
                     var weapon = unitCalculation.UnitTypeData.Weapons.FirstOrDefault();
                     if (weapon != null && weapon.HasSpeed)
                     {
-                        fireTime = weapon.Speed/10f; // TODO: need to get the actual fire times for weapons
+                        fireTime = weapon.Speed / 10f; // TODO: need to get the actual fire times for weapons
                     }
                     var distance = Vector2.Distance(unitCalculation.Position, enemyAttack.Position);
                     if (enemyAttack.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED && distance < 2)
                     {
-                        continue;                   
+                        continue;
                     }
                     var avoidDistance = AvoidRange + enemyAttack.Range + unitCalculation.Unit.Radius + enemyAttack.Unit.Radius;
                     var distanceToInRange = distance - avoidDistance;

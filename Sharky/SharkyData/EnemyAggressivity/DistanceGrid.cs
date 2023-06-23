@@ -1,6 +1,5 @@
 ﻿using Sharky.DefaultBot;
 using Sharky.Pathing;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -127,7 +126,7 @@ namespace Sharky
             lastUpdate = frame;
         }
 
-        private IEnumerable<Point> GetResourceCenterPositions(ConcurrentDictionary<ulong, UnitCalculation> units)
+        private IEnumerable<Point> GetResourceCenterPositions(Dictionary<ulong, UnitCalculation> units)
         {
             // Use resource centers if we can
             var centerPositions = units.Values.Where(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter)).Select(u => u.Unit.Pos);

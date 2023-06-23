@@ -4,7 +4,6 @@ using Sharky.MicroControllers;
 using Sharky.MicroTasks.Attack;
 using Sharky.MicroTasks.Harass;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -48,7 +47,7 @@ namespace Sharky.MicroTasks
             DefenseArmySplitter = new ArmySplitter(defaultSharkyBot);
         }
 
-        public override void ClaimUnits(ConcurrentDictionary<ulong, UnitCommander> commanders)
+        public override void ClaimUnits(Dictionary<ulong, UnitCommander> commanders)
         {
             if (UnitCommanders.Count() < DesiredCount)
             {
