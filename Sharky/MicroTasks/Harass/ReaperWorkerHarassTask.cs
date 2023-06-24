@@ -106,8 +106,8 @@ namespace Sharky.MicroTasks
                             if (attack != null)
                             {
                                 commands.AddRange(attack);
-                                continue;
                             }
+                            continue;
                         }
                     }
 
@@ -117,8 +117,8 @@ namespace Sharky.MicroTasks
                         if (action != null)
                         {
                             commands.AddRange(action);
-                            continue;
                         }
+                        continue;
                     }
                     else if (Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(harassInfo.BaseLocation.MineralLineLocation.X, harassInfo.BaseLocation.MineralLineLocation.Y)) < 100)
                     {

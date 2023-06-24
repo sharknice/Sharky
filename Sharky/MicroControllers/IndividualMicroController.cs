@@ -3218,6 +3218,7 @@ namespace Sharky.MicroControllers
                     {
                         enemy.IncomingDamage += GetDamage(commander.UnitCalculation.Weapons, enemy.Unit, enemy.UnitTypeData);
                     }
+                    action = new List<SC2APIProtocol.Action>();
                     return true;
                 }
 
@@ -3227,7 +3228,7 @@ namespace Sharky.MicroControllers
                     {
                         enemy.IncomingDamage += GetDamage(commander.UnitCalculation.Weapons, enemy.Unit, enemy.UnitTypeData);
                     }
-
+                    action = new List<SC2APIProtocol.Action>();
                     return true;
                 }
             }

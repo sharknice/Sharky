@@ -71,7 +71,7 @@ namespace Sharky.Pathing
 
             if (commander.UnitCalculation.Unit.IsFlying)
             {
-                if (commander.UnitRole == UnitRole.Leader && commander.UnitCalculation.NearbyAllies.Count(a => !a.Unit.IsFlying) > 5)
+                if (commander.UnitRole == UnitRole.Leader && commander.UnitCalculation.NearbyAllies.Count(a => !a.Unit.IsFlying) > 5 && commander.UnitCalculation.NearbyAllies.Count(a => a.Attributes.Contains(Attribute.Structure)) < 4)
                 {
                     // follow the ground path so supporting units can follow
                 }

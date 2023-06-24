@@ -140,7 +140,6 @@ namespace Sharky.MicroTasks
 
             var mainVector = new Vector2(AttackPoint.X, AttackPoint.Y);
 
-            // TODO: if enemy is on one base, hide behind natural mineral line and wait until enemy builds 2nd base or is attacking our base before attack enemy
             if (Started && !DoneHiding)
             {
                 if (WaitAndHide)
@@ -173,8 +172,8 @@ namespace Sharky.MicroTasks
                     if (action != null)
                     {
                         commands.AddRange(action);
-                        continue;
                     }
+                    continue;
                 }
                 // kill any unguarded workers
                 if (commander.UnitCalculation.Unit.WeaponCooldown < 2 && commander.UnitCalculation.NearbyEnemies.Any(e => e.FrameLastSeen == frame && e.UnitClassifications.Contains(UnitClassification.Worker)) && !commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) || e.UnitClassifications.Contains(UnitClassification.DefensiveStructure)))
@@ -183,47 +182,56 @@ namespace Sharky.MicroTasks
                     if (action != null)
                     {
                         commands.AddRange(action);
-                        continue;
                     }
+                    continue;
                 }
-                // go straight to mineral line, ignoring enemies
-                if (Vector2.DistanceSquared(commander.UnitCalculation.Position, mainVector) > 36)
+                // kill clumps of workers
+                if (commander.UnitCalculation.EnemiesInRange.Count(e => e.FrameLastSeen == frame && e.UnitClassifications.Contains(UnitClassification.Worker)) > 2)
                 {
-                    commander.UnitCalculation.TargetPriorityCalculation.Overwhelm = true;
                     var action = HellionMicroController.HarassWorkers(commander, AttackPoint, TargetingData.MainDefensePoint, frame);
                     if (action != null)
                     {
                         commands.AddRange(action);
-                        continue;
                     }
+                    continue;
+                }
+                // go straight to mineral line, ignoring enemies
+                if (Vector2.DistanceSquared(commander.UnitCalculation.Position, mainVector) > 100)
+                {
+                    commander.UnitCalculation.TargetPriorityCalculation.Overwhelm = true;
+                    List<SC2APIProtocol.Action> action = null;
+                    action = commander.Order(frame, Abilities.MOVE, AttackPoint);
+                    if (action != null)
+                    {
+                        commands.AddRange(action);
+                    }
+                    continue;
+                }
+
+                // kill workers at mineral line
+                if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker)))
+                {
+                    var action = HellionMicroController.HarassWorkers(commander, AttackPoint, TargetingData.MainDefensePoint, frame);
+                    if (action != null)
+                    {
+                        commands.AddRange(action);
+                    }
+                    continue;
                 }
                 else
                 {
-                    // kill workers at mineral line
-                    if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker)))
+                    // switch between main and natural
+                    if (AttackPoint != BaseData.EnemyBaseLocations.FirstOrDefault().BehindMineralLineLocation)
                     {
-                        var action = HellionMicroController.HarassWorkers(commander, AttackPoint, TargetingData.MainDefensePoint, frame);
-                        if (action != null)
-                        {
-                            commands.AddRange(action);
-                            continue;
-                        }
+                        AttackPoint = BaseData.EnemyBaseLocations.FirstOrDefault().BehindMineralLineLocation;
+                        mainVector = new Vector2(AttackPoint.X, AttackPoint.Y);
                     }
                     else
                     {
-                        // switch between main and natural
-                        if (AttackPoint != BaseData.EnemyBaseLocations.FirstOrDefault().BehindMineralLineLocation)
-                        {
-                            AttackPoint = BaseData.EnemyBaseLocations.FirstOrDefault().BehindMineralLineLocation;
-                            mainVector = new Vector2(AttackPoint.X, AttackPoint.Y);
-                        }
-                        else
-                        {
-                            AttackPoint = BaseData.EnemyBaseLocations.Skip(1).FirstOrDefault().BehindMineralLineLocation;
-                            mainVector = new Vector2(AttackPoint.X, AttackPoint.Y);
-                        }
+                        AttackPoint = BaseData.EnemyBaseLocations.Skip(1).FirstOrDefault().BehindMineralLineLocation;
+                        mainVector = new Vector2(AttackPoint.X, AttackPoint.Y);
                     }
-                }
+                }  
             }
 
             if (Reaper != null)
