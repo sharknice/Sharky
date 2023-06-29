@@ -134,7 +134,7 @@ namespace Sharky.Builds.BuildingPlacement
                 var existingBuildings = ActiveUnitData.SelfUnits.Values.Where(u => !u.Unit.IsFlying && u.Attributes.Contains(Attribute.Structure));
                 foreach (var spot in wallData.Production)
                 {
-                    if (!existingBuildings.Any(e => e.Position.X == spot.X && e.Position.Y == spot.Y) && WallService.Buildable(spot, .5f))
+                    if (!existingBuildings.Any(e => e.Position.X == spot.X && e.Position.Y == spot.Y) && WallService.Buildable(spot, 1f))
                     {
                         if (!MacroData.AddOnSwaps.Values.Any(s => !s.Completed && s.Started && s.AddOn != null && s.AddOn.UnitCalculation.Position.X == spot.X + 2.5f && s.AddOn.UnitCalculation.Position.Y == spot.Y - .5f))
                         {

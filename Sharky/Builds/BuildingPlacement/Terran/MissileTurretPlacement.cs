@@ -1,6 +1,7 @@
 ﻿using SC2APIProtocol;
 using Sharky.DefaultBot;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
@@ -11,12 +12,15 @@ namespace Sharky.Builds.BuildingPlacement
         BaseData BaseData;
         BuildingService BuildingService;
         ActiveUnitData ActiveUnitData;
+        List<Point2D> LastLocations;
 
         public MissileTurretPlacement(DefaultSharkyBot defaultSharkyBot)
         {
             BaseData = defaultSharkyBot.BaseData;
             BuildingService = defaultSharkyBot.BuildingService;
             ActiveUnitData = defaultSharkyBot.ActiveUnitData;
+
+            LastLocations = new List<Point2D>();
         }
 
         public Point2D FindPlacement(Point2D target, UnitTypes unitType, int size, bool ignoreResourceProximity = false, float maxDistance = 50, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.None, bool requireVision = false, bool allowBlockBase = true)
@@ -92,7 +96,16 @@ namespace Sharky.Builds.BuildingPlacement
                     if (Vector2.DistanceSquared(new Vector2(reference.X, reference.Y), new Vector2(point.X, point.Y)) <= maxDistance * maxDistance &&
                         !ActiveUnitData.SelfUnits.Any(u => u.Value.Unit.UnitType == (uint)UnitTypes.TERRAN_MISSILETURRET && Vector2.DistanceSquared(new Vector2(point.X, point.Y), u.Value.Position) <= 9))
                     {
-                        return point;
+                        if (!LastLocations.Any(l => l.X == point.X && l.Y == point.Y))
+                        {
+                            LastLocations.Add(point);
+                            if (LastLocations.Count() > 10)
+                            {
+                                LastLocations.RemoveAt(0);
+                            }
+
+                            return point;
+                        }
                     }
                 }
             }

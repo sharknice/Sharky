@@ -19,10 +19,9 @@ namespace Sharky.MicroTasks.Harass
         ChatService ChatService;
         DebugService DebugService;
         ActiveUnitData ActiveUnitData;
-        MapData MapData;
-        SharkyOptions SharkyOptions;
         SharkyUnitData SharkyUnitData;
         MacroData MacroData;
+        HarassPathingService HarassPathingService;
         FrameToTimeConverter FrameToTimeConverter;
 
         IIndividualMicroController IndividualMicroController;
@@ -36,27 +35,19 @@ namespace Sharky.MicroTasks.Harass
 
         Point2D Target { get; set; }
 
-        Point2D MidPoint;
-        Point2D StagingPoint;
-        bool Left;
-        bool Right;
-        bool Top;
-        bool Bottom;
         int TargetIndex;
-        int TargetAquisitionFrame;
 
+        PathData PathToEnemyMainData { get; set; }
 
-        // TODO: defend base if near it and enemies attacking
         public BansheeHarassTask(DefaultSharkyBot defaultSharkyBot, IIndividualMicroController microController, int desiredCount = 2, bool enabled = true, float priority = -1f)
         {
             BaseData = defaultSharkyBot.BaseData;
             TargetingData = defaultSharkyBot.TargetingData;
             MapDataService = defaultSharkyBot.MapDataService;
+            HarassPathingService = defaultSharkyBot.HarassPathingService;
             ChatService = defaultSharkyBot.ChatService;
             DebugService = defaultSharkyBot.DebugService;
             ActiveUnitData = defaultSharkyBot.ActiveUnitData;
-            MapData = defaultSharkyBot.MapData;
-            SharkyOptions = defaultSharkyBot.SharkyOptions;
             SharkyUnitData = defaultSharkyBot.SharkyUnitData;
             MacroData = defaultSharkyBot.MacroData;
             FrameToTimeConverter = defaultSharkyBot.FrameToTimeConverter;
@@ -65,6 +56,8 @@ namespace Sharky.MicroTasks.Harass
             Priority = priority;
             Enabled = enabled;
             UnitCommanders = new List<UnitCommander>();
+
+            TargetIndex = -1;
 
             Kills = new Dictionary<ulong, UnitCalculation>();
         }
@@ -91,6 +84,11 @@ namespace Sharky.MicroTasks.Harass
                     {
                         commander.Value.Claimed = true;
                         commander.Value.UnitRole = UnitRole.Harass;
+                        if (TargetIndex == 0)
+                        {
+                            commander.Value.CurrentPath = PathToEnemyMainData;
+                            commander.Value.CurrentPathIndex = 0;
+                        }
                         UnitCommanders.Add(commander.Value);
 
                         if (UnitCommanders.Count() == DesiredCount)
@@ -115,24 +113,39 @@ namespace Sharky.MicroTasks.Harass
 
             DebugService.DrawSphere(new Point { X = Target.X, Y = Target.Y, Z = 10 }, .5f);
 
+            var defensivePoint = TargetingData.ForwardDefensePoint;
+
             foreach (var commander in UnitCommanders.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_BANSHEE))
             {
-                var defensivePoint = TargetingData.ForwardDefensePoint;
-                var commanderVector = commander.UnitCalculation.Position;
-                var targetVector = new Vector2(Target.X, Target.Y);
-
-                if (!CloakedAndUndetected(commander) && commander.UnitCalculation.Unit.Health < commander.UnitCalculation.Unit.HealthMax)
+                if (commander.UnitRole == UnitRole.Repair)
                 {
-                    commander.UnitRole = UnitRole.None;
-                    commander.Claimed = false;
-                    UnitCommanders.Remove(commander);
-                    return commands;
+                    if (commander.UnitCalculation.Unit.Health == commander.UnitCalculation.Unit.HealthMax)
+                    {
+                        commander.UnitRole = UnitRole.Harass;
+                    }
+                    var repairSpot = BaseData.SelfBases.FirstOrDefault();
+                    if (repairSpot != null)
+                    {
+                        var action = IndividualMicroController.NavigateToPoint(commander, repairSpot.MineralLineLocation, TargetingData.MainDefensePoint, null, frame);
+                        if (action != null)
+                        {
+                            commands.AddRange(action);
+                        }
+                        continue;
+                    }
                 }
 
-                if ((CloakedAndUndetected(commander) || commander.UnitCalculation.EnemiesInRangeOfAvoid.Count(e => e.Unit.UnitType != (uint)UnitTypes.TERRAN_BUNKER) == 0) && commander.UnitCalculation.NearbyEnemies.Count(e => e.FrameLastSeen == frame && e.UnitClassifications.Contains(UnitClassification.Worker)) > 0)
+                if (commander.UnitCalculation.Unit.Health < commander.UnitCalculation.Unit.HealthMax / 2)
                 {
-                    if (commander.UnitCalculation.EnemiesInRange.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker)) || (commander.UnitCalculation.NearbyEnemies.Any(e => e.FrameLastSeen == frame && e.UnitClassifications.Contains(UnitClassification.Worker)) && (CloakedAndUndetected(commander) || !commander.UnitCalculation.NearbyEnemies.Any(e => e.DamageAir && e.Unit.BuildProgress == 1))))
+                    commander.UnitRole = UnitRole.Repair;
+                }
+
+                if (commander.UnitCalculation.Unit.Health == commander.UnitCalculation.Unit.HealthMax || Undetected(commander) || !commander.UnitCalculation.EnemiesThreateningDamage.Any())
+                {
+                    if (commander.UnitCalculation.EnemiesInRange.Any(e => e.FrameLastSeen == frame && e.UnitClassifications.Contains(UnitClassification.Worker)) ||
+                        (commander.UnitCalculation.NearbyEnemies.Count(e => e.FrameLastSeen == frame && e.UnitClassifications.Contains(UnitClassification.Worker)) > 2 && !commander.UnitCalculation.NearbyEnemies.Any(e => e.DamageAir)))
                     {
+                        // kill free workers
                         var action = IndividualMicroController.HarassWorkers(commander, Target, defensivePoint, frame);
                         if (action != null)
                         {
@@ -140,15 +153,10 @@ namespace Sharky.MicroTasks.Harass
                         }
                         continue;
                     }
-                }
-
-                if (CloakedAndUndetected(commander))
-                {
-                    var buildingUnderAttack = commander.UnitCalculation.NearbyAllies.FirstOrDefault(a => a.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && a.NearbyEnemies.Any(e => !e.Unit.IsFlying) && !MapDataService.InEnemyDetection(a.Unit.Pos));
-                    if (buildingUnderAttack != null)
+                    if (commander.UnitCalculation.Unit.WeaponCooldown == 0 && commander.UnitCalculation.EnemiesInRange.Any())
                     {
-                        var enemyInvader = buildingUnderAttack.NearbyEnemies.FirstOrDefault(e => !e.Unit.IsFlying);
-                        var action = IndividualMicroController.Attack(commander, enemyInvader.Position.ToPoint2D(), defensivePoint, null, frame);
+                        // do free damage kiting to target
+                        var action = IndividualMicroController.Attack(commander, Target, defensivePoint, null, frame);
                         if (action != null)
                         {
                             commands.AddRange(action);
@@ -157,48 +165,33 @@ namespace Sharky.MicroTasks.Harass
                     }
                 }
 
-                if (Vector2.DistanceSquared(commanderVector, targetVector) < 25)
+                bool atTarget = Vector2.DistanceSquared(commander.UnitCalculation.Position, Target.ToVector2()) < 100;
+
+                // avoid damage
+                if (commander.UnitCalculation.EnemiesThreateningDamage.Any())
                 {
-                    if (!CheeseChatSent)
+                    if (!Undetected(commander) && commander.UnitCalculation.Unit.Health < commander.UnitCalculation.Unit.HealthMax)
                     {
-                        ChatService.SendChatType("BansheeHarass-FirstAttack");
-                        CheeseChatSent = true;
-                    }
-                    var canHarass = CanHarass(commander, Target);
-                    if (canHarass)
-                    {
-                        var action = IndividualMicroController.HarassWorkers(commander, Target, defensivePoint, frame);
+                        var action = IndividualMicroController.NavigateToPoint(commander, Target, defensivePoint, null, frame);
                         if (action != null)
                         {
                             commands.AddRange(action);
                         }
-                        continue;
-                    }
-                    else
-                    {
-                        GetNextTarget(frame);
-                    }
-                    continue;
-                }
 
-                if (!CloakedAndUndetected(commander) && !commander.UnitCalculation.NearbyAllies.Any() && commander.UnitCalculation.EnemiesInRangeOf.Any(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_PHOENIX))
-                {
-                    // no escape, just kill as many workers as possible
-                    if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker)))
-                    {
-                        var action = IndividualMicroController.HarassWorkers(commander, Target, defensivePoint, frame);
-                        if (action != null)
+                        if (atTarget)
                         {
-                            commands.AddRange(action);
+                            GetNextTarget(frame);
                         }
-                        SendYoloChat();
                         continue;
                     }
                 }
 
-                if (Vector2.DistanceSquared(commanderVector, targetVector) > Vector2.DistanceSquared(commanderVector, new Vector2(TargetingData.ForwardDefensePoint.X, TargetingData.ForwardDefensePoint.Y)))
+                // follow path until get to target
+                if (!atTarget)
                 {
-                    var action = IndividualMicroController.NavigateToPoint(commander, MidPoint, defensivePoint, MidPoint, frame);
+                    var point = HarassPathingService.GetNextPointToTarget(commander, Target);
+                    DebugService.DrawLine(commander.UnitCalculation.Unit.Pos, new Point { X = point.X, Y = point.Y, Z = 16 }, new Color { R = 250, B = 250, G = 250 });
+                    var action = commander.Order(frame, Abilities.MOVE, point);
                     if (action != null)
                     {
                         commands.AddRange(action);
@@ -206,72 +199,49 @@ namespace Sharky.MicroTasks.Harass
                     continue;
                 }
 
-                if (commander.RetreatPath.Count() < 1 || Vector2.DistanceSquared(commander.RetreatPath.Last(), new Vector2(StagingPoint.X, StagingPoint.Y)) > 9)
-                {
-                    if (Left || Right)
-                    {
-                        var side = new Point2D { X = StagingPoint.X, Y = commander.UnitCalculation.Unit.Pos.Y };
-                        if (commander.RetreatPathFrame + 2 < frame && Vector2.DistanceSquared(commanderVector, new Vector2(side.X, side.Y)) > 4)
-                        {
-                            var action = IndividualMicroController.NavigateToPoint(commander, side, defensivePoint, side, frame);
-                            if (action != null)
-                            {
-                                commands.AddRange(action);
-                            }
-                            continue;
-                        }
-                    }
-                    else if (Top || Bottom)
-                    {
-                        var side = new Point2D { X = commander.UnitCalculation.Unit.Pos.X, Y = StagingPoint.Y };
-                        if (commander.RetreatPathFrame + 2 < frame && Vector2.DistanceSquared(commanderVector, new Vector2(side.X, side.Y)) > 4)
-                        {
-                            var action = IndividualMicroController.NavigateToPoint(commander, side, defensivePoint, side, frame);
-                            if (action != null)
-                            {
-                                commands.AddRange(action);
-                            }
-                            continue;
-                        }
-                    }
-                }
+                // at target
 
-                if (commander.UnitCalculation.EnemiesInRangeOfAvoid.Any(e => e.Unit.UnitType != (uint)UnitTypes.TERRAN_BUNKER) && Vector2.DistanceSquared(new Vector2(StagingPoint.X, StagingPoint.Y), commanderVector) < 10)
-                {
-                    var action = IndividualMicroController.Retreat(commander, defensivePoint, null, frame);
-                    if (action != null)
-                    {
-                        commands.AddRange(action);
-                    }
-                    GetNextTarget(frame);
-                    continue;
-                }
-
-                if (Vector2.DistanceSquared(commander.UnitCalculation.Position, StagingPoint.ToVector2()) < 10)
+                // harass workers
+                if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker)))
                 {
                     var action = IndividualMicroController.HarassWorkers(commander, Target, defensivePoint, frame);
                     if (action != null)
                     {
                         commands.AddRange(action);
                     }
-                    if (frame - TargetAquisitionFrame > 10 * SharkyOptions.FramesPerSecond && !commander.UnitCalculation.NearbyEnemies.Any())
+                    continue;
+                }
+
+                // move closer
+                if (!MapDataService.SelfVisible(Target))
+                {
+                    var point = HarassPathingService.GetNextPointToTarget(commander, Target);
+                    var action = commander.Order(frame, Abilities.MOVE, point);
+                    if (action != null)
                     {
-                        GetNextTarget(frame);
+                        commands.AddRange(action);
                     }
                     continue;
                 }
 
-                var navigateAction = IndividualMicroController.NavigateToPoint(commander, StagingPoint, defensivePoint, StagingPoint, frame);
-                if (navigateAction != null)
+                // if no nearby workers move on(if no activeunitdata any enemy workers on whole map, attack any enemies nearby), 
+                if (!commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker)))
                 {
-                    commands.AddRange(navigateAction);
-                    if (frame - TargetAquisitionFrame > 60 * SharkyOptions.FramesPerSecond)
+                    // if nothing is here move on, or if workers elsewhere go kill them
+                    if (!commander.UnitCalculation.NearbyEnemies.Any() || ActiveUnitData.EnemyUnits.Any(e => e.Value.UnitClassifications.Contains(UnitClassification.Worker)))
                     {
                         GetNextTarget(frame);
+                        continue;
                     }
                 }
-            }
 
+                // just kill what's here
+                var defaultAction = IndividualMicroController.Attack(commander, Target, defensivePoint, null, frame);
+                if (defaultAction != null)
+                {
+                    commands.AddRange(defaultAction);
+                }
+            }
 
             return commands;
         }
@@ -299,81 +269,57 @@ namespace Sharky.MicroTasks.Harass
             {
                 return false;
             }
-            if (!CloakedAndUndetected(commander) && commander.UnitCalculation.NearbyEnemies.Where(e => !e.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && e.DamageAir).Sum(e => e.Damage) * 3 > commander.UnitCalculation.Unit.Health)
+            if (!Undetected(commander) && commander.UnitCalculation.NearbyEnemies.Where(e => !e.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && e.DamageAir).Sum(e => e.Damage) * 3 > commander.UnitCalculation.Unit.Health)
             {
                 return false;
             }
             return true;
         }
 
+        /// <summary>
+        /// harass all the known enemy bases, or just go between the main and natural if there aren't any other enemy bases
+        /// </summary>
+        /// <param name="frame">current frame</param>
         void GetNextTarget(int frame)
         {
-            var target = BaseData.BaseLocations.OrderBy(b => Vector2.DistanceSquared(new Vector2(b.Location.X, b.Location.Y), new Vector2(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y))).Skip(TargetIndex + 1).FirstOrDefault();
-            if (ActiveUnitData.SelfUnits.Values.Any(u => u.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS && u.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit))))
+            if (BaseData.EnemyBases.Count() > TargetIndex + 1)
             {
-                target = BaseData.EnemyBaseLocations.FirstOrDefault();
-            }
-            if (target == null)
-            {
-                TargetIndex = 0;
-            }
-            else
-            {
-                Target = target.MiddleMineralLocation;
                 TargetIndex++;
-                if (TargetIndex > 3)
-                {
-                    TargetIndex = 0;
-                }
-                GetTargetPath(Target, frame);
+                Target = BaseData.EnemyBases[TargetIndex].MineralLineBuildingLocation;
+                return;
             }
+
+            if (TargetIndex == 0)
+            {
+                TargetIndex++;
+                Target = BaseData.EnemyBaseLocations[TargetIndex].MineralLineBuildingLocation;
+                return;
+            }
+
+            TargetIndex = 0;
+            if (BaseData.EnemyBases.Any())
+            {
+                Target = BaseData.EnemyBases[TargetIndex].MineralLineBuildingLocation;
+                return;
+            }
+            Target = BaseData.EnemyBaseLocations[TargetIndex].MineralLineBuildingLocation;        
         }
 
         void GetTargetPath(Point2D target, int frame)
         {
-            TargetAquisitionFrame = frame;
-            var closestDistance = target.X - 0;
-            Left = true;
-            MidPoint = new Point2D { X = 0, Y = (target.Y + TargetingData.ForwardDefensePoint.Y) / 2f };
-            StagingPoint = new Point2D { X = 0, Y = target.Y };
-
-            var right = MapData.MapWidth - target.X;
-            if (right < closestDistance)
-            {
-                closestDistance = right;
-                Left = false;
-                Right = true;
-                MidPoint = new Point2D { X = MapData.MapWidth, Y = (target.Y + TargetingData.ForwardDefensePoint.Y) / 2f };
-                StagingPoint = new Point2D { X = MapData.MapWidth - 0, Y = target.Y };
-            }
-
-            var top = target.Y;
-            if (top < closestDistance)
-            {
-                closestDistance = top;
-                Left = false;
-                Right = false;
-                Top = true;
-                MidPoint = new Point2D { X = (target.X + TargetingData.ForwardDefensePoint.X) / 2f, Y = 0 };
-                StagingPoint = new Point2D { X = target.X, Y = 0 };
-            }
-
-            var bottom = MapData.MapHeight - target.Y;
-            if (bottom < closestDistance)
-            {
-                closestDistance = bottom;
-                Left = false;
-                Right = false;
-                Top = false;
-                Bottom = true;
-                MidPoint = new Point2D { X = (target.X + TargetingData.ForwardDefensePoint.X) / 2f, Y = MapData.MapHeight };
-                StagingPoint = new Point2D { X = target.X, Y = MapData.MapHeight - 0 };
-            }
+            TargetIndex = 0;
+            PathToEnemyMainData = HarassPathingService.GetHomeToEnemyBaseAirPath(target);
         }
 
-        private bool CloakedAndUndetected(UnitCommander commander)
+        private bool Undetected(UnitCommander commander)
         {
-            return (commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.BANSHEECLOAK) || (commander.UnitCalculation.Unit.Energy > 50 && SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.BANSHEECLOAK))) && !MapDataService.InEnemyDetection(commander.UnitCalculation.Unit.Pos);
+            return CloakedOrCanCloak(commander) && !MapDataService.InEnemyDetection(commander.UnitCalculation.Unit.Pos);
+        }
+
+        bool CloakedOrCanCloak(UnitCommander commander)
+        {
+            if (commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.ORACLEREVELATION)) { return false; }
+            return commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.BANSHEECLOAK) || (commander.UnitCalculation.Unit.Energy > 50 && SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.BANSHEECLOAK));
         }
 
         public override void RemoveDeadUnits(List<ulong> deadUnits)
@@ -399,10 +345,12 @@ namespace Sharky.MicroTasks.Harass
 
             if (deaths > 0)
             {
+                // TODO: chat for death, was or was not worth it
                 Deaths += deaths;
             }
             if (kills > 0 || deaths > 0)
             {
+                // TOOD: chat for kills, 10 kills, 25, 
                 ReportResults();
             }
         }

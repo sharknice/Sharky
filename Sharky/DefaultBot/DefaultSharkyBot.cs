@@ -103,6 +103,7 @@ namespace Sharky.DefaultBot
         public DamageService DamageService { get; set; }
         public TargetingService TargetingService { get; set; }
         public AttackPathingService AttackPathingService { get; set; }
+        public HarassPathingService HarassPathingService { get; set; }
         public ChatService ChatService { get; set; }
         public DebugService DebugService { get; set; }
         public VersionService VersionService { get; set; }
@@ -258,6 +259,7 @@ namespace Sharky.DefaultBot
             Managers.Add(BaseManager);
 
             AttackPathingService = new AttackPathingService(this);
+            HarassPathingService = new HarassPathingService(this);
             TargetingManager = new TargetingManager(this);
             Managers.Add(TargetingManager);
 
@@ -479,6 +481,8 @@ namespace Sharky.DefaultBot
             var reaperWorkerHarassTask = new ReaperWorkerHarassTask(this, reaperHarassMicroController, 2, false);
             var bansheeHarassTask = new BansheeHarassTask(this, bansheeMicroController, 2, false);
             var hellionHarassTask = new HellionHarassTask(this, false, -.9f, hellionMicroController, reaperHarassMicroController);
+            var hellionExpansionScoutTask = new HellionExpansionScoutTask(this, false, -.9f, hellionMicroController, reaperHarassMicroController);
+            var siegeTankAtPlanetaryTask = new SiegeTankAtPlanetaryTask(this, siegeTankMicroController, siegeTankSiegedMicroController, false, .5f);
             var hallucinationScoutTask = new HallucinationScoutTask(TargetingData, BaseData, MicroTaskData, false, .5f);
             var hallucinationScoutEmptyBasesTask = new HallucinationScoutEmptyBasesTask(this, false, .51f);
             var wallOffTask = new WallOffTask(SharkyUnitData, ActiveUnitData, MacroData, MapData, WallService, ChatService, false, .25f);
@@ -524,6 +528,8 @@ namespace Sharky.DefaultBot
             MicroTaskData[reaperWorkerHarassTask.GetType().Name] = reaperWorkerHarassTask;
             MicroTaskData[bansheeHarassTask.GetType().Name] = bansheeHarassTask;
             MicroTaskData[hellionHarassTask.GetType().Name] = hellionHarassTask;
+            MicroTaskData[hellionExpansionScoutTask.GetType().Name] = hellionExpansionScoutTask;
+            MicroTaskData[siegeTankAtPlanetaryTask.GetType().Name] = siegeTankAtPlanetaryTask;
             MicroTaskData[hallucinationScoutTask.GetType().Name] = hallucinationScoutTask;
             MicroTaskData[hallucinationScoutEmptyBasesTask.GetType().Name] = hallucinationScoutEmptyBasesTask;
             MicroTaskData[wallOffTask.GetType().Name] = wallOffTask;

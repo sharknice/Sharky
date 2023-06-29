@@ -276,13 +276,14 @@ namespace Sharky.MicroTasks.Attack
                 {
                     closerEnemies = attackingEnemies.Where(e => Vector2.DistanceSquared(e.Position, armyVector) < distanceToAttackPoint);
                 }
+                var defendToDeath = MacroData.FoodUsed > 175;
                 if (closerEnemies.Count() > 0)
                 {
                     if (stopwatch.ElapsedMilliseconds > 100)
                     {
                         System.Console.WriteLine($"AdvancedAttackTask closerenemies second count {stopwatch.ElapsedMilliseconds}");
                     }
-                    actions = DefenseArmySplitter.SplitArmy(frame, closerEnemies, TargetingData.AttackPoint, MainUnits.Concat(SupportUnits), false);
+                    actions = DefenseArmySplitter.SplitArmy(frame, closerEnemies, TargetingData.AttackPoint, MainUnits.Concat(SupportUnits), defendToDeath);
                     if (stopwatch.ElapsedMilliseconds > 100)
                     {
                         System.Console.WriteLine($"AdvancedAttackTask closerenemies splitarmy {stopwatch.ElapsedMilliseconds}");
@@ -310,7 +311,7 @@ namespace Sharky.MicroTasks.Attack
                     var closerSelfUnits = UnitCommanders.Where(u => attackingEnemies.Any(e => Vector2.DistanceSquared(u.UnitCalculation.Position, attackVector) > Vector2.DistanceSquared(u.UnitCalculation.Position, e.Position)));
                     if (closerSelfUnits.Count() > 0)
                     {
-                        actions.AddRange(DefenseArmySplitter.SplitArmy(frame, attackingEnemies, TargetingData.AttackPoint, closerSelfUnits, false));
+                        actions.AddRange(DefenseArmySplitter.SplitArmy(frame, attackingEnemies, TargetingData.AttackPoint, closerSelfUnits, defendToDeath));
                     }
                 }
 

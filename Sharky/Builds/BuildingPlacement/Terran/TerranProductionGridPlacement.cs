@@ -11,7 +11,9 @@ namespace Sharky.Builds.BuildingPlacement
         BaseData BaseData;
         MapDataService MapDataService;
         DebugService DebugService;
-        BuildingService BuildingService;   
+        BuildingService BuildingService;
+
+        List<Point2D> LastLocations;
 
         public TerranProductionGridPlacement(BaseData baseData, MapDataService mapDataService, DebugService debugService, BuildingService buildingService)
         {
@@ -20,6 +22,8 @@ namespace Sharky.Builds.BuildingPlacement
             MapDataService = mapDataService;
             DebugService = debugService;
             BuildingService = buildingService;
+
+            LastLocations = new List<Point2D>();
         }
 
         public Point2D FindPlacement(Point2D target, UnitTypes unitType, float size, float maxDistance, float minimumMineralProximinity)
@@ -57,6 +61,12 @@ namespace Sharky.Builds.BuildingPlacement
 
                 if (closest != null)
                 {
+                    LastLocations.Add(closest);
+                    if (LastLocations.Count() > 5)
+                    {
+                        LastLocations.RemoveAt(0);
+                    }
+
                     return closest;
                 }
                 else if (unitType == UnitTypes.TERRAN_COMMANDCENTER)
@@ -96,11 +106,16 @@ namespace Sharky.Builds.BuildingPlacement
 
         Point2D GetValidPoint(float x, float y, float size, int baseHeight, IEnumerable<Unit> mineralFields, List<Unit> vespeneGeysers, float maxDistance, Vector2 target, UnitTypes unitType)
         {
+            if (LastLocations.Any(l => l.X == x && l.Y == y))
+            {
+                return null;
+            }
+
             // main building
             var vector = new Vector2(x, y);
             if (x >= 0 && y >= 0 && x < MapDataService.MapData.MapWidth && y < MapDataService.MapData.MapHeight &&
                 (Vector2.DistanceSquared(vector, target) < (maxDistance * maxDistance)) &&
-                MapDataService.MapHeight((int)x, (int)y) == baseHeight &&
+                MapDataService.MapHeight((int)x, (int)y) == baseHeight && MapDataService.MapHeight((int)x - (int)(size / 2), (int)y) == baseHeight && MapDataService.MapHeight((int)x, (int)y - (int)(size / 2)) == baseHeight && MapDataService.MapHeight((int)x, (int)y + (int)(size / 2)) == baseHeight && MapDataService.MapHeight((int)x + (int)(size / 2), (int)y) == baseHeight &&
                 RoomForExitingUnits(x, y, size, unitType) &&
                 !BuildingService.Blocked(x, y, size / 2.0f, -.5f) && !BuildingService.HasAnyCreep(x, y, size / 2f) &&
                 (mineralFields == null || !mineralFields.Any(m => Vector2.DistanceSquared(new Vector2(m.Pos.X, m.Pos.Y), vector) < 16)) &&

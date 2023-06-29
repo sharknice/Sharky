@@ -248,10 +248,12 @@ namespace Sharky.MicroTasks
 
             if (deaths > 0)
             {
+                // TODO: chat for death, oh no I needed that for late game
                 Deaths += deaths;
             }
             if (kills > 0 || deaths > 0)
             {
+                // TODO: chat for kills, I was just scouting but ok, etc.
                 ReportResults();
             }
         }

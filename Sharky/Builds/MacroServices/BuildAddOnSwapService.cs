@@ -124,7 +124,10 @@ namespace Sharky.Builds.MacroServices
                                 var unitData = SharkyUnitData.BuildingData[addOnSwap.DesiredAddOnBuilder];
                                 addOnSwap.TakerLocation = BuildingPlacement.FindPlacement(addOnSwap.TakerLocation, addOnSwap.DesiredAddOnBuilder, unitData.Size);
                             }
-                            command = addOnSwap.AddOnBuilder.Order(MacroData.Frame, Abilities.LAND, addOnSwap.TakerLocation);
+                            if (!addOnSwap.AddOnBuilder.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.LAND_BARRACKS || o.AbilityId == (uint)Abilities.LAND_FACTORY || o.AbilityId == (uint)Abilities.LAND_STARPORT))
+                            {
+                                command = addOnSwap.AddOnBuilder.Order(MacroData.Frame, Abilities.LAND, addOnSwap.TakerLocation);
+                            }
                         }
                         else
                         {

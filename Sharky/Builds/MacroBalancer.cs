@@ -112,7 +112,8 @@ namespace Sharky.Builds
         {
             foreach (var u in MacroData.AddOns)
             {
-                MacroData.BuildAddOns[u] = UnitCountService.Count(u) < MacroData.DesiredAddOnCounts[u];
+                var unitData = SharkyUnitData.AddOnData[u];
+                MacroData.BuildAddOns[u] = UnitCountService.Count(u) + ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && c.UnitCalculation.Unit.IsFlying && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability)) < MacroData.DesiredAddOnCounts[u];
             }
         }
 

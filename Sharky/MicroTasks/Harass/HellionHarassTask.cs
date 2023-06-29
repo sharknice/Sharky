@@ -12,8 +12,8 @@ namespace Sharky.MicroTasks
 {
     public class HellionHarassTask : MicroTask
     {
-        BaseData BaseData;
-        TargetingData TargetingData;
+        protected BaseData BaseData;
+        protected TargetingData TargetingData;
         MacroData MacroData;
         SharkyUnitData SharkyUnitData;
         MicroTaskData MicroTaskData;
@@ -29,7 +29,7 @@ namespace Sharky.MicroTasks
 
         public int DesiredHellions { get; set; }
 
-        Point2D AttackPoint { get; set; }
+        protected Point2D AttackPoint { get; set; }
 
         public Dictionary<ulong, UnitCalculation> Kills { get; private set; }
 
@@ -128,17 +128,26 @@ namespace Sharky.MicroTasks
                         commands.AddRange(action);
                     }
                 }
-
             }
 
-            if (BaseData?.EnemyBaseLocations?.FirstOrDefault() == null || !Started) { return commands; }
+            if (BaseData?.EnemyBaseLocations?.FirstOrDefault() == null || !Started) 
+            {
+                foreach (var commander in UnitCommanders)
+                {
+                    var action = HellionMicroController.Retreat(commander, TargetingData.MainDefensePoint, null, frame);
+                    if (action != null)
+                    {
+                        commands.AddRange(action);
+                    }
+                }
 
-            if (AttackPoint == null) 
+                return commands;              
+            }
+
+            if (AttackPoint == null)
             {
                 AttackPoint = BaseData.EnemyBaseLocations.Skip(1).FirstOrDefault().BehindMineralLineLocation;
             }
-
-            var mainVector = new Vector2(AttackPoint.X, AttackPoint.Y);
 
             if (Started && !DoneHiding)
             {
@@ -157,82 +166,11 @@ namespace Sharky.MicroTasks
                     else
                     {
                         WaitAndHide = false;
-                    }    
+                    }
                 }
             }
 
-            foreach (var commander in UnitCommanders)
-            {
-                if (commander.UnitCalculation.Unit.UnitType != (uint)UnitTypes.TERRAN_HELLION) { continue; }
-
-                // kill any workers in range
-                if (commander.UnitCalculation.Unit.WeaponCooldown < 2 && commander.UnitCalculation.EnemiesInRange.Any(e => e.FrameLastSeen == frame && e.UnitClassifications.Contains(UnitClassification.Worker)))
-                {
-                    var action = HellionMicroController.HarassWorkers(commander, AttackPoint, TargetingData.MainDefensePoint, frame);
-                    if (action != null)
-                    {
-                        commands.AddRange(action);
-                    }
-                    continue;
-                }
-                // kill any unguarded workers
-                if (commander.UnitCalculation.Unit.WeaponCooldown < 2 && commander.UnitCalculation.NearbyEnemies.Any(e => e.FrameLastSeen == frame && e.UnitClassifications.Contains(UnitClassification.Worker)) && !commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) || e.UnitClassifications.Contains(UnitClassification.DefensiveStructure)))
-                {
-                    var action = HellionMicroController.HarassWorkers(commander, AttackPoint, TargetingData.MainDefensePoint, frame);
-                    if (action != null)
-                    {
-                        commands.AddRange(action);
-                    }
-                    continue;
-                }
-                // kill clumps of workers
-                if (commander.UnitCalculation.EnemiesInRange.Count(e => e.FrameLastSeen == frame && e.UnitClassifications.Contains(UnitClassification.Worker)) > 2)
-                {
-                    var action = HellionMicroController.HarassWorkers(commander, AttackPoint, TargetingData.MainDefensePoint, frame);
-                    if (action != null)
-                    {
-                        commands.AddRange(action);
-                    }
-                    continue;
-                }
-                // go straight to mineral line, ignoring enemies
-                if (Vector2.DistanceSquared(commander.UnitCalculation.Position, mainVector) > 100)
-                {
-                    commander.UnitCalculation.TargetPriorityCalculation.Overwhelm = true;
-                    List<SC2APIProtocol.Action> action = null;
-                    action = commander.Order(frame, Abilities.MOVE, AttackPoint);
-                    if (action != null)
-                    {
-                        commands.AddRange(action);
-                    }
-                    continue;
-                }
-
-                // kill workers at mineral line
-                if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker)))
-                {
-                    var action = HellionMicroController.HarassWorkers(commander, AttackPoint, TargetingData.MainDefensePoint, frame);
-                    if (action != null)
-                    {
-                        commands.AddRange(action);
-                    }
-                    continue;
-                }
-                else
-                {
-                    // switch between main and natural
-                    if (AttackPoint != BaseData.EnemyBaseLocations.FirstOrDefault().BehindMineralLineLocation)
-                    {
-                        AttackPoint = BaseData.EnemyBaseLocations.FirstOrDefault().BehindMineralLineLocation;
-                        mainVector = new Vector2(AttackPoint.X, AttackPoint.Y);
-                    }
-                    else
-                    {
-                        AttackPoint = BaseData.EnemyBaseLocations.Skip(1).FirstOrDefault().BehindMineralLineLocation;
-                        mainVector = new Vector2(AttackPoint.X, AttackPoint.Y);
-                    }
-                }  
-            }
+            commands.AddRange(OrderHellions(frame));
 
             if (Reaper != null)
             {
@@ -280,6 +218,97 @@ namespace Sharky.MicroTasks
             }
 
             return commands;
+        }
+
+        protected virtual List<SC2APIProtocol.Action> OrderHellions(int frame)
+        {
+            var commands = new List<SC2APIProtocol.Action>();
+
+            foreach (var commander in UnitCommanders)
+            {
+                if (commander.UnitCalculation.Unit.UnitType != (uint)UnitTypes.TERRAN_HELLION) 
+                {
+                    if (commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_HELLIONTANK)
+                    {
+                        var action = commander.Order(frame, Abilities.MORPH_HELLION);
+                        if (action != null) { commands.AddRange(action); }
+                    }
+                    continue;
+                }
+
+                // kill any workers in range
+                if (commander.UnitCalculation.Unit.WeaponCooldown < 2 && commander.UnitCalculation.EnemiesInRange.Any(e => e.FrameLastSeen == frame && e.UnitClassifications.Contains(UnitClassification.Worker)))
+                {
+                    var action = HellionMicroController.HarassWorkers(commander, AttackPoint, TargetingData.MainDefensePoint, frame);
+                    if (action != null)
+                    {
+                        commands.AddRange(action);
+                    }
+                    continue;
+                }
+                // kill any unguarded workers
+                if (commander.UnitCalculation.Unit.WeaponCooldown < 2 && commander.UnitCalculation.NearbyEnemies.Any(e => e.FrameLastSeen == frame && e.UnitClassifications.Contains(UnitClassification.Worker)) && !commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) || e.UnitClassifications.Contains(UnitClassification.DefensiveStructure)))
+                {
+                    var action = HellionMicroController.HarassWorkers(commander, AttackPoint, TargetingData.MainDefensePoint, frame);
+                    if (action != null)
+                    {
+                        commands.AddRange(action);
+                    }
+                    continue;
+                }
+                // kill clumps of workers
+                if (commander.UnitCalculation.EnemiesInRange.Count(e => e.FrameLastSeen == frame && e.UnitClassifications.Contains(UnitClassification.Worker)) > 2)
+                {
+                    var action = HellionMicroController.HarassWorkers(commander, AttackPoint, TargetingData.MainDefensePoint, frame);
+                    if (action != null)
+                    {
+                        commands.AddRange(action);
+                    }
+                    continue;
+                }
+                // go straight to mineral line, ignoring enemies
+                if (Vector2.DistanceSquared(commander.UnitCalculation.Position, AttackPoint.ToVector2()) > 100)
+                {
+                    commander.UnitCalculation.TargetPriorityCalculation.Overwhelm = true;
+                    List<SC2APIProtocol.Action> action = null;
+                    action = commander.Order(frame, Abilities.MOVE, AttackPoint);
+                    if (action != null)
+                    {
+                        commands.AddRange(action);
+                    }
+                    continue;
+                }
+
+                // kill workers at mineral line
+                if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker)))
+                {
+                    var action = HellionMicroController.HarassWorkers(commander, AttackPoint, TargetingData.MainDefensePoint, frame);
+                    if (action != null)
+                    {
+                        commands.AddRange(action);
+                    }
+                    continue;
+                }
+                else
+                {
+                    SwitchTargetLocation();
+                }
+            }
+
+            return commands;
+        }
+
+        protected virtual void SwitchTargetLocation()
+        {
+            // switch between main and natural
+            if (AttackPoint != BaseData.EnemyBaseLocations.FirstOrDefault().BehindMineralLineLocation)
+            {
+                AttackPoint = BaseData.EnemyBaseLocations.FirstOrDefault().BehindMineralLineLocation;
+            }
+            else
+            {
+                AttackPoint = BaseData.EnemyBaseLocations.Skip(1).FirstOrDefault().BehindMineralLineLocation;
+            }
         }
 
         private IEnumerable<SC2APIProtocol.Action> HideHellionsAndReaper(int frame)
@@ -355,10 +384,12 @@ namespace Sharky.MicroTasks
 
             if (deaths > 0)
             {
+                // TODO: chat for deaths, it was worth it, that didn't go well, etc.
                 Deaths += deaths;
             }
             if (kills > 0 || deaths > 0)
             {
+                // TODO: chat for kills
                 ReportResults();
             }
         }

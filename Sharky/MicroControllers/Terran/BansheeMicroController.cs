@@ -48,29 +48,8 @@ namespace Sharky.MicroControllers.Terran
 
             if (PreOffenseOrder(commander, target, defensivePoint, null, null, frame, out action)) { return action; }
 
-            if (!commander.UnitCalculation.Unit.BuffIds.Contains((int)Buffs.BANSHEECLOAK) || MapDataService.InEnemyDetection(commander.UnitCalculation.Unit.Pos))
-            {
-                if (commander.UnitCalculation.NearbyEnemies.Any(e => e.DamageAir))
-                {
-                    if (commander.RetreatPathFrame + 2 < frame)
-                    {
-                        commander.RetreatPath = SharkyPathFinder.GetSafeAirPath(target.X, target.Y, commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y, frame);
-                        commander.RetreatPathFrame = frame;
-                    }
-
-                    if (FollowPath(commander, frame, out action)) { return action; }
-                }
-
-                if (AvoidTargettedDamage(commander, target, defensivePoint, frame, out action))
-                {
-                    return action;
-                }
-
-                if (AvoidDamage(commander, target, defensivePoint, frame, out action))
-                {
-                    return action;
-                }
-            }
+            if (AvoidTargettedDamage(commander, target, defensivePoint, frame, out action)) { return action; }
+            if (AvoidEnemiesThreateningDamage(commander, target, defensivePoint, frame, false, out action)) { return action; }
 
             NavigateToTarget(commander, target, groupCenter, null, Formation.Normal, frame, out action);
 
@@ -178,6 +157,7 @@ namespace Sharky.MicroControllers.Terran
 
         protected bool CloakedAndUndetected(UnitCommander commander)
         {
+            if (commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.ORACLEREVELATION)) { return false; }
             return (commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.BANSHEECLOAK) || (commander.UnitCalculation.Unit.Energy > 50 && SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.BANSHEECLOAK))) && !MapDataService.InEnemyDetection(commander.UnitCalculation.Unit.Pos);
         }
     }

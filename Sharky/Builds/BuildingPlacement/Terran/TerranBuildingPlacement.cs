@@ -149,7 +149,7 @@ namespace Sharky.Builds.BuildingPlacement
                 while (angle + (sliceSize / 2) < fullCircle)
                 {
                     var point = new Point2D { X = x + (float)(radius * Math.Cos(angle)), Y = y + (float)(radius * Math.Sin(angle)) };
-                    if (size == 3)
+                    if (size == 3 || size == 1)
                     {
                         if (point.X % 1 != .5)
                         {
@@ -199,7 +199,7 @@ namespace Sharky.Builds.BuildingPlacement
                                         DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
 
                                         LastLocations.Add(point);
-                                        if (LastLocations.Count() > 5)
+                                        if (LastLocations.Count() > 10)
                                         {
                                             LastLocations.RemoveAt(0);
                                         }

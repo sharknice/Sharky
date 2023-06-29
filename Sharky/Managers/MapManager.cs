@@ -299,9 +299,9 @@ namespace Sharky.Managers
                 }
             }
 
-            foreach (var enemy in ActiveUnitData.EnemyUnits.Where(e => e.Value.UnitClassifications.Contains(UnitClassification.Detector) && e.Value.Unit.BuildProgress == 1))
+            foreach (var enemy in ActiveUnitData.EnemyUnits.Where(e => e.Value.UnitClassifications.Contains(UnitClassification.Detector) && (e.Value.Unit.BuildProgress == 1 || e.Value.Unit.BuildProgress == 0)))
             {
-                var nodes = GetNodesInRange(enemy.Value.Unit.Pos, enemy.Value.Unit.DetectRange + 1, MapData.MapWidth, MapData.MapHeight);
+                var nodes = GetNodesInRange(enemy.Value.Unit.Pos, 11, MapData.MapWidth, MapData.MapHeight);
                 foreach (var node in nodes)
                 {
                     MapData.Map[(int)node.X][(int)node.Y].InEnemyDetection = true;
