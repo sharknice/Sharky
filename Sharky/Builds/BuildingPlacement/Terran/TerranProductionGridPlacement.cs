@@ -14,6 +14,7 @@ namespace Sharky.Builds.BuildingPlacement
         BuildingService BuildingService;
 
         List<Point2D> LastLocations;
+        List<Point2D> LastLocationsAddons;
 
         public TerranProductionGridPlacement(BaseData baseData, MapDataService mapDataService, DebugService debugService, BuildingService buildingService)
         {
@@ -24,11 +25,12 @@ namespace Sharky.Builds.BuildingPlacement
             BuildingService = buildingService;
 
             LastLocations = new List<Point2D>();
+            LastLocationsAddons = new List<Point2D>();
         }
 
         public Point2D FindPlacement(Point2D target, UnitTypes unitType, float size, float maxDistance, float minimumMineralProximinity)
         {
-            foreach (var selfBase in BaseData.SelfBases)
+            foreach (var selfBase in BaseData.SelfBases.Where(b => b.Location.X == BaseData.BaseLocations.FirstOrDefault().Location.X && b.Location.Y == BaseData.BaseLocations.FirstOrDefault().Location.Y))
             {
                 // grid placement for production and tech, put tech in same spot a production building would go
                 // startX -1, startY +4, X +7/-7, Y +3/-3
@@ -61,10 +63,21 @@ namespace Sharky.Builds.BuildingPlacement
 
                 if (closest != null)
                 {
-                    LastLocations.Add(closest);
-                    if (LastLocations.Count() > 5)
+                    if (unitType == UnitTypes.TERRAN_BARRACKSREACTOR || unitType == UnitTypes.TERRAN_BARRACKSTECHLAB || unitType == UnitTypes.TERRAN_FACTORYREACTOR || unitType == UnitTypes.TERRAN_FACTORYTECHLAB || unitType == UnitTypes.TERRAN_STARPORTREACTOR || unitType == UnitTypes.TERRAN_STARPORTTECHLAB)
                     {
-                        LastLocations.RemoveAt(0);
+                        LastLocationsAddons.Add(closest);
+                        if (LastLocationsAddons.Count() > 5)
+                        {
+                            LastLocationsAddons.RemoveAt(0);
+                        }
+                    }
+                    else
+                    {
+                        LastLocations.Add(closest);
+                        if (LastLocations.Count() > 5)
+                        {
+                            LastLocations.RemoveAt(0);
+                        }
                     }
 
                     return closest;
@@ -106,10 +119,21 @@ namespace Sharky.Builds.BuildingPlacement
 
         Point2D GetValidPoint(float x, float y, float size, int baseHeight, IEnumerable<Unit> mineralFields, List<Unit> vespeneGeysers, float maxDistance, Vector2 target, UnitTypes unitType)
         {
-            if (LastLocations.Any(l => l.X == x && l.Y == y))
+            if (unitType == UnitTypes.TERRAN_BARRACKSREACTOR || unitType == UnitTypes.TERRAN_BARRACKSTECHLAB || unitType == UnitTypes.TERRAN_FACTORYREACTOR || unitType == UnitTypes.TERRAN_FACTORYTECHLAB || unitType == UnitTypes.TERRAN_STARPORTREACTOR || unitType == UnitTypes.TERRAN_STARPORTTECHLAB)
             {
-                return null;
+                if (LastLocationsAddons.Any(l => l.X == x && l.Y == y))
+                {
+                    return null;
+                }
             }
+            else
+            {
+                if (LastLocations.Any(l => l.X == x && l.Y == y))
+                {
+                    return null;
+                }
+            }
+
 
             // main building
             var vector = new Vector2(x, y);
@@ -166,11 +190,11 @@ namespace Sharky.Builds.BuildingPlacement
 
         bool RoomForExitingUnits(float x, float y, float size, UnitTypes unitType)
         {
-            if (unitType == UnitTypes.TERRAN_BARRACKS || unitType == UnitTypes.TERRAN_FACTORY)
+            if (unitType == UnitTypes.TERRAN_BARRACKS || unitType == UnitTypes.TERRAN_FACTORY || unitType == UnitTypes.TERRAN_STARPORT)
             {
-                return BuildingService.AreaBuildable(x, y, size);
+                return BuildingService.AreaBuildable(x, y, size + 4) && BuildingService.AreaBuildable(x + 2.5f, y -.5f, size + 4) && BuildingService.SameHeight(x, y, size) && BuildingService.SameHeight(x + 2.5f, y - .5f, size);
             }
-            return BuildingService.AreaBuildable(x, y, size / 2.0f);
+            return BuildingService.AreaBuildable(x, y, size + 4);
         }
     }
 }

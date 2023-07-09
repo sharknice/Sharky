@@ -141,7 +141,7 @@ namespace Sharky.Builds.BuildingPlacement
 
         bool RoomForExitingUnits(float x, float y, float size)
         {
-            return BuildingService.AreaBuildable(x, y, size);
+            return BuildingService.AreaBuildable(x, y, size + 4);
         }
     }
 }

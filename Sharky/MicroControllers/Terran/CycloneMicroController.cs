@@ -29,10 +29,10 @@ namespace Sharky.MicroControllers.Terran
         {
             action = null;
 
-            if (!commander.AutoCastOff)
+            if (!commander.AutoCastToggled)
             {
                 action = commander.ToggleAutoCast(Abilities.EFFECT_LOCKON);
-                commander.AutoCastOff = true;
+                commander.AutoCastToggled = true;
                 return true;
             }
 

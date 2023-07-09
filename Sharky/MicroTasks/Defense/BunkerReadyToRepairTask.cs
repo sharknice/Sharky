@@ -1,5 +1,6 @@
 ﻿using Sharky.DefaultBot;
 using Sharky.Extensions;
+using Sharky.MicroControllers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,16 +14,18 @@ namespace Sharky.MicroTasks
         SharkyUnitData SharkyUnitData;
         MicroTaskData MicroTaskData;
         ActiveUnitData ActiveUnitData;
+        IndividualMicroController WorkerDefenseMicroController;
 
         public int DesiredScvs { get; set; }
 
-        public BunkerReadyToRepairTask(DefaultSharkyBot defaultSharkyBot, bool enabled, float priority)
+        public BunkerReadyToRepairTask(DefaultSharkyBot defaultSharkyBot, IndividualMicroController workerDefenseMicroController, bool enabled, float priority)
         {
             TargetingData = defaultSharkyBot.TargetingData;
             SharkyUnitData = defaultSharkyBot.SharkyUnitData;
             MicroTaskData = defaultSharkyBot.MicroTaskData;
             ActiveUnitData = defaultSharkyBot.ActiveUnitData;
 
+            WorkerDefenseMicroController = workerDefenseMicroController;
 
             UnitCommanders = new List<UnitCommander>();
 
@@ -63,10 +66,10 @@ namespace Sharky.MicroTasks
             {
                 if (commander.UnitCalculation.Unit.UnitType != (uint)UnitTypes.TERRAN_SCV) { continue; }
 
-                if (!commander.AutoCastOff)
+                if (!commander.AutoCastToggled)
                 {
                     var action = commander.ToggleAutoCast(Abilities.EFFECT_REPAIR_SCV);
-                    commander.AutoCastOff = true;
+                    commander.AutoCastToggled = true;
                     if (action != null)
                     {
                         commands.AddRange(action);
@@ -80,11 +83,24 @@ namespace Sharky.MicroTasks
 
                     if (bunkerInside != null)
                     {
-                        var action = bunkerInside.UnloadSpecificUnit(frame, Abilities.UNLOADALLAT, commander.UnitCalculation.Unit.Tag);
-                        if (action != null)
+                        if (commander.UnitCalculation.Unit.Health == commander.UnitCalculation.Unit.HealthMax || bunkerInside.UnitCalculation.NearbyAllies.Any(a => a.Unit.UnitType == (uint)UnitTypes.TERRAN_MARINE) || bunkerInside.UnitCalculation.Unit.Passengers.Count() == 4)
                         {
-                            commands.AddRange(action);
+                            var action = bunkerInside.UnloadSpecificUnit(frame, Abilities.UNLOADALLAT, commander.UnitCalculation.Unit.Tag);
+                            if (action != null)
+                            {
+                                commands.AddRange(action);
+                            }
                         }
+                    }
+                    continue;
+                }
+
+                if (commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.CARRYMINERALFIELDMINERALS) || commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.CARRYHARVESTABLEVESPENEGEYSERGAS))
+                {
+                    var action = commander.Order(frame, Abilities.HARVEST_RETURN);
+                    if (action != null)
+                    {
+                        commands.AddRange(action);
                     }
                     continue;
                 }
@@ -102,9 +118,18 @@ namespace Sharky.MicroTasks
                 bunker = bunkers.FirstOrDefault();
                 if (bunker != null)
                 {
-                    if (commander.UnitCalculation.EnemiesThreateningDamage.Any())
+                    if (commander.UnitCalculation.EnemiesThreateningDamage.Any() && (bunker.UnitCalculation.Unit.Passengers.Count() < 4 || bunker.UnitCalculation.Unit.Health < bunker.UnitCalculation.Unit.HealthMax))
                     {
                         var action = commander.Order(frame, Abilities.SMART, targetTag: bunker.UnitCalculation.Unit.Tag);
+                        if (action != null)
+                        {
+                            commands.AddRange(action);
+                        }
+                        continue;
+                    }
+                    else if (commander.UnitCalculation.EnemiesThreateningDamage.Any())
+                    {
+                        var action = WorkerDefenseMicroController.Retreat(commander, TargetingData.MainDefensePoint, null, frame);
                         if (action != null)
                         {
                             commands.AddRange(action);

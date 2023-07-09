@@ -1,5 +1,6 @@
 ﻿using SC2APIProtocol;
 using Sharky.DefaultBot;
+using Sharky.Extensions;
 using Sharky.MicroControllers;
 using Sharky.MicroTasks.Attack;
 using System.Collections.Generic;
@@ -69,7 +70,7 @@ namespace Sharky.MicroTasks
                     var unitType = commander.Value.UnitCalculation.Unit.UnitType;
                     foreach (var desiredUnitClaim in DesiredUnitsClaims)
                     {
-                        if ((uint)desiredUnitClaim.UnitType == unitType && !commander.Value.UnitCalculation.Unit.IsHallucination && UnitCommanders.Count(u => u.UnitCalculation.Unit.UnitType == (uint)desiredUnitClaim.UnitType) < desiredUnitClaim.Count)
+                        if ((uint)desiredUnitClaim.UnitType == unitType && !commander.Value.UnitCalculation.Unit.IsHallucination && NeedDesiredClaim(desiredUnitClaim))
                         {
                             commander.Value.Claimed = true;
                             commander.Value.UnitRole = UnitRole.Defend;
@@ -78,6 +79,16 @@ namespace Sharky.MicroTasks
                     }
                 }
             }
+        }
+
+        bool NeedDesiredClaim(DesiredUnitsClaim desiredUnitClaim)
+        {
+            var count = UnitCommanders.Count(u => u.UnitCalculation.Unit.UnitType == (uint)desiredUnitClaim.UnitType);
+            if (desiredUnitClaim.UnitType == UnitTypes.TERRAN_SIEGETANK)
+            {
+                count+= UnitCommanders.Count(u => u.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED);
+            }
+            return count < desiredUnitClaim.Count;
         }
 
         public override IEnumerable<SC2APIProtocol.Action> PerformActions(int frame)
@@ -143,9 +154,9 @@ namespace Sharky.MicroTasks
         {
             if (AlwaysFillBunkers && EnemyData.SelfRace == Race.Terran)
             {
-                foreach (var commander in UnitCommanders.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_MARINE))
+                foreach (var commander in UnitCommanders.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_MARINE && !c.UnitCalculation.EnemiesThreateningDamage.Any()))
                 {
-                    var nearbyBunkers = commander.UnitCalculation.NearbyAllies.Where(u => u.Unit.UnitType == (uint)UnitTypes.TERRAN_BUNKER && u.Unit.BuildProgress == 1);
+                    var nearbyBunkers = ActiveUnitData.SelfUnits.Values.Where(c => c.Unit.UnitType == (uint)UnitTypes.TERRAN_BUNKER && c.Unit.BuildProgress == 1).OrderBy(c => Vector2.DistanceSquared(c.Position, TargetingData.ForwardDefensePoint.ToVector2()));
                     foreach (var bunker in nearbyBunkers)
                     {
                         if (bunker.Unit.CargoSpaceMax - bunker.Unit.CargoSpaceTaken >= UnitDataService.CargoSize((UnitTypes)commander.UnitCalculation.Unit.UnitType))

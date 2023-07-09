@@ -89,7 +89,7 @@ namespace Sharky.Builds.MacroServices
             {
                 if (addOnSwap.AddOnBuilder.UnitCalculation.Unit.BuildProgress == 1 && addOnSwap.AddOnTaker.UnitCalculation.Unit.BuildProgress == 1)
                 {
-                    if (!addOnSwap.AddOnBuilder.UnitCalculation.UnitTypeData.Name.Contains("Flying") && addOnSwap.AddOnTaker.UnitCalculation.Unit.HasAddOnTag)
+                    if (addOnSwap.AddOnTaker.UnitCalculation.Unit.HasAddOnTag && addOnSwap.AddOnTaker.UnitCalculation.Unit.AddOnTag == addOnSwap.AddOn.UnitCalculation.Unit.Tag)
                     {
                         addOnSwap.Completed = true;
                     }
@@ -166,7 +166,7 @@ namespace Sharky.Builds.MacroServices
                 }
                 else
                 {
-                    if (addOnSwap.AddOn != null && addOnSwap.AddOnTaker.UnitCalculation.NearbyEnemies.Count(e => Vector2.DistanceSquared(e.Position, addOnSwap.AddOnTaker.UnitCalculation.Position) < 25) == 0)
+                    if (addOnSwap.AddOn != null && addOnSwap.AddOnTaker.UnitCalculation.NearbyEnemies.Count(e => Vector2.DistanceSquared(e.Position, addOnSwap.AddOnTaker.UnitCalculation.Position) < 16) == 0)
                     {
                         command = addOnSwap.AddOnTaker.Order(MacroData.Frame, Abilities.LIFT);
                     }
@@ -198,10 +198,14 @@ namespace Sharky.Builds.MacroServices
 
             if (addOnSwap.AddOnTaker == null)
             {
-                addOnSwap.AddOnTaker = ActiveUnitData.Commanders.Values.FirstOrDefault(c => c.UnitCalculation.Unit.UnitType == (uint)addOnSwap.DesiredAddOnTaker);
+                addOnSwap.AddOnTaker = ActiveUnitData.Commanders.Values.FirstOrDefault(c => c.UnitCalculation.Unit.UnitType == (uint)addOnSwap.DesiredAddOnTaker && !c.UnitCalculation.Unit.HasAddOnTag);
                 if (addOnSwap.AddOnTaker == null)
                 {
-                    addOnSwap.AddOnTaker = ActiveUnitData.Commanders.Values.FirstOrDefault(c => c.UnitCalculation.Unit.IsFlying && c.UnitCalculation.UnitTypeData.Name.Contains(addOnSwap.DesiredAddOnTaker.ToString()));
+                    addOnSwap.AddOnTaker = ActiveUnitData.Commanders.Values.FirstOrDefault(c => c.UnitCalculation.Unit.UnitType == (uint)addOnSwap.DesiredAddOnTaker);
+                }
+                if (addOnSwap.AddOnTaker == null)
+                {
+                    addOnSwap.AddOnTaker = ActiveUnitData.Commanders.Values.FirstOrDefault(c => c.UnitCalculation.Unit.IsFlying && ((UnitTypes)c.UnitCalculation.Unit.UnitType).ToString().Contains(addOnSwap.DesiredAddOnTaker.ToString()));
                 }
                 if (addOnSwap.AddOnTaker != null)
                 {

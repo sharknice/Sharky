@@ -134,7 +134,7 @@ namespace Sharky.MicroTasks
             {
                 foreach (var commander in UnitCommanders)
                 {
-                    var action = HellionMicroController.Retreat(commander, TargetingData.MainDefensePoint, null, frame);
+                    var action = HellionMicroController.Attack(commander, TargetingData.ForwardDefensePoint, TargetingData.MainDefensePoint, null, frame);
                     if (action != null)
                     {
                         commands.AddRange(action);

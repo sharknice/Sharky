@@ -30,15 +30,11 @@ namespace Sharky.MicroControllers.Terran
             }
             if (repairTargets == null || repairTargets.Count() == 0)
             {
-                repairTargets = commander.UnitCalculation.NearbyAllies.Take(25).Where(a => a.Attributes.Contains(Attribute.Mechanical) && a.Unit.BuildProgress == 1 && a.Unit.Health < a.Unit.HealthMax).OrderByDescending(a => a.Unit.HealthMax - a.Unit.Health);
+                repairTargets = commander.UnitCalculation.NearbyAllies.Where(a => a.Attributes.Contains(Attribute.Mechanical) && a.Unit.BuildProgress == 1 && a.Unit.Health < a.Unit.HealthMax).OrderBy(a => Vector2.DistanceSquared(a.Position, commander.UnitCalculation.Position));
             }
 
-            var repairTarget = repairTargets.FirstOrDefault(a => Vector2.DistanceSquared(a.Position, commander.UnitCalculation.Position) <= (a.Unit.Radius + commander.UnitCalculation.Unit.Radius + commander.UnitCalculation.Range) * (a.Unit.Radius + commander.UnitCalculation.Unit.Radius + commander.UnitCalculation.Range));
-            if (repairTarget == null)
-            {
-                repairTarget = repairTargets.FirstOrDefault();
-            }
-
+            var repairTarget = repairTargets.FirstOrDefault();
+            
             if (repairTarget != null)
             {
                 action = commander.Order(frame, Abilities.EFFECT_REPAIR, targetTag: repairTarget.Unit.Tag);
@@ -51,6 +47,13 @@ namespace Sharky.MicroControllers.Terran
         protected override bool OffensiveAbility(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
+
+            if (!commander.AutoCastToggled)
+            {
+                action = commander.ToggleAutoCast(Abilities.EFFECT_REPAIR_SCV);
+                commander.AutoCastToggled = true;
+                return true;
+            }
 
             if (commander.UnitRole == UnitRole.Support)
             {

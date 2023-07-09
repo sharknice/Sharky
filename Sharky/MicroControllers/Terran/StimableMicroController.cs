@@ -19,12 +19,15 @@ namespace Sharky.MicroControllers.Terran
         public override List<SC2APIProtocol.Action> Attack(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
             if (GetOutOfBunker(commander, target, frame, out List<Action> action)) { return action; }
+            if (OffensiveAbility(commander, target, defensivePoint, groupCenter, null, frame, out action)) { return action; }
+            if (commander.UnitCalculation.TargetPriorityCalculation.OverallWinnability < 1 && GetInBunker(commander, frame, out action)) { return action; }
             return base.Attack(commander, target, defensivePoint, groupCenter, frame);
         }
 
         public override List<SC2APIProtocol.Action> Support(UnitCommander commander, IEnumerable<UnitCommander> supportTargets, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
             if (GetOutOfBunker(commander, target, frame, out List<Action> action)) { return action; }
+            if (GetInBunker(commander, frame, out action)) { return action; }
             return base.Support(commander, supportTargets, target, defensivePoint, groupCenter, frame);
         }
 
@@ -79,6 +82,7 @@ namespace Sharky.MicroControllers.Terran
         protected override bool GetInBunker(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
+            if (commander.UnitCalculation.Loaded) { return false; }
             if (commander.UnitCalculation.TargetPriorityCalculation.Overwhelm) { return false; }
 
             var nearbyBunkers = commander.UnitCalculation.NearbyAllies.Where(u => u.Unit.UnitType == (uint)UnitTypes.TERRAN_BUNKER && u.Unit.BuildProgress == 1);

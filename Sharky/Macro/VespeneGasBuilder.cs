@@ -43,11 +43,15 @@ namespace Sharky.Macro
                     var closestGyeser = openGeysers.OrderBy(o => Vector2.DistanceSquared(new Vector2(baseLocation.X, baseLocation.Y), new Vector2(o.Pos.X, o.Pos.Y))).FirstOrDefault();
                     if (closestGyeser != null)
                     {
-                        var command = BuildingBuilder.BuildGas(MacroData, unitData, closestGyeser);
-                        if (command != null)
+                        var actualGyser = ActiveUnitData.NeutralUnits.Values.FirstOrDefault(g => g.Unit.Pos.X == closestGyeser.Pos.X && g.Unit.Pos.Y == closestGyeser.Pos.Y);
+                        if (actualGyser != null)
                         {
-                            commands.AddRange(command);
-                            return commands;
+                            var command = BuildingBuilder.BuildGas(MacroData, unitData, actualGyser.Unit);
+                            if (command != null)
+                            {
+                                commands.AddRange(command);
+                                return commands;
+                            }
                         }
                     }
 

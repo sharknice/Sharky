@@ -33,7 +33,7 @@ namespace Sharky
         public int LastInRangeAttackFrame { get; set; }
         public CommanderState CommanderState { get; set; }
         public LockOnData LastLockOn { get; set; }
-        public bool AutoCastOff { get; set; }
+        public bool AutoCastToggled { get; set; }
         public bool RallyPointSet { get; set; }
         public bool AlwaysSpam { get; set; }
 
@@ -74,7 +74,7 @@ namespace Sharky
             LastInRangeAttackFrame = -100;
             LastOrderFrame = -100;
             FrameFirstSeen = unitCalculation.FrameLastSeen;
-            AutoCastOff = false;
+            AutoCastToggled = false;
             RallyPointSet = false;
             AlwaysSpam = false;
 

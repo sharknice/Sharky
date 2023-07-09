@@ -153,6 +153,10 @@ namespace Sharky.Builds
                         {
                             location = new Point2D { X = building.First().Value.UnitCalculation.Position.X, Y = building.First().Value.UnitCalculation.Position.Y };
                         }
+                        if (building.First().Value.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.LAND_BARRACKS || o.AbilityId == (uint)Abilities.LAND_FACTORY || o.AbilityId == (uint)Abilities.LAND_STARPORT))
+                        {
+                            return null;
+                        }
                         var placementLocation = BuildingPlacement.FindPlacement(location, UnitTypes.TERRAN_BARRACKSTECHLAB, 1, true, maxDistance, false, WallOffType.Terran);
                         if (placementLocation != null)
                         {

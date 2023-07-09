@@ -136,6 +136,16 @@ namespace Sharky
             }
         }
 
+        public void RemoveUnit(ulong tag)
+        {
+            var command = new DebugKillUnit();
+            command.Tag.Add(tag);
+            SpawnRequest.Debug.Debug.Add(new DebugCommand()
+            {
+                KillUnit = command,
+            });          
+        }
+
         public void KillCritters()
         {
             var tags = ActiveUnitData.NeutralUnits.Where(u => u.Value.Unit.Health == 10).Select(u => u.Key);

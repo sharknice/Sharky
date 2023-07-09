@@ -105,8 +105,24 @@ namespace Sharky.Managers
                 if (entry.Value > 0 || amountHave > 0 || amountHaveInProgress > 0)
                     Console.WriteLine($"    [{entry.Key}]={entry.Value} ({amountHave} have, {amountHaveInProgress} in progress)");
             }
-            Console.WriteLine("  Desired defense:");
+            Console.WriteLine("  Desired defense at defensive point:");
             foreach (var entry in DefaultSharkyBot.MacroData.DesiredDefensiveBuildingsAtDefensivePoint.OrderBy(x => Enum.GetName(typeof(UnitTypes), x.Key)))
+            {
+                int amountHave = DefaultSharkyBot.UnitCountService.EquivalentTypeCompleted(entry.Key);
+                int amountHaveInProgress = DefaultSharkyBot.UnitCountService.BuildingsInProgressCount(entry.Key);
+                if (entry.Value > 0 || amountHave > 0 || amountHaveInProgress > 0)
+                    Console.WriteLine($"    [{entry.Key}]={entry.Value} ({amountHave} have, {amountHaveInProgress} in progress)");
+            }
+            Console.WriteLine("  Desired defense at defensive at every base:");
+            foreach (var entry in DefaultSharkyBot.MacroData.DesiredDefensiveBuildingsAtEveryBase.OrderBy(x => Enum.GetName(typeof(UnitTypes), x.Key)))
+            {
+                int amountHave = DefaultSharkyBot.UnitCountService.EquivalentTypeCompleted(entry.Key);
+                int amountHaveInProgress = DefaultSharkyBot.UnitCountService.BuildingsInProgressCount(entry.Key);
+                if (entry.Value > 0 || amountHave > 0 || amountHaveInProgress > 0)
+                    Console.WriteLine($"    [{entry.Key}]={entry.Value} ({amountHave} have, {amountHaveInProgress} in progress)");
+            }
+            Console.WriteLine("  Desired defense at defensive at every mineral line:");
+            foreach (var entry in DefaultSharkyBot.MacroData.DesiredDefensiveBuildingsAtEveryMineralLine.OrderBy(x => Enum.GetName(typeof(UnitTypes), x.Key)))
             {
                 int amountHave = DefaultSharkyBot.UnitCountService.EquivalentTypeCompleted(entry.Key);
                 int amountHaveInProgress = DefaultSharkyBot.UnitCountService.BuildingsInProgressCount(entry.Key);

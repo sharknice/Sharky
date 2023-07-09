@@ -210,7 +210,7 @@ namespace Sharky.MicroTasks.Attack
                         {
                             desiredTotal = totalScvs - 22;
                         }
-                        if (desiredTotal > 15 && MacroData.FoodUsed < 185)
+                        if (desiredTotal > 15)
                         {
                             desiredTotal = 15;
                         }
@@ -450,7 +450,7 @@ namespace Sharky.MicroTasks.Attack
                 else
                 {
                     actions.AddRange(MicroController.Retreat(mainUnits, TargetingData.ForwardDefensePoint, null, frame));
-                    actions.AddRange(MicroController.Retreat(supportUnits, supportAttackPoint, supportAttackPoint, frame));
+                    actions.AddRange(MicroController.Support(supportUnits, mainUnits, supportAttackPoint, TargetingData.ForwardDefensePoint, supportAttackPoint, frame));
                 }
                 foreach (var subTask in SubTasks.Where(t => t.Value.Enabled).OrderBy(t => t.Value.Priority))
                 {

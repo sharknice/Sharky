@@ -508,7 +508,7 @@ namespace Sharky.DefaultBot
             var protossDoorTask = new ProtossDoorTask(this, false, -0.5f);
             var zealotHarassTask = new ZealotHarassTask(this, false, 0.5f, zealotMicroController);
             var clearFutureExpansionTask = new ClearFutureExpansionTask(this, new List<DesiredUnitsClaim>(), 0.1f, false);
-            var bunkerReadyToRepairTask = new BunkerReadyToRepairTask(this, false, 0.1f);
+            var bunkerReadyToRepairTask = new BunkerReadyToRepairTask(this, workerDefenseMicroController, false, 0.1f);
 
             MicroTaskData[defenseSquadTask.GetType().Name] = defenseSquadTask;
             MicroTaskData[workerScoutGasStealTask.GetType().Name] = workerScoutGasStealTask;

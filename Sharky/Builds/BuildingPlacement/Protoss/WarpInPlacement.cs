@@ -57,7 +57,12 @@ namespace Sharky.Builds.BuildingPlacement
                     {
                         var point = GetValidPoint(x + (float)(radius * Math.Cos(angle)), y + (float)(radius * Math.Sin(angle)), MapDataService.MapHeight(powerSource.UnitCalculation.Unit.Pos), target.ToVector2(), powerSource.UnitCalculation);
                         if (point != null) 
-                        { 
+                        {
+                            LastWarpInLocations.Add(point);
+                            if (LastWarpInLocations.Count() > 5)
+                            {
+                                LastWarpInLocations.RemoveAt(0);
+                            }
                             return point; 
                         }
 
@@ -159,7 +164,7 @@ namespace Sharky.Builds.BuildingPlacement
 
             if (x >= 0 && y >= 0 && x < MapDataService.MapData.MapWidth && y < MapDataService.MapData.MapHeight)
             {
-                if (BuildingService.AreaBuildable(x, y, .5f) && !BuildingService.Blocked(x, y, .75f, 0f) && !BuildingService.BlockedByUnits(x, y, .75f, powerSource) && Powered(powerSource, x, y))
+                if (BuildingService.AreaBuildable(x, y, .75f) && !BuildingService.Blocked(x, y, .75f, 0f) && !BuildingService.BlockedByUnits(x, y, .75f, powerSource) && Powered(powerSource, x, y))
                 {
                     return new Point2D { X = x, Y = y };
                 }

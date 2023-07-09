@@ -21,6 +21,7 @@ namespace Sharky.Builds.BuildingPlacement
         TerranTechGridPlacement TerranTechGridPlacement;
         IBuildingPlacement MissileTurretPlacement;
         List<Point2D> LastLocations;
+        List<Point2D> LastBunkerLocations;
 
         public TerranBuildingPlacement(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, BaseData baseData, MacroData macroData, DebugService debugService, BuildingService buildingService, IBuildingPlacement wallOffPlacement, TerranWallService terranWallService, TerranSupplyDepotGridPlacement terranBuildingGridPlacement, TerranProductionGridPlacement terranProductionGridPlacement, TerranTechGridPlacement terranTechGridPlacement, IBuildingPlacement missileTurretPlacement)
         {
@@ -38,14 +39,15 @@ namespace Sharky.Builds.BuildingPlacement
             MissileTurretPlacement = missileTurretPlacement;
 
             LastLocations = new List<Point2D>();
+            LastBunkerLocations = new List<Point2D>();
         }
 
-        public Point2D FindPlacement(Point2D target, UnitTypes unitType, int size, bool ignoreResourceProximity = false, float maxDistance = 50, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.None, bool requireVision = false, bool allowBlockBase = true)
+        public Point2D FindPlacement(Point2D target, UnitTypes unitType, int size, bool ignoreResourceProximity = false, float maxDistance = 200, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.None, bool requireVision = false, bool allowBlockBase = true)
         {
             var mineralProximity = 2;
             if (ignoreResourceProximity) { mineralProximity = 0; };
 
-            if (unitType == UnitTypes.TERRAN_BARRACKS || unitType == UnitTypes.TERRAN_FACTORY || unitType == UnitTypes.TERRAN_STARPORT || unitType == UnitTypes.TERRAN_BARRACKSTECHLAB || unitType == UnitTypes.TERRAN_COMMANDCENTER)
+            if (unitType == UnitTypes.TERRAN_BARRACKS || unitType == UnitTypes.TERRAN_BARRACKSTECHLAB || unitType == UnitTypes.TERRAN_BARRACKSREACTOR || unitType == UnitTypes.TERRAN_FACTORY || unitType == UnitTypes.TERRAN_FACTORYTECHLAB || unitType == UnitTypes.TERRAN_FACTORYREACTOR || unitType == UnitTypes.TERRAN_STARPORT || unitType == UnitTypes.TERRAN_STARPORTTECHLAB || unitType == UnitTypes.TERRAN_STARPORTREACTOR || unitType == UnitTypes.TERRAN_COMMANDCENTER)
             {
                 return FindProductionPlacement(target, unitType, size, maxDistance, wallOffType, mineralProximity);
             }
@@ -99,7 +101,7 @@ namespace Sharky.Builds.BuildingPlacement
                 if (spot != null) { return spot; }
             }
 
-            return FindTechPlacement(target, size, maxDistance, minimumMineralProximinity);
+            return FindBunkerPlacement(target, size, maxDistance, minimumMineralProximinity);
         }
 
         public Point2D FindProductionPlacement(Point2D reference, UnitTypes unitType, float size, float maxDistance, WallOffType wallOffType, float minimumMineralProximinity = 5)
@@ -123,7 +125,11 @@ namespace Sharky.Builds.BuildingPlacement
 
             if (unitType == UnitTypes.TERRAN_COMMANDCENTER)
             {
-                minimumMineralProximinity = 3;
+                minimumMineralProximinity = 6;
+            }
+            else
+            {
+                minimumMineralProximinity = 1;
             }
 
             if (unitType == UnitTypes.TERRAN_BARRACKSTECHLAB || unitType == UnitTypes.TERRAN_BARRACKSREACTOR || unitType == UnitTypes.TERRAN_FACTORYTECHLAB || unitType == UnitTypes.TERRAN_FACTORYREACTOR || unitType == UnitTypes.TERRAN_STARPORTTECHLAB || unitType == UnitTypes.TERRAN_STARPORTREACTOR)
@@ -131,20 +137,20 @@ namespace Sharky.Builds.BuildingPlacement
                 size += 2;
             }
 
-            return FindTechPlacement(reference, size + 4f, maxDistance, minimumMineralProximinity); // add to the radius to make room for the addon and completed units to exit
+            return FindTechPlacement(reference, size + 1, maxDistance, minimumMineralProximinity); // add to the radius to make room for the addon and completed units to exit
         }
 
         public Point2D FindTechPlacement(Point2D reference, float size, float maxDistance, float minimumMineralProximinity = 2)
         {
             var x = reference.X;
             var y = reference.Y;
-            var radius = size / 2f;
+            var radius = .25f;
 
             // start at 12 o'clock then rotate around 12 times, increase radius by 1 until it's more than maxDistance
             while (radius < maxDistance / 2.0)
             {
                 var fullCircle = Math.PI * 2;
-                var sliceSize = fullCircle / (4.0 + radius);
+                var sliceSize = fullCircle / (16.0 + radius);
                 var angle = 0.0;
                 while (angle + (sliceSize / 2) < fullCircle)
                 {
@@ -160,7 +166,7 @@ namespace Sharky.Builds.BuildingPlacement
                             point.Y -= .5f;
                         }
                     }
-                    else if (size == 2)
+                    else if (size % 2 == 0)
                     {
                         if (point.X % 1 != 0)
                         {
@@ -171,16 +177,16 @@ namespace Sharky.Builds.BuildingPlacement
                             point.Y -= .5f;
                         }
                     }
-                    if (BuildingService.AreaBuildable(point.X, point.Y, size / 2.0f) && !BuildingService.Blocked(point.X, point.Y, size / 2.0f) && !BuildingService.HasAnyCreep(point.X, point.Y, size / 2.0f))
+                    if (BuildingService.AreaBuildable(point.X, point.Y, size / 2.0f) && !BuildingService.Blocked(point.X, point.Y, size / 2.0f) && !BuildingService.HasAnyCreep(point.X, point.Y, size / 2.0f) && BuildingService.SameHeight(point.X, point.Y, size))
                     {
-                        var mineralFields = ActiveUnitData.NeutralUnits.Where(u => SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType));
+                        var mineralFields = ActiveUnitData.NeutralUnits.Where(u => SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType) || SharkyUnitData.GasGeyserTypes.Contains((UnitTypes)u.Value.Unit.UnitType));
                         var squared = (1 + minimumMineralProximinity + (size/2f)) * (1 + minimumMineralProximinity + (size / 2f));
                         var vector = new Vector2(point.X, point.Y);
                         var clashes = mineralFields.Where(u => Vector2.DistanceSquared(u.Value.Position, vector) < squared);
                         bool blocksBase = false;
                         if (minimumMineralProximinity != 0)
                         {
-                            if (BaseData.BaseLocations.Any(b => Vector2.DistanceSquared(new Vector2(b.Location.X, b.Location.Y), vector) < 25))
+                            if (BuildingService.BlocksResourceCenter(point.X, point.Y, size / 2f) || BuildingService.BlocksResourceCenter(point.X + 2.5f, point.Y - .5f, size / 2f))
                             {
                                 blocksBase = true;
                             }
@@ -208,6 +214,87 @@ namespace Sharky.Builds.BuildingPlacement
                                     }
                                 }
                             }
+                        }
+                    }
+
+                    angle += sliceSize;
+                }
+                radius += 1;
+            }
+
+            return null;
+        }
+
+        public Point2D FindBunkerPlacement(Point2D reference, float size, float maxDistance, float minimumMineralProximinity = 2)
+        {
+            var x = reference.X;
+            var y = reference.Y;
+            var radius = .25f;
+
+            // start at 12 o'clock then rotate around 12 times, increase radius by 1 until it's more than maxDistance
+            while (radius < maxDistance / 2.0)
+            {
+                var fullCircle = Math.PI * 2;
+                var sliceSize = fullCircle / (16.0 + radius);
+                var angle = 0.0;
+                while (angle + (sliceSize / 2) < fullCircle)
+                {
+                    var point = new Point2D { X = x + (float)(radius * Math.Cos(angle)), Y = y + (float)(radius * Math.Sin(angle)) };
+                    if (size == 3 || size == 1)
+                    {
+                        if (point.X % 1 != .5)
+                        {
+                            point.X -= .5f;
+                        }
+                        if (point.Y % 1 != .5)
+                        {
+                            point.Y -= .5f;
+                        }
+                    }
+                    else if (size == 2)
+                    {
+                        if (point.X % 1 != 0)
+                        {
+                            point.X -= .5f;
+                        }
+                        if (point.Y % 1 != 0)
+                        {
+                            point.Y -= .5f;
+                        }
+                    }
+                    if (BuildingService.AreaBuildable(point.X, point.Y, size / 2.0f) && !BuildingService.Blocked(point.X, point.Y, size / 2.0f) && !BuildingService.HasAnyCreep(point.X, point.Y, size / 2.0f) && BuildingService.SameHeight(point.X, point.Y, size))
+                    {
+                        var mineralFields = ActiveUnitData.NeutralUnits.Where(u => SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType));
+                        var squared = (1 + minimumMineralProximinity + (size / 2f)) * (1 + minimumMineralProximinity + (size / 2f));
+                        var vector = new Vector2(point.X, point.Y);
+                        var clashes = mineralFields.Where(u => Vector2.DistanceSquared(u.Value.Position, vector) < squared);
+                        bool blocksBase = false;
+                        if (minimumMineralProximinity != 0)
+                        {
+                            if (BuildingService.BlocksResourceCenter(point.X, point.Y, size / 2f) || BuildingService.BlocksResourceCenter(point.X + 2.5f, point.Y - .5f, size / 2f))
+                            {
+                                blocksBase = true;
+                            }
+                        }
+
+                        if (!blocksBase && clashes.Count() == 0)
+                        {
+                            if (Vector2.DistanceSquared(new Vector2(reference.X, reference.Y), new Vector2(point.X, point.Y)) <= maxDistance * maxDistance)
+                            {
+                                DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
+                                if (!LastBunkerLocations.Any(l => l.X == x && l.Y == y))
+                                {
+                                    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
+
+                                    LastBunkerLocations.Add(point);
+                                    if (LastBunkerLocations.Count() > 10)
+                                    {
+                                        LastBunkerLocations.RemoveAt(0);
+                                    }
+
+                                    return point;
+                                }
+                            }                        
                         }
                     }
 
