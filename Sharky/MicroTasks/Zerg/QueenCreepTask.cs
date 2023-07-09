@@ -4,6 +4,7 @@ using Sharky.Builds.BuildingPlacement;
 using Sharky.DefaultBot;
 using Sharky.Extensions;
 using Sharky.MicroControllers.Zerg;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -32,6 +33,9 @@ namespace Sharky.MicroTasks.Zerg
 
             Priority = priority;
             Enabled = enabled;
+
+            CommanderDebugColor = new SC2APIProtocol.Color() { R = 255, G = 32, B = 127 };
+            CommanderDebugText = "Creep";
         }
 
         public override void ClaimUnits(Dictionary<ulong, UnitCommander> commanders)

@@ -4,6 +4,7 @@ using Sharky.Extensions;
 using Sharky.Pathing;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Linq;
 using System.Numerics;
 
@@ -17,7 +18,6 @@ namespace Sharky.MicroTasks
         SharkyUnitData SharkyUnitData;
         TargetingData TargetingData;
         MapDataService MapDataService;
-        DebugService DebugService;
         BaseData BaseData;
         AreaService AreaService;
         FrameToTimeConverter FrameToTimeConverter;
@@ -35,7 +35,6 @@ namespace Sharky.MicroTasks
             SharkyUnitData = defaultSharkyBot.SharkyUnitData;
             TargetingData = defaultSharkyBot.TargetingData;
             MapDataService = defaultSharkyBot.MapDataService;
-            DebugService = defaultSharkyBot.DebugService;
             BaseData = defaultSharkyBot.BaseData;
             AreaService = defaultSharkyBot.AreaService;
             FrameToTimeConverter = defaultSharkyBot.FrameToTimeConverter;
@@ -47,6 +46,9 @@ namespace Sharky.MicroTasks
 
             UnitCommanders = new List<UnitCommander>();
             Enabled = enabled;
+
+            CommanderDebugText = "Main scouting overlord";
+            CommanderDebugColor = new SC2APIProtocol.Color() { R = 255, G = 192, B = 127 };
         }
 
         public override void ClaimUnits(Dictionary<ulong, UnitCommander> commanders)

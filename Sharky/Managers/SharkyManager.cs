@@ -24,7 +24,7 @@ namespace Sharky.Managers
         {
             if (observation != null)
             {
-                System.Console.WriteLine($"{observation.Observation.GameLoop} {GetType().Name} {TotalFrameTime} ms, average: {TotalFrameTime / observation.Observation.GameLoop} ms");
+                System.Console.WriteLine($"{observation.Observation.GameLoop} {GetType().Name} {TotalFrameTime:F2}ms, average: {(TotalFrameTime / observation.Observation.GameLoop):F2}ms");
             }
             else
             {

@@ -121,7 +121,7 @@ namespace Sharky
                         if (SharkyOptions.LogPerformance && managerTime > manager.LongestFrame)
                         {
                             manager.LongestFrame = managerTime;
-                            Console.WriteLine($"{observation.Observation.GameLoop} {manager.GetType().Name} {managerTime} ms, average: {manager.TotalFrameTime / observation.Observation.GameLoop} ms");
+                            Console.WriteLine($"{observation.Observation.GameLoop} {manager.GetType().Name} {managerTime:F2}ms, average: {(manager.TotalFrameTime / observation.Observation.GameLoop):F2}ms");
                         }
                     }
                 }

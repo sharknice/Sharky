@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using Sharky.MicroTasks;
 using System.Numerics;
 
 namespace Sharky.Extensions
@@ -100,6 +101,16 @@ namespace Sharky.Extensions
         public static Point ToPoint(this Vector2 thisVec)
         {
             return new Point { X = thisVec.X, Y = thisVec.Y };
+        }
+
+        /// <summary>
+        /// Converts Point2 to Point
+        /// </summary>
+        /// <param name="thisVec"></param>
+        /// <returns></returns>
+        public static Point ToPoint(this Point2D thisVec, float z = 16)
+        {
+            return new Point { X = thisVec.X, Y = thisVec.Y, Z = z };
         }
 
         /// <summary>

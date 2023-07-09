@@ -28,6 +28,9 @@ namespace Sharky.MicroTasks
 
             UnitCommanders = new List<UnitCommander>();
             Enabled = enabled;
+
+            CommanderDebugColor = new SC2APIProtocol.Color() { R = 255, G = 255, B = 127 };
+            CommanderDebugText = "Scouting";
         }
 
         private void Claim(Dictionary<ulong, UnitCommander> commanders, bool allowSteal)

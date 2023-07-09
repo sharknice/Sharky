@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Sharky
@@ -7,21 +8,25 @@ namespace Sharky
     {
         SharkyOptions SharkyOptions;
         ActiveUnitData ActiveUnitData;
+        MacroData MacroData;
 
         int TextLine;
-        Color DefaultColor;
+        public Color DefaultColor;
+        public Color DefaultMicroTaskColor;
 
         public Request DrawRequest { get; set; }
         public Request SpawnRequest { get; set; }
         public bool Surrender { get; set; }
 
-        public DebugService(SharkyOptions sharkyOptions, ActiveUnitData activeUnitData)
+        public DebugService(SharkyOptions sharkyOptions, ActiveUnitData activeUnitData, MacroData macroData)
         {
             SharkyOptions = sharkyOptions;
             ActiveUnitData = activeUnitData;
             DefaultColor = new Color() { R = 255, G = 0, B = 0 };
+            DefaultMicroTaskColor = new Color() { R = 255, G = 200, B = 150 };
             ResetDrawRequest();
             ResetSpawnRequest();
+            MacroData=macroData;
         }
 
         public void DrawLine(Point start, Point end, Color color)
@@ -44,12 +49,28 @@ namespace Sharky
             }
         }
 
+        /// <summary>
+        /// Draws text to common debug text area
+        /// </summary>
         public void DrawText(string text)
         {
             if (SharkyOptions.Debug)
             {
                 DrawText(text, 12, 0.05f, 0.1f + 0.02f * TextLine);
                 TextLine++;
+            }
+        }
+
+        /// <summary>
+        /// Draws text into the space.
+        /// Make sure the altitude of the text is above the terrain.
+        /// </summary>
+        public void DrawText(string text, Point pos, Color color, uint size = 12)
+        {
+            if (SharkyOptions.Debug)
+            {
+                DrawRequest.Debug.Debug[0].Draw.Text.Add(new DebugText() { Size = size, Color = color, Text = text, WorldPos = pos });
+                
             }
         }
 
@@ -69,6 +90,9 @@ namespace Sharky
             DebugCommand debugCommand = new DebugCommand();
             debugCommand.Draw = new DebugDraw();
             DrawRequest.Debug.Debug.Add(debugCommand);
+
+            // Remove unit debug info older than 5 frames
+            DebugUnits = DebugUnits.Where(x=>(MacroData.Frame - x.Value.LastFrameUpdate <= 5)).ToDictionary(k => k.Key, v => v.Value);
         }
 
         public void ResetSpawnRequest()
@@ -78,6 +102,21 @@ namespace Sharky
             SpawnRequest.Debug = new RequestDebug();
             DebugCommand debugCommand = new DebugCommand();
             DrawRequest.Debug.Debug.Add(debugCommand);
+        }
+
+        public Dictionary<ulong, UnitDebugEntry> DebugUnits = new Dictionary<ulong, UnitDebugEntry>();
+
+        public void DebugUnitText(UnitCalculation unitCalculation, string text, Color color, uint size = 12)
+        {
+            DebugUnits[unitCalculation.Unit.Tag] = new UnitDebugEntry(MacroData.Frame, text, unitCalculation, color, size);
+        }
+
+        public void DrawUnitInfo()
+        {
+            foreach (var unit in DebugUnits)
+            {
+                unit.Value.Draw(this);
+            }
         }
 
         public void SpawnUnit(UnitTypes unitType, Point2D location, int playerId)

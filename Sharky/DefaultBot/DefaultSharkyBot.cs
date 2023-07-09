@@ -182,7 +182,7 @@ namespace Sharky.DefaultBot
 
             var framesPerSecond = 22.4f;
 
-            SharkyOptions = new SharkyOptions { Debug = debug, FramesPerSecond = framesPerSecond, TagsEnabled = true, BuildTagsEnabled = true, LogPerformance = false, GameStatusReportingEnabled = true, GeneratePathing = false, GeneratePathingPrecision = (10, 10), TagsAllChat = false };
+            SharkyOptions = new SharkyOptions { Debug = debug, DebugMicroTaskUnits = true, FramesPerSecond = framesPerSecond, TagsEnabled = true, BuildTagsEnabled = true, LogPerformance = false, GameStatusReportingEnabled = true, GeneratePathing = false, GeneratePathingPrecision = (10, 10), TagsAllChat = false };
             FrameToTimeConverter = new FrameToTimeConverter(SharkyOptions);
             MacroData = new MacroData();
             AttackData = new AttackData { ArmyFoodAttack = 30, ArmyFoodRetreat = 25, Attacking = false, UseAttackDataManager = true, CustomAttackFunction = true, RetreatTrigger = 1f, AttackTrigger = 1.5f, RequireDetection = false, ContainBelowKill = true, RequireMaxOut = false, AttackWhenMaxedOut = true, RequireBank = false, AttackWhenOverwhelm = true, GroupUpEnabled = true, ContainTrigger = 1.5f, KillTrigger = 3f };
@@ -205,7 +205,7 @@ namespace Sharky.DefaultBot
 
             Managers = new List<IManager>();
 
-            DebugService = new DebugService(SharkyOptions, ActiveUnitData);
+            DebugService = new DebugService(SharkyOptions, ActiveUnitData, MacroData);
             DebugManager = new DebugManager(gameConnection, SharkyOptions, DebugService, MapData, TargetingData, ActiveUnitData, EnemyData);
             Managers.Add(DebugManager);
 
@@ -560,7 +560,7 @@ namespace Sharky.DefaultBot
             MicroTaskData[changelingScout.GetType().Name] = changelingScout;
             MicroTaskData[bunkerReadyToRepairTask.GetType().Name] = bunkerReadyToRepairTask;
 
-            MicroManager = new MicroManager(ActiveUnitData, MicroTaskData, SharkyOptions);
+            MicroManager = new MicroManager(ActiveUnitData, MicroTaskData, SharkyOptions, DebugService);
             Managers.Add(MicroManager);
 
             AttackDataManager = new AttackDataManager(AttackData, ActiveUnitData, attackTask, TargetPriorityService, TargetingData, MacroData, BaseData, DebugService);
