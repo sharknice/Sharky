@@ -319,7 +319,7 @@ namespace Sharky
                 if (frames > 1 && frameTotal > longestFrameTime)
                 {
                     longestFrameTime = frameTotal;
-                    Console.WriteLine($"Longest Frame: #{frames}: {longestFrameTime} ms, average: {totalTime / frames} ms");
+                    Console.WriteLine($"Longest Frame: #{frames}: {longestFrameTime:F2}ms, average: {(totalTime / frames):F2}ms");
                 }
             }
         }

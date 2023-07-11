@@ -6,16 +6,18 @@ using System.Linq;
 namespace Sharky.Managers
 {
     public class MicroManager : SharkyManager
-    {      
+    {
         ActiveUnitData ActiveUnitData;
         MicroTaskData MicroTaskData;
         SharkyOptions SharkyOptions;
+        DebugService DebugService;
 
-        public MicroManager(ActiveUnitData activeUnitData, MicroTaskData microTaskData, SharkyOptions sharkyOptions)
+        public MicroManager(ActiveUnitData activeUnitData, MicroTaskData microTaskData, SharkyOptions sharkyOptions, DebugService debugService)
         {
             ActiveUnitData = activeUnitData;
             MicroTaskData = microTaskData;
             SharkyOptions = sharkyOptions;
+            DebugService = debugService;
         }
 
         public override bool NeverSkip { get => true; }
@@ -35,7 +37,7 @@ namespace Sharky.Managers
 
                 if (frame > 10 && SharkyOptions.LogPerformance && stopwatch.ElapsedMilliseconds > 100)
                 {
-                    System.Console.WriteLine($"{frame} ClaimUnits {microTask.GetType().Name} {stopwatch.ElapsedMilliseconds} ms, average: {microTask.TotalFrameTime / frame} ms");
+                    System.Console.WriteLine($"{frame} ClaimUnits {microTask.GetType().Name} {stopwatch.ElapsedMilliseconds}ms, average: {microTask.TotalFrameTime / frame:F2}ms");
                 }
 
                 if (!SkipFrame)
@@ -48,6 +50,8 @@ namespace Sharky.Managers
 
                     actions.AddRange(taskActions);
                 }
+
+                microTask.DebugUnits(DebugService);
                 stopwatch.Stop();
                 var time = stopwatch.ElapsedMilliseconds;
                 microTask.TotalFrameTime += time;
@@ -55,11 +59,11 @@ namespace Sharky.Managers
                 if (frame > 10 && SharkyOptions.LogPerformance && time > 1 && time > microTask.LongestFrame)
                 {
                     microTask.LongestFrame = time;
-                    System.Console.WriteLine($"{frame} {microTask.GetType().Name} {time} ms, average: {microTask.TotalFrameTime / frame} ms");
+                    System.Console.WriteLine($"{frame} {microTask.GetType().Name} {time:F2}ms, average: {microTask.TotalFrameTime / frame:F2}ms");
                 }
                 if (frame > 10 && SharkyOptions.LogPerformance && time > 100)
                 {
-                    System.Console.WriteLine($"{frame} {microTask.GetType().Name} {time} ms, average: {microTask.TotalFrameTime / frame} ms");
+                    System.Console.WriteLine($"{frame} {microTask.GetType().Name} {time:F2}ms, average: {microTask.TotalFrameTime / frame:F2}ms");
                 }
             }
             if (SkipFrame)
@@ -81,7 +85,7 @@ namespace Sharky.Managers
                 }
                 else if (action.ActionRaw.UnitCommand.UnitTags.All(tag => !observation.Observation.RawData.Units.Any(u => u.Tag == tag)))
                 {
-                    if (microTask.GetType().Name != "MiningTask") 
+                    if (microTask.GetType().Name != "MiningTask")
                     {
                         // System.Console.WriteLine($"{observation.Observation.GameLoop} {microTask.GetType().Name}, ignored uncontrollable unit order {action.ActionRaw.UnitCommand.AbilityId} for tags {string.Join(" ", action.ActionRaw.UnitCommand.UnitTags)}");
                     }
@@ -126,10 +130,10 @@ namespace Sharky.Managers
             {
                 foreach (var microTask in MicroTaskData.Values.Where(m => m.TotalFrameTime > 0).OrderBy(m => m.TotalFrameTime))
                 {
-                    System.Console.WriteLine($" {microTask.GetType().Name} {microTask.TotalFrameTime} ms, average: {microTask.TotalFrameTime / observation.Observation.GameLoop} ms");
+                    System.Console.WriteLine($" {microTask.GetType().Name} {microTask.TotalFrameTime:F2}ms, average: {microTask.TotalFrameTime / observation.Observation.GameLoop:F2}ms");
                 }
 
-                System.Console.WriteLine($"{observation.Observation.GameLoop} {GetType().Name} {TotalFrameTime} ms, average: {TotalFrameTime / observation.Observation.GameLoop} ms");
+                System.Console.WriteLine($"{observation.Observation.GameLoop} {GetType().Name} {TotalFrameTime:F2}ms, average: {TotalFrameTime / observation.Observation.GameLoop:F2}ms");
             }
         }
     }

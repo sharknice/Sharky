@@ -26,7 +26,6 @@ namespace Sharky.MicroTasks
         TargetingData TargetingData;
         MacroData MacroData;
         MapDataService MapDataService;
-        DebugService DebugService;
         BaseData BaseData;
         MapData MapData;
         EnemyData EnemyData;
@@ -53,7 +52,6 @@ namespace Sharky.MicroTasks
             TargetingData = defaultSharkyBot.TargetingData;
             MacroData = defaultSharkyBot.MacroData;
             MapDataService = defaultSharkyBot.MapDataService;
-            DebugService = defaultSharkyBot.DebugService;
             BaseData = defaultSharkyBot.BaseData;
             EnemyData = defaultSharkyBot.EnemyData;
             AreaService = defaultSharkyBot.AreaService;

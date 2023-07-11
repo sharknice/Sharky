@@ -37,6 +37,11 @@ namespace Sharky.Managers
         {
             if (SharkyOptions.Debug)
             {
+                if (SharkyOptions.DebugMicroTaskUnits)
+                {
+                    DebugService.DrawUnitInfo();
+                }
+
                 ReadCommand(observation.Chat, observation.Observation.RawData.Player.Camera);
                 try
                 {
@@ -60,7 +65,7 @@ namespace Sharky.Managers
 
             DebugService.ResetDrawRequest();
             DebugService.ResetSpawnRequest();
-
+            
             return new List<Action>();
         }
 

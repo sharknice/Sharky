@@ -5,6 +5,7 @@ using Sharky.Extensions;
 using Sharky.MicroControllers;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.NetworkInformation;
 
 namespace Sharky.MicroTasks.Zerg
 {
@@ -27,6 +28,9 @@ namespace Sharky.MicroTasks.Zerg
 
             Priority = priority;
             Enabled = enabled;
+
+            CommanderDebugText = "Blocking expansion";
+            CommanderDebugColor = new SC2APIProtocol.Color() { R = 255, G = 63, B = 32 };
         }
 
         public override void ClaimUnits(Dictionary<ulong, UnitCommander> commanders)

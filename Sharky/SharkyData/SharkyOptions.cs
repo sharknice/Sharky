@@ -3,6 +3,12 @@
     public class SharkyOptions
     {
         public bool Debug { get; set; }
+
+        /// <summary>
+        /// Show micro task assigned to the unit
+        /// </summary>
+        public bool DebugMicroTaskUnits { get; set; }
+
         public float FramesPerSecond { get; set; }
         public bool TagsEnabled { get; set; }
         public bool TagsAllChat { get; set; }

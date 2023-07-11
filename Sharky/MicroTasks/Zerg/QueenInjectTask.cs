@@ -14,7 +14,6 @@ namespace Sharky.MicroTasks.Zerg
         UnitCountService UnitCountService;
         BuildOptions BuildOptions;
         QueenMicroController QueenMicroController;
-        DebugService DebugService;
 
         List<InjectData> HatcheryQueenPairing = new List<InjectData>();
 
@@ -25,10 +24,12 @@ namespace Sharky.MicroTasks.Zerg
             UnitCountService = defaultSharkyBot.UnitCountService;
             BuildOptions = defaultSharkyBot.BuildOptions;
             QueenMicroController = queenMicroController;
-            DebugService = defaultSharkyBot.DebugService;
 
             Priority = priority;
             Enabled = enabled;
+
+            CommanderDebugColor = new SC2APIProtocol.Color() { R = 127, G = 255, B = 32 };
+            CommanderDebugText = "Injecting";
         }
 
         public override void ClaimUnits(Dictionary<ulong, UnitCommander> commanders)
@@ -87,11 +88,6 @@ namespace Sharky.MicroTasks.Zerg
         public override IEnumerable<SC2APIProtocol.Action> PerformActions(int frame)
         {
             var actions = new List<SC2APIProtocol.Action>();
-
-            /*foreach (var entry in HatcheryQueenPairing)
-            {
-                DebugService.DrawLine(entry.Queen?.UnitCalculation.Unit.Pos ?? new SC2APIProtocol.Point() { X = 0, Y = 0, Z = 16}, entry.Hatchery?.Unit.Pos ?? new SC2APIProtocol.Point() { X = 0, Y = 0, Z = 16}, new SC2APIProtocol.Color() { R = 255, G = 127, B = 32 });
-            }*/
 
             foreach (var entry in HatcheryQueenPairing)
             {

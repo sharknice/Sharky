@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SC2APIProtocol;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -83,7 +84,18 @@ namespace Sharky.MicroTasks
 
         public virtual void PrintReport(int frame)
         {
-            Console.WriteLine($"     Deaths: {Deaths}, Frames - Longest: {LongestFrame}, Average: {TotalFrameTime/frame}, Total: {TotalFrameTime}");
+            Console.WriteLine($"     Deaths: {Deaths}, Frames - Longest: {LongestFrame:F2}ms, Average: {TotalFrameTime/frame:F2}ms, Total: {TotalFrameTime:F2}ms");
+        }
+
+        public string? CommanderDebugText { get; set; }
+        public Color? CommanderDebugColor { get; set; }
+
+        public virtual void DebugUnits(DebugService debugService)
+        {
+            foreach (var unit in UnitCommanders)
+            {
+                debugService.DebugUnitText(unit.UnitCalculation, CommanderDebugText ?? GetType().Name.Replace("Task", "", StringComparison.InvariantCultureIgnoreCase), CommanderDebugColor ?? debugService.DefaultMicroTaskColor);
+            }
         }
     }
 }
