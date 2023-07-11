@@ -1,5 +1,4 @@
-﻿using Roy_T.AStar.Primitives;
-using SC2APIProtocol;
+﻿using SC2APIProtocol;
 using Sharky.DefaultBot;
 using Sharky.Extensions;
 using System.Collections.Generic;

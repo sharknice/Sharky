@@ -1,6 +1,7 @@
 ﻿using SC2APIProtocol;
 using Sharky.Builds.BuildingPlacement;
 using Sharky.DefaultBot;
+using Sharky.Pathing;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -11,6 +12,7 @@ namespace Sharky.MicroTasks
         EnemyData EnemyData;
         BaseData BaseData;
         UnitCountService UnitCountService;
+        MapData MapData;
 
         IBuildingPlacement BuildingPlacement;
 
@@ -19,6 +21,7 @@ namespace Sharky.MicroTasks
             EnemyData = defaultSharkyBot.EnemyData;
             BaseData = defaultSharkyBot.BaseData;
             UnitCountService = defaultSharkyBot.UnitCountService;
+            MapData = defaultSharkyBot.MapData;
 
             BuildingPlacement = buildingPlacement;
 
@@ -59,6 +62,11 @@ namespace Sharky.MicroTasks
                         if (!commander.UnitCalculation.Unit.IsFlying)
                         {
                             if (commander.UnitCalculation.NearbyEnemies.Count() == 0 && commander.UnitCalculation.Unit.Health >= commander.UnitCalculation.PreviousUnit.Health)
+                            {
+                                continue;
+                            }
+
+                            if (IsWall(commander))
                             {
                                 continue;
                             }
@@ -124,6 +132,32 @@ namespace Sharky.MicroTasks
                 UnitCommanders.Remove(commander);
                 break;
             }
+        }
+
+        bool IsWall(UnitCommander commander)
+        {
+            if (MapData?.WallData != null)
+            {
+                foreach (var selfBase in BaseData.SelfBases)
+                {
+                    var wallData = MapData.WallData.FirstOrDefault(b => b.BasePosition.X == selfBase.Location.X && b.BasePosition.Y == selfBase.Location.Y);
+                    if (wallData?.Production != null)
+                    {
+                        if (wallData.Production.Any(p => p.X == commander.UnitCalculation.Position.X && p.Y == commander.UnitCalculation.Position.Y))
+                        {
+                            return true;
+                        }
+                    }
+                    if (wallData?.ProductionWithAddon != null)
+                    {
+                        if (wallData.ProductionWithAddon.Any(p => p.X == commander.UnitCalculation.Position.X && p.Y == commander.UnitCalculation.Position.Y))
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
         }
     }
 }

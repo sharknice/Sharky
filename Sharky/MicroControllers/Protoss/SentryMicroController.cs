@@ -77,14 +77,14 @@ namespace Sharky.MicroControllers.Protoss
             var height = MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos);
             if (!commander.UnitCalculation.NearbyAllies.Any(a => a.Unit.IsFlying || a.Unit.UnitType == (uint)UnitTypes.PROTOSS_COLOSSUS))
             {
-                if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && MapDataService.MapHeight(e.Unit.Pos) > height))
+                if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && MapDataService.MapHeight(e.Unit.Pos) > height) && commander.UnitCalculation.NearbyEnemies.Count(e => e.FrameLastSeen == frame) > 2)
                 {
                     action = commander.Order(frame, Abilities.HALLUCINATION_COLOSSUS);
                     return true;
                 }
             }
 
-            if (commander.UnitCalculation.NearbyEnemies.Count(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit)) > 3 && !commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Detector)))
+            if (commander.UnitCalculation.NearbyEnemies.Count(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && e.FrameLastSeen == frame) > 3 && !commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Detector)))
             {
                 action = commander.Order(frame, Abilities.HALLUCINATION_ARCHON);
                 return true;

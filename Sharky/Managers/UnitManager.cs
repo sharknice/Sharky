@@ -367,7 +367,7 @@ namespace Sharky.Managers
                 {
                     var parent = GetParentUnitCalculation(ActiveUnitData.Commanders[allyAttack.Value.Unit.Tag]);
                     ActiveUnitData.Commanders[allyAttack.Value.Unit.Tag].ParentUnitCalculation = parent;
-                    if (parent != null)
+                    if (parent != null && ActiveUnitData.Commanders.ContainsKey(parent.Unit.Tag))
                     {
                         ActiveUnitData.Commanders[parent.Unit.Tag].ChildUnitCalculation = ActiveUnitData.Commanders[allyAttack.Value.Unit.Tag].UnitCalculation;
                     }

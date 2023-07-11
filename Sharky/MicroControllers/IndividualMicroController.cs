@@ -160,7 +160,7 @@ namespace Sharky.MicroControllers
             var gap = actualDistance - rangeDistance;
             var framesToRange = gap / (GetMovementSpeed(commander) / SharkyOptions.FramesPerSecond);
             var framesToShoot = commander.UnitCalculation.Unit.WeaponCooldown - 1;
-            if (framesToRange >= framesToShoot && commander.UnitCalculation.Unit.Tag != bestTarget.Unit.Tag)
+            if (framesToRange >= framesToShoot && commander.UnitCalculation.Unit.Tag != bestTarget.Unit.Tag && bestTarget.FrameLastSeen == frame)
             {
                 action = commander.Order(frame, Abilities.ATTACK, targetTag: bestTarget.Unit.Tag);
                 return true;
@@ -244,7 +244,7 @@ namespace Sharky.MicroControllers
             List<SC2APIProtocol.Action> action = null;
             if (commander.UnitCalculation.Loaded) { return action; }
             UpdateState(commander, defensivePoint, defensivePoint, null, null, Formation.Normal, frame);
-            if (GetInBunker(commander, frame, out action)) { return action; }
+            if (GetInBunker(commander, defensivePoint, frame, out action)) { return action; }
             if (RechargeShieldsAtBattery(commander, defensivePoint, defensivePoint, frame, out action)) { return action; }
             if (HoldStillForRepair(commander, frame, out action)) { return action; }
             if (AttackUnitsMarkedForDeath(commander, frame, out action)) { return action; }
@@ -476,7 +476,7 @@ namespace Sharky.MicroControllers
 
             if (HoldStillForRepair(commander, frame, out action)) { return true; }
 
-            if (commander.UnitCalculation.NearbyEnemies.Any() && GetInBunker(commander, frame, out action)) { return true; }
+            if (commander.UnitCalculation.NearbyEnemies.Any() && GetInBunker(commander, target, frame, out action)) { return true; }
 
             // TODO: special case movement
             //if (ChargeBlindly(commander, target))
@@ -587,7 +587,7 @@ namespace Sharky.MicroControllers
             return false;
         }
 
-        protected virtual bool GetInBunker(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
+        protected virtual bool GetInBunker(UnitCommander commander, Point2D target, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
             return false;
@@ -1097,14 +1097,14 @@ namespace Sharky.MicroControllers
             if (commander.UnitCalculation.EnemiesInRange.Any() && WeaponReady(commander, frame) && !SharkyUnitData.NoWeaponCooldownTypes.Contains((UnitTypes)commander.UnitCalculation.Unit.UnitType)) // keep shooting as you retreat
             {
                 var bestTarget = GetBestTarget(commander, target, frame);
-                if (bestTarget != null && MapDataService.SelfVisible(bestTarget.Unit.Pos))
+                if (bestTarget != null && MapDataService.SelfVisible(bestTarget.Unit.Pos) && bestTarget.FrameLastSeen == frame)
                 {
                     action = commander.Order(frame, Abilities.ATTACK, null, bestTarget.Unit.Tag);
                     return true;
                 }
             }
 
-            if (GetInBunker(commander, frame, out action)) { return true; }
+            if (GetInBunker(commander, target, frame, out action)) { return true; }
 
             var closestEnemy = commander.UnitCalculation.NearbyEnemies.Take(25).Where(e => DamageService.CanDamage(e, commander.UnitCalculation) && e.FrameLastSeen >= frame - 5).OrderBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position)).FirstOrDefault();
             if (closestEnemy == null)
@@ -1576,7 +1576,7 @@ namespace Sharky.MicroControllers
 
                 if (WeaponReady(commander, frame))
                 {
-                    if (priorityEnemyMain || (bestTarget != null && commander.UnitCalculation.NearbyEnemies.Any(e => AvoidedUnitTypes.Contains((UnitTypes)e.Unit.UnitType))))
+                    if (priorityEnemyMain || (bestTarget != null && bestTarget.FrameLastSeen == frame && commander.UnitCalculation.NearbyEnemies.Any(e => AvoidedUnitTypes.Contains((UnitTypes)e.Unit.UnitType))))
                     {
                         action = commander.Order(frame, Abilities.ATTACK, targetTag: bestTarget.Unit.Tag);
                     }
@@ -1744,7 +1744,7 @@ namespace Sharky.MicroControllers
             action = null;
             if (bestTarget != null)
             {
-                if (commander.UnitCalculation.EnemiesInRange.Any(e => e.Unit.Tag == bestTarget.Unit.Tag) && bestTarget.Unit.DisplayType == DisplayType.Visible && MapDataService.SelfVisible(bestTarget.Unit.Pos))
+                if (commander.UnitCalculation.EnemiesInRange.Any(e => e.Unit.Tag == bestTarget.Unit.Tag) && bestTarget.Unit.DisplayType == DisplayType.Visible && MapDataService.SelfVisible(bestTarget.Unit.Pos) && bestTarget.FrameLastSeen == frame)
                 {
                     bestTarget.IncomingDamage += GetDamage(commander.UnitCalculation.Weapons, bestTarget.Unit, bestTarget.UnitTypeData);
                     if (WeaponReady(commander, frame))
@@ -2475,7 +2475,7 @@ namespace Sharky.MicroControllers
 
                 if (cycloneDps > otherDps)
                 {
-                    var closestCyclone = enemyCyclones.OrderBy(e => Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position)).FirstOrDefault();
+                    var closestCyclone = enemyCyclones.OrderBy(e => Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position)).FirstOrDefault(e => e.FrameLastSeen == frame);
                     action = commander.Order(frame, Abilities.ATTACK, null, closestCyclone.Unit.Tag);
                     return true;
                 }
@@ -2483,7 +2483,7 @@ namespace Sharky.MicroControllers
 
             if (commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.LOCKON))
             {
-                var cyclone = commander.UnitCalculation.EnemiesInRange.FirstOrDefault(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_CYCLONE && e.Unit.Health < 25);
+                var cyclone = commander.UnitCalculation.EnemiesInRange.FirstOrDefault(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_CYCLONE && e.Unit.Health < 25 && e.FrameLastSeen == frame);
                 if (cyclone != null)
                 {
                     action = commander.Order(frame, Abilities.ATTACK, null, cyclone.Unit.Tag);
@@ -2495,7 +2495,7 @@ namespace Sharky.MicroControllers
                     action = commander.Order(frame, Abilities.SMART, null, prism.Unit.Tag);
                     return true;
                 }
-                cyclone = commander.UnitCalculation.EnemiesInRange.FirstOrDefault(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_CYCLONE);
+                cyclone = commander.UnitCalculation.EnemiesInRange.FirstOrDefault(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_CYCLONE && e.FrameLastSeen == frame);
                 if (cyclone != null)
                 {
                     var avoidPoint = GetPositionFromRange(commander, commander.UnitCalculation.Unit.Pos, cyclone.Unit.Pos, 9);

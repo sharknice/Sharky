@@ -161,7 +161,7 @@ namespace Sharky.MicroTasks
                     {
                         if (bunker.Unit.CargoSpaceMax - bunker.Unit.CargoSpaceTaken >= UnitDataService.CargoSize((UnitTypes)commander.UnitCalculation.Unit.UnitType))
                         {
-                            var action = commander.Order(frame, Abilities.SMART, targetTag: bunker.Unit.Tag);
+                            var action = commander.Order(frame, Abilities.SMART, targetTag: bunker.Unit.Tag, allowSpam: true);
                             actions.AddRange(action);
                             break;
                         }

@@ -34,7 +34,7 @@ namespace Sharky.Builds.BuildingPlacement
                 {
                     if (UnitCountService.EquivalentTypeCount(UnitTypes.TERRAN_COMMANDCENTER) - BaseData.SelfBases.Count() < MacroData.DesiredMacroCommandCenters)
                     {
-                        var placement = TerranBuildingPlacement.FindPlacement(target, unitType, size, ignoreResourceProximity, maxDistance, requireSameHeight, wallOffType, requireVision, true);
+                        var placement = TerranBuildingPlacement.FindPlacement(target, unitType, size, ignoreResourceProximity, maxDistance, true, wallOffType, requireVision, true);
                         if (placement != null)
                         {
                             return placement;

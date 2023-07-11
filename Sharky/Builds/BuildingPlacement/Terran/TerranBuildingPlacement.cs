@@ -1,4 +1,5 @@
-﻿using SC2APIProtocol;
+﻿using Google.Protobuf.WellKnownTypes;
+using SC2APIProtocol;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -125,7 +126,7 @@ namespace Sharky.Builds.BuildingPlacement
 
             if (unitType == UnitTypes.TERRAN_COMMANDCENTER)
             {
-                minimumMineralProximinity = 6;
+                return FindMacroCommandCenterPlacement(reference, size + 1, maxDistance, minimumMineralProximinity);
             }
             else
             {
@@ -155,27 +156,15 @@ namespace Sharky.Builds.BuildingPlacement
                 while (angle + (sliceSize / 2) < fullCircle)
                 {
                     var point = new Point2D { X = x + (float)(radius * Math.Cos(angle)), Y = y + (float)(radius * Math.Sin(angle)) };
-                    if (size == 3 || size == 1)
+                    if (size % 2 == 0)
                     {
-                        if (point.X % 1 != .5)
-                        {
-                            point.X -= .5f;
-                        }
-                        if (point.Y % 1 != .5)
-                        {
-                            point.Y -= .5f;
-                        }
+                        point.X = (float)Math.Round(point.X * 2.0) / 2f;
+                        point.Y = (float)Math.Round(point.Y * 2.0) / 2f;
                     }
-                    else if (size % 2 == 0)
+                    else
                     {
-                        if (point.X % 1 != 0)
-                        {
-                            point.X -= .5f;
-                        }
-                        if (point.Y % 1 != 0)
-                        {
-                            point.Y -= .5f;
-                        }
+                        point.X = (float)Math.Round(point.X);
+                        point.Y = (float)Math.Round(point.Y);
                     }
                     if (BuildingService.AreaBuildable(point.X, point.Y, size / 2.0f) && !BuildingService.Blocked(point.X, point.Y, size / 2.0f) && !BuildingService.HasAnyCreep(point.X, point.Y, size / 2.0f) && BuildingService.SameHeight(point.X, point.Y, size))
                     {
@@ -225,6 +214,69 @@ namespace Sharky.Builds.BuildingPlacement
             return null;
         }
 
+        public Point2D FindMacroCommandCenterPlacement(Point2D reference, float size, float maxDistance, float minimumMineralProximinity = 2)
+        {
+            var x = reference.X;
+            var y = reference.Y;
+            var radius = .25f;
+
+            // start at 12 o'clock then rotate around 12 times, increase radius by 1 until it's more than maxDistance
+            while (radius < maxDistance / 2.0)
+            {
+                var fullCircle = Math.PI * 2;
+                var sliceSize = fullCircle / (16.0 * radius);
+                var angle = 0.0;
+                while (angle + (sliceSize / 2) < fullCircle)
+                {
+                    var point = new Point2D { X = x + (float)(radius * Math.Cos(angle)), Y = y + (float)(radius * Math.Sin(angle)) };
+
+                    if (size % 2 == 0)
+                    {
+                        point.X = (float)Math.Round(point.X * 2.0) / 2f;
+                        point.Y = (float)Math.Round(point.Y * 2.0) / 2f;
+                    }
+                    else
+                    {
+                        point.X = (float)Math.Round(point.X);
+                        point.Y = (float)Math.Round(point.Y);
+                    }
+                    
+                    if (BuildingService.AreaBuildable(point.X, point.Y, size / 2.0f) && !BuildingService.Blocked(point.X, point.Y, size / 2.0f) && !BuildingService.HasAnyCreep(point.X, point.Y, size / 2.0f) && BuildingService.SameHeight(point.X, point.Y, size/2))
+                    {
+                        var mineralFields = ActiveUnitData.NeutralUnits.Where(u => SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType) || SharkyUnitData.GasGeyserTypes.Contains((UnitTypes)u.Value.Unit.UnitType));
+                        var squared = (1 + minimumMineralProximinity + (size / 2f)) * (1 + minimumMineralProximinity + (size / 2f));
+                        var vector = new Vector2(point.X, point.Y);
+                        var clashes = mineralFields.Where(u => Vector2.DistanceSquared(u.Value.Position, vector) < squared);
+
+                        if (clashes.Count() == 0)
+                        {
+                            if (Vector2.DistanceSquared(new Vector2(reference.X, reference.Y), new Vector2(point.X, point.Y)) <= maxDistance * maxDistance)
+                            {
+                                DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
+                                if (!LastLocations.Any(l => l.X == x && l.Y == y))
+                                {
+                                    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
+
+                                    LastLocations.Add(point);
+                                    if (LastLocations.Count() > 10)
+                                    {
+                                        LastLocations.RemoveAt(0);
+                                    }
+
+                                    return point;
+                                }
+                            }
+                        }
+                    }
+
+                    angle += sliceSize;
+                }
+                radius += 1;
+            }
+
+            return null;
+        }
+
         public Point2D FindBunkerPlacement(Point2D reference, float size, float maxDistance, float minimumMineralProximinity = 2)
         {
             var x = reference.X;
@@ -240,27 +292,15 @@ namespace Sharky.Builds.BuildingPlacement
                 while (angle + (sliceSize / 2) < fullCircle)
                 {
                     var point = new Point2D { X = x + (float)(radius * Math.Cos(angle)), Y = y + (float)(radius * Math.Sin(angle)) };
-                    if (size == 3 || size == 1)
+                    if (size % 2 == 0)
                     {
-                        if (point.X % 1 != .5)
-                        {
-                            point.X -= .5f;
-                        }
-                        if (point.Y % 1 != .5)
-                        {
-                            point.Y -= .5f;
-                        }
+                        point.X = (float)Math.Round(point.X * 2.0) / 2f;
+                        point.Y = (float)Math.Round(point.Y * 2.0) / 2f;
                     }
-                    else if (size == 2)
+                    else
                     {
-                        if (point.X % 1 != 0)
-                        {
-                            point.X -= .5f;
-                        }
-                        if (point.Y % 1 != 0)
-                        {
-                            point.Y -= .5f;
-                        }
+                        point.X = (float)Math.Round(point.X);
+                        point.Y = (float)Math.Round(point.Y);
                     }
                     if (BuildingService.AreaBuildable(point.X, point.Y, size / 2.0f) && !BuildingService.Blocked(point.X, point.Y, size / 2.0f) && !BuildingService.HasAnyCreep(point.X, point.Y, size / 2.0f) && BuildingService.SameHeight(point.X, point.Y, size))
                     {
