@@ -1,5 +1,6 @@
 ﻿using SC2APIProtocol;
 using Sharky.DefaultBot;
+using Sharky.Extensions;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -44,14 +45,14 @@ namespace Sharky.MicroTasks.Macro
 
         public override void ClaimUnits(Dictionary<ulong, UnitCommander> commanders)
         {
-            if (UnitCommanders.Count() < 1)
+            if (UnitCommanders.Count() < 1 && BuildPosition != null)
             {
                 if (started)
                 {
                     Disable();
                     return;
                 }
-                foreach (var commander in commanders.OrderBy(c => c.Value.Claimed).ThenBy(c => c.Value.UnitCalculation.Unit.BuffIds.Count()).ThenBy(c => DistanceToResourceCenter(c)))
+                foreach (var commander in commanders.OrderBy(c => c.Value.Claimed).ThenBy(c => c.Value.UnitCalculation.Unit.BuffIds.Count()).ThenBy(c => Vector2.DistanceSquared(c.Value.UnitCalculation.Position, BuildPosition.ToVector2())).ThenBy(c => DistanceToResourceCenter(c)))
                 {
                     if (commander.Value.UnitRole != UnitRole.Gas && (!commander.Value.Claimed || commander.Value.UnitRole == UnitRole.Minerals) && commander.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && !commander.Value.UnitCalculation.Unit.BuffIds.Any(b => SharkyUnitData.CarryingResourceBuffs.Contains((Buffs)b)) && commander.Value.UnitRole != UnitRole.Build)
                     {

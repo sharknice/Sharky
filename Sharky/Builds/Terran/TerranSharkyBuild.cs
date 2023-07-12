@@ -64,6 +64,27 @@ namespace Sharky.Builds.Terran
             }
         }
 
+        protected void SendScvForFirstBarracks(int frame)
+        {
+            if (UnitCountService.EquivalentTypeCompleted(UnitTypes.TERRAN_SUPPLYDEPOT) == 1 && UnitCountService.Count(UnitTypes.TERRAN_BARRACKS) == 0)
+            {
+                if (MapDataService != null && MapDataService.MapData.WallData != null)
+                {
+                    var wallData = MapDataService.MapData.WallData.FirstOrDefault(b => b.BasePosition.X == TargetingData.SelfMainBasePoint.X && b.BasePosition.Y == TargetingData.SelfMainBasePoint.Y);
+                    if (wallData != null && wallData.Production != null)
+                    {
+                        var point = wallData.Production.FirstOrDefault();
+                        if (point != null)
+                        {
+                            PrePositionBuilderTask.SendBuilder(point, frame);
+                            return;
+                        }
+                    }
+                }
+                PrePositionBuilderTask.SendBuilder(TargetingData.ForwardDefensePoint, frame);
+            }
+        }
+
         protected void SendScvForCommandCenter(int frame)
         {
             if (UnitCountService.EquivalentTypeCount(UnitTypes.TERRAN_COMMANDCENTER) == 1 && MacroData.Minerals > 275)

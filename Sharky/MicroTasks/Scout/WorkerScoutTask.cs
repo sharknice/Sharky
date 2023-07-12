@@ -1,5 +1,6 @@
 ﻿using SC2APIProtocol;
 using Sharky.DefaultBot;
+using Sharky.Extensions;
 using Sharky.MicroControllers;
 using Sharky.Pathing;
 using System.Collections.Generic;
@@ -13,12 +14,14 @@ namespace Sharky.MicroTasks
         SharkyUnitData SharkyUnitData;
         TargetingData TargetingData;
         MapDataService MapDataService;
-        DebugService DebugService;
         BaseData BaseData;
         AreaService AreaService;
         MineralWalker MineralWalker;
+        MicroData MicroData;
 
         List<Point2D> ScoutPoints;
+
+        public bool ScoutOnlyMain { get; set; }
 
         bool started { get; set; }
 
@@ -27,15 +30,17 @@ namespace Sharky.MicroTasks
             SharkyUnitData = defaultSharkyBot.SharkyUnitData;
             TargetingData = defaultSharkyBot.TargetingData;
             MapDataService = defaultSharkyBot.MapDataService;
-            DebugService = defaultSharkyBot.DebugService;
             BaseData = defaultSharkyBot.BaseData;
             AreaService = defaultSharkyBot.AreaService;
             MineralWalker = defaultSharkyBot.MineralWalker;
+            MicroData = defaultSharkyBot.MicroData;
 
             Priority = priority;
 
             UnitCommanders = new List<UnitCommander>();
             Enabled = enabled;
+
+            ScoutOnlyMain = false;
         }
 
         public override void ClaimUnits(Dictionary<ulong, UnitCommander> commanders)
@@ -71,29 +76,26 @@ namespace Sharky.MicroTasks
         public override IEnumerable<SC2APIProtocol.Action> PerformActions(int frame)
         {
             var commands = new List<SC2APIProtocol.Action>();
-
-            if (ScoutPoints == null)
-            {
-                ScoutPoints = AreaService.GetTargetArea(TargetingData.EnemyMainBasePoint);
-                ScoutPoints.Add(BaseData.EnemyBaseLocations.Skip(1).First().Location);
-                var ramp = TargetingData.ChokePoints.Bad.FirstOrDefault();
-                if (ramp != null)
-                {
-                    ScoutPoints.Add(new Point2D { X = ramp.Center.X, Y = ramp.Center.Y });
-                }
-            }
+            UpdateScoutPoints();
 
             var mainVector = new Vector2(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y);
             var points = ScoutPoints.OrderBy(p => MapDataService.LastFrameVisibility(p)).ThenBy(p => Vector2.DistanceSquared(mainVector, new Vector2(p.X, p.Y)));
 
             foreach (var commander in UnitCommanders)
             {
+                if (!ScoutOnlyMain && commander.UnitCalculation.NearbyEnemies.Any(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_ZEALOT))
+                {
+                    ScoutOnlyMain = true;
+                    ScoutPoints = null;
+                    UpdateScoutPoints();
+                }
+
                 if (commander.UnitCalculation.Unit.ShieldMax > 5 && (commander.UnitCalculation.Unit.Shield < 5 || (commander.UnitCalculation.Unit.Shield < commander.UnitCalculation.Unit.ShieldMax && commander.UnitCalculation.EnemiesInRangeOf.Count() > 0)))
                 {
                     if (MineralWalker.MineralWalkHome(commander, frame, out List<Action> mineralWalk))
                     {
                         commands.AddRange(mineralWalk);
-                        return commands;
+                        continue;
                     }
                 }
 
@@ -107,8 +109,18 @@ namespace Sharky.MicroTasks
                         {
                             commands.AddRange(attackAction);
                         }
-                        return commands;
+                        continue;
                     }
+                }
+
+                if (commander.UnitCalculation.EnemiesInRangeOfAvoid.Any(e => e.Range > 1 || e.Damage > 5))
+                {
+                    var retreatAction = MicroData.IndividualMicroControllers[(UnitTypes)commander.UnitCalculation.Unit.UnitType].Retreat(commander, points.FirstOrDefault(), null, frame);
+                    if (retreatAction != null)
+                    {
+                        commands.AddRange(retreatAction);
+                    }
+                    continue;
                 }
 
                 var action = commander.Order(frame, Abilities.MOVE, points.FirstOrDefault());
@@ -119,6 +131,33 @@ namespace Sharky.MicroTasks
             }
 
             return commands;
+        }
+
+        private void UpdateScoutPoints()
+        {
+            if (ScoutPoints == null)
+            {
+                ScoutPoints = AreaService.GetTargetArea(TargetingData.EnemyMainBasePoint);
+                if (ScoutOnlyMain)
+                {
+                    GetPathAroundMainPerimiter();
+                }
+                else 
+                {
+                    ScoutPoints = AreaService.GetTargetArea(TargetingData.EnemyMainBasePoint);
+                    ScoutPoints.Add(BaseData.EnemyBaseLocations.Skip(1).First().Location);
+                    var ramp = TargetingData.ChokePoints.Bad.FirstOrDefault();
+                    if (ramp != null)
+                    {
+                        ScoutPoints.Add(new Point2D { X = ramp.Center.X, Y = ramp.Center.Y });
+                    }
+                }
+            }
+        }
+
+        private void GetPathAroundMainPerimiter()
+        {
+            ScoutPoints = ScoutPoints.Where(p => !MapDataService.PathWalkable(p, 3) && MapDataService.PathWalkable(p, 2)).ToList();
         }
 
         UnitCalculation GetEnemyBuildingScv(List<UnitCalculation> enemies)
