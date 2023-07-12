@@ -146,7 +146,7 @@ namespace Sharky.Builds.BuildingPlacement
             return null;
         }
 
-        public Point2D FindSupplyDepotWallPlacement(Point2D target, float size, float maxDistance, float minimumMineralProximinity, WallOffType wallOffType)
+        public Point2D FindSupplyDepotWallPlacement(WallOffType wallOffType)
         {
             if (MapData != null && MapData.WallData != null)
             {

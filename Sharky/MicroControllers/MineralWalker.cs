@@ -24,7 +24,7 @@ namespace Sharky.MicroControllers
             MapDataService = mapDataService;
         }
 
-        public bool MineralWalkHome(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
+        public bool MineralWalkHome(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action, bool spam = false, bool queue = false)
         {
             action = null;
 
@@ -34,7 +34,7 @@ namespace Sharky.MicroControllers
                 var mineralPatch = selfBase.MineralFields.FirstOrDefault();
                 if (mineralPatch != null && Vector2.DistanceSquared(new Vector2(mineralPatch.Pos.X, mineralPatch.Pos.Y), commander.UnitCalculation.Position) > 9)
                 {
-                    action = commander.Order(frame, Abilities.HARVEST_GATHER, null, mineralPatch.Tag);
+                    action = commander.Order(frame, Abilities.HARVEST_GATHER, null, mineralPatch.Tag, allowSpam: spam, queue: queue);
                     return true;
                 }
             }
