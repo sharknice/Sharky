@@ -281,13 +281,13 @@ namespace Sharky.Builds.BuildingPlacement
         {
             var x = reference.X;
             var y = reference.Y;
-            var radius = .25f;
+            var radius = 0f;
 
             // start at 12 o'clock then rotate around 12 times, increase radius by 1 until it's more than maxDistance
-            while (radius < maxDistance / 2.0)
+            while (radius < (maxDistance / 2.0) + size)
             {
                 var fullCircle = Math.PI * 2;
-                var sliceSize = fullCircle / (16.0 + radius);
+                var sliceSize = fullCircle / (16.0 * radius);
                 var angle = 0.0;
                 while (angle + (sliceSize / 2) < fullCircle)
                 {

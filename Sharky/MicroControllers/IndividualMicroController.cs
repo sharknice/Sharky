@@ -143,8 +143,6 @@ namespace Sharky.MicroControllers
                 return false;
             }
 
-            DebugService.DrawLine(commander.UnitCalculation.Unit.Pos, bestTarget.Unit.Pos, new Color { R = 250, B = 1, G = 250 });
-
             if (AvoidTargettedDamage(commander, target, defensivePoint, frame, out action)) 
             { 
                 return true; 
@@ -155,6 +153,18 @@ namespace Sharky.MicroControllers
                 return true;
             }
 
+            if (AttackIfCooldownDistanceClose(commander, bestTarget, target, defensivePoint, frame, out action))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        protected virtual bool AttackIfCooldownDistanceClose(UnitCommander commander, UnitCalculation bestTarget, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
+
             var rangeDistance = commander.UnitCalculation.Range + commander.UnitCalculation.Unit.Radius + bestTarget.Unit.Radius;
             var actualDistance = Vector2.Distance(commander.UnitCalculation.Position, bestTarget.Position);
             var gap = actualDistance - rangeDistance;
@@ -162,6 +172,7 @@ namespace Sharky.MicroControllers
             var framesToShoot = commander.UnitCalculation.Unit.WeaponCooldown - 1;
             if (framesToRange >= framesToShoot && commander.UnitCalculation.Unit.Tag != bestTarget.Unit.Tag && bestTarget.FrameLastSeen == frame)
             {
+                DebugService.DrawLine(commander.UnitCalculation.Unit.Pos, bestTarget.Unit.Pos, new Color { R = 250, B = 1, G = 250 });
                 action = commander.Order(frame, Abilities.ATTACK, targetTag: bestTarget.Unit.Tag);
                 return true;
             }
@@ -2476,8 +2487,11 @@ namespace Sharky.MicroControllers
                 if (cycloneDps > otherDps)
                 {
                     var closestCyclone = enemyCyclones.OrderBy(e => Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position)).FirstOrDefault(e => e.FrameLastSeen == frame);
-                    action = commander.Order(frame, Abilities.ATTACK, null, closestCyclone.Unit.Tag);
-                    return true;
+                    if (closestCyclone != null)
+                    {
+                        action = commander.Order(frame, Abilities.ATTACK, null, closestCyclone.Unit.Tag);
+                        return true;
+                    }
                 }
             }
 
@@ -3203,7 +3217,7 @@ namespace Sharky.MicroControllers
             return commander.Order(frame, Abilities.ATTACK, target);
         }
 
-        protected bool ContinueInRangeAttack(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
+        protected virtual bool ContinueInRangeAttack(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 

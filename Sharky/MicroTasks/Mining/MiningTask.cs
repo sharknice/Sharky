@@ -23,6 +23,7 @@ namespace Sharky.MicroTasks
         MacroData MacroData;
         BuildOptions BuildOptions;
         MicroTaskData MicroTaskData;
+        EnemyData EnemyData;
 
         BuildingService BuildingService;
         TargetingService TargetingService;
@@ -43,6 +44,7 @@ namespace Sharky.MicroTasks
             MicroTaskData = defaultSharkyBot.MicroTaskData;
             BuildingService = defaultSharkyBot.BuildingService;
             TargetingService = defaultSharkyBot.TargetingService;
+            EnemyData = defaultSharkyBot.EnemyData;
 
             MineralMiner = mineralMiner;
             GasMiner = gasMiner;
@@ -54,7 +56,7 @@ namespace Sharky.MicroTasks
             Enabled = true;
         }
 
-        public MiningTask(SharkyUnitData sharkyUnitData, BaseData baseData, ActiveUnitData activeUnitData, float priority, MiningDefenseService miningDefenseService, MacroData macroData, BuildOptions buildOptions, MicroTaskData microTaskData, MineralMiner mineralMiner, GasMiner gasMiner)
+        public MiningTask(SharkyUnitData sharkyUnitData, BaseData baseData, ActiveUnitData activeUnitData, float priority, MiningDefenseService miningDefenseService, MacroData macroData, BuildOptions buildOptions, MicroTaskData microTaskData, MineralMiner mineralMiner, GasMiner gasMiner, EnemyData enemyData)
         {
             SharkyUnitData = sharkyUnitData;
             BaseData = baseData;
@@ -64,6 +66,7 @@ namespace Sharky.MicroTasks
             MacroData = macroData;
             BuildOptions = buildOptions;
             MicroTaskData = microTaskData;
+            EnemyData = enemyData;
 
             MineralMiner = mineralMiner;
             GasMiner = gasMiner;
@@ -107,7 +110,12 @@ namespace Sharky.MicroTasks
             commands.AddRange(GasMiner.MineGas(frame));
             commands.AddRange(RecallWorkers(frame));
 
-            if (LongDistanceMiningEnabled)
+            var hurtWorkers = UnitCommanders.Where(c => c.UnitCalculation.Unit.Health < c.UnitCalculation.Unit.HealthMax);
+            if (EnemyData.SelfRace == Race.Terran && hurtWorkers.Any())
+            {
+                commands.AddRange(RepairWithExtraIdleWorkers(frame, hurtWorkers));
+            }
+            else if (LongDistanceMiningEnabled)
             {
                 commands.AddRange(DistanceMineWithExtraIdleWorkers(frame));
             }
@@ -415,6 +423,41 @@ namespace Sharky.MicroTasks
 
                 }                             
             }
+
+            return actions;
+        }
+
+        private IEnumerable<SC2APIProtocol.Action> RepairWithExtraIdleWorkers(int frame, IEnumerable<UnitCommander> hurtWorkers)
+        {
+            var actions = new List<SC2APIProtocol.Action>();
+
+            foreach (var worker in GetIdleWorkers())
+            {
+                if (worker.UnitCalculation.Unit.BuffIds.Any(b => SharkyUnitData.CarryingResourceBuffs.Contains((Buffs)b)))
+                {
+                    var action = worker.Order(frame, Abilities.HARVEST_RETURN, null, 0);
+                    if (action != null) { actions.AddRange(action); }
+                    continue;
+                }
+                else if (worker.UnitCalculation.Unit.Orders.Count() == 0 || worker.UnitCalculation.Unit.Orders.Any(o => BaseData.SelfBases.Any(b => b.MineralMiningInfo.Any(m => m.ResourceUnit.Tag == o.TargetUnitTag))))
+                {
+                    if (!worker.AutoCastToggled)
+                    {
+                        var action = worker.ToggleAutoCast(Abilities.EFFECT_REPAIR_SCV);
+                        worker.AutoCastToggled = true;
+                        if (action != null) { actions.AddRange(action); }
+                        continue;
+                    }
+                    var hurtWorker = hurtWorkers.OrderBy(w => Vector2.DistanceSquared(w.UnitCalculation.Position, worker.UnitCalculation.Position)).FirstOrDefault();
+                    if (hurtWorker != null)
+                    {
+                        var action = worker.Order(frame, Abilities.EFFECT_REPAIR, targetTag: hurtWorker.UnitCalculation.Unit.Tag);
+                        if (action != null) { actions.AddRange(action); }
+                        continue;
+                    }
+                }
+            }
+            
 
             return actions;
         }

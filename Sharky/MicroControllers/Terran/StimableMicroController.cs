@@ -84,7 +84,7 @@ namespace Sharky.MicroControllers.Terran
             action = null;
             if (commander.UnitCalculation.Loaded) { return false; }
 
-            bool willWin = commander.UnitCalculation.TargetPriorityCalculation.Overwhelm && commander.UnitCalculation.Unit.Health == commander.UnitCalculation.Unit.HealthMax;
+            bool willWin = commander.UnitCalculation.TargetPriorityCalculation.Overwhelm && (commander.UnitCalculation.Unit.Health == commander.UnitCalculation.Unit.HealthMax || (!commander.UnitCalculation.EnemiesInRangeOfAvoid.Any() && !commander.UnitCalculation.EnemiesThreateningDamage.Any()));
 
             var nearbyBunkers = commander.UnitCalculation.NearbyAllies.Where(u => u.Unit.UnitType == (uint)UnitTypes.TERRAN_BUNKER && u.Unit.BuildProgress == 1);
             foreach (var bunker in nearbyBunkers)
