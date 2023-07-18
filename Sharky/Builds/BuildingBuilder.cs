@@ -1,6 +1,7 @@
 ﻿using SC2APIProtocol;
 using Sharky.Builds.BuildingPlacement;
 using Sharky.Builds.MacroServices;
+using Sharky.Extensions;
 using Sharky.Pathing;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,6 +21,8 @@ namespace Sharky.Builds
 
         BuildingService BuildingService;
         MapDataService MapDataService;
+
+        Point2D HadRoomLastPosition;
 
         public BuildingBuilder(ActiveUnitData activeUnitData, TargetingData targetingData, IBuildingPlacement buildingPlacement, SharkyUnitData sharkyUnitData, BaseData baseData, MicroTaskData microTaskData, BuildingService buildingService, MapDataService mapDataService, WorkerBuilderService workerBuilderService)
         {
@@ -89,6 +92,19 @@ namespace Sharky.Builds
             return null;
         }
 
+        bool TriedThisAddonLocation(UnitCommander commander)
+        {
+            if (HadRoomLastPosition == null)
+            {
+                return false;
+            }
+            if (commander.UnitCalculation.Position.X == HadRoomLastPosition.X &&  commander.UnitCalculation.Position.Y == HadRoomLastPosition.Y)
+            {
+                return true;
+            }
+            return false;
+        }
+
         public List<Action> BuildAddOn(MacroData macroData, TrainingTypeData unitData, Point2D location = null, float maxDistance = 50)
         {
             if (unitData.Minerals <= macroData.Minerals && unitData.Gas <= macroData.VespeneGas)
@@ -106,7 +122,7 @@ namespace Sharky.Builds
 
                         // is there room to build the addon?
                         var buildingWithRoom = building.FirstOrDefault(b => HasRoomForAddon(b.Value)).Value;
-                        if (buildingWithRoom != null)
+                        if (buildingWithRoom != null && !TriedThisAddonLocation(buildingWithRoom))
                         {
                             if (addOnSwap != null && Vector2.DistanceSquared(addOnSwap.AddOnTaker.UnitCalculation.Position, buildingWithRoom.UnitCalculation.Position) > 36)
                             {
@@ -116,6 +132,7 @@ namespace Sharky.Builds
                             }
                             else
                             {
+                                HadRoomLastPosition = buildingWithRoom.UnitCalculation.Position.ToPoint2D();
                                 var action = buildingWithRoom.Order(macroData.Frame, unitData.Ability);
                                 if (action != null) { return action; }
                             }

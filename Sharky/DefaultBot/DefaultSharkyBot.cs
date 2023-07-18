@@ -591,6 +591,7 @@ namespace Sharky.DefaultBot
                 [nameof(CompletedProxy)] = new CompletedProxy(this),
                 [nameof(WorkerRush)] = new WorkerRush(this),
                 [nameof(InvisibleAttacks)] = new InvisibleAttacks(this),
+                [nameof(InvisibleAttacksSuspected)] = new InvisibleAttacksSuspected(this),
                 [nameof(Air)] = new Air(this),
 
                 [nameof(OneBase)] = new OneBase(this),

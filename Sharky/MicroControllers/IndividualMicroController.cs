@@ -569,6 +569,34 @@ namespace Sharky.MicroControllers
             return false;
         }
 
+        protected virtual bool GetHighGroundVisionSupport(UnitCommander commander, Point2D target, Point2D defensivePoint, UnitCalculation bestTarget, UnitCommander targetToSupport, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
+
+            if (GetHighGroundVision(commander, target, defensivePoint, bestTarget, frame, out action)) { return true; }
+
+            if (MicroPriority == MicroPriority.StayOutOfRange || MicroPriority == MicroPriority.JustLive || !commander.UnitCalculation.NearbyAllies.Any()) { return false; }
+            if (!commander.UnitCalculation.Unit.IsFlying && commander.UnitCalculation.Unit.UnitType != (uint)UnitTypes.PROTOSS_COLOSSUS)
+            {
+                var badChokes = TargetingData.ChokePoints.Bad.Where(b => Vector2.DistanceSquared(b.Center, targetToSupport.UnitCalculation.Position) < 100 || Vector2.DistanceSquared(b.Center, commander.UnitCalculation.Position) < 100);
+                if (badChokes.Count() > 0)
+                {
+                    var chokePoint = badChokes.OrderBy(b => Vector2.DistanceSquared(b.Center, target.ToVector2())).First();
+                    if (Vector2.Distance(chokePoint.Center, targetToSupport.UnitCalculation.Position) <= targetToSupport.UnitCalculation.Range + 1)
+                    {
+                        if (MapDataService.SelfVisible(chokePoint.Center, 4))
+                        {
+                            return false;
+                        }
+                        commander.CurrentPath = null;
+                        action = commander.Order(frame, Abilities.MOVE, new Point2D { X = chokePoint.Center.X, Y = chokePoint.Center.Y });
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
         protected virtual bool RechargeShieldsAtBattery(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
@@ -818,7 +846,7 @@ namespace Sharky.MicroControllers
 
             if (formation == Formation.Loose)
             {
-                var closestAlly = commander.UnitCalculation.NearbyAllies.Take(25).OrderBy(a => Vector2.DistanceSquared(commander.UnitCalculation.Position, a.Position)).FirstOrDefault();
+                var closestAlly = commander.UnitCalculation.NearbyAllies.OrderBy(a => Vector2.DistanceSquared(commander.UnitCalculation.Position, a.Position)).FirstOrDefault();
                 if (closestAlly != null)
                 {
                     if (Vector2.DistanceSquared(commander.UnitCalculation.Position, closestAlly.Position) < (LooseFormationDistance * LooseFormationDistance))
@@ -2718,6 +2746,10 @@ namespace Sharky.MicroControllers
                 return Attack(commander, target, defensivePoint, groupCenter, frame);
             }
 
+            var supportPoint = GetSupportSpot(commander, unitToSupport.UnitCalculation, target, defensivePoint);
+            var formation = GetDesiredFormation(commander);
+            var bestTarget = GetBestTarget(commander, unitToSupport, supportPoint, frame);
+
             if (commander.UnitCalculation.NearbyEnemies.Count(e => e.FrameLastSeen == frame) == 0)
             {
                 if (commander.UnitCalculation.Unit.IsFlying)
@@ -2725,15 +2757,17 @@ namespace Sharky.MicroControllers
                     return commander.Order(frame, Abilities.MOVE, new Point2D { X = unitToSupport.UnitCalculation.Position.X, Y = unitToSupport.UnitCalculation.Position.Y });
                 }
 
+                if (GetHighGroundVisionSupport(commander, target, defensivePoint, bestTarget, unitToSupport, frame, out action)) { return action; }
+
                 if (AttackUnitsMarkedForDeath(commander, frame, out action)) { return action; }
+
+                if (formation == Formation.Loose)
+                {
+                    if (GetInFormation(commander, formation, frame, out action)) { return action; }
+                }
 
                 return commander.Order(frame, Abilities.MOVE, targetTag: unitToSupport.UnitCalculation.Unit.Tag);
             }
-
-            var supportPoint = GetSupportSpot(commander, unitToSupport.UnitCalculation, target, defensivePoint);
-
-            var formation = GetDesiredFormation(commander);
-            var bestTarget = GetBestTarget(commander, unitToSupport, supportPoint, frame);
 
             if (SpecialCaseMove(commander, supportPoint, defensivePoint, groupCenter, bestTarget, formation, frame, out action)) { return action; }
 

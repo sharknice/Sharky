@@ -1,6 +1,7 @@
 ﻿using SC2APIProtocol;
 using Sharky.Builds.BuildingPlacement;
 using Sharky.Chat;
+using Sharky.EnemyStrategies;
 using Sharky.Pathing;
 using System.Collections.Generic;
 using System.Linq;
@@ -152,7 +153,7 @@ namespace Sharky.Managers.Terran
 
         List<SC2APIProtocol.Action> Mule(UnitCommander orbital, int frame)
         {
-            if (orbital.UnitCalculation.Unit.Energy >= 50 && !EnemyData.EnemyStrategies["InvisibleAttacks"].Detected || orbital.UnitCalculation.Unit.Energy > 95)
+            if ((orbital.UnitCalculation.Unit.Energy >= 50 && !EnemyData.EnemyStrategies[typeof(InvisibleAttacks).Name].Detected && !EnemyData.EnemyStrategies[typeof(InvisibleAttacksSuspected).Name].Detected) || orbital.UnitCalculation.Unit.Energy > 95)
             {
                 var highestMineralPatch = BaseData.SelfBases.Where(b => b.ResourceCenter != null && b.ResourceCenter.BuildProgress > .99 && b.MineralFields.Count() > 0 && ActiveUnitData.SelfUnits.ContainsKey(b.ResourceCenter.Tag) && ActiveUnitData.SelfUnits[b.ResourceCenter.Tag].NearbyEnemies.Count(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit)) < 2).SelectMany(m => m.MineralFields).OrderByDescending(m => m.MineralContents).FirstOrDefault();
                 if (highestMineralPatch != null)
