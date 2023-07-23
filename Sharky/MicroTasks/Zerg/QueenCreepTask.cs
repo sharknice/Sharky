@@ -4,7 +4,6 @@ using Sharky.Builds.BuildingPlacement;
 using Sharky.DefaultBot;
 using Sharky.Extensions;
 using Sharky.MicroControllers.Zerg;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -62,7 +61,7 @@ namespace Sharky.MicroTasks.Zerg
                 UnitCommanders.Add(commander.Value);
             }
 
-            //DebugCreepSpread();
+            //Debug();
         }
 
         private void RemoveQueenCreepTargetFromCreepMap(float x, float y)
@@ -75,7 +74,7 @@ namespace Sharky.MicroTasks.Zerg
             CreepTumorPlacementFinder.AddQueenTarget((int)x, (int)y);
         }
 
-        private void DebugCreepSpread()
+        private void Debug()
         {
             CreepTumorPlacementFinder.DebugCreepSpread(DebugService);
 

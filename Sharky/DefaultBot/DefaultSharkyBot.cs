@@ -473,7 +473,7 @@ namespace Sharky.DefaultBot
             var queenDefendTask = new QueenDefendTask(this, 1.1f, queenMicroController, false);
             var burrowBlockExpansions = new BurrowBlockExpansionsTask(this, 0.9f, new IndividualMicroController(this, SharkySimplePathFinder, MicroPriority.StayOutOfRange, false), SharkyUnitData, false);
             var burrowDronesFromHarras = new BurrowDronesFromHarras(this, 0.5f, false);
-            var creepTumorTask = new CreepTumorTask(this, queenCreepTask, 1, 1.11f, false);
+            var creepTumorTask = new CreepTumorTask(this, 1.11f, false);
             var attackTask = new AttackTask(MicroController, TargetingData, ActiveUnitData, DefenseService, MacroData, AttackData, TargetingService, MicroTaskData, SharkyUnitData, new ArmySplitter(this), new EnemyCleanupService(MicroController, DamageService), 2);
             var adeptWorkerHarassTask = new AdeptWorkerHarassTask(BaseData, TargetingData, adeptMicroController, adeptShadeMicroController, false);
             var oracleWorkerHarassTask = new OracleWorkerHarassTask(this, oracleHarassMicroController, 1, false);

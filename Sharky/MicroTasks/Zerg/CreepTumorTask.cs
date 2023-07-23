@@ -15,17 +15,15 @@ namespace Sharky.MicroTasks.Zerg
 
         CreepTumorPlacementFinder CreepTumorPlacementFinder;
         DebugService DebugService;
-        MapData MapData;
 
         Dictionary<UnitCommander, Point2D> debugPos = new Dictionary<UnitCommander, Point2D>();
 
-        public CreepTumorTask(DefaultSharkyBot defaultSharkyBot, QueenCreepTask queenCreepTask, int desiredCreepSpreaders, float priority, bool enabled)
+        public CreepTumorTask(DefaultSharkyBot defaultSharkyBot, float priority, bool enabled)
         {
             EnemyData = defaultSharkyBot.EnemyData;
             SharkyOptions = defaultSharkyBot.SharkyOptions;
             CreepTumorPlacementFinder = defaultSharkyBot.CreepTumorPlacementFinder;
             DebugService = defaultSharkyBot.DebugService;
-            MapData = defaultSharkyBot.MapData;
 
             UnitCommanders = new List<UnitCommander>();
 

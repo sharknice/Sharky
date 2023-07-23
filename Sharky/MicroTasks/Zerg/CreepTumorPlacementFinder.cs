@@ -20,7 +20,6 @@ namespace Sharky.MicroTasks.Zerg
         IBuildingPlacement ZergBuildingPlacement;
         ActiveUnitData ActiveUnitData;
         BuildOptions BuildOptions;
-        UnitCountService UnitCountService;
         BuildingService BuildingService;
 
         MapData MapData;
@@ -50,7 +49,6 @@ namespace Sharky.MicroTasks.Zerg
             MapData = defaultSharkyBot.MapData;
             ActiveUnitData = defaultSharkyBot.ActiveUnitData;
             BuildOptions = defaultSharkyBot.BuildOptions;
-            UnitCountService = defaultSharkyBot.UnitCountService;
             BuildingService = defaultSharkyBot.BuildingService;
         }
 
@@ -179,52 +177,6 @@ namespace Sharky.MicroTasks.Zerg
             UpdateAreaCreepDensity(x, y, -1);
         }
 
-        //private void UpdateMap(IEnumerable<UnitCommander> queens)
-        //{
-        //    for (int x = 0; x < MapData.MapWidth; x++)
-        //        for (int y = 0; y < MapData.MapHeight; y++)
-        //        {
-        //            var mc = MapData.Map[x,y];
-        //            bool valid = mc.HasCreep
-        //                && mc.Walkable
-        //                && mc.InSelfVision
-        //                && !mc.PathBlocked;
-        //            creepSourceDensityIndex[x, y] = valid ? 0.0f : -1000.0f;
-        //        }
-
-        //    // Score area around creep spread structures
-        //    foreach (var creepSpreader in ActiveUnitData.Commanders.Values.Where(x => IsCreepSource((UnitTypes)x.UnitCalculation.Unit.UnitType)))
-        //    {
-        //        UpdateAreaCreepDensity(creepSpreader.UnitCalculation.Position.X, creepSpreader.UnitCalculation.Position.Y, 2.0f);
-
-        //        // Creep tumor targets
-        //        if (creepSpreader.UnitCalculation.Unit.UnitType == (int)UnitTypes.ZERG_CREEPTUMORBURROWED && creepSpreader.UnitCalculation.Unit.Orders.Any() && creepSpreader.UnitCalculation.Unit.Orders.First().TargetWorldSpacePos != null)
-        //        {
-        //            UpdateAreaCreepDensity(creepSpreader.UnitCalculation.Unit.Orders.First().TargetWorldSpacePos.X, creepSpreader.UnitCalculation.Unit.Orders.First().TargetWorldSpacePos.X, 1.0f);
-        //        }
-        //    }
-
-        //    // Queen targets
-        //    foreach (var queen in queens)
-        //    {
-        //        UpdateAreaCreepDensity(queen.UnitCalculation.Unit.Orders.First().TargetWorldSpacePos.X, queen.UnitCalculation.Unit.Orders.First().TargetWorldSpacePos.Y, 1.5f);
-        //    }
-
-        //    bool earlyTumors = UnitCountService.EquivalentTypeCount(UnitTypes.ZERG_CREEPTUMOR) < BuildOptions.ZergBuildOptions.TumorsPreferForward;
-
-        //    // Distance to main/enemy base
-        //    var enemyMain = TargetingData.EnemyMainBasePoint.ToVector2();
-        //    var selfMain = TargetingData.SelfMainBasePoint.ToVector2();
-        //    float mainBasesDistance = Vector2.Distance(TargetingData.SelfMainBasePoint.ToVector2(), enemyMain);
-        //    for (int x = 0; x < MapData.MapWidth; x++)
-        //        for (int y = 0; y < MapData.MapHeight; y++)
-        //        {
-        //            float enemyBaseBonus = Vector2.Distance(new Vector2(x, y), enemyMain) / mainBasesDistance;
-        //            enemyBaseBonus = 1.0f - enemyBaseBonus * enemyBaseBonus;
-        //            creepSourceDensityIndex[x, y] += (earlyTumors ? 50 : 3f) * enemyBaseBonus;
-        //        }
-        //}
-
         /// <summary>
         /// Calculates 
         /// </summary>
@@ -246,7 +198,7 @@ namespace Sharky.MicroTasks.Zerg
         /// <summary>
         /// Finds position for placing tumor by queen
         /// </summary>
-        public Point2D FindTumorPlacement(int frame)
+        public Point2D? FindTumorPlacement(int frame)
         {
             System.Drawing.Point? lowest = null;
             float lowestScore = OutsideCreepRange;
