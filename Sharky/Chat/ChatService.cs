@@ -13,6 +13,7 @@ namespace Sharky.Chat
         EnemyData EnemyData;
 
         bool ExceptionTagged;
+        List<string> ExceptionsTagged;
 
         public ChatService(IChatDataService chatDataService, SharkyOptions sharkyOptions, ActiveChatData activeChatData, EnemyData enemyData)
         {
@@ -22,6 +23,8 @@ namespace Sharky.Chat
             EnemyData = enemyData;
 
             ExceptionTagged = false;
+
+            ExceptionsTagged = new List<string>();
         }
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
@@ -120,12 +123,26 @@ namespace Sharky.Chat
             }
         }
 
-        public void TagException()
+        public void TagException(string type = null)
         {
-            if (SharkyOptions.TagsEnabled && !ExceptionTagged)
+            if (SharkyOptions.TagsEnabled)
             {
-                SendInstantChatMessage($"Tag:Exception", !SharkyOptions.TagsAllChat);
-                ExceptionTagged = true;
+                if (string.IsNullOrWhiteSpace(type))
+                {
+                    if (!ExceptionTagged)
+                    {
+                        SendInstantChatMessage($"Tag:Exception", !SharkyOptions.TagsAllChat);
+                        ExceptionTagged = true;
+                    }
+                }
+                else
+                {
+                    if (!ExceptionsTagged.Contains(type))
+                    {
+                        SendInstantChatMessage($"Tag:Exception_{type}", !SharkyOptions.TagsAllChat);
+                        ExceptionsTagged.Add(type);
+                    }
+                }
             }
         }
 

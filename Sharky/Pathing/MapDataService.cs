@@ -178,7 +178,7 @@ namespace Sharky.Pathing
 
         public bool SelfVisible(Point2D point)
         {
-            if (point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
+            if (point == null || point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
             {
                 return false;
             }
@@ -187,7 +187,7 @@ namespace Sharky.Pathing
 
         public bool SelfVisible(Point point)
         {
-            if (point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
+            if (point == null || point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
             {
                 return false;
             }
@@ -196,7 +196,7 @@ namespace Sharky.Pathing
 
         public int Visibility(Point2D point)
         {
-            if (point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
+            if (point == null || point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
             {
                 return 0;
             }
@@ -205,7 +205,7 @@ namespace Sharky.Pathing
 
         public int LastFrameVisibility(Point2D point)
         {
-            if (point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
+            if (point == null || point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
             {
                 return 0;
             }
@@ -214,7 +214,7 @@ namespace Sharky.Pathing
 
         public bool InEnemyDetection(Point point)
         {
-            if (point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
+            if (point == null || point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
             {
                 return false;
             }
@@ -223,7 +223,7 @@ namespace Sharky.Pathing
 
         public bool InEnemyDetection(Point2D point)
         {
-            if (point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
+            if (point == null || point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
             {
                 return false;
             }
@@ -232,7 +232,7 @@ namespace Sharky.Pathing
 
         public bool InSelfDetection(Point point)
         {
-            if (point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
+            if (point == null || point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
             {
                 return false;
             }
@@ -241,7 +241,7 @@ namespace Sharky.Pathing
 
         public bool InSelfDetection(Point2D point)
         {
-            if (point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
+            if (point == null || point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
             {
                 return false;
             }
@@ -250,7 +250,7 @@ namespace Sharky.Pathing
 
         public int MapHeight(Point point)
         {
-            if (point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
+            if (point == null || point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
             {
                 return 0;
             }
@@ -259,7 +259,7 @@ namespace Sharky.Pathing
 
         public int MapHeight(Point2D point)
         {
-            if (point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
+            if (point == null || point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
             {
                 return 0;
             }
@@ -286,7 +286,7 @@ namespace Sharky.Pathing
 
         public bool IsOnCreep(Point point)
         {
-            if (point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
+            if (point == null || point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
             {
                 return false;
             }
@@ -295,7 +295,7 @@ namespace Sharky.Pathing
 
         public float EnemyAirDpsInRange(Point point)
         {
-            if (point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
+            if (point == null || point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
             {
                 return 0;
             }
@@ -304,7 +304,7 @@ namespace Sharky.Pathing
 
         public float EnemyGroundSplashDpsInRange(Point point)
         {
-            if (point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
+            if (point == null || point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
             {
                 return 0;
             }
@@ -313,7 +313,7 @@ namespace Sharky.Pathing
 
         public float EnemyGroundDpsInRange(Point2D point)
         {
-            if (point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
+            if (point == null || point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
             {
                 return 0;
             }
@@ -322,7 +322,7 @@ namespace Sharky.Pathing
 
         public int LastFrameAlliesTouched(Point2D point)
         {
-            if (point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
+            if (point == null || point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
             {
                 return 0;
             }
@@ -331,7 +331,7 @@ namespace Sharky.Pathing
 
         public bool InEnemyVision(Point point)
         {
-            if (point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
+            if (point == null || point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
             {
                 return false;
             }
@@ -340,7 +340,7 @@ namespace Sharky.Pathing
 
         public bool InEnemyVision(Point2D point)
         {
-            if (point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
+            if (point == null || point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
             {
                 return false;
             }

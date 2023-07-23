@@ -22,28 +22,28 @@ namespace Sharky.MicroTasks
         public bool BlockAddons { get; set; }
         public bool RecallProbe { get; set; }
 
-        SharkyUnitData SharkyUnitData;
-        TargetingData TargetingData;
-        MacroData MacroData;
-        MapDataService MapDataService;
-        BaseData BaseData;
-        MapData MapData;
-        EnemyData EnemyData;
-        AreaService AreaService;
-        BuildingService BuildingService;
-        UnitCountService UnitCountService;
-        ActiveUnitData ActiveUnitData;
-        SharkyOptions SharkyOptions;
-        IBuildingBuilder BuildingBuilder;
+        protected SharkyUnitData SharkyUnitData;
+        protected TargetingData TargetingData;
+        protected MacroData MacroData;
+        protected MapDataService MapDataService;
+        protected BaseData BaseData;
+        protected MapData MapData;
+        protected EnemyData EnemyData;
+        protected AreaService AreaService;
+        protected BuildingService BuildingService;
+        protected UnitCountService UnitCountService;
+        protected ActiveUnitData ActiveUnitData;
+        protected SharkyOptions SharkyOptions;
+        protected IBuildingBuilder BuildingBuilder;
 
-        MineralWalker MineralWalker;
+        protected MineralWalker MineralWalker;
 
-        List<Point2D> ScoutPoints;
-        List<Point2D> EnemyMainArea;
+        protected List<Point2D> ScoutPoints;
+        protected List<Point2D> EnemyMainArea;
 
-        IIndividualMicroController IndividualMicroController;
+        protected IIndividualMicroController IndividualMicroController;
 
-        bool started { get; set; }
+        protected bool started { get; set; }
 
 
         public WorkerScoutGasStealTask(DefaultSharkyBot defaultSharkyBot, bool enabled, float priority, IIndividualMicroController individualMicroController)
@@ -167,47 +167,11 @@ namespace Sharky.MicroTasks
                     }
                 }
 
-                if (RecallProbe)
+                if (TryRecallProbe(commander, frame, commands, disable))
                 {
-                    if (frame > 1.9 * 60 * SharkyOptions.FramesPerSecond)
-                    {
-                        if (commander.UnitCalculation.NearbyEnemies.Count(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit)) == 1 && commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ProductionStructure)))
-                        {
-                            var nexus = ActiveUnitData.Commanders.Values.FirstOrDefault(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS && c.UnitCalculation.Unit.BuildProgress == 1 && c.UnitCalculation.Unit.Energy >= 50);
-                            if (nexus != null)
-                            {
-                                var baseLocation = BaseData.SelfBases.FirstOrDefault(b => b.ResourceCenter != null && b.ResourceCenter.Tag == nexus.UnitCalculation.Unit.Tag);
-                                if (baseLocation != null)
-                                {
-                                    var angle = Math.Atan2(baseLocation.Location.Y - baseLocation.MineralLineLocation.Y, baseLocation.MineralLineLocation.X - baseLocation.Location.X);
-                                    var recallPoint = new Point2D { X = commander.UnitCalculation.Position.X + (float)(-2 * Math.Cos(angle)), Y = commander.UnitCalculation.Position.Y - (float)(-2 * Math.Sin(angle)) };
-                                    var recall = nexus.Order(frame, Abilities.NEXUSMASSRECALL, recallPoint);
-                                    if (recall != null)
-                                    {
-                                        commands.AddRange(recall);
-                                        commands.AddRange(commander.Order(frame, Abilities.MOVE, commander.UnitCalculation.Position.ToPoint2D()));
-                                        disable = true;
-                                        break;
-                                    }
-                                }
-                            }
-                            if (disable) { continue; }
-                        }
-                    }
-
-                    if (frame > 1.75 * 60 * SharkyOptions.FramesPerSecond)
-                    {
-                        if (commander.UnitCalculation.NearbyEnemies.Any(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_BARRACKS && e.Unit.IsActive))
-                        {
-                            var scout = IndividualMicroController.Scout(commander, BaseData.EnemyBaseLocations.FirstOrDefault().BehindMineralLineLocation, TargetingData.ForwardDefensePoint, frame, false, true);
-                            if (scout != null)
-                            {
-                                commands.AddRange(scout);
-                            }
-                            continue;
-                        }
-                    }
+                    continue;
                 }
+                
 
                 if (StealGas && MacroData.Minerals >= 75 && commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE)
                 {
@@ -250,46 +214,9 @@ namespace Sharky.MicroTasks
                         }
                     }
 
-                    if (BlockWall && enemyBase != null && MapData.WallData != null)
+                    if (TryBlockWall(enemyBase, commands, commander, frame))
                     {
-                        var wallData = MapData.WallData.FirstOrDefault(b => b.BasePosition.X == enemyBase.Location.X && b.BasePosition.Y == enemyBase.Location.Y);
-                        if (wallData != null)
-                        {
-                            var vector = new Vector2(enemyBase.Location.X, enemyBase.Location.Y);
-                            if (Vector2.DistanceSquared(vector, commander.UnitCalculation.Position) < 225)
-                            {
-                                if (wallData.Depots != null && !ActiveUnitData.SelfUnits.Any(a => a.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && wallData.Depots.Any(p => Vector2.DistanceSquared(new Vector2(p.X, p.Y), a.Value.Position) < 4)))
-                                {
-                                    foreach (var point in wallData.Depots)
-                                    {
-                                        if (!BuildingService.Blocked(point.X, point.Y, 1, -.5f))
-                                        {
-                                            var wallBlock = commander.Order(frame, Abilities.BUILD_PYLON, point);
-                                            if (wallBlock != null)
-                                            {
-                                                commands.AddRange(wallBlock);
-                                                continue;
-                                            }
-                                        }
-                                    }
-                                }
-                                if (wallData.Production != null && !ActiveUnitData.SelfUnits.Any(a => a.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && wallData.Production.Any(p => Vector2.DistanceSquared(new Vector2(p.X, p.Y), a.Value.Position) < 4)))
-                                { 
-                                    foreach (var point in wallData.Production)
-                                    {
-                                        if (!BuildingService.Blocked(point.X, point.Y, 1, -.5f))
-                                        {
-                                            var wallBlock = commander.Order(frame, Abilities.BUILD_PYLON, point);
-                                            if (wallBlock != null)
-                                            {
-                                                commands.AddRange(wallBlock);
-                                                continue;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        continue;
                     }
 
                     var expansion = BaseData.EnemyBaseLocations.Skip(1).FirstOrDefault();
@@ -406,6 +333,102 @@ namespace Sharky.MicroTasks
             }
 
             return commands;
+        }
+
+        private bool TryRecallProbe(UnitCommander commander, int frame, List<SC2APIProtocol.Action> commands, bool disable)
+        {
+            if (!RecallProbe) { return false; }
+
+            if (frame > 1.9 * 60 * SharkyOptions.FramesPerSecond)
+            {
+                if (commander.UnitCalculation.NearbyEnemies.Count(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit)) == 1 && commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ProductionStructure)))
+                {
+                    var nexus = ActiveUnitData.Commanders.Values.FirstOrDefault(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS && c.UnitCalculation.Unit.BuildProgress == 1 && c.UnitCalculation.Unit.Energy >= 50);
+                    if (nexus != null)
+                    {
+                        var baseLocation = BaseData.SelfBases.FirstOrDefault(b => b.ResourceCenter != null && b.ResourceCenter.Tag == nexus.UnitCalculation.Unit.Tag);
+                        if (baseLocation != null)
+                        {
+                            var angle = Math.Atan2(baseLocation.Location.Y - baseLocation.MineralLineLocation.Y, baseLocation.MineralLineLocation.X - baseLocation.Location.X);
+                            var recallPoint = new Point2D { X = commander.UnitCalculation.Position.X + (float)(-2 * Math.Cos(angle)), Y = commander.UnitCalculation.Position.Y - (float)(-2 * Math.Sin(angle)) };
+                            var recall = nexus.Order(frame, Abilities.NEXUSMASSRECALL, recallPoint);
+                            if (recall != null)
+                            {
+                                commands.AddRange(recall);
+                                commands.AddRange(commander.Order(frame, Abilities.MOVE, commander.UnitCalculation.Position.ToPoint2D()));
+                                disable = true;
+                                return true;
+                            }
+                        }
+                    }
+                    if (disable) { return true; }
+                }
+            }
+
+            if (frame > 1.75 * 60 * SharkyOptions.FramesPerSecond)
+            {
+                if (commander.UnitCalculation.NearbyEnemies.Any(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_BARRACKS && e.Unit.IsActive))
+                {
+                    var scout = IndividualMicroController.Scout(commander, BaseData.EnemyBaseLocations.FirstOrDefault().BehindMineralLineLocation, TargetingData.ForwardDefensePoint, frame, false, true);
+                    if (scout != null)
+                    {
+                        commands.AddRange(scout);
+                    }
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        protected virtual bool TryBlockWall(BaseLocation enemyBase, List<SC2APIProtocol.Action> commands, UnitCommander commander, int frame)
+        {
+            if (!BlockWall || enemyBase == null || MapData.WallData == null) { return false; }
+
+            var wallData = MapData.WallData.FirstOrDefault(b => b.BasePosition.X == enemyBase.Location.X && b.BasePosition.Y == enemyBase.Location.Y);
+            if (wallData == null) { return false; }
+
+            if (Vector2.DistanceSquared(enemyBase.Location.ToVector2(), commander.UnitCalculation.Position) >= 225) { return false; }
+
+            var alreadyBlocked = wallData.Depots != null && ActiveUnitData.SelfUnits.Any(a => a.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && wallData.Depots.Any(p => Vector2.DistanceSquared(new Vector2(p.X, p.Y), a.Value.Position) < 4));
+            if (!alreadyBlocked)
+            {
+                alreadyBlocked = wallData.Production != null && ActiveUnitData.SelfUnits.Any(a => a.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && wallData.Production.Any(p => Vector2.DistanceSquared(new Vector2(p.X, p.Y), a.Value.Position) < 4));
+            }
+            if (alreadyBlocked) { return false; }
+
+            if (wallData.Depots != null)
+            {
+                foreach (var point in wallData.Depots)
+                {
+                    if (!BuildingService.Blocked(point.X, point.Y, 1, -.5f))
+                    {
+                        var wallBlock = commander.Order(frame, Abilities.BUILD_PYLON, point);
+                        if (wallBlock != null)
+                        {
+                            commands.AddRange(wallBlock);
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            if (wallData.Production != null)
+            {
+                foreach (var point in wallData.Production)
+                {
+                    if (!BuildingService.Blocked(point.X, point.Y, 1, -.5f))
+                    {
+                        var wallBlock = commander.Order(frame, Abilities.BUILD_PYLON, point);
+                        if (wallBlock != null)
+                        {
+                            commands.AddRange(wallBlock);
+                            return true; ;
+                        }
+                    }
+                }
+            }
+
+            return false;
         }
     }
 }

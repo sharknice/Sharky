@@ -72,6 +72,24 @@ namespace Sharky.MicroControllers.Protoss
             return commander.UnitCalculation.Unit.WeaponCooldown < 5 || commander.UnitCalculation.Unit.WeaponCooldown > 15; // a zealot has 2 attacks, so we do this because after one attack the cooldown starts over instead of both
         }
 
+        protected override UnitCalculation GetBestTarget(UnitCommander commander, Point2D target, int frame)
+        {
+            var bestTarget = base.GetBestTarget(commander, target, frame);
+            if (bestTarget == null) { return bestTarget; }
+
+            if (commander.UnitCalculation.EnemiesInRange.Any(e => e.Unit.Tag == bestTarget.Unit.Tag)) { return bestTarget; }
+
+            if (bestTarget.Unit.UnitType == (uint)UnitTypes.TERRAN_REAPER)
+            {
+                if (commander.UnitCalculation.NearbyAllies.Any(a => a.UnitClassifications.Contains(UnitClassification.ArmyUnit) && Vector2.DistanceSquared(a.Position, bestTarget.Position) < Vector2.DistanceSquared(commander.UnitCalculation.Position, bestTarget.Position)))
+                {
+                    return null;
+                }
+            }
+
+            return bestTarget;
+        }
+
         protected override float GetMovementSpeed(UnitCommander commander)
         {
             if (SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.CHARGE))

@@ -143,6 +143,14 @@ namespace Sharky.MicroTasks.Attack
             {
                 subTask.Value.ClaimUnitsFromParent(GetAvailableCommanders());
             }
+
+            var stuck = MainUnits.FirstOrDefault(c => c.CommanderState == CommanderState.Stuck);
+            if (stuck != null)
+            {
+                System.Console.WriteLine($"AdvancedAttackTask: removing stuck {(UnitTypes)stuck.UnitCalculation.Unit.UnitType} #{stuck.UnitCalculation.Unit.Tag} from MainUnits");
+                MainUnits.Remove(stuck);
+                SupportUnits.Add(stuck);
+            }
         }
 
         void ClaimBusyScvs(Dictionary<ulong, UnitCommander> commanders, int desiredScvs, int claimedScvs)

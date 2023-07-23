@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using Sharky.Builds.BuildingPlacement;
 using Sharky.Pathing;
 using System.Collections.Generic;
 using System.Linq;
@@ -108,9 +109,25 @@ namespace Sharky.Managers
                             }
                             foreach (var spot in wallData.Production)
                             {
-
                                 DebugService.SpawnUnits(UnitTypes.TERRAN_BARRACKS, spot, 2, 1);                             
                             }
+                        }
+                    }
+
+                    return;
+                }
+
+                match = Regex.Match(chatReceived.Message.ToLower(), "spawn enemy depot racks");
+                if (match.Success)
+                {
+                    foreach (var wallData in MapData.WallData.Where(w => w.BasePosition.X == TargetingData.EnemyMainBasePoint.X && w.BasePosition.Y == TargetingData.EnemyMainBasePoint.Y && w.Depots != null))
+                    {
+                        var spot = wallData.Depots.FirstOrDefault();
+                        DebugService.SpawnUnits(UnitTypes.TERRAN_SUPPLYDEPOTLOWERED, spot, 2, 1);
+
+                        foreach (var racksSpot in wallData.Production)
+                        {
+                            DebugService.SpawnUnits(UnitTypes.TERRAN_BARRACKS, racksSpot, 2, 1);
                         }
                     }
 
@@ -124,7 +141,7 @@ namespace Sharky.Managers
                     {
                         var spot = wallData.Depots.FirstOrDefault();
 
-                        DebugService.SpawnUnits(UnitTypes.TERRAN_SUPPLYDEPOTLOWERED, spot, 2, 1);                      
+                        DebugService.SpawnUnits(UnitTypes.TERRAN_SUPPLYDEPOTLOWERED, spot, 2, 1);
                     }
 
                     return;
