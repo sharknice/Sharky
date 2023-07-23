@@ -103,6 +103,9 @@ namespace Sharky.MicroTasks.Zerg
                 // Issue new commands at least 5 frames after the previous one
                 if (frame - queen.LastOrderFrame <= 5) continue;
 
+                // Let the queen to pick spread creep position when it is close to use it so the point is more optimal
+                if (queen.UnitCalculation.Unit.Energy <= 20) continue;
+
                 // Check if this creep queen has tumor position assigned
                 if (!QueensTumors.TryGetValue(queen, out var tumorPosition))
                 {
