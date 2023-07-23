@@ -7,7 +7,7 @@ namespace Sharky.Pathing
     {
         public int MapWidth { get; set; }
         public int MapHeight { get; set; }
-        public Dictionary<int, Dictionary<int, MapCell>> Map { get; set; }
+        public MapCell[,] Map { get; set; }
         public string MapName { get; set; }
         public List<WallData> WallData { get; set; }
         public List<PathData> PathData { get; set; }

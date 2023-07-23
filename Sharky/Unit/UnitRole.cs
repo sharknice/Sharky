@@ -20,7 +20,22 @@
         Support,
         Repair,
         SpawnLarva,
-        SpreadCreep,
+        
+        /// <summary>
+        /// Idle queen assigned to creep spread
+        /// </summary>
+        SpreadCreepWait,
+
+        /// <summary>
+        /// Queen assigned to spred creep, walking towards next creep pooint
+        /// </summary>
+        SpreadCreepWalk,
+
+        /// <summary>
+        /// Queen assigned to creep spred, ordered to create tumor and in cast distance to the tumor position
+        /// </summary>
+        SpreadCreepCast,
+
         Morph,
         Die,
         ChaseReaper,

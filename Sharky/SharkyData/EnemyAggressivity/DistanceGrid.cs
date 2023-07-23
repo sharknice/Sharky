@@ -183,7 +183,7 @@ namespace Sharky
                 return;
 
             // Skip unwalkable
-            if (!groundOnly && !MapData.Map[x][y].Walkable)
+            if (!groundOnly && !MapData.Map[x,y].Walkable)
                 return;
 
             distances[x, y] = distance;

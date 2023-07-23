@@ -170,7 +170,7 @@ namespace Sharky.Pathing
                 {
                     for (var y = 0; y < MapData.MapHeight; y++)
                     {
-                        if (!MapData.Map[x][y].Walkable || MapData.Map[x][y].EnemyGroundDpsInRange > 0)
+                        if (!MapData.Map[x,y].Walkable || MapData.Map[x,y].EnemyGroundDpsInRange > 0)
                         {
                             GroundDamageGrid.DisconnectNode(new GridPosition(x, y));
                         }
@@ -193,7 +193,8 @@ namespace Sharky.Pathing
                 {
                     for (var y = 0; y < MapData.MapHeight; y++)
                     {
-                        if (!MapData.Map[x][y].Walkable || MapData.Map[x][y].InEnemyDetection)
+                        var mapfield = MapData.Map[x,y];
+                        if (!mapfield.Walkable || mapfield.InEnemyDetection)
                         {
                             GroundDetectionGrid.DisconnectNode(new GridPosition(x, y));
                         }
@@ -217,7 +218,7 @@ namespace Sharky.Pathing
             {
                 for (var y = startY; y < yPos + halfSize; y++)
                 {
-                    if (x < 0 || y < 0 || x >= MapData.MapWidth || y >= MapData.MapHeight || MapData.Map[x][y].EnemyAirDpsInRange > 0)
+                    if (x < 0 || y < 0 || x >= MapData.MapWidth || y >= MapData.MapHeight || MapData.Map[x,y].EnemyAirDpsInRange > 0)
                     {
                         if (x != xPos && y != yPos)
                         {
@@ -244,14 +245,15 @@ namespace Sharky.Pathing
                 {
                     for (var y = 0; y < MapData.MapHeight; y++)
                     {
-                        if (!MapData.Map[x][y].Walkable)
+                        var mapfield = MapData.Map[x,y];
+                        if (!mapfield.Walkable)
                         {
                             WalkGrid.DisconnectNode(new GridPosition(x, y));
-                            //DebugService.DrawSphere(new Point { X = x, Y = y, Z = MapData.Map[x][y].TerrainHeight + 1 }, 2, new Color { R = 0, G = 255, B = 0 });
+                            //DebugService.DrawSphere(new Point { X = x, Y = y, Z = mapfield.TerrainHeight + 1 }, 2, new Color { R = 0, G = 255, B = 0 });
                         }
                         else
                         {
-                            //DebugService.DrawSphere(new Point { X = x, Y = y, Z = MapData.Map[x][y].TerrainHeight + 1 }, 2, new Color { R = 255, G = 0, B = 0 });
+                            //DebugService.DrawSphere(new Point { X = x, Y = y, Z = mapfield.TerrainHeight + 1 }, 2, new Color { R = 255, G = 0, B = 0 });
                         }
                     }
                 }

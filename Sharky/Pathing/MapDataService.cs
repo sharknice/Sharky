@@ -44,7 +44,7 @@ namespace Sharky.Pathing
             {
                 for (var currentY = yMin; currentY <= yMax; currentY++)
                 {
-                    cells.Add(MapData.Map[currentX][currentY]);
+                    cells.Add(MapData.Map[currentX,currentY]);
                 }
             }
 
@@ -57,7 +57,7 @@ namespace Sharky.Pathing
             {
                 return false;
             }
-            return MapData.Map[(int)endX][(int)endY].Walkable;
+            return MapData.Map[(int)endX,(int)endY].Walkable;
         }
 
         public bool PathWalkable(Point start, Point2D end)
@@ -159,7 +159,7 @@ namespace Sharky.Pathing
             {
                 return false;
             }
-            return MapData.Map[(int)endX][(int)endY].Buildable;
+            return MapData.Map[(int)endX,(int)endY].Buildable;
         }
 
         public bool SelfVisible(Vector2 point, float radius)
@@ -173,7 +173,7 @@ namespace Sharky.Pathing
             {
                 return false;
             }
-            return MapData.Map[(int)x][(int)y].InSelfVision;
+            return MapData.Map[(int)x,(int)y].InSelfVision;
         }
 
         public bool SelfVisible(Point2D point)
@@ -182,7 +182,7 @@ namespace Sharky.Pathing
             {
                 return false;
             }
-            return MapData.Map[(int)point.X][(int)point.Y].InSelfVision;
+            return MapData.Map[(int)point.X,(int)point.Y].InSelfVision;
         }
 
         public bool SelfVisible(Point point)
@@ -191,7 +191,7 @@ namespace Sharky.Pathing
             {
                 return false;
             }
-            return MapData.Map[(int)point.X][(int)point.Y].InSelfVision;
+            return MapData.Map[(int)point.X,(int)point.Y].InSelfVision;
         }
 
         public int Visibility(Point2D point)
@@ -200,7 +200,7 @@ namespace Sharky.Pathing
             {
                 return 0;
             }
-            return MapData.Map[(int)point.X][(int)point.Y].Visibility;
+            return MapData.Map[(int)point.X,(int)point.Y].Visibility;
         }
 
         public int LastFrameVisibility(Point2D point)
@@ -209,7 +209,7 @@ namespace Sharky.Pathing
             {
                 return 0;
             }
-            return MapData.Map[(int)point.X][(int)point.Y].LastFrameVisibility;
+            return MapData.Map[(int)point.X,(int)point.Y].LastFrameVisibility;
         }
 
         public bool InEnemyDetection(Point point)
@@ -218,7 +218,7 @@ namespace Sharky.Pathing
             {
                 return false;
             }
-            return MapData.Map[(int)point.X][(int)point.Y].InEnemyDetection;
+            return MapData.Map[(int)point.X,(int)point.Y].InEnemyDetection;
         }
 
         public bool InEnemyDetection(Point2D point)
@@ -227,7 +227,7 @@ namespace Sharky.Pathing
             {
                 return false;
             }
-            return MapData.Map[(int)point.X][(int)point.Y].InEnemyDetection;
+            return MapData.Map[(int)point.X,(int)point.Y].InEnemyDetection;
         }
 
         public bool InSelfDetection(Point point)
@@ -236,7 +236,7 @@ namespace Sharky.Pathing
             {
                 return false;
             }
-            return MapData.Map[(int)point.X][(int)point.Y].InSelfDetection;
+            return MapData.Map[(int)point.X,(int)point.Y].InSelfDetection;
         }
 
         public bool InSelfDetection(Point2D point)
@@ -245,7 +245,7 @@ namespace Sharky.Pathing
             {
                 return false;
             }
-            return MapData.Map[(int)point.X][(int)point.Y].InSelfDetection;
+            return MapData.Map[(int)point.X,(int)point.Y].InSelfDetection;
         }
 
         public int MapHeight(Point point)
@@ -254,7 +254,7 @@ namespace Sharky.Pathing
             {
                 return 0;
             }
-            return MapData.Map[(int)point.X][(int)point.Y].TerrainHeight;
+            return MapData.Map[(int)point.X,(int)point.Y].TerrainHeight;
         }
 
         public int MapHeight(Point2D point)
@@ -263,7 +263,7 @@ namespace Sharky.Pathing
             {
                 return 0;
             }
-            return MapData.Map[(int)point.X][(int)point.Y].TerrainHeight;
+            return MapData.Map[(int)point.X,(int)point.Y].TerrainHeight;
         }
 
         public int MapHeight(Vector2 point)
@@ -272,7 +272,7 @@ namespace Sharky.Pathing
             {
                 return 0;
             }
-            return MapData.Map[(int)point.X][(int)point.Y].TerrainHeight;
+            return MapData.Map[(int)point.X,(int)point.Y].TerrainHeight;
         }
 
         public int MapHeight(int x, int y)
@@ -281,7 +281,7 @@ namespace Sharky.Pathing
             {
                 return 0;
             }
-            return MapData.Map[x][y].TerrainHeight;
+            return MapData.Map[x,y].TerrainHeight;
         }
 
         public bool IsOnCreep(Point point)
@@ -290,7 +290,7 @@ namespace Sharky.Pathing
             {
                 return false;
             }
-            return MapData.Map[(int)point.X][(int)point.Y].HasCreep;
+            return MapData.Map[(int)point.X,(int)point.Y].HasCreep;
         }
 
         public float EnemyAirDpsInRange(Point point)
@@ -299,7 +299,7 @@ namespace Sharky.Pathing
             {
                 return 0;
             }
-            return MapData.Map[(int)point.X][(int)point.Y].EnemyAirDpsInRange;
+            return MapData.Map[(int)point.X,(int)point.Y].EnemyAirDpsInRange;
         }
 
         public float EnemyGroundSplashDpsInRange(Point point)
@@ -308,7 +308,7 @@ namespace Sharky.Pathing
             {
                 return 0;
             }
-            return MapData.Map[(int)point.X][(int)point.Y].EnemyGroundSplashDpsInRange;
+            return MapData.Map[(int)point.X,(int)point.Y].EnemyGroundSplashDpsInRange;
         }
 
         public float EnemyGroundDpsInRange(Point2D point)
@@ -317,7 +317,7 @@ namespace Sharky.Pathing
             {
                 return 0;
             }
-            return MapData.Map[(int)point.X][(int)point.Y].EnemyGroundDpsInRange;
+            return MapData.Map[(int)point.X,(int)point.Y].EnemyGroundDpsInRange;
         }
 
         public int LastFrameAlliesTouched(Point2D point)
@@ -326,7 +326,7 @@ namespace Sharky.Pathing
             {
                 return 0;
             }
-            return MapData.Map[(int)point.X][(int)point.Y].LastFrameAlliesTouched;
+            return MapData.Map[(int)point.X,(int)point.Y].LastFrameAlliesTouched;
         }
 
         public bool InEnemyVision(Point point)
@@ -335,7 +335,7 @@ namespace Sharky.Pathing
             {
                 return false;
             }
-            return MapData.Map[(int)point.X][(int)point.Y].InEnemyVision;
+            return MapData.Map[(int)point.X,(int)point.Y].InEnemyVision;
         }
 
         public bool InEnemyVision(Point2D point)
@@ -344,7 +344,7 @@ namespace Sharky.Pathing
             {
                 return false;
             }
-            return MapData.Map[(int)point.X][(int)point.Y].InEnemyVision;
+            return MapData.Map[(int)point.X,(int)point.Y].InEnemyVision;
         }
     }
 }
