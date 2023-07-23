@@ -1,4 +1,5 @@
-﻿using Roy_T.AStar.Graphs;
+﻿using Google.Protobuf.Collections;
+using Roy_T.AStar.Graphs;
 using Roy_T.AStar.Grids;
 using Roy_T.AStar.Paths;
 using Roy_T.AStar.Primitives;
@@ -78,22 +79,23 @@ namespace Sharky.Pathing
                 {
                     for (var y = 0; y < MapData.MapHeight; y++)
                     {
-                        if (MapData.Map[x][y].Walkable && !MapData.Map[x][y].PathBlocked)
+                        var mapfield = MapData.Map[x,y];
+                        if (mapfield.Walkable && !mapfield.PathBlocked)
                         {
-                            var speed = BaseSpeed - MapData.Map[x][y].EnemyGroundDpsInRange + MapData.Map[x][y].SelfGroundDpsInRange;
-                            if (MapData.Map[x][y].InSelfVision)
+                            var speed = BaseSpeed - mapfield.EnemyGroundDpsInRange + mapfield.SelfGroundDpsInRange;
+                            if (mapfield.InSelfVision)
                             {
                                 speed += FriendlyVisionSpeed;
                             }
-                            if (MapData.Map[x][y].InEnemyVision)
+                            if (mapfield.InEnemyVision)
                             {
                                 speed += EnemyVisionSpeed;
                             }
-                            //if (MapData.Map[x][y].SelfDetection) // TODO: Self detection
+                            //if (mapfield.SelfDetection) // TODO: Self detection
                             //{
                             //    speed += FriendlyDetectionSpeed;
                             //}
-                            if (MapData.Map[x][y].InEnemyDetection)
+                            if (mapfield.InEnemyDetection)
                             {
                                 speed += EnemyDetectionSpeed;
                             }
@@ -104,7 +106,7 @@ namespace Sharky.Pathing
                             // TODO: low ground near high ground, add a high ground proximity to the MapCell
                             foreach (Node neighbor in GetNeighbors(x, y, 1, nodes))
                             {
-                                if (MapData.Map[(int)neighbor.Position.X][(int)neighbor.Position.Y].Walkable && !MapData.Map[(int)neighbor.Position.X][(int)neighbor.Position.Y].PathBlocked)
+                                if (MapData.Map[(int)neighbor.Position.X,(int)neighbor.Position.Y].Walkable && !MapData.Map[(int)neighbor.Position.X,(int)neighbor.Position.Y].PathBlocked)
                                 {
                                     var node = nodes[x, y];
                                     node.Connect(neighbor, Velocity.FromMetersPerSecond(speed));
@@ -138,20 +140,21 @@ namespace Sharky.Pathing
                 {
                     for (var y = 0; y < MapData.MapHeight; y++)
                     {
-                        var speed = BaseSpeed - MapData.Map[x][y].EnemyAirDpsInRange + MapData.Map[x][y].SelfAirDpsInRange;
-                        if (MapData.Map[x][y].InSelfVision)
+                        var mapfield = MapData.Map[x, y];
+                        var speed = BaseSpeed - mapfield.EnemyAirDpsInRange + mapfield.SelfAirDpsInRange;
+                        if (mapfield.InSelfVision)
                         {
                             speed += FriendlyVisionSpeed;
                         }
-                        if (MapData.Map[x][y].InEnemyVision)
+                        if (mapfield.InEnemyVision)
                         {
                             speed += EnemyVisionSpeed;
                         }
-                        //if (MapData.Map[x][y].SelfDetection) // TODO: Self detection
+                        //if (mapfield.SelfDetection) // TODO: Self detection
                         //{
                         //    speed += FriendlyDetectionSpeed;
                         //}
-                        if (MapData.Map[x][y].InEnemyDetection)
+                        if (mapfield.InEnemyDetection)
                         {
                             speed += EnemyDetectionSpeed;
                         }
@@ -192,22 +195,23 @@ namespace Sharky.Pathing
                 {
                     for (var y = 0; y < MapData.MapHeight; y++)
                     {
-                        if (MapData.Map[x][y].Walkable)
+                        var mapfield = MapData.Map[x, y];
+                        if (mapfield.Walkable)
                         {
-                            var speed = BaseSpeed - MapData.Map[x][y].EnemyGroundDpsInRange + MapData.Map[x][y].SelfGroundDpsInRange;
-                            if (MapData.Map[x][y].InSelfVision)
+                            var speed = BaseSpeed - mapfield.EnemyGroundDpsInRange + mapfield.SelfGroundDpsInRange;
+                            if (mapfield.InSelfVision)
                             {
                                 speed += FriendlyVisionSpeed;
                             }
-                            if (MapData.Map[x][y].InEnemyVision)
+                            if (mapfield.InEnemyVision)
                             {
                                 speed += EnemyVisionSpeed;
                             }
-                            //if (MapData.Map[x][y].SelfDetection) // TODO: Self detection
+                            //if (mapfield.SelfDetection) // TODO: Self detection
                             //{
                             //    speed += FriendlyDetectionSpeed;
                             //}
-                            if (MapData.Map[x][y].InEnemyDetection)
+                            if (mapfield.InEnemyDetection)
                             {
                                 speed += EnemyDetectionSpeed;
                             }
@@ -218,7 +222,7 @@ namespace Sharky.Pathing
                             // TODO: low ground near high ground, add a high ground proximity to the MapCell
                             foreach (Node neighbor in GetNeighbors(x, y, 1, nodes))
                             {
-                                if (MapData.Map[(int)neighbor.Position.X][(int)neighbor.Position.Y].Walkable && !MapData.Map[(int)neighbor.Position.X][(int)neighbor.Position.Y].PathBlocked)
+                                if (MapData.Map[(int)neighbor.Position.X,(int)neighbor.Position.Y].Walkable && !MapData.Map[(int)neighbor.Position.X,(int)neighbor.Position.Y].PathBlocked)
                                 {
                                     var node = nodes[x, y];
                                     node.Connect(neighbor, Velocity.FromMetersPerSecond(speed));

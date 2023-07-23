@@ -45,7 +45,7 @@ namespace Sharky.Builds.BuildingPlacement
                     {
 
                     }
-                    else if (!MapData.Map[(int)currentX][(int)currentY].CurrentlyBuildable)
+                    else if (!MapData.Map[(int)currentX,(int)currentY].CurrentlyBuildable)
                     {
                         if (rectangle.Contains(currentX, currentY))
                         {
@@ -67,9 +67,9 @@ namespace Sharky.Builds.BuildingPlacement
             {
                 return false;
             }
-            return MapData.Map[(int)x][(int)y].InSelfVision && MapData.Map[(int)x][(int)y + (int)radius].InSelfVision && MapData.Map[(int)x][(int)y - (int)radius].InSelfVision
-                && MapData.Map[(int)x + (int)radius][(int)y].InSelfVision && MapData.Map[(int)x + (int)radius][(int)y + (int)radius].InSelfVision && MapData.Map[(int)x + (int)radius][(int)y - (int)radius].InSelfVision
-                && MapData.Map[(int)x - (int)radius][(int)y].InSelfVision && MapData.Map[(int)x - (int)radius][(int)y + (int)radius].InSelfVision && MapData.Map[(int)x - (int)radius][(int)y - (int)radius].InSelfVision;
+            return MapData.Map[(int)x,(int)y].InSelfVision && MapData.Map[(int)x,(int)y + (int)radius].InSelfVision && MapData.Map[(int)x,(int)y - (int)radius].InSelfVision
+                && MapData.Map[(int)x + (int)radius,(int)y].InSelfVision && MapData.Map[(int)x + (int)radius,(int)y + (int)radius].InSelfVision && MapData.Map[(int)x + (int)radius,(int)y - (int)radius].InSelfVision
+                && MapData.Map[(int)x - (int)radius,(int)y].InSelfVision && MapData.Map[(int)x - (int)radius,(int)y + (int)radius].InSelfVision && MapData.Map[(int)x - (int)radius,(int)y - (int)radius].InSelfVision;
         }
 
         public bool RoomBelowAndAbove(float x, float y, float radius)
@@ -78,9 +78,9 @@ namespace Sharky.Builds.BuildingPlacement
             {
                 return false;
             }
-            return MapData.Map[(int)x][(int)y + (int)radius].CurrentlyBuildable && MapData.Map[(int)x][(int)y - (int)radius].CurrentlyBuildable
-                && MapData.Map[(int)x + (int)radius][(int)y + (int)radius].CurrentlyBuildable && MapData.Map[(int)x + (int)radius][(int)y - (int)radius].CurrentlyBuildable
-                && MapData.Map[(int)x - (int)radius][(int)y + (int)radius].CurrentlyBuildable && MapData.Map[(int)x - (int)radius][(int)y - (int)radius].CurrentlyBuildable;
+            return MapData.Map[(int)x,(int)y + (int)radius].CurrentlyBuildable && MapData.Map[(int)x,(int)y - (int)radius].CurrentlyBuildable
+                && MapData.Map[(int)x + (int)radius,(int)y + (int)radius].CurrentlyBuildable && MapData.Map[(int)x + (int)radius,(int)y - (int)radius].CurrentlyBuildable
+                && MapData.Map[(int)x - (int)radius,(int)y + (int)radius].CurrentlyBuildable && MapData.Map[(int)x - (int)radius,(int)y - (int)radius].CurrentlyBuildable;
         }
 
         public bool RoomForAddonsOnOtherBuildings(float x, float y, float radius)
@@ -100,10 +100,10 @@ namespace Sharky.Builds.BuildingPlacement
             {
                 return false;
             }
-            var height = MapData.Map[(int)x][(int)y].TerrainHeight;
-            return (height == MapData.Map[(int)x][(int)y + (int)radius].TerrainHeight) && (height == MapData.Map[(int)x][(int)y - (int)radius].TerrainHeight)
-               && (height ==  MapData.Map[(int)x + (int)radius][(int)y].TerrainHeight) && (height == MapData.Map[(int)x + (int)radius][(int)y + (int)radius].TerrainHeight) && (height == MapData.Map[(int)x + (int)radius][(int)y - (int)radius].TerrainHeight)
-               && (height == MapData.Map[(int)x - (int)radius][(int)y].TerrainHeight) && (height == MapData.Map[(int)x - (int)radius][(int)y + (int)radius].TerrainHeight) && (height == MapData.Map[(int)x - (int)radius][(int)y - (int)radius].TerrainHeight);
+            var height = MapData.Map[(int)x,(int)y].TerrainHeight;
+            return (height == MapData.Map[(int)x,(int)y + (int)radius].TerrainHeight) && (height == MapData.Map[(int)x,(int)y - (int)radius].TerrainHeight)
+               && (height ==  MapData.Map[(int)x + (int)radius,(int)y].TerrainHeight) && (height == MapData.Map[(int)x + (int)radius,(int)y + (int)radius].TerrainHeight) && (height == MapData.Map[(int)x + (int)radius,(int)y - (int)radius].TerrainHeight)
+               && (height == MapData.Map[(int)x - (int)radius,(int)y].TerrainHeight) && (height == MapData.Map[(int)x - (int)radius,(int)y + (int)radius].TerrainHeight) && (height == MapData.Map[(int)x - (int)radius,(int)y - (int)radius].TerrainHeight);
         }
 
         public bool Blocked(float x, float y, float radius, float padding = .5f, ulong tag = 0)
@@ -301,9 +301,9 @@ namespace Sharky.Builds.BuildingPlacement
             {
                 return true;
             }
-            var blocked = MapData.Map[(int)x][(int)y].Walkable && MapData.Map[(int)x][(int)y + (int)radius].Walkable && MapData.Map[(int)x][(int)y - (int)radius].Walkable
-                && MapData.Map[(int)x + (int)radius][(int)y].Walkable && MapData.Map[(int)x + (int)radius][(int)y + (int)radius].Walkable && MapData.Map[(int)x + (int)radius][(int)y - (int)radius].Walkable
-                && MapData.Map[(int)x - (int)radius][(int)y].Walkable && MapData.Map[(int)x - (int)radius][(int)y + (int)radius].Walkable && MapData.Map[(int)x - (int)radius][(int)y - (int)radius].Walkable;
+            var blocked = MapData.Map[(int)x,(int)y].Walkable && MapData.Map[(int)x,(int)y + (int)radius].Walkable && MapData.Map[(int)x,(int)y - (int)radius].Walkable
+                && MapData.Map[(int)x + (int)radius,(int)y].Walkable && MapData.Map[(int)x + (int)radius,(int)y + (int)radius].Walkable && MapData.Map[(int)x + (int)radius,(int)y - (int)radius].Walkable
+                && MapData.Map[(int)x - (int)radius,(int)y].Walkable && MapData.Map[(int)x - (int)radius,(int)y + (int)radius].Walkable && MapData.Map[(int)x - (int)radius,(int)y - (int)radius].Walkable;
 
             if (blocked) { return true; }
             return !SameHeight(x, y, radius);
@@ -315,9 +315,9 @@ namespace Sharky.Builds.BuildingPlacement
             {
                 return false;
             }
-            return MapData.Map[(int)x][(int)y].EnemyGroundDpsInRange > 0 || MapData.Map[(int)x][(int)y + (int)radius].EnemyGroundDpsInRange > 0 || MapData.Map[(int)x][(int)y - (int)radius].EnemyGroundDpsInRange > 0
-                || MapData.Map[(int)x + (int)radius][(int)y].EnemyGroundDpsInRange > 0 || MapData.Map[(int)x + (int)radius][(int)y + (int)radius].EnemyGroundDpsInRange > 0 || MapData.Map[(int)x + (int)radius][(int)y - (int)radius].EnemyGroundDpsInRange > 0
-                || MapData.Map[(int)x - (int)radius][(int)y].EnemyGroundDpsInRange > 0 || MapData.Map[(int)x - (int)radius][(int)y + (int)radius].EnemyGroundDpsInRange > 0 || MapData.Map[(int)x - (int)radius][(int)y - (int)radius].EnemyGroundDpsInRange > 0;
+            return MapData.Map[(int)x,(int)y].EnemyGroundDpsInRange > 0 || MapData.Map[(int)x,(int)y + (int)radius].EnemyGroundDpsInRange > 0 || MapData.Map[(int)x,(int)y - (int)radius].EnemyGroundDpsInRange > 0
+                || MapData.Map[(int)x + (int)radius,(int)y].EnemyGroundDpsInRange > 0 || MapData.Map[(int)x + (int)radius,(int)y + (int)radius].EnemyGroundDpsInRange > 0 || MapData.Map[(int)x + (int)radius,(int)y - (int)radius].EnemyGroundDpsInRange > 0
+                || MapData.Map[(int)x - (int)radius,(int)y].EnemyGroundDpsInRange > 0 || MapData.Map[(int)x - (int)radius,(int)y + (int)radius].EnemyGroundDpsInRange > 0 || MapData.Map[(int)x - (int)radius,(int)y - (int)radius].EnemyGroundDpsInRange > 0;
         }
 
         public bool HasCreep(float x, float y, float radius)
@@ -326,9 +326,9 @@ namespace Sharky.Builds.BuildingPlacement
             {
                 return false;
             }
-            return MapData.Map[(int)x][(int)y].HasCreep && MapData.Map[(int)x][(int)y + (int)radius].HasCreep && MapData.Map[(int)x][(int)y - (int)radius].HasCreep
-                && MapData.Map[(int)x + (int)radius][(int)y].HasCreep && MapData.Map[(int)x + (int)radius][(int)y + (int)radius].HasCreep && MapData.Map[(int)x + (int)radius][(int)y - (int)radius].HasCreep
-                && MapData.Map[(int)x - (int)radius][(int)y].HasCreep && MapData.Map[(int)x - (int)radius][(int)y + (int)radius].HasCreep && MapData.Map[(int)x - (int)radius][(int)y - (int)radius].HasCreep;
+            return MapData.Map[(int)x,(int)y].HasCreep && MapData.Map[(int)x,(int)y + (int)radius].HasCreep && MapData.Map[(int)x,(int)y - (int)radius].HasCreep
+                && MapData.Map[(int)x + (int)radius,(int)y].HasCreep && MapData.Map[(int)x + (int)radius,(int)y + (int)radius].HasCreep && MapData.Map[(int)x + (int)radius,(int)y - (int)radius].HasCreep
+                && MapData.Map[(int)x - (int)radius,(int)y].HasCreep && MapData.Map[(int)x - (int)radius,(int)y + (int)radius].HasCreep && MapData.Map[(int)x - (int)radius,(int)y - (int)radius].HasCreep;
         }
 
         public bool HasAnyCreep(float x, float y, float radius)
@@ -337,9 +337,9 @@ namespace Sharky.Builds.BuildingPlacement
             {
                 return false;
             }
-            return MapData.Map[(int)x][(int)y].HasCreep || MapData.Map[(int)x][(int)y + (int)radius].HasCreep || MapData.Map[(int)x][(int)y - (int)radius].HasCreep
-                || MapData.Map[(int)x + (int)radius][(int)y].HasCreep && MapData.Map[(int)x + (int)radius][(int)y + (int)radius].HasCreep || MapData.Map[(int)x + (int)radius][(int)y - (int)radius].HasCreep
-                || MapData.Map[(int)x - (int)radius][(int)y].HasCreep && MapData.Map[(int)x - (int)radius][(int)y + (int)radius].HasCreep || MapData.Map[(int)x - (int)radius][(int)y - (int)radius].HasCreep;
+            return MapData.Map[(int)x,(int)y].HasCreep || MapData.Map[(int)x,(int)y + (int)radius].HasCreep || MapData.Map[(int)x,(int)y - (int)radius].HasCreep
+                || MapData.Map[(int)x + (int)radius,(int)y].HasCreep && MapData.Map[(int)x + (int)radius,(int)y + (int)radius].HasCreep || MapData.Map[(int)x + (int)radius,(int)y - (int)radius].HasCreep
+                || MapData.Map[(int)x - (int)radius,(int)y].HasCreep && MapData.Map[(int)x - (int)radius,(int)y + (int)radius].HasCreep || MapData.Map[(int)x - (int)radius,(int)y - (int)radius].HasCreep;
         }
 
         public bool FullyWalled()

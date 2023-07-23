@@ -98,9 +98,9 @@ namespace Sharky.Extensions
         /// </summary>
         /// <param name="thisVec"></param>
         /// <returns></returns>
-        public static Point ToPoint(this Vector2 thisVec)
+        public static Point ToPoint(this Vector2 thisVec, float z = 0)
         {
-            return new Point { X = thisVec.X, Y = thisVec.Y };
+            return new Point { X = thisVec.X, Y = thisVec.Y, Z = z };
         }
 
         /// <summary>

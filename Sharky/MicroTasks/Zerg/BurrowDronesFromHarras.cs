@@ -85,7 +85,7 @@ namespace Sharky.MicroTasks.Zerg
 
         private bool IsDetected(UnitCalculation unitCalculation)
         {
-            return MapData.Map[(int)unitCalculation.Position.X][(int)unitCalculation.Position.Y].InEnemyDetection;
+            return MapData.Map[(int)unitCalculation.Position.X,(int)unitCalculation.Position.Y].InEnemyDetection;
         }
 
         public override IEnumerable<SC2APIProtocol.Action> PerformActions(int frame)

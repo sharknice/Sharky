@@ -80,7 +80,7 @@ namespace Sharky.MicroTasks
                 {
                     int cellX = (int)(x + position.X);
                     int cellY = (int)(y + position.Y);
-                    if (cellX >= 0 && cellY >= 0 && cellX < MapData.MapWidth && cellY < MapData.MapHeight && MapData.Map[cellX][cellY].HasCreep && (frame - MapData.Map[cellX][cellY].LastFrameVisibility > 22.4f * 5.0f))
+                    if (cellX >= 0 && cellY >= 0 && cellX < MapData.MapWidth && cellY < MapData.MapHeight && MapData.Map[cellX,cellY].HasCreep && (frame - MapData.Map[cellX,cellY].LastFrameVisibility > 22.4f * 5.0f))
                     {
                         ScoutPoints.Add(new Point2D().Create(cellX, cellY));
                     }
@@ -128,7 +128,7 @@ namespace Sharky.MicroTasks
                     commands.AddRange(action);
                 }
 
-                if (MapData.Map[(int)scoutPos.X][(int)scoutPos.Y].InSelfVision)
+                if (MapData.Map[(int)scoutPos.X,(int)scoutPos.Y].InSelfVision)
                 {
                     ScoutPoints.Remove(scoutPos);
                     ScoutPoints.OrderBy(x => Vector2.DistanceSquared(x.ToVector2(), commander.UnitCalculation.Position));

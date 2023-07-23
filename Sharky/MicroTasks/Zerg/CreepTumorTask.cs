@@ -1,5 +1,9 @@
-﻿using Sharky.DefaultBot;
+﻿using SC2APIProtocol;
+using Sharky.DefaultBot;
+using Sharky.Extensions;
+using Sharky.Pathing;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Linq;
 
 namespace Sharky.MicroTasks.Zerg
@@ -8,16 +12,20 @@ namespace Sharky.MicroTasks.Zerg
     {
         EnemyData EnemyData;
         SharkyOptions SharkyOptions;
-        QueenCreepTask QueenCreepAndDefendTask;
 
         CreepTumorPlacementFinder CreepTumorPlacementFinder;
+        DebugService DebugService;
+        MapData MapData;
 
-        public CreepTumorTask(DefaultSharkyBot defaultSharkyBot, QueenCreepTask queenCreepAndDefendTask, int desiredCreepSpreaders, float priority, bool enabled)
+        Dictionary<UnitCommander, Point2D> debugPos = new Dictionary<UnitCommander, Point2D>();
+
+        public CreepTumorTask(DefaultSharkyBot defaultSharkyBot, QueenCreepTask queenCreepTask, int desiredCreepSpreaders, float priority, bool enabled)
         {
             EnemyData = defaultSharkyBot.EnemyData;
             SharkyOptions = defaultSharkyBot.SharkyOptions;
             CreepTumorPlacementFinder = defaultSharkyBot.CreepTumorPlacementFinder;
-            QueenCreepAndDefendTask = queenCreepAndDefendTask;
+            DebugService = defaultSharkyBot.DebugService;
+            MapData = defaultSharkyBot.MapData;
 
             UnitCommanders = new List<UnitCommander>();
 
@@ -29,9 +37,23 @@ namespace Sharky.MicroTasks.Zerg
         {
             foreach (var commander in commanders.Where(c => !c.Value.Claimed && c.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.ZERG_CREEPTUMORBURROWED && c.Value.UnitCalculation.Unit.BuildProgress == 1))
             {
-                commander.Value.UnitRole = UnitRole.SpreadCreep;
+                commander.Value.UnitRole = UnitRole.SpreadCreepWait;
                 commander.Value.Claimed = true;
                 UnitCommanders.Add(commander.Value);
+            }
+
+            //Debug();
+        }
+
+        private void Debug()
+        {
+            foreach (var pos in debugPos.Values)
+            {
+                if (pos is not null)
+                {
+                    for (int i=6; i<=12; i++)
+                    DebugService.DrawSphere(pos.ToPoint(i), 0.5f);
+                }
             }
         }
 
@@ -46,7 +68,6 @@ namespace Sharky.MicroTasks.Zerg
             }
 
             actions.AddRange(SpreadCreep(frame));
-
             UnitCommanders.RemoveAll(x => x.LastAbility == Abilities.BUILD_CREEPTUMOR_TUMOR);
 
             return actions;
@@ -58,17 +79,19 @@ namespace Sharky.MicroTasks.Zerg
 
             foreach (var commander in UnitCommanders)
             {
-                if (!commander.UnitCalculation.Unit.Orders.Any() && (frame - commander.UnitCalculation.FrameFirstSeen > SharkyOptions.FramesPerSecond * 22))
+                if (!commander.UnitCalculation.Unit.Orders.Any() && ((frame - commander.UnitCalculation.FrameFirstSeen) > SharkyOptions.FramesPerSecond * 24.5f))
                 {
                     if (commander.UnitCalculation.EnemiesInRangeOf.Count() > 0)
                     {
-                        continue; // Don't suicide and stuff
+                        continue; // Don't spread if enemy is close
                     }
 
-                    var spot = CreepTumorPlacementFinder.FindTumorExtensionPlacement(frame, QueenCreepAndDefendTask.UnitCommanders, commander.UnitCalculation.Position, true, UnitCommanders.Count < 3);
+                    var spot = CreepTumorPlacementFinder.FindTumorExtensionPlacement(frame, commander.UnitCalculation.Position);
 
                     if (spot != null)
                     {
+                        commander.UnitRole = UnitRole.SpreadCreepCast;
+                        debugPos[commander] = spot;
                         var action = commander.Order(frame, Abilities.BUILD_CREEPTUMOR_TUMOR, spot);
                         if (action != null)
                         {
