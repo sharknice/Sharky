@@ -94,7 +94,7 @@ namespace Sharky.MicroTasks
         {
             foreach (var unit in UnitCommanders)
             {
-                debugService.DebugUnitText(unit.UnitCalculation, CommanderDebugText ?? GetType().Name.Replace("Task", "", StringComparison.InvariantCultureIgnoreCase), CommanderDebugColor ?? debugService.DefaultMicroTaskColor);
+                debugService.DebugUnitText(unit.UnitCalculation, $"{CommanderDebugText ?? GetType().Name.Replace("Task", "", StringComparison.InvariantCultureIgnoreCase)}, {unit.UnitRole}", CommanderDebugColor ?? debugService.DefaultMicroTaskColor);
             }
         }
     }

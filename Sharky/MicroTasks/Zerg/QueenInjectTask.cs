@@ -62,7 +62,7 @@ namespace Sharky.MicroTasks.Zerg
             UnitCommanders.RemoveAll(q => q.UnitRole != UnitRole.SpawnLarva);
 
             var availableQueens = commanders.Values.Where(commander => (commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.ZERG_QUEEN || commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.ZERG_QUEENBURROWED)
-                    && (!commander.Claimed || commander.UnitRole == UnitRole.SpreadCreep));
+                    && (!commander.Claimed || commander.UnitRole == UnitRole.SpreadCreepWait));
 
             // TODO: find nearest free hatchery for queen - now queen from natural goes to main hatchery if born before queen in main
 
@@ -157,6 +157,13 @@ namespace Sharky.MicroTasks.Zerg
             }
 
             HatcheryQueenPairing.RemoveAll(x => x.Hatchery == null);
+        }
+
+        public override void StealUnit(UnitCommander commander)
+        {
+            HatcheryQueenPairing.RemoveAll(x=>x.Queen == commander);
+
+            base.StealUnit(commander);
         }
     }
 }

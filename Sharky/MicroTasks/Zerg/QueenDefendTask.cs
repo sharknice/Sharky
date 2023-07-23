@@ -1,6 +1,7 @@
 ﻿using SC2APIProtocol;
 using Sharky.DefaultBot;
 using Sharky.Extensions;
+using Sharky.Managers;
 using Sharky.MicroControllers.Zerg;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,6 +19,7 @@ namespace Sharky.MicroTasks.Zerg
         EnemyData EnemyData;
         ActiveUnitData ActiveUnitData;
         QueenMicroController QueenMicroController;
+        MicroTaskData MicroTaskData;
 
         public QueenDefendTask(DefaultSharkyBot defaultSharkyBot, float priority, QueenMicroController queenMicroController, bool enabled)
         {
@@ -25,6 +27,7 @@ namespace Sharky.MicroTasks.Zerg
             EnemyData = defaultSharkyBot.EnemyData;
             ActiveUnitData = defaultSharkyBot.ActiveUnitData;
             QueenMicroController = queenMicroController;
+            MicroTaskData = defaultSharkyBot.MicroTaskData;
 
             Priority = priority;
             Enabled = enabled;
@@ -49,6 +52,7 @@ namespace Sharky.MicroTasks.Zerg
 
                     if (enemy != null)
                     {
+                        MicroTaskData.StealCommanderFromAllTasks(commander.Value);
                         commander.Value.UnitRole = UnitRole.Defend;
                         commander.Value.Claimed = true;
                         UnitCommanders.Add(commander.Value);

@@ -39,18 +39,16 @@ namespace Sharky.Managers
             var pathingGrid = gameInfo.StartRaw.PathingGrid;
             MapData.MapWidth = pathingGrid.Size.X;
             MapData.MapHeight = pathingGrid.Size.Y;
-            MapData.Map = new Dictionary<int, Dictionary<int, MapCell>>();
+            MapData.Map = new MapCell[MapData.MapWidth, MapData.MapHeight];
             for (var x = 0; x < pathingGrid.Size.X; x++)
             {
-                var row = new Dictionary<int, MapCell>();
                 for (var y = 0; y < pathingGrid.Size.Y; y++)
                 {
                     var walkable = GetDataValueBit(pathingGrid, x, y);
                     var height = GetDataValueByte(heightGrid, x, y);
                     var placeable = GetDataValueBit(placementGrid, x, y);
-                    row[y] = new MapCell { X = x, Y = y, Walkable = walkable, TerrainHeight = height, Buildable = placeable, HasCreep = false, CurrentlyBuildable = placeable, EnemyAirDpsInRange = 0, EnemyGroundDpsInRange = 0, InEnemyVision = false, InSelfVision = false, InEnemyDetection = false, InSelfDetection = false, Visibility = 0, LastFrameVisibility = 0, NumberOfAllies = 0, NumberOfEnemies = 0, PoweredBySelfPylon = false, SelfAirDpsInRange = 0, SelfGroundDpsInRange = 0, LastFrameAlliesTouched = 0, PathBlocked = false };
+                    MapData.Map[x,y] = new MapCell { X = x, Y = y, Walkable = walkable, TerrainHeight = height, Buildable = placeable, HasCreep = false, CurrentlyBuildable = placeable, EnemyAirDpsInRange = 0, EnemyGroundDpsInRange = 0, InEnemyVision = false, InSelfVision = false, InEnemyDetection = false, InSelfDetection = false, Visibility = 0, LastFrameVisibility = 0, NumberOfAllies = 0, NumberOfEnemies = 0, PoweredBySelfPylon = false, SelfAirDpsInRange = 0, SelfGroundDpsInRange = 0, LastFrameAlliesTouched = 0, PathBlocked = false };
                 }
-                MapData.Map[x] = row;
             }
 
            MapData.MapName = gameInfo.MapName;
@@ -133,7 +131,7 @@ namespace Sharky.Managers
                     var color = new Color { R = 255, G = 255, B = 255 };
                     if (point.X + 1 < MapData.MapWidth && point.Y + 1 < MapData.MapHeight && point.X > 0 && point.Y > 0)
                     {        
-                        if (!MapData.Map[(int)point.X][(int)point.Y].CurrentlyBuildable)
+                        if (!MapData.Map[(int)point.X,(int)point.Y].CurrentlyBuildable)
                         {
                             color = new Color { R = 255, G = 0, B = 0 };
                         }
@@ -151,7 +149,7 @@ namespace Sharky.Managers
             {
                 for (var y = 0; y < MapData.MapHeight; y++)
                 {
-                    MapData.Map[x][y].NumberOfAllies = 0;
+                    MapData.Map[x,y].NumberOfAllies = 0;
                 }
             }
 
@@ -160,8 +158,8 @@ namespace Sharky.Managers
                 var nodes = GetNodesInRange(selfUnit.Value.Unit.Pos, selfUnit.Value.Unit.Radius, MapData.MapWidth, MapData.MapHeight);
                 foreach (var node in nodes)
                 {
-                    MapData.Map[(int)node.X][(int)node.Y].NumberOfAllies += 1;
-                    MapData.Map[(int)node.X][(int)node.Y].LastFrameAlliesTouched = frame;
+                    MapData.Map[(int)node.X,(int)node.Y].NumberOfAllies += 1;
+                    MapData.Map[(int)node.X,(int)node.Y].LastFrameAlliesTouched = frame;
                 }
             }
         }
@@ -172,10 +170,11 @@ namespace Sharky.Managers
             {
                 for (var y = 0; y < MapData.MapHeight; y++)
                 {
-                    MapData.Map[x][y].EnemyAirDpsInRange = 0;
-                    MapData.Map[x][y].EnemyGroundDpsInRange = 0;
-                    MapData.Map[x][y].EnemyAirSplashDpsInRange = 0;
-                    MapData.Map[x][y].EnemyGroundSplashDpsInRange = 0;
+                    var mc = MapData.Map[x,y];
+                    mc.EnemyAirDpsInRange = 0;
+                    mc.EnemyGroundDpsInRange = 0;
+                    mc.EnemyAirSplashDpsInRange = 0;
+                    mc.EnemyGroundSplashDpsInRange = 0;
                 }
             }
 
@@ -187,10 +186,10 @@ namespace Sharky.Managers
                     var splash = SharkyUnitData.AirSplashDamagers.Contains((UnitTypes)enemy.Value.Unit.UnitType);
                     foreach (var node in nodes)
                     {
-                        MapData.Map[(int)node.X][(int)node.Y].EnemyAirDpsInRange += enemy.Value.Dps;
+                        MapData.Map[(int)node.X,(int)node.Y].EnemyAirDpsInRange += enemy.Value.Dps;
                         if (splash)
                         {
-                            MapData.Map[(int)node.X][(int)node.Y].EnemyAirSplashDpsInRange += enemy.Value.Dps;
+                            MapData.Map[(int)node.X,(int)node.Y].EnemyAirSplashDpsInRange += enemy.Value.Dps;
                         }
                     }
                 }
@@ -200,10 +199,10 @@ namespace Sharky.Managers
                     var splash = SharkyUnitData.GroundSplashDamagers.Contains((UnitTypes)enemy.Value.Unit.UnitType);
                     foreach (var node in nodes)
                     {
-                        MapData.Map[(int)node.X][(int)node.Y].EnemyGroundDpsInRange += enemy.Value.Dps;
+                        MapData.Map[(int)node.X,(int)node.Y].EnemyGroundDpsInRange += enemy.Value.Dps;
                         if (splash)
                         {
-                            MapData.Map[(int)node.X][(int)node.Y].EnemyGroundSplashDpsInRange += enemy.Value.Dps;
+                            MapData.Map[(int)node.X,(int)node.Y].EnemyGroundSplashDpsInRange += enemy.Value.Dps;
                         }
                     }
                 }
@@ -214,8 +213,8 @@ namespace Sharky.Managers
                         var nodes = GetNodesInRange(enemy.Value.Unit.Pos, 12, MapData.MapWidth, MapData.MapHeight);
                         foreach (var node in nodes)
                         {
-                            MapData.Map[(int)node.X][(int)node.Y].EnemyAirSplashDpsInRange += 50;
-                            MapData.Map[(int)node.X][(int)node.Y].EnemyGroundSplashDpsInRange += 50;
+                            MapData.Map[(int)node.X,(int)node.Y].EnemyAirSplashDpsInRange += 50;
+                            MapData.Map[(int)node.X,(int)node.Y].EnemyGroundSplashDpsInRange += 50;
                         }
                     }
                 }
@@ -228,7 +227,7 @@ namespace Sharky.Managers
             {
                 for (var y = 0; y < MapData.MapHeight; y++)
                 {
-                    MapData.Map[x][y].PathBlocked = false;
+                    MapData.Map[x,y].PathBlocked = false;
                 }
             }
 
@@ -237,7 +236,7 @@ namespace Sharky.Managers
                 var nodes = GetNodesInRange(enemy.Value.Unit.Pos, enemy.Value.Unit.Radius, MapData.MapWidth, MapData.MapHeight);
                 foreach (var node in nodes)
                 {
-                    MapData.Map[(int)node.X][(int)node.Y].PathBlocked = true;
+                    MapData.Map[(int)node.X,(int)node.Y].PathBlocked = true;
                 }
             }
 
@@ -246,7 +245,7 @@ namespace Sharky.Managers
                 var nodes = GetNodesInRange(enemy.Value.Unit.Pos, enemy.Value.Unit.Radius, MapData.MapWidth, MapData.MapHeight);
                 foreach (var node in nodes)
                 {
-                    MapData.Map[(int)node.X][(int)node.Y].PathBlocked = true;
+                    MapData.Map[(int)node.X,(int)node.Y].PathBlocked = true;
                 }
             }
 
@@ -255,7 +254,7 @@ namespace Sharky.Managers
                 var nodes = GetNodesInRange(enemy.Value.Unit.Pos, enemy.Value.Unit.Radius, MapData.MapWidth, MapData.MapHeight);
                 foreach (var node in nodes)
                 {
-                    MapData.Map[(int)node.X][(int)node.Y].PathBlocked = true;
+                    MapData.Map[(int)node.X,(int)node.Y].PathBlocked = true;
                 }
             }
         }
@@ -266,7 +265,7 @@ namespace Sharky.Managers
             {
                 for (var y = 0; y < MapData.MapHeight; y++)
                 {
-                    MapData.Map[x][y].InSelfDetection = false;
+                    MapData.Map[x,y].InSelfDetection = false;
                 }
             }
 
@@ -275,7 +274,7 @@ namespace Sharky.Managers
                 var nodes = GetNodesInRange(unitCalculation.Value.Unit.Pos, unitCalculation.Value.Unit.DetectRange + 1, MapData.MapWidth, MapData.MapHeight);
                 foreach (var node in nodes)
                 {
-                    MapData.Map[(int)node.X][(int)node.Y].InSelfDetection = true;
+                    MapData.Map[(int)node.X,(int)node.Y].InSelfDetection = true;
                 }
             }
 
@@ -284,7 +283,7 @@ namespace Sharky.Managers
                 var nodes = GetNodesInRange(new Point { X = scan.Pos[0].X, Y = scan.Pos[0].Y, Z = 1 }, scan.Radius + 2, MapData.MapWidth, MapData.MapHeight);
                 foreach (var node in nodes)
                 {
-                    MapData.Map[(int)node.X][(int)node.Y].InSelfDetection = true;
+                    MapData.Map[(int)node.X,(int)node.Y].InSelfDetection = true;
                 }
             }
         }
@@ -295,7 +294,7 @@ namespace Sharky.Managers
             {
                 for (var y = 0; y < MapData.MapHeight; y++)
                 {
-                    MapData.Map[x][y].InEnemyDetection = false;
+                    MapData.Map[x,y].InEnemyDetection = false;
                 }
             }
 
@@ -304,7 +303,7 @@ namespace Sharky.Managers
                 var nodes = GetNodesInRange(enemy.Value.Unit.Pos, 11, MapData.MapWidth, MapData.MapHeight);
                 foreach (var node in nodes)
                 {
-                    MapData.Map[(int)node.X][(int)node.Y].InEnemyDetection = true;
+                    MapData.Map[(int)node.X,(int)node.Y].InEnemyDetection = true;
                 }
             }
 
@@ -313,7 +312,7 @@ namespace Sharky.Managers
                 var nodes = GetNodesInRange(new Point { X = scan.Pos[0].X, Y = scan.Pos[0].Y, Z = 1 }, scan.Radius + 2, MapData.MapWidth, MapData.MapHeight);
                 foreach (var node in nodes)
                 {
-                    MapData.Map[(int)node.X][(int)node.Y].InEnemyDetection = true;
+                    MapData.Map[(int)node.X,(int)node.Y].InEnemyDetection = true;
                 }
             }
         }
@@ -324,7 +323,7 @@ namespace Sharky.Managers
             {
                 for (var y = 0; y < MapData.MapHeight; y++)
                 {
-                    MapData.Map[x][y].InEnemyVision = false;
+                    MapData.Map[x,y].InEnemyVision = false;
                 }
             }
 
@@ -338,7 +337,7 @@ namespace Sharky.Managers
                 var nodes = GetNodesInRange(enemy.Value.Unit.Pos, radius, MapData.MapWidth, MapData.MapHeight);
                 foreach (var node in nodes)
                 {
-                    MapData.Map[(int)node.X][(int)node.Y].InEnemyVision = true;
+                    MapData.Map[(int)node.X,(int)node.Y].InEnemyVision = true;
                 }
             }
 
@@ -347,7 +346,7 @@ namespace Sharky.Managers
                 var nodes = GetNodesInRange(new Point { X = scan.Pos[0].X, Y = scan.Pos[0].Y, Z = 1 }, scan.Radius + 2, MapData.MapWidth, MapData.MapHeight);
                 foreach (var node in nodes)
                 {
-                    MapData.Map[(int)node.X][(int)node.Y].InEnemyVision = true;
+                    MapData.Map[(int)node.X,(int)node.Y].InEnemyVision = true;
                 }
             }
         }
@@ -394,7 +393,7 @@ namespace Sharky.Managers
             {
                 for (var y = 0; y < creep.Size.Y; y++)
                 {
-                    MapData.Map[x][y].HasCreep = GetDataValueBit(creep, x, y);
+                    MapData.Map[x,y].HasCreep = GetDataValueBit(creep, x, y);
                 }
             }
         }
@@ -405,11 +404,11 @@ namespace Sharky.Managers
             {
                 for (var y = 0; y < visiblilityMap.Size.Y; y++)
                 {
-                    MapData.Map[x][y].InSelfVision = GetDataValueByte(visiblilityMap, x, y) == 2; // 2 is fully visible
-                    MapData.Map[x][y].Visibility = GetDataValueByte(visiblilityMap, x, y);
+                    MapData.Map[x,y].InSelfVision = GetDataValueByte(visiblilityMap, x, y) == 2; // 2 is fully visible
+                    MapData.Map[x,y].Visibility = GetDataValueByte(visiblilityMap, x, y);
                     if (GetDataValueByte(visiblilityMap, x, y) == 2)
                     {
-                        MapData.Map[x][y].LastFrameVisibility = frame;
+                        MapData.Map[x,y].LastFrameVisibility = frame;
                     }
                 }
             }

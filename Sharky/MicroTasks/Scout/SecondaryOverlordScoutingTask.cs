@@ -104,7 +104,7 @@ namespace Sharky.MicroTasks
                 .Where(x => !BaseData.EnemyBases.Contains(x))
                 .Select(x => x.Location)
                 .Where(p => !scoutedPos.Contains(p))
-                .OrderBy(p => MapData.Map[(int)p.X][(int)p.Y].LastFrameVisibility)
+                .OrderBy(p => MapData.Map[(int)p.X,(int)p.Y].LastFrameVisibility)
                 .ThenBy(p => p.Distance(unitPos))
                 .FirstOrDefault();
 

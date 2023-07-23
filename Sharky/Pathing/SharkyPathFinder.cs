@@ -170,7 +170,7 @@ namespace Sharky.Pathing
                 {
                     for (var y = 0; y < MapData.MapHeight; y++)
                     {
-                        if (!MapData.Map[x][y].Walkable || MapData.Map[x][y].EnemyGroundDpsInRange > 0)
+                        if (!MapData.Map[x,y].Walkable || MapData.Map[x,y].EnemyGroundDpsInRange > 0)
                         {
                             GroundDamageGrid.DisconnectNode(new GridPosition(x, y));
                         }
@@ -193,7 +193,7 @@ namespace Sharky.Pathing
                 {
                     for (var y = 0; y < MapData.MapHeight; y++)
                     {
-                        if (!MapData.Map[x][y].Walkable || MapData.Map[x][y].InEnemyDetection)
+                        if (!MapData.Map[x,y].Walkable || MapData.Map[x,y].InEnemyDetection)
                         {
                             GroundDetectionGrid.DisconnectNode(new GridPosition(x, y));
                         }
@@ -216,7 +216,7 @@ namespace Sharky.Pathing
                 {
                     for (var y = 0; y < MapData.MapHeight; y++)
                     {
-                        if (MapData.Map[x][y].EnemyAirDpsInRange > 0)
+                        if (MapData.Map[x,y].EnemyAirDpsInRange > 0)
                         {
                             AirDamageGrid.DisconnectNode(new GridPosition(x, y));
                         }
@@ -239,7 +239,7 @@ namespace Sharky.Pathing
                 {
                     for (var y = 0; y < MapData.MapHeight; y++)
                     {
-                        if (!MapData.Map[x][y].Walkable)
+                        if (!MapData.Map[x,y].Walkable)
                         {
                             WalkGrid.DisconnectNode(new GridPosition(x, y));
                             continue;
@@ -304,7 +304,7 @@ namespace Sharky.Pathing
             {
                 for (var y = yMin; y < yMax; y++)
                 {
-                    if (!MapData.Map[x][y].Walkable)
+                    if (!MapData.Map[x,y].Walkable)
                     {
                         WalkGrid.DisconnectNode(new GridPosition(x - xMin, y - yMin));
                         continue;
