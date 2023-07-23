@@ -80,24 +80,12 @@ namespace Sharky.MicroTasks.Zerg
 
             foreach (var action in QueensTumors)
             {
-                DebugService.DrawLine(action.Value.ToPoint(16), action.Key.UnitCalculation.Position.ToPoint(16), new Color() { R = 255, G=255, B = 255 });
-                DebugService.DrawSphere(action.Value.ToPoint(16), 0.5f);
-                DebugService.DrawSphere(action.Value.ToPoint(15), 0.5f);
-                DebugService.DrawSphere(action.Value.ToPoint(14), 0.5f);
-                DebugService.DrawSphere(action.Value.ToPoint(13), 0.5f);
-                DebugService.DrawSphere(action.Value.ToPoint(12), 0.5f);
-                DebugService.DrawSphere(action.Value.ToPoint(11), 0.5f);
-                DebugService.DrawSphere(action.Value.ToPoint(10), 0.5f);
-                DebugService.DrawSphere(action.Value.ToPoint(9), 0.5f);
-                DebugService.DrawSphere(action.Value.ToPoint(8), 0.5f);
-                DebugService.DrawSphere(action.Value.ToPoint(7), 0.5f);
-                DebugService.DrawSphere(action.Value.ToPoint(6), 0.5f);
-                DebugService.DrawSphere(action.Value.ToPoint(5), 0.5f);
-                DebugService.DrawSphere(action.Value.ToPoint(4), 0.5f);
-                DebugService.DrawSphere(action.Value.ToPoint(3), 0.5f);
-                DebugService.DrawSphere(action.Value.ToPoint(2), 0.5f);
-                DebugService.DrawSphere(action.Value.ToPoint(1), 0.5f);
-                DebugService.DrawSphere(action.Value.ToPoint(0), 0.5f);
+                DebugService.DrawLine(action.Value.ToPoint(12), action.Key.UnitCalculation.Position.ToPoint(16), new Color() { R = 255, G=255, B = 255 });
+
+                for (int i = 6; i<=12; i++)
+                {
+                    DebugService.DrawSphere(action.Value.ToPoint(i), 0.5f);
+                }
             }
         }
 
