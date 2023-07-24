@@ -21,8 +21,11 @@ namespace Sharky.MicroTasks.Zerg
         ActiveUnitData ActiveUnitData;
         BuildOptions BuildOptions;
         BuildingService BuildingService;
+        UnitCountService UnitCountService;
 
         MapData MapData;
+
+        private const int MaxCreepDensity = 4;
 
         /// <summary>
         /// Creep source density in given area. Higher numbers mean higher creep source density.
@@ -41,7 +44,7 @@ namespace Sharky.MicroTasks.Zerg
 
         // Creep source units on the map that were already calculated for creep density map. We keep track of them so we could remove them when they are destroyed.
         private Dictionary<ulong, Vector2> creepSources = new();
-        
+
         public CreepTumorPlacementFinder(DefaultSharkyBot defaultSharkyBot, IPathFinder pathFinder)
         {
             TargetingData = defaultSharkyBot.TargetingData;
@@ -50,6 +53,7 @@ namespace Sharky.MicroTasks.Zerg
             ActiveUnitData = defaultSharkyBot.ActiveUnitData;
             BuildOptions = defaultSharkyBot.BuildOptions;
             BuildingService = defaultSharkyBot.BuildingService;
+            UnitCountService = defaultSharkyBot.UnitCountService;
         }
 
         /// <summary>
@@ -89,7 +93,7 @@ namespace Sharky.MicroTasks.Zerg
                     }
             }
 
-            foreach (var commander in ActiveUnitData.Commanders.Values.Where(x=>IsCreepSource((UnitTypes)x.UnitCalculation.Unit.UnitType) && x.FrameFirstSeen > lastFrameUpdate))
+            foreach (var commander in ActiveUnitData.Commanders.Values.Where(x => IsCreepSource((UnitTypes)x.UnitCalculation.Unit.UnitType) && x.FrameFirstSeen > lastFrameUpdate))
             {
                 AddCreepSource(commander.UnitCalculation);
             }
@@ -113,12 +117,12 @@ namespace Sharky.MicroTasks.Zerg
         /// </summary>
         public bool IsValidCreepTumorPosition(int x, int y)
         {
-            var mc = MapData.Map[x,y];
+            var mc = MapData.Map[x, y];
             return mc.HasCreep
                 && mc.Walkable
-                && mc.Buildable
-                && mc.InSelfVision
-                && mc.CurrentlyBuildable;
+                && !mc.PathBlocked
+                && mc.InSelfVision;
+                
         }
 
         /// <summary>
@@ -127,26 +131,26 @@ namespace Sharky.MicroTasks.Zerg
         /// <param name="posX">Position X</param>
         /// <param name="posY">Position Y</param>
         /// <param name="multiplier">positive (adding) or negative (removing) multiplier</param>
-        private void UpdateAreaCreepDensity(float posX, float posY, int multiplier = 1)
+        private void UpdateAreaCreepDensity(float posX, float posY, int multiplier = 1, int radius = 10)
         {
-            for (int y = -10; y <= 10; y++)
+            for (int y = -radius; y <= radius; y++)
             {
                 int arrY = (int)(y + posY);
                 if (arrY < 0 || arrY >= MapData.MapHeight) // Check array bounds
                     continue;
 
-                for (int x = -10; x <= 10; x++)
+                for (int x = -radius; x <= radius; x++)
                 {
                     int arrX = (int)(x + posX);
                     if (arrX < 0 || arrX >= MapData.MapWidth) // Check array bounds
                         continue;
 
                     float dist = (float)Math.Sqrt(x*x + y*y);
-                    if (dist > 10)
+                    if (dist > radius)
                         continue;
 
                     // highest score is far from point
-                    int score = (10 - (int)dist) * multiplier;
+                    int score = (radius - (int)dist) * multiplier;
 
                     // Initially 
                     creepSourceDensityIndex[arrX, arrY] = (creepSourceDensityIndex[arrX, arrY] & OutsideCreepRangeMask) + score;
@@ -180,19 +184,41 @@ namespace Sharky.MicroTasks.Zerg
         /// <summary>
         /// Calculates 
         /// </summary>
-        public float CreepScore(int x, int y)
+        /// <param name="preferForward">If true, highest attention is taken to the distance to enemy base and lower attention is given to creep density.</param>
+        public float CreepScore(int x, int y, bool preferForward)
         {
+            float score = creepSourceDensityIndex[x, y];
+
+            if (score > MaxCreepDensity)
+            {
+                return OutsideCreepRange;
+            }
+
             // Distance to main/enemy base
             var enemyMain = TargetingData.EnemyMainBasePoint.ToVector2();
             var selfMain = TargetingData.SelfMainBasePoint.ToVector2();
-            
+
             // Distance from our main to enemy main
             float mainBasesDistance = Vector2.Distance(TargetingData.SelfMainBasePoint.ToVector2(), enemyMain);
+
+            if (mainBasesDistance != 0)
+            {
+                // Enemy base distance penalty. The closer to the enemy base, the lower the penalty.
+                float enemyBaseDistancePenalty = 100 * Vector2.Distance(new Vector2(x, y), enemyMain) / mainBasesDistance;
+
+                if (preferForward)
+                {
+                    score = score + enemyBaseDistancePenalty * 5;
+                }
+                else
+                {
+                    score = score + enemyBaseDistancePenalty;
+                }
+            }
             
-            // How far is this point from enemy main. The closer to enemy base, smaller the number.
-            float enemyBaseBonus = Vector2.Distance(new Vector2(x, y), enemyMain) / mainBasesDistance;
-            //enemyBaseBonus = 1.0f - enemyBaseBonus * enemyBaseBonus;
-            return creepSourceDensityIndex[x, y] + enemyBaseBonus * 2;
+            // todo: creepdensityindex limit penalty to avoid too dense creep?
+
+            return score;
         }
 
         /// <summary>
@@ -203,6 +229,8 @@ namespace Sharky.MicroTasks.Zerg
             System.Drawing.Point? lowest = null;
             float lowestScore = OutsideCreepRange;
 
+            bool preferForward = UnitCountService.EquivalentTypeCount(UnitTypes.ZERG_CREEPTUMORBURROWED) < BuildOptions.ZergBuildOptions.TumorsPreferForward;
+
             // Find best tumor place
             for (int x = 0; x < MapData.MapWidth; x++)
                 for (int y = 0; y < MapData.MapHeight; y++)
@@ -212,7 +240,12 @@ namespace Sharky.MicroTasks.Zerg
                         continue;
                     }
 
-                    var creepScore = CreepScore(x, y);
+                    var creepScore = CreepScore(x, y, preferForward);
+
+                    if (creepScore >= 60000)
+                    {
+                        continue;
+                    }
 
                     if (lowest is null || creepScore<lowestScore)
                     {
@@ -238,21 +271,37 @@ namespace Sharky.MicroTasks.Zerg
             System.Drawing.Point? lowest = null;
             float lowestScore = OutsideCreepRange;
 
+            bool preferForward = UnitCountService.EquivalentTypeCount(UnitTypes.ZERG_CREEPTUMORBURROWED) < BuildOptions.ZergBuildOptions.TumorsPreferForward;
+
             for (int x = -10; x < 10; x++)
+            {
+                int arrX = (int)(x + location.X);
+
+                if (arrX < 0 || arrX >= MapData.MapWidth)
+                    continue;
+
                 for (int y = -10; y < 10; y++)
                 {
-                    int arrX = (int)(x + location.X);
                     int arrY = (int)(y + location.Y);
 
-                    if (arrX >= 0 && arrX < MapData.MapWidth && arrY >= 0 && arrY < MapData.MapHeight
-                        && Vector2.Distance(new Vector2(x, y), Vector2.Zero) <= 10
-                        && IsValidCreepTumorPosition(arrX, arrY)
-                        && (lowest is null || CreepScore(arrX, arrY) < lowestScore))
+                    if (arrY < 0 || arrY >= MapData.MapHeight)
+                        continue;
+
+                    if (Vector2.Distance(new Vector2(x, y), Vector2.Zero) > 10 || !IsValidCreepTumorPosition(arrX, arrY))
+                        continue;
+
+                    var score = CreepScore(arrX, arrY, preferForward);
+
+                    if (score == OutsideCreepRange)
+                        continue;
+
+                    if (lowest is null || score < lowestScore)
                     {
                         lowest = new System.Drawing.Point(arrX, arrY);
-                        lowestScore = CreepScore(arrX, arrY);
+                        lowestScore = score;
                     }
                 }
+            }
 
             if (lowest is null)
                 return null;
@@ -267,12 +316,14 @@ namespace Sharky.MicroTasks.Zerg
 
         public void DebugCreepSpread(DebugService debugService)
         {
+            bool preferForward = UnitCountService.EquivalentTypeCount(UnitTypes.ZERG_CREEPTUMORBURROWED) < BuildOptions.ZergBuildOptions.TumorsPreferForward;
+
             for (int x = 0; x < MapData.MapWidth; x++)
                 for (int y = 0; y < MapData.MapHeight; y++)
                 {
                     if (creepSourceDensityIndex[x, y] < 65535)
                     {
-                        debugService.DrawText($"{creepSourceDensityIndex[x, y]}:{CreepScore(x, y):F2}", new Point() { X= x, Y =y, Z = MapData.Map[x, y].TerrainHeight }, new Color() { R = 255, G = 31, B = 127 }, 8);
+                        debugService.DrawText($"{creepSourceDensityIndex[x, y]}:{CreepScore(x, y, preferForward):F2}", new Point() { X= x, Y =y, Z = MapData.Map[x, y].TerrainHeight }, new Color() { R = 255, G = 31, B = 127 }, 8);
                     }
                 }
         }
