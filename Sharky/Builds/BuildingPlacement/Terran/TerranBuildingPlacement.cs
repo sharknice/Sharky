@@ -189,7 +189,7 @@ namespace Sharky.Builds.BuildingPlacement
                                 if (Vector2.DistanceSquared(new Vector2(reference.X, reference.Y), new Vector2(point.X, point.Y)) <= maxDistance * maxDistance)
                                 {
                                     DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
-                                    if (!LastLocations.Any(l => l.X == x && l.Y == y))
+                                    if (!LastLocations.Any(l => l.X == point.X && l.Y == point.Y))
                                     {
                                         DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
 

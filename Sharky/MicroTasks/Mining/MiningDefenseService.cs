@@ -88,7 +88,7 @@ namespace Sharky.MicroTasks.Mining
 
                             desiredWorkers = 1;
 
-                            if (workers.Count(w => w.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE) > 0)
+                            if (workers.Count(w => w.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE) > 0 && workers.Count(w => w.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE) < 4)
                             {      
                                 var takenGases = selfBase.GasMiningInfo.Select(i => i.ResourceUnit);
                                 var openGeysers = BaseData.BaseLocations.SelectMany(b => b.VespeneGeysers).Where(g => g.VespeneContents > 0 && !takenGases.Any(t => t.Pos.X == g.Pos.X && t.Pos.Y == g.Pos.Y));
