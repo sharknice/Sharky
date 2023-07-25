@@ -18,6 +18,7 @@ namespace Sharky.MicroTasks.Zerg
         IBuildingPlacement ZergBuildingPlacement;
         BuildingService BuildingService;
         DebugService DebugService;
+        SharkyOptions SharkyOptions;
 
         Dictionary<UnitCommander, Point2D> QueensTumors = new Dictionary<UnitCommander, Point2D>();
 
@@ -31,6 +32,7 @@ namespace Sharky.MicroTasks.Zerg
             BuildOptions = defaultSharkyBot.BuildOptions;
             BuildingService = defaultSharkyBot.BuildingService;
             DebugService = defaultSharkyBot.DebugService;
+            SharkyOptions = defaultSharkyBot.SharkyOptions;
 
             Priority = priority;
             Enabled = enabled;
@@ -61,7 +63,10 @@ namespace Sharky.MicroTasks.Zerg
                 UnitCommanders.Add(commander.Value);
             }
 
-            //Debug();
+            if (SharkyOptions.DebugCreep)
+            {
+                Debug();
+            }
         }
 
         private void RemoveQueenCreepTargetFromCreepMap(float x, float y)
@@ -80,9 +85,9 @@ namespace Sharky.MicroTasks.Zerg
 
             foreach (var action in QueensTumors)
             {
-                DebugService.DrawLine(action.Value.ToPoint(12), action.Key.UnitCalculation.Position.ToPoint(16), new Color() { R = 255, G=255, B = 255 });
+                DebugService.DrawLine(action.Value.ToPoint(12), action.Key.UnitCalculation.Position.ToPoint(12), new Color() { R = 255, G=255, B = 255 });
 
-                for (int i = 6; i<=12; i++)
+                for (int i = 6; i<=10; i++)
                 {
                     DebugService.DrawSphere(action.Value.ToPoint(i), 0.5f);
                 }

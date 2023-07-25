@@ -74,7 +74,19 @@ namespace Sharky.Managers
         {
             foreach (var chatReceived in chatsReceived)
             {
-                var match = Regex.Match(chatReceived.Message.ToLower(), "spawn enemy wall");
+                var match = Regex.Match(chatReceived.Message.ToLower(), "debug units");
+                if (match.Success)
+                {
+                    DebugService.DebugUnits();
+                }
+
+                match = Regex.Match(chatReceived.Message.ToLower(), "debug creep");
+                if (match.Success)
+                {
+                    DebugService.DebugCreep();
+                }
+
+                match = Regex.Match(chatReceived.Message.ToLower(), "spawn enemy wall");
                 if (match.Success)
                 {
                     foreach (var wallData in MapData.WallData.Where(w => w.BasePosition.X == TargetingData.EnemyMainBasePoint.X && w.BasePosition.Y == TargetingData.EnemyMainBasePoint.Y && w.Pylons != null))

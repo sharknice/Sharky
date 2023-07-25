@@ -79,11 +79,6 @@ namespace Sharky.MicroTasks.Zerg
             {
                 if (!commander.UnitCalculation.Unit.Orders.Any() && ((frame - commander.UnitCalculation.FrameFirstSeen) > SharkyOptions.FramesPerSecond * 24.5f))
                 {
-                    if (commander.UnitCalculation.EnemiesInRangeOf.Count() > 0)
-                    {
-                        continue; // Don't spread if enemy is close
-                    }
-
                     var spot = CreepTumorPlacementFinder.FindTumorExtensionPlacement(frame, commander.UnitCalculation.Position);
 
                     if (spot != null)
