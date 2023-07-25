@@ -46,6 +46,7 @@ namespace Sharky.MicroControllers.Protoss
                             MapDataService.SelfVisible(new Point2D { X = bestTarget.Unit.Pos.X + 7, Y = bestTarget.Unit.Pos.Y }) && MapDataService.SelfVisible(new Point2D { X = bestTarget.Unit.Pos.X - 7, Y = bestTarget.Unit.Pos.Y }) &&
                             MapDataService.SelfVisible(new Point2D { X = bestTarget.Unit.Pos.X, Y = bestTarget.Unit.Pos.Y + 7 }) && MapDataService.SelfVisible(new Point2D { X = bestTarget.Unit.Pos.X, Y = bestTarget.Unit.Pos.Y - 7 }))
                         {
+                            ChatService.Tag("a_blink");
                             action = commander.Order(frame, Abilities.EFFECT_BLINK_STALKER, point);
                             return true;
                         }

@@ -114,6 +114,7 @@ namespace Sharky.MicroControllers.Protoss
 
                     if (bestAttack != null)
                     {
+                        ChatService.Tag("a_purification");
                         action = commander.Order(frame, Abilities.EFFECT_PURIFICATIONNOVA, bestAttack);
                         lastPurificationFrame = frame;
                         return true;

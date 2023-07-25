@@ -86,6 +86,7 @@ namespace Sharky.MicroControllers.Zerg
 
                     if (bestAttack != null)
                     {
+                        ChatService.Tag("a_bile");
                         action = commander.Order(frame, Abilities.EFFECT_CORROSIVEBILE, bestAttack);
                         lastBileFrame = frame;
                         return true;

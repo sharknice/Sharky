@@ -43,6 +43,7 @@ namespace Sharky.MicroControllers.Zerg
             if (building != null)
             {
                 action = commander.Order(frame, Abilities.EFFECT_CAUSTICSPRAY, targetTag: building.Unit.Tag);
+                ChatService.Tag("a_caustic");
                 return true;
             }
 

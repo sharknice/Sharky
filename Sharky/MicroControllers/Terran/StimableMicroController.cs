@@ -71,6 +71,7 @@ namespace Sharky.MicroControllers.Terran
 
                 if (commander.UnitCalculation.EnemiesInRange.Sum(e => e.Unit.Health + e.Unit.Shield) > 100) // stim if more than 100 hitpoints in range
                 {
+                    ChatService.Tag("a_stim");
                     action = commander.Order(frame, Abilities.EFFECT_STIM);
                     return true;
                 }
@@ -93,6 +94,7 @@ namespace Sharky.MicroControllers.Terran
                 {
                     if (!willWin || Vector2.DistanceSquared(bunker.Position, target.ToVector2()) < 25)
                     {
+                        ChatService.Tag("a_bunker_load");
                         action = commander.Order(frame, Abilities.SMART, targetTag: bunker.Unit.Tag, allowSpam: true);
                         return true;
                     }

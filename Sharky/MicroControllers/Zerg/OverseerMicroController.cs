@@ -33,6 +33,7 @@ namespace Sharky.MicroControllers.Zerg
                 var activeBuilding = commander.UnitCalculation.NearbyEnemies.Take(25).FirstOrDefault(e => e.Unit.IsActive && e.Attributes.Contains(Attribute.Structure) && !e.Unit.BuffIds.Contains((uint)Buffs.CONTAMINATED));
                 if (activeBuilding != null)
                 {
+                    ChatService.Tag("a_contaminate");
                     action = commander.Order(frame, Abilities.EFFECT_CONTAMINATE, targetTag: activeBuilding.Unit.Tag);
                     return true;
                 }
@@ -46,6 +47,7 @@ namespace Sharky.MicroControllers.Zerg
         {
             if (commander.UnitCalculation.Unit.Energy >= 170)
             {
+                ChatService.Tag("a_changeling");
                 action = commander.Order(frame, Abilities.EFFECT_SPAWNCHANGELING);
                 return true;
             }

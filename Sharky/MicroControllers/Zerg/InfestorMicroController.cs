@@ -108,6 +108,7 @@ namespace Sharky.MicroControllers.Zerg
                     if (bestAttack != null)
                     {
                         action = commander.Order(frame, Abilities.EFFECT_FUNGALGROWTH, bestAttack);
+                        ChatService.Tag("a_fungal");
                         lastFungalFrame = frame;
                         return true;
                     }

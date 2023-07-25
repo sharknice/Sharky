@@ -27,11 +27,13 @@ namespace Sharky.MicroControllers.Terran
         {
             if (Yamato(commander, frame, out action))
             {
+                ChatService.Tag("a_yamato");
                 return true;
             }
 
             if (TacticalJump(commander, frame, out action))
             {
+                ChatService.Tag("a_tactical");
                 return true;
             }
 

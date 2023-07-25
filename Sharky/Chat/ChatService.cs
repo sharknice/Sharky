@@ -15,6 +15,8 @@ namespace Sharky.Chat
         bool ExceptionTagged;
         List<string> ExceptionsTagged;
 
+        private HashSet<string> TagsUsed = new HashSet<string>();
+
         public ChatService(IChatDataService chatDataService, SharkyOptions sharkyOptions, ActiveChatData activeChatData, EnemyData enemyData)
         {
             ChatDataService = chatDataService;
@@ -119,7 +121,12 @@ namespace Sharky.Chat
             if (SharkyOptions.TagsEnabled)
             {
                 tag = new string(tag.Select(c => (char.IsLetterOrDigit(c) || c == '-') ? c : '_').ToArray());
-                SendInstantChatMessage($"Tag:{tag}", !SharkyOptions.TagsAllChat);
+
+                if (!TagsUsed.Contains(tag))
+                {
+                    TagsUsed.Add(tag);
+                    SendInstantChatMessage($"Tag:{tag}", !SharkyOptions.TagsAllChat);
+                }
             }
         }
 

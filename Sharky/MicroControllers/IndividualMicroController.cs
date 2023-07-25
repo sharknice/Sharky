@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using Sharky.Chat;
 using Sharky.DefaultBot;
 using Sharky.Extensions;
 using Sharky.MicroTasks.Attack;
@@ -27,6 +28,7 @@ namespace Sharky.MicroControllers
         protected TargetingService TargetingService;
         protected AttackPathingService AttackPathingService;
         protected AttackData AttackData;
+        protected ChatService ChatService;
 
         public MicroPriority MicroPriority { get; set; }
 
@@ -63,6 +65,7 @@ namespace Sharky.MicroControllers
             UnitDataService = defaultSharkyBot.UnitDataService;
             TargetingService = defaultSharkyBot.TargetingService;
             AttackPathingService = defaultSharkyBot.AttackPathingService;
+            ChatService = defaultSharkyBot.ChatService;
 
             GroupUpDistanceSmall = 5;
             GroupUpDistance = 10;

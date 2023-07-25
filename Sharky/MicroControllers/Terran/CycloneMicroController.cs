@@ -128,6 +128,7 @@ namespace Sharky.MicroControllers.Terran
                 {
                     if (Vector2.DistanceSquared(bestTarget.Position, commander.UnitCalculation.Position) <= 49)
                     {
+                        ChatService.Tag("a_lockon");
                         action = commander.Order(frame, Abilities.EFFECT_LOCKON, targetTag: bestTarget.Unit.Tag);
                         LastLockOnFrame = frame;
                         commander.LastLockOn = new LockOnData { StartFrame = frame, Tag = bestTarget.Unit.Tag, EndFrame = frame + (int)(14.3 * SharkyOptions.FramesPerSecond) };

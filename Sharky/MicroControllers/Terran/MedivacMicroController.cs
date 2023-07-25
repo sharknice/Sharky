@@ -32,6 +32,7 @@ namespace Sharky.MicroControllers.Terran
 
             if (commander.AbilityOffCooldown(Abilities.EFFECT_MEDIVACIGNITEAFTERBURNERS, frame, SharkyOptions.FramesPerSecond, SharkyUnitData))
             {
+                ChatService.Tag("a_afterburner");
                 action = commander.Order(frame, Abilities.EFFECT_MEDIVACIGNITEAFTERBURNERS);
                 return true;
             }

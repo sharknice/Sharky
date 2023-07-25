@@ -73,6 +73,7 @@ namespace Sharky.MicroControllers.Terran
                     }
                     else if (distanceSqaured < Kd8Charge * Kd8Charge)
                     {
+                        ChatService.Tag("a_kd8charge");
                         var point = new Point2D { X = bestTarget.Position.X, Y = bestTarget.Position.Y };
                         action = commander.Order(frame, Abilities.EFFECT_KD8CHARGE, point);
                         return true;
