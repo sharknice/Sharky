@@ -31,7 +31,9 @@ namespace Sharky.EnemyStrategies
                 && x.Unit.Pos.ToVector2().DistanceSquared(TargetingData.EnemyMainBasePoint.ToVector2()) > 16.0f);
 
             if (MapDataService.LastFrameVisibility(BaseData.EnemyNaturalBase.Location) == 0)
+            {
                 return false;
+            }
 
             if (enemyExpansions > 1)
             {
@@ -44,7 +46,8 @@ namespace Sharky.EnemyStrategies
                 return false;
             }
 
-            if (!MapDataService.SelfVisible(BaseData.EnemyBaseLocations.Skip(2).FirstOrDefault().Location))
+            // If we havent scouted third
+            if (BaseData.EnemyBaseLocations.Count() >= 3 && MapDataService.LastFrameVisibility(BaseData.EnemyBaseLocations.Skip(2).First().Location) == 0)
             {
                 return false;
             }
@@ -61,8 +64,10 @@ namespace Sharky.EnemyStrategies
             {
                 return elapsedTime.TotalMinutes >= 7f;
             }
-
-            return false;
+            else
+            {
+                return false;
+            }
         }
     }
 }
