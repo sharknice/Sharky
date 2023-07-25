@@ -121,7 +121,8 @@ namespace Sharky.MicroTasks.Zerg
             return mc.HasCreep
                 && mc.Walkable
                 && !mc.PathBlocked
-                && mc.InSelfVision;
+                && mc.InSelfVision
+                && mc.EnemyGroundDpsInRange == 0;
                 
         }
 
@@ -204,11 +205,11 @@ namespace Sharky.MicroTasks.Zerg
             if (mainBasesDistance != 0)
             {
                 // Enemy base distance penalty. The closer to the enemy base, the lower the penalty.
-                float enemyBaseDistancePenalty = 100 * Vector2.Distance(new Vector2(x, y), enemyMain) / mainBasesDistance;
+                float enemyBaseDistancePenalty = 20 * Vector2.Distance(new Vector2(x, y), enemyMain) / mainBasesDistance;
 
                 if (preferForward)
                 {
-                    score = score + enemyBaseDistancePenalty * 5;
+                    score = score + enemyBaseDistancePenalty * 10;
                 }
                 else
                 {
@@ -321,9 +322,14 @@ namespace Sharky.MicroTasks.Zerg
             for (int x = 0; x < MapData.MapWidth; x++)
                 for (int y = 0; y < MapData.MapHeight; y++)
                 {
-                    if (creepSourceDensityIndex[x, y] < 65535)
+                    if (IsValidCreepTumorPosition(x, y) && creepSourceDensityIndex[x, y] < 50000)
                     {
-                        debugService.DrawText($"{creepSourceDensityIndex[x, y]}:{CreepScore(x, y, preferForward):F2}", new Point() { X= x, Y =y, Z = MapData.Map[x, y].TerrainHeight }, new Color() { R = 255, G = 31, B = 127 }, 8);
+                        var creepScore = CreepScore(x, y, preferForward);
+                        if (creepScore < 50000)
+                        {
+                            debugService.DrawText($"{creepScore:F3}", new Point() { X= x, Y =y, Z = 10 }, new Color() { R = 255, G = 31, B = 127 }, 8);
+                            debugService.DrawText($"Density: {creepSourceDensityIndex[x, y]}", new Point() { X= x, Y = y + 0.2f, Z = 10 }, new Color() { R = 191, G = 255, B = 127 }, 8);
+                        }
                     }
                 }
         }

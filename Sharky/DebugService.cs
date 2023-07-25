@@ -18,6 +18,8 @@ namespace Sharky
         public Request SpawnRequest { get; set; }
         public bool Surrender { get; set; }
 
+        public Dictionary<ulong, UnitDebugEntry> DebugUnitsInfo = new Dictionary<ulong, UnitDebugEntry>();
+
         public DebugService(SharkyOptions sharkyOptions, ActiveUnitData activeUnitData, MacroData macroData)
         {
             SharkyOptions = sharkyOptions;
@@ -92,7 +94,7 @@ namespace Sharky
             DrawRequest.Debug.Debug.Add(debugCommand);
 
             // Remove unit debug info older than 5 frames
-            DebugUnits = DebugUnits.Where(x=>(MacroData.Frame - x.Value.LastFrameUpdate <= 5)).ToDictionary(k => k.Key, v => v.Value);
+            DebugUnitsInfo = DebugUnitsInfo.Where(x=>(MacroData.Frame - x.Value.LastFrameUpdate <= 5)).ToDictionary(k => k.Key, v => v.Value);
         }
 
         public void ResetSpawnRequest()
@@ -104,16 +106,14 @@ namespace Sharky
             DrawRequest.Debug.Debug.Add(debugCommand);
         }
 
-        public Dictionary<ulong, UnitDebugEntry> DebugUnits = new Dictionary<ulong, UnitDebugEntry>();
-
-        public void DebugUnitText(UnitCalculation unitCalculation, string text, Color color, uint size = 12)
+        public void DebugUnitText(UnitCalculation unitCalculation, string text, Color color, uint size = 11)
         {
-            DebugUnits[unitCalculation.Unit.Tag] = new UnitDebugEntry(MacroData.Frame, text, unitCalculation, color, size);
+            DebugUnitsInfo[unitCalculation.Unit.Tag] = new UnitDebugEntry(MacroData.Frame, text, unitCalculation, color, size);
         }
 
         public void DrawUnitInfo()
         {
-            foreach (var unit in DebugUnits)
+            foreach (var unit in DebugUnitsInfo)
             {
                 unit.Value.Draw(this);
             }
@@ -210,6 +210,16 @@ namespace Sharky
                     Value = value
                 }
             });
+        }
+
+        public void DebugUnits()
+        {
+            SharkyOptions.DebugMicroTaskUnits = !SharkyOptions.DebugMicroTaskUnits;
+        }
+
+        public void DebugCreep()
+        {
+            SharkyOptions.DebugCreep = !SharkyOptions.DebugCreep;
         }
 
         public void SetCamera(Point location)

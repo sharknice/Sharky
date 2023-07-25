@@ -7,7 +7,12 @@
         /// <summary>
         /// Show micro task assigned to the unit
         /// </summary>
-        public bool DebugMicroTaskUnits { get; set; }
+        public bool DebugMicroTaskUnits { get; set; } = false;
+
+        /// <summary>
+        /// Debug creep spread map
+        /// </summary>
+        public bool DebugCreep { get; set; } = false;
 
         public float FramesPerSecond { get; set; }
         public bool TagsEnabled { get; set; }
