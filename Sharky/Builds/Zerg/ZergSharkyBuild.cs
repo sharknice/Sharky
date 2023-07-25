@@ -1,6 +1,7 @@
 ﻿using SC2APIProtocol;
 using Sharky.Builds.QuickBuilds;
 using Sharky.DefaultBot;
+using Sharky.EnemyStrategies;
 using System.Linq;
 
 namespace Sharky.Builds.Zerg
@@ -9,12 +10,14 @@ namespace Sharky.Builds.Zerg
     {
         protected TargetingData TargetingData;
         protected BaseData BaseData;
+        protected EnemyData EnemyData;
 
         public ZergSharkyBuild(DefaultSharkyBot defaultSharkyBot)
             : base(defaultSharkyBot)
         {
             TargetingData = defaultSharkyBot.TargetingData;
             BaseData = defaultSharkyBot.BaseData;
+            EnemyData = defaultSharkyBot.EnemyData;
         }
 
         protected void SendDroneForHatchery(int frame, bool natural = true)
@@ -23,7 +26,7 @@ namespace Sharky.Builds.Zerg
             {
                 PrePositionBuilderTask.SendBuilder(TargetingData.NaturalBasePoint, frame);
             }
-            else if (!natural && UnitCountService.EquivalentTypeCount(UnitTypes.ZERG_HATCHERY) == 2 && UnitCountService.BuildingsInProgressCount(UnitTypes.ZERG_HATCHERY) == 0 && MacroData.Minerals > 100)
+            else if (!natural && UnitCountService.EquivalentTypeCount(UnitTypes.ZERG_HATCHERY) == 2 && UnitCountService.BuildingsInProgressCount(UnitTypes.ZERG_HATCHERY) == 0 && MacroData.Minerals > 100 && !EnemyData.EnemyStrategies[nameof(OneBase)].Active)
             {
                 PrePositionBuilderTask.SendBuilder(BaseData.BaseLocations.Skip(2).FirstOrDefault().Location, frame);
             }
