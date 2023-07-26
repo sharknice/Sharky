@@ -928,9 +928,9 @@ namespace Sharky.MicroControllers
             if (commander.UnitCalculation.Unit.IsHallucination) { return false; }
             if (commander.UnitCalculation.Unit.Shield > 75 && commander.UnitCalculation.Unit.Health > 75) { return false; }
 
-            if (commander.UnitCalculation.EnemiesThreateningDamage.Count(e => e.EnemiesInRange.Count() <= 1) > 0) // if ally is already in range of the enemy shoot it because it's going to shoot ally
+            var speed = commander.UnitCalculation.UnitTypeData.MovementSpeed;
+            if (commander.UnitCalculation.EnemiesThreateningDamage.Count(e => e.UnitTypeData.MovementSpeed <= speed && e.EnemiesInRange.Count() <= 1) > 0) // if ally is already in range of the enemy shoot it because it's going to shoot ally
             {
-                var speed = commander.UnitCalculation.UnitTypeData.MovementSpeed;
                 if (commander.UnitCalculation.EnemiesInRangeOf.Count() == 0 && commander.UnitCalculation.EnemiesThreateningDamage.Any(e => e.Range >= commander.UnitCalculation.Range || e.UnitTypeData.MovementSpeed >= speed)) // TODO: factor in creep and other speed buffs
                 {
                     return false;

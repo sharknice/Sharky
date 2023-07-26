@@ -2,6 +2,7 @@
 using Sharky.DefaultBot;
 using Sharky.Extensions;
 using Sharky.MicroControllers.Zerg;
+using Sharky.Pathing;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -19,6 +20,7 @@ namespace Sharky.MicroTasks.Zerg
         ActiveUnitData ActiveUnitData;
         QueenMicroController QueenMicroController;
         MicroTaskData MicroTaskData;
+        MapDataService MapDataService;
 
         public QueenDefendTask(DefaultSharkyBot defaultSharkyBot, float priority, QueenMicroController queenMicroController, bool enabled)
         {
@@ -27,6 +29,7 @@ namespace Sharky.MicroTasks.Zerg
             ActiveUnitData = defaultSharkyBot.ActiveUnitData;
             QueenMicroController = queenMicroController;
             MicroTaskData = defaultSharkyBot.MicroTaskData;
+            MapDataService = defaultSharkyBot.MapDataService;
 
             Priority = priority;
             Enabled = enabled;
@@ -82,22 +85,25 @@ namespace Sharky.MicroTasks.Zerg
 
             foreach (var queen in UnitCommanders)
             {
-                {
-                    var attackPos = FindNearestEnemyPos(queen);
+                var attackPos = FindNearestEnemyPos(queen);
 
-                    if (attackPos != null)
+                if (attackPos != null)
+                {
+                    var action = QueenMicroController.Attack(queen, attackPos, attackPos, null, frame);
+                    if (action != null)
                     {
-                        var action = QueenMicroController.Attack(queen, attackPos, attackPos, null, frame);
-                        if (action != null)
-                        {
-                            actions.AddRange(action);
-                        }
+                        actions.AddRange(action);
                     }
-                    else
-                    {
-                        // No target close enough, remove
-                        toRemove.Add(queen);
-                    }
+                }
+                else
+                {
+                    // No target close enough, remove
+                    toRemove.Add(queen);
+                }
+
+                if (!MapDataService.IsOnCreep(queen.UnitCalculation.Unit.Pos))
+                {
+                    toRemove.Add(queen);
                 }
             }
 
