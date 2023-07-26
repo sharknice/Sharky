@@ -1,15 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.Builds;
-using Sharky.Builds.BuildingPlacement;
-using Sharky.DefaultBot;
-using Sharky.Extensions;
-using Sharky.Pathing;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.MicroTasks.Zerg
+﻿namespace Sharky.MicroTasks.Zerg
 {
     /// <summary>
     /// Finds best placement spot for creep tumors

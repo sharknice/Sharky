@@ -1,7 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.DefaultBot;
-
-namespace Sharky.Builds.Zerg
+﻿namespace Sharky.Builds.Zerg
 {
     public class BasicZerglingRush : ZergSharkyBuild
     {

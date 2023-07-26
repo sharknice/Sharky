@@ -1,10 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.Builds;
-using Sharky.DefaultBot;
-using System.Collections.Generic;
-using System.Diagnostics;
-
-namespace Sharky.Macro
+﻿namespace Sharky.Macro
 {
     public class TechBuilder
     {
@@ -25,9 +19,9 @@ namespace Sharky.Macro
             BuildingBuilder = buildingBuilder;
         }
 
-        public List<Action> BuildTechBuildings()
+        public List<SC2Action> BuildTechBuildings()
         {
-            var commands = new List<Action>();
+            var commands = new List<SC2Action>();
             if (SkipTech)
             {
                 SkipTech = false;

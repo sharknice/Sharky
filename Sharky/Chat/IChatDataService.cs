@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Text.RegularExpressions;
-
-namespace Sharky.Chat
+﻿namespace Sharky.Chat
 {
     public interface IChatDataService
     {

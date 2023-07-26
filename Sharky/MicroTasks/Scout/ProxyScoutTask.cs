@@ -1,11 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.Builds;
-using Sharky.MicroControllers;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.MicroTasks
+﻿namespace Sharky.MicroTasks
 {
     public class ProxyScoutTask : MicroTask
     {
@@ -96,7 +89,7 @@ namespace Sharky.MicroTasks
             {
                 if (commander.UnitRole != UnitRole.Scout) { commander.UnitRole = UnitRole.Scout; }
 
-                if (commander.UnitCalculation.NearbyEnemies.Take(25).Any(e => e.FrameLastSeen == frame && (e.UnitClassifications.Contains(UnitClassification.Worker) || e.Attributes.Contains(Attribute.Structure))) && commander.UnitCalculation.NearbyEnemies.Count() < 5)
+                if (commander.UnitCalculation.NearbyEnemies.Take(25).Any(e => e.FrameLastSeen == frame && (e.UnitClassifications.Contains(UnitClassification.Worker) || e.Attributes.Contains(SC2Attribute.Structure))) && commander.UnitCalculation.NearbyEnemies.Count() < 5)
                 {
                     if (BlockAddons && (MacroData.Minerals > 100 || commander.LastAbility == Abilities.BUILD_PYLON) && commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE)
                     {

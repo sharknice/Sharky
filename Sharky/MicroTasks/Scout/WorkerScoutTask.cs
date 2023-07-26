@@ -1,13 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.DefaultBot;
-using Sharky.Extensions;
-using Sharky.MicroControllers;
-using Sharky.Pathing;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.MicroTasks
+﻿namespace Sharky.MicroTasks
 {
     public class WorkerScoutTask : MicroTask
     {
@@ -73,9 +64,9 @@ namespace Sharky.MicroTasks
             }
         }
 
-        public override IEnumerable<SC2APIProtocol.Action> PerformActions(int frame)
+        public override IEnumerable<SC2Action> PerformActions(int frame)
         {
-            var commands = new List<SC2APIProtocol.Action>();
+            var commands = new List<SC2Action>();
             UpdateScoutPoints();
 
             var mainVector = new Vector2(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y);
@@ -92,7 +83,7 @@ namespace Sharky.MicroTasks
 
                 if (commander.UnitCalculation.Unit.ShieldMax > 5 && (commander.UnitCalculation.Unit.Shield < 5 || (commander.UnitCalculation.Unit.Shield < commander.UnitCalculation.Unit.ShieldMax && commander.UnitCalculation.EnemiesInRangeOf.Count() > 0)))
                 {
-                    if (MineralWalker.MineralWalkHome(commander, frame, out List<Action> mineralWalk))
+                    if (MineralWalker.MineralWalkHome(commander, frame, out List<SC2Action> mineralWalk))
                     {
                         commands.AddRange(mineralWalk);
                         continue;

@@ -1,8 +1,4 @@
-﻿using Sharky.DefaultBot;
-using Sharky.Extensions;
-using System.Linq;
-
-namespace Sharky.EnemyStrategies
+﻿namespace Sharky.EnemyStrategies
 {
     public class WorkerRush : EnemyStrategy
     {

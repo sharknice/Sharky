@@ -1,13 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.DefaultBot;
-using Sharky.Extensions;
-using Sharky.Pathing;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.MicroControllers.Terran
+﻿namespace Sharky.MicroControllers.Terran
 {
     public class HellionMicroController : IndividualMicroController
     {

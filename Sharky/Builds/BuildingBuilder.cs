@@ -1,13 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.Builds.BuildingPlacement;
-using Sharky.Builds.MacroServices;
-using Sharky.Extensions;
-using Sharky.Pathing;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.Builds
+﻿namespace Sharky.Builds
 {
     public class BuildingBuilder : IBuildingBuilder
     {
@@ -38,7 +29,7 @@ namespace Sharky.Builds
             WorkerBuilderService = workerBuilderService;
         }
 
-        public List<Action> BuildBuilding(MacroData macroData, UnitTypes unitType, BuildingTypeData unitData, Point2D generalLocation = null, bool ignoreMineralProximity = false, float maxDistance = 50, List<UnitCommander> workerPool = null, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.None, bool allowBlockBase = false)
+        public List<SC2Action> BuildBuilding(MacroData macroData, UnitTypes unitType, BuildingTypeData unitData, Point2D generalLocation = null, bool ignoreMineralProximity = false, float maxDistance = 50, List<UnitCommander> workerPool = null, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.None, bool allowBlockBase = false)
         {
             if (unitData.Minerals <= macroData.Minerals && unitData.Gas <= macroData.VespeneGas)
             {
@@ -105,7 +96,7 @@ namespace Sharky.Builds
             return false;
         }
 
-        public List<Action> BuildAddOn(MacroData macroData, TrainingTypeData unitData, Point2D location = null, float maxDistance = 50)
+        public List<SC2Action> BuildAddOn(MacroData macroData, TrainingTypeData unitData, Point2D location = null, float maxDistance = 50)
         {
             if (unitData.Minerals <= macroData.Minerals && unitData.Gas <= macroData.VespeneGas)
             {
@@ -204,7 +195,7 @@ namespace Sharky.Builds
             return false;
         }
 
-        public List<Action> BuildGas(MacroData macroData, BuildingTypeData unitData, Unit geyser)
+        public List<SC2Action> BuildGas(MacroData macroData, BuildingTypeData unitData, Unit geyser)
         {
             if (unitData.Minerals <= macroData.Minerals && unitData.Gas <= macroData.VespeneGas)
             {

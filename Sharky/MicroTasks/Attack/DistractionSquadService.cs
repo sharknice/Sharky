@@ -1,10 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.MicroControllers;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.MicroTasks.Attack
+﻿namespace Sharky.MicroTasks.Attack
 {
     public class DistractionSquadService
     {
@@ -106,9 +100,9 @@ namespace Sharky.MicroTasks.Attack
             }
         }
 
-        public List<Action> TakeAction(int frame)
+        public List<SC2Action> TakeAction(int frame)
         {
-            if (!Enabled) { return new List<Action>(); };
+            if (!Enabled) { return new List<SC2Action>(); };
 
             UpdateState();
             UpdateTarget();
@@ -129,7 +123,7 @@ namespace Sharky.MicroTasks.Attack
                 return MicroController.Attack(DistractionSquad, DistractionTarget, RegroupPoint, null, frame);
             }
 
-            return new List<Action>();
+            return new List<SC2Action>();
         }
 
         void UpdateTarget()

@@ -1,9 +1,4 @@
-﻿using SC2APIProtocol;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.Managers.Protoss
+﻿namespace Sharky.Managers.Protoss
 {
     public class PhotonCannonManager : SharkyManager
     {
@@ -16,7 +11,7 @@ namespace Sharky.Managers.Protoss
             EnemyData = enemyData;
         }
 
-        public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
+        public override IEnumerable<SC2Action> OnFrame(ResponseObservation observation)
         {
             var actions = new List<SC2APIProtocol.Action>();
 
@@ -38,9 +33,9 @@ namespace Sharky.Managers.Protoss
             return actions;
         }
 
-        List<SC2APIProtocol.Action> Attack(UnitCommander commander, int frame)
+        List<SC2Action> Attack(UnitCommander commander, int frame)
         {
-            if (ContinueInRangeAttack(commander, frame, out List<Action> action))
+            if (ContinueInRangeAttack(commander, frame, out List<SC2Action> action))
             {
                 return action;
             }
@@ -55,7 +50,7 @@ namespace Sharky.Managers.Protoss
                     var existing = oneShotKills.FirstOrDefault(o => o.Unit.Tag == existingAttackOrder.TargetUnitTag);
                     if (existing != null)
                     {
-                        return new List<SC2APIProtocol.Action>();
+                        return new List<SC2Action>();
                     }
                 }
 
@@ -80,7 +75,7 @@ namespace Sharky.Managers.Protoss
             return null;
         }
 
-        protected bool ContinueInRangeAttack(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
+        protected bool ContinueInRangeAttack(UnitCommander commander, int frame, out List<SC2Action> action)
         {
             action = null;
 

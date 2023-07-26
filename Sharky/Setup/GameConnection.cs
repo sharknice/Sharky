@@ -1,14 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Net.WebSockets;
-using System.Threading;
-using System.Threading.Tasks;
-using SC2APIProtocol;
-
-namespace Sharky
+﻿namespace Sharky
 {
     public class GameConnection
     {
@@ -24,7 +14,7 @@ namespace Sharky
         {
             var processStartInfo = new ProcessStartInfo(starcraftExe);
             processStartInfo.Arguments = String.Format("-listen {0} -port {1} -displayMode 0", address, port);
-            processStartInfo.WorkingDirectory = Path.Combine(starcraftDir, "Support64");
+            processStartInfo.WorkingDirectory = FilePath.Combine(starcraftDir, "Support64");
             Process.Start(processStartInfo);
         }
 
@@ -53,7 +43,7 @@ namespace Sharky
                 createGame.RandomSeed = (uint)randomSeed;
             }
 
-            string mapPath = Path.Combine(starcraftDir, "Maps", mapName);
+            string mapPath = FilePath.Combine(starcraftDir, "Maps", mapName);
             if (!File.Exists(mapPath))
             {
                 throw new Exception("Could not find map at " + mapPath);
@@ -84,7 +74,7 @@ namespace Sharky
         private void readSettings()
         {
             var myDocuments = Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
-            var executeInfo = Path.Combine(myDocuments, "Starcraft II", "ExecuteInfo.txt");
+            var executeInfo = FilePath.Combine(myDocuments, "Starcraft II", "ExecuteInfo.txt");
             if (File.Exists(executeInfo))
             {
                 var lines = File.ReadAllLines(executeInfo);
@@ -94,7 +84,7 @@ namespace Sharky
                     if (line.Trim().StartsWith("executable"))
                     {
                         starcraftExe = argument;
-                        starcraftDir = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(starcraftExe)));
+                        starcraftDir = FilePath.GetDirectoryName(FilePath.GetDirectoryName(FilePath.GetDirectoryName(starcraftExe)));
                     }
                 }
             }

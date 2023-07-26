@@ -1,11 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.DefaultBot;
-using Sharky.Pathing;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.MicroControllers.Terran
+﻿namespace Sharky.MicroControllers.Terran
 {
     public class MedivacMicroController : IndividualMicroController
     {
@@ -136,14 +129,14 @@ namespace Sharky.MicroControllers.Terran
         {
             if (supportableUnits == null)
             {
-                supportableUnits = commander.UnitCalculation.NearbyAllies.Where(a => a.Unit.Health < a.Unit.HealthMax && a.Attributes.Contains(Attribute.Biological));
+                supportableUnits = commander.UnitCalculation.NearbyAllies.Where(a => a.Unit.Health < a.Unit.HealthMax && a.Attributes.Contains(SC2Attribute.Biological));
                 if (!supportableUnits.Any())
                 {
                     supportableUnits = ActiveUnitData.SelfUnits.Values.Where(u => u.Unit.UnitType != commander.UnitCalculation.Unit.UnitType && u.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !u.Unit.IsHallucination);
                 }
             }
 
-            var friendlies = supportableUnits.Where(u => u.UnitClassifications.Contains(UnitClassification.ArmyUnit) && u.Attributes.Contains(Attribute.Biological) && u.Unit.Health < u.Unit.HealthMax
+            var friendlies = supportableUnits.Where(u => u.UnitClassifications.Contains(UnitClassification.ArmyUnit) && u.Attributes.Contains(SC2Attribute.Biological) && u.Unit.Health < u.Unit.HealthMax
                     && Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position) < 225
                     && u.NearbyEnemies.Any(e => DistanceSquared(u, e) < 225)
                 ).OrderBy(u => DistanceSquared(u.NearbyEnemies.OrderBy(e => DistanceSquared(e, u)).First(), u));

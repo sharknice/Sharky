@@ -1,12 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.DefaultBot;
-using Sharky.Extensions;
-using Sharky.Pathing;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.MicroControllers.Terran
+﻿namespace Sharky.MicroControllers.Terran
 {
     public class StimableMicroController : IndividualMicroController
     {
@@ -18,7 +10,7 @@ namespace Sharky.MicroControllers.Terran
 
         public override List<SC2APIProtocol.Action> Attack(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
-            if (GetOutOfBunker(commander, target, frame, out List<Action> action)) { return action; }
+            if (GetOutOfBunker(commander, target, frame, out List<SC2Action> action)) { return action; }
             if (OffensiveAbility(commander, target, defensivePoint, groupCenter, null, frame, out action)) { return action; }
             if (commander.UnitCalculation.TargetPriorityCalculation.OverallWinnability < 1 && GetInBunker(commander, target, frame, out action)) { return action; }
             return base.Attack(commander, target, defensivePoint, groupCenter, frame);
@@ -26,7 +18,7 @@ namespace Sharky.MicroControllers.Terran
 
         public override List<SC2APIProtocol.Action> Support(UnitCommander commander, IEnumerable<UnitCommander> supportTargets, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
-            if (GetOutOfBunker(commander, target, frame, out List<Action> action)) { return action; }
+            if (GetOutOfBunker(commander, target, frame, out List<SC2Action> action)) { return action; }
             if (GetInBunker(commander, target, frame, out action)) { return action; }
             return base.Support(commander, supportTargets, target, defensivePoint, groupCenter, frame);
         }

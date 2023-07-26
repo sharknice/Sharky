@@ -1,10 +1,4 @@
-﻿using Sharky.DefaultBot;
-using Sharky.MicroControllers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Sharky.MicroTasks
+﻿namespace Sharky.MicroTasks
 {
     public class HellionExpansionScoutTask : HellionHarassTask
     {

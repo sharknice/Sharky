@@ -1,9 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.Pathing;
-using System;
-using System.Numerics;
-
-namespace Sharky.Builds.BuildingPlacement
+﻿namespace Sharky.Builds.BuildingPlacement
 {
     public class TerranSupplyDepotGridPlacement
     {

@@ -1,9 +1,4 @@
-﻿using Sharky.DefaultBot;
-using Sharky.Pathing;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Sharky
+﻿namespace Sharky
 {
     /// <summary>
     /// Grid with distances to enemy and self resource center

@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-
-namespace Sharky.TypeData
+﻿namespace Sharky.TypeData
 {
     public class UpgradeDataService
     {

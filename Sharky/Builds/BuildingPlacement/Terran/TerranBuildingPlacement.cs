@@ -1,11 +1,4 @@
-﻿using Google.Protobuf.WellKnownTypes;
-using SC2APIProtocol;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.Builds.BuildingPlacement
+﻿namespace Sharky.Builds.BuildingPlacement
 {
     public class TerranBuildingPlacement : IBuildingPlacement
     {

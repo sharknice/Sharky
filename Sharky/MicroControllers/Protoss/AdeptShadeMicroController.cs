@@ -1,11 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.DefaultBot;
-using Sharky.Pathing;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.MicroControllers.Protoss
+﻿namespace Sharky.MicroControllers.Protoss
 {
     public class AdeptShadeMicroController : IndividualMicroController
     {
@@ -75,7 +68,7 @@ namespace Sharky.MicroControllers.Protoss
             return false;
         }
 
-        protected override bool Move(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, Formation formation, int frame, out List<SC2APIProtocol.Action> action)
+        protected override bool Move(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, Formation formation, int frame, out List<SC2Action> action)
         {
             action = null;
 
@@ -84,7 +77,7 @@ namespace Sharky.MicroControllers.Protoss
             return NavigateToTarget(commander, target, groupCenter, bestTarget, formation, frame, out action);
         }
 
-        public override List<Action> NavigateToPoint(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
+        public override List<SC2Action> NavigateToPoint(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
             List<SC2APIProtocol.Action> action = null;
             var bestTarget = GetBestHarassTarget(commander, target);

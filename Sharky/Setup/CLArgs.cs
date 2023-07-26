@@ -1,7 +1,4 @@
-﻿using System.Linq;
-using SC2APIProtocol;
-
-namespace Sharky
+﻿namespace Sharky
 {
     /* This class is used to load the CommandLine arguments for the bot.
      */

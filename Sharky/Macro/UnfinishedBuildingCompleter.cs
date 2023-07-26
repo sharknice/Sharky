@@ -1,10 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.DefaultBot;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.Macro
+﻿namespace Sharky.Macro
 {
     public class UnfinishedBuildingCompleter
     {
@@ -19,11 +13,11 @@ namespace Sharky.Macro
             MacroData = defaultSharkyBot.MacroData;
         }
 
-        public List<Action> SendScvToFinishIncompleteBuildings()
+        public List<SC2Action> SendScvToFinishIncompleteBuildings()
         {
-            var commands = new List<Action>();
+            var commands = new List<SC2Action>();
 
-            foreach (var building in ActiveUnitData.Commanders.Where(c => c.Value.UnitCalculation.Unit.BuildProgress < 1 && c.Value.UnitCalculation.Unit.BuildProgress > 0 && c.Value.UnitCalculation.Attributes.Contains(Attribute.Structure) && c.Value.UnitCalculation.Unit.BuildProgress == c.Value.UnitCalculation.PreviousUnit.BuildProgress))
+            foreach (var building in ActiveUnitData.Commanders.Where(c => c.Value.UnitCalculation.Unit.BuildProgress < 1 && c.Value.UnitCalculation.Unit.BuildProgress > 0 && c.Value.UnitCalculation.Attributes.Contains(SC2Attribute.Structure) && c.Value.UnitCalculation.Unit.BuildProgress == c.Value.UnitCalculation.PreviousUnit.BuildProgress))
             {
                 if (building.Value.UnitCalculation.EnemiesInRangeOf.Count() > building.Value.UnitCalculation.NearbyAllies.Count(a => a.UnitClassifications.Contains(UnitClassification.ArmyUnit) || a.UnitClassifications.Contains(UnitClassification.DefensiveStructure)))
                 {

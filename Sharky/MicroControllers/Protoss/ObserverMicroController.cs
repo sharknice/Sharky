@@ -1,7 +1,4 @@
-﻿using Sharky.DefaultBot;
-using Sharky.Pathing;
-
-namespace Sharky.MicroControllers.Protoss
+﻿namespace Sharky.MicroControllers.Protoss
 {
     public class ObserverMicroController : FlyingDetectorMicroController
     {

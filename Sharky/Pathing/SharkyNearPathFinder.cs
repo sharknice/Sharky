@@ -1,12 +1,4 @@
-﻿using Roy_T.AStar.Grids;
-using Roy_T.AStar.Paths;
-using Roy_T.AStar.Primitives;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.Pathing
+﻿namespace Sharky.Pathing
 {
 
     // find node within 20 range that is safe, closest to desired position

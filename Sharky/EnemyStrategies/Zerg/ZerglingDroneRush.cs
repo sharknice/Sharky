@@ -1,8 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.DefaultBot;
-using System.Linq;
-
-namespace Sharky.EnemyStrategies.Zerg
+﻿namespace Sharky.EnemyStrategies.Zerg
 {
     public class ZerglingDroneRush : EnemyStrategy
     {

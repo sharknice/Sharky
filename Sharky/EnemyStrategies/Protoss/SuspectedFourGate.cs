@@ -1,8 +1,4 @@
-﻿using Sharky.DefaultBot;
-using Sharky.Pathing;
-using System.Linq;
-
-namespace Sharky.EnemyStrategies.Protoss
+﻿namespace Sharky.EnemyStrategies.Protoss
 {
     public class SuspectedFourGate : EnemyStrategy
     {

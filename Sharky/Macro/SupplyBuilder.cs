@@ -1,10 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.Builds;
-using Sharky.DefaultBot;
-using System.Collections.Generic;
-using System.Diagnostics;
-
-namespace Sharky.Macro
+﻿namespace Sharky.Macro
 {
     public class SupplyBuilder
     {
@@ -27,9 +21,9 @@ namespace Sharky.Macro
             BuildingBuilder = buildingBuilder;
         }
 
-        public List<Action> BuildSupply()
+        public List<SC2Action> BuildSupply()
         {
-            var commands = new List<Action>();
+            var commands = new List<SC2Action>();
             if (SkipSupply)
             {
                 SkipSupply = false;

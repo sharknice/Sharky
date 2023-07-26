@@ -1,12 +1,4 @@
-﻿using Sharky.MicroControllers;
-using Sharky.MicroTasks.Attack;
-using Sharky.MicroTasks.Scout;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.MicroTasks
+﻿namespace Sharky.MicroTasks
 {
     public class AttackTask : MicroTask
     {

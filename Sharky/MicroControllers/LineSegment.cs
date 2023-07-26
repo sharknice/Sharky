@@ -1,6 +1,4 @@
-﻿using System.Numerics;
-
-namespace Sharky.MicroControllers
+﻿namespace Sharky.MicroControllers
 {
     public class LineSegment
     {

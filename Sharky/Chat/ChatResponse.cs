@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Sharky.Chat
+﻿namespace Sharky.Chat
 {
     [Serializable]
     public class ChatResponse

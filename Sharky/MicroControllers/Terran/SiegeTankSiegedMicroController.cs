@@ -1,12 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.DefaultBot;
-using Sharky.Pathing;
-using Sharky.S2ClientTypeEnums;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.MicroControllers.Terran
+﻿namespace Sharky.MicroControllers.Terran
 {
     public class SiegeTankSiegedMicroController : IndividualMicroController
     {
@@ -45,7 +37,7 @@ namespace Sharky.MicroControllers.Terran
         {
             action = null;
 
-            if (commander.UnitCalculation.EnemiesInRange.Count(e => !e.Attributes.Contains(Attribute.Structure) && e.EnemiesInRange.Any(u => u.Unit.Tag == commander.UnitCalculation.Unit.Tag)) > 0)
+            if (commander.UnitCalculation.EnemiesInRange.Count(e => !e.Attributes.Contains(SC2Attribute.Structure) && e.EnemiesInRange.Any(u => u.Unit.Tag == commander.UnitCalculation.Unit.Tag)) > 0)
             {
                 return false;
             }

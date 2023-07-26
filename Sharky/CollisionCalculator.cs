@@ -1,7 +1,4 @@
-﻿using System;
-using System.Numerics;
-
-namespace Sharky
+﻿namespace Sharky
 {
     public class CollisionCalculator
     {

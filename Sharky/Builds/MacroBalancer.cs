@@ -1,9 +1,4 @@
-﻿using SC2APIProtocol;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Sharky.Builds
+﻿namespace Sharky.Builds
 {
     public class MacroBalancer : IMacroBalancer
     {

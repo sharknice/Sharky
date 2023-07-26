@@ -1,7 +1,4 @@
-﻿using SC2APIProtocol;
-using System;
-
-namespace Sharky.Builds
+﻿namespace Sharky.Builds
 {
     public class AddOnSwap
     {

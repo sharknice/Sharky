@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Sharky.Builds.QuickBuilds
+﻿namespace Sharky.Builds.QuickBuilds
 {
     /// <summary>
     /// Allows to define build steps in easy way. The units/upgrades are built step by step once enough workers are produced.

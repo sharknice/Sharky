@@ -1,17 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.Chat;
-using Sharky.DefaultBot;
-using Sharky.Extensions;
-using Sharky.MicroTasks.Attack;
-using Sharky.Pathing;
-using Sharky.S2ClientTypeEnums;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.MicroControllers
+﻿namespace Sharky.MicroControllers
 {
     public class IndividualMicroController : IIndividualMicroController
     {

@@ -1,9 +1,4 @@
-﻿using Sharky.DefaultBot;
-using Sharky.MicroControllers;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Sharky.MicroTasks.Mining
+﻿namespace Sharky.MicroTasks.Mining
 {
     public class ReaperMiningDefenseTask : MicroTask
     {

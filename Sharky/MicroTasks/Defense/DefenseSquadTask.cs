@@ -1,14 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.DefaultBot;
-using Sharky.Extensions;
-using Sharky.MicroControllers;
-using Sharky.MicroTasks.Attack;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.MicroTasks
+﻿namespace Sharky.MicroTasks
 {
     public class DefenseSquadTask : MicroTask
     {
@@ -91,9 +81,9 @@ namespace Sharky.MicroTasks
             return count < desiredUnitClaim.Count;
         }
 
-        public override IEnumerable<SC2APIProtocol.Action> PerformActions(int frame)
+        public override IEnumerable<SC2Action> PerformActions(int frame)
         {
-            var actions = new List<SC2APIProtocol.Action>();
+            var actions = new List<SC2Action>();
 
             if (lastFrameTime > 5)
             {
@@ -105,7 +95,7 @@ namespace Sharky.MicroTasks
 
             FillBunkers(frame, actions);
 
-            var structures = ActiveUnitData.SelfUnits.Where(u => u.Value.Attributes.Contains(Attribute.Structure));
+            var structures = ActiveUnitData.SelfUnits.Where(u => u.Value.Attributes.Contains(SC2Attribute.Structure));
             if (OnlyDefendMain)
             {
                 var vector = new Vector2(TargetingData.SelfMainBasePoint.X, TargetingData.SelfMainBasePoint.Y);
@@ -182,7 +172,7 @@ namespace Sharky.MicroTasks
             }
         }
 
-        private List<Action> DefendWithWorkers(IEnumerable<UnitCalculation> attackingEnemies, int frame)
+        private List<SC2Action> DefendWithWorkers(IEnumerable<UnitCalculation> attackingEnemies, int frame)
         {
             var bunkersInProgress = attackingEnemies.Where(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_BUNKER && (e.Unit.BuildProgress < 1 || (e.Unit.HasHealth && e.Unit.Health < 100)) && Vector2.DistanceSquared(e.Position, new Vector2(TargetingData.SelfMainBasePoint.X, TargetingData.SelfMainBasePoint.Y)) < 1600);
             if (bunkersInProgress.Count() > 0)
@@ -206,7 +196,7 @@ namespace Sharky.MicroTasks
                 return MicroController.Attack(WorkerDefenders, new Point2D { X = bunker.Position.X, Y = bunker.Position.Y }, TargetingData.ForwardDefensePoint, TargetingData.MainDefensePoint, frame);
             }
 
-            return new List<SC2APIProtocol.Action>();
+            return new List<SC2Action>();
         }
 
         public override void RemoveDeadUnits(List<ulong> deadUnits)

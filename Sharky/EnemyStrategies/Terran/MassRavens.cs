@@ -1,6 +1,4 @@
-﻿using Sharky.DefaultBot;
-
-namespace Sharky.EnemyStrategies.Terran
+﻿namespace Sharky.EnemyStrategies.Terran
 {
     public class MassRavens : EnemyStrategy
     {

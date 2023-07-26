@@ -1,10 +1,4 @@
-﻿using SC2APIProtocol;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.MicroControllers
+﻿namespace Sharky.MicroControllers
 {
     public class MicroController : IMicroController
     {
@@ -15,9 +9,9 @@ namespace Sharky.MicroControllers
             MicroData = microData;
         }
 
-        public List<Action> Attack(IEnumerable<UnitCommander> commanders, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
+        public List<SC2Action> Attack(IEnumerable<UnitCommander> commanders, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
-            var actions = new List<Action>();
+            var actions = new List<SC2Action>();
             var stopwatch = new Stopwatch();
 
             foreach (var commander in commanders)
@@ -28,7 +22,7 @@ namespace Sharky.MicroControllers
                     continue;
                 }
                 stopwatch.Restart();
-                List<Action> action;
+                List<SC2Action> action;
 
                 if (MicroData.IndividualMicroControllers.TryGetValue((UnitTypes)commander.UnitCalculation.Unit.UnitType, out var individualMicroController))
                 {
@@ -52,9 +46,9 @@ namespace Sharky.MicroControllers
             return actions;
         }
 
-        public List<Action> Retreat(IEnumerable<UnitCommander> commanders, Point2D defensivePoint, Point2D groupCenter, int frame)
+        public List<SC2Action> Retreat(IEnumerable<UnitCommander> commanders, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
-            var actions = new List<Action>();
+            var actions = new List<SC2Action>();
             var stopwatch = new Stopwatch();
 
             foreach (var commander in commanders)
@@ -65,7 +59,7 @@ namespace Sharky.MicroControllers
                     continue;
                 }
                 stopwatch.Restart();
-                List<Action> action;
+                List<SC2Action> action;
 
                 if (MicroData.IndividualMicroControllers.TryGetValue((UnitTypes)commander.UnitCalculation.Unit.UnitType, out var individualMicroController))
                 {
@@ -89,9 +83,9 @@ namespace Sharky.MicroControllers
             return actions;
         }
 
-        public List<Action> Idle(IEnumerable<UnitCommander> commanders, Point2D target, Point2D defensivePoint, int frame)
+        public List<SC2Action> Idle(IEnumerable<UnitCommander> commanders, Point2D target, Point2D defensivePoint, int frame)
         {
-            var actions = new List<Action>();
+            var actions = new List<SC2Action>();
             var stopwatch = new Stopwatch();
 
             foreach (var commander in commanders)
@@ -102,7 +96,7 @@ namespace Sharky.MicroControllers
                     continue;
                 }
                 stopwatch.Restart();
-                List<Action> action;
+                List<SC2Action> action;
 
                 if (MicroData.IndividualMicroControllers.TryGetValue((UnitTypes)commander.UnitCalculation.Unit.UnitType, out var individualMicroController))
                 {
@@ -126,9 +120,9 @@ namespace Sharky.MicroControllers
             return actions;
         }
 
-        public List<Action> Support(IEnumerable<UnitCommander> commanders, IEnumerable<UnitCommander> supportTargets, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
+        public List<SC2Action> Support(IEnumerable<UnitCommander> commanders, IEnumerable<UnitCommander> supportTargets, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
-            var actions = new List<Action>();
+            var actions = new List<SC2Action>();
             var stopwatch = new Stopwatch();
 
             var targetVector = new Vector2(target.X, target.Y);
@@ -142,7 +136,7 @@ namespace Sharky.MicroControllers
                     continue;
                 }
                 stopwatch.Restart();
-                List<Action> action;
+                List<SC2Action> action;
 
                 if (MicroData.IndividualMicroControllers.TryGetValue((UnitTypes)commander.UnitCalculation.Unit.UnitType, out var individualMicroController))
                 {

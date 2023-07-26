@@ -1,7 +1,4 @@
-﻿using SC2APIProtocol;
-using System.Collections.Generic;
-
-namespace Sharky.Managers
+﻿namespace Sharky.Managers
 {
     public abstract class SharkyManager : IManager
     {
@@ -15,9 +12,9 @@ namespace Sharky.Managers
 
         }
 
-        public virtual IEnumerable<Action> OnFrame(ResponseObservation observation)
+        public virtual IEnumerable<SC2Action> OnFrame(ResponseObservation observation)
         {
-            return new List<Action>();
+            return new List<SC2Action>();
         }
 
         public virtual void OnEnd(ResponseObservation observation, Result result)

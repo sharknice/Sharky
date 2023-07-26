@@ -1,7 +1,4 @@
-﻿using Sharky.Builds.BuildChoosing;
-using System.Collections.Generic;
-
-namespace Sharky.Builds.Protoss
+﻿namespace Sharky.Builds.Protoss
 {
     public class EmptyCounterTransitioner : ICounterTransitioner
     {

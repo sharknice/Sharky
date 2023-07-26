@@ -1,9 +1,4 @@
-﻿using SC2APIProtocol;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace Sharky.Chat
+﻿namespace Sharky.Chat
 {
     public class ChatService
     {
@@ -81,7 +76,7 @@ namespace Sharky.Chat
             var typeTime = 0;
             foreach (var message in messages.ToList())
             {
-                var chatAction = new Action { ActionChat = new ActionChat { Message = message } };
+                var chatAction = new SC2Action { ActionChat = new ActionChat { Message = message } };
                 if (teamChannel)
                 {
                     chatAction.ActionChat.Channel = ActionChat.Types.Channel.Team;
@@ -107,7 +102,7 @@ namespace Sharky.Chat
                 var typeTime = 0;
                 foreach (var message in messages)
                 {
-                    var chatAction = new Action { ActionChat = new ActionChat { Message = message, Channel = ActionChat.Types.Channel.Team } };
+                    var chatAction = new SC2Action { ActionChat = new ActionChat { Message = message, Channel = ActionChat.Types.Channel.Team } };
 
                     typeTime += message.Length * 80; // simulate typing at 80 ms per keystroke
                                                      // translate framerate to real
@@ -155,7 +150,7 @@ namespace Sharky.Chat
 
         void SendInstantChatMessage(string message, bool teamChannel = false)
         {
-            var chatAction = new Action { ActionChat = new ActionChat { Message = message } };
+            var chatAction = new SC2Action { ActionChat = new ActionChat { Message = message } };
             if (teamChannel)
             {
                 chatAction.ActionChat.Channel = ActionChat.Types.Channel.Team;

@@ -1,9 +1,4 @@
-﻿using Sharky.DefaultBot;
-using Sharky.Extensions;
-using Sharky.Pathing;
-using System.Linq;
-
-namespace Sharky.EnemyStrategies
+﻿namespace Sharky.EnemyStrategies
 {
     public class TwoBase : EnemyStrategy
     {

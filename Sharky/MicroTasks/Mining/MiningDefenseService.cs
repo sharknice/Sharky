@@ -1,13 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.DefaultBot;
-using Sharky.MicroControllers;
-using Sharky.Pathing;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.MicroTasks.Mining
+﻿namespace Sharky.MicroTasks.Mining
 {
     public class MiningDefenseService
     {

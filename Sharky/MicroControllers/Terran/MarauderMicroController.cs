@@ -1,7 +1,4 @@
-﻿using Sharky.DefaultBot;
-using Sharky.Pathing;
-
-namespace Sharky.MicroControllers.Terran
+﻿namespace Sharky.MicroControllers.Terran
 {
     public class MarauderMicroController : StimableMicroController
     {

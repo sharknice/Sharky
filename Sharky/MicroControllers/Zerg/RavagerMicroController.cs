@@ -1,11 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.DefaultBot;
-using Sharky.Pathing;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.MicroControllers.Zerg
+﻿namespace Sharky.MicroControllers.Zerg
 {
     public class RavagerMicroController : IndividualMicroController
     {
@@ -121,7 +114,7 @@ namespace Sharky.MicroControllers.Zerg
 
         public override List<SC2APIProtocol.Action> Retreat(UnitCommander commander, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
-            List<Action> actions = null;
+            List<SC2Action> actions = null;
 
             if (OffensiveAbility(commander, defensivePoint, defensivePoint, groupCenter, null, frame, out actions))
             {

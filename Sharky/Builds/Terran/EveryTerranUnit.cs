@@ -1,8 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.DefaultBot;
-using Sharky.MicroTasks;
-
-namespace Sharky.Builds.Terran
+﻿namespace Sharky.Builds.Terran
 {
     public class EveryTerranUnit : TerranSharkyBuild
     {

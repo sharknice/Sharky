@@ -1,7 +1,4 @@
-﻿using SC2APIProtocol;
-using System.Collections.Generic;
-
-namespace Sharky.Counter
+﻿namespace Sharky.Counter
 {
     public class UnitCounterData
     {

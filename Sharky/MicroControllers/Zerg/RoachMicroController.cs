@@ -1,10 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.DefaultBot;
-using Sharky.Pathing;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Sharky.MicroControllers.Zerg
+﻿namespace Sharky.MicroControllers.Zerg
 {
     public class RoachMicroController : IndividualMicroController
     {
@@ -16,7 +10,7 @@ namespace Sharky.MicroControllers.Zerg
             UnitData = unitData;
         }
 
-        protected override bool AvoidPointlessDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, Formation formation, int frame, out List<Action> action)
+        protected override bool AvoidPointlessDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, Formation formation, int frame, out List<SC2Action> action)
         {
             action = null;
 
@@ -28,24 +22,24 @@ namespace Sharky.MicroControllers.Zerg
             return base.AvoidPointlessDamage(commander, target, defensivePoint, formation, frame, out action);
         }
 
-        public override List<Action> Attack(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
+        public override List<SC2Action> Attack(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
             return ManageBurrow(commander, defensivePoint, frame) ?? base.Attack(commander, target, defensivePoint, groupCenter, frame);
         }
 
-        protected override bool Retreat(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<Action> action)
+        protected override bool Retreat(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2Action> action)
         {
             action = ManageBurrow(commander, defensivePoint, frame);
             if (action is null) return base.Retreat(commander, target, defensivePoint, frame, out action);
             return true;
         }
 
-        public override List<Action> Idle(UnitCommander commander, Point2D defensivePoint, int frame)
+        public override List<SC2Action> Idle(UnitCommander commander, Point2D defensivePoint, int frame)
         {
             return ManageBurrow(commander, defensivePoint, frame) ?? base.Idle(commander, defensivePoint, frame);
         }
 
-        private List<Action> ManageBurrow(UnitCommander commander, Point2D defensivePoint, int frame)
+        private List<SC2Action> ManageBurrow(UnitCommander commander, Point2D defensivePoint, int frame)
         {
             if (commander.UnitCalculation.Unit.IsBurrowed)
             {
@@ -55,7 +49,7 @@ namespace Sharky.MicroControllers.Zerg
                 }
                 else
                 {
-                    List<Action> actions;
+                    List<SC2Action> actions;
                     base.Retreat(commander, defensivePoint, defensivePoint, frame, out actions);
                     return actions;
                 }

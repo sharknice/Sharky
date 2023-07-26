@@ -1,26 +1,15 @@
-﻿using SC2APIProtocol;
-using Sharky.Builds.BuildingPlacement;
-using Sharky.DefaultBot;
-using Sharky.Pathing;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.MicroControllers.Protoss
+﻿namespace Sharky.MicroControllers.Protoss
 {
     public class OracleMicroController : IndividualMicroController
     {
         float RevelationRange = 9;
         float RevelationRadius = 6;
 
-        AttackData AttackData;
         StasisWardPlacement StasisWardPlacement;
 
         public OracleMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled, float avoidDamageDistance = 3f)
             : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled, avoidDamageDistance)
         {
-            AttackData = defaultSharkyBot.AttackData;
             StasisWardPlacement = defaultSharkyBot.StasisWardPlacement;
         }
 

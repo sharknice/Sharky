@@ -1,9 +1,4 @@
-﻿using SC2APIProtocol;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.MicroTasks
+﻿namespace Sharky.MicroTasks
 {
     public class DestroyWallOffTask : MicroTask
     {
@@ -57,7 +52,7 @@ namespace Sharky.MicroTasks
 
             if (WallPoints != null)
             {
-                var buildings = ActiveUnitData.Commanders.Where(u => u.Value.UnitCalculation.Attributes.Contains(Attribute.Structure) && WallPoints.Any(point => Vector2.DistanceSquared(new Vector2(point.X, point.Y), u.Value.UnitCalculation.Position) < 1)).Select(b => b.Value);
+                var buildings = ActiveUnitData.Commanders.Where(u => u.Value.UnitCalculation.Attributes.Contains(SC2Attribute.Structure) && WallPoints.Any(point => Vector2.DistanceSquared(new Vector2(point.X, point.Y), u.Value.UnitCalculation.Position) < 1)).Select(b => b.Value);
                 foreach (var building in buildings)
                 {
                     building.UnitRole = UnitRole.Die;

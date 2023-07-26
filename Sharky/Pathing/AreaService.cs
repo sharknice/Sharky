@@ -1,8 +1,4 @@
-﻿using SC2APIProtocol;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Sharky.Pathing
+﻿namespace Sharky.Pathing
 {
     public class AreaService
     {

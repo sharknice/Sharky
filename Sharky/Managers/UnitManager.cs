@@ -1,13 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.Pathing;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Threading.Tasks;
-
-namespace Sharky.Managers
+﻿namespace Sharky.Managers
 {
     public class UnitManager : SharkyManager
     {

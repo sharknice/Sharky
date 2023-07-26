@@ -1,6 +1,4 @@
-﻿using SC2APIProtocol;
-
-namespace Sharky
+﻿namespace Sharky
 {
     public class AttackData
     {

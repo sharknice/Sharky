@@ -1,12 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.Builds;
-using Sharky.Extensions;
-using Sharky.Pathing;
-using System;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.Proxy
+﻿namespace Sharky.Proxy
 {
     public class ProxyLocationService : IProxyLocationService
     {

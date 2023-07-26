@@ -1,12 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.DefaultBot;
-using Sharky.Extensions;
-using Sharky.Pathing;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.MicroControllers.Zerg
+﻿namespace Sharky.MicroControllers.Zerg
 {
     public class ViperMicroController : IndividualMicroController
     {
@@ -87,7 +79,7 @@ namespace Sharky.MicroControllers.Zerg
             return false;
         }
 
-        private bool Consume(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<Action> action)
+        private bool Consume(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2Action> action)
         {
             action = null;
 
@@ -99,7 +91,7 @@ namespace Sharky.MicroControllers.Zerg
             bool wasConsuming = commander.LastAbility == Abilities.EFFECT_VIPERCONSUME || commander.LastAbility == Abilities.INVALID;
             if (commander.UnitCalculation.Unit.Energy < 75 || wasConsuming)
             {
-                var buildings = ActiveUnitData.SelfUnits.Where(b => b.Value.Unit.Health >= 450 && b.Value.Attributes.Contains(Attribute.Structure)).OrderBy(b => commander.UnitCalculation.Position.DistanceSquared(b.Value.Position));
+                var buildings = ActiveUnitData.SelfUnits.Where(b => b.Value.Unit.Health >= 450 && b.Value.Attributes.Contains(SC2Attribute.Structure)).OrderBy(b => commander.UnitCalculation.Position.DistanceSquared(b.Value.Position));
 
                 if (buildings.Any())
                 {
@@ -161,7 +153,7 @@ namespace Sharky.MicroControllers.Zerg
             return null;
         }
 
-        private bool Abduct(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<Action> action)
+        private bool Abduct(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2Action> action)
         {
             action = null;
 
@@ -216,7 +208,7 @@ namespace Sharky.MicroControllers.Zerg
             return false;
         }
 
-        private bool ParasiticBomb(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<Action> action)
+        private bool ParasiticBomb(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2Action> action)
         {
             action = null;
 
@@ -351,7 +343,7 @@ namespace Sharky.MicroControllers.Zerg
 
         public override List<SC2APIProtocol.Action> Retreat(UnitCommander commander, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
-            List<Action> actions = null;
+            List<SC2Action> actions = null;
 
             if (OffensiveAbility(commander, defensivePoint, defensivePoint, groupCenter, null, frame, out actions))
             {

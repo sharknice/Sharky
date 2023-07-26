@@ -1,7 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.DefaultBot;
-
-namespace Sharky.Builds.Terran
+﻿namespace Sharky.Builds.Terran
 {
     public class BattleCruisers : TerranSharkyBuild
     {

@@ -1,9 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.Chat;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Sharky.Managers
+﻿namespace Sharky.Managers
 {
     public class EnemyRaceManager : SharkyManager
     {
@@ -41,7 +36,7 @@ namespace Sharky.Managers
             }
         }
 
-        public override IEnumerable<Action> OnFrame(ResponseObservation observation)
+        public override IEnumerable<SC2Action> OnFrame(ResponseObservation observation)
         {
             if (EnemyData.EnemyRace == Race.Random)
             {
@@ -62,7 +57,7 @@ namespace Sharky.Managers
                 }
             }
 
-            return new List<Action>();
+            return new List<SC2Action>();
         }
 
         void TagRace()

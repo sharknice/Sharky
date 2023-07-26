@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Numerics;
-
-namespace Sharky.Pathing
+﻿namespace Sharky.Pathing
 {
     public class PathData
     {

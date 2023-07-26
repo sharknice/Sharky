@@ -1,9 +1,4 @@
-﻿using SC2APIProtocol;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.Managers.Protoss
+﻿namespace Sharky.Managers.Protoss
 {
     public class ShieldBatteryManager : SharkyManager
     {
@@ -42,9 +37,9 @@ namespace Sharky.Managers.Protoss
             return actions;
         }
 
-        List<SC2APIProtocol.Action> Restore(UnitCommander shieldBattery, IEnumerable<UnitOrder> unitsBeingRestored, uint frame)
+        List<SC2Action> Restore(UnitCommander shieldBattery, IEnumerable<UnitOrder> unitsBeingRestored, uint frame)
         {
-            var targets = shieldBattery.UnitCalculation.NearbyAllies.Where(a => a.Unit.BuildProgress == 1 && a.Unit.Shield < a.Unit.ShieldMax - 5 && (!a.Attributes.Contains(Attribute.Structure) || a.Unit.Shield < 10) && !(ActiveUnitData.Commanders.ContainsKey(a.Unit.Tag) && ActiveUnitData.Commanders[a.Unit.Tag].UnitRole == UnitRole.Die));
+            var targets = shieldBattery.UnitCalculation.NearbyAllies.Where(a => a.Unit.BuildProgress == 1 && a.Unit.Shield < a.Unit.ShieldMax - 5 && (!a.Attributes.Contains(SC2Attribute.Structure) || a.Unit.Shield < 10) && !(ActiveUnitData.Commanders.ContainsKey(a.Unit.Tag) && ActiveUnitData.Commanders[a.Unit.Tag].UnitRole == UnitRole.Die));
             var target = targets.Where(a => !unitsBeingRestored.Any(o => o.TargetUnitTag == a.Unit.Tag) && Vector2.DistanceSquared(a.Position, shieldBattery.UnitCalculation.Position) <= (RestoreRange + a.Unit.Radius) * (RestoreRange + a.Unit.Radius)).OrderByDescending(a => a.Dps).ThenBy(a => a.Unit.Shield).FirstOrDefault(); 
             if (shieldBattery.UnitCalculation.Unit.Energy > 0 && target != null)
             {

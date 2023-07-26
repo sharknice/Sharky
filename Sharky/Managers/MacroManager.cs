@@ -1,11 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.Builds;
-using Sharky.Builds.MacroServices;
-using Sharky.DefaultBot;
-using Sharky.Macro;
-using System.Collections.Generic;
-
-namespace Sharky.Managers
+﻿namespace Sharky.Managers
 {
     public class MacroManager : SharkyManager
     {
@@ -82,9 +75,9 @@ namespace Sharky.Managers
             MacroSetup.SetupMacro(MacroData);
         }
 
-        public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
+        public override IEnumerable<SC2Action> OnFrame(ResponseObservation observation)
         {
-            var actions = new List<Action>();
+            var actions = new List<SC2Action>();
 
             MacroData.FoodUsed = (int)observation.Observation.PlayerCommon.FoodUsed;
             MacroData.FoodLeft = (int)observation.Observation.PlayerCommon.FoodCap - MacroData.FoodUsed;
@@ -158,9 +151,9 @@ namespace Sharky.Managers
             return true;
         }
 
-        IEnumerable<SC2APIProtocol.Action> EveryFrameProduction()
+        IEnumerable<SC2Action> EveryFrameProduction()
         {
-            var actions = new List<Action>();
+            var actions = new List<SC2Action>();
 
             actions.AddRange(UpgradeResearcher.ResearchUpgrades());
             actions.AddRange(UnitBuilder.ProduceUnits());

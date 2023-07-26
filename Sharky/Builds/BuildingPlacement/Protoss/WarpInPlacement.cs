@@ -1,12 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.Extensions;
-using Sharky.Pathing;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.Builds.BuildingPlacement
+﻿namespace Sharky.Builds.BuildingPlacement
 {
     public class WarpInPlacement : IBuildingPlacement
     {

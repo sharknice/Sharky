@@ -1,6 +1,4 @@
-﻿using SC2APIProtocol;
-
-namespace Sharky.Proxy
+﻿namespace Sharky.Proxy
 {
     public class CliffProxyData
     {

@@ -1,12 +1,4 @@
-﻿using Sharky.MicroControllers;
-using Sharky.MicroTasks.Harass;
-using Sharky.Pathing;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.MicroTasks.Scout
+﻿namespace Sharky.MicroTasks.Scout
 {
     public class FindHiddenBaseTask : MicroTask
     {

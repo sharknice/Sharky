@@ -1,7 +1,4 @@
-﻿using Sharky.DefaultBot;
-using System.Linq;
-
-namespace Sharky.EnemyStrategies.Terran
+﻿namespace Sharky.EnemyStrategies.Terran
 {
     public class ProxyMaurauders : EnemyStrategy
     {

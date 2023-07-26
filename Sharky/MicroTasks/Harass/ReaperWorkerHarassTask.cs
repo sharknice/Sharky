@@ -1,14 +1,4 @@
-﻿using Sharky.DefaultBot;
-using Sharky.Extensions;
-using Sharky.MicroControllers;
-using Sharky.MicroTasks.Attack;
-using Sharky.MicroTasks.Harass;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.MicroTasks
+﻿namespace Sharky.MicroTasks
 {
     public class ReaperWorkerHarassTask : MicroTask
     {

@@ -1,7 +1,4 @@
-﻿using Sharky.MicroControllers;
-using System.Collections.Generic;
-
-namespace Sharky
+﻿namespace Sharky
 {
     public class MicroData
     {

@@ -1,10 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.Builds.BuildingPlacement;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.Builds.MacroServices
+﻿namespace Sharky.Builds.MacroServices
 {
     public class BuildDefenseService
     {
@@ -33,9 +27,9 @@ namespace Sharky.Builds.MacroServices
             defensivePointLastFailFrame = 0;
         }
 
-        public List<Action> BuildDefensiveBuildings()
+        public List<SC2Action> BuildDefensiveBuildings()
         {
-            var commands = new List<Action>();
+            var commands = new List<SC2Action>();
 
             foreach (var unit in MacroData.BuildDefensiveBuildings)
             {
@@ -54,9 +48,9 @@ namespace Sharky.Builds.MacroServices
             return commands;
         }
 
-        public List<Action> BuildDefensiveBuildingsAtDefensivePoint()
+        public List<SC2Action> BuildDefensiveBuildingsAtDefensivePoint()
         {
-            var commands = new List<Action>();
+            var commands = new List<SC2Action>();
 
             if (defensivePointLastFailFrame < MacroData.Frame - 100)
             {
@@ -85,9 +79,9 @@ namespace Sharky.Builds.MacroServices
             return commands;
         }
 
-        public List<Action> BuildDefensiveBuildingsAtEveryBase()
+        public List<SC2Action> BuildDefensiveBuildingsAtEveryBase()
         {
-            var commands = new List<Action>();
+            var commands = new List<SC2Action>();
 
             foreach (var unit in MacroData.DesiredDefensiveBuildingsAtEveryBase)
             {
@@ -122,9 +116,9 @@ namespace Sharky.Builds.MacroServices
             return commands;
         }
 
-        public List<Action> BuildDefensiveBuildingsAtNextBase()
+        public List<SC2Action> BuildDefensiveBuildingsAtNextBase()
         {
-            var commands = new List<Action>();
+            var commands = new List<SC2Action>();
 
             foreach (var unit in MacroData.DesiredDefensiveBuildingsAtNextBase)
             {
@@ -161,9 +155,9 @@ namespace Sharky.Builds.MacroServices
             return commands;
         }
 
-        public IEnumerable<Action> BuildDefensiveBuildingsAtEveryMineralLine()
+        public IEnumerable<SC2Action> BuildDefensiveBuildingsAtEveryMineralLine()
         {
-            var commands = new List<SC2APIProtocol.Action>();
+            var commands = new List<SC2Action>();
 
             foreach (var unit in MacroData.DesiredDefensiveBuildingsAtEveryMineralLine)
             {

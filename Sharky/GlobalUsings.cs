@@ -1,0 +1,70 @@
+﻿global using System;
+global using System.Buffers;
+global using System.Collections.Concurrent;
+global using System.Collections.Generic;
+global using System.Diagnostics;
+global using System.Globalization;
+global using System.IO;
+global using System.IO.Compression;
+global using System.Linq;
+global using System.Net.Http;
+global using System.Net.WebSockets;
+global using System.Numerics;
+global using System.Text;
+global using System.Text.RegularExpressions;
+global using System.Threading;
+global using System.Threading.Tasks;
+
+global using Sharky;
+global using Sharky.Builds;
+global using Sharky.Builds.BuildingPlacement;
+global using Sharky.Builds.BuildChoosing;
+global using Sharky.Builds.MacroServices;
+global using Sharky.Builds.Protoss;
+global using Sharky.Builds.QuickBuilds;
+global using Sharky.Builds.Terran;
+global using Sharky.Builds.Zerg;
+global using Sharky.DefaultBot;
+global using Sharky.EnemyPlayer;
+global using Sharky.EnemyStrategies;
+global using Sharky.EnemyStrategies.Protoss;
+global using Sharky.EnemyStrategies.Terran;
+global using Sharky.EnemyStrategies.Zerg;
+global using Sharky.Extensions;
+global using Sharky.Chat;
+global using Sharky.Macro;
+global using Sharky.Managers;
+global using Sharky.Managers.Protoss;
+global using Sharky.Managers.Terran;
+global using Sharky.MicroControllers;
+global using Sharky.MicroControllers.Protoss;
+global using Sharky.MicroControllers.Terran;
+global using Sharky.MicroControllers.Zerg;
+global using Sharky.MicroTasks;
+global using Sharky.MicroTasks.Attack;
+global using Sharky.MicroTasks.Harass;
+global using Sharky.MicroTasks.Macro;
+global using Sharky.MicroTasks.Mining;
+global using Sharky.MicroTasks.Scout;
+global using Sharky.MicroTasks.Zerg;
+global using Sharky.Pathing;
+global using Sharky.Proxy;
+global using Sharky.S2ClientTypeEnums;
+global using Sharky.TypeData;
+
+global using Google.Protobuf;
+global using Google.Protobuf.Collections;
+global using Newtonsoft.Json;
+global using Newtonsoft.Json.Converters;
+
+global using Roy_T.AStar.Graphs;
+global using Roy_T.AStar.Grids;
+global using Roy_T.AStar.Paths;
+global using Roy_T.AStar.Primitives;
+
+global using SC2APIProtocol;
+
+global using SC2Action = SC2APIProtocol.Action;
+global using SC2Attribute = SC2APIProtocol.Attribute;
+
+global using FilePath = System.IO.Path;

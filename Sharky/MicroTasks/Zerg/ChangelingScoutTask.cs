@@ -1,9 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.DefaultBot;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Sharky.MicroTasks.Zerg
+﻿namespace Sharky.MicroTasks.Zerg
 {
     public class ChangelingScoutTask : MicroTask
     {
@@ -38,9 +33,9 @@ namespace Sharky.MicroTasks.Zerg
             return type >= (uint)UnitTypes.ZERG_CHANGELING && type <= (uint)UnitTypes.ZERG_CHANGELINGZERGLING;
         }
 
-        public override IEnumerable<Action> PerformActions(int frame)
+        public override IEnumerable<SC2Action> PerformActions(int frame)
         {
-            var commands = new List<Action>();
+            var commands = new List<SC2Action>();
             foreach (var commander in UnitCommanders)
             {
                 if (!commander.UnitCalculation.Unit.Orders.Any())

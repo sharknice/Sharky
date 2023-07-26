@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-
-namespace Sharky.EnemyPlayer
+﻿namespace Sharky.EnemyPlayer
 {
     public class EnemyNameService : IEnemyNameService
     {

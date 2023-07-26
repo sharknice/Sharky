@@ -1,8 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.DefaultBot;
-using System.Collections.Generic;
-
-namespace Sharky.Managers
+﻿namespace Sharky.Managers
 {
     public class EnemyStrategyManager : SharkyManager
     {
@@ -17,7 +13,7 @@ namespace Sharky.Managers
             DebugService = defaultSharkyBot.DebugService;
         }
 
-        public override IEnumerable<Action> OnFrame(ResponseObservation observation)
+        public override IEnumerable<SC2Action> OnFrame(ResponseObservation observation)
         {
             var frame = (int)observation.Observation.GameLoop;
 
@@ -30,7 +26,7 @@ namespace Sharky.Managers
 
             DebugService.DrawText($"Enemy aggression {EnemyData.EnemyAggressivityData.ArmyAggressivity}");
 
-            return new List<Action>();
+            return new List<SC2Action>();
         }
     }
 }

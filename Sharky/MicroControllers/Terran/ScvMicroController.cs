@@ -1,11 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.DefaultBot;
-using Sharky.Pathing;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.MicroControllers.Terran
+﻿namespace Sharky.MicroControllers.Terran
 {
     public class ScvMicroController : IndividualWorkerMicroController
     {
@@ -26,11 +19,11 @@ namespace Sharky.MicroControllers.Terran
             IOrderedEnumerable<UnitCalculation> repairTargets = null;
             if (supportTargets != null)
             {
-                repairTargets = supportTargets.Select(c => c.UnitCalculation).Where(a => a.Attributes.Contains(Attribute.Mechanical) && a.Unit.BuildProgress == 1 && a.Unit.Health < a.Unit.HealthMax).OrderByDescending(a => a.Unit.HealthMax - a.Unit.Health);
+                repairTargets = supportTargets.Select(c => c.UnitCalculation).Where(a => a.Attributes.Contains(SC2Attribute.Mechanical) && a.Unit.BuildProgress == 1 && a.Unit.Health < a.Unit.HealthMax).OrderByDescending(a => a.Unit.HealthMax - a.Unit.Health);
             }
             if (repairTargets == null || repairTargets.Count() == 0)
             {
-                repairTargets = commander.UnitCalculation.NearbyAllies.Where(a => a.Attributes.Contains(Attribute.Mechanical) && a.Unit.BuildProgress == 1 && a.Unit.Health < a.Unit.HealthMax).OrderBy(a => Vector2.DistanceSquared(a.Position, commander.UnitCalculation.Position));
+                repairTargets = commander.UnitCalculation.NearbyAllies.Where(a => a.Attributes.Contains(SC2Attribute.Mechanical) && a.Unit.BuildProgress == 1 && a.Unit.Health < a.Unit.HealthMax).OrderBy(a => Vector2.DistanceSquared(a.Position, commander.UnitCalculation.Position));
             }
 
             var repairTarget = repairTargets.FirstOrDefault();

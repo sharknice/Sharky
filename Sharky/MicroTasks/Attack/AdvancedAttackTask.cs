@@ -1,13 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.DefaultBot;
-using Sharky.MicroControllers;
-using Sharky.MicroTasks.Scout;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.MicroTasks.Attack
+﻿namespace Sharky.MicroTasks.Attack
 {
     public class AdvancedAttackTask : MicroTask, IAttackTask
     {
@@ -175,7 +166,7 @@ namespace Sharky.MicroTasks.Attack
 
         void UnclaimScvs(int desiredScvs, int claimedScvs)
         {
-            if (claimedScvs > desiredScvs || !AttackData.Attacking && !UnitCommanders.Any(c => c.UnitCalculation.Unit.Health < c.UnitCalculation.Unit.HealthMax && c.UnitCalculation.Attributes.Contains(Attribute.Mechanical)) || MacroData.Minerals == 0)
+            if (claimedScvs > desiredScvs || !AttackData.Attacking && !UnitCommanders.Any(c => c.UnitCalculation.Unit.Health < c.UnitCalculation.Unit.HealthMax && c.UnitCalculation.Attributes.Contains(SC2Attribute.Mechanical)) || MacroData.Minerals == 0)
             {
                 var scv = UnitCommanders.FirstOrDefault(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_SCV);
                 if (scv != null)
@@ -210,7 +201,7 @@ namespace Sharky.MicroTasks.Attack
                 }
                 else
                 {
-                    var missingHealth = UnitCommanders.Where(c => c.UnitCalculation.Attributes.Contains(Attribute.Mechanical)).Sum(c => c.UnitCalculation.Unit.HealthMax - c.UnitCalculation.Unit.Health);
+                    var missingHealth = UnitCommanders.Where(c => c.UnitCalculation.Attributes.Contains(SC2Attribute.Mechanical)).Sum(c => c.UnitCalculation.Unit.HealthMax - c.UnitCalculation.Unit.Health);
                     if (missingHealth > 0)
                     {
                         var desiredTotal = (missingHealth / 50f) + 1;
@@ -259,7 +250,7 @@ namespace Sharky.MicroTasks.Attack
             var attackingEnemies = ActiveUnitData.EnemyUnits.Values.Where(e => e.FrameLastSeen > frame - 100 &&
                     (e.NearbyEnemies.Any(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter) || u.UnitClassifications.Contains(UnitClassification.ProductionStructure) || u.UnitClassifications.Contains(UnitClassification.DefensiveStructure)) ||
                     (e.TargetPriorityCalculation.OverallWinnability < .5f && EnemyAttackers.Any(ea => ea.Unit.Tag == e.Unit.Tag))
-                ) && (e.NearbyEnemies.Count(b => b.Attributes.Contains(Attribute.Structure)) >= e.NearbyAllies.Count(b => b.Attributes.Contains(Attribute.Structure)))
+                ) && (e.NearbyEnemies.Count(b => b.Attributes.Contains(SC2Attribute.Structure)) >= e.NearbyAllies.Count(b => b.Attributes.Contains(SC2Attribute.Structure)))
             ).Where(e => e.Unit.UnitType != (uint)UnitTypes.TERRAN_KD8CHARGE);
 
             if (OnlyDefendBuildings)
@@ -367,7 +358,7 @@ namespace Sharky.MicroTasks.Attack
             }
         }
 
-        private void OrderSupportUnitsWithoutMainUnits(int frame, List<Action> actions, IEnumerable<UnitCommander> supportUnits)
+        private void OrderSupportUnitsWithoutMainUnits(int frame, List<SC2Action> actions, IEnumerable<UnitCommander> supportUnits)
         {
             if (AttackData.Attacking)
             {
@@ -415,7 +406,7 @@ namespace Sharky.MicroTasks.Attack
             }
         }
 
-        private void OrderMainUnitsWithSupportUnits(int frame, List<Action> actions, IEnumerable<UnitCommander> mainUnits, IEnumerable<UnitCommander> supportUnits)
+        private void OrderMainUnitsWithSupportUnits(int frame, List<SC2Action> actions, IEnumerable<UnitCommander> mainUnits, IEnumerable<UnitCommander> supportUnits)
         {
             var stopwatch = new Stopwatch();
             stopwatch.Start();
@@ -488,7 +479,7 @@ namespace Sharky.MicroTasks.Attack
             {
                 MicroTaskData[typeof(FindHiddenBaseTask).Name].Disable();
             }
-            if (MicroTaskData[typeof(FindHiddenBaseTask).Name].Enabled && ActiveUnitData.EnemyUnits.Any(e => e.Value.Attributes.Contains(Attribute.Structure)))
+            if (MicroTaskData[typeof(FindHiddenBaseTask).Name].Enabled && ActiveUnitData.EnemyUnits.Any(e => e.Value.Attributes.Contains(SC2Attribute.Structure)))
             {
                 MicroTaskData[typeof(FindHiddenBaseTask).Name].Disable();
             }

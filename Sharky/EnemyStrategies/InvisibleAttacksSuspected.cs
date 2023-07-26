@@ -1,6 +1,4 @@
-﻿using Sharky.DefaultBot;
-
-namespace Sharky.EnemyStrategies
+﻿namespace Sharky.EnemyStrategies
 {
     public class InvisibleAttacksSuspected : EnemyStrategy
     {

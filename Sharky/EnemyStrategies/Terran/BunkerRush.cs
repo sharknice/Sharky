@@ -1,8 +1,4 @@
-﻿using Sharky.DefaultBot;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.EnemyStrategies.Terran
+﻿namespace Sharky.EnemyStrategies.Terran
 {
     public class BunkerRush : EnemyStrategy
     {

@@ -1,7 +1,4 @@
-﻿using Sharky.MicroTasks;
-using System.Collections.Generic;
-
-namespace Sharky
+﻿namespace Sharky
 {
     public class MicroTaskData : Dictionary<string, IMicroTask>
     {

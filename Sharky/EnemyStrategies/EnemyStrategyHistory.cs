@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Sharky.EnemyStrategies
+﻿namespace Sharky.EnemyStrategies
 {
     public class EnemyStrategyHistory
     {

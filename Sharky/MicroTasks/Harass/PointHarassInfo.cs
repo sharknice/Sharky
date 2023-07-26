@@ -1,7 +1,4 @@
-﻿using SC2APIProtocol;
-using System.Collections.Generic;
-
-namespace Sharky.MicroTasks.Harass
+﻿namespace Sharky.MicroTasks.Harass
 {
     public class PointHarassInfo
     {

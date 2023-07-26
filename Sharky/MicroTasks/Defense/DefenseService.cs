@@ -1,10 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.MicroTasks.Attack;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.MicroTasks
+﻿namespace Sharky.MicroTasks
 {
     public class DefenseService
     {
@@ -27,7 +21,7 @@ namespace Sharky.MicroTasks
             var enemyGroupLocation = new Vector2(position.X, position.Y);
 
             var enemyHealth = enemyGroup.Sum(e => e.SimulatedHitpoints);
-            var enemyDps = enemyGroup.Sum(e => e.SimulatedDamagePerSecond(new List<Attribute>(), true, true));
+            var enemyDps = enemyGroup.Sum(e => e.SimulatedDamagePerSecond(new List<SC2Attribute>(), true, true));
             var enemyHps = enemyGroup.Sum(e => e.SimulatedHealPerSecond);
             var enemyAttributes = enemyGroup.SelectMany(e => e.Attributes).Distinct();
             var hasGround = enemyGroup.Any(e => !e.Unit.IsFlying);
@@ -114,7 +108,7 @@ namespace Sharky.MicroTasks
             if (targetPriority.Overwhelm) { return reinforcements; }
 
             var enemyHealth = split.EnemyGroup.Sum(e => e.SimulatedHitpoints);
-            var enemyDps = split.EnemyGroup.Sum(e => e.SimulatedDamagePerSecond(new List<Attribute>(), true, true));
+            var enemyDps = split.EnemyGroup.Sum(e => e.SimulatedDamagePerSecond(new List<SC2Attribute>(), true, true));
             var enemyHps = split.EnemyGroup.Sum(e => e.SimulatedHealPerSecond);
             var enemyAttributes = split.EnemyGroup.SelectMany(e => e.Attributes).Distinct();
             var hasGround = split.EnemyGroup.Any(e => !e.Unit.IsFlying);
