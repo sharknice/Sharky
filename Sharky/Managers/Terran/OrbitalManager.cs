@@ -127,6 +127,7 @@ namespace Sharky.Managers.Terran
                     if (!undetectedEnemy.Value.EnemiesInRangeOf.All(a => a.Unit.UnitType == (uint)UnitTypes.TERRAN_BANSHEE && a.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker))))
                     {
                         LastScanFrame = frame;
+                        ChatService.Tag("a_scan");
                         return orbital.Order(frame, Abilities.EFFECT_SCAN, new Point2D { X = undetectedEnemy.Value.Position.X, Y = undetectedEnemy.Value.Position.Y });
                     }
                 }
@@ -136,6 +137,7 @@ namespace Sharky.Managers.Terran
                     if (siegedTank.BestTarget != null && siegedTank.UnitCalculation.Unit.WeaponCooldown < 0.1f && siegedTank.UnitCalculation.EnemiesInRange.Any(e => e.Unit.Tag == siegedTank.BestTarget.Unit.Tag) && frame - siegedTank.BestTarget.FrameLastSeen > 10 && !MapDataService.SelfVisible(siegedTank.BestTarget.Unit.Pos))
                     {
                         LastScanFrame = frame;
+                        ChatService.Tag("a_scan");
                         return orbital.Order(frame, Abilities.EFFECT_SCAN, new Point2D { X = siegedTank.BestTarget.Position.X, Y = siegedTank.BestTarget.Position.Y });
                     }
                 }
@@ -144,6 +146,7 @@ namespace Sharky.Managers.Terran
                 {
                     var scanPoint = ScanQueue.Pop();
                     LastScanFrame = frame;
+                    ChatService.Tag("a_scan");
                     return orbital.Order(frame, Abilities.EFFECT_SCAN, scanPoint);
                 }
             }
@@ -158,6 +161,7 @@ namespace Sharky.Managers.Terran
                 var highestMineralPatch = BaseData.SelfBases.Where(b => b.ResourceCenter != null && b.ResourceCenter.BuildProgress > .99 && b.MineralFields.Count() > 0 && ActiveUnitData.SelfUnits.ContainsKey(b.ResourceCenter.Tag) && ActiveUnitData.SelfUnits[b.ResourceCenter.Tag].NearbyEnemies.Count(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit)) < 2).SelectMany(m => m.MineralFields).OrderByDescending(m => m.MineralContents).FirstOrDefault();
                 if (highestMineralPatch != null)
                 {
+                    ChatService.Tag("a_mule");
                     return orbital.Order(frame, Abilities.EFFECT_CALLDOWNMULE, targetTag: highestMineralPatch.Tag);
                 }
 
@@ -179,6 +183,7 @@ namespace Sharky.Managers.Terran
                 var visibleMineral = ActiveUnitData.NeutralUnits.FirstOrDefault(u => SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType) && u.Value.Unit.DisplayType == DisplayType.Visible).Value;
                 if (visibleMineral != null)
                 {
+                    ChatService.Tag("a_mule");
                     return orbital.Order(frame, Abilities.EFFECT_CALLDOWNMULE, targetTag: visibleMineral.Unit.Tag);
                 }
             }

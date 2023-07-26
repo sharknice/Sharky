@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using Sharky.Chat;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -9,11 +10,13 @@ namespace Sharky.Managers.Terran
     {
         ActiveUnitData ActiveUnitData;
         EnemyData EnemyData;
+        ChatService ChatService;
 
-        public SupplyDepotManager(ActiveUnitData activeUnitData, EnemyData enemyData)
+        public SupplyDepotManager(ActiveUnitData activeUnitData, EnemyData enemyData, ChatService chatService)
         {
             ActiveUnitData = activeUnitData;
             EnemyData = enemyData;
+            ChatService = chatService;
         }
 
         public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
@@ -33,6 +36,7 @@ namespace Sharky.Managers.Terran
             {
                 if (!raisedDepot.UnitCalculation.NearbyEnemies.Any(e => !e.Unit.IsFlying && e.FrameLastSeen >= frame - 5 && Vector2.DistanceSquared(e.Position, raisedDepot.UnitCalculation.Position) < 25) || WinningGround(raisedDepot))
                 {
+                    ChatService.Tag("a_depot_lower");
                     var action = raisedDepot.Order(frame, Abilities.MORPH_SUPPLYDEPOT_LOWER);
                     if (action != null)
                     {
@@ -45,6 +49,7 @@ namespace Sharky.Managers.Terran
             {
                 if (loweredDepot.UnitCalculation.NearbyEnemies.Any(enemy => !enemy.Unit.IsFlying && enemy.FrameLastSeen >= frame - 5 && Vector2.DistanceSquared(enemy.Position, loweredDepot.UnitCalculation.Position) < 25) && LosingGround(loweredDepot))
                 {
+                    ChatService.Tag("a_depot_raise");
                     var action = loweredDepot.Order(frame, Abilities.MORPH_SUPPLYDEPOT_RAISE);
                     if (action != null)
                     {

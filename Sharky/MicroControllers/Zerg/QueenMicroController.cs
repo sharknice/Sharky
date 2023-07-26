@@ -59,6 +59,7 @@ namespace Sharky.MicroControllers.Zerg
             var transfuseTarget = FindTransfuseTarget(commander.UnitCalculation);
             if (transfuseTarget.Item1 != null)
             {
+                ChatService.Tag("a_transfuse");
                 action = commander.Order(frame, Abilities.EFFECT_TRANSFUSION, targetTag: transfuseTarget.Item1.Tag);
                 return true;
             }

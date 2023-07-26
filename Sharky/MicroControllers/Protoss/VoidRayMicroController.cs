@@ -58,6 +58,7 @@ namespace Sharky.MicroControllers.Protoss
                             {
                                 if (commander.UnitCalculation.EnemiesInRange.Where(e => e.Attributes.Contains(Attribute.Armored)).Sum(e => e.Unit.Health) > 200)
                                 {
+                                    ChatService.Tag("a_prismatic");
                                     action = commander.Order(frame, Abilities.EFFECT_VOIDRAYPRISMATICALIGNMENT);
                                     return true;
                                 }

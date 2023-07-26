@@ -1,4 +1,5 @@
 ﻿using SC2APIProtocol;
+using Sharky.Chat;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -11,15 +12,17 @@ namespace Sharky.Managers.Protoss
         SharkyUnitData SharkyUnitData;
         ChronoData ChronoData;
         EnemyData EnemyData;
+        ChatService ChatService;
         float OverchargeRangeSquared = 100;
         float RestoreRangeSquared = 36;
 
-        public NexusManager(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, ChronoData chronoData, EnemyData enemyData)
+        public NexusManager(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, ChronoData chronoData, EnemyData enemyData, ChatService chatService)
         {
             ActiveUnitData = activeUnitData;
             SharkyUnitData = sharkyUnitData;
             ChronoData = chronoData;
             EnemyData = enemyData;
+            ChatService = chatService;
         }
 
         public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
@@ -37,6 +40,7 @@ namespace Sharky.Managers.Protoss
                 var action = Overcharge(nexus, (int)observation.Observation.GameLoop);
                 if (action != null)
                 {
+                    ChatService.Tag("a_overcharge");
                     actions.AddRange(action);
                 }
                 else
@@ -44,6 +48,7 @@ namespace Sharky.Managers.Protoss
                     action = ChronoBoost(nexus, (int)observation.Observation.GameLoop);
                     if (action != null)
                     {
+                        ChatService.Tag("a_chronoboost");
                         actions.AddRange(action);
                         return actions;
                     }               

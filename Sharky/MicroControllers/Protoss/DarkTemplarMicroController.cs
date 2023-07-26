@@ -41,6 +41,7 @@ namespace Sharky.MicroControllers.Protoss
                         var attack = commander.UnitCalculation.EnemiesThreateningDamage.OrderBy(e => Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position) - (e.Range * e.Range)).FirstOrDefault();
                         if (attack != null)
                         {
+                            ChatService.Tag("a_shadowstrike");
                             var avoidPoint = GetGroundAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, attack.Unit.Pos, target, defensivePoint, attack.Range + attack.Unit.Radius + commander.UnitCalculation.Unit.Radius + AvoidDamageDistance + 4);
                             action = commander.Order(frame, Abilities.EFFECT_SHADOWSTRIDE, avoidPoint);
                             return true;

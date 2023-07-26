@@ -33,6 +33,7 @@ namespace Sharky.MicroControllers.Terran
 
             if (EnemyData.EnemyRace == Race.Protoss)
             {
+                ChatService.Tag("a_high_impact");
                 action = commander.Order(frame, Abilities.MORPH_THORHIGHIMPACTMODE);
                 return true;
             }
@@ -40,6 +41,7 @@ namespace Sharky.MicroControllers.Terran
             {
                 if (commander.UnitCalculation.NearbyEnemies.Any(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_BATTLECRUISER))
                 {
+                    ChatService.Tag("a_high_impact");
                     action = commander.Order(frame, Abilities.MORPH_THORHIGHIMPACTMODE);
                     return true;
                 }

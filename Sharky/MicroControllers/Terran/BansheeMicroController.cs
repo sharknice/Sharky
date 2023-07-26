@@ -34,6 +34,7 @@ namespace Sharky.MicroControllers.Terran
 
                 if (commander.UnitCalculation.Unit.Energy > 25 && (commander.UnitCalculation.EnemiesInRangeOf.Count() > 0 || commander.UnitCalculation.NearbyEnemies.Any(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_HIGHTEMPLAR))) // if enemies can hit it, cloak
                 {
+                    ChatService.Tag("a_banshee_cloak");
                     action = commander.Order(frame, Abilities.BEHAVIOR_CLOAKON);
                     return true;
                 }

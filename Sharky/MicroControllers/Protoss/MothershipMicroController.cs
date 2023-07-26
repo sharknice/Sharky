@@ -50,6 +50,7 @@ namespace Sharky.MicroControllers.Protoss
 
             if (TimeWarp(commander, frame, out action))
             {
+                ChatService.Tag("a_timewarp");
                 return true;
             }
 

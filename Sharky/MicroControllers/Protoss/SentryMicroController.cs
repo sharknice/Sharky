@@ -39,11 +39,13 @@ namespace Sharky.MicroControllers.Protoss
 
             if (GuardianShield(commander, frame, out action))
             {
+                ChatService.Tag("a_guardian");
                 return true;
             }
 
             if (Hallucinate(commander, frame, out action))
             {
+                ChatService.Tag("a_hallucinate");
                 return true;
             }
 

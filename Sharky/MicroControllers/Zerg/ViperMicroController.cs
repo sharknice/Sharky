@@ -62,16 +62,19 @@ namespace Sharky.MicroControllers.Zerg
 
             if (Consume(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action))
             {
+                ChatService.Tag("a_consume");
                 return true;
             }
 
             if (ParasiticBomb(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action))
             {
+                ChatService.Tag("a_parasitic");
                 return true;
             }
 
             if (Abduct(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action))
             {
+                ChatService.Tag("a_abduct");
                 return true;
             }
 

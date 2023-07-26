@@ -20,16 +20,19 @@ namespace Sharky.MicroControllers.Terran
 
             if (InterferenceMatrix(commander, frame, bestTarget, out action))
             {
+                ChatService.Tag("a_interference");
                 return true;
             }
 
             if (AntiArmorMissile(commander, frame, bestTarget, out action))
             {
+                ChatService.Tag("a_armormissile");
                 return true;
             }
 
             if (AutoTurret(commander, frame, bestTarget, out action))
             {
+                ChatService.Tag("a_autoturret");
                 return true;
             }
 

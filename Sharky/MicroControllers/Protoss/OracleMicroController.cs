@@ -46,6 +46,7 @@ namespace Sharky.MicroControllers.Protoss
 
                 if (Revelation(commander, frame, out action))
                 {
+                    ChatService.Tag("a_revelation");
                     return true;
                 }
             }
@@ -195,16 +196,19 @@ namespace Sharky.MicroControllers.Protoss
 
             if (PulsarBeam(commander, frame, bestTarget, out action))
             {
+                ChatService.Tag("a_pulsar");
                 return true;
             }
 
             if (Revelation(commander, frame, out action))
             {
+                ChatService.Tag("a_revelation");
                 return true;
             }
 
             if (StasisWard(commander, frame, bestTarget, out action))
             {
+                ChatService.Tag("a_stasis");
                 return true;
             }
 
