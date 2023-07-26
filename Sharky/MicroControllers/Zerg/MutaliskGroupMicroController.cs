@@ -69,7 +69,7 @@ namespace Sharky.MicroControllers.Zerg
                         leader.UnitCalculation.TargetPriorityCalculation.TargetPriority = TargetPriority.KillWorkers;
                     }
                     // if enemies threatening damage and no free kills run away
-                    if (leader.UnitCalculation.EnemiesThreateningDamage.Any() && !leader.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker)))
+                    if (leader.UnitCalculation.Unit.Health < leader.UnitCalculation.Unit.HealthMax / 2 && leader.UnitCalculation.EnemiesThreateningDamage.Any() && !leader.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker)))
                     {
                         foreach(var commander in commanders)
                         {

@@ -106,7 +106,7 @@ namespace Sharky.MicroTasks.Mining
 
         private void GetEnemyReaper()
         {
-            EnemyReaper = ActiveUnitData.EnemyUnits.Values.FirstOrDefault(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_REAPER && e.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ResourceCenter)) && !e.NearbyAllies.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit)) && !e.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !e.Unit.IsFlying));
+            EnemyReaper = ActiveUnitData.EnemyUnits.Values.FirstOrDefault(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_REAPER && e.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ResourceCenter) && !e.NearbyAllies.Any(a => a.Unit.UnitType == (uint)UnitTypes.ZERG_QUEEN)) && !e.NearbyAllies.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) || e.Unit.UnitType == (uint)UnitTypes.ZERG_QUEEN) && !e.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !e.Unit.IsFlying));
         }
 
         public override void RemoveDeadUnits(List<ulong> deadUnits)

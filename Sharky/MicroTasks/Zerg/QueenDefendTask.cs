@@ -1,7 +1,6 @@
 ﻿using SC2APIProtocol;
 using Sharky.DefaultBot;
 using Sharky.Extensions;
-using Sharky.Managers;
 using Sharky.MicroControllers.Zerg;
 using System.Collections.Generic;
 using System.Linq;

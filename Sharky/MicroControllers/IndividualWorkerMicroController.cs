@@ -10,8 +10,8 @@ namespace Sharky.MicroControllers
 {
     public class IndividualWorkerMicroController : IndividualMicroController
     {
-        MineralWalker MineralWalker;
-        bool EnemySpotted = false;
+        protected MineralWalker MineralWalker;
+        protected bool EnemySpotted = false;
 
         public IndividualWorkerMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled)
             : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled)
@@ -47,7 +47,7 @@ namespace Sharky.MicroControllers
 
             if (!EnemySpotted)
             {
-                if (!ActiveUnitData.EnemyUnits.Any() && frame < SharkyOptions.FramesPerSecond * 60 * 1.5)
+                if (!ActiveUnitData.EnemyUnits.Any() && frame < SharkyOptions.FramesPerSecond * 60 * 3)
                 {
                     if (MineralWalker.MineralWalkTarget(commander, frame, out action)) { return action; }
                 }
