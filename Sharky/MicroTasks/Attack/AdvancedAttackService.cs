@@ -48,7 +48,7 @@
             var targetPriority = CalculateTargetPriority();
             AttackData.TargetPriorityCalculation = targetPriority;
 
-            if (AttackTask.UnitCommanders.Count() < 1)
+            if (AttackTask.UnitCommanders.Count() + ((AdvancedAttackTask)AttackTask).SubTasks.Values.Sum(t => t.UnitCommanders.Count()) < 1)
             {
                 TargetingData.AttackState = AttackState.Retreat;
                 DebugService.DrawText("Retreating: no army");
