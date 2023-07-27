@@ -3,13 +3,15 @@
     public class DefenseService
     {
         ActiveUnitData ActiveUnitData;
+        EnemyData EnemyData;
         TargetPriorityService TargetPriorityService;
 
         public HashSet<UnitTypes> UnSplittableUnitTypes { get; set; }
 
-        public DefenseService(ActiveUnitData activeUnitData, TargetPriorityService targetPriorityService)
+        public DefenseService(DefaultSharkyBot defaultSharkyBot, TargetPriorityService targetPriorityService)
         {
-            ActiveUnitData = activeUnitData;
+            ActiveUnitData = defaultSharkyBot.ActiveUnitData;
+            EnemyData = defaultSharkyBot.EnemyData;
             TargetPriorityService = targetPriorityService;
 
             UnSplittableUnitTypes = new HashSet<UnitTypes>();
@@ -62,7 +64,7 @@
             {
                 return counterGroup;
             }
-            if (ActiveUnitData.SelfUnits.Any(u => u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_SHIELDBATTERY && u.Value.Unit.IsPowered && u.Value.Unit.BuildProgress >= 1 && (u.Value.Unit.Energy > 3 || u.Value.Unit.BuffIds.Contains((uint)Buffs.BATTERYOVERCHARGE)) && Vector2.DistanceSquared(enemyGroupLocation, u.Value.Position) < 64))
+            if (EnemyData.SelfRace == Race.Protoss && ActiveUnitData.SelfUnits.Any(u => u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_SHIELDBATTERY && u.Value.Unit.IsPowered && u.Value.Unit.BuildProgress >= 1 && (u.Value.Unit.Energy > 3 || u.Value.Unit.BuffIds.Contains((uint)Buffs.BATTERYOVERCHARGE)) && Vector2.DistanceSquared(enemyGroupLocation, u.Value.Position) < 64))
             {
                 // always defend by shield batteries
                 return counterGroup;

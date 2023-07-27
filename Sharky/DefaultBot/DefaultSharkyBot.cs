@@ -421,7 +421,7 @@
 
             MicroData = new MicroData { IndividualMicroControllers = individualMicroControllers, IndividualMicroController = individualMicroController };
 
-            DefenseService = new DefenseService(ActiveUnitData, TargetPriorityService);
+            DefenseService = new DefenseService(this, TargetPriorityService);
             MicroController = new MicroController(MicroData);
 
             var defenseSquadTask = new DefenseSquadTask(this, new ArmySplitter(this), new List<DesiredUnitsClaim>(), 0, false);
