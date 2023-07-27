@@ -1,16 +1,4 @@
-﻿using Newtonsoft.Json;
-using SC2APIProtocol;
-using Sharky.Extensions;
-using Sharky.Pathing;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-
-namespace Sharky.Managers
+﻿namespace Sharky.Managers
 {
     public class BaseManager : SharkyManager
     {
@@ -108,10 +96,10 @@ namespace Sharky.Managers
 
             var folder = GetGneratedBaseDataFolder();
             var fileName = GetGeneratedBaseDataFileName(gameInfo.MapName, folder, gameInfo.StartRaw.StartLocations.First());
-            if (GeneratedBaseLocationData.ContainsKey(Path.GetFileNameWithoutExtension(fileName)))
+            if (GeneratedBaseLocationData.ContainsKey(FilePath.GetFileNameWithoutExtension(fileName)))
             {
                 Console.WriteLine($"loading {fileName}");
-                var loadedData = GeneratedBaseLocationData[Path.GetFileNameWithoutExtension(fileName)];
+                var loadedData = GeneratedBaseLocationData[FilePath.GetFileNameWithoutExtension(fileName)];
                 BaseData.BaseLocations = BaseData.BaseLocations.OrderBy(b => loadedData.SelfBaseLocations.FindIndex(d => d.X == b.Location.X && d.Y == b.Location.Y)).ToList();
                 BaseData.EnemyBaseLocations = BaseData.BaseLocations.OrderBy(b => loadedData.EnemyBaseLocations.FindIndex(d => d.X == b.Location.X && d.Y == b.Location.Y)).ToList();
             }
@@ -191,7 +179,7 @@ namespace Sharky.Managers
                 {
                     var serializer = new JsonSerializer { TypeNameHandling = TypeNameHandling.Auto };
                     var data = (BaseLocationData)serializer.Deserialize(file, typeof(BaseLocationData));
-                    dictionary[Path.GetFileNameWithoutExtension(fileName)] = data;
+                    dictionary[FilePath.GetFileNameWithoutExtension(fileName)] = data;
                 }
             }
             return dictionary;

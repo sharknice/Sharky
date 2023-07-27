@@ -1,16 +1,4 @@
-﻿using Newtonsoft.Json;
-using SC2APIProtocol;
-using Sharky.DefaultBot;
-using Sharky.Pathing;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-
-namespace Sharky.Builds.BuildingPlacement
+﻿namespace Sharky.Builds.BuildingPlacement
 {
     public class WallDataService
     {
@@ -51,7 +39,7 @@ namespace Sharky.Builds.BuildingPlacement
                     using (StreamReader file = File.OpenText(fileName))
                     {
                         var wallData = JsonConvert.DeserializeObject<List<WallData>>(file.ReadToEnd());
-                        var data = new MapWallData { MapName = Path.GetFileNameWithoutExtension(fileName), WallData = wallData };
+                        var data = new MapWallData { MapName = FilePath.GetFileNameWithoutExtension(fileName), WallData = wallData };
                         mapWallData.Add(data);
                     }
                 }
@@ -71,7 +59,7 @@ namespace Sharky.Builds.BuildingPlacement
                 {
                     var serializer = new JsonSerializer { TypeNameHandling = TypeNameHandling.Auto };
                     var wallData = (List<WallData>)serializer.Deserialize(file, typeof(List<WallData>));
-                    dictionary[Path.GetFileNameWithoutExtension(fileName)] = wallData;
+                    dictionary[FilePath.GetFileNameWithoutExtension(fileName)] = wallData;
                 }
             }
             return dictionary;

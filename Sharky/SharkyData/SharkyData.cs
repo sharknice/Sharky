@@ -1,7 +1,4 @@
-﻿using Sharky.EnemyStrategies;
-using System.Collections.Generic;
-
-namespace Sharky
+﻿namespace Sharky
 {
     public class SharkyData
     {

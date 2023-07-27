@@ -1,7 +1,4 @@
-﻿using SC2APIProtocol;
-using System.Collections.Generic;
-
-namespace Sharky.MicroTasks.Scout
+﻿namespace Sharky.MicroTasks.Scout
 {
     public class ScoutInfo
     {

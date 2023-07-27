@@ -1,11 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.Builds.BuildingPlacement;
-using Sharky.MicroTasks.Attack;
-using Sharky.Pathing;
-using System.Collections.Generic;
-using System.Numerics;
-
-namespace Sharky
+﻿namespace Sharky
 {
     public class TargetingData
     {

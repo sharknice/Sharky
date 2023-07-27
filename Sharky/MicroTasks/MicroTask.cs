@@ -1,9 +1,4 @@
-﻿using SC2APIProtocol;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Sharky.MicroTasks
+﻿namespace Sharky.MicroTasks
 {
     public abstract class MicroTask : IMicroTask
     {

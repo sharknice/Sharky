@@ -1,12 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.DefaultBot;
-using Sharky.MicroTasks;
-using Sharky.Pathing;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.MicroControllers.Terran
+﻿namespace Sharky.MicroControllers.Terran
 {
     public class BansheeGroupMicroController : IMicroController
     {

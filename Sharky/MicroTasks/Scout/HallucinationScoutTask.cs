@@ -1,9 +1,4 @@
-﻿using SC2APIProtocol;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.MicroTasks
+﻿namespace Sharky.MicroTasks
 {
     public class HallucinationScoutTask : MicroTask
     {

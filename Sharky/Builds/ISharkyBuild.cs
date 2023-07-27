@@ -1,7 +1,4 @@
-﻿using SC2APIProtocol;
-using System.Collections.Generic;
-
-namespace Sharky.Builds
+﻿namespace Sharky.Builds
 {
     public interface ISharkyBuild
     {

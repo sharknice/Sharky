@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Sharky.Builds.BuildingPlacement
+﻿namespace Sharky.Builds.BuildingPlacement
 {
     public class MapWallData
     {

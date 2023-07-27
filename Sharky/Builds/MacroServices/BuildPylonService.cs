@@ -1,10 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.Builds.BuildingPlacement;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.Builds.MacroServices
+﻿namespace Sharky.Builds.MacroServices
 {
     public class BuildPylonService
     {
@@ -96,7 +90,7 @@ namespace Sharky.Builds.MacroServices
             return commands;
         }
 
-        public IEnumerable<Action> BuildPylonsAtEveryMineralLine()
+        public IEnumerable<SC2Action> BuildPylonsAtEveryMineralLine()
         {
             var commands = new List<SC2APIProtocol.Action>();
 
@@ -123,9 +117,9 @@ namespace Sharky.Builds.MacroServices
             return commands;
         }
 
-        public IEnumerable<Action> BuildPylonsAtDefensivePoint()
+        public IEnumerable<SC2Action> BuildPylonsAtDefensivePoint()
         {
-            var commands = new List<SC2APIProtocol.Action>();
+            var commands = new List<SC2Action>();
 
             if (defensivePointLastFailFrame < MacroData.Frame - 100)
             {

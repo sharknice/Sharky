@@ -1,10 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.MicroTasks;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.Managers
+﻿namespace Sharky.Managers
 {
     public class AttackDataManager : SharkyManager
     {

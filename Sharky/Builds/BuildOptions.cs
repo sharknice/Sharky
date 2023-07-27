@@ -1,8 +1,4 @@
-﻿using Sharky.Builds.BuildingPlacement;
-using Sharky.Builds.Terran;
-using Sharky.Builds.Zerg;
-
-namespace Sharky.Builds
+﻿namespace Sharky.Builds
 {
     public class BuildOptions
     {

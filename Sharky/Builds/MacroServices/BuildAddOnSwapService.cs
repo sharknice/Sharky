@@ -1,11 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.Builds.BuildingPlacement;
-using Sharky.Extensions;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.Builds.MacroServices
+﻿namespace Sharky.Builds.MacroServices
 {
     public class BuildAddOnSwapService
     {
@@ -24,9 +17,9 @@ namespace Sharky.Builds.MacroServices
             BuildingPlacement = buildingPlacement;
         }
 
-        public IEnumerable<Action> BuildAndSwapAddons()
+        public IEnumerable<SC2Action> BuildAndSwapAddons()
         {
-            var commands = new List<Action>();
+            var commands = new List<SC2Action>();
 
             foreach (var pair in MacroData.AddOnSwaps)
             {
@@ -49,9 +42,9 @@ namespace Sharky.Builds.MacroServices
             return commands;
         }
 
-        private IEnumerable<Action> LandFloatingBuildings()
+        private IEnumerable<SC2Action> LandFloatingBuildings()
         {
-            var commands = new List<Action>();
+            var commands = new List<SC2Action>();
 
             var emptyAddons = ActiveUnitData.SelfUnits.Values.Where(a => a.Unit.UnitType == (uint)UnitTypes.TERRAN_TECHLAB || a.Unit.UnitType == (uint)UnitTypes.TERRAN_REACTOR);
             List<UnitCalculation> usedAddons = new List<UnitCalculation>();
@@ -97,9 +90,9 @@ namespace Sharky.Builds.MacroServices
             }
         }
 
-        List<Action> SwapBuildings(AddOnSwap addOnSwap)
+        List<SC2Action> SwapBuildings(AddOnSwap addOnSwap)
         {
-            var commands = new List<Action>();
+            var commands = new List<SC2Action>();
             if (addOnSwap.Cancel)
             {
                 if (addOnSwap.AddOnBuilder.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.BUILD_REACTOR_BARRACKS || o.AbilityId == (uint)Abilities.BUILD_TECHLAB_BARRACKS || o.AbilityId == (uint)Abilities.BUILD_REACTOR_FACTORY || o.AbilityId == (uint)Abilities.BUILD_TECHLAB_FACTORY || o.AbilityId == (uint)Abilities.BUILD_REACTOR_STARPORT || o.AbilityId == (uint)Abilities.BUILD_TECHLAB_STARPORT))
@@ -111,7 +104,7 @@ namespace Sharky.Builds.MacroServices
 
             if (addOnSwap.AddOnBuilder != null && addOnSwap.AddOn != null && addOnSwap.AddOn.UnitCalculation.Unit.BuildProgress == 1)
             {
-                List<Action> command = null;
+                List<SC2Action> command = null;
                 if (addOnSwap.AddOnBuilder.UnitCalculation.UnitTypeData.Name.Contains("Flying"))
                 {
                     if (addOnSwap.TakerLocation != null)
@@ -151,7 +144,7 @@ namespace Sharky.Builds.MacroServices
 
             if (addOnSwap.AddOnTaker != null && addOnSwap.AddOnTaker.UnitCalculation.Unit.BuildProgress == 1 && !addOnSwap.AddOnTaker.UnitCalculation.Unit.HasAddOnTag)
             {
-                List<Action> command = null;
+                List<SC2Action> command = null;
                 if (addOnSwap.AddOnTaker.UnitCalculation.UnitTypeData.Name.Contains("Flying"))
                 {
                     if (addOnSwap.AddOn != null && addOnSwap.AddOn.UnitCalculation.Unit.BuildProgress == 1 && 

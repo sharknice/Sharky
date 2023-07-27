@@ -1,9 +1,4 @@
-﻿using Sharky.DefaultBot;
-using System;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.EnemyStrategies
+﻿namespace Sharky.EnemyStrategies
 {
     public class Proxy : EnemyStrategy
     {

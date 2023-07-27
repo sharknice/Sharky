@@ -1,11 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.S2ClientTypeEnums;
-using Sharky.TypeData;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Sharky.Managers
+﻿namespace Sharky.Managers
 {
     public class UnitDataManager : SharkyManager
     {

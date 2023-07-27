@@ -1,10 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.MicroControllers;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.MicroTasks
+﻿namespace Sharky.MicroTasks
 {
     public class ProxyTask : MicroTask
     {
@@ -69,7 +63,7 @@ namespace Sharky.MicroTasks
                     return;
                 }
 
-                var commander = ActiveUnitData.Commanders.Values.Where(c => c.UnitRole == UnitRole.Build && c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_SCV && c.UnitCalculation.Unit.Orders.Any(o => ActiveUnitData.SelfUnits.Values.Any(s => s.Attributes.Contains(Attribute.Structure) && s.Unit.BuildProgress == 1 && o.TargetWorldSpacePos != null && s.Position.X == o.TargetWorldSpacePos.X && s.Position.Y == o.TargetWorldSpacePos.Y))).Concat(
+                var commander = ActiveUnitData.Commanders.Values.Where(c => c.UnitRole == UnitRole.Build && c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_SCV && c.UnitCalculation.Unit.Orders.Any(o => ActiveUnitData.SelfUnits.Values.Any(s => s.Attributes.Contains(SC2Attribute.Structure) && s.Unit.BuildProgress == 1 && o.TargetWorldSpacePos != null && s.Position.X == o.TargetWorldSpacePos.X && s.Position.Y == o.TargetWorldSpacePos.Y))).Concat(
                     ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && !c.UnitCalculation.Unit.BuffIds.Any(b => SharkyUnitData.CarryingResourceBuffs.Contains((Buffs)b))).Where(c => (c.UnitRole == UnitRole.PreBuild || c.UnitRole == UnitRole.None || c.UnitRole == UnitRole.Minerals) && !c.UnitCalculation.Unit.Orders.Any(o => SharkyUnitData.BuildingData.Values.Any(b => (uint)b.Ability == o.AbilityId))))
                     .OrderBy(p => Vector2.DistanceSquared(p.UnitCalculation.Position, new Vector2(MacroData.Proxies[ProxyName].Location.X, MacroData.Proxies[ProxyName].Location.Y))).FirstOrDefault();
 
@@ -84,9 +78,9 @@ namespace Sharky.MicroTasks
             }
         }
 
-        public override IEnumerable<SC2APIProtocol.Action> PerformActions(int frame)
+        public override IEnumerable<SC2Action> PerformActions(int frame)
         {
-            var commands = new List<SC2APIProtocol.Action>();
+            var commands = new List<SC2Action>();
 
             if (MacroData.Proxies.ContainsKey(ProxyName))
             {
@@ -96,9 +90,9 @@ namespace Sharky.MicroTasks
             return commands;
         }
 
-        IEnumerable<SC2APIProtocol.Action> MoveToProxyLocation(int frame)
+        IEnumerable<SC2Action> MoveToProxyLocation(int frame)
         {
-            var commands = new List<SC2APIProtocol.Action>();
+            var commands = new List<SC2Action>();
 
             foreach (var commander in UnitCommanders.Where(c => !c.UnitCalculation.Unit.Orders.Any(o => SharkyUnitData.BuildingData.Values.Any(b => (uint)b.Ability == o.AbilityId))))
             {
@@ -116,7 +110,7 @@ namespace Sharky.MicroTasks
                 }
                 else if (Vector2.DistanceSquared(new Vector2(MacroData.Proxies[ProxyName].Location.X, MacroData.Proxies[ProxyName].Location.Y), commander.UnitCalculation.Position) > MacroData.Proxies[ProxyName].MaximumBuildingDistance)
                 {
-                    List<SC2APIProtocol.Action> action;
+                    List<SC2Action> action;
                     if (IndividualMicroController.NavigateToTarget(commander, MacroData.Proxies[ProxyName].Location, null, null, Formation.Normal, frame, out action))
                     {
                         if (action != null)

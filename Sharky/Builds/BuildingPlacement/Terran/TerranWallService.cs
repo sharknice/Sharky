@@ -1,8 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.Pathing;
-using System.Linq;
-
-namespace Sharky.Builds.BuildingPlacement
+﻿namespace Sharky.Builds.BuildingPlacement
 {
     public class TerranWallService
     {
@@ -112,7 +108,7 @@ namespace Sharky.Builds.BuildingPlacement
         {
             if (wallData != null && wallData.ProductionWithAddon != null)
             {
-                var existingBuildings = ActiveUnitData.SelfUnits.Values.Where(u => !u.Unit.IsFlying && u.Attributes.Contains(Attribute.Structure));
+                var existingBuildings = ActiveUnitData.SelfUnits.Values.Where(u => !u.Unit.IsFlying && u.Attributes.Contains(SC2Attribute.Structure));
                 foreach (var spot in wallData.ProductionWithAddon)
                 {
                     if (!existingBuildings.Any(e => e.Position.X == spot.X && e.Position.Y == spot.Y) && WallService.Buildable(spot, 3f) && WallService.Buildable(new Point2D { X = spot.X + 2.5f, Y = spot.Y - .5f }, .5f))
@@ -131,7 +127,7 @@ namespace Sharky.Builds.BuildingPlacement
         {
             if (wallData != null && wallData.Production != null)
             {
-                var existingBuildings = ActiveUnitData.SelfUnits.Values.Where(u => !u.Unit.IsFlying && u.Attributes.Contains(Attribute.Structure));
+                var existingBuildings = ActiveUnitData.SelfUnits.Values.Where(u => !u.Unit.IsFlying && u.Attributes.Contains(SC2Attribute.Structure));
                 foreach (var spot in wallData.Production)
                 {
                     if (!existingBuildings.Any(e => e.Position.X == spot.X && e.Position.Y == spot.Y) && WallService.Buildable(spot, 1f))
@@ -257,7 +253,7 @@ namespace Sharky.Builds.BuildingPlacement
                         }
                         if (wallData.Production != null)
                         {
-                            var existingBuildings = ActiveUnitData.SelfUnits.Values.Where(u => u.Attributes.Contains(Attribute.Structure));
+                            var existingBuildings = ActiveUnitData.SelfUnits.Values.Where(u => u.Attributes.Contains(SC2Attribute.Structure));
                             if (wallData.Production.All(spot => existingBuildings.Any(e => e.Position.X == spot.X && e.Position.Y == spot.Y)))
                             {
                                 productionFilled = true;
@@ -265,7 +261,7 @@ namespace Sharky.Builds.BuildingPlacement
                         }
                         if (wallData.ProductionWithAddon != null)
                         {
-                            var existingBuildings = ActiveUnitData.SelfUnits.Values.Where(u => u.Attributes.Contains(Attribute.Structure) && u.Unit.HasAddOnTag);
+                            var existingBuildings = ActiveUnitData.SelfUnits.Values.Where(u => u.Attributes.Contains(SC2Attribute.Structure) && u.Unit.HasAddOnTag);
                             if (wallData.ProductionWithAddon.All(spot => existingBuildings.Any(e => e.Position.X == spot.X && e.Position.Y == spot.Y)))
                             {
                                 productionFilled = true;

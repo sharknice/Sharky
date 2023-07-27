@@ -1,14 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.DefaultBot;
-using Sharky.Extensions;
-using Sharky.Pathing;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.Design;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.MicroTasks
+﻿namespace Sharky.MicroTasks
 {
     /// <summary>
     /// Primary overlord scouting enemy natural and hiding in safe spot

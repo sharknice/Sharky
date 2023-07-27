@@ -1,9 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.DefaultBot;
-using System;
-using System.Linq;
-
-namespace Sharky.Builds
+﻿namespace Sharky.Builds
 {
     public class BuildNothing : SharkyBuild
     {

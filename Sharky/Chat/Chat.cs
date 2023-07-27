@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Sharky.Chat
+﻿namespace Sharky.Chat
 {
     [Serializable]
     public class Chat

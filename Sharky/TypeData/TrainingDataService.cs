@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Sharky.TypeData
+﻿namespace Sharky.TypeData
 {
     public class TrainingDataService
     {

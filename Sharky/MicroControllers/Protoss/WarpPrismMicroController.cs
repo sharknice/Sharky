@@ -1,12 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.DefaultBot;
-using Sharky.Pathing;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.MicroControllers.Protoss
+﻿namespace Sharky.MicroControllers.Protoss
 {
     public class WarpPrismMicroController : IndividualMicroController
     {

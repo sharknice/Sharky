@@ -1,10 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.DefaultBot;
-using Sharky.MicroTasks;
-using Sharky.MicroTasks.Attack;
-using System.Collections.Generic;
-
-namespace Sharky.Managers
+﻿namespace Sharky.Managers
 {
     public class AdvancedAttackDataManager : AttackDataManager
     {

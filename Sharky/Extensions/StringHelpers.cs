@@ -1,7 +1,4 @@
-﻿using SC2APIProtocol;
-using System.Text;
-
-namespace Sharky.Extensions
+﻿namespace Sharky.Extensions
 {
     public static class StringHelpers
     {

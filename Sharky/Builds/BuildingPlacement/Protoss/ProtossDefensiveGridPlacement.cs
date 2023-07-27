@@ -1,11 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.DefaultBot;
-using Sharky.Pathing;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.Builds.BuildingPlacement
+﻿namespace Sharky.Builds.BuildingPlacement
 {
     public class ProtossDefensiveGridPlacement : IBuildingPlacement
     {

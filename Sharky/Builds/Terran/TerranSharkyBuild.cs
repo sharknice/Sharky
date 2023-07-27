@@ -1,13 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.Builds.BuildingPlacement;
-using Sharky.Builds.MacroServices;
-using Sharky.DefaultBot;
-using Sharky.Managers.Terran;
-using Sharky.Pathing;
-using Sharky.S2ClientTypeEnums;
-using System.Linq;
-
-namespace Sharky.Builds.Terran
+﻿namespace Sharky.Builds.Terran
 {
     public class TerranSharkyBuild : SharkyBuild
     {

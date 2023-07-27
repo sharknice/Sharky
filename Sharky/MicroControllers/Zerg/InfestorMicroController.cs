@@ -1,11 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.DefaultBot;
-using Sharky.Pathing;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.MicroControllers.Zerg
+﻿namespace Sharky.MicroControllers.Zerg
 {
     public class InfestorMicroController : IndividualMicroController
     {
@@ -56,7 +49,7 @@ namespace Sharky.MicroControllers.Zerg
 
             foreach (var enemyAttack in commander.UnitCalculation.NearbyEnemies.Take(25))
             {
-                if (enemyAttack.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELING && !enemyAttack.Attributes.Contains(Attribute.Structure) && !enemyAttack.Unit.BuffIds.Contains((uint)Buffs.FUNGALGROWTH) &&
+                if (enemyAttack.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELING && !enemyAttack.Attributes.Contains(SC2Attribute.Structure) && !enemyAttack.Unit.BuffIds.Contains((uint)Buffs.FUNGALGROWTH) &&
                     InRange(enemyAttack.Position, commander.UnitCalculation.Position, 10 + enemyAttack.Unit.Radius + commander.UnitCalculation.Unit.Radius))
                 {
                     attacks.Add(enemyAttack);
@@ -151,7 +144,7 @@ namespace Sharky.MicroControllers.Zerg
 
         public override List<SC2APIProtocol.Action> Retreat(UnitCommander commander, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
-            List<Action> actions = null;
+            List<SC2Action> actions = null;
 
             if (OffensiveAbility(commander, defensivePoint, defensivePoint, groupCenter, null, frame, out actions))
             {

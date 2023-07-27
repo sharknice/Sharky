@@ -1,15 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.DefaultBot;
-using Sharky.Extensions;
-using Sharky.MicroControllers.Protoss;
-using Sharky.MicroTasks.Attack;
-using Sharky.Pathing;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.MicroTasks.Protoss
+﻿namespace Sharky.MicroTasks.Protoss
 {
     public class PhoenixSubAttackTask : AttackSubTask
     {

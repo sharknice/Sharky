@@ -1,7 +1,4 @@
-﻿using SC2APIProtocol;
-using System.Collections.Generic;
-
-namespace Sharky.Builds.BuildingPlacement
+﻿namespace Sharky.Builds.BuildingPlacement
 {
     public class WallData
     {

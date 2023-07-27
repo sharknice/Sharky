@@ -1,8 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.DefaultBot;
-using System;
-
-namespace Sharky.Builds.QuickBuilds
+﻿namespace Sharky.Builds.QuickBuilds
 {
     /// <summary>
     /// To use quick build orders you need to call base.StartBuild and base.OnFrame at start of those functions, if your build overrides them. <see cref="ZergSharkyBuild"/> as example.

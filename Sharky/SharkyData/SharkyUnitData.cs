@@ -1,8 +1,4 @@
-﻿using Google.Protobuf.Collections;
-using SC2APIProtocol;
-using System.Collections.Generic;
-
-namespace Sharky
+﻿namespace Sharky
 {
     public class SharkyUnitData
     {

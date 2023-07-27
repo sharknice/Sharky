@@ -1,11 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.DefaultBot;
-using Sharky.Pathing;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.MicroControllers.Zerg
+﻿namespace Sharky.MicroControllers.Zerg
 {
     public class BanelingMicroController : IndividualMicroController
     {
@@ -73,7 +66,7 @@ namespace Sharky.MicroControllers.Zerg
                 var targetDamage = SplashDamage(commander, commander.UnitCalculation.NearbyEnemies.Take(25).Where(u => AttackersFilter(commander, u)), bestTarget, out hitUnits);
                 var selfDetonateDamage = SplashDamage(commander, commander.UnitCalculation.NearbyEnemies.Take(25).Where(u => AttackersFilter(commander, u)), commander.UnitCalculation, out hitSelfUnits);
 
-                var detonateChoke = hitSelfUnits.Any(s => s.Attributes.Contains(Attribute.Structure)) && hitSelfUnits.Count() > 1;
+                var detonateChoke = hitSelfUnits.Any(s => s.Attributes.Contains(SC2Attribute.Structure)) && hitSelfUnits.Count() > 1;
                 if (detonateChoke)
                 {
                     if (EnemyData.EnemyRace == Race.Zerg)

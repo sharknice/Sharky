@@ -1,10 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.Builds.MacroServices;
-using Sharky.DefaultBot;
-using System;
-using System.Linq;
-
-namespace Sharky.Builds.QuickBuilds
+﻿namespace Sharky.Builds.QuickBuilds
 {
     public enum QuickBuildStepStatus
     {

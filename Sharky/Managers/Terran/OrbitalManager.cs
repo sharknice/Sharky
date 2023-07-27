@@ -1,13 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.Builds.BuildingPlacement;
-using Sharky.Chat;
-using Sharky.EnemyStrategies;
-using Sharky.Pathing;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.Managers.Terran
+﻿namespace Sharky.Managers.Terran
 {
     public class OrbitalManager : SharkyManager
     {

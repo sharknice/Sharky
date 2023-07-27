@@ -1,12 +1,9 @@
-﻿using SC2APIProtocol;
-using System.Collections.Generic;
-
-namespace Sharky
+﻿namespace Sharky
 {
     public class ActiveChatData
     {
         public string EnemyName { get; set; }
         public double TimeModulation { get; set; }
-        public List<Action> ChatActions { get; set; }
+        public List<SC2Action> ChatActions { get; set; }
     }
 }

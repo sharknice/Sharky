@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Sharky.Chat
+﻿namespace Sharky.Chat
 {
     public class ChatTypeData
     {

@@ -1,8 +1,4 @@
-﻿using SC2APIProtocol;
-using System;
-using System.Collections.Generic;
-
-namespace Sharky
+﻿namespace Sharky
 {
     public interface ISharkyBot
     {

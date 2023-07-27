@@ -1,7 +1,4 @@
-﻿using Sharky.DefaultBot;
-using Sharky.Pathing;
-
-namespace Sharky.MicroControllers.Zerg
+﻿namespace Sharky.MicroControllers.Zerg
 {
     public class UltraliskMicroController : IndividualMicroController
     {

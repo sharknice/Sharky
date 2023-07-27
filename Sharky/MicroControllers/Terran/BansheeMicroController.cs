@@ -1,11 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.DefaultBot;
-using Sharky.Extensions;
-using Sharky.Pathing;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Sharky.MicroControllers.Terran
+﻿namespace Sharky.MicroControllers.Terran
 {
     public class BansheeMicroController : IndividualMicroController
     {
@@ -23,7 +16,7 @@ namespace Sharky.MicroControllers.Terran
             {
                 if (commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.BANSHEECLOAK)) // already cloaked
                 {
-                    if (!commander.UnitCalculation.NearbyEnemies.Any() && commander.UnitCalculation.NearbyAllies.Any(a => a.Attributes.Contains(Attribute.Structure)))
+                    if (!commander.UnitCalculation.NearbyEnemies.Any() && commander.UnitCalculation.NearbyAllies.Any(a => a.Attributes.Contains(SC2Attribute.Structure)))
                     {
                         action = commander.Order(frame, Abilities.BEHAVIOR_CLOAKOFF);
                         return true;

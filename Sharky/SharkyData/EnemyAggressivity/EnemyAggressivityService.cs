@@ -1,9 +1,4 @@
-﻿using Sharky.DefaultBot;
-using Sharky.Extensions;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Sharky
+﻿namespace Sharky
 {
     public class EnemyAggressivityService
     {

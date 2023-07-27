@@ -1,13 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.DefaultBot;
-using Sharky.EnemyStrategies.Zerg;
-using Sharky.Extensions;
-using Sharky.Pathing;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.MicroTasks
+﻿namespace Sharky.MicroTasks
 {
     /// <summary>
     /// Scout for 12pool spine crawler rush

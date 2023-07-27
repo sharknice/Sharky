@@ -1,12 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.DefaultBot;
-using Sharky.Extensions;
-using Sharky.Pathing;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.MicroControllers.Terran
+﻿namespace Sharky.MicroControllers.Terran
 {
     class BattleCruiserMicroController : IndividualMicroController
     {
@@ -48,7 +40,7 @@ namespace Sharky.MicroControllers.Terran
 
             if (!SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.BATTLECRUISERENABLESPECIALIZATIONS) || !commander.AbilityOffCooldown(Abilities.EFFECT_YAMATOGUN, frame, SharkyOptions.FramesPerSecond, SharkyUnitData)) { return false; }
 
-            var enemiesInRange = commander.UnitCalculation.NearbyEnemies.Where(e => e.FrameLastSeen == frame && e.Unit.DisplayType == DisplayType.Visible && Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position) < 100 && e.SimulatedHitpoints > 50 && (!e.Attributes.Contains(Attribute.Structure) || (e.Damage > 0 && e.SimulatedHitpoints < 250)) && (e.Unit.HealthMax + e.Unit.ShieldMax > 200 || (e.Unit.IsFlying && e.Unit.HealthMax + e.Unit.ShieldMax > 150)));
+            var enemiesInRange = commander.UnitCalculation.NearbyEnemies.Where(e => e.FrameLastSeen == frame && e.Unit.DisplayType == DisplayType.Visible && Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position) < 100 && e.SimulatedHitpoints > 50 && (!e.Attributes.Contains(SC2Attribute.Structure) || (e.Damage > 0 && e.SimulatedHitpoints < 250)) && (e.Unit.HealthMax + e.Unit.ShieldMax > 200 || (e.Unit.IsFlying && e.Unit.HealthMax + e.Unit.ShieldMax > 150)));
 
             var target = enemiesInRange.FirstOrDefault();
             if (target != null)

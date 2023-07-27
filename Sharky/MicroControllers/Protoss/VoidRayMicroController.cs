@@ -1,11 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.DefaultBot;
-using Sharky.Pathing;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.MicroControllers.Protoss
+﻿namespace Sharky.MicroControllers.Protoss
 {
     public class VoidRayMicroController : IndividualMicroController
     {
@@ -54,9 +47,9 @@ namespace Sharky.MicroControllers.Protoss
                         UnitCalculation unit;
                         if (ActiveUnitData.EnemyUnits.TryGetValue(tag, out unit))
                         {
-                            if (unit.Attributes.Contains(Attribute.Armored))
+                            if (unit.Attributes.Contains(SC2Attribute.Armored))
                             {
-                                if (commander.UnitCalculation.EnemiesInRange.Where(e => e.Attributes.Contains(Attribute.Armored)).Sum(e => e.Unit.Health) > 200)
+                                if (commander.UnitCalculation.EnemiesInRange.Where(e => e.Attributes.Contains(SC2Attribute.Armored)).Sum(e => e.Unit.Health) > 200)
                                 {
                                     ChatService.Tag("a_prismatic");
                                     action = commander.Order(frame, Abilities.EFFECT_VOIDRAYPRISMATICALIGNMENT);

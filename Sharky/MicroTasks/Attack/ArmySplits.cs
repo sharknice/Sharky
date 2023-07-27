@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Sharky.MicroTasks.Attack
+﻿namespace Sharky.MicroTasks.Attack
 {
     public class ArmySplits
     {

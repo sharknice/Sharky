@@ -1,9 +1,4 @@
-﻿using Sharky.DefaultBot;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.MicroTasks.Mining
+﻿namespace Sharky.MicroTasks.Mining
 {
     public class MineralMiner
     {

@@ -1,8 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.MicroTasks;
-using System.Numerics;
-
-namespace Sharky.Extensions
+﻿namespace Sharky.Extensions
 {
     public static class Extensions
     {

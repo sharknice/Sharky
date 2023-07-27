@@ -1,12 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.DefaultBot;
-using Sharky.Pathing;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.MicroControllers.Protoss
+﻿namespace Sharky.MicroControllers.Protoss
 {
     // TODO: make hallucinations move farther forward than rest of army when there is splash damage, do not allow them to be close enough to friendly to take splash
     public class ColossusMicroController : IndividualMicroController

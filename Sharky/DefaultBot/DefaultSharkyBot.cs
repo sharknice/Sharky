@@ -1,39 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.Builds;
-using Sharky.Builds.BuildChoosing;
-using Sharky.Builds.BuildingPlacement;
-using Sharky.Builds.MacroServices;
-using Sharky.Builds.Protoss;
-using Sharky.Builds.Terran;
-using Sharky.Builds.Zerg;
-using Sharky.Chat;
-using Sharky.EnemyPlayer;
-using Sharky.EnemyStrategies;
-using Sharky.EnemyStrategies.Protoss;
-using Sharky.EnemyStrategies.Terran;
-using Sharky.EnemyStrategies.Zerg;
-using Sharky.Macro;
-using Sharky.Managers;
-using Sharky.Managers.Protoss;
-using Sharky.Managers.Terran;
-using Sharky.MicroControllers;
-using Sharky.MicroControllers.Protoss;
-using Sharky.MicroControllers.Terran;
-using Sharky.MicroControllers.Zerg;
-using Sharky.MicroTasks;
-using Sharky.MicroTasks.Attack;
-using Sharky.MicroTasks.Harass;
-using Sharky.MicroTasks.Macro;
-using Sharky.MicroTasks.Mining;
-using Sharky.MicroTasks.Scout;
-using Sharky.MicroTasks.Zerg;
-using Sharky.Pathing;
-using Sharky.Proxy;
-using Sharky.TypeData;
-using System.Collections.Generic;
-using System.Net.Http;
-
-namespace Sharky.DefaultBot
+﻿namespace Sharky.DefaultBot
 {
     public class DefaultSharkyBot
     {

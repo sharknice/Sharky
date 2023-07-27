@@ -1,15 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.Builds;
-using Sharky.Builds.BuildChoosing;
-using Sharky.Chat;
-using Sharky.DefaultBot;
-using Sharky.EnemyPlayer;
-using Sharky.EnemyStrategies;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Sharky.Managers
+﻿namespace Sharky.Managers
 {
     public class BuildManager : SharkyManager
     {
@@ -132,7 +121,7 @@ namespace Sharky.Managers
             EnemyData.EnemyPlayer = EnemyPlayer;
         }
 
-        public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
+        public override IEnumerable<SC2Action> OnFrame(ResponseObservation observation)
         {
             DebugService.DrawText("Build: " + CurrentBuild.Name());
             DebugService.DrawText("Sequence: " + string.Join(", ", BuildSequence));

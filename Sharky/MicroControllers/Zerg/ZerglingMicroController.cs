@@ -1,11 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.DefaultBot;
-using Sharky.Pathing;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.MicroControllers.Zerg
+﻿namespace Sharky.MicroControllers.Zerg
 {
     public class ZerglingMicroController : IndividualMicroController
     {
@@ -168,7 +161,7 @@ namespace Sharky.MicroControllers.Zerg
             return base.GetWeaponCooldown(commander, enemy);
         }
 
-        public override List<Action> Scout(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, bool prioritizeVision = false, bool attack = true)
+        public override List<SC2Action> Scout(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, bool prioritizeVision = false, bool attack = true)
         {
             if (commander.UnitCalculation.EnemiesThreateningDamage.Any())
             {

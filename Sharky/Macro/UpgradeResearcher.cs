@@ -1,9 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.DefaultBot;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Sharky.Macro
+﻿namespace Sharky.Macro
 {
     public class UpgradeResearcher
     {
@@ -18,9 +13,9 @@ namespace Sharky.Macro
             SharkyUnitData = defaultSharkyBot.SharkyUnitData;
         }
 
-        public List<Action> ResearchUpgrades()
+        public List<SC2Action> ResearchUpgrades()
         {
-            var commands = new List<Action>();
+            var commands = new List<SC2Action>();
 
             foreach (var upgrade in MacroData.DesiredUpgrades)
             {

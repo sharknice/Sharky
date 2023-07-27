@@ -1,6 +1,4 @@
-﻿using Sharky.DefaultBot;
-
-namespace Sharky.Builds.BuildChoosing
+﻿namespace Sharky.Builds.BuildChoosing
 {
     /// <summary>
     /// TODO: Looks at the enemy strategies used in the last game and attempts to find the best counter

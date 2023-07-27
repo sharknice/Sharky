@@ -1,12 +1,4 @@
-﻿using System;
-using System.Buffers;
-using System.Net.WebSockets;
-using System.Threading;
-using System.Threading.Tasks;
-using Google.Protobuf;
-using SC2APIProtocol;
-
-namespace Sharky
+﻿namespace Sharky
 {
     public class ProtobufProxy
     {

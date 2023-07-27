@@ -1,7 +1,4 @@
-﻿using Sharky.Builds.BuildingPlacement;
-using System.Collections.Generic;
-
-namespace Sharky.Pathing
+﻿namespace Sharky.Pathing
 {
     public class MapData
     {

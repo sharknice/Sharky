@@ -1,7 +1,4 @@
-﻿using Sharky.DefaultBot;
-using System.Linq;
-
-namespace Sharky.EnemyStrategies.Protoss
+﻿namespace Sharky.EnemyStrategies.Protoss
 {
     public class ProtossFastExpand : EnemyStrategy
     {

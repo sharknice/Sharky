@@ -1,10 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.DefaultBot;
-using Sharky.Pathing;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Sharky.MicroControllers.Protoss
+﻿namespace Sharky.MicroControllers.Protoss
 {
     public class AdeptMicroController : IndividualMicroController
     {
@@ -33,7 +27,7 @@ namespace Sharky.MicroControllers.Protoss
             return false;
         }
 
-        public override List<Action> NavigateToPoint(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
+        public override List<SC2Action> NavigateToPoint(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
             List<SC2APIProtocol.Action> action = null;
 

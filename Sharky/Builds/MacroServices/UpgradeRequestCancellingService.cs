@@ -1,8 +1,4 @@
-﻿using Sharky.DefaultBot;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Sharky.Builds.MacroServices
+﻿namespace Sharky.Builds.MacroServices
 {
     /// <summary>
     /// Class for requesting upgrade cancelling

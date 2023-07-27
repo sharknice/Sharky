@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Sharky.Builds.BuildChoosing
+﻿namespace Sharky.Builds.BuildChoosing
 {
     public interface ICounterTransitioner
     {

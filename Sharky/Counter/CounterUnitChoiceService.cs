@@ -1,7 +1,4 @@
-﻿using Sharky.DefaultBot;
-using System.Collections.Generic;
-
-namespace Sharky.Counter
+﻿namespace Sharky.Counter
 {
     public class CounterUnitChoiceService
     {

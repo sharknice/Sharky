@@ -1,10 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.DefaultBot;
-using Sharky.Pathing;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Sharky.MicroControllers.Zerg
+﻿namespace Sharky.MicroControllers.Zerg
 {
     public class CorruptorMicroController : IndividualMicroController
     {
@@ -38,7 +32,7 @@ namespace Sharky.MicroControllers.Zerg
                 return false;
             }
 
-            var building = GetBestBuildingTarget(commander.UnitCalculation.NearbyEnemies.Take(25).Where(e => e.Attributes.Contains(Attribute.Structure)), commander);
+            var building = GetBestBuildingTarget(commander.UnitCalculation.NearbyEnemies.Take(25).Where(e => e.Attributes.Contains(SC2Attribute.Structure)), commander);
 
             if (building != null)
             {

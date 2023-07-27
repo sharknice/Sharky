@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Sharky
+﻿namespace Sharky
 {
     public class VersionService
     {

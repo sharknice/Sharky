@@ -1,9 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.Pathing;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.Builds.BuildingPlacement
+﻿namespace Sharky.Builds.BuildingPlacement
 {
     public class HardCodedWallOffPlacement : IBuildingPlacement
     {
@@ -93,7 +88,7 @@ namespace Sharky.Builds.BuildingPlacement
         Point2D FindPartialWallProductionPlacement(WallData wallData, float size, float maxDistance)
         {
             if (wallData?.WallSegments == null) { return null; }
-            var existingBuildings = ActiveUnitData.SelfUnits.Values.Where(u => u.Attributes.Contains(Attribute.Structure));
+            var existingBuildings = ActiveUnitData.SelfUnits.Values.Where(u => u.Attributes.Contains(SC2Attribute.Structure));
             var radius = (size / 2f);
             var powerSources = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && c.UnitCalculation.Unit.BuildProgress == 1).Where(c => Vector2.DistanceSquared(c.UnitCalculation.Position, new Vector2(wallData.Pylons.FirstOrDefault().X, wallData.Pylons.FirstOrDefault().Y)) < 15 * 15);
 

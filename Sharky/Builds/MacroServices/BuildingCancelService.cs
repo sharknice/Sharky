@@ -1,9 +1,4 @@
-﻿using SC2APIProtocol;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.Builds.MacroServices
+﻿namespace Sharky.Builds.MacroServices
 {
     public class BuildingCancelService
     {
@@ -16,14 +11,14 @@ namespace Sharky.Builds.MacroServices
             MacroData = macroData;
         }
 
-        public List<Action> CancelBuildings()
+        public List<SC2Action> CancelBuildings()
         {
-            var commands = new List<Action>();
+            var commands = new List<SC2Action>();
 
             foreach (var commander in ActiveUnitData.Commanders)
             {
                 var unitCalculation = commander.Value.UnitCalculation;
-                if (unitCalculation.Unit.BuildProgress < 1 && unitCalculation.Attributes.Contains(Attribute.Structure))
+                if (unitCalculation.Unit.BuildProgress < 1 && unitCalculation.Attributes.Contains(SC2Attribute.Structure))
                 {
                     if (unitCalculation.Unit.ShieldMax > 0)
                     {

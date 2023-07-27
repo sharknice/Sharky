@@ -1,17 +1,4 @@
-﻿using Google.Protobuf.Collections;
-using Newtonsoft.Json;
-using SC2APIProtocol;
-using Sharky.Chat;
-using Sharky.EnemyPlayer;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Text;
-using System.Text.RegularExpressions;
-using Action = SC2APIProtocol.Action;
-
-namespace Sharky.Managers
+﻿namespace Sharky.Managers
 {
     public class ChatManager : SharkyManager
     {
@@ -70,7 +57,7 @@ namespace Sharky.Managers
 
             GreetingSent = false;
 
-            ActiveChatData.ChatActions = new List<Action>();
+            ActiveChatData.ChatActions = new List<SC2Action>();
 
             Self = gameInfo.PlayerInfo[(int)observation.Observation.PlayerCommon.PlayerId - 1];
             Enemy = gameInfo.PlayerInfo[2 - (int)observation.Observation.PlayerCommon.PlayerId];
@@ -94,7 +81,7 @@ namespace Sharky.Managers
             ChatService.Tag($"v_{VersionService.BuildDate.ToString("yyyy-MM-dd__HH-mm-ss")}"); 
         }
 
-        public override IEnumerable<Action> OnFrame(ResponseObservation observation)
+        public override IEnumerable<SC2Action> OnFrame(ResponseObservation observation)
         {
             UpdateTimeModulation();
             ObserveChatAsync(observation.Chat, (int)observation.Observation.GameLoop);
@@ -154,10 +141,10 @@ namespace Sharky.Managers
             }
         }
 
-        private List<Action> PopChatActions()
+        private List<SC2Action> PopChatActions()
         {
-            var poppedActions = new List<Action>(ActiveChatData.ChatActions);
-            ActiveChatData.ChatActions = new List<Action>();
+            var poppedActions = new List<SC2Action>(ActiveChatData.ChatActions);
+            ActiveChatData.ChatActions = new List<SC2Action>();
             return poppedActions;
         }
 

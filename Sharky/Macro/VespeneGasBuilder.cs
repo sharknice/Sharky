@@ -1,11 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.Builds;
-using Sharky.DefaultBot;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.Macro
+﻿namespace Sharky.Macro
 {
     public class VespeneGasBuilder
     {

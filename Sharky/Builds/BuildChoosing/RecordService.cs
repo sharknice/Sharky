@@ -1,8 +1,4 @@
-﻿using SC2APIProtocol;
-using System;
-using System.Collections.Generic;
-
-namespace Sharky.Builds.BuildChoosing
+﻿namespace Sharky.Builds.BuildChoosing
 {
     public class RecordService
     {

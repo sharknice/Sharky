@@ -1,13 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.Builds.BuildingPlacement;
-using Sharky.Pathing;
-using Sharky.S2ClientTypeEnums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.Managers
+﻿namespace Sharky.Managers
 {
     public class MapManager : SharkyManager
     {

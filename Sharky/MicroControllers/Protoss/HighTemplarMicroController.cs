@@ -1,11 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.DefaultBot;
-using Sharky.Pathing;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.MicroControllers.Protoss
+﻿namespace Sharky.MicroControllers.Protoss
 {
     public class HighTemplarMicroController : IndividualMicroController
     {
@@ -91,7 +84,7 @@ namespace Sharky.MicroControllers.Protoss
                     if (merge != null)
                     {
                         commander.UnitRole = UnitRole.Morph;
-                        action = new List<Action> { merge };
+                        action = new List<SC2Action> { merge };
                     }
                     return true;
                 }
@@ -157,7 +150,7 @@ namespace Sharky.MicroControllers.Protoss
                 }
             }
 
-            var enemies = commander.UnitCalculation.NearbyEnemies.Take(25).Where(a => !a.Attributes.Contains(Attribute.Structure) && !a.Unit.BuffIds.Contains((uint)Buffs.PSISTORM) && !a.Unit.BuffIds.Contains((uint)Buffs.ORACLESTASISTRAPTARGET) && a.Unit.UnitType != (uint)UnitTypes.PROTOSS_ADEPTPHASESHIFT).OrderByDescending(u => u.Unit.Health);
+            var enemies = commander.UnitCalculation.NearbyEnemies.Take(25).Where(a => !a.Attributes.Contains(SC2Attribute.Structure) && !a.Unit.BuffIds.Contains((uint)Buffs.PSISTORM) && !a.Unit.BuffIds.Contains((uint)Buffs.ORACLESTASISTRAPTARGET) && a.Unit.UnitType != (uint)UnitTypes.PROTOSS_ADEPTPHASESHIFT).OrderByDescending(u => u.Unit.Health);
             if (enemies.Count() > 2)
             {
                 var bestAttack = GetBestAttack(commander.UnitCalculation, enemies);
@@ -179,14 +172,14 @@ namespace Sharky.MicroControllers.Protoss
             foreach (var enemyAttack in enemies)
             {
                 int hitCount = 0;
-                foreach (var splashedEnemy in enemyAttack.NearbyAllies.Take(25).Where(a => !a.Attributes.Contains(Attribute.Structure) && !a.Unit.BuffIds.Contains((uint)Buffs.PSISTORM)))
+                foreach (var splashedEnemy in enemyAttack.NearbyAllies.Take(25).Where(a => !a.Attributes.Contains(SC2Attribute.Structure) && !a.Unit.BuffIds.Contains((uint)Buffs.PSISTORM)))
                 {
                     if (Vector2.DistanceSquared(splashedEnemy.Position, enemyAttack.Position) < (splashedEnemy.Unit.Radius + StormRadius) * (splashedEnemy.Unit.Radius + StormRadius))
                     {
                         hitCount++;
                     }
                 }
-                foreach (var splashedAlly in potentialAttack.NearbyAllies.Take(25).Where(a => !a.Attributes.Contains(Attribute.Structure)))
+                foreach (var splashedAlly in potentialAttack.NearbyAllies.Take(25).Where(a => !a.Attributes.Contains(SC2Attribute.Structure)))
                 {
                     if (Vector2.DistanceSquared(splashedAlly.Position, enemyAttack.Position) < (splashedAlly.Unit.Radius + StormRadius) * (splashedAlly.Unit.Radius + StormRadius))
                     {
@@ -207,7 +200,7 @@ namespace Sharky.MicroControllers.Protoss
 
         public override List<SC2APIProtocol.Action> Retreat(UnitCommander commander, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
-            List<Action> actions = null;
+            List<SC2Action> actions = null;
             if (OffensiveAbility(commander, defensivePoint, defensivePoint, groupCenter, null, frame, out actions))
             {
                 return actions;

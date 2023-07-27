@@ -1,9 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.Builds;
-using Sharky.DefaultBot;
-using System.Collections.Generic;
-
-namespace Sharky.Macro
+﻿namespace Sharky.Macro
 {
     public class BuildingMorpher
     {
@@ -18,9 +13,9 @@ namespace Sharky.Macro
             Morpher = defaultSharkyBot.Morpher;
         }
 
-        public List<Action> MorphBuildings()
+        public List<SC2Action> MorphBuildings()
         {
-            var commands = new List<Action>();
+            var commands = new List<SC2Action>();
 
             foreach (var unit in MacroData.Morph)
             {

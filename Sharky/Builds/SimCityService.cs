@@ -1,11 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.Builds.BuildingPlacement;
-using Sharky.Builds.MacroServices;
-using Sharky.DefaultBot;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Sharky.Builds
+﻿namespace Sharky.Builds
 {
     public class SimCityService
     {

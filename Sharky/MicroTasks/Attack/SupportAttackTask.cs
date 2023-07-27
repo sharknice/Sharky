@@ -1,12 +1,4 @@
-﻿using Sharky.Chat;
-using Sharky.MicroControllers;
-using Sharky.MicroTasks.Attack;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.MicroTasks.Proxy
+﻿namespace Sharky.MicroTasks.Proxy
 {
     public class SupportAttackTask : MicroTask
     {

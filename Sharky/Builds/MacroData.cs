@@ -1,8 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.Builds;
-using System.Collections.Generic;
-
-namespace Sharky
+﻿namespace Sharky
 {
     public class MacroData
     {

@@ -1,6 +1,4 @@
-﻿using SC2APIProtocol;
-
-namespace Sharky.Builds.BuildingPlacement
+﻿namespace Sharky.Builds.BuildingPlacement
 {
     public class WallSegment
     {

@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Sharky.MicroTasks
+﻿namespace Sharky.MicroTasks
 {
     public class MicroGroup
     {

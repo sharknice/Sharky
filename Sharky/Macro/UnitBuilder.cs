@@ -1,11 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.Builds;
-using Sharky.Builds.BuildingPlacement;
-using Sharky.DefaultBot;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Sharky.Macro
+﻿namespace Sharky.Macro
 {
     public class UnitBuilder
     {
@@ -45,7 +38,7 @@ namespace Sharky.Macro
                     var unitData = SharkyUnitData.TrainingData[unit.Key];
                     if ((unitData.Food == 0 || unitData.Food <= MacroData.FoodLeft) && unitData.Minerals <= MacroData.Minerals && unitData.Gas <= MacroData.VespeneGas)
                     {
-                        var building = ActiveUnitData.Commanders.Where(c => unitData.ProducingUnits.Contains((UnitTypes)c.Value.UnitCalculation.Unit.UnitType) && (!c.Value.UnitCalculation.Unit.IsActive || !c.Value.UnitCalculation.Attributes.Contains(Attribute.Structure)) && c.Value.UnitCalculation.Unit.BuildProgress == 1 && c.Value.WarpInOffCooldown(MacroData.Frame, SharkyOptions.FramesPerSecond, SharkyUnitData));
+                        var building = ActiveUnitData.Commanders.Where(c => unitData.ProducingUnits.Contains((UnitTypes)c.Value.UnitCalculation.Unit.UnitType) && (!c.Value.UnitCalculation.Unit.IsActive || !c.Value.UnitCalculation.Attributes.Contains(SC2Attribute.Structure)) && c.Value.UnitCalculation.Unit.BuildProgress == 1 && c.Value.WarpInOffCooldown(MacroData.Frame, SharkyOptions.FramesPerSecond, SharkyUnitData));
 
                         if (unitData.ProducingUnits.Contains(UnitTypes.TERRAN_BARRACKS) || unitData.ProducingUnits.Contains(UnitTypes.TERRAN_FACTORY) || unitData.ProducingUnits.Contains(UnitTypes.TERRAN_STARPORT))
                         {

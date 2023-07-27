@@ -1,14 +1,11 @@
-﻿using SC2APIProtocol;
-using System.Collections.Generic;
-
-namespace Sharky.MicroTasks
+﻿namespace Sharky.MicroTasks
 {
     public interface IMicroTask
     {
         float Priority { get; set; }
         List<UnitCommander> UnitCommanders { get; set; }
         void ClaimUnits(Dictionary<ulong, UnitCommander> commanders);
-        IEnumerable<Action> PerformActions(int frame);
+        IEnumerable<SC2Action> PerformActions(int frame);
         void ResetClaimedUnits();
         List<UnitCommander> ResetNonEssentialClaims();
         void Enable();

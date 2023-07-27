@@ -1,10 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.DefaultBot;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Sharky.Counter
+﻿namespace Sharky.Counter
 {
     public class CounterUnitChooser
     {

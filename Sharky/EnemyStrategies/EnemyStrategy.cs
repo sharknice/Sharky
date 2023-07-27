@@ -1,9 +1,4 @@
-﻿using Sharky.Chat;
-using Sharky.DefaultBot;
-using System;
-using System.Linq;
-
-namespace Sharky.EnemyStrategies
+﻿namespace Sharky.EnemyStrategies
 {
     public abstract class EnemyStrategy : IEnemyStrategy
     {

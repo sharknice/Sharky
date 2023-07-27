@@ -1,12 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.Chat;
-using Sharky.Managers;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-
-namespace Sharky
+﻿namespace Sharky
 {
     public class SharkyBot : ISharkyBot
     {

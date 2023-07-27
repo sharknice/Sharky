@@ -1,9 +1,4 @@
-﻿using SC2APIProtocol;
-using System;
-using System.Collections.Generic;
-using System.Numerics;
-
-namespace Sharky
+﻿namespace Sharky
 {
     public class MiningInfo
     {

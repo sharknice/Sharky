@@ -1,17 +1,4 @@
-﻿using Newtonsoft.Json;
-using Sharky.DefaultBot;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.IO.Compression;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Sharky.Pathing
+﻿namespace Sharky.Pathing
 {
     public class BaseToBasePathingService
     {
@@ -36,17 +23,17 @@ namespace Sharky.Pathing
             };
             foreach (var folder in folders)
             {
-                string fileName = Path.Combine(folder, mapName);
+                string fileName = FilePath.Combine(folder, mapName);
                 if (File.Exists(fileName))
                 {
                     return LoadPathDataJson(fileName);
                 }
-                fileName = Path.Combine(folder, mapName + ".json");
+                fileName = FilePath.Combine(folder, mapName + ".json");
                 if (File.Exists(fileName))
                 {
                     return LoadPathDataJson(fileName);
                 }
-                fileName = Path.Combine(folder, mapName + ".zip");
+                fileName = FilePath.Combine(folder, mapName + ".zip");
                 if (File.Exists(fileName))
                 {
                     return LoadPathDataZip(fileName);

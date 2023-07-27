@@ -1,7 +1,4 @@
-﻿using Sharky.DefaultBot;
-using Sharky.Pathing;
-
-namespace Sharky.EnemyStrategies.Terran
+﻿namespace Sharky.EnemyStrategies.Terran
 {
     public class SuspectedTerranProxy : EnemyStrategy
     {

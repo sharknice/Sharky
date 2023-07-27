@@ -1,8 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.Builds.BuildingPlacement;
-using System.Collections.Generic;
-
-namespace Sharky.Builds
+﻿namespace Sharky.Builds
 {
     public class ProxyData
     {

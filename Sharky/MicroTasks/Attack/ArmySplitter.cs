@@ -1,13 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.Builds.BuildingPlacement;
-using Sharky.DefaultBot;
-using Sharky.Extensions;
-using Sharky.MicroControllers;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.MicroTasks.Attack
+﻿namespace Sharky.MicroTasks.Attack
 {
     public class ArmySplitter
     {

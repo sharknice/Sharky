@@ -1,9 +1,4 @@
-﻿using SC2APIProtocol;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-
-namespace Sharky.Managers
+﻿namespace Sharky.Managers
 {
     public class MicroManager : SharkyManager
     {
@@ -22,11 +17,11 @@ namespace Sharky.Managers
 
         public override bool NeverSkip { get => true; }
 
-        public override IEnumerable<Action> OnFrame(ResponseObservation observation)
+        public override IEnumerable<SC2Action> OnFrame(ResponseObservation observation)
         {
             var frame = (int)observation.Observation.GameLoop;
 
-            var actions = new List<Action>();
+            var actions = new List<SC2Action>();
             foreach (var microTask in MicroTaskData.Values.Where(m => m.Enabled).OrderBy(m => m.Priority))
             {
                 var stopwatch = new Stopwatch();
@@ -73,9 +68,9 @@ namespace Sharky.Managers
             return actions;
         }
 
-        private static List<Action> FilterActions(ResponseObservation observation, MicroTasks.IMicroTask microTask, IEnumerable<Action> taskActions)
+        private static List<SC2Action> FilterActions(ResponseObservation observation, MicroTasks.IMicroTask microTask, IEnumerable<SC2Action> taskActions)
         {
-            var filteredActions = new List<SC2APIProtocol.Action>();
+            var filteredActions = new List<SC2Action>();
             var tags = new List<ulong>();
             foreach (var action in taskActions)
             {

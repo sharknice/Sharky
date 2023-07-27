@@ -1,13 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.Builds.MacroServices;
-using Sharky.Chat;
-using Sharky.DefaultBot;
-using Sharky.MicroTasks;
-using Sharky.MicroTasks.Macro;
-using System;
-using System.Collections.Generic;
-
-namespace Sharky.Builds
+﻿namespace Sharky.Builds
 {
     public abstract class SharkyBuild : ISharkyBuild
     {

@@ -1,11 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.DefaultBot;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-
-namespace Sharky.Managers
+﻿namespace Sharky.Managers
 {
     /// <summary>
     /// Reporting manager allows detailed frame reporting to follow what happened in the game from logs.

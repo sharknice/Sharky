@@ -1,14 +1,4 @@
-﻿using Roy_T.AStar.Grids;
-using Roy_T.AStar.Paths;
-using Roy_T.AStar.Primitives;
-using SC2APIProtocol;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.Pathing
+﻿namespace Sharky.Pathing
 {
     public class SharkyPathFinder : IPathFinder
     {

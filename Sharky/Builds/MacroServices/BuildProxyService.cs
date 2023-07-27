@@ -1,9 +1,4 @@
-﻿using SC2APIProtocol;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.Builds.MacroServices
+﻿namespace Sharky.Builds.MacroServices
 {
     public class BuildProxyService
     {
@@ -28,9 +23,9 @@ namespace Sharky.Builds.MacroServices
             lastFailFrame = 0;
         }
 
-        public IEnumerable<Action> BuildPylons()
+        public IEnumerable<SC2Action> BuildPylons()
         {
-            var commands = new List<Action>();
+            var commands = new List<SC2Action>();
 
             if (MacroData.Minerals >= 100 && lastFailFrame < MacroData.Frame - 100)
             {
@@ -70,9 +65,9 @@ namespace Sharky.Builds.MacroServices
             return commands;
         }
 
-        public IEnumerable<Action> BuildDefensiveBuildings()
+        public IEnumerable<SC2Action> BuildDefensiveBuildings()
         {
-            var commands = new List<Action>();
+            var commands = new List<SC2Action>();
 
             if (lastFailFrame < MacroData.Frame - 100)
             {
@@ -110,9 +105,9 @@ namespace Sharky.Builds.MacroServices
             return commands;
         }
 
-        public IEnumerable<Action> BuildProductionBuildings()
+        public IEnumerable<SC2Action> BuildProductionBuildings()
         {
-            var commands = new List<Action>();
+            var commands = new List<SC2Action>();
 
             if (lastFailFrame < MacroData.Frame - 100)
             {
@@ -177,9 +172,9 @@ namespace Sharky.Builds.MacroServices
             return commands;
         }
 
-        public IEnumerable<Action> MorphBuildings()
+        public IEnumerable<SC2Action> MorphBuildings()
         {
-            var commands = new List<Action>();
+            var commands = new List<SC2Action>();
             // TODO: check morph location needs to be the proxied one
             foreach (var unit in MacroData.Morph)
             {
@@ -198,9 +193,9 @@ namespace Sharky.Builds.MacroServices
             return commands;
         }
 
-        public IEnumerable<Action> BuildTechBuildings()
+        public IEnumerable<SC2Action> BuildTechBuildings()
         {
-            var commands = new List<Action>();
+            var commands = new List<SC2Action>();
 
             if (lastFailFrame < MacroData.Frame - 100)
             {
@@ -240,9 +235,9 @@ namespace Sharky.Builds.MacroServices
             return commands;
         }
 
-        public IEnumerable<Action> BuildAddOns()
+        public IEnumerable<SC2Action> BuildAddOns()
         {
-            var commands = new List<Action>();
+            var commands = new List<SC2Action>();
 
             if (lastFailFrame < MacroData.Frame - 100)
             {

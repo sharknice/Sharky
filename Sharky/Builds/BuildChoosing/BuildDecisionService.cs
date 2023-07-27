@@ -1,13 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.Chat;
-using Sharky.DefaultBot;
-using Sharky.EnemyPlayer;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-
-namespace Sharky.Builds.BuildChoosing
+﻿namespace Sharky.Builds.BuildChoosing
 {
     public class BuildDecisionService : IBuildDecisionService
     {

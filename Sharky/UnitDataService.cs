@@ -1,7 +1,4 @@
-﻿using SC2APIProtocol;
-using System.Linq;
-
-namespace Sharky
+﻿namespace Sharky
 {
     public class UnitDataService
     {
@@ -64,7 +61,7 @@ namespace Sharky
                     {
                         if (!weapon.DamageBonus.Any())
                         {
-                            weapon.DamageBonus.Add(new DamageBonus { Attribute = Attribute.Light, Bonus = 12 });
+                            weapon.DamageBonus.Add(new DamageBonus { Attribute = SC2Attribute.Light, Bonus = 12 });
                         }
                     }
                 }

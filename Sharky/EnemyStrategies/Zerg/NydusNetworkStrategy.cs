@@ -1,6 +1,4 @@
-﻿using Sharky.DefaultBot;
-
-namespace Sharky.EnemyStrategies.Zerg
+﻿namespace Sharky.EnemyStrategies.Zerg
 {
     public class NydusNetworkStrategy : EnemyStrategy
     {

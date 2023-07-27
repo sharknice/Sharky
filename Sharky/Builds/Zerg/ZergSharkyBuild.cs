@@ -1,10 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.Builds.QuickBuilds;
-using Sharky.DefaultBot;
-using Sharky.EnemyStrategies;
-using System.Linq;
-
-namespace Sharky.Builds.Zerg
+﻿namespace Sharky.Builds.Zerg
 {
     public class ZergSharkyBuild : QuickBuild
     {

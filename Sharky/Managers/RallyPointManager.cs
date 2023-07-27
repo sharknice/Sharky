@@ -1,11 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.Builds.BuildingPlacement;
-using Sharky.Pathing;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Sharky.Managers.Protoss
+﻿namespace Sharky.Managers.Protoss
 {
     public class RallyPointManager : SharkyManager
     {

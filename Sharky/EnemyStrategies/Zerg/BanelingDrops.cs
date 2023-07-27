@@ -1,8 +1,4 @@
-﻿using Sharky.DefaultBot;
-using Sharky.Extensions;
-using System.Linq;
-
-namespace Sharky.EnemyStrategies.Zerg
+﻿namespace Sharky.EnemyStrategies.Zerg
 {
     public class BanelingDrops : EnemyStrategy
     {

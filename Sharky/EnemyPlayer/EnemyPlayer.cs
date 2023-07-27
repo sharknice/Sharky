@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Sharky.EnemyPlayer
+﻿namespace Sharky.EnemyPlayer
 {
     public class EnemyPlayer
     {

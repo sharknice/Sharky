@@ -1,13 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.DefaultBot;
-using Sharky.Extensions;
-using Sharky.Pathing;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.MicroControllers.Protoss
+﻿namespace Sharky.MicroControllers.Protoss
 {
     public class PhoenixInGroupMicroController : PhoenixMicroController
     {
@@ -386,7 +377,6 @@ namespace Sharky.MicroControllers.Protoss
 
         public override List<SC2APIProtocol.Action> Idle(UnitCommander commander, Point2D defensivePoint, int frame)
         {
-            List<SC2APIProtocol.Action> action = null;
             var markedForDeath = commander.UnitCalculation.NearbyAllies.FirstOrDefault(a => ActiveUnitData.Commanders.ContainsKey(a.Unit.Tag) && ActiveUnitData.Commanders[a.Unit.Tag].UnitRole == UnitRole.Die);
             if (markedForDeath != null)
             {

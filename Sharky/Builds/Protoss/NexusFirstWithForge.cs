@@ -1,10 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.Builds.BuildChoosing;
-using Sharky.DefaultBot;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Sharky.Builds.Protoss
+﻿namespace Sharky.Builds.Protoss
 {
     public class NexusFirstWithForge : ProtossSharkyBuild
     {

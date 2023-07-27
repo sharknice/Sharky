@@ -1,6 +1,4 @@
-﻿using System.Numerics;
-
-namespace Sharky
+﻿namespace Sharky
 {
     public class StuckCheck
     {

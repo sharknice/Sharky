@@ -1,8 +1,4 @@
-﻿using Sharky.DefaultBot;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.EnemyStrategies.Protoss
+﻿namespace Sharky.EnemyStrategies.Protoss
 {
     public class ProxyRobo : EnemyStrategy
     {

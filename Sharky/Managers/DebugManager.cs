@@ -1,12 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.Builds.BuildingPlacement;
-using Sharky.Pathing;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading;
-
-namespace Sharky.Managers
+﻿namespace Sharky.Managers
 {
     public class DebugManager : SharkyManager
     {
@@ -34,7 +26,7 @@ namespace Sharky.Managers
 
         public override bool NeverSkip { get => true; }
 
-        public override IEnumerable<Action> OnFrame(ResponseObservation observation)
+        public override IEnumerable<SC2Action> OnFrame(ResponseObservation observation)
         {
             if (SharkyOptions.Debug)
             {
@@ -67,7 +59,7 @@ namespace Sharky.Managers
             DebugService.ResetDrawRequest();
             DebugService.ResetSpawnRequest();
             
-            return new List<Action>();
+            return new List<SC2Action>();
         }
 
         private void ReadCommand(Google.Protobuf.Collections.RepeatedField<ChatReceived> chatsReceived, Point camera)

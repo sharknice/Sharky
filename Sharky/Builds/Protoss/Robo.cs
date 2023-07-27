@@ -1,10 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.Builds.BuildChoosing;
-using Sharky.DefaultBot;
-using Sharky.MicroTasks;
-using System.Collections.Generic;
-
-namespace Sharky.Builds.Protoss
+﻿namespace Sharky.Builds.Protoss
 {
     public class Robo : ProtossSharkyBuild
     {

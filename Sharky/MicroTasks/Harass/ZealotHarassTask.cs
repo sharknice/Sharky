@@ -1,11 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.DefaultBot;
-using Sharky.MicroControllers;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Sharky.MicroTasks
+﻿namespace Sharky.MicroTasks
 {
     public class ZealotHarassTask : MicroTask
     {
@@ -63,7 +56,7 @@ namespace Sharky.MicroTasks
 
             foreach (var commander in UnitCommanders)
             {
-                if (commander.UnitCalculation.EnemiesInRange.Any(e => !e.Attributes.Contains(Attribute.Structure)) || Vector2.DistanceSquared(commander.UnitCalculation.Position, mainVector) < 100)
+                if (commander.UnitCalculation.EnemiesInRange.Any(e => !e.Attributes.Contains(SC2Attribute.Structure)) || Vector2.DistanceSquared(commander.UnitCalculation.Position, mainVector) < 100)
                 {
                     var action = ZealotMicroController.HarassWorkers(commander, mainPoint, TargetingData.MainDefensePoint, frame);
                     if (action != null)

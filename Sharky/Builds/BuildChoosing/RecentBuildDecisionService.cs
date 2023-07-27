@@ -1,10 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.DefaultBot;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Sharky.Builds.BuildChoosing
+﻿namespace Sharky.Builds.BuildChoosing
 {
     public class RecentBuildDecisionService : BuildDecisionService
     {

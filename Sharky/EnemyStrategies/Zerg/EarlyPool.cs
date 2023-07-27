@@ -1,8 +1,4 @@
-﻿using Sharky.DefaultBot;
-using System;
-using System.Linq;
-
-namespace Sharky.EnemyStrategies.Zerg
+﻿namespace Sharky.EnemyStrategies.Zerg
 {
     public class EarlyPool : EnemyStrategy
     {

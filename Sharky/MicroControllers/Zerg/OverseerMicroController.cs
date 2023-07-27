@@ -1,10 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.DefaultBot;
-using Sharky.Pathing;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Sharky.MicroControllers.Zerg
+﻿namespace Sharky.MicroControllers.Zerg
 {
     public class OverseerMicroController : FlyingDetectorMicroController
     {
@@ -21,7 +15,7 @@ namespace Sharky.MicroControllers.Zerg
             return Contaminate(commander, frame, out action) || Changeling(commander, frame, out action);
         }
 
-        protected override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<Action> action)
+        protected override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2Action> action)
         {
             return Changeling(commander, frame, out action);
         }
@@ -30,7 +24,7 @@ namespace Sharky.MicroControllers.Zerg
         {
             if (commander.UnitCalculation.Unit.Energy >= 125)
             {
-                var activeBuilding = commander.UnitCalculation.NearbyEnemies.Take(25).FirstOrDefault(e => e.Unit.IsActive && e.Attributes.Contains(Attribute.Structure) && !e.Unit.BuffIds.Contains((uint)Buffs.CONTAMINATED));
+                var activeBuilding = commander.UnitCalculation.NearbyEnemies.Take(25).FirstOrDefault(e => e.Unit.IsActive && e.Attributes.Contains(SC2Attribute.Structure) && !e.Unit.BuffIds.Contains((uint)Buffs.CONTAMINATED));
                 if (activeBuilding != null)
                 {
                     ChatService.Tag("a_contaminate");

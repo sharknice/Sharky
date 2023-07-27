@@ -1,12 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.DefaultBot;
-using Sharky.Extensions;
-using Sharky.MicroControllers;
-using Sharky.Pathing;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Sharky.MicroTasks
+﻿namespace Sharky.MicroTasks
 {
     /// <summary>
     /// Secondary overlords for keeping map control

@@ -1,12 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.Builds.BuildChoosing;
-using Sharky.DefaultBot;
-using Sharky.MicroTasks;
-using Sharky.Pathing;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Sharky.Builds
+﻿namespace Sharky.Builds
 {
     public abstract class ProtossSharkyBuild : SharkyBuild
     {
