@@ -93,6 +93,15 @@
                 var bestOutOfRangeAttack = GetBestTargetFromList(commander, attacks, existingAttackOrder);
                 if (bestOutOfRangeAttack != null && (bestOutOfRangeAttack.UnitClassifications.Contains(UnitClassification.ArmyUnit) || bestOutOfRangeAttack.UnitClassifications.Contains(UnitClassification.DefensiveStructure)))
                 {
+                    var movementSpeed = GetMovementSpeed(commander);
+                    if (bestOutOfRangeAttack.Unit.UnitType == (uint)UnitTypes.TERRAN_REAPER && movementSpeed < bestOutOfRangeAttack.UnitTypeData.MovementSpeed)
+                    {
+                        if (commander.UnitCalculation.NearbyAllies.Any(a => a.UnitClassifications.Contains(UnitClassification.ArmyUnit) && Vector2.DistanceSquared(a.Position, bestOutOfRangeAttack.Position) < Vector2.DistanceSquared(commander.UnitCalculation.Position, bestOutOfRangeAttack.Position)))
+                        {
+                            bestOutOfRangeAttack = GetBestTargetFromList(commander, attacks.Where(a => a.UnitTypeData.MovementSpeed <= movementSpeed), existingAttackOrder);
+                        }
+                    }
+
                     commander.BestTarget = bestOutOfRangeAttack;
                     return bestOutOfRangeAttack;
                 }
