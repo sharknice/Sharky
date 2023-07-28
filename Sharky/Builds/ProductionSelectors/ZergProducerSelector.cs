@@ -30,7 +30,7 @@
         private UnitCommander SelectBestOverseerProducer(IEnumerable<UnitCommander> producers)
         {
             Vector2 desiredMorphPoint;
-            if (EnemyData.EnemyStrategies[nameof(InvisibleAttacks)].Active || EnemyData.EnemyStrategies[nameof(InvisibleAttacksSuspected)].Active)
+            if (EnemyData.EnemyStrategies[nameof(InvisibleAttacks)].Detected || EnemyData.EnemyStrategies[nameof(InvisibleAttacksSuspected)].Active)
             {
                 var enemyInvisibleUnits = ActiveUnitData.EnemyUnits.Where(x => InvisibleAttacks.IsNonObserverCloakableUnit(x.Value)).Select(x => x.Value);
 
