@@ -11,6 +11,12 @@
                 return true;
             }
 
+
+            if (EnemyData.EnemyRace == Race.Zerg && ActiveUnitData.EnemyUnits.Any(e => (UnitTypes)e.Value.Unit.UnitType == UnitTypes.ZERG_LURKERMPEGG))
+            {
+                return true;
+            }
+
             if (ActiveUnitData.EnemyUnits.Any(e => e.Value.UnitClassifications.Contains(UnitClassification.Cloakable) && e.Value.Unit.UnitType != (uint)UnitTypes.PROTOSS_OBSERVER))
             {
                 return true;
