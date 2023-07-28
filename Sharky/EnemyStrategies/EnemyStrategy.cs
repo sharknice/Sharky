@@ -64,7 +64,10 @@
 
         protected void DetectedChat()
         {
-            ChatService.Tag($"es_{Name()}");
+            if (SharkyOptions.TagOptions.EnemyStrategyTagsEnabled)
+            {
+                ChatService.Tag($"es_{Name()}");
+            }
 
             var lastGame = EnemyData?.EnemyPlayer.Games.FirstOrDefault();
             if (lastGame != null)

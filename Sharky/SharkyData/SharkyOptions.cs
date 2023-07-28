@@ -15,9 +15,9 @@
         public bool DebugCreep { get; set; } = false;
 
         public float FramesPerSecond { get; set; }
-        public bool TagsEnabled { get; set; }
-        public bool TagsAllChat { get; set; }
-        public bool BuildTagsEnabled { get; set; }
+
+        public TagOptions TagOptions { get; set; }
+
         public bool LogPerformance { get; set; }
         public bool GameStatusReportingEnabled { get; set; }
 

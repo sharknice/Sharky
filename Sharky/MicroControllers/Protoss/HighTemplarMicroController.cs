@@ -41,19 +41,19 @@
         {
             if (Storm(commander, frame, out action))
             {
-                ChatService.Tag("a_storm");
+                ChatService.TagAbility("storm");
                 return true;
             }
 
             if (Feedback(commander, frame, out action))
             {
-                ChatService.Tag("a_feedback");
+                ChatService.TagAbility("feedback");
                 return true;
             }
 
             if (Merge(commander, frame, out action))
             {
-                ChatService.Tag("a_merge_archon");
+                ChatService.TagAbility("merge_archon");
                 return true;
             }
 

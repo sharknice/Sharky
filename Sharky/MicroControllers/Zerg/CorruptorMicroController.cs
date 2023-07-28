@@ -37,7 +37,7 @@
             if (building != null)
             {
                 action = commander.Order(frame, Abilities.EFFECT_CAUSTICSPRAY, targetTag: building.Unit.Tag);
-                ChatService.Tag("a_caustic");
+                ChatService.TagAbility("caustic");
                 return true;
             }
 

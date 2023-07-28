@@ -147,7 +147,7 @@
 
             var framesPerSecond = 22.4f;
 
-            SharkyOptions = new SharkyOptions { Debug = debug, DebugMicroTaskUnits = true, FramesPerSecond = framesPerSecond, TagsEnabled = true, BuildTagsEnabled = true, LogPerformance = false, GameStatusReportingEnabled = true, GeneratePathing = false, GeneratePathingPrecision = (10, 10), TagsAllChat = false };
+            SharkyOptions = new SharkyOptions { Debug = debug, DebugMicroTaskUnits = true, FramesPerSecond = framesPerSecond, TagOptions = new TagOptions(), LogPerformance = false, GameStatusReportingEnabled = true, GeneratePathing = false, GeneratePathingPrecision = (10, 10) };
             FrameToTimeConverter = new FrameToTimeConverter(SharkyOptions);
             MacroData = new MacroData();
             AttackData = new AttackData { ArmyFoodAttack = 30, ArmyFoodRetreat = 25, Attacking = false, UseAttackDataManager = true, CustomAttackFunction = true, RetreatTrigger = 1f, AttackTrigger = 1.5f, RequireDetection = false, ContainBelowKill = true, RequireMaxOut = false, AttackWhenMaxedOut = true, RequireBank = false, AttackWhenOverwhelm = true, GroupUpEnabled = true, ContainTrigger = 1.5f, KillTrigger = 3f };

@@ -31,7 +31,7 @@
 
             if (commander.UnitCalculation.NearbyEnemies.Count() > 0 || commander.UnitCalculation.NearbyAllies.Count() > 10 || Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(TargetingData.AttackPoint.X, TargetingData.AttackPoint.Y)) < 1600)
             {
-                ChatService.Tag("a_locust");
+                ChatService.TagAbility("locust");
                 action = commander.Order(frame, Abilities.EFFECT_SPAWNLOCUSTS, TargetingData.AttackPoint);
                 return true;
             }

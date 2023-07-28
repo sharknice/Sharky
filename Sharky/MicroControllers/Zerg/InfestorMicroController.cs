@@ -101,7 +101,7 @@
                     if (bestAttack != null)
                     {
                         action = commander.Order(frame, Abilities.EFFECT_FUNGALGROWTH, bestAttack);
-                        ChatService.Tag("a_fungal");
+                        ChatService.TagAbility("fungal");
                         lastFungalFrame = frame;
                         return true;
                     }

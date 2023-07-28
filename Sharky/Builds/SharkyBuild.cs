@@ -84,7 +84,7 @@
 
             if (!Started)
             {
-                if (SharkyOptions.BuildTagsEnabled)
+                if (SharkyOptions.TagOptions.BuildTagsEnabled)
                 {
                     ChatService.Tag($"b_{Name()}");
                 }

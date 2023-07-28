@@ -34,7 +34,7 @@
                 var action = Overcharge(nexus, (int)observation.Observation.GameLoop);
                 if (action != null)
                 {
-                    ChatService.Tag("a_overcharge");
+                    ChatService.TagAbility("overcharge");
                     actions.AddRange(action);
                 }
                 else
@@ -42,7 +42,7 @@
                     action = ChronoBoost(nexus, (int)observation.Observation.GameLoop);
                     if (action != null)
                     {
-                        ChatService.Tag("a_chronoboost");
+                        ChatService.TagAbility("chronoboost");
                         actions.AddRange(action);
                         return actions;
                     }               

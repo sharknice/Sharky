@@ -30,7 +30,7 @@
             {
                 if (!raisedDepot.UnitCalculation.NearbyEnemies.Any(e => !e.Unit.IsFlying && e.FrameLastSeen >= frame - 5 && Vector2.DistanceSquared(e.Position, raisedDepot.UnitCalculation.Position) < 25) || WinningGround(raisedDepot))
                 {
-                    ChatService.Tag("a_depot_lower");
+                    ChatService.TagAbility("depot_lower");
                     var action = raisedDepot.Order(frame, Abilities.MORPH_SUPPLYDEPOT_LOWER);
                     if (action != null)
                     {
@@ -43,7 +43,7 @@
             {
                 if (loweredDepot.UnitCalculation.NearbyEnemies.Any(enemy => !enemy.Unit.IsFlying && enemy.FrameLastSeen >= frame - 5 && Vector2.DistanceSquared(enemy.Position, loweredDepot.UnitCalculation.Position) < 25) && LosingGround(loweredDepot))
                 {
-                    ChatService.Tag("a_depot_raise");
+                    ChatService.TagAbility("depot_raise");
                     var action = loweredDepot.Order(frame, Abilities.MORPH_SUPPLYDEPOT_RAISE);
                     if (action != null)
                     {

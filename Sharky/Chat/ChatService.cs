@@ -113,27 +113,35 @@
 
         public void Tag(string tag)
         {
-            if (SharkyOptions.TagsEnabled)
+            if (SharkyOptions.TagOptions.TagsEnabled)
             {
                 tag = new string(tag.Select(c => (char.IsLetterOrDigit(c) || c == '-') ? c : '_').ToArray());
 
                 if (!TagsUsed.Contains(tag))
                 {
                     TagsUsed.Add(tag);
-                    SendInstantChatMessage($"Tag:{tag}", !SharkyOptions.TagsAllChat);
+                    SendInstantChatMessage($"Tag:{tag}", !SharkyOptions.TagOptions.TagsAllChat);
                 }
+            }
+        }
+
+        public void TagAbility(string tag)
+        {
+            if (SharkyOptions.TagOptions.AbilityTagsEnabled)
+            {
+                Tag($"a_{tag}");
             }
         }
 
         public void TagException(string type = null)
         {
-            if (SharkyOptions.TagsEnabled)
+            if (SharkyOptions.TagOptions.TagsEnabled)
             {
                 if (string.IsNullOrWhiteSpace(type))
                 {
                     if (!ExceptionTagged)
                     {
-                        SendInstantChatMessage($"Tag:Exception", !SharkyOptions.TagsAllChat);
+                        SendInstantChatMessage($"Tag:Exception", !SharkyOptions.TagOptions.TagsAllChat);
                         ExceptionTagged = true;
                     }
                 }
@@ -141,7 +149,7 @@
                 {
                     if (!ExceptionsTagged.Contains(type))
                     {
-                        SendInstantChatMessage($"Tag:Exception_{type}", !SharkyOptions.TagsAllChat);
+                        SendInstantChatMessage($"Tag:Exception_{type}", !SharkyOptions.TagOptions.TagsAllChat);
                         ExceptionsTagged.Add(type);
                     }
                 }

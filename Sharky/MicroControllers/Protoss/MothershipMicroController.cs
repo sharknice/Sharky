@@ -42,7 +42,7 @@
 
             if (TimeWarp(commander, frame, out action))
             {
-                ChatService.Tag("a_timewarp");
+                ChatService.TagAbility("timewarp");
                 return true;
             }
 
