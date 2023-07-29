@@ -24,6 +24,11 @@
                 return SelectBestOverseerProducer(producers);
             }
 
+            if (unitType == UnitTypes.ZERG_LURKERMP || unitType == UnitTypes.ZERG_RAVAGER || unitType == UnitTypes.ZERG_BANELING || unitType == UnitTypes.ZERG_BROODLORD)
+            {
+                return SelectBestCoconProducer(producers);
+            }
+
             return producers.First();
         }
 
@@ -53,6 +58,12 @@
             }
 
             return producers.OrderBy(x => x.UnitCalculation.Position.DistanceSquared(desiredMorphPoint)).OrderBy(x => x.UnitCalculation.EnemiesThreateningDamage.Count).First();
+        }
+
+        private UnitCommander SelectBestCoconProducer(IEnumerable<UnitCommander> producers)
+        {
+            // Morph most damaged units that are least in danger as they recover all hp with the morph
+            return producers.OrderBy(x => x.UnitCalculation.Unit.Health / x.UnitCalculation.Unit.HealthMax).OrderBy(x => x.UnitCalculation.EnemiesThreateningDamage.Count).First();
         }
     }
 }
