@@ -37,7 +37,7 @@
                 if (enemyInvisibleUnits.Any())
                 {
                     // Morph near invisible units
-                    desiredMorphPoint = TargetingData.NaturalBasePoint.ToVector2();
+                    desiredMorphPoint = enemyInvisibleUnits.First().Position;
                 }
                 else
                 {
