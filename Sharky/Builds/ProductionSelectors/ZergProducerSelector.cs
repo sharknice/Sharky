@@ -38,6 +38,7 @@
                 {
                     // Morph near invisible units
                     desiredMorphPoint = enemyInvisibleUnits.First().Position;
+                    // todo: order by whether unit is detected to prefer morphing near non-detected units
                 }
                 else
                 {
