@@ -24,6 +24,11 @@
                 return SelectBestOverseerProducer(producers);
             }
 
+            if (unitType == UnitTypes.ZERG_OVERLORDTRANSPORT)
+            {
+                return SelectBestOverlordTransportProducer(producers);
+            }
+
             if (unitType == UnitTypes.ZERG_LURKERMP || unitType == UnitTypes.ZERG_RAVAGER || unitType == UnitTypes.ZERG_BANELING || unitType == UnitTypes.ZERG_BROODLORD)
             {
                 return SelectBestCoconProducer(producers);
@@ -58,6 +63,11 @@
             }
 
             return producers.OrderBy(x => x.UnitCalculation.Position.DistanceSquared(desiredMorphPoint)).OrderBy(x => x.UnitCalculation.EnemiesThreateningDamage.Count).First();
+        }
+
+        private UnitCommander SelectBestOverlordTransportProducer(IEnumerable<UnitCommander> producers)
+        {
+            return producers.OrderBy(x => x.UnitCalculation.Unit.Health / x.UnitCalculation.Unit.HealthMax).OrderBy(x => x.UnitCalculation.EnemiesThreateningDamage.Count).First();
         }
 
         private UnitCommander SelectBestCoconProducer(IEnumerable<UnitCommander> producers)
