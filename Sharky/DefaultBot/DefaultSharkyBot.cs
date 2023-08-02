@@ -170,8 +170,12 @@
 
             Managers = new List<IManager>();
 
+            ChatHistory = new ChatHistory();
+            ChatDataService = new ChatDataService();
+            EnemyNameService = new EnemyNameService();
             DebugService = new DebugService(SharkyOptions, ActiveUnitData, MacroData);
-            DebugManager = new DebugManager(gameConnection, SharkyOptions, DebugService, MapData, TargetingData, ActiveUnitData, EnemyData);
+            ChatService = new ChatService(ChatDataService, SharkyOptions, ActiveChatData, EnemyData);
+            DebugManager = new DebugManager(gameConnection, SharkyOptions, DebugService, MapData, TargetingData, ActiveUnitData, EnemyData, ChatService, SharkyUnitData);
             Managers.Add(DebugManager);
 
             ReportingManager = new ReportingManager(this);
@@ -204,11 +208,7 @@
             Managers.Add(UnitManager);
 
             HttpClient = new HttpClient();
-            ChatHistory = new ChatHistory();
-            ChatDataService = new ChatDataService();
-            EnemyNameService = new EnemyNameService();
             EnemyPlayerService = new EnemyPlayerService(EnemyNameService);
-            ChatService = new ChatService(ChatDataService, SharkyOptions, ActiveChatData, EnemyData);
             EnemyRaceManager = new EnemyRaceManager(ActiveUnitData, SharkyUnitData, EnemyData, SharkyOptions, ChatService);
             Managers.Add(EnemyRaceManager);
 

@@ -8,6 +8,7 @@
         protected DebugService DebugService;
         protected IPathFinder SharkyPathFinder;
         protected BaseData BaseData;
+        protected EnemyData EnemyData;
         protected SharkyOptions SharkyOptions;
         protected DamageService DamageService;
         protected UnitDataService UnitDataService;
@@ -39,6 +40,7 @@
             ActiveUnitData = defaultSharkyBot.ActiveUnitData;
             DebugService = defaultSharkyBot.DebugService;
             BaseData = defaultSharkyBot.BaseData;
+            EnemyData = defaultSharkyBot.EnemyData;
             TargetingData = defaultSharkyBot.TargetingData;
             AttackData = defaultSharkyBot.AttackData;
 

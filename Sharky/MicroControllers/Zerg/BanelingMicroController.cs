@@ -92,6 +92,7 @@
                         {
                             enemy.IncomingDamage += GetDamage(commander.UnitCalculation.Weapon, enemy.Unit, SharkyUnitData.UnitData[(UnitTypes)enemy.Unit.UnitType]);
                         }
+                        ChatService.TagAbility("explode");
                         action = commander.Order(frame, Abilities.EFFECT_EXPLODE);
                         LastManualDetonationFrame = frame;
                         return true;
