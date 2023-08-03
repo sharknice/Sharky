@@ -9,11 +9,17 @@
         TargetingData TargetingData;
         ActiveUnitData ActiveUnitData;
         EnemyData EnemyData;
+        SharkyUnitData SharkyUnitData;
+        ChatService ChatService;
 
         bool SlowMode = false;
         int SlowTime = 0;
 
-        public DebugManager(GameConnection gameConnection, SharkyOptions sharkyOptions, DebugService debugService, MapData mapData, TargetingData targetingData, ActiveUnitData activeUnitData, EnemyData enemyData)
+        protected HashSet<Upgrades> TaggedUpgrades = new HashSet<Upgrades>();
+        protected HashSet<UnitTypes> TaggedUnits = new HashSet<UnitTypes>();
+        protected HashSet<UnitTypes> TaggedEnemyUnits = new HashSet<UnitTypes>();
+
+        public DebugManager(GameConnection gameConnection, SharkyOptions sharkyOptions, DebugService debugService, MapData mapData, TargetingData targetingData, ActiveUnitData activeUnitData, EnemyData enemyData, ChatService chatService, SharkyUnitData sharkyUnitData)
         {
             GameConnection = gameConnection;
             SharkyOptions = sharkyOptions;
@@ -22,12 +28,24 @@
             TargetingData = targetingData;
             ActiveUnitData = activeUnitData;
             EnemyData = enemyData;
+            ChatService = chatService;
+            SharkyUnitData = sharkyUnitData;
         }
 
         public override bool NeverSkip { get => true; }
 
         public override IEnumerable<SC2Action> OnFrame(ResponseObservation observation)
         {
+            if (SharkyOptions.TagOptions.UnitTagsEnabled)
+            {
+                TagUnits();
+            }
+
+            if (SharkyOptions.TagOptions.UpgradeTagsEnabled)
+            {
+                TagUpgrades();
+            }
+
             if (SharkyOptions.Debug)
             {
                 if (SharkyOptions.DebugMicroTaskUnits)
@@ -45,7 +63,7 @@
                         GameConnection.SendRequest(new Request { LeaveGame = new RequestLeaveGame() }).Wait();
                     }
                 }
-                catch(System.Exception e)
+                catch (System.Exception e)
                 {
                     System.Console.WriteLine($"{e.Message}");
                 }
@@ -58,11 +76,48 @@
 
             DebugService.ResetDrawRequest();
             DebugService.ResetSpawnRequest();
-            
+
             return new List<SC2Action>();
         }
 
-        private void ReadCommand(Google.Protobuf.Collections.RepeatedField<ChatReceived> chatsReceived, Point camera)
+        private void TagUnits()
+        {
+            foreach (var unit in ActiveUnitData.EnemyUnits.Values)
+            {
+                var unitType = (UnitTypes)unit.Unit.UnitType;
+                if (!TaggedEnemyUnits.Contains(unitType))
+                {
+                    TaggedEnemyUnits.Add(unitType);
+                    ChatService.TagUnit(unitType.ToString().Split('_')[1], true);
+                }
+            }
+
+            foreach (var unit in ActiveUnitData.SelfUnits.Values)
+            {
+                var unitType = (UnitTypes)unit.Unit.UnitType;
+                if (!TaggedUnits.Contains(unitType))
+                {
+                    TaggedUnits.Add(unitType);
+                    ChatService.TagUnit(unitType.ToString().Split('_')[1]);
+                }
+            }
+        }
+
+        private void TagUpgrades()
+        {
+            if (SharkyUnitData.ResearchedUpgrades is not null)
+                foreach (var upgradeInt in SharkyUnitData.ResearchedUpgrades)
+                {
+                    var upgrade = (Upgrades)upgradeInt;
+                    if (!TaggedUpgrades.Contains(upgrade))
+                    {
+                        TaggedUpgrades.Add(upgrade);
+                        ChatService.Tag($"g_{upgrade}");
+                    }
+                }
+        }
+
+        private void ReadCommand(RepeatedField<ChatReceived> chatsReceived, Point camera)
         {
             foreach (var chatReceived in chatsReceived)
             {
@@ -113,7 +168,7 @@
                             }
                             foreach (var spot in wallData.Production)
                             {
-                                DebugService.SpawnUnits(UnitTypes.TERRAN_BARRACKS, spot, 2, 1);                             
+                                DebugService.SpawnUnits(UnitTypes.TERRAN_BARRACKS, spot, 2, 1);
                             }
                         }
                     }
@@ -178,7 +233,7 @@
                 if (match.Success)
                 {
                     var unitType = (UnitTypes)System.Enum.Parse(typeof(UnitTypes), match.Groups[1].Value, true);
-                    DebugService.SpawnUnit(unitType, new Point2D { X = camera.X, Y = camera.Y }, (int)chatReceived.PlayerId);                 
+                    DebugService.SpawnUnit(unitType, new Point2D { X = camera.X, Y = camera.Y }, (int)chatReceived.PlayerId);
                     return;
                 }
 

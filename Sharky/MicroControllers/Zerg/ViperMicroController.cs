@@ -20,9 +20,10 @@
                 { UnitTypes.TERRAN_CYCLONE, 160 },
                 { UnitTypes.TERRAN_GHOST, 150 },
                 { UnitTypes.TERRAN_WIDOWMINEBURROWED, 140 },
-                { UnitTypes.ZERG_LURKERMPBURROWED, 200 },
+                { UnitTypes.ZERG_LURKERMPBURROWED, 205 },
                 { UnitTypes.ZERG_LURKERMP, 190 },
                 { UnitTypes.ZERG_INFESTORBURROWED, 180 },
+                { UnitTypes.ZERG_LURKERMPEGG, 175 },
                 { UnitTypes.ZERG_INFESTOR, 170 },
                 { UnitTypes.ZERG_RAVAGERBURROWED, 160 },
                 { UnitTypes.ZERG_RAVAGER, 150 },
@@ -35,6 +36,7 @@
                 { UnitTypes.PROTOSS_CARRIER, 180 },
                 { UnitTypes.PROTOSS_VOIDRAY, 170 },
                 { UnitTypes.PROTOSS_ORACLE, 160 },
+                { UnitTypes.PROTOSS_OBSERVER, 160 },
                 { UnitTypes.TERRAN_BATTLECRUISER, 200 },
                 { UnitTypes.TERRAN_RAVEN, 190 },
                 { UnitTypes.TERRAN_BANSHEE, 180 },
@@ -169,10 +171,10 @@
             }
 
             var targets = commander.UnitCalculation.NearbyEnemies.Take(25).Where(enemyUnit =>
-                                InRange(enemyUnit.Position, commander.UnitCalculation.Position, 12 + enemyUnit.Unit.Radius + commander.UnitCalculation.Unit.Radius, 7));
+                                InRange(enemyUnit.Position, commander.UnitCalculation.Position, 12 + enemyUnit.Unit.Radius + commander.UnitCalculation.Unit.Radius, 6));
 
             var alliesInRange = commander.UnitCalculation.NearbyAllies.Take(25).Where(ally =>
-                InRange(ally.Position, commander.UnitCalculation.Position, 5));
+                InRange(ally.Position, commander.UnitCalculation.Position, 6));
 
             ulong bestAttack = 0;
 
@@ -182,7 +184,7 @@
                 {
                     var airAttackers = alliesInRange.Where(u => u.DamageAir);
 
-                    if (airAttackers.Count() >= 4)
+                    if (airAttackers.Count() >= 3)
                     {
                         bestAttack = GetBestAbductUnit(targets, AirAbductPriorities) ?? 0;
                     }
@@ -191,7 +193,7 @@
                 if (bestAttack == 0 && (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.WinGround || commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.WinAir || commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.Attack))
                 {
                     var groundAttackers = alliesInRange.Where(u => u.DamageGround);
-                    if (groundAttackers.Count() >= 6)
+                    if (groundAttackers.Count() >= 5)
                     {
                         bestAttack = GetBestAbductUnit(targets, GroundAbductPriorities) ?? 0;
                     }
@@ -312,8 +314,7 @@
 
         private int AbductPriority(UnitTypes type, Dictionary<UnitTypes, int> abductPriorities)
         {
-            int priority = 0;
-            return AirAbductPriorities.TryGetValue(type, out priority) ? priority : 0;
+            return abductPriorities.TryGetValue(type, out var priority) ? priority : 0;
         }
 
         private ulong GetBestAttackUnit(UnitCalculation unitCalculation, IEnumerable<UnitCalculation> enemies, IEnumerable<UnitCalculation> splashableEnemies, float splashRadius, int threshold = 1)

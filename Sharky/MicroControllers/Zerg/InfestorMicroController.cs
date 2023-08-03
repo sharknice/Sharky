@@ -3,6 +3,41 @@
     public class InfestorMicroController : IndividualMicroController
     {
         private int lastFungalFrame = 0;
+        private int lastNeuralFrame = 0;
+        private int lastShroudFrame = 0;
+
+        private Dictionary<UnitTypes, int> GroundNeuralPriorities = new()
+            {
+                { UnitTypes.PROTOSS_DISRUPTOR, 200 },
+                { UnitTypes.PROTOSS_HIGHTEMPLAR, 170 },
+                { UnitTypes.PROTOSS_COLOSSUS, 190 },
+                { UnitTypes.PROTOSS_ARCHON, 180 },
+                { UnitTypes.PROTOSS_IMMORTAL, 170 },
+                { UnitTypes.TERRAN_GHOST, 210 },
+                { UnitTypes.TERRAN_SIEGETANKSIEGED, 200 },
+                { UnitTypes.TERRAN_THOR, 190 },
+                { UnitTypes.TERRAN_THORAP, 180 },
+                { UnitTypes.TERRAN_SIEGETANK, 170 },
+                { UnitTypes.TERRAN_CYCLONE, 160 },
+                { UnitTypes.TERRAN_WIDOWMINEBURROWED, 140 },
+                { UnitTypes.ZERG_INFESTOR, 200 },
+                { UnitTypes.ZERG_INFESTORBURROWED, 190 },
+                { UnitTypes.ZERG_LURKERMPBURROWED, 180 },
+                { UnitTypes.ZERG_LURKERMP, 170 },
+            };
+
+        private Dictionary<UnitTypes, int> AirNeuralPriorities = new()
+            {
+                { UnitTypes.PROTOSS_TEMPEST, 190 },
+                { UnitTypes.PROTOSS_CARRIER, 180 },
+                { UnitTypes.PROTOSS_VOIDRAY, 170 },
+                { UnitTypes.PROTOSS_ORACLE, 160 },
+                { UnitTypes.TERRAN_BATTLECRUISER, 200 },
+                { UnitTypes.TERRAN_RAVEN, 190 },
+                { UnitTypes.TERRAN_BANSHEE, 180 },
+                { UnitTypes.ZERG_VIPER, 200 },
+                { UnitTypes.ZERG_BROODLORD, 190 },
+            };
 
         public InfestorMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled)
             : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled)
@@ -30,7 +65,162 @@
             return false;
         }
 
-        protected override bool OffensiveAbility(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
+        private ulong? GetBestNeuralUnit(IEnumerable<UnitCalculation> enemies, Dictionary<UnitTypes, int> neuralPriorities)
+        {
+            ulong? bestNeuralUnit = null;
+
+            var enemy = enemies.OrderBy(x => NeuralPriority((UnitTypes)x.Unit.UnitType, neuralPriorities)).LastOrDefault();
+
+            if (enemy is not null && neuralPriorities.ContainsKey((UnitTypes)enemy.Unit.UnitType))
+            {
+                bestNeuralUnit = enemy.Unit.Tag;
+            }
+
+            return bestNeuralUnit;
+        }
+
+        private int NeuralPriority(UnitTypes type, Dictionary<UnitTypes, int> neuralPriorities)
+        {
+            return neuralPriorities.TryGetValue(type, out var priority) ? priority : 0;
+        }
+
+        protected bool NeuralAbility(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2Action> action)
+        {
+            action = null;
+
+            int range = 8;
+
+            if (commander.UnitCalculation.Unit.Energy < 100)
+            {
+                return false;
+            }
+
+            if (lastNeuralFrame >= frame - 5)
+            {
+                return false;
+            }
+
+            var targets = commander.UnitCalculation.NearbyEnemies.Take(25).Where(enemyUnit =>
+                                InRange(enemyUnit.Position, commander.UnitCalculation.Position, range + enemyUnit.Unit.Radius + commander.UnitCalculation.Unit.Radius));
+
+            if (targets.Any())
+            {
+                ulong bestAttack = 0;
+
+                if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.WinGround)
+                {
+                    bestAttack = GetBestNeuralUnit(targets, GroundNeuralPriorities) ?? 0;
+                }
+                else if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.WinAir)
+                {
+                    bestAttack = GetBestNeuralUnit(targets, AirNeuralPriorities) ?? 0;
+                }
+
+                if (bestAttack == 0)
+                {
+                    bestAttack = GetBestNeuralUnit(targets, AirNeuralPriorities) ?? 0;
+                    if (bestAttack == 0)
+                    {
+                        bestAttack = GetBestNeuralUnit(targets, GroundNeuralPriorities) ?? 0;
+                    }
+                }
+
+                if (bestAttack > 0)
+                {
+                    action = commander.Order(frame, Abilities.EFFECT_NEURALPARASITE, targetTag: bestAttack);
+                    lastNeuralFrame = frame;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        protected bool ShroudAbility(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2Action> action)
+        {
+            action = null;
+            // todo: implement this
+            return false;
+
+            //int range = 9;
+
+            //if (commander.UnitCalculation.Unit.Energy < 75)
+            //{
+            //    return false;
+            //}
+
+            //if (lastShroudFrame >= frame - 10)
+            //{
+            //    return false;
+            //}
+
+            //var attacks = new List<UnitCalculation>();
+            //var center = commander.UnitCalculation.Position;
+
+            //foreach (var enemyAttack in commander.UnitCalculation.NearbyEnemies.Take(25))
+            //{
+            //    if (enemyAttack.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELING && !enemyAttack.Attributes.Contains(SC2Attribute.Structure) && !enemyAttack.Unit.BuffIds.Contains((uint)Buffs.FUNGALGROWTH) &&
+            //        InRange(enemyAttack.Position, commander.UnitCalculation.Position, 10 + enemyAttack.Unit.Radius + commander.UnitCalculation.Unit.Radius))
+            //    {
+            //        attacks.Add(enemyAttack);
+            //    }
+            //}
+
+            //if (attacks.Count > 0)
+            //{
+            //    var victims = attacks.OrderByDescending(u => u.Dps);
+            //    if (victims.Count() > 0)
+            //    {
+            //        var bestAttack = GetBestAttack(commander.UnitCalculation, victims, attacks);
+            //        if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.WinAir)
+            //        {
+            //            var airAttackers = victims.Where(u => u.DamageAir);
+            //            if (airAttackers.Count() > 0)
+            //            {
+            //                var air = GetBestAttack(commander.UnitCalculation, airAttackers, attacks);
+            //                if (air != null)
+            //                {
+            //                    bestAttack = air;
+            //                }
+            //            }
+            //        }
+            //        else if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.WinGround)
+            //        {
+            //            var groundAttackers = victims.Where(u => u.DamageGround);
+            //            if (groundAttackers.Count() > 0)
+            //            {
+            //                var ground = GetBestAttack(commander.UnitCalculation, groundAttackers, attacks);
+            //                if (ground != null)
+            //                {
+            //                    bestAttack = ground;
+            //                }
+            //            }
+            //        }
+            //        else
+            //        {
+            //            if (victims.Count() > 0)
+            //            {
+            //                var any = GetBestAttack(commander.UnitCalculation, victims, attacks);
+            //                if (any != null)
+            //                {
+            //                    bestAttack = any;
+            //                }
+            //            }
+            //        }
+
+            //        if (bestAttack != null)
+            //        {
+            //            action = commander.Order(frame, Abilities.EFFECT_FUNGALGROWTH, bestAttack);
+            //            lastShroudFrame = frame;
+            //            return true;
+            //        }
+            //    }
+            //}
+
+            //return false;
+        }
+
+        protected bool FungalAbility(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2Action> action)
         {
             action = null;
 
@@ -39,7 +229,7 @@
                 return false;
             }
 
-            if (lastFungalFrame >= frame - 5)
+            if (lastFungalFrame >= frame - 10)
             {
                 return false;
             }
@@ -101,11 +291,33 @@
                     if (bestAttack != null)
                     {
                         action = commander.Order(frame, Abilities.EFFECT_FUNGALGROWTH, bestAttack);
-                        ChatService.TagAbility("fungal");
                         lastFungalFrame = frame;
                         return true;
                     }
                 }
+            }
+
+            return false;
+        }
+
+        protected override bool OffensiveAbility(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2Action> action)
+        {
+            action = null;
+
+            if (NeuralAbility(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action))
+            {
+                ChatService.TagAbility("neural");
+                return true;
+            }
+            if (FungalAbility(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action))
+            {
+                ChatService.TagAbility("fungal");
+                return true;
+            }
+            if (ShroudAbility(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action))
+            {
+                ChatService.TagAbility("shroud");
+                return true;
             }
 
             return false;
