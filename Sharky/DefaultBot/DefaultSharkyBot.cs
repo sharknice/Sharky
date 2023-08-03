@@ -110,6 +110,8 @@
         public ResourceCenterLocator ResourceCenterLocator { get; set; }
         public AttackData AttackData { get; set; }
         public IBuildingPlacement WarpInPlacement { get; set; }
+        public IProducerSelector DefaultProducerSelector { get; set; }
+        public IProducerSelector ZergProducerSelector { get; set; }
         public MacroData MacroData { get; set; }
         public Morpher Morpher { get; set; }
         public HttpClient HttpClient { get; set; }
@@ -170,8 +172,12 @@
 
             Managers = new List<IManager>();
 
+            ChatHistory = new ChatHistory();
+            ChatDataService = new ChatDataService();
+            EnemyNameService = new EnemyNameService();
             DebugService = new DebugService(SharkyOptions, ActiveUnitData, MacroData);
-            DebugManager = new DebugManager(gameConnection, SharkyOptions, DebugService, MapData, TargetingData, ActiveUnitData, EnemyData);
+            ChatService = new ChatService(ChatDataService, SharkyOptions, ActiveChatData, EnemyData);
+            DebugManager = new DebugManager(gameConnection, SharkyOptions, DebugService, MapData, TargetingData, ActiveUnitData, EnemyData, ChatService, SharkyUnitData);
             Managers.Add(DebugManager);
 
             ReportingManager = new ReportingManager(this);
@@ -204,11 +210,7 @@
             Managers.Add(UnitManager);
 
             HttpClient = new HttpClient();
-            ChatHistory = new ChatHistory();
-            ChatDataService = new ChatDataService();
-            EnemyNameService = new EnemyNameService();
             EnemyPlayerService = new EnemyPlayerService(EnemyNameService);
-            ChatService = new ChatService(ChatDataService, SharkyOptions, ActiveChatData, EnemyData);
             EnemyRaceManager = new EnemyRaceManager(ActiveUnitData, SharkyUnitData, EnemyData, SharkyOptions, ChatService);
             Managers.Add(EnemyRaceManager);
 
@@ -257,7 +259,9 @@
             BuildingBuilder = new BuildingBuilder(ActiveUnitData, TargetingData, BuildingPlacement, SharkyUnitData, BaseData, MicroTaskData, BuildingService, MapDataService, WorkerBuilderService);
 
             WarpInPlacement = new WarpInPlacement(ActiveUnitData, DebugService, MapData, MapDataService, BuildingService);
-            
+            DefaultProducerSelector = new SimpleProducerSelector();
+            ZergProducerSelector = new ZergProducerSelector(this);
+
             Morpher = new Morpher(ActiveUnitData, TargetingData);
             BuildPylonService = new BuildPylonService(MacroData, BuildingBuilder, SharkyUnitData, ActiveUnitData, BaseData, TargetingData, BuildingService);
             BuildDefenseService = new BuildDefenseService(MacroData, BuildingBuilder, SharkyUnitData, ActiveUnitData, BaseData, TargetingData, BuildOptions, BuildingService);
@@ -538,7 +542,7 @@
             UnitRequestCancellingService = new UnitRequestCancellingService(this);
             BuildingRequestCancellingService = new BuildingRequestCancellingService(ActiveUnitData, MacroData, UnitCountService);
             VespeneGasBuilder = new VespeneGasBuilder(this, BuildingBuilder);
-            UnitBuilder = new UnitBuilder(this, WarpInPlacement);
+            UnitBuilder = new UnitBuilder(this, WarpInPlacement, DefaultProducerSelector, ZergProducerSelector);
             UpgradeResearcher = new UpgradeResearcher(this);
             SupplyBuilder = new SupplyBuilder(this, BuildingBuilder);
             ProductionBuilder = new ProductionBuilder(this, BuildingBuilder);

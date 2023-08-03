@@ -180,6 +180,7 @@
                 UnitTypes.TERRAN_WIDOWMINEBURROWED,
                 UnitTypes.ZERG_LURKERMPBURROWED,
                 UnitTypes.ZERG_LURKERMP,
+                UnitTypes.ZERG_LURKERMPEGG,
                 UnitTypes.ZERG_SWARMHOSTBURROWEDMP,
                 UnitTypes.ZERG_SWARMHOSTMP,
                 UnitTypes.PROTOSS_MOTHERSHIP

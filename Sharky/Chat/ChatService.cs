@@ -133,6 +133,17 @@
             }
         }
 
+        public void TagUnit(string tag, bool enemy = false)
+        {
+            if (SharkyOptions.TagOptions.UnitTagsEnabled)
+            {
+                if (enemy)
+                    Tag($"eu_{tag}");
+                else
+                    Tag($"u_{tag}");
+            }
+        }
+
         public void TagException(string type = null)
         {
             if (SharkyOptions.TagOptions.TagsEnabled)
