@@ -222,7 +222,7 @@
             if (WeaponReady(commander, frame) && !commander.UnitCalculation.EnemiesThreateningDamage.Any() && !commander.UnitCalculation.EnemiesInRangeOfAvoid.Any())
             {
                 var safe = true;
-                var closestEnemy = commander.UnitCalculation.NearbyEnemies.Take(25).OrderBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+                var closestEnemy = commander.UnitCalculation.NearbyEnemies.OrderBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position)).FirstOrDefault();
                 if (closestEnemy != null && !closestEnemy.UnitClassifications.Contains(UnitClassification.Worker))
                 {
                     if (DamageService.CanDamage(closestEnemy, commander.UnitCalculation) && (closestEnemy.Range >= commander.UnitCalculation.Range || closestEnemy.UnitTypeData.MovementSpeed > commander.UnitCalculation.UnitTypeData.MovementSpeed))
@@ -344,14 +344,14 @@
 
             if (commander.UnitCalculation.Range < 3 || !commander.UnitCalculation.NearbyEnemies.Any() || !WeaponReady(commander, frame)) { return false; }
 
-            var closestWall = commander.UnitCalculation.NearbyAllies.Take(25).Where(a => TargetingData.WallBuildings.Any(w => w.Unit.Tag == a.Unit.Tag)).OrderBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+            var closestWall = commander.UnitCalculation.NearbyAllies.Where(a => TargetingData.WallBuildings.Any(w => w.Unit.Tag == a.Unit.Tag)).OrderBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position)).FirstOrDefault();
             if (closestWall != null)
             {
                 var distanceToDefensivePoint = Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(defensivePoint.X, defensivePoint.Y));
                 var wallDistanceToDefensivePoint = Vector2.DistanceSquared(closestWall.Position, new Vector2(defensivePoint.X, defensivePoint.Y));
                 if (wallDistanceToDefensivePoint > distanceToDefensivePoint + commander.UnitCalculation.Unit.Radius + commander.UnitCalculation.Unit.Radius + closestWall.Unit.Radius + closestWall.Unit.Radius + 1)
                 {
-                    var closestEnemy = commander.UnitCalculation.NearbyEnemies.Take(25).OrderBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+                    var closestEnemy = commander.UnitCalculation.NearbyEnemies.OrderBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position)).FirstOrDefault();
                     if (closestEnemy != null)
                     {
                         var distanceToEnemy = Vector2.DistanceSquared(commander.UnitCalculation.Position, closestEnemy.Position);
@@ -805,11 +805,11 @@
         protected bool PointBlocked(UnitCalculation unitCalculation, Point2D point, ulong excludedUnit)
         {
             var vector = new Vector2(point.X, point.Y);
-            if (unitCalculation.NearbyEnemies.Take(25).Any(u => u.Unit.Tag != excludedUnit && Vector2.DistanceSquared(vector, u.Position) < .1))
+            if (unitCalculation.NearbyEnemies.Any(u => u.Unit.Tag != excludedUnit && Vector2.DistanceSquared(vector, u.Position) < .1))
             {
                 return true;
             }
-            if (unitCalculation.NearbyAllies.Take(25).Any(u => u.Unit.Tag != excludedUnit && Vector2.DistanceSquared(vector, u.Position) < .1))
+            if (unitCalculation.NearbyAllies.Any(u => u.Unit.Tag != excludedUnit && Vector2.DistanceSquared(vector, u.Position) < .1))
             {
                 return true;
             }
@@ -850,7 +850,7 @@
 
             if (formation == Formation.Tight && commander.UnitCalculation.NearbyEnemies.Count() > 0)
             {
-                var vectors = commander.UnitCalculation.NearbyAllies.Take(25).Where(a => (!a.Unit.IsFlying && !commander.UnitCalculation.Unit.IsFlying && a.UnitClassifications.Contains(UnitClassification.ArmyUnit)) || (commander.UnitCalculation.Unit.IsFlying && a.Unit.UnitType == commander.UnitCalculation.Unit.UnitType)).Where(a => Vector2.DistanceSquared(a.Position, commander.UnitCalculation.Position) < GroupUpDistance * GroupUpDistance).Select(u => u.Position);
+                var vectors = commander.UnitCalculation.NearbyAllies.Where(a => (!a.Unit.IsFlying && !commander.UnitCalculation.Unit.IsFlying && a.UnitClassifications.Contains(UnitClassification.ArmyUnit)) || (commander.UnitCalculation.Unit.IsFlying && a.Unit.UnitType == commander.UnitCalculation.Unit.UnitType)).Where(a => Vector2.DistanceSquared(a.Position, commander.UnitCalculation.Position) < GroupUpDistance * GroupUpDistance).Select(u => u.Position);
                 if (vectors.Count() > 0)
                 {
                     var max = 1f;
@@ -1099,7 +1099,7 @@
             }
 
             var range = commander.UnitCalculation.Range;
-            var enemiesInRange = commander.UnitCalculation.NearbyEnemies.Take(25).Where(enemyAttack => DamageService.CanDamage(enemyAttack, commander.UnitCalculation) && InRange(commander.UnitCalculation.Position, enemyAttack.Position, range + commander.UnitCalculation.Unit.Radius + enemyAttack.Unit.Radius + AvoidDamageDistance));
+            var enemiesInRange = commander.UnitCalculation.NearbyEnemies.Where(enemyAttack => DamageService.CanDamage(enemyAttack, commander.UnitCalculation) && InRange(commander.UnitCalculation.Position, enemyAttack.Position, range + commander.UnitCalculation.Unit.Radius + enemyAttack.Unit.Radius + AvoidDamageDistance));
 
             var closestEnemy = enemiesInRange.OrderBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position)).FirstOrDefault();
             if (closestEnemy == null)
@@ -1135,10 +1135,10 @@
 
             if (GetInBunker(commander, target, frame, out action)) { return true; }
 
-            var closestEnemy = commander.UnitCalculation.NearbyEnemies.Take(25).Where(e => DamageService.CanDamage(e, commander.UnitCalculation) && e.FrameLastSeen >= frame - 5).OrderBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+            var closestEnemy = commander.UnitCalculation.NearbyEnemies.Where(e => DamageService.CanDamage(e, commander.UnitCalculation) && e.FrameLastSeen >= frame - 5).OrderBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position)).FirstOrDefault();
             if (closestEnemy == null)
             {
-                closestEnemy = commander.UnitCalculation.NearbyEnemies.Take(25).Where(e => e.FrameLastSeen >= frame - 5).OrderBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+                closestEnemy = commander.UnitCalculation.NearbyEnemies.Where(e => e.FrameLastSeen >= frame - 5).OrderBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position)).FirstOrDefault();
             }
 
 
@@ -1146,7 +1146,7 @@
             {
                 if (DefendBehindWall(commander, defensivePoint, defensivePoint, frame, out action)) { return true; }
 
-                if (commander.UnitCalculation.NearbyEnemies.Take(25).All(e => e.Range < commander.UnitCalculation.Range && e.UnitTypeData.MovementSpeed < commander.UnitCalculation.UnitTypeData.MovementSpeed))
+                if (commander.UnitCalculation.NearbyEnemies.All(e => e.Range < commander.UnitCalculation.Range && e.UnitTypeData.MovementSpeed < commander.UnitCalculation.UnitTypeData.MovementSpeed))
                 {
                     if (MapDataService.SelfVisible(closestEnemy.Unit.Pos))
                     {
@@ -1320,7 +1320,7 @@
                 range = 10;
             }
             // TODO: don't go attack units super far away if there are still units that can't attack this unit, but are close
-            var outOfRangeAttacks = commander.UnitCalculation.NearbyEnemies.Take(25).Where(enemyAttack => !commander.UnitCalculation.EnemiesInRange.Any(e => e.Unit.Tag == enemyAttack.Unit.Tag)
+            var outOfRangeAttacks = commander.UnitCalculation.NearbyEnemies.Where(enemyAttack => !commander.UnitCalculation.EnemiesInRange.Any(e => e.Unit.Tag == enemyAttack.Unit.Tag)
                 && enemyAttack.Unit.DisplayType == DisplayType.Visible && DamageService.CanDamage(commander.UnitCalculation, enemyAttack) && !AvoidedUnitTypes.Contains((UnitTypes)enemyAttack.Unit.UnitType) && AttackersFilter(commander, enemyAttack));
 
             attacks = outOfRangeAttacks.Where(enemyAttack => enemyAttack.EnemiesInRange.Count() > 0 && enemyAttack.Unit.UnitType != (uint)UnitTypes.PROTOSS_INTERCEPTOR);
@@ -1674,7 +1674,7 @@
             if (AvoidDeceleration(commander, target, true, frame, out action)) { return true; }
 
             // no damaging targets in range, attack towards the main target
-            if (priorityEnemyMain)
+            if (priorityEnemyMain || commander.UnitCalculation.NearbyEnemies.Any(e => AvoidedUnitTypes.Any(a => (uint)a == e.Unit.UnitType)))
             {
                 action = MoveToTarget(commander, target, frame);
             }
@@ -2196,7 +2196,7 @@
                 }
             }
 
-            var zerglingDps = commander.UnitCalculation.NearbyEnemies.Take(25).Where(e => e.Unit.UnitType == (uint)UnitTypes.ZERG_ZERGLING || e.Unit.UnitType == (uint)UnitTypes.ZERG_ZERGLINGBURROWED).Sum(e => e.Dps);
+            var zerglingDps = commander.UnitCalculation.NearbyEnemies.Where(e => e.Unit.UnitType == (uint)UnitTypes.ZERG_ZERGLING || e.Unit.UnitType == (uint)UnitTypes.ZERG_ZERGLINGBURROWED).Sum(e => e.Dps);
             var splashDps = MapDataService.EnemyGroundSplashDpsInRange(commander.UnitCalculation.Unit.Pos);
 
             if (zerglingDps > splashDps)
@@ -2328,7 +2328,7 @@
             action = null;
             if (!commander.UnitCalculation.Unit.IsFlying || !commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.PARASITICBOMB)) { return false; }
 
-            var closestAlly = commander.UnitCalculation.NearbyAllies.Take(25).Where(a => a.Unit.IsFlying).OrderBy(a => Vector2.DistanceSquared(commander.UnitCalculation.Position, a.Position)).FirstOrDefault();
+            var closestAlly = commander.UnitCalculation.NearbyAllies.Where(a => a.Unit.IsFlying).OrderBy(a => Vector2.DistanceSquared(commander.UnitCalculation.Position, a.Position)).FirstOrDefault();
             if (closestAlly != null)
             {
                 if (Vector2.DistanceSquared(commander.UnitCalculation.Position, closestAlly.Position) < (3f + commander.UnitCalculation.Unit.Radius + closestAlly.Unit.Radius) * (3f + commander.UnitCalculation.Unit.Radius + closestAlly.Unit.Radius))

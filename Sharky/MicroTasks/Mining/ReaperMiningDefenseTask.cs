@@ -5,6 +5,7 @@
         ActiveUnitData ActiveUnitData;
         EnemyData EnemyData;
         MineralWalker MineralWalker;
+        MapDataService MapDataService;
 
         UnitCalculation EnemyReaper;
 
@@ -13,6 +14,7 @@
             ActiveUnitData = defaultSharkyBot.ActiveUnitData;
             EnemyData = defaultSharkyBot.EnemyData;
             MineralWalker = defaultSharkyBot.MineralWalker;
+            MapDataService = defaultSharkyBot.MapDataService;
 
             Priority = priority;
 
@@ -101,7 +103,10 @@
 
         private void GetEnemyReaper()
         {
-            EnemyReaper = ActiveUnitData.EnemyUnits.Values.FirstOrDefault(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_REAPER && e.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ResourceCenter) && !e.NearbyAllies.Any(a => a.Unit.UnitType == (uint)UnitTypes.ZERG_QUEEN)) && !e.NearbyAllies.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) || e.Unit.UnitType == (uint)UnitTypes.ZERG_QUEEN) && !e.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !e.Unit.IsFlying));
+            EnemyReaper = ActiveUnitData.EnemyUnits.Values.FirstOrDefault(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_REAPER
+                            && e.NearbyEnemies.Any(ee => ee.UnitClassifications.Contains(UnitClassification.ResourceCenter) && MapDataService.MapHeight(ee.Unit.Pos) == MapDataService.MapHeight(e.Unit.Pos) && !ee.NearbyAllies.Any(a => a.Unit.UnitType == (uint)UnitTypes.ZERG_QUEEN))
+                            && !e.NearbyAllies.Any(ee => ee.UnitClassifications.Contains(UnitClassification.ArmyUnit) || ee.Unit.UnitType == (uint)UnitTypes.ZERG_QUEEN)
+                            && !e.NearbyEnemies.Any(ee => ee.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !ee.Unit.IsFlying));
         }
 
         public override void RemoveDeadUnits(List<ulong> deadUnits)

@@ -130,12 +130,7 @@
                                 ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
                             }              
 
-                            if (unit.Key == UnitTypes.PROTOSS_GATEWAY)
-                            {
-                                orderedBuildings += ActiveUnitData.SelfUnits.Count(u => u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPGATE && Vector2.DistanceSquared(u.Value.Position, new Vector2(proxy.Value.Location.X, proxy.Value.Location.Y)) < proxy.Value.MaximumBuildingDistance * proxy.Value.MaximumBuildingDistance);
-                            }
-
-                            if (ActiveUnitData.SelfUnits.Count(u => u.Value.Unit.UnitType == (uint)unit.Key && Vector2.DistanceSquared(u.Value.Position, new Vector2(proxy.Value.Location.X, proxy.Value.Location.Y)) < proxy.Value.MaximumBuildingDistance * proxy.Value.MaximumBuildingDistance) + orderedBuildings < unit.Value)
+                            if (ActiveUnitData.SelfUnits.Count(u => EquivalentType(u.Value.Unit.UnitType, unit.Key) && Vector2.DistanceSquared(u.Value.Position, new Vector2(proxy.Value.Location.X, proxy.Value.Location.Y)) < proxy.Value.MaximumBuildingDistance * proxy.Value.MaximumBuildingDistance) + orderedBuildings < unit.Value)
                             {
                                 if (MicroTaskData[proxy.Key].UnitCommanders.Any(c => c.UnitCalculation.Unit.Orders.Count() == 0 || c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId != (uint)unitData.Ability)))
                                 {
@@ -170,6 +165,30 @@
             }
 
             return commands;
+        }
+
+        bool EquivalentType(uint unitType, UnitTypes desiredType)
+        {
+            if (unitType == (uint)desiredType) { return true; }
+
+            if (unitType == (uint)UnitTypes.PROTOSS_GATEWAY)
+            {
+                return unitType == (uint)UnitTypes.PROTOSS_WARPGATE;
+            }
+            if (unitType == (uint)UnitTypes.TERRAN_BARRACKS)
+            {
+                return unitType == (uint)UnitTypes.TERRAN_BARRACKSFLYING;
+            }
+            if (unitType == (uint)UnitTypes.TERRAN_FACTORY)
+            {
+                return unitType == (uint)UnitTypes.TERRAN_FACTORYFLYING;
+            }
+            if (unitType == (uint)UnitTypes.TERRAN_STARPORT)
+            {
+                return unitType == (uint)UnitTypes.TERRAN_STARPORTFLYING;
+            }
+
+            return false;
         }
 
         public IEnumerable<SC2Action> MorphBuildings()

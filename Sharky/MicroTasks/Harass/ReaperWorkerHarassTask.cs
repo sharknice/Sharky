@@ -1,4 +1,7 @@
-﻿namespace Sharky.MicroTasks
+﻿using Sharky.MicroTasks.Harass;
+using System.ComponentModel.Design;
+
+namespace Sharky.MicroTasks
 {
     public class ReaperWorkerHarassTask : MicroTask
     {
@@ -13,6 +16,7 @@
         ArmySplitter DefenseArmySplitter;
 
         public Dictionary<ulong, UnitCalculation> Kills { get; private set; }
+        public bool HuntEnemyReapers { get; set; } = false;
 
         int DesiredCount { get; set; }
         List<HarassInfo> HarassInfos { get; set; }
@@ -68,18 +72,57 @@
                 (e.NearbyEnemies.Any(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter) || u.UnitClassifications.Contains(UnitClassification.ProductionStructure) || u.UnitClassifications.Contains(UnitClassification.DefensiveStructure))) && 
                 (e.NearbyEnemies.Count(b => b.Attributes.Contains(SC2APIProtocol.Attribute.Structure)) >= e.NearbyAllies.Count(b => b.Attributes.Contains(SC2APIProtocol.Attribute.Structure)))).Where(e => e.Unit.UnitType != (uint)UnitTypes.TERRAN_KD8CHARGE);
 
-            if (attackingEnemies.Count() > 0)
+            var enemyReapers = ActiveUnitData.EnemyUnits.Values.Where(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_REAPER);
+            if (HuntEnemyReapers && enemyReapers.Any())
+            {
+                var attackingEnemyVector = TargetingService.GetArmyPoint(enemyReapers).ToVector2();
+
+                var reaperVReapers = new List<UnitCommander>();
+                foreach (var commander in UnitCommanders)
+                {
+                    var enemyReaper = commander.UnitCalculation.NearbyEnemies.Where(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_REAPER).OrderBy(e => Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+                    if (enemyReaper != null)
+                    {
+                        if (commander.UnitCalculation.SimulatedHitpoints >= enemyReaper.SimulatedHitpoints)
+                        {
+                            var attack = MicroController.Attack(commander, enemyReaper.Position.ToPoint2D(), TargetingData.ForwardDefensePoint, null, frame);
+                            if (attack != null)
+                            {
+                                commands.AddRange(attack);
+                            }
+                            reaperVReapers.Add(commander);
+                        }
+                    }
+                }
+
+                defenders = UnitCommanders.Where(c => !reaperVReapers.Contains(c));
+                foreach (var commander in defenders)
+                {
+                    if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker)) && !commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) || e.UnitClassifications.Contains(UnitClassification.DefensiveStructure) || (e.Unit.UnitType == (uint)UnitTypes.TERRAN_BARRACKS && e.Unit.IsActive && !e.NearbyEnemies.Any(sa => sa.Unit.UnitType == (uint)UnitTypes.TERRAN_MARAUDER))))
+                    {
+                        var harassAction = MicroController.HarassWorkers(commander, attackingEnemyVector.ToPoint2D(), TargetingData.ForwardDefensePoint, frame);
+                        if (harassAction != null)
+                        {
+                            commands.AddRange(harassAction);
+                        }
+                        continue;
+                    }
+                    var action = MicroController.NavigateToPoint(commander, attackingEnemyVector.ToPoint2D(), TargetingData.ForwardDefensePoint, null, frame);
+                    if (action != null)
+                    {
+                        commands.AddRange(action);
+                    }
+                }
+                return commands;
+            }
+            else if (attackingEnemies.Count() > 0)
             {
                 var attackingEnemyVector = TargetingService.GetArmyPoint(attackingEnemies).ToVector2();
-
-                if (attackingEnemies.Count() > 0)
+                defenders = UnitCommanders.Where(c => Vector2.DistanceSquared(c.UnitCalculation.Position, attackingEnemyVector) < Vector2.DistanceSquared(c.UnitCalculation.Position, TargetingData.EnemyMainBasePoint.ToVector2()));
+                if (defenders.Any())
                 {
-                    defenders = UnitCommanders.Where(c => Vector2.DistanceSquared(c.UnitCalculation.Position, attackingEnemyVector) < Vector2.DistanceSquared(c.UnitCalculation.Position, TargetingData.EnemyMainBasePoint.ToVector2()));
-                    if (defenders.Any())
-                    {
-                        var actions = DefenseArmySplitter.SplitArmy(frame, attackingEnemies, TargetingData.AttackPoint, defenders, true);
-                        commands.AddRange(actions);
-                    }
+                    var actions = DefenseArmySplitter.SplitArmy(frame, attackingEnemies, TargetingData.AttackPoint, defenders, true);
+                    commands.AddRange(actions);
                 }
             }
 
@@ -101,7 +144,16 @@
                         }
                     }
 
-                    if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker)) && !commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) || e.UnitClassifications.Contains(UnitClassification.DefensiveStructure)))
+                    if (commander.UnitCalculation.Unit.Health < commander.UnitCalculation.Unit.HealthMax && commander.UnitCalculation.NearbyEnemies.Any(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_MARAUDER))
+                    {
+                        var action = MicroController.Retreat(commander, TargetingData.ForwardDefensePoint, null, frame);
+                        if (action != null)
+                        {
+                            commands.AddRange(action);
+                        }
+                        continue;
+                    }
+                    if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker)) && !commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) || e.UnitClassifications.Contains(UnitClassification.DefensiveStructure) || (e.Unit.UnitType == (uint)UnitTypes.TERRAN_BARRACKS && e.Unit.IsActive && !e.NearbyEnemies.Any(sa => sa.Unit.UnitType == (uint)UnitTypes.TERRAN_MARAUDER))))
                     {
                         var action = MicroController.HarassWorkers(commander, harassInfo.BaseLocation.MineralLineLocation, TargetingData.ForwardDefensePoint, frame);
                         if (action != null)

@@ -27,6 +27,7 @@
         List<UnitCalculation> EnemyAttackers { get; set; }
 
         public bool OnlyDefendBuildings { get; set; }
+        public bool AllowSplitWhileKill { get; set; }
 
 
         public AdvancedAttackTask(DefaultSharkyBot defaultSharkyBot, EnemyCleanupService enemyCleanupService, List<UnitTypes> mainAttackerTypes, float priority, bool enabled = true)
@@ -56,6 +57,8 @@
             EnemyAttackers = new List<UnitCalculation>();
 
             SubTasks = new Dictionary<string, IAttackSubTask>();
+
+            AllowSplitWhileKill = true;
         }
 
         public override void ResetClaimedUnits()
@@ -365,7 +368,7 @@
                 if (TargetingData.AttackState == AttackState.Kill || !AttackData.UseAttackDataManager)
                 {
                     var attackingEnemies = supportUnits.SelectMany(c => c.UnitCalculation.NearbyEnemies).Distinct();
-                    if (attackingEnemies.Count() > 0)
+                    if (AllowSplitWhileKill && attackingEnemies.Count() > 0)
                     {
                         var splitActions = AttackArmySplitter.SplitArmy(frame, attackingEnemies, TargetingData.AttackPoint, supportUnits, false);
                         actions.AddRange(splitActions);

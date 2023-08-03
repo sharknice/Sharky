@@ -17,7 +17,7 @@
         {
             action = null;
 
-            if (commander.UnitCalculation.Unit.Health < 10 || (commander.UnitCalculation.Unit.Health < 30 && commander.UnitCalculation.NearbyEnemies.Any(e => e.DamageGround && e.Damage > commander.UnitCalculation.Unit.Health)))
+            if (commander.UnitCalculation.Unit.Health < 10 || (commander.UnitCalculation.Unit.Health < 30 && commander.UnitCalculation.NearbyEnemies.Any(e => e.DamageGround && e.Damage > commander.UnitCalculation.Unit.Health)) || commander.UnitCalculation.EnemiesInRangeOfAvoid.Any(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_MARAUDER))
             {
                 if (AvoidDamage(commander, target, defensivePoint, frame, out action))
                 {
@@ -42,6 +42,11 @@
         protected override bool OffensiveAbility(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
+
+            if (WeaponReady(commander, frame) && bestTarget != null && commander.UnitCalculation.EnemiesInRange.Any(e => e.Unit.Tag == bestTarget.Unit.Tag))
+            {
+                return false;
+            }
 
             if (commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.EFFECT_KD8CHARGE)) { return true; }
 
