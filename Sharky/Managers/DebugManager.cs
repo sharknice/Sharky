@@ -1,6 +1,4 @@
-﻿using System.Linq;
-
-namespace Sharky.Managers
+﻿namespace Sharky.Managers
 {
     public class DebugManager : SharkyManager
     {
@@ -38,21 +36,21 @@ namespace Sharky.Managers
 
         public override IEnumerable<SC2Action> OnFrame(ResponseObservation observation)
         {
+            if (SharkyOptions.TagOptions.UnitTagsEnabled)
+            {
+                TagUnits();
+            }
+
+            if (SharkyOptions.TagOptions.UpgradeTagsEnabled)
+            {
+                TagUpgrades();
+            }
+
             if (SharkyOptions.Debug)
             {
                 if (SharkyOptions.DebugMicroTaskUnits)
                 {
                     DebugService.DrawUnitInfo();
-                }
-
-                if (SharkyOptions.TagOptions.UnitTagsEnabled)
-                {
-                    TagUnits();
-                }
-
-                if (SharkyOptions.TagOptions.UpgradeTagsEnabled)
-                {
-                    TagUpgrades();
                 }
 
                 ReadCommand(observation.Chat, observation.Observation.RawData.Player.Camera);
