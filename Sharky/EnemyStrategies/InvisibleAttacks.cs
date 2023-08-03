@@ -4,20 +4,17 @@
     {
         public InvisibleAttacks(DefaultSharkyBot defaultSharkyBot) : base(defaultSharkyBot) { }
 
+        /// <summary>
+        /// Unit is not an observer and can be invisible
+        /// </summary>
+        public static bool IsNonObserverCloakableUnit(UnitCalculation unitCalculation)
+        {
+            return unitCalculation.Unit.UnitType != (uint)UnitTypes.PROTOSS_OBSERVER && (unitCalculation.UnitClassifications.Contains(UnitClassification.Cloakable) || unitCalculation.Unit.DisplayType == DisplayType.Hidden);
+        }
+
         protected override bool Detect(int frame)
         {
-            if (ActiveUnitData.EnemyUnits.Any(e => e.Value.Unit.DisplayType == SC2APIProtocol.DisplayType.Hidden && e.Value.Unit.UnitType != (uint)UnitTypes.PROTOSS_OBSERVER))
-            {
-                return true;
-            }
-
-
-            if (EnemyData.EnemyRace == Race.Zerg && ActiveUnitData.EnemyUnits.Any(e => (UnitTypes)e.Value.Unit.UnitType == UnitTypes.ZERG_LURKERMPEGG))
-            {
-                return true;
-            }
-
-            if (ActiveUnitData.EnemyUnits.Any(e => e.Value.UnitClassifications.Contains(UnitClassification.Cloakable) && e.Value.Unit.UnitType != (uint)UnitTypes.PROTOSS_OBSERVER))
+            if (ActiveUnitData.EnemyUnits.Any(e => IsNonObserverCloakableUnit(e.Value)))
             {
                 return true;
             }

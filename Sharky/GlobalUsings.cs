@@ -20,6 +20,7 @@ global using Sharky.Builds;
 global using Sharky.Builds.BuildingPlacement;
 global using Sharky.Builds.BuildChoosing;
 global using Sharky.Builds.MacroServices;
+global using Sharky.Builds.ProductionSelectors;
 global using Sharky.Builds.Protoss;
 global using Sharky.Builds.QuickBuilds;
 global using Sharky.Builds.Terran;

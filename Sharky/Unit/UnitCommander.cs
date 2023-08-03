@@ -73,20 +73,20 @@
             StuckCheck = new StuckCheck { AttemptFrame = 0, StuckPosition = unitCalculation.Position };
         }
 
-        public List<SC2APIProtocol.Action> Order(int frame, Abilities ability, Point2D targetLocation = null, ulong targetTag = 0, bool allowSpam = false, bool queue = false, bool allowConflict = false)
+        public List<SC2Action> Order(int frame, Abilities ability, Point2D targetLocation = null, ulong targetTag = 0, bool allowSpam = false, bool queue = false, bool allowConflict = false)
         {
             if (!allowConflict)
             {
                 if (!queue && LastOrderFrame == frame)
                 {
-                    return new List<SC2APIProtocol.Action>(); // don't give a unit conflicting orders, only one order per frame
+                    return new List<SC2Action>(); // don't give a unit conflicting orders, only one order per frame
                 }
                 if (!allowSpam && !AlwaysSpam)
                 {
                     if (ability == LastAbility && targetTag == LastTargetTag && ((targetLocation == null && LastTargetLocation == null) || (LastTargetLocation != null && targetLocation != null && targetLocation.X == LastTargetLocation.X && targetLocation.Y == LastTargetLocation.Y)) && AbilityOrderTimes[ability] > frame - SpamFrames)
                     {
                         LastOrderFrame = frame;
-                        return new List<SC2APIProtocol.Action>(); // if new action is exactly the same, don't do anything to prevent apm spam
+                        return new List<SC2Action>(); // if new action is exactly the same, don't do anything to prevent apm spam
                     }
                     else
                     {
@@ -125,7 +125,7 @@
             LastTargetTag = targetTag;
             AbilityOrderTimes[ability] = frame;
 
-            var action = new SC2APIProtocol.Action
+            var action = new SC2Action
             {
                 ActionRaw = new ActionRaw
                 {
@@ -141,7 +141,7 @@
             LastOrderFrame = frame;
             PerformStuckCheck(frame, targetLocation);
 
-            return new List<SC2APIProtocol.Action> { action };
+            return new List<SC2Action> { action };
         }
 
         private void PerformStuckCheck(int frame, Point2D targetLocation)
@@ -161,13 +161,13 @@
             }
         }
 
-        public List<SC2APIProtocol.Action> ToggleAutoCast(Abilities ability)
+        public List<SC2Action> ToggleAutoCast(Abilities ability)
         {
             var command = new ActionRawToggleAutocast();
             command.UnitTags.Add(UnitCalculation.Unit.Tag);
             command.AbilityId = (int)ability;
 
-            var action = new SC2APIProtocol.Action
+            var action = new SC2Action
             {
                 ActionRaw = new ActionRaw
                 {
@@ -175,17 +175,17 @@
                 }
             };
 
-            return new List<SC2APIProtocol.Action> { action };
+            return new List<SC2Action> { action };
         }
 
-        public SC2APIProtocol.Action Merge(ulong targetTag)
+        public SC2Action Merge(ulong targetTag)
         {
             var command = new ActionRawUnitCommand();
             command.AbilityId = (int)Abilities.MORPH_ARCHON;
             command.UnitTags.Add(UnitCalculation.Unit.Tag);
             command.UnitTags.Add(targetTag);
 
-            var action = new SC2APIProtocol.Action
+            var action = new SC2Action
             {
                 ActionRaw = new ActionRaw
                 {

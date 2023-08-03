@@ -110,6 +110,8 @@
         public ResourceCenterLocator ResourceCenterLocator { get; set; }
         public AttackData AttackData { get; set; }
         public IBuildingPlacement WarpInPlacement { get; set; }
+        public IProducerSelector DefaultProducerSelector { get; set; }
+        public IProducerSelector ZergProducerSelector { get; set; }
         public MacroData MacroData { get; set; }
         public Morpher Morpher { get; set; }
         public HttpClient HttpClient { get; set; }
@@ -257,7 +259,9 @@
             BuildingBuilder = new BuildingBuilder(ActiveUnitData, TargetingData, BuildingPlacement, SharkyUnitData, BaseData, MicroTaskData, BuildingService, MapDataService, WorkerBuilderService);
 
             WarpInPlacement = new WarpInPlacement(ActiveUnitData, DebugService, MapData, MapDataService, BuildingService);
-            
+            DefaultProducerSelector = new SimpleProducerSelector();
+            ZergProducerSelector = new ZergProducerSelector(this);
+
             Morpher = new Morpher(ActiveUnitData, TargetingData);
             BuildPylonService = new BuildPylonService(MacroData, BuildingBuilder, SharkyUnitData, ActiveUnitData, BaseData, TargetingData, BuildingService);
             BuildDefenseService = new BuildDefenseService(MacroData, BuildingBuilder, SharkyUnitData, ActiveUnitData, BaseData, TargetingData, BuildOptions, BuildingService);
@@ -538,7 +542,7 @@
             UnitRequestCancellingService = new UnitRequestCancellingService(this);
             BuildingRequestCancellingService = new BuildingRequestCancellingService(ActiveUnitData, MacroData, UnitCountService);
             VespeneGasBuilder = new VespeneGasBuilder(this, BuildingBuilder);
-            UnitBuilder = new UnitBuilder(this, WarpInPlacement);
+            UnitBuilder = new UnitBuilder(this, WarpInPlacement, DefaultProducerSelector, ZergProducerSelector);
             UpgradeResearcher = new UpgradeResearcher(this);
             SupplyBuilder = new SupplyBuilder(this, BuildingBuilder);
             ProductionBuilder = new ProductionBuilder(this, BuildingBuilder);
