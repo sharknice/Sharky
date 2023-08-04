@@ -16,7 +16,7 @@
                 commander.UnitCalculation.NearbyEnemies.Any(e => e.Unit.IsFlying) || 
                 commander.UnitCalculation.NearbyEnemies.Any(e => e.DamageGround && e.UnitClassifications.Any(c => c == UnitClassification.ArmyUnit || c == UnitClassification.DefensiveStructure)))
             {
-                ChatService.TagAbility("viking_fly");
+                TagService.TagAbility("viking_fly");
                 action = commander.Order(frame, Abilities.MORPH_VIKINGFIGHTERMODE);
                 return true;
             }

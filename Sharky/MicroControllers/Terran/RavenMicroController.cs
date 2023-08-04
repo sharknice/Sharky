@@ -13,19 +13,19 @@
 
             if (InterferenceMatrix(commander, frame, bestTarget, out action))
             {
-                ChatService.TagAbility("interference");
+                TagService.TagAbility("interference");
                 return true;
             }
 
             if (AntiArmorMissile(commander, frame, bestTarget, out action))
             {
-                ChatService.TagAbility("armormissile");
+                TagService.TagAbility("armormissile");
                 return true;
             }
 
             if (AutoTurret(commander, frame, bestTarget, out action))
             {
-                ChatService.TagAbility("autoturret");
+                TagService.TagAbility("autoturret");
                 return true;
             }
 

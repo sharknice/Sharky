@@ -82,7 +82,7 @@
             var bestGravitonTarget = GetBestGravitonBeamTarget(commander, target);
             if (bestGravitonTarget != null && bestGravitonTarget.FrameLastSeen + 1 >= frame)
             {
-                ChatService.TagAbility("graviton");
+                TagService.TagAbility("graviton");
                 action = commander.Order(frame, Abilities.EFFECT_GRAVITONBEAM, null, bestGravitonTarget.Unit.Tag);
                 return true;
             }

@@ -35,7 +35,7 @@
 
                 if (Revelation(commander, frame, out action))
                 {
-                    ChatService.TagAbility("revelation");
+                    TagService.TagAbility("revelation");
                     return true;
                 }
             }
@@ -185,19 +185,19 @@
 
             if (PulsarBeam(commander, frame, bestTarget, out action))
             {
-                ChatService.TagAbility("pulsar");
+                TagService.TagAbility("pulsar");
                 return true;
             }
 
             if (Revelation(commander, frame, out action))
             {
-                ChatService.TagAbility("revelation");
+                TagService.TagAbility("revelation");
                 return true;
             }
 
             if (StasisWard(commander, frame, bestTarget, out action))
             {
-                ChatService.TagAbility("stasis");
+                TagService.TagAbility("stasis");
                 return true;
             }
 

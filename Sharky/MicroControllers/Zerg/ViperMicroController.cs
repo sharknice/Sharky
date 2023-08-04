@@ -56,19 +56,19 @@
 
             if (Consume(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action))
             {
-                ChatService.TagAbility("consume");
+                TagService.TagAbility("consume");
                 return true;
             }
 
             if (ParasiticBomb(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action))
             {
-                ChatService.TagAbility("parasitic");
+                TagService.TagAbility("parasitic");
                 return true;
             }
 
             if (Abduct(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action))
             {
-                ChatService.TagAbility("abduct");
+                TagService.TagAbility("abduct");
                 return true;
             }
 

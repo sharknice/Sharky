@@ -33,13 +33,13 @@
 
             if (GuardianShield(commander, frame, out action))
             {
-                ChatService.TagAbility("guardian");
+                TagService.TagAbility("guardian");
                 return true;
             }
 
             if (Hallucinate(commander, frame, out action))
             {
-                ChatService.TagAbility("hallucinate");
+                TagService.TagAbility("hallucinate");
                 return true;
             }
 
