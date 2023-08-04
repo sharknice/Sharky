@@ -112,11 +112,12 @@
             return response.JoinGame.PlayerId;
         }
 
-        public async Task<uint> JoinGameLadder(Race race, int startPort, string botName = "")
+        public async Task<uint> JoinGameLadder(Race race, int startPort, string botName = "", string address = "127.0.0.1")
         {
             var joinGame = new RequestJoinGame();
             joinGame.Race = race;
             joinGame.PlayerName = botName;
+            joinGame.HostIp = address;
 
             joinGame.SharedPort = startPort + 1;
             joinGame.ServerPorts = new PortSet();
@@ -138,6 +139,8 @@
 
             var request = new Request();
             request.JoinGame = joinGame;
+
+            Console.WriteLine($"Proxy join request to {joinGame.HostIp}:{startPort} to {startPort+5}");
 
             var response = await Proxy.SendRequest(request);
             return response.JoinGame.PlayerId;
@@ -324,6 +327,7 @@
 
         public async Task RunLadder(ISharkyBot bot, Race myRace, int gamePort, int startPort, String opponentID, string botName = "", string address = "127.0.0.1")
         {
+            Console.WriteLine($"Connecting to {address}:{gamePort}");
             await Connect(gamePort, address);
             var playerId = await JoinGameLadder(myRace, startPort, botName);
             await Run(bot, playerId, opponentID, botName);
