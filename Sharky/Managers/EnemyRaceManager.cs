@@ -6,17 +6,14 @@
         SharkyUnitData SharkyUnitData;
         EnemyData EnemyData;
 
-        SharkyOptions SharkyOptions;
+        TagService TagService;
 
-        ChatService ChatService;
-
-        public EnemyRaceManager(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, EnemyData enemyData, SharkyOptions sharkyOptions, ChatService chatService)
+        public EnemyRaceManager(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, EnemyData enemyData, TagService tagService)
         {
             ActiveUnitData = activeUnitData;
             SharkyUnitData = sharkyUnitData;
             EnemyData = enemyData;
-            SharkyOptions = sharkyOptions;
-            ChatService = chatService;
+            TagService = tagService;
         }
 
         public override void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)
@@ -62,7 +59,7 @@
 
         void TagRace()
         {
-            ChatService.Tag($"EnemyRandomRace_{EnemyData.EnemyRace}");
+            TagService.Tag($"EnemyRandomRace_{EnemyData.EnemyRace}");
         }
     }
 }

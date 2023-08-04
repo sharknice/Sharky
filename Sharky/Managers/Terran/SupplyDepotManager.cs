@@ -4,13 +4,13 @@
     {
         ActiveUnitData ActiveUnitData;
         EnemyData EnemyData;
-        ChatService ChatService;
+        TagService TagService;
 
-        public SupplyDepotManager(ActiveUnitData activeUnitData, EnemyData enemyData, ChatService chatService)
+        public SupplyDepotManager(ActiveUnitData activeUnitData, EnemyData enemyData, TagService tagService)
         {
             ActiveUnitData = activeUnitData;
             EnemyData = enemyData;
-            ChatService = chatService;
+            TagService = tagService;
         }
 
         public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
@@ -30,7 +30,7 @@
             {
                 if (!raisedDepot.UnitCalculation.NearbyEnemies.Any(e => !e.Unit.IsFlying && e.FrameLastSeen >= frame - 5 && Vector2.DistanceSquared(e.Position, raisedDepot.UnitCalculation.Position) < 25) || WinningGround(raisedDepot))
                 {
-                    ChatService.TagAbility("depot_lower");
+                    TagService.TagAbility("depot_lower");
                     var action = raisedDepot.Order(frame, Abilities.MORPH_SUPPLYDEPOT_LOWER);
                     if (action != null)
                     {
@@ -43,7 +43,7 @@
             {
                 if (loweredDepot.UnitCalculation.NearbyEnemies.Any(enemy => !enemy.Unit.IsFlying && enemy.FrameLastSeen >= frame - 5 && Vector2.DistanceSquared(enemy.Position, loweredDepot.UnitCalculation.Position) < 25) && LosingGround(loweredDepot))
                 {
-                    ChatService.TagAbility("depot_raise");
+                    TagService.TagAbility("depot_raise");
                     var action = loweredDepot.Order(frame, Abilities.MORPH_SUPPLYDEPOT_RAISE);
                     if (action != null)
                     {

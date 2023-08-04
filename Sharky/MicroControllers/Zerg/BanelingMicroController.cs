@@ -6,12 +6,9 @@
 
         int LastManualDetonationFrame;
 
-        EnemyData EnemyData;
-
         public BanelingMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled)
             : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled)
         {
-            EnemyData = defaultSharkyBot.EnemyData;
             AvoidDamageDistance = 5;
             SplashRadius = 2.2f - 0.375f;
             LastManualDetonationFrame = 0;
@@ -92,7 +89,7 @@
                         {
                             enemy.IncomingDamage += GetDamage(commander.UnitCalculation.Weapon, enemy.Unit, SharkyUnitData.UnitData[(UnitTypes)enemy.Unit.UnitType]);
                         }
-                        ChatService.TagAbility("explode");
+                        TagService.TagAbility("explode");
                         action = commander.Order(frame, Abilities.EFFECT_EXPLODE);
                         LastManualDetonationFrame = frame;
                         return true;

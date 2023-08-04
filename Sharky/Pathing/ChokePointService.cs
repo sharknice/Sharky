@@ -94,25 +94,25 @@
         {
             return null; // TODO: check points around if they are walkable, if you can fit a circle near, not sure how to do it exactly
 
-            if (path.Count > 0)
-            {
-                var previousPoint = path[0];
+            //if (path.Count > 0)
+            //{
+            //    var previousPoint = path[0];
 
-                foreach (var point in path)
-                {
-                    if (IsFlatChoke(new Point2D { X = point.X, Y = point.Y }))
-                    {
-                        if (Vector2.DistanceSquared(path[0], point) > maxDistance * maxDistance)
-                        {
-                            return null;
-                        }
-                        return new Point2D { X = previousPoint.X, Y = previousPoint.Y };
-                    }
-                    previousPoint = point;
-                }
-            }
+            //    foreach (var point in path)
+            //    {
+            //        if (IsFlatChoke(new Point2D { X = point.X, Y = point.Y }))
+            //        {
+            //            if (Vector2.DistanceSquared(path[0], point) > maxDistance * maxDistance)
+            //            {
+            //                return null;
+            //            }
+            //            return new Point2D { X = previousPoint.X, Y = previousPoint.Y };
+            //        }
+            //        previousPoint = point;
+            //    }
+            //}
 
-            return null;
+            //return null;
         }
 
         private bool IsFlatChoke(Point2D chokePoint)

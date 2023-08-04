@@ -7,21 +7,12 @@
         ActiveChatData ActiveChatData;
         EnemyData EnemyData;
 
-        bool ExceptionTagged;
-        List<string> ExceptionsTagged;
-
-        private HashSet<string> TagsUsed = new HashSet<string>();
-
         public ChatService(IChatDataService chatDataService, SharkyOptions sharkyOptions, ActiveChatData activeChatData, EnemyData enemyData)
         {
             ChatDataService = chatDataService;
             SharkyOptions = sharkyOptions;
             ActiveChatData = activeChatData;
             EnemyData = enemyData;
-
-            ExceptionTagged = false;
-
-            ExceptionsTagged = new List<string>();
         }
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
@@ -107,62 +98,6 @@
                     typeTime += message.Length * 80; // simulate typing at 80 ms per keystroke
                                                      // translate framerate to real
                     await Task.Delay((int)(typeTime / ActiveChatData.TimeModulation)).ContinueWith((task) => { ActiveChatData.ChatActions.Add(chatAction); });
-                }
-            }
-        }
-
-        public void Tag(string tag)
-        {
-            if (SharkyOptions.TagOptions.TagsEnabled)
-            {
-                tag = new string(tag.Select(c => (char.IsLetterOrDigit(c) || c == '-') ? c : '_').ToArray());
-
-                if (!TagsUsed.Contains(tag))
-                {
-                    TagsUsed.Add(tag);
-                    SendInstantChatMessage($"Tag:{tag}", !SharkyOptions.TagOptions.TagsAllChat);
-                }
-            }
-        }
-
-        public void TagAbility(string tag)
-        {
-            if (SharkyOptions.TagOptions.AbilityTagsEnabled)
-            {
-                Tag($"a_{tag}");
-            }
-        }
-
-        public void TagUnit(string tag, bool enemy = false)
-        {
-            if (SharkyOptions.TagOptions.UnitTagsEnabled)
-            {
-                if (enemy)
-                    Tag($"eu_{tag}");
-                else
-                    Tag($"u_{tag}");
-            }
-        }
-
-        public void TagException(string type = null)
-        {
-            if (SharkyOptions.TagOptions.TagsEnabled)
-            {
-                if (string.IsNullOrWhiteSpace(type))
-                {
-                    if (!ExceptionTagged)
-                    {
-                        SendInstantChatMessage($"Tag:Exception", !SharkyOptions.TagOptions.TagsAllChat);
-                        ExceptionTagged = true;
-                    }
-                }
-                else
-                {
-                    if (!ExceptionsTagged.Contains(type))
-                    {
-                        SendInstantChatMessage($"Tag:Exception_{type}", !SharkyOptions.TagOptions.TagsAllChat);
-                        ExceptionsTagged.Add(type);
-                    }
                 }
             }
         }

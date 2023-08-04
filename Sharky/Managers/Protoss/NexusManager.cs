@@ -6,22 +6,22 @@
         SharkyUnitData SharkyUnitData;
         ChronoData ChronoData;
         EnemyData EnemyData;
-        ChatService ChatService;
+        TagService TagService;
         float OverchargeRangeSquared = 100;
         float RestoreRangeSquared = 36;
 
-        public NexusManager(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, ChronoData chronoData, EnemyData enemyData, ChatService chatService)
+        public NexusManager(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, ChronoData chronoData, EnemyData enemyData, TagService tagService)
         {
             ActiveUnitData = activeUnitData;
             SharkyUnitData = sharkyUnitData;
             ChronoData = chronoData;
             EnemyData = enemyData;
-            ChatService = chatService;
+            TagService = tagService;
         }
 
-        public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
+        public override IEnumerable<SC2Action> OnFrame(ResponseObservation observation)
         {
-            var actions = new List<SC2APIProtocol.Action>();
+            var actions = new List<SC2Action>();
 
             if (EnemyData.SelfRace != Race.Protoss)
             {
@@ -34,7 +34,7 @@
                 var action = Overcharge(nexus, (int)observation.Observation.GameLoop);
                 if (action != null)
                 {
-                    ChatService.TagAbility("overcharge");
+                    TagService.TagAbility("overcharge");
                     actions.AddRange(action);
                 }
                 else
@@ -42,7 +42,7 @@
                     action = ChronoBoost(nexus, (int)observation.Observation.GameLoop);
                     if (action != null)
                     {
-                        ChatService.TagAbility("chronoboost");
+                        TagService.TagAbility("chronoboost");
                         actions.AddRange(action);
                         return actions;
                     }               
@@ -57,7 +57,7 @@
             return actions;
         }
 
-        List<SC2APIProtocol.Action> Overcharge(UnitCommander nexus, int frame)
+        List<SC2Action> Overcharge(UnitCommander nexus, int frame)
         {
             if (nexus.UnitCalculation.Unit.Energy >= 50)
             {
@@ -73,7 +73,7 @@
             return null;
         }
 
-        List<SC2APIProtocol.Action> ChronoBoost(UnitCommander nexus, int frame)
+        List<SC2Action> ChronoBoost(UnitCommander nexus, int frame)
         {
             if (nexus.UnitRole == UnitRole.Defend && nexus.UnitCalculation.Unit.Energy < 100) { return null; } // save for overcharge or recall
 

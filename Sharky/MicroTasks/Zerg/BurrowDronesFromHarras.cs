@@ -9,6 +9,7 @@
         MicroTaskData MicroTaskData;
         MacroData MacroData;
         ChatService ChatService;
+        TagService TagService;
 
         private bool tagged = false;
 
@@ -22,6 +23,7 @@
             MicroTaskData = defaultSharkyBot.MicroTaskData;
             MacroData = defaultSharkyBot.MacroData;
             ChatService = defaultSharkyBot.ChatService;
+            TagService = defaultSharkyBot.TagService;
 
             Priority = priority;
             Enabled = enabled;
@@ -29,7 +31,7 @@
 
         public override void ClaimUnits(Dictionary<ulong, UnitCommander> commanders)
         {
-            if (EnemyData.SelfRace != SC2APIProtocol.Race.Zerg)
+            if (EnemyData.SelfRace != Race.Zerg)
             {
                 Disable();
                 return;
@@ -48,7 +50,7 @@
                 {
                     if (!tagged)
                     {
-                        ChatService.Tag("self_burrow_drones");
+                        TagService.Tag("self_burrow_drones");
                         tagged = true;
                     }
 
@@ -81,9 +83,9 @@
             return MapData.Map[(int)unitCalculation.Position.X,(int)unitCalculation.Position.Y].InEnemyDetection;
         }
 
-        public override IEnumerable<SC2APIProtocol.Action> PerformActions(int frame)
+        public override IEnumerable<SC2Action> PerformActions(int frame)
         {
-            var actions = new List<SC2APIProtocol.Action>();
+            var actions = new List<SC2Action>();
 
             foreach (var drone in UnitCommanders)
             {

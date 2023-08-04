@@ -7,6 +7,7 @@
         EnemyData EnemyData;
         MacroData MacroData;
         UnitCountService UnitCountService;
+        TagService TagService;
         ChatService ChatService;
         ResourceCenterLocator ResourceCenterLocator;
         MapDataService MapDataService;
@@ -17,13 +18,14 @@
 
         bool MulesUnderAttackChatSent;
 
-        public OrbitalManager(ActiveUnitData activeUnitData, BaseData baseData, EnemyData enemyData, MacroData macroData, UnitCountService unitCountService, ChatService chatService, ResourceCenterLocator resourceCenterLocator, MapDataService mapDataService, SharkyUnitData sharkyUnitData)
+        public OrbitalManager(ActiveUnitData activeUnitData, BaseData baseData, EnemyData enemyData, MacroData macroData, UnitCountService unitCountService, TagService tagService, ChatService chatService, ResourceCenterLocator resourceCenterLocator, MapDataService mapDataService, SharkyUnitData sharkyUnitData)
         {
             ActiveUnitData = activeUnitData;
             BaseData = baseData;
             EnemyData = enemyData;
             MacroData = macroData;
             UnitCountService = unitCountService;
+            TagService = tagService;
             ChatService = chatService;
             ResourceCenterLocator = resourceCenterLocator;
             MapDataService = mapDataService;
@@ -35,9 +37,9 @@
             LastScanFrame = 0;
         }
 
-        public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
+        public override IEnumerable<SC2Action> OnFrame(ResponseObservation observation)
         {
-            var actions = new List<SC2APIProtocol.Action>();
+            var actions = new List<SC2Action>();
 
             if (EnemyData.SelfRace != Race.Terran)
             {
@@ -73,9 +75,9 @@
             return actions;
         }
 
-        List<SC2APIProtocol.Action> TakeBases(int frame)
+        List<SC2Action> TakeBases(int frame)
         {
-            var actions = new List<SC2APIProtocol.Action>();
+            var actions = new List<SC2Action>();
 
             var excess = UnitCountService.EquivalentTypeCount(UnitTypes.TERRAN_COMMANDCENTER) - BaseData.SelfBases.Count() - MacroData.DesiredMacroCommandCenters;
             if (excess > 0)
@@ -118,7 +120,7 @@
                     if (!undetectedEnemy.Value.EnemiesInRangeOf.All(a => a.Unit.UnitType == (uint)UnitTypes.TERRAN_BANSHEE && a.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker))))
                     {
                         LastScanFrame = frame;
-                        ChatService.TagAbility("scan");
+                        TagService.TagAbility("scan");
                         return orbital.Order(frame, Abilities.EFFECT_SCAN, new Point2D { X = undetectedEnemy.Value.Position.X, Y = undetectedEnemy.Value.Position.Y });
                     }
                 }
@@ -128,7 +130,7 @@
                     if (siegedTank.BestTarget != null && siegedTank.UnitCalculation.Unit.WeaponCooldown < 0.1f && siegedTank.UnitCalculation.EnemiesInRange.Any(e => e.Unit.Tag == siegedTank.BestTarget.Unit.Tag) && frame - siegedTank.BestTarget.FrameLastSeen > 10 && !MapDataService.SelfVisible(siegedTank.BestTarget.Unit.Pos))
                     {
                         LastScanFrame = frame;
-                        ChatService.TagAbility("scan");
+                        TagService.TagAbility("scan");
                         return orbital.Order(frame, Abilities.EFFECT_SCAN, new Point2D { X = siegedTank.BestTarget.Position.X, Y = siegedTank.BestTarget.Position.Y });
                     }
                 }
@@ -137,7 +139,7 @@
                 {
                     var scanPoint = ScanQueue.Pop();
                     LastScanFrame = frame;
-                    ChatService.TagAbility("scan");
+                    TagService.TagAbility("scan");
                     return orbital.Order(frame, Abilities.EFFECT_SCAN, scanPoint);
                 }
             }
@@ -152,7 +154,7 @@
                 var highestMineralPatch = BaseData.SelfBases.Where(b => b.ResourceCenter != null && b.ResourceCenter.BuildProgress > .99 && b.MineralFields.Count() > 0 && ActiveUnitData.SelfUnits.ContainsKey(b.ResourceCenter.Tag) && ActiveUnitData.SelfUnits[b.ResourceCenter.Tag].NearbyEnemies.Count(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit)) < 2).SelectMany(m => m.MineralFields).OrderByDescending(m => m.MineralContents).FirstOrDefault();
                 if (highestMineralPatch != null)
                 {
-                    ChatService.TagAbility("mule");
+                    TagService.TagAbility("mule");
                     return orbital.Order(frame, Abilities.EFFECT_CALLDOWNMULE, targetTag: highestMineralPatch.Tag);
                 }
 
@@ -174,7 +176,7 @@
                 var visibleMineral = ActiveUnitData.NeutralUnits.FirstOrDefault(u => SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType) && u.Value.Unit.DisplayType == DisplayType.Visible).Value;
                 if (visibleMineral != null)
                 {
-                    ChatService.TagAbility("mule");
+                    TagService.TagAbility("mule");
                     return orbital.Order(frame, Abilities.EFFECT_CALLDOWNMULE, targetTag: visibleMineral.Unit.Tag);
                 }
             }

@@ -17,6 +17,7 @@
         protected AttackPathingService AttackPathingService;
         protected AttackData AttackData;
         protected ChatService ChatService;
+        protected TagService TagService;
 
         public MicroPriority MicroPriority { get; set; }
 
@@ -55,6 +56,7 @@
             TargetingService = defaultSharkyBot.TargetingService;
             AttackPathingService = defaultSharkyBot.AttackPathingService;
             ChatService = defaultSharkyBot.ChatService;
+            TagService = defaultSharkyBot.TagService;
 
             GroupUpDistanceSmall = 5;
             GroupUpDistance = 10;
@@ -66,14 +68,14 @@
             MaximumSupportDistanceSqaured = 225f;
         }
 
-        public virtual List<SC2APIProtocol.Action> Attack(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
+        public virtual List<SC2Action> Attack(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
             if (commander.UnitCalculation.Unit.IsOnScreen)
             {
                 var breakpoint = true;
             }
 
-            List<SC2APIProtocol.Action> action = null;
+            List<SC2Action> action = null;
             if (commander.UnitCalculation.Loaded) { return action; }
 
             var formation = GetDesiredFormation(commander);

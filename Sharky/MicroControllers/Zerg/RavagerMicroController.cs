@@ -79,7 +79,7 @@
 
                     if (bestAttack != null)
                     {
-                        ChatService.TagAbility("bile");
+                        TagService.TagAbility("bile");
                         action = commander.Order(frame, Abilities.EFFECT_CORROSIVEBILE, bestAttack);
                         lastBileFrame = frame;
                         return true;
