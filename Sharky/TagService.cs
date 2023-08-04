@@ -171,7 +171,7 @@
             {
                 var tag = strategy.Name;
                 EnemyStrategyTagsUsed.Add(strategy);
-                Tag($"g_{tag}");
+                Tag($"es_{tag}");
             }
         }
 
