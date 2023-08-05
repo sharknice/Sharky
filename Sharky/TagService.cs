@@ -169,7 +169,7 @@
 
             if (!EnemyStrategyTagsUsed.Contains(strategy))
             {
-                var tag = strategy.Name;
+                var tag = strategy.Name();
                 EnemyStrategyTagsUsed.Add(strategy);
                 Tag($"es_{tag}");
             }
