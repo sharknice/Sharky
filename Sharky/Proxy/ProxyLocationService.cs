@@ -20,7 +20,7 @@
         public Point2D GetCliffProxyLocation(float offsetDistance = 0)
         {
             var numberOfCloseLocations = NumberOfCloseBaseLocations();
-            if (MapDataService.MapData.MapName.ToLower().Contains("glittering") || MapDataService.MapData.MapName.ToLower().Contains("berlingrad"))
+            if (MapDataService.MapData.MapName.ToLower().Contains("cistern") || MapDataService.MapData.MapName.ToLower().Contains("golden") || MapDataService.MapData.MapName.ToLower().Contains("glittering") || MapDataService.MapData.MapName.ToLower().Contains("berlingrad"))
             {
                 numberOfCloseLocations = 3;
             }

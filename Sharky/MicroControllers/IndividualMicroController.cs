@@ -1689,12 +1689,22 @@
 
         protected virtual List<SC2APIProtocol.Action> MoveToTarget(UnitCommander commander, Point2D target, int frame)
         {
+            if (commander.UnitCalculation.NearbyAllies.Any(a => a.Attributes.Contains(SC2APIProtocol.Attribute.Structure)) && Vector2.DistanceSquared(commander.UnitCalculation.Position, target.ToVector2()) > 400)
+            {
+                return commander.Order(frame, Abilities.MOVE, target);
+            }
+
             var moveTo = GetNextPointToTarget(commander, target, frame);
             return commander.Order(frame, Abilities.MOVE, moveTo);
         }
 
         protected virtual List<SC2APIProtocol.Action> AttackToTarget(UnitCommander commander, Point2D target, int frame)
         {
+            if (commander.UnitCalculation.NearbyAllies.Any(a => a.Attributes.Contains(SC2APIProtocol.Attribute.Structure)) && Vector2.DistanceSquared(commander.UnitCalculation.Position, target.ToVector2()) > 400)
+            {
+                return commander.Order(frame, Abilities.ATTACK, target);
+            }
+
             var moveTo = GetNextPointToTarget(commander, target, frame);
             return commander.Order(frame, Abilities.ATTACK, moveTo);
         }

@@ -1,27 +1,33 @@
-﻿namespace Sharky.MicroTasks
+﻿using Sharky.Extensions;
+
+namespace Sharky.MicroTasks
 {
     public class ProxyTask : MicroTask
     {
         SharkyUnitData SharkyUnitData;
         MacroData MacroData;
         ActiveUnitData ActiveUnitData;
+        MicroData MicroData;
         IIndividualMicroController IndividualMicroController;
 
         public int DesiredWorkers { get; set; }
+        public List<DesiredUnitsClaim> DesiredDefendingUnitsClaims { get; set; }
 
         public string ProxyName { get; set; }
 
         bool started { get; set; }
 
-        public ProxyTask(SharkyUnitData sharkyUnitData, bool enabled, float priority, MacroData macroData, string proxyName, MicroTaskData microTaskData, DebugService debugService, ActiveUnitData activeUnitData, IIndividualMicroController individualMicroController, int desiredWorkers = 1)
+        public ProxyTask(DefaultSharkyBot defaultSharkyBot, bool enabled, float priority, string proxyName, IIndividualMicroController individualMicroController, int desiredWorkers = 1)
         {
-            SharkyUnitData = sharkyUnitData;
+            SharkyUnitData = defaultSharkyBot.SharkyUnitData;
             Priority = priority;
-            MacroData = macroData;
+            MacroData = defaultSharkyBot.MacroData;
             ProxyName = proxyName;
-            ActiveUnitData = activeUnitData;
+            ActiveUnitData = defaultSharkyBot.ActiveUnitData;
             IndividualMicroController = individualMicroController;
+            MicroData = defaultSharkyBot.MicroData;
 
+            DesiredDefendingUnitsClaims = new List<DesiredUnitsClaim>();
             UnitCommanders = new List<UnitCommander>();
             Enabled = enabled;
             DesiredWorkers = desiredWorkers;
@@ -76,6 +82,33 @@
                     return;
                 }
             }
+
+            foreach (var commander in commanders)
+            {
+                if (!commander.Value.Claimed)
+                {
+                    var unitType = commander.Value.UnitCalculation.Unit.UnitType;
+                    foreach (var desiredUnitClaim in DesiredDefendingUnitsClaims)
+                    {
+                        if ((uint)desiredUnitClaim.UnitType == unitType && !commander.Value.UnitCalculation.Unit.IsHallucination && NeedDesiredClaim(desiredUnitClaim))
+                        {
+                            commander.Value.Claimed = true;
+                            commander.Value.UnitRole = UnitRole.Defend;
+                            UnitCommanders.Add(commander.Value);
+                        }
+                    }
+                }
+            }
+        }
+
+        bool NeedDesiredClaim(DesiredUnitsClaim desiredUnitClaim)
+        {
+            var count = UnitCommanders.Count(u => u.UnitCalculation.Unit.UnitType == (uint)desiredUnitClaim.UnitType);
+            if (desiredUnitClaim.UnitType == UnitTypes.TERRAN_SIEGETANK)
+            {
+                count += UnitCommanders.Count(u => u.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED);
+            }
+            return count < desiredUnitClaim.Count;
         }
 
         public override IEnumerable<SC2Action> PerformActions(int frame)
@@ -96,19 +129,36 @@
 
             foreach (var commander in UnitCommanders.Where(c => !c.UnitCalculation.Unit.Orders.Any(o => SharkyUnitData.BuildingData.Values.Any(b => (uint)b.Ability == o.AbilityId))))
             {
-                if (commander.UnitRole != UnitRole.Proxy && commander.UnitRole != UnitRole.Build)
+                if (commander.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker))
                 {
-                    commander.UnitRole = UnitRole.Proxy;
+                    OrderWorker(frame, commands, commander);
                 }
-                if (commander.UnitCalculation.EnemiesInRangeOfAvoid.Any())
+                else
                 {
-                    var action = IndividualMicroController.Retreat(commander, MacroData.Proxies[ProxyName].Location, null, frame);
-                    if (action != null)
-                    {
-                        commands.AddRange(action);
-                    }
+                    OrderDefender(frame, commands, commander);
                 }
-                else if (Vector2.DistanceSquared(new Vector2(MacroData.Proxies[ProxyName].Location.X, MacroData.Proxies[ProxyName].Location.Y), commander.UnitCalculation.Position) > MacroData.Proxies[ProxyName].MaximumBuildingDistance)
+            }
+
+            return commands;
+        }
+
+        private void OrderWorker(int frame, List<SC2Action> commands, UnitCommander commander)
+        {
+            if (commander.UnitRole != UnitRole.Proxy && commander.UnitRole != UnitRole.Build)
+            {
+                commander.UnitRole = UnitRole.Proxy;
+            }
+            if (commander.UnitCalculation.EnemiesInRangeOfAvoid.Any())
+            {
+                var action = IndividualMicroController.Retreat(commander, MacroData.Proxies[ProxyName].Location, null, frame);
+                if (action != null)
+                {
+                    commands.AddRange(action);
+                }
+            }
+            else if (Vector2.DistanceSquared(new Vector2(MacroData.Proxies[ProxyName].Location.X, MacroData.Proxies[ProxyName].Location.Y), commander.UnitCalculation.Position) > MacroData.Proxies[ProxyName].MaximumBuildingDistance)
+            {
+                if (commander.UnitCalculation.NearbyEnemies.Any(e => e.DamageGround))
                 {
                     List<SC2Action> action;
                     if (IndividualMicroController.NavigateToTarget(commander, MacroData.Proxies[ProxyName].Location, null, null, Formation.Normal, frame, out action))
@@ -119,9 +169,45 @@
                         }
                     }
                 }
+                else
+                {
+                    var action = commander.Order(frame, Abilities.MOVE, MacroData.Proxies[ProxyName].Location);
+                    if (action != null)
+                    {
+                        commands.AddRange(action);
+                    }
+                }
             }
+        }
 
-            return commands;
+        private void OrderDefender(int frame, List<SC2Action> commands, UnitCommander commander)
+        {
+            if (Vector2.DistanceSquared(commander.UnitCalculation.Position, MacroData.Proxies[ProxyName].Location.ToVector2()) < 225)
+            {
+                List<SC2Action> action;
+                if (MicroData.IndividualMicroControllers.TryGetValue((UnitTypes)commander.UnitCalculation.Unit.UnitType, out var individualMicroController))
+                {
+                    action = individualMicroController.Attack(commander, MacroData.Proxies[ProxyName].Location, MacroData.Proxies[ProxyName].Location, null, frame);
+                }
+                else
+                {
+                    action = MicroData.IndividualMicroController.Attack(commander, MacroData.Proxies[ProxyName].Location, MacroData.Proxies[ProxyName].Location, null, frame);
+                }
+                if (action != null) { commands.AddRange(action); }
+            }
+            else
+            {
+                List<SC2Action> action;
+                if (MicroData.IndividualMicroControllers.TryGetValue((UnitTypes)commander.UnitCalculation.Unit.UnitType, out var individualMicroController))
+                {
+                    action = individualMicroController.NavigateToPoint(commander, MacroData.Proxies[ProxyName].Location, MacroData.Proxies[ProxyName].Location, null, frame);
+                }
+                else
+                {
+                    action = MicroData.IndividualMicroController.NavigateToPoint(commander, MacroData.Proxies[ProxyName].Location, MacroData.Proxies[ProxyName].Location, null, frame);
+                }
+                if (action != null) { commands.AddRange(action); }
+            }
         }
     }
 }

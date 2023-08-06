@@ -107,11 +107,24 @@ namespace Sharky.MicroTasks
                         }
                         continue;
                     }
-                    var action = MicroController.NavigateToPoint(commander, attackingEnemyVector.ToPoint2D(), TargetingData.ForwardDefensePoint, null, frame);
-                    if (action != null)
+
+                    if (commander.UnitCalculation.NearbyEnemies.Any(e => e.FrameLastSeen == frame))
                     {
-                        commands.AddRange(action);
+                        var action = MicroController.NavigateToPoint(commander, attackingEnemyVector.ToPoint2D(), TargetingData.ForwardDefensePoint, null, frame);
+                        if (action != null)
+                        {
+                            commands.AddRange(action);
+                        }
                     }
+                    else
+                    {
+                        var action = commander.Order(frame, Abilities.MOVE, attackingEnemyVector.ToPoint2D());
+                        if (action != null)
+                        {
+                            commands.AddRange(action);
+                        }
+                    }
+
                 }
                 return commands;
             }
