@@ -43,7 +43,7 @@
         {
             if (commander.UnitCalculation.Unit.IsBurrowed)
             {
-                if ((Detected(commander) && commander.UnitCalculation.NearbyAllies.Count < 5) || (commander.UnitCalculation.Unit.Health > commander.UnitCalculation.Unit.HealthMax * 0.9f) || (commander.UnitCalculation.EnemiesInRangeOf.Count == 0 && commander.UnitCalculation.Unit.Health > commander.UnitCalculation.Unit.HealthMax * 0.8f))
+                if ((Detected(commander) && commander.UnitCalculation.NearbyAllies.Count < 5) || (commander.UnitCalculation.Unit.Health > commander.UnitCalculation.Unit.HealthMax * 0.95f) || (commander.UnitCalculation.EnemiesInRangeOf.Count == 0 && commander.UnitCalculation.Unit.Health > commander.UnitCalculation.Unit.HealthMax * 0.85f))
                 {
                     return commander.Order(frame, Abilities.BURROWUP_ROACH);
                 }
