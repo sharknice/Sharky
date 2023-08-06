@@ -32,6 +32,7 @@
             { 
                 UnitTypes.ZERG_DRONE,
                 UnitTypes.ZERG_HATCHERY,
+                UnitTypes.ZERG_SPAWNINGPOOL,
                 UnitTypes.ZERG_OVERLORD,
                 UnitTypes.ZERG_LARVA,
                 UnitTypes.ZERG_EGG,
@@ -41,6 +42,7 @@
                 UnitTypes.ZERG_CREEPTUMORQUEEN,
                 UnitTypes.ZERG_EXTRACTOR,
                 UnitTypes.ZERG_QUEEN,
+                UnitTypes.ZERG_BROODLING,
 
                 UnitTypes.TERRAN_SCV,
                 UnitTypes.TERRAN_SUPPLYDEPOT,

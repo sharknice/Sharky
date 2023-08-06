@@ -57,7 +57,7 @@
             else
             {
                 if (UnitData.ResearchedUpgrades.Contains((uint)Upgrades.BURROW)
-                    && commander.UnitCalculation.Unit.Health < commander.UnitCalculation.Unit.HealthMax * 0.3f
+                    && commander.UnitCalculation.Unit.Health < commander.UnitCalculation.Unit.HealthMax * 0.35f
                     && (!commander.UnitCalculation.NearbyEnemies.Any(x => x.UnitClassifications.Contains(UnitClassification.Detector)) || commander.UnitCalculation.EnemiesInRangeOf.Count <= 2 || commander.UnitCalculation.NearbyAllies.Count > 2))
                 {
                     return commander.Order(frame, Abilities.BURROWDOWN_ROACH);
