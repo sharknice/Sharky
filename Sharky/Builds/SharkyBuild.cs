@@ -9,6 +9,7 @@
         protected AttackData AttackData;
         protected MicroTaskData MicroTaskData;
 
+        protected TagService TagService;
         protected ChatService ChatService;
         protected UnitCountService UnitCountService;
 
@@ -29,6 +30,7 @@
             MacroData = defaultSharkyBot.MacroData;
             ActiveUnitData = defaultSharkyBot.ActiveUnitData;
             AttackData = defaultSharkyBot.AttackData;
+            TagService = defaultSharkyBot.TagService;
             ChatService = defaultSharkyBot.ChatService;
             UnitCountService = defaultSharkyBot.UnitCountService;
             MicroTaskData = defaultSharkyBot.MicroTaskData;
@@ -45,14 +47,15 @@
         }
 
         public SharkyBuild(BuildOptions buildOptions, SharkyOptions sharkyOptions, MacroData macroData, ActiveUnitData activeUnitData, AttackData attackData, MicroTaskData microTaskData,
-            ChatService chatService, UnitCountService unitCountService,
-            FrameToTimeConverter frameToTimeConverter)
+            TagService tagService, UnitCountService unitCountService,
+            FrameToTimeConverter frameToTimeConverter, ChatService chatService)
         {
             BuildOptions = buildOptions;
             SharkyOptions = sharkyOptions;
             MacroData = macroData;
             ActiveUnitData = activeUnitData;
             AttackData = attackData;
+            TagService = tagService;
             ChatService = chatService;
             UnitCountService = unitCountService;
             MicroTaskData = microTaskData;
@@ -86,7 +89,7 @@
             {
                 if (SharkyOptions.TagOptions.BuildTagsEnabled)
                 {
-                    ChatService.Tag($"b_{Name()}");
+                    TagService.TagBuild(this);
                 }
                 Started = true;
             }

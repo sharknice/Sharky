@@ -47,21 +47,47 @@
                 return false;
             }
 
-            if (EnemyData.EnemyRace == SC2APIProtocol.Race.Zerg)
+            if (EnemyData.SelfRace == Race.Zerg)
             {
-                return elapsedTime.TotalMinutes >= 4f;
-            }
-            else if (EnemyData.EnemyRace == SC2APIProtocol.Race.Protoss)
-            {
-                return elapsedTime.TotalMinutes >= 6f;
-            }
-            else if (EnemyData.EnemyRace == SC2APIProtocol.Race.Terran)
-            {
-                return elapsedTime.TotalMinutes >= 7f;
+                // Timing comments are based on human matches without speedmining 
+                if (EnemyData.EnemyRace == SC2APIProtocol.Race.Zerg)
+                {
+                    // Fast third is taken as fast as around 2:30
+                    return elapsedTime.TotalMinutes >= 3.75f;
+                }
+                else if (EnemyData.EnemyRace == SC2APIProtocol.Race.Protoss)
+                {
+                    // Greedy third Nexus at 4:00
+                    return elapsedTime.TotalMinutes >= 5.25f;
+                }
+                else if (EnemyData.EnemyRace == SC2APIProtocol.Race.Terran)
+                {
+                    // Greedy Terran can land CC/OC built in base around 5:00
+                    return elapsedTime.TotalMinutes >= 6.5f;
+                }
+                else
+                {
+                    return false;
+                }
             }
             else
             {
-                return false;
+                if (EnemyData.EnemyRace == SC2APIProtocol.Race.Zerg)
+                {
+                    return elapsedTime.TotalMinutes >= 4f;
+                }
+                else if (EnemyData.EnemyRace == SC2APIProtocol.Race.Protoss)
+                {
+                    return elapsedTime.TotalMinutes >= 6f;
+                }
+                else if (EnemyData.EnemyRace == SC2APIProtocol.Race.Terran)
+                {
+                    return elapsedTime.TotalMinutes >= 7f;
+                }
+                else
+                {
+                    return false;
+                }
             }
         }
     }

@@ -19,7 +19,7 @@
 
             if (commander.AbilityOffCooldown(Abilities.EFFECT_ADEPTPHASESHIFT, frame, SharkyOptions.FramesPerSecond, SharkyUnitData))
             {
-                ChatService.TagAbility("shade");
+                TagService.TagAbility("shade");
                 action = commander.Order(frame, Abilities.EFFECT_ADEPTPHASESHIFT, target);
                 return true;
             }

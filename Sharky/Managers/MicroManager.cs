@@ -109,12 +109,12 @@
         void LogMissingCommanders(ResponseObservation observation, MicroTasks.IMicroTask microTask)
         {
             return;
-            if (microTask.GetType().Name == "MiningTask") { return; }
+            /*if (microTask.GetType().Name == "MiningTask") { return; }
             var missingCommanders = microTask.UnitCommanders.Where(c => !observation.Observation.RawData.Units.Any(u => u.Tag == c.UnitCalculation.Unit.Tag));
             foreach (var missingCommander in missingCommanders)
             {
                 System.Console.WriteLine($"{observation.Observation.GameLoop} {microTask.GetType().Name}, missing {missingCommander.UnitCalculation.Unit.UnitType}, tag {missingCommander.UnitCalculation.Unit.Tag}");
-            }
+            }*/
         }
 
         public override void OnEnd(ResponseObservation observation, Result result)

@@ -9,6 +9,7 @@
         protected FrameToTimeConverter FrameToTimeConverter;
         protected SharkyOptions SharkyOptions;
         protected ChatService ChatService;
+        protected TagService TagService;
 
         protected IMacroBalancer MacroBalancer;
         protected ISharkyBuild CurrentBuild;
@@ -42,6 +43,7 @@
             FrameToTimeConverter = defaultSharkyBot.FrameToTimeConverter;
             SharkyOptions = defaultSharkyBot.SharkyOptions;
             ChatService = defaultSharkyBot.ChatService;
+            TagService = defaultSharkyBot.TagService;
             SimCityService = defaultSharkyBot.SimCityService;
             EnemyData = defaultSharkyBot.EnemyData;
         }
@@ -87,7 +89,7 @@
                     SelectedRace = playerInfo.RaceRequested;
                     if (playerInfo.RaceRequested == Race.Random)
                     {
-                        ChatService.Tag($"SelfRandomRace_{playerInfo.RaceActual}");
+                        TagService.Tag($"SelfRandomRace_{playerInfo.RaceActual}");
                     }
                 }
                 else

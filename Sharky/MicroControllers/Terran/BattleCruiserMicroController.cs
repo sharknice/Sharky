@@ -19,13 +19,13 @@
         {
             if (Yamato(commander, frame, out action))
             {
-                ChatService.TagAbility("yamato");
+                TagService.TagAbility("yamato");
                 return true;
             }
 
             if (TacticalJump(commander, frame, out action))
             {
-                ChatService.TagAbility("tactical");
+                TagService.TagAbility("tactical");
                 return true;
             }
 

@@ -63,7 +63,7 @@
 
                 if (commander.UnitCalculation.EnemiesInRange.Sum(e => e.Unit.Health + e.Unit.Shield) > 100) // stim if more than 100 hitpoints in range
                 {
-                    ChatService.TagAbility("stim");
+                    TagService.TagAbility("stim");
                     action = commander.Order(frame, Abilities.EFFECT_STIM);
                     return true;
                 }
@@ -86,7 +86,7 @@
                 {
                     if (!willWin || Vector2.DistanceSquared(bunker.Position, target.ToVector2()) < 25)
                     {
-                        ChatService.TagAbility("bunker_load");
+                        TagService.TagAbility("bunker_load");
                         action = commander.Order(frame, Abilities.SMART, targetTag: bunker.Unit.Tag, allowSpam: true);
                         return true;
                     }

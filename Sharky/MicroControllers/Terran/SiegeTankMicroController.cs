@@ -49,7 +49,7 @@
 
                 if (enemiesTooClose.Count() > enemiesInSiegeRange.Count() - enemiesTooClose.Count()) { return false; }
 
-                ChatService.TagAbility("siege");
+                TagService.TagAbility("siege");
                 action = commander.Order(frame, Abilities.MORPH_SIEGEMODE);
                 return true;
             }

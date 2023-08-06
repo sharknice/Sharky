@@ -51,7 +51,7 @@
                             {
                                 if (commander.UnitCalculation.EnemiesInRange.Where(e => e.Attributes.Contains(SC2Attribute.Armored)).Sum(e => e.Unit.Health) > 200)
                                 {
-                                    ChatService.TagAbility("prismatic");
+                                    TagService.TagAbility("prismatic");
                                     action = commander.Order(frame, Abilities.EFFECT_VOIDRAYPRISMATICALIGNMENT);
                                     return true;
                                 }

@@ -8,8 +8,6 @@
         string starcraftExe;
         string starcraftDir;
 
-        public GameConnection() { }
-
         public void StartSC2Instance(int port)
         {
             var processStartInfo = new ProcessStartInfo(starcraftExe);
@@ -18,7 +16,7 @@
             Process.Start(processStartInfo);
         }
 
-        public async Task Connect(int port)
+        public async Task Connect(int port, string address = "127.0.0.1")
         {
             for (int i = 0; i < 40; i++)
             {
@@ -114,11 +112,12 @@
             return response.JoinGame.PlayerId;
         }
 
-        public async Task<uint> JoinGameLadder(Race race, int startPort, string botName = "")
+        public async Task<uint> JoinGameLadder(Race race, int startPort, string botName = "", string address = "127.0.0.1")
         {
             var joinGame = new RequestJoinGame();
             joinGame.Race = race;
             joinGame.PlayerName = botName;
+            joinGame.HostIp = address;
 
             joinGame.SharedPort = startPort + 1;
             joinGame.ServerPorts = new PortSet();
@@ -140,6 +139,8 @@
 
             var request = new Request();
             request.JoinGame = joinGame;
+
+            Console.WriteLine($"Proxy join request to {joinGame.HostIp}:{startPort} to {startPort+5}");
 
             var response = await Proxy.SendRequest(request);
             return response.JoinGame.PlayerId;
@@ -324,9 +325,10 @@
             await Run(bot, playerId, opponentID, botName);
         }
 
-        public async Task RunLadder(ISharkyBot bot, Race myRace, int gamePort, int startPort, String opponentID, string botName = "")
+        public async Task RunLadder(ISharkyBot bot, Race myRace, int gamePort, int startPort, String opponentID, string botName = "", string address = "127.0.0.1")
         {
-            await Connect(gamePort);
+            Console.WriteLine($"Connecting to {address}:{gamePort}");
+            await Connect(gamePort, address);
             var playerId = await JoinGameLadder(myRace, startPort, botName);
             await Run(bot, playerId, opponentID, botName);
         }
@@ -334,7 +336,7 @@
         public async Task RunLadder(ISharkyBot bot, Race myRace, string[] args, string botName = "")
         {
             var clargs = new CLArgs(args);
-            await RunLadder(bot, myRace, clargs.GamePort, clargs.StartPort, clargs.OpponentID, botName);
+            await RunLadder(bot, myRace, clargs.GamePort, clargs.StartPort, clargs.OpponentID, botName, clargs.LadderServer);
         }
     }
 }

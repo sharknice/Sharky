@@ -4,7 +4,7 @@
     {
         private int lastFungalFrame = 0;
         private int lastNeuralFrame = 0;
-        private int lastShroudFrame = 0;
+        //private int lastShroudFrame = 0;
 
         private Dictionary<UnitTypes, int> GroundNeuralPriorities = new()
             {
@@ -306,17 +306,17 @@
 
             if (NeuralAbility(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action))
             {
-                ChatService.TagAbility("neural");
+                TagService.TagAbility("neural");
                 return true;
             }
             if (FungalAbility(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action))
             {
-                ChatService.TagAbility("fungal");
+                TagService.TagAbility("fungal");
                 return true;
             }
             if (ShroudAbility(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action))
             {
-                ChatService.TagAbility("shroud");
+                TagService.TagAbility("shroud");
                 return true;
             }
 

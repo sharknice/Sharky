@@ -6,7 +6,7 @@
     {
         private int gamePort;
         private int startPort;
-        private string ladderServer;
+        private string ladderServer = "127.0.0.1";
         private Race computerRace = Race.NoRace;
         private Difficulty computerDifficulty = Difficulty.VeryHard;
 

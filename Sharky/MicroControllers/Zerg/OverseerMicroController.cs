@@ -27,7 +27,7 @@
                 var activeBuilding = commander.UnitCalculation.NearbyEnemies.Take(25).FirstOrDefault(e => e.Unit.IsActive && e.Attributes.Contains(SC2Attribute.Structure) && !e.Unit.BuffIds.Contains((uint)Buffs.CONTAMINATED));
                 if (activeBuilding != null)
                 {
-                    ChatService.TagAbility("contaminate");
+                    TagService.TagAbility("contaminate");
                     action = commander.Order(frame, Abilities.EFFECT_CONTAMINATE, targetTag: activeBuilding.Unit.Tag);
                     return true;
                 }
@@ -41,7 +41,7 @@
         {
             if (commander.UnitCalculation.Unit.Energy >= 170)
             {
-                ChatService.TagAbility("changeling");
+                TagService.TagAbility("changeling");
                 action = commander.Order(frame, Abilities.EFFECT_SPAWNCHANGELING);
                 return true;
             }

@@ -70,6 +70,7 @@
         public AttackPathingService AttackPathingService { get; set; }
         public HarassPathingService HarassPathingService { get; set; }
         public ChatService ChatService { get; set; }
+        public TagService TagService { get; set; }
         public DebugService DebugService { get; set; }
         public VersionService VersionService { get; set; }
         public UnitDataService UnitDataService { get; set; }
@@ -177,7 +178,8 @@
             EnemyNameService = new EnemyNameService();
             DebugService = new DebugService(SharkyOptions, ActiveUnitData, MacroData);
             ChatService = new ChatService(ChatDataService, SharkyOptions, ActiveChatData, EnemyData);
-            DebugManager = new DebugManager(gameConnection, SharkyOptions, DebugService, MapData, TargetingData, ActiveUnitData, EnemyData, ChatService, SharkyUnitData);
+            TagService = new TagService(ChatService, SharkyOptions, VersionService, MacroData, FrameToTimeConverter);
+            DebugManager = new DebugManager(gameConnection, SharkyOptions, DebugService, MapData, TargetingData, ActiveUnitData, EnemyData, ChatService, TagService, SharkyUnitData);
             Managers.Add(DebugManager);
 
             ReportingManager = new ReportingManager(this);
@@ -211,7 +213,7 @@
 
             HttpClient = new HttpClient();
             EnemyPlayerService = new EnemyPlayerService(EnemyNameService);
-            EnemyRaceManager = new EnemyRaceManager(ActiveUnitData, SharkyUnitData, EnemyData, SharkyOptions, ChatService);
+            EnemyRaceManager = new EnemyRaceManager(ActiveUnitData, SharkyUnitData, EnemyData, TagService);
             Managers.Add(EnemyRaceManager);
 
             ChokePointService = new ChokePointService(SharkyPathFinder, MapDataService, BuildingService);
@@ -267,7 +269,7 @@
             BuildDefenseService = new BuildDefenseService(MacroData, BuildingBuilder, SharkyUnitData, ActiveUnitData, BaseData, TargetingData, BuildOptions, BuildingService);
 
             ChronoData = new ChronoData();
-            NexusManager = new NexusManager(ActiveUnitData, SharkyUnitData, ChronoData, EnemyData, ChatService);
+            NexusManager = new NexusManager(ActiveUnitData, SharkyUnitData, ChronoData, EnemyData, TagService);
             Managers.Add(NexusManager);
             ShieldBatteryManager = new ShieldBatteryManager(ActiveUnitData, EnemyData);
             Managers.Add(ShieldBatteryManager);
@@ -277,9 +279,9 @@
             RallyPointManager = new RallyPointManager(ActiveUnitData, TargetingData, MapData, WallService);
             Managers.Add(RallyPointManager);
 
-            OrbitalManager = new OrbitalManager(ActiveUnitData, BaseData, EnemyData, MacroData, UnitCountService, ChatService, ResourceCenterLocator, MapDataService, SharkyUnitData);
+            OrbitalManager = new OrbitalManager(ActiveUnitData, BaseData, EnemyData, MacroData, UnitCountService, TagService, ChatService, ResourceCenterLocator, MapDataService, SharkyUnitData);
             Managers.Add(OrbitalManager);
-            SupplyDepotManager = new SupplyDepotManager(ActiveUnitData, EnemyData, ChatService);
+            SupplyDepotManager = new SupplyDepotManager(ActiveUnitData, EnemyData, TagService);
             Managers.Add(SupplyDepotManager);
 
             ChatManager = new ChatManager(HttpClient, ChatHistory, SharkyOptions, ChatDataService, EnemyPlayerService, EnemyNameService, ChatService, ActiveChatData, FrameToTimeConverter, VersionService);
@@ -702,12 +704,12 @@
 
         public SharkyBot CreateBot(List<IManager> managers, DebugService debugService)
         {
-            return new SharkyBot(managers, debugService, FrameToTimeConverter, SharkyOptions, PerformanceData, ChatService);
+            return new SharkyBot(managers, debugService, FrameToTimeConverter, SharkyOptions, PerformanceData, ChatService, TagService);
         }
 
         public SharkyBot CreateBot()
         {
-            return new SharkyBot(Managers, DebugService, FrameToTimeConverter, SharkyOptions, PerformanceData, ChatService);
+            return new SharkyBot(Managers, DebugService, FrameToTimeConverter, SharkyOptions, PerformanceData, ChatService, TagService);
         }
     }
 }

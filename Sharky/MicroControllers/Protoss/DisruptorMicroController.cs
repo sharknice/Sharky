@@ -107,7 +107,7 @@
 
                     if (bestAttack != null)
                     {
-                        ChatService.TagAbility("purification");
+                        TagService.TagAbility("purification");
                         action = commander.Order(frame, Abilities.EFFECT_PURIFICATIONNOVA, bestAttack);
                         lastPurificationFrame = frame;
                         return true;

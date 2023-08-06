@@ -11,15 +11,12 @@
         EnemyData EnemyData;
         SharkyUnitData SharkyUnitData;
         ChatService ChatService;
+        TagService TagService;
 
         bool SlowMode = false;
         int SlowTime = 0;
 
-        protected HashSet<Upgrades> TaggedUpgrades = new HashSet<Upgrades>();
-        protected HashSet<UnitTypes> TaggedUnits = new HashSet<UnitTypes>();
-        protected HashSet<UnitTypes> TaggedEnemyUnits = new HashSet<UnitTypes>();
-
-        public DebugManager(GameConnection gameConnection, SharkyOptions sharkyOptions, DebugService debugService, MapData mapData, TargetingData targetingData, ActiveUnitData activeUnitData, EnemyData enemyData, ChatService chatService, SharkyUnitData sharkyUnitData)
+        public DebugManager(GameConnection gameConnection, SharkyOptions sharkyOptions, DebugService debugService, MapData mapData, TargetingData targetingData, ActiveUnitData activeUnitData, EnemyData enemyData, ChatService chatService, TagService tagService, SharkyUnitData sharkyUnitData)
         {
             GameConnection = gameConnection;
             SharkyOptions = sharkyOptions;
@@ -29,6 +26,7 @@
             ActiveUnitData = activeUnitData;
             EnemyData = enemyData;
             ChatService = chatService;
+            TagService = tagService;
             SharkyUnitData = sharkyUnitData;
         }
 
@@ -38,12 +36,12 @@
         {
             if (SharkyOptions.TagOptions.UnitTagsEnabled)
             {
-                TagUnits();
+                TagService.TagUnits(ActiveUnitData);
             }
 
             if (SharkyOptions.TagOptions.UpgradeTagsEnabled)
             {
-                TagUpgrades();
+                TagService.TagUpgrades(SharkyUnitData);
             }
 
             if (SharkyOptions.Debug)
@@ -78,43 +76,6 @@
             DebugService.ResetSpawnRequest();
 
             return new List<SC2Action>();
-        }
-
-        private void TagUnits()
-        {
-            foreach (var unit in ActiveUnitData.EnemyUnits.Values)
-            {
-                var unitType = (UnitTypes)unit.Unit.UnitType;
-                if (!TaggedEnemyUnits.Contains(unitType))
-                {
-                    TaggedEnemyUnits.Add(unitType);
-                    ChatService.TagUnit(unitType.ToString().Split('_')[1], true);
-                }
-            }
-
-            foreach (var unit in ActiveUnitData.SelfUnits.Values)
-            {
-                var unitType = (UnitTypes)unit.Unit.UnitType;
-                if (!TaggedUnits.Contains(unitType))
-                {
-                    TaggedUnits.Add(unitType);
-                    ChatService.TagUnit(unitType.ToString().Split('_')[1]);
-                }
-            }
-        }
-
-        private void TagUpgrades()
-        {
-            if (SharkyUnitData.ResearchedUpgrades is not null)
-                foreach (var upgradeInt in SharkyUnitData.ResearchedUpgrades)
-                {
-                    var upgrade = (Upgrades)upgradeInt;
-                    if (!TaggedUpgrades.Contains(upgrade))
-                    {
-                        TaggedUpgrades.Add(upgrade);
-                        ChatService.Tag($"g_{upgrade}");
-                    }
-                }
         }
 
         private void ReadCommand(RepeatedField<ChatReceived> chatsReceived, Point camera)

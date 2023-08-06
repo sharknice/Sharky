@@ -8,11 +8,12 @@
         SharkyOptions SharkyOptions;
         PerformanceData PerformanceData;
         ChatService ChatService;
+        TagService TagService;
 
-        List<SC2APIProtocol.Action> Actions;
+        List<SC2Action> Actions;
 
 
-        public SharkyBot(List<IManager> managers, DebugService debugService, FrameToTimeConverter frameToTimeConverter, SharkyOptions sharkyOptions, PerformanceData performanceData, ChatService chatService)
+        public SharkyBot(List<IManager> managers, DebugService debugService, FrameToTimeConverter frameToTimeConverter, SharkyOptions sharkyOptions, PerformanceData performanceData, ChatService chatService, TagService tagService)
         {
             Managers = managers;
             DebugService = debugService;
@@ -21,6 +22,7 @@
 
             SharkyOptions = sharkyOptions;
             ChatService = chatService;
+            TagService = tagService;
         }
 
         public void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)
@@ -38,6 +40,8 @@
             Console.WriteLine($"OnStart: {stopwatch.ElapsedMilliseconds} ms");
 
             PerformanceData.TotalFrameCalculationTime = 0;
+
+            TagService.TagVersion();
         }
 
         public void OnEnd(ResponseObservation observation, Result result)
@@ -97,7 +101,7 @@
                     }
                     catch (Exception exception)
                     {
-                        ChatService.TagException();
+                        TagService.TagException();
                         Console.WriteLine(exception.ToString());
                     }
 

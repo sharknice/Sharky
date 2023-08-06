@@ -77,8 +77,6 @@
 
             ChatHistory.EnemyChatHistory = new Dictionary<int, string>();
             ChatHistory.MyChatHistory = new Dictionary<int, string>();
-
-            ChatService.Tag($"v_{VersionService.BuildDate.ToString("yyyy-MM-dd__HH-mm-ss")}"); 
         }
 
         public override IEnumerable<SC2Action> OnFrame(ResponseObservation observation)

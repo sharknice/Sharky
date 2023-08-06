@@ -8,6 +8,7 @@
         public int LastActiveFrame { get; private set; }
 
         protected ChatService ChatService;
+        protected TagService TagService;
         protected EnemyStrategyHistory EnemyStrategyHistory;
         protected ActiveUnitData ActiveUnitData;
         protected SharkyOptions SharkyOptions;
@@ -25,6 +26,7 @@
         {
             EnemyStrategyHistory = defaultSharkyBot.EnemyStrategyHistory;
             ChatService = defaultSharkyBot.ChatService;
+            TagService = defaultSharkyBot.TagService;
             ActiveUnitData = defaultSharkyBot.ActiveUnitData;
             SharkyOptions = defaultSharkyBot.SharkyOptions;
             DebugService = defaultSharkyBot.DebugService;
@@ -66,7 +68,7 @@
         {
             if (SharkyOptions.TagOptions.EnemyStrategyTagsEnabled)
             {
-                ChatService.Tag($"es_{Name()}");
+                TagService.TagEnemyStrategy(this);
             }
 
             var lastGame = EnemyData?.EnemyPlayer.Games.FirstOrDefault();
