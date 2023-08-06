@@ -46,11 +46,12 @@
                 || (commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.ZERG_DRONE && (commander.Value.UnitRole == UnitRole.Minerals || commander.Value.UnitRole == UnitRole.Gas || commander.Value.UnitRole == UnitRole.Hide)))))
             {
                 if (!UnitCommanders.Contains(commander.Value)
-                    && (commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.ZERG_DRONEBURROWED || BurrowWanted(commander.Value.UnitCalculation)))
+                    && (commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.ZERG_DRONEBURROWED || BurrowWanted(commander.Value)))
                 {
                     if (!tagged)
                     {
                         TagService.Tag("self_burrow_drones");
+                        ChatService.SendChatType("burrow_drones");
                         tagged = true;
                     }
 
@@ -63,10 +64,10 @@
             }
         }
 
-        private bool BurrowWanted(UnitCalculation unitCalculation)
+        private bool BurrowWanted(UnitCommander unitCommander)
         {
             // TODO: better decision - when to burrow - maybe we should not burrow when few zerglings are harassing, but we want to burrow from splash/air units even when army is less than X
-            return MacroData.FoodArmy >= 6 && IsInDanger(unitCalculation) && !IsDetected(unitCalculation);
+            return unitCommander.UnitRole != UnitRole.Attack && unitCommander.UnitRole != UnitRole.Defend && unitCommander.UnitRole != UnitRole.PreventBuildingLand && MacroData.FoodArmy >= 6 && IsInDanger(unitCommander.UnitCalculation) && !IsDetected(unitCommander.UnitCalculation);
         }
 
         /// <summary>
@@ -89,7 +90,7 @@
 
             foreach (var drone in UnitCommanders)
             {
-                bool burrowWanted = BurrowWanted(drone.UnitCalculation);
+                bool burrowWanted = BurrowWanted(drone);
 
                 if (burrowWanted && !drone.UnitCalculation.Unit.IsBurrowed)
                 {

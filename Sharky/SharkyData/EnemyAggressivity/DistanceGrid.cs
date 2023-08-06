@@ -1,4 +1,6 @@
-﻿namespace Sharky
+﻿using Sharky.Extensions;
+
+namespace Sharky
 {
     /// <summary>
     /// Grid with distances to enemy and self resource center
@@ -14,24 +16,13 @@
         private ActiveUnitData ActiveUnitData;
         private MapData MapData;
         private BaseData BaseData;
-        SharkyOptions SharkyOptions;
+        private TargetingData TargetingData;
+        private SharkyOptions SharkyOptions;
 
         private int Width;
         private int Height;
 
         private int lastUpdate = -1000;
-
-        private struct Point
-        {
-            public readonly int X;
-            public readonly int Y;
-
-            public Point(int x, int y)
-            {
-                X = x;
-                Y = y;
-            }
-        }
 
         /// <summary>
         /// Gets distance to nearest self or enemy resource center on ground / air.
@@ -84,6 +75,7 @@
             MapData = defaultSharkyBot.MapData;
             BaseData = defaultSharkyBot.BaseData;
             SharkyOptions = defaultSharkyBot.SharkyOptions;
+            TargetingData = defaultSharkyBot.TargetingData;
         }
 
         private void Init()
@@ -121,31 +113,38 @@
             lastUpdate = frame;
         }
 
-        private IEnumerable<Point> GetResourceCenterPositions(Dictionary<ulong, UnitCalculation> units)
+        private IEnumerable<Point2D> GetResourceCenterPositions(Dictionary<ulong, UnitCalculation> units)
         {
+            // TODO: use targeting instead?
+
             // Use resource centers if we can
             var centerPositions = units.Values.Where(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter)).Select(u => u.Unit.Pos);
-            
+
+            if (!centerPositions.Any())
+            {
+                centerPositions = new List<Point>() { TargetingData.EnemyMainBasePoint.ToPoint() };
+            }
+
             // Use remaining buildings if no resource centers
             if (!centerPositions.Any())
             {
-                centerPositions = units.Values.Where(u => u.UnitTypeData.Attributes.Contains(SC2APIProtocol.Attribute.Structure)).Select(u => u.Unit.Pos);
+                centerPositions = units.Values.Where(u => u.UnitTypeData.Attributes.Contains(SC2Attribute.Structure)).Select(u => u.Unit.Pos);
             }
 
             // Use enemy natural if we do not see any of his buildings yet
             if (!centerPositions.Any())
             {
-                centerPositions = new List<SC2APIProtocol.Point>() { new SC2APIProtocol.Point() { X = BaseData.EnemyNaturalBase.Location.X, Y = BaseData.EnemyNaturalBase.Location.Y } };
+                centerPositions = new List<Point>() { new Point() { X = BaseData.EnemyNaturalBase.Location.X, Y = BaseData.EnemyNaturalBase.Location.Y } };
             }
 
-            return centerPositions.Select(p => new Point((int)(p.X + 0.5f), (int)(p.Y + 0.5f)));
+            return centerPositions.Select(p => p.ToPoint2D());
         }
 
-        private void CalcDistances(IEnumerable<Point> points, int[,] distances, bool groundOnly = true)
+        private void CalcDistances(IEnumerable<Point2D> points, int[,] distances, bool groundOnly = true)
         {
             Queue<Point> openSet = new();
 
-            for (int x=0; x<Width; x++)
+            for (int x = 0; x<Width; x++)
                 for (int y = 0; y < Height; y++)
                 {
                     distances[x, y] = -1;
@@ -153,17 +152,17 @@
 
             foreach (var p in points)
             {
-                SafeOpenSetAdd(openSet, p.X, p.Y, 0, distances, groundOnly);
+                SafeOpenSetAdd(openSet, (int)p.X, (int)p.Y, 0, distances, groundOnly);
             }
 
             while (openSet.Count > 0)
             {
                 var p = openSet.Dequeue();
-                var dist = distances[p.X, p.Y] + 1;
-                SafeOpenSetAdd(openSet, p.X+1, p.Y, dist, distances, groundOnly);
-                SafeOpenSetAdd(openSet, p.X, p.Y+1, dist, distances, groundOnly);
-                SafeOpenSetAdd(openSet, p.X-1, p.Y, dist, distances, groundOnly);
-                SafeOpenSetAdd(openSet, p.X, p.Y-1, dist, distances, groundOnly);
+                var dist = distances[(int)p.X, (int)p.Y] + 1;
+                SafeOpenSetAdd(openSet, (int)p.X+1, (int)p.Y, dist, distances, groundOnly);
+                SafeOpenSetAdd(openSet, (int)p.X, (int)p.Y+1, dist, distances, groundOnly);
+                SafeOpenSetAdd(openSet, (int)p.X-1, (int)p.Y, dist, distances, groundOnly);
+                SafeOpenSetAdd(openSet, (int)p.X, (int)p.Y-1, dist, distances, groundOnly);
             }
         }
 
@@ -178,11 +177,11 @@
                 return;
 
             // Skip unwalkable
-            if (!groundOnly && !MapData.Map[x,y].Walkable)
+            if (!groundOnly && !MapData.Map[x, y].Walkable)
                 return;
 
             distances[x, y] = distance;
-            openSet.Enqueue(new Point(x,y));
+            openSet.Enqueue(new Point() { X = x, Y = y });
         }
     }
 }
