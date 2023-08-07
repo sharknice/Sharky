@@ -178,7 +178,7 @@
 
         IEnumerable<UnitCommander> GetIdleWorkers()
         {
-            return UnitCommanders.Where(c => c.UnitRole == UnitRole.None);
+            return UnitCommanders.Where(c => c.UnitRole == UnitRole.None && !c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.BUILD_HATCHERY));
         }
 
         List<SC2APIProtocol.Action> BalanceGasWorkers(int frame)
