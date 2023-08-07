@@ -88,7 +88,7 @@
 
                 TargetingData.SelfMainBasePoint = new Point2D { X = unit.Pos.X, Y = unit.Pos.Y };
 
-                var mainVector = Vector2.Normalize(TargetingData.SelfMainBasePoint.ToVector2() - TargetingData.EnemyMainBasePoint.ToVector2()) * 22.0f;
+                var mainVector = Vector2.Normalize(TargetingData.SelfMainBasePoint.ToVector2() - TargetingData.EnemyMainBasePoint.ToVector2()) * 24.0f;
                 TargetingData.NaturalFrontScoutPoint = (BaseData.EnemyNaturalBase.Location.ToVector2() + mainVector).ToPoint2D();
 
                 var naturalBaseLocation = BaseData.BaseLocations.Skip(1).Take(1).FirstOrDefault();

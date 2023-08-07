@@ -7,6 +7,9 @@
         BuildOptions BuildOptions;
         SharkyUnitData UnitData;
         BaseData BaseData;
+        MacroData MacroData;
+        ActiveUnitData ActiveUnitData;
+        TargetingData TargetingData;
 
         public BurrowBlockExpansionsTask(DefaultSharkyBot defaultSharkyBot, float priority, IndividualMicroController individualMicroController, SharkyUnitData unitData, bool enabled)
         {
@@ -15,24 +18,27 @@
             BuildOptions = defaultSharkyBot.BuildOptions;
             UnitData = unitData;
             BaseData = defaultSharkyBot.BaseData;
+            MacroData = defaultSharkyBot.MacroData;
+            ActiveUnitData = defaultSharkyBot.ActiveUnitData;
             IndividualMicroController = individualMicroController;
+            TargetingData = defaultSharkyBot.TargetingData;
 
             Priority = priority;
             Enabled = enabled;
 
             CommanderDebugText = "Blocking expansion";
-            CommanderDebugColor = new SC2APIProtocol.Color() { R = 255, G = 63, B = 32 };
+            CommanderDebugColor = new Color() { R = 255, G = 63, B = 32 };
         }
 
         public override void ClaimUnits(Dictionary<ulong, UnitCommander> commanders)
         {
-            if (EnemyData.SelfRace != SC2APIProtocol.Race.Zerg)
+            if (EnemyData.SelfRace != Race.Zerg)
             {
                 Disable();
                 return;
             }
 
-            if (!UnitData.ResearchedUpgrades.Contains((uint)Upgrades.BURROW) || EnemyData.EnemyAggressivityData.ArmyAggressivity > 0.5f)
+            if (!UnitData.ResearchedUpgrades.Contains((uint)Upgrades.BURROW) || EnemyData.EnemyAggressivityData.ArmyAggressivity > 0.5f || AreLingsNeededElsewhere())
             {
                 return;
             }
@@ -48,9 +54,15 @@
             }
         }
 
-        public override IEnumerable<SC2APIProtocol.Action> PerformActions(int frame)
+        public override IEnumerable<SC2Action> PerformActions(int frame)
         {
-            var actions = new List<SC2APIProtocol.Action>();
+            var actions = new List<SC2Action>();
+
+            if (AreLingsNeededElsewhere())
+            {
+                StopBlocking(frame, actions);
+                return actions;
+            }
 
             if (!UnitCommanders.Any())
                 return actions;
@@ -74,7 +86,25 @@
             return actions;
         }
 
-        private bool FreeOurExpansions(UnitCommander ling, int frame, Point2D pos, List<SC2APIProtocol.Action> actions)
+        private void StopBlocking(int frame, List<SC2Action> actions)
+        {
+            foreach (var commander in UnitCommanders)
+            {
+                commander.UnitRole = UnitRole.None;
+                commander.Claimed = false;
+                actions.AddRange(commander.Order(frame, Abilities.BURROWUP_ZERGLING));
+            }
+
+            UnitCommanders.Clear();
+        }
+
+        // In some emergency situations we stop blocking and use the lings
+        private bool AreLingsNeededElsewhere()
+        {
+            return MacroData.FoodUsed < 40;
+        }
+
+        private bool FreeOurExpansions(UnitCommander ling, int frame, Point2D pos, List<SC2Action> actions)
         {
             if ((ling.UnitCalculation.Unit.IsBurrowed || (pos != null && pos.ToVector2().Distance(ling.UnitCalculation.Position) < 6))
                 && ling.UnitCalculation.NearbyAllies.Any(x => x.Unit.UnitType == (uint)UnitTypes.ZERG_DRONE && x.Position.Distance(ling.UnitCalculation.Position) < 8))
@@ -86,10 +116,10 @@
             return false;
         }
 
-        private IEnumerable<SC2APIProtocol.Action> BlockExpansion(UnitCommander ling, Point2D pos, int frame)
+        private IEnumerable<SC2Action> BlockExpansion(UnitCommander ling, Point2D pos, int frame)
         {
             if (pos == null)
-                return new List<SC2APIProtocol.Action>();
+                return new List<SC2Action>();
 
             var distanceFromTarget = pos.Distance(ling.UnitCalculation.Unit.Pos.ToPoint2D());
 
@@ -110,9 +140,22 @@
 
         private IEnumerable<Point2D> GetBlockingPoints()
         {
-            var points = BaseData.EnemyBaseLocations.Where(b => !BaseData.EnemyBases.Contains(b)).Select(b => b.Location).Take(BuildOptions.ZergBuildOptions.MaxBurrowedBlockingZerglings);
+            var points = BaseData.BaseLocations
+                .Where(b => BaseMakesSenseToTake(b))
+                .Where(b => !BaseData.EnemyBases.Contains(b))
+                .OrderBy(b => EnemyData.EnemyAggressivityData.DistanceGrid.GetDist(b.Location.X, b.Location.Y, false))
+                .Take(BuildOptions.ZergBuildOptions.MaxBurrowedBlockingZerglings);
 
-            return points;
+            return points.Select(x => x.Location);
+        }
+
+        /// <summary>
+        /// Returns true if the base still seems to have some resources to mine
+        /// </summary>
+        private bool BaseMakesSenseToTake(BaseLocation baseLoc)
+        {
+            // Returns true if there is enough resources in the base to make at least some sense to block it
+            return baseLoc.MineralFields.Count>4 || baseLoc.MineralFields.Where(x => x.HasMineralContents).Sum(x => x.MineralContents) > 400 || baseLoc.VespeneGeysers.Where(x => x.HasVespeneContents).Sum(x => x.VespeneContents) > 300;
         }
     }
 }
