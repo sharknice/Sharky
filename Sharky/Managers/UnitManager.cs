@@ -266,7 +266,7 @@
             {
                 if (enemy.FrameLastSeen != frame && MapDataService.SelfVisible(enemy.Unit.Pos))
                 {
-                    if (SharkyUnitData.BurrowableUnits.Contains((UnitTypes)enemy.Unit.UnitType) && !MapDataService.InSelfDetection(enemy.Unit.Pos))
+                    if (SharkyUnitData.BurrowedUnits.Contains((UnitTypes)enemy.Unit.UnitType) && !MapDataService.InSelfDetection(enemy.Unit.Pos))
                     {
                         enemy.Unit.DisplayType = DisplayType.Hidden;
                         continue; // it's still there but it's burrowed so we can't see it

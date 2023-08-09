@@ -186,7 +186,7 @@
                 UnitTypes.PROTOSS_MOTHERSHIP
             };
 
-            SharkyUnitData.BurrowableUnits = new HashSet<UnitTypes>
+            SharkyUnitData.BurrowedUnits = new HashSet<UnitTypes>
             {
                 UnitTypes.TERRAN_WIDOWMINEBURROWED,
                 UnitTypes.ZERG_BANELINGBURROWED,
