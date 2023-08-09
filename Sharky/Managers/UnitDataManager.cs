@@ -186,6 +186,23 @@
                 UnitTypes.PROTOSS_MOTHERSHIP
             };
 
+            SharkyUnitData.BurrowableUnits = new HashSet<UnitTypes>
+            {
+                UnitTypes.TERRAN_WIDOWMINEBURROWED,
+                UnitTypes.ZERG_BANELINGBURROWED,
+                UnitTypes.ZERG_CREEPTUMORBURROWED,
+                UnitTypes.ZERG_DRONEBURROWED,
+                UnitTypes.ZERG_HYDRALISKBURROWED,
+                UnitTypes.ZERG_INFESTORBURROWED,
+                UnitTypes.ZERG_LURKERMPBURROWED,
+                UnitTypes.ZERG_QUEENBURROWED,
+                UnitTypes.ZERG_RAVAGERBURROWED,
+                UnitTypes.ZERG_ROACHBURROWED,
+                UnitTypes.ZERG_SWARMHOSTBURROWEDMP,
+                UnitTypes.ZERG_ULTRALISKBURROWED,
+                UnitTypes.ZERG_ZERGLINGBURROWED,
+            };
+
             SharkyUnitData.DetectionTypes = new HashSet<UnitTypes>
             {
                 UnitTypes.TERRAN_MISSILETURRET,

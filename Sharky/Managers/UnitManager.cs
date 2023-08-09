@@ -227,7 +227,7 @@
                     {
                         attack.SetPreviousUnit(existing, existing.FrameLastSeen);
                     }
-                    else if (frame > 0 && attack.UnitTypeData.Name.Contains("MineralField"))
+                    else if (frame > 0 && SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)attack.Unit.UnitType))
                     {
                         var existingMatch = ActiveUnitData.NeutralUnits.FirstOrDefault(m => m.Value.Unit.Pos.X == attack.Unit.Pos.X && m.Value.Unit.Pos.Y == attack.Unit.Pos.Y);
                         if (existingMatch.Value != null)
@@ -256,7 +256,7 @@
                 }
             }
 
-            foreach (var unit in ActiveUnitData.EnemyUnits.Where(u => u.Value.FrameLastSeen != frame && u.Value.UnitTypeData.Attributes.Contains(SC2APIProtocol.Attribute.Structure))) // structures get replaced by snapshots if we can't see them, so just remove them and let them get readded
+            foreach (var unit in ActiveUnitData.EnemyUnits.Where(u => u.Value.FrameLastSeen != frame && u.Value.UnitTypeData.Attributes.Contains(SC2Attribute.Structure))) // structures get replaced by snapshots if we can't see them, so just remove them and let them get readded
             {
                 ActiveUnitData.EnemyUnits.Remove(unit.Key, out UnitCalculation removed);
             }
@@ -266,7 +266,7 @@
             {
                 if (enemy.FrameLastSeen != frame && MapDataService.SelfVisible(enemy.Unit.Pos))
                 {
-                    if (((UnitTypes)enemy.Unit.UnitType).ToString().Contains("BURROWED") && !MapDataService.InSelfDetection(enemy.Unit.Pos))
+                    if (SharkyUnitData.BurrowableUnits.Contains((UnitTypes)enemy.Unit.UnitType) && !MapDataService.InSelfDetection(enemy.Unit.Pos))
                     {
                         enemy.Unit.DisplayType = DisplayType.Hidden;
                         continue; // it's still there but it's burrowed so we can't see it
@@ -509,32 +509,34 @@
             return GetRange(allyAttack.Value, enemyAttack.Value);
         }
 
-        ConcurrentBag<UnitCalculation> GetTargetedAttacks(UnitCalculation unitCalculation)
+        List<UnitCalculation> GetTargetedAttacks(UnitCalculation unitCalculation)
         {
-            var attacks = new ConcurrentBag<UnitCalculation>();
+            var attacks = new List<UnitCalculation>();
 
-            Parallel.ForEach(unitCalculation.EnemiesInRangeOfAvoid, (enemyAttack) =>
+            foreach (var enemyAttack in unitCalculation.EnemiesInRangeOfAvoid)
             {
-                if (DamageService.CanDamage(enemyAttack, unitCalculation) && CollisionCalculator.Collides(unitCalculation.Position, unitCalculation.Unit.Radius, enemyAttack.Start, enemyAttack.End))
+                if (DamageService.CanDamage(enemyAttack, unitCalculation) 
+                    && CollisionCalculator.Collides(unitCalculation.Position, unitCalculation.Unit.Radius, enemyAttack.Start, enemyAttack.End))
                 {
                     attacks.Add(enemyAttack);
                 }
-            });
+            };
 
             return attacks;
         }
 
-        ConcurrentBag<UnitCalculation> GetTargeters(UnitCalculation unitCalculation)
+        List<UnitCalculation> GetTargeters(UnitCalculation unitCalculation)
         {
-            var attacks = new ConcurrentBag<UnitCalculation>();
+            var attacks = new List<UnitCalculation>();
 
-            Parallel.ForEach(unitCalculation.NearbyEnemies, (enemyAttack) =>
+            foreach (var enemyAttack in unitCalculation.NearbyEnemies)
             {
-                if (DamageService.CanDamage(enemyAttack, unitCalculation) && CollisionCalculator.Collides(unitCalculation.Position, unitCalculation.Unit.Radius, enemyAttack.Start, enemyAttack.EndPlusFive))
+                if (DamageService.CanDamage(enemyAttack, unitCalculation) 
+                    && CollisionCalculator.Collides(unitCalculation.Position, unitCalculation.Unit.Radius, enemyAttack.Start, enemyAttack.EndPlusFive))
                 {
                     attacks.Add(enemyAttack);
                 }
-            });
+            };
 
             return attacks;
         }

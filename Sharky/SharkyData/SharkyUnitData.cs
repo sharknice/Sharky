@@ -32,6 +32,7 @@
         public HashSet<UnitTypes> GroundSplashDamagers { get; set; }
         public HashSet<UnitTypes> AirSplashDamagers { get; set; }
         public HashSet<UnitTypes> CloakableAttackers { get; set; }
+        public HashSet<UnitTypes> BurrowableUnits { get; set; }
         public HashSet<UnitTypes> DetectionTypes { get; set; }
         public HashSet<UnitTypes> AbilityDetectionTypes { get; set; }
         public HashSet<UnitTypes> NoWeaponCooldownTypes { get; set; }

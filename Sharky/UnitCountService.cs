@@ -70,8 +70,8 @@
 
         private int GetInProgressCountForUnit(KeyValuePair<ulong, UnitCalculation> u, TrainingTypeData unitData)
         {
-            if (unitData.ProducingUnits.Contains((UnitTypes)u.Value.Unit.UnitType)
-                || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_EGG
+            if (u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_EGG
+                || unitData.ProducingUnits.Contains((UnitTypes)u.Value.Unit.UnitType)
                 || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_OVERLORDCOCOON
                 || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_BANELINGCOCOON
                 || u.Value.Unit.UnitType == (uint)UnitTypes.ZERG_LURKERMPEGG
