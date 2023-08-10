@@ -2,7 +2,7 @@
 {
     public class EnemyAggressivityService
     {
-        private EnemyAggressivityData EnemyAgresivityData { get; set; }
+        private EnemyAggressivityData EnemyAggressivityData { get; set; }
         private ActiveUnitData ActiveUnitData { get; set; }
         private EnemyData EnemyData { get; set; }
         private DefaultSharkyBot DefaultSharkyBot { get; set; }
@@ -20,39 +20,39 @@
 
             EnemyData = defaultSharkyBot.EnemyData;
             EnemyData.EnemyAggressivityData = new EnemyAggressivityData();
-            EnemyAgresivityData = EnemyData.EnemyAggressivityData;
-            EnemyAgresivityData.DistanceGrid = new DistanceGrid(DefaultSharkyBot);
+            EnemyAggressivityData = EnemyData.EnemyAggressivityData;
+            EnemyAggressivityData.DistanceGrid = new DistanceGrid(DefaultSharkyBot);
         }
 
         public void Update(int frame)
         {
-            EnemyAgresivityData.DistanceGrid.Update(frame);
+            EnemyAggressivityData.DistanceGrid.Update(frame);
 
-            var grid = EnemyAgresivityData.DistanceGrid;
+            var grid = EnemyAggressivityData.DistanceGrid;
 
             float aggressivitySum = 0;
             var unitCount = 0;
 
             var enemyArmyUnits = ActiveUnitData.EnemyUnits.Values.Where(u => u.UnitClassifications.Contains(UnitClassification.ArmyUnit));
 
-            EnemyAgresivityData.ArmySize = 0;
+            EnemyAggressivityData.ArmySupplySize = 0;
             foreach (var unit in enemyArmyUnits)
             {
                 var selfDist = grid.GetDist(unit.Unit.Pos.X, unit.Unit.Pos.Y, true, !unit.Unit.IsFlying);
                 var enemyDist = grid.GetDist(unit.Unit.Pos.X, unit.Unit.Pos.Y, false, !unit.Unit.IsFlying);
 
-                EnemyAgresivityData.ArmySize += unit.UnitTypeData.FoodRequired;
+                EnemyAggressivityData.ArmySupplySize += unit.UnitTypeData.FoodRequired;
                 aggressivitySum += enemyDist / (selfDist + enemyDist + 1);
                 unitCount++;
             }
 
             if (unitCount == 0)
             {
-                EnemyAgresivityData.ArmyAggressivity = 0;
+                EnemyAggressivityData.ArmyAggressivity = 0;
             }
             else
             {
-                EnemyAgresivityData.ArmyAggressivity = aggressivitySum / unitCount;
+                EnemyAggressivityData.ArmyAggressivity = aggressivitySum / unitCount;
             }
 
             if (frame - LastRecalc >= FrameSkip)
@@ -60,13 +60,19 @@
                 UpdateHarassing(enemyArmyUnits, frame);
                 LastRecalc = frame;
             }
+
+            // If enemy is attacking and the enemy army can be considered attack and not only harras/scout
+            if (EnemyAggressivityData.ArmyAggressivity > 0.75f && EnemyAggressivityData.ArmySupplySize > 5 && EnemyAggressivityData.ArmySupplySize*3 >= DefaultSharkyBot.MacroData.FoodArmy)
+            {
+                EnemyAggressivityData.LastBigAttackFrame = frame;
+            }
         }
 
         private void UpdateHarassing(IEnumerable<UnitCalculation> enemyUnits, int frame)
         {
-            EnemyAgresivityData.HarassingUnits.Clear();
-            EnemyAgresivityData.IsAirHarassing = false;
-            EnemyAgresivityData.IsGroundHarassing = false;
+            EnemyAggressivityData.HarassingUnits.Clear();
+            EnemyAggressivityData.IsAirHarassing = false;
+            EnemyAggressivityData.IsGroundHarassing = false;
 
             // Units that can be considered as harassing with max group size when the group still can be considered harass
             var harassingUnits = new Dictionary<UnitTypes, int>() {
@@ -98,28 +104,28 @@
             {
                 if (!harassingUnits.TryGetValue((UnitTypes)unit.Unit.UnitType, out var maxCount))
                     continue;
-                
+
                 if (maxCount == 0)
                 {
                     continue;
                 }
 
-                var dist = EnemyAgresivityData.DistanceGrid.GetDist(unit.Unit.Pos.X, unit.Unit.Pos.Y, true, !unit.Unit.IsFlying);
+                var dist = EnemyAggressivityData.DistanceGrid.GetDist(unit.Unit.Pos.X, unit.Unit.Pos.Y, true, !unit.Unit.IsFlying);
 
                 if (dist > 15)
                     continue;
 
                 // +1 for some tollerance, for example 
-                var nearbySameTypeCount = unit.NearbyAllies.Count(u=>u.Unit.UnitType == unit.Unit.UnitType && unit.Unit.Pos.DistanceSquared(u.Unit.Pos) < 100);
+                var nearbySameTypeCount = unit.NearbyAllies.Count(u => u.Unit.UnitType == unit.Unit.UnitType && unit.Unit.Pos.DistanceSquared(u.Unit.Pos) < 100);
 
                 if (nearbySameTypeCount <= maxCount)
                 {
-                    EnemyAgresivityData.HarassingUnits.Add(unit);
+                    EnemyAggressivityData.HarassingUnits.Add(unit);
 
                     if (unit.Unit.IsFlying)
-                        EnemyAgresivityData.IsAirHarassing = true;
+                        EnemyAggressivityData.IsAirHarassing = true;
                     else
-                        EnemyAgresivityData.IsGroundHarassing = true;
+                        EnemyAggressivityData.IsGroundHarassing = true;
                 }
             }
         }

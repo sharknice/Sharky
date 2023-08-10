@@ -32,7 +32,7 @@
                 return false;
             }
 
-            if (!MapDataService.SelfVisible(BaseData.EnemyNaturalBase.Location))
+            if (frame - MapDataService.MapData.Map[(int)BaseData.EnemyNaturalBase.Location.X, (int)BaseData.EnemyNaturalBase.Location.Y].LastFrameVisibility > 60 * 22.4f)
             {
                 return false;
             }

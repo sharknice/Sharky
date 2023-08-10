@@ -18,7 +18,12 @@
         /// <summary>
         /// Enemy army supply size
         /// </summary>
-        public float ArmySize { get; set; }
+        public float ArmySupplySize { get; set; }
+
+        /// <summary>
+        /// Frame when last big attack happened
+        /// </summary>
+        public int LastBigAttackFrame { get; set; }
 
         /// <summary>
         /// Grid with distances from enemy and self base.
@@ -27,7 +32,7 @@
 
         public override string ToString()
         {
-            return $"{ArmyAggressivity}";
+            return $"{ArmyAggressivity}, {LastBigAttackFrame}";
         }
     }
 }
