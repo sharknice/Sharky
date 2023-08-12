@@ -327,7 +327,7 @@
 
                             if (speed > enemySpeed || closestEnemy.Range + 3 < commander.UnitCalculation.Range)
                             {
-                                if (MaintainRange(commander, frame, out action)) { return true; }
+                                if (MaintainRange(commander, defensivePoint, frame, out action)) { return true; }
                             }
                         }
                     }

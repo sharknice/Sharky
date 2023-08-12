@@ -112,7 +112,7 @@
                     return true;
                 }
 
-                if (MaintainRange(commander, frame, out action)) { return true; }
+                if (MaintainRange(commander, defensivePoint, frame, out action)) { return true; }
 
                 return false;
             }

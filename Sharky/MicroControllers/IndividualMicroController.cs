@@ -994,7 +994,7 @@
 
             if (AvoidEnemiesThreateningDamage(commander, target, defensivePoint, frame, false, out action)) { return true; }
 
-            if (MaintainRange(commander, frame, out action)) { return true; }
+            if (MaintainRange(commander, defensivePoint, frame, out action)) { return true; }
 
             return false;
         }
@@ -1088,7 +1088,7 @@
             return false;
         }
 
-        protected virtual bool MaintainRange(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
+        protected virtual bool MaintainRange(UnitCommander commander, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -1169,7 +1169,7 @@
 
                             if (speed > enemySpeed || closestEnemy.Range + 3 < commander.UnitCalculation.Range)
                             {
-                                if (MaintainRange(commander, frame, out action)) { return true; }
+                                if (MaintainRange(commander, defensivePoint, frame, out action)) { return true; }
                             }
                         }
                     }

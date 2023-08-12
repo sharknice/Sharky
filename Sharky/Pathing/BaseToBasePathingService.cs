@@ -18,6 +18,7 @@
         {
             string[] folders = new string[]
             {
+                GetCustomStaticPathingDataFolder(),
                 GetStaticPathingDataFolder(),
                 GetGeneratedPathingDataFolder()
             };
@@ -68,6 +69,11 @@
                 var pathData = serializer.Deserialize<List<PathData>>(new JsonTextReader(file));
                 return pathData;
             }
+        }
+
+        private string GetCustomStaticPathingDataFolder()
+        {
+            return Directory.GetCurrentDirectory() + "/StaticData/pathing/custom/";
         }
 
         private string GetStaticPathingDataFolder()

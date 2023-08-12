@@ -63,7 +63,7 @@
             {
                 foreach (var shieldBattery in nexus.UnitCalculation.NearbyAllies.Where(u => u.Unit.UnitType == (uint)UnitTypes.PROTOSS_SHIELDBATTERY && u.Unit.BuildProgress == 1 && Vector2.DistanceSquared(nexus.UnitCalculation.Position, u.Position) < OverchargeRangeSquared).OrderBy(u => u.Unit.Energy))
                 {
-                    if (shieldBattery.NearbyAllies.Any(a => a.EnemiesInRangeOf.Count() > 0 && a.Unit.Shield < 5 && Vector2.DistanceSquared(shieldBattery.Position, a.Position) < RestoreRangeSquared))
+                    if (shieldBattery.NearbyAllies.Any(a => a.Unit.BuildProgress == 1 && a.EnemiesInRangeOf.Count() > 0 && a.Unit.Shield < 5 && Vector2.DistanceSquared(shieldBattery.Position, a.Position) < RestoreRangeSquared))
                     {
                         return nexus.Order(frame, Abilities.BATTERYOVERCHARGE, null, shieldBattery.Unit.Tag);
                     }
