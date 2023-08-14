@@ -16,11 +16,11 @@
 
         protected void SendDroneForHatchery(int frame, bool natural = true)
         {
-            if (natural && UnitCountService.EquivalentTypeCount(UnitTypes.ZERG_HATCHERY) == 1 && MacroData.Minerals > 180)
+            if (natural && UnitCountService.EquivalentTypeCount(UnitTypes.ZERG_HATCHERY) == 1 && MacroData.Minerals > 180 && FrameToTimeConverter.GetTime(frame).TotalMinutes < 3)
             {
                 PrePositionBuilderTask.SendBuilder(TargetingData.NaturalBasePoint, frame);
             }
-            else if (!natural && UnitCountService.EquivalentTypeCount(UnitTypes.ZERG_HATCHERY) == 2 && UnitCountService.BuildingsInProgressCount(UnitTypes.ZERG_HATCHERY) == 0 && MacroData.Minerals > 100 && !EnemyData.EnemyStrategies[nameof(OneBase)].Active)
+            else if (!natural && UnitCountService.EquivalentTypeCount(UnitTypes.ZERG_HATCHERY) == 2 && UnitCountService.BuildingsInProgressCount(UnitTypes.ZERG_HATCHERY) == 0 && MacroData.Minerals > 120 && !EnemyData.EnemyStrategies[nameof(OneBase)].Active && FrameToTimeConverter.GetTime(frame).TotalMinutes < 4)
             {
                 PrePositionBuilderTask.SendBuilder(BaseData.BaseLocations.Skip(2).FirstOrDefault().Location, frame);
             }

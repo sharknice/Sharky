@@ -11,6 +11,7 @@
         private bool ExceptionTagged = false;
         private HashSet<string> ExceptionsTagged = new HashSet<string>();
 
+        private HashSet<UnitTypes> UnitTagsWhitelist = new HashSet<UnitTypes>();
         private HashSet<UnitTypes> UnitTagsUsed = new HashSet<UnitTypes>();
         private HashSet<UnitTypes> EnemyUnitTagsUsed = new HashSet<UnitTypes>();
         private HashSet<Upgrades> UpgradeTagsUsed = new HashSet<Upgrades>();
@@ -28,103 +29,58 @@
             FrameToTimeConverter = frameToTimeConverter;
 
             // Basic units we dont want to get tagged as they appear probably in every game (with very few exceptions)
-            UnitTagsUsed = new HashSet<UnitTypes>() 
+            UnitTagsWhitelist = new HashSet<UnitTypes>() 
             { 
-                UnitTypes.ZERG_DRONE,
-                UnitTypes.ZERG_HATCHERY,
-                UnitTypes.ZERG_SPAWNINGPOOL,
-                UnitTypes.ZERG_OVERLORD,
-                UnitTypes.ZERG_LARVA,
-                UnitTypes.ZERG_EGG,
-                UnitTypes.ZERG_OVERLORD,
-                UnitTypes.ZERG_CREEPTUMOR,
-                UnitTypes.ZERG_CREEPTUMORBURROWED,
-                UnitTypes.ZERG_CREEPTUMORQUEEN,
-                UnitTypes.ZERG_EXTRACTOR,
-                UnitTypes.ZERG_QUEEN,
-                UnitTypes.ZERG_BROODLING,
-                UnitTypes.ZERG_ZERGLING,
-                UnitTypes.ZERG_ZERGLINGBURROWED,
-                UnitTypes.ZERG_CHANGELING,
-                UnitTypes.ZERG_CHANGELINGMARINE,
-                UnitTypes.ZERG_CHANGELINGMARINESHIELD,
-                UnitTypes.ZERG_CHANGELINGZEALOT,
-                UnitTypes.ZERG_CHANGELINGZERGLING,
-                UnitTypes.ZERG_CHANGELINGZERGLINGWINGS,
+                UnitTypes.ZERG_LURKERMP,
+                UnitTypes.ZERG_LURKERMPBURROWED,
+                UnitTypes.ZERG_LURKERDENMP,
+                UnitTypes.ZERG_ULTRALISK,
+                UnitTypes.ZERG_ULTRALISKBURROWED,
+                UnitTypes.ZERG_ULTRALISKCAVERN,
+                UnitTypes.ZERG_BANELINGBURROWED,
+                UnitTypes.ZERG_INFESTATIONPIT,
+                UnitTypes.ZERG_INFESTOR,
+                UnitTypes.ZERG_INFESTORBURROWED,
+                UnitTypes.ZERG_LOCUSTMP,
+                UnitTypes.ZERG_LOCUSTMPFLYING,
+                UnitTypes.ZERG_SWARMHOSTMP,
+                UnitTypes.ZERG_SWARMHOSTBURROWEDMP,
+                UnitTypes.ZERG_HIVE,
+                UnitTypes.ZERG_VIPER,
+                UnitTypes.ZERG_GREATERSPIRE,
+                UnitTypes.ZERG_BROODLORD,
 
-                UnitTypes.TERRAN_SCV,
-                UnitTypes.TERRAN_SUPPLYDEPOT,
-                UnitTypes.TERRAN_SUPPLYDEPOTLOWERED,
-                UnitTypes.TERRAN_COMMANDCENTER,
-                UnitTypes.TERRAN_ORBITALCOMMAND,
-                UnitTypes.TERRAN_ORBITALCOMMANDFLYING,
-                UnitTypes.TERRAN_BARRACKS,
-                UnitTypes.TERRAN_BARRACKSFLYING,
-                UnitTypes.TERRAN_BARRACKSREACTOR,
-                UnitTypes.TERRAN_BARRACKSTECHLAB,
-                UnitTypes.TERRAN_FACTORY,
-                UnitTypes.TERRAN_FACTORYFLYING,
-                UnitTypes.TERRAN_FACTORYREACTOR,
-                UnitTypes.TERRAN_FACTORYTECHLAB,
-                UnitTypes.TERRAN_STARPORT,
-                UnitTypes.TERRAN_STARPORTFLYING,
-                UnitTypes.TERRAN_STARPORTREACTOR,
-                UnitTypes.TERRAN_STARPORTTECHLAB,
-                UnitTypes.TERRAN_MULE,
-                UnitTypes.TERRAN_REFINERY,
-
-                UnitTypes.PROTOSS_PROBE,
-                UnitTypes.PROTOSS_NEXUS,
-                UnitTypes.PROTOSS_PYLON,
-                UnitTypes.PROTOSS_GATEWAY,
-                UnitTypes.PROTOSS_FORGE,
-                UnitTypes.PROTOSS_CYBERNETICSCORE,
-                UnitTypes.PROTOSS_ASSIMILATOR,
-
-                // Some additional unit tag ignores to fit to the tag limit on aiarena
-                UnitTypes.PROTOSS_WARPGATE,
-                UnitTypes.PROTOSS_SHIELDBATTERY,
-                UnitTypes.PROTOSS_FORGE,
-                UnitTypes.PROTOSS_ROBOTICSFACILITY,
-                UnitTypes.PROTOSS_STARGATE,
-                UnitTypes.PROTOSS_PHOTONCANNON,
-                UnitTypes.PROTOSS_ADEPT,
-                UnitTypes.PROTOSS_STALKER,
-                UnitTypes.PROTOSS_ZEALOT,
-                UnitTypes.PROTOSS_SENTRY,
-                UnitTypes.PROTOSS_WARPPRISM,
-                UnitTypes.PROTOSS_WARPPRISMPHASING,
-                UnitTypes.PROTOSS_OBSERVER,
-                UnitTypes.PROTOSS_IMMORTAL,
-
-                UnitTypes.TERRAN_STARPORT,
-                UnitTypes.TERRAN_STARPORTFLYING,
-                UnitTypes.TERRAN_ARMORY,
-                UnitTypes.TERRAN_MEDIVAC,
-                UnitTypes.TERRAN_ENGINEERINGBAY,
+                UnitTypes.TERRAN_BATTLECRUISER,
+                UnitTypes.TERRAN_PLANETARYFORTRESS,
+                UnitTypes.TERRAN_SENSORTOWER,
+                UnitTypes.TERRAN_FUSIONCORE,
+                UnitTypes.TERRAN_BANSHEE,
+                UnitTypes.TERRAN_LIBERATOR,
+                UnitTypes.TERRAN_LIBERATORAG,
+                UnitTypes.TERRAN_THOR,
+                UnitTypes.TERRAN_THORAP,
                 UnitTypes.TERRAN_WIDOWMINE,
                 UnitTypes.TERRAN_WIDOWMINEBURROWED,
-                UnitTypes.TERRAN_MARAUDER,
-                UnitTypes.TERRAN_REAPER,
-                UnitTypes.TERRAN_KD8CHARGE,
+                UnitTypes.TERRAN_GHOST,
+                UnitTypes.TERRAN_GHOSTACADEMY,
+                UnitTypes.TERRAN_MEDIVAC,
+                UnitTypes.TERRAN_PLANETARYFORTRESS,
 
-                UnitTypes.ZERG_HYDRALISK,
-                UnitTypes.ZERG_HYDRALISKBURROWED,
-                UnitTypes.ZERG_HYDRALISKDEN,
-                UnitTypes.ZERG_SPIRE,
-                UnitTypes.ZERG_ROACH,
-                UnitTypes.ZERG_ROACHBURROWED,
-                UnitTypes.ZERG_ROACHWARREN,
-                UnitTypes.ZERG_BANELING,
-                UnitTypes.ZERG_BANELINGBURROWED,
-                UnitTypes.ZERG_BANELINGCOCOON,
-                UnitTypes.ZERG_BANELINGNEST,
-                UnitTypes.ZERG_RAVAGER,
-                UnitTypes.ZERG_RAVAGERBURROWED,
-                UnitTypes.ZERG_RAVAGERCOCOON,
+                UnitTypes.PROTOSS_MOTHERSHIP,
+                UnitTypes.PROTOSS_CARRIER,
+                UnitTypes.PROTOSS_TEMPEST,
+                UnitTypes.PROTOSS_COLOSSUS,
+                UnitTypes.PROTOSS_DARKTEMPLAR,
+                UnitTypes.PROTOSS_ARCHON,
+                UnitTypes.PROTOSS_HIGHTEMPLAR,
+                UnitTypes.PROTOSS_DARKSHRINE,
+                UnitTypes.PROTOSS_DISRUPTOR,
+                UnitTypes.PROTOSS_FLEETBEACON,
+                UnitTypes.PROTOSS_ROBOTICSBAY,
+                UnitTypes.PROTOSS_ORACLESTASISTRAP,
+                UnitTypes.PROTOSS_PHOTONCANNON,
+                UnitTypes.PROTOSS_SHIELDBATTERY,
             };
-
-            EnemyUnitTagsUsed = new HashSet<UnitTypes>(UnitTagsUsed);
         }
 
         private string TimeFormat(TimeSpan timeSpan)
@@ -211,7 +167,7 @@
 
             if (enemy)
             {
-                if (!EnemyUnitTagsUsed.Contains(unit))
+                if (!EnemyUnitTagsUsed.Contains(unit) && UnitTagsWhitelist.Contains(unit))
                 {
                     EnemyUnitTagsUsed.Add(unit);
                     Tag($"eu_{tag}");
@@ -219,7 +175,7 @@
             }
             else
             {
-                if (!UnitTagsUsed.Contains(unit))
+                if (!UnitTagsUsed.Contains(unit) && UnitTagsWhitelist.Contains(unit))
                 {
                     UnitTagsUsed.Add(unit);
                     Tag($"u_{tag}");
