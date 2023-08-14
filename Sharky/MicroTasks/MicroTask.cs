@@ -4,7 +4,7 @@
     {
         public int Deaths { get; protected set; }
 
-        public List<UnitCommander> UnitCommanders { get; set; }
+        public List<UnitCommander> UnitCommanders { get; set; } = new List<UnitCommander>();
         public float Priority { get; set; }
 
         public bool Enabled { get; protected set; }
