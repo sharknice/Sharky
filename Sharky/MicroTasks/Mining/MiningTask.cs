@@ -18,6 +18,7 @@
         TargetingService TargetingService;
 
         public bool LongDistanceMiningEnabled { get; set; }
+        public bool AttackWithIdleWorkers { get; set; } = true;
 
         bool LowMineralsHighGas;
 
@@ -487,6 +488,7 @@
         private IEnumerable<SC2APIProtocol.Action> DistanceMineWithExtraIdleWorkers(int frame)
         {
             var actions = new List<SC2APIProtocol.Action>();
+            var outOfPlaceBase = GetOutOfPlaceBase();
             foreach (var worker in GetIdleWorkers())
             {
                 if (worker.UnitCalculation.Unit.BuffIds.Any(b => SharkyUnitData.CarryingResourceBuffs.Contains((Buffs)b)))
@@ -497,7 +499,7 @@
                         actions.AddRange(action);
                     }
                 }
-                else if (worker.UnitCalculation.NearbyEnemies.Any(e => e.FrameFirstSeen == frame && !e.Unit.IsFlying) && worker.UnitCalculation.NearbyAllies.Any(a => a.Attributes.Contains(SC2APIProtocol.Attribute.Structure)))
+                else if (AttackWithIdleWorkers && worker.UnitCalculation.NearbyEnemies.Any(e => e.FrameFirstSeen == frame && !e.Unit.IsFlying) && worker.UnitCalculation.NearbyAllies.Any(a => a.Attributes.Contains(SC2APIProtocol.Attribute.Structure)))
                 {
                     var attackTask = MicroTaskData[typeof(AttackTask).Name];
                     if (attackTask.Enabled)
@@ -513,7 +515,7 @@
                         }
                     }
                 }
-                else if (worker.UnitCalculation.EnemiesThreateningDamage.Any(e => e.FrameFirstSeen == frame))
+                else if (AttackWithIdleWorkers && worker.UnitCalculation.EnemiesThreateningDamage.Any(e => e.FrameFirstSeen == frame))
                 {
                     var attackTask = MicroTaskData[typeof(AttackTask).Name];
                     if (attackTask.Enabled)
@@ -532,6 +534,15 @@
                 else if (worker.UnitCalculation.Unit.Orders.Count() == 0 || worker.UnitCalculation.Unit.Orders.Any(o => BaseData.SelfBases.Any(b => b.MineralMiningInfo.Any(m => m.ResourceUnit.Tag == o.TargetUnitTag))))
                 {
                     var nextBase = BuildingService.GetNextBaseLocation();
+                    if (outOfPlaceBase != null)
+                    {
+                        var closestBase = BaseData.BaseLocations.OrderBy(b => Vector2.DistanceSquared(b.Location.ToVector2(), outOfPlaceBase.UnitCalculation.Position)).FirstOrDefault(b => !BaseData.SelfBases.Any(sb => b.Location.X == sb.Location.X && b.Location.Y == sb.Location.Y));
+                        if (closestBase != null)
+                        {
+                            nextBase = closestBase;
+                        }
+                    }
+
                     var progressPatch = ActiveUnitData.NeutralUnits.Where(u => SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType) && BaseData.SelfBases.Any(b => b.ResourceCenter != null && b.ResourceCenter.BuildProgress < 1 && b.MineralFields.Any(m => m.Tag == u.Value.Unit.Tag))).OrderBy(m => Vector2.DistanceSquared(m.Value.Position, worker.UnitCalculation.Position)).FirstOrDefault().Value;
                     if (progressPatch != null)
                     {
@@ -572,6 +583,11 @@
                 }
             }
             return actions;
+        }
+
+        UnitCommander GetOutOfPlaceBase()
+        {
+            return ActiveUnitData.Commanders.Values.FirstOrDefault(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.ResourceCenter) && c.UnitCalculation.Unit.BuildProgress > .75f && !BaseData.SelfBases.Any(b => b.ResourceCenter != null && b.ResourceCenter.Tag == c.UnitCalculation.Unit.Tag));
         }
 
         private void AttackWithWorker(UnitCommander worker)
