@@ -54,6 +54,10 @@
                 TargetingData.AttackPoint = location;
                 TargetingData.EnemyMainBasePoint = location;
             }
+            if (gameInfo.StartRaw.StartLocations.Count == 0)
+            {
+                TargetingData.AttackPoint = new Point2D { X = 0, Y = 0 };
+            }
             foreach (var unit in observation.Observation.RawData.Units.Where(u => u.Alliance == Alliance.Self && SharkyUnitData.UnitData[(UnitTypes)u.UnitType].Attributes.Contains(SC2APIProtocol.Attribute.Structure)))
             {
                 TargetingData.MainDefensePoint = new Point2D { X = unit.Pos.X, Y = unit.Pos.Y };

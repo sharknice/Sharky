@@ -92,7 +92,12 @@
             }
 
             var startingUnit = observation.Observation.RawData.Units.FirstOrDefault(u => u.Alliance == Alliance.Self && SharkyUnitData.ResourceCenterTypes.Contains((UnitTypes)u.UnitType));
-            var enemystartingLocation = gameInfo.StartRaw.StartLocations.Last();
+            var enemystartingLocation = gameInfo.StartRaw.StartLocations.LastOrDefault();
+
+            if (startingUnit == null || enemystartingLocation == null)
+            {
+                return;
+            }
 
             var folder = GetGneratedBaseDataFolder();
             var fileName = GetGeneratedBaseDataFileName(gameInfo.MapName, folder, gameInfo.StartRaw.StartLocations.First());

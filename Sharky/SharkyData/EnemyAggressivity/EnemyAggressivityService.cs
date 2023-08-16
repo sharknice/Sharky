@@ -26,6 +26,8 @@
 
         public void Update(int frame)
         {
+            if (DefaultSharkyBot.BaseData.MainBase == null) { return; }
+
             EnemyAggressivityData.DistanceGrid.Update(frame);
 
             var grid = EnemyAggressivityData.DistanceGrid;

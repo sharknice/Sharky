@@ -32,6 +32,8 @@
                 return false;
             }
 
+            if (BaseData.EnemyNaturalBase == null) { return false; }
+
             if (frame - MapDataService.MapData.Map[(int)BaseData.EnemyNaturalBase.Location.X, (int)BaseData.EnemyNaturalBase.Location.Y].LastFrameVisibility > 60 * 22.4f)
             {
                 return false;
