@@ -29,6 +29,16 @@
             foreach (var enemyAttack in commander.UnitCalculation.NearbyEnemies)
             {
                 if (enemyAttack.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELING &&
+                    enemyAttack.Unit.UnitType != (uint)UnitTypes.ZERG_ZERGLING &&
+                    enemyAttack.Unit.UnitType != (uint)UnitTypes.ZERG_BROODLING &&
+                    enemyAttack.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELINGZERGLING &&
+                    enemyAttack.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELINGZERGLINGWINGS &&
+                    enemyAttack.Unit.UnitType != (uint)UnitTypes.TERRAN_KD8CHARGE &&
+                    enemyAttack.Unit.UnitType != (uint)UnitTypes.PROTOSS_DISRUPTORPHASED &&
+                    enemyAttack.Unit.UnitType != (uint)UnitTypes.TERRAN_MULE &&
+                    enemyAttack.Unit.UnitType != (uint)UnitTypes.TERRAN_NUKE &&
+                    enemyAttack.Unit.UnitType != (uint)UnitTypes.ZERG_PARASITICBOMBDUMMY &&
+                    !enemyAttack.Unit.IsHallucination &&
                     InRange(enemyAttack.Position, commander.UnitCalculation.Position, 9 + enemyAttack.Unit.Radius + commander.UnitCalculation.Unit.Radius) && MapDataService.SelfVisible(enemyAttack.Unit.Pos))
                 {
                     attacks.Add(enemyAttack);

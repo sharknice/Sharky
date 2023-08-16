@@ -18,7 +18,8 @@
                 return UnitCountService.EnemyCount(UnitTypes.PROTOSS_VOIDRAY) > 0
                     || UnitCountService.EnemyCount(UnitTypes.PROTOSS_CARRIER) > 0
                     || UnitCountService.EnemyCount(UnitTypes.PROTOSS_TEMPEST) > 0
-                    || UnitCountService.EnemyCount(UnitTypes.PROTOSS_ORACLE) > 0;
+                    || UnitCountService.EnemyCount(UnitTypes.PROTOSS_ORACLE) > 0
+                    || UnitCountService.EnemyCount(UnitTypes.PROTOSS_STARGATE) > 0;
             }
             else if (EnemyData.EnemyRace == SC2APIProtocol.Race.Terran)
             {
