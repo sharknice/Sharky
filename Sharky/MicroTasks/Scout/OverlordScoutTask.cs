@@ -78,6 +78,8 @@
 
         private void ScoutEnemyNaturalAndHide(int frame)
         {
+            if (BaseData.EnemyNaturalBase == null) { return; }
+
             if (CurrentScoutTargetPoint == null)
             {
                 CurrentScoutTargetPoint = BaseData.EnemyNaturalBase.Location;

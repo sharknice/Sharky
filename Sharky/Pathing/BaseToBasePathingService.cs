@@ -140,28 +140,51 @@
                 numbers.Add(x);
             }
 
-            Parallel.ForEach(numbers, x =>
-                   {
-                       var pathFinder = new Roy_T.AStar.Paths.PathFinder();
-                       for (int y = SharkyOptions.GeneratePathingPrecision.Item1; y <= MapData.MapHeight - SharkyOptions.GeneratePathingPrecision.Item1; y += SharkyOptions.GeneratePathingPrecision.Item1)
-                       {
-                           var start = new Vector2(x, y);
+            foreach (int x in numbers)
+            {
+                var pathFinder = new Roy_T.AStar.Paths.PathFinder();
+                for (int y = SharkyOptions.GeneratePathingPrecision.Item1; y <= MapData.MapHeight - SharkyOptions.GeneratePathingPrecision.Item1; y += SharkyOptions.GeneratePathingPrecision.Item1)
+                {
+                    var start = new Vector2(x, y);
 
-                           for (int endX = SharkyOptions.GeneratePathingPrecision.Item1; endX <= MapData.MapWidth - SharkyOptions.GeneratePathingPrecision.Item2; endX += SharkyOptions.GeneratePathingPrecision.Item2)
-                           {
-                               for (int endY = SharkyOptions.GeneratePathingPrecision.Item1; endY <= MapData.MapHeight - SharkyOptions.GeneratePathingPrecision.Item2; endY += SharkyOptions.GeneratePathingPrecision.Item2)
-                               {
-                                   var end = new Vector2(endX, endY);
-                                   if (end.X == start.X && end.Y == start.Y) { continue; }
+                    for (int endX = SharkyOptions.GeneratePathingPrecision.Item1; endX <= MapData.MapWidth - SharkyOptions.GeneratePathingPrecision.Item2; endX += SharkyOptions.GeneratePathingPrecision.Item2)
+                    {
+                        for (int endY = SharkyOptions.GeneratePathingPrecision.Item1; endY <= MapData.MapHeight - SharkyOptions.GeneratePathingPrecision.Item2; endY += SharkyOptions.GeneratePathingPrecision.Item2)
+                        {
+                            var end = new Vector2(endX, endY);
+                            if (end.X == start.X && end.Y == start.Y) { continue; }
 
-                                   var path = PathFinder.GetGroundPath(start.X, start.Y, end.X, end.Y, 0, pathFinder);
-                                   if (path.Count == 0) { continue; }
-                                   var data = new PathData { StartPosition = start, EndPosition = end, Path = path };
-                                   pathData.Add(data);
-                               }
-                           }
-                       }
-                   });
+                            var path = PathFinder.GetGroundPath(start.X, start.Y, end.X, end.Y, 0, pathFinder);
+                            if (path.Count == 0) { continue; }
+                            var data = new PathData { StartPosition = start, EndPosition = end, Path = path };
+                            pathData.Add(data);
+                        }
+                    }
+                }
+            }
+
+            //Parallel.ForEach(numbers, x =>
+            //       {
+            //           var pathFinder = new Roy_T.AStar.Paths.PathFinder();
+            //           for (int y = SharkyOptions.GeneratePathingPrecision.Item1; y <= MapData.MapHeight - SharkyOptions.GeneratePathingPrecision.Item1; y += SharkyOptions.GeneratePathingPrecision.Item1)
+            //           {
+            //               var start = new Vector2(x, y);
+
+            //               for (int endX = SharkyOptions.GeneratePathingPrecision.Item1; endX <= MapData.MapWidth - SharkyOptions.GeneratePathingPrecision.Item2; endX += SharkyOptions.GeneratePathingPrecision.Item2)
+            //               {
+            //                   for (int endY = SharkyOptions.GeneratePathingPrecision.Item1; endY <= MapData.MapHeight - SharkyOptions.GeneratePathingPrecision.Item2; endY += SharkyOptions.GeneratePathingPrecision.Item2)
+            //                   {
+            //                       var end = new Vector2(endX, endY);
+            //                       if (end.X == start.X && end.Y == start.Y) { continue; }
+
+            //                       var path = PathFinder.GetGroundPath(start.X, start.Y, end.X, end.Y, 0, pathFinder);
+            //                       if (path.Count == 0) { continue; }
+            //                       var data = new PathData { StartPosition = start, EndPosition = end, Path = path };
+            //                       pathData.Add(data);
+            //                   }
+            //               }
+            //           }
+            //       });
             return pathData.ToList();
         }
     }

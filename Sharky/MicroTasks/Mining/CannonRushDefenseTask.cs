@@ -30,9 +30,10 @@
 
         public override IEnumerable<SC2APIProtocol.Action> PerformActions(int frame)
         {
-            if (EnemyData.EnemyRace == SC2APIProtocol.Race.Zerg || EnemyData.EnemyRace == SC2APIProtocol.Race.Terran)
+            if (EnemyData.EnemyRace == SC2APIProtocol.Race.Zerg || EnemyData.EnemyRace == SC2APIProtocol.Race.Terran || TargetingData.SelfMainBasePoint == null)
             {
                 Disable();
+                return new List<SC2APIProtocol.Action>();
             }
 
             var commands = new List<SC2APIProtocol.Action>();

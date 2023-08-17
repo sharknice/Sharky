@@ -12,7 +12,7 @@
 
         protected override bool Detect(int frame)
         {
-            if (EnemyData.EnemyRace != SC2APIProtocol.Race.Protoss) { return false; }
+            if (EnemyData.EnemyRace != SC2APIProtocol.Race.Protoss || !BaseData.EnemyBaseLocations.Any()) { return false; }
 
             if (frame < SharkyOptions.FramesPerSecond * 1.5 * 60)
             {

@@ -15,6 +15,8 @@
             var startHeight = MapDataService.MapHeight(start);
             var endHeight = MapDataService.MapHeight(end);
 
+            if (MapDataService.MapData.PathData == null) { return null; }
+
             var startPaths = MapDataService.MapData.PathData.Where(data => data.Path.Any(p => Vector2.DistanceSquared(p, start) <= 25 && MapDataService.MapHeight(p) == startHeight));
             var best = startPaths.FirstOrDefault(data => data.Path.Any(p => Vector2.DistanceSquared(p, end) <= 25 && MapDataService.MapHeight(p) == endHeight));
             if (best == null)

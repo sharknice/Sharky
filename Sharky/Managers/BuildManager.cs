@@ -30,6 +30,7 @@
         protected EnemyStrategyHistory EnemyStrategyHistory;
 
         EnemyData EnemyData;
+        BaseData BaseData;
 
         public BuildManager(DefaultSharkyBot defaultSharkyBot)
         {
@@ -46,6 +47,7 @@
             TagService = defaultSharkyBot.TagService;
             SimCityService = defaultSharkyBot.SimCityService;
             EnemyData = defaultSharkyBot.EnemyData;
+            BaseData = defaultSharkyBot.BaseData;
         }
 
         public override void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)
@@ -152,6 +154,8 @@
             CurrentBuild.OnFrame(observation);
             CurrentBuild.OnAfterFrame();
 
+            
+
             var actions = SimCityService.OnFrame();
             MacroBalance();
             // TODO: add some frame time stats for each section here and the macro balance
@@ -161,6 +165,8 @@
 
         protected void MacroBalance()
         {
+            if (BaseData.SelfBases == null) { return; }
+
             MacroBalancer.BalanceSupply();
             MacroBalancer.BalanceGases();
             MacroBalancer.BalanceTech();

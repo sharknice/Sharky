@@ -106,6 +106,12 @@
         {
             var commands = new List<SC2APIProtocol.Action>();
 
+            if (!BaseData.EnemyBaseLocations.Any())
+            {
+                Disable();
+                return null;
+            }
+
             if (Target == null)
             {
                 Target = BaseData.EnemyBaseLocations.FirstOrDefault().MiddleMineralLocation;

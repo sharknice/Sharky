@@ -96,6 +96,10 @@
 
             if (startingUnit == null || enemystartingLocation == null)
             {
+                BaseData.SelfBases = new List<BaseLocation>();
+                BaseData.EnemyBases = new List<BaseLocation>();
+                BaseData.BaseLocations = new List<BaseLocation>();
+                BaseData.EnemyBaseLocations = new List<BaseLocation>();
                 return;
             }
 
@@ -202,6 +206,8 @@
 
         public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
         {
+            if (BaseData.SelfBases == null) { return null; }
+
             foreach (var tag in ActiveUnitData.DeadUnits)
             {
                 foreach (var baseLocation in BaseData.BaseLocations)

@@ -13,15 +13,9 @@
 
         public ChokePoints GetChokePoints(Point2D start, Point2D end, int frame)
         {
-            var stopwatch = new System.Diagnostics.Stopwatch();
-            stopwatch.Start();
-
             var chokePoints = new ChokePoints();
             chokePoints.Good = GeHighGroundChokePoints(start, end, frame);
             chokePoints.Bad = GeHighGroundChokePoints(end, start, frame);
-
-            stopwatch.Stop();
-            //System.Console.WriteLine($"Generated Chokepoints in {stopwatch.ElapsedMilliseconds} ms");
 
             return chokePoints;
         }

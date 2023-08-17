@@ -49,15 +49,15 @@
 
         public override void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)
         {
+            TargetingData.MainDefensePoint = observation.Observation.RawData.Player.Camera.ToPoint2D();
+            TargetingData.ForwardDefensePoint = observation.Observation.RawData.Player.Camera.ToPoint2D();
+
             foreach (var location in gameInfo.StartRaw.StartLocations)
             {
                 TargetingData.AttackPoint = location;
                 TargetingData.EnemyMainBasePoint = location;
             }
-            if (gameInfo.StartRaw.StartLocations.Count == 0)
-            {
-                TargetingData.AttackPoint = new Point2D { X = 0, Y = 0 };
-            }
+
             foreach (var unit in observation.Observation.RawData.Units.Where(u => u.Alliance == Alliance.Self && SharkyUnitData.UnitData[(UnitTypes)u.UnitType].Attributes.Contains(SC2APIProtocol.Attribute.Structure)))
             {
                 TargetingData.MainDefensePoint = new Point2D { X = unit.Pos.X, Y = unit.Pos.Y };
@@ -107,6 +107,8 @@
 
                 return;
             }
+
+            MapData.PathData = BaseToBasePathingService.GetBaseToBasePathingData(gameInfo.MapName);
         }
 
         
@@ -130,7 +132,10 @@
 
             if (count == 0)
             {
-                TargetingData.EnemyArmyCenter = BaseData.EnemyBaseLocations.First().Location.ToVector2();
+                if (BaseData.EnemyBaseLocations.Any())
+                {
+                    TargetingData.EnemyArmyCenter = BaseData.EnemyBaseLocations.FirstOrDefault().Location.ToVector2();
+                }
             }
             else
             {
@@ -249,6 +254,8 @@
 
         void UpdateDefensePoint(int frame)
         {
+            if (BaseData.SelfBases == null) { return; }
+
             if (baseCount != BaseData.SelfBases.Count())
             {
                 var resourceCenters = ActiveUnitData.SelfUnits.Values.Where(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter) && !u.Unit.IsFlying);

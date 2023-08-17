@@ -67,6 +67,8 @@
         public override IEnumerable<SC2Action> PerformActions(int frame)
         {
             var commands = new List<SC2Action>();
+            if (TargetingData.EnemyMainBasePoint == null) { return commands; }
+
             UpdateScoutPoints();
 
             var mainVector = new Vector2(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y);

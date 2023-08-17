@@ -71,6 +71,7 @@
         private static List<SC2Action> FilterActions(ResponseObservation observation, MicroTasks.IMicroTask microTask, IEnumerable<SC2Action> taskActions)
         {
             var filteredActions = new List<SC2Action>();
+            if (taskActions == null) { return filteredActions; }
             var tags = new List<ulong>();
             foreach (var action in taskActions)
             {

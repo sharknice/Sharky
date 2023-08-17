@@ -270,6 +270,7 @@
 
         private bool UpdateBaseLocation()
         {
+            if (BaseData.SelfBases == null) { return false; }
             var baseCount = BaseData.SelfBases.Count();
             if (NextBaseLocation == null || BaseCountDuringLocation != baseCount)
             {

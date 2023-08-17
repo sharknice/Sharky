@@ -81,6 +81,8 @@
 
         public override IEnumerable<SC2APIProtocol.Action> PerformActions(int frame)
         {
+            if (!BaseData.SelfBases.Any()) { return null; }
+
             if (frame == 0)
             {
                 return SplitWorkers(frame);
