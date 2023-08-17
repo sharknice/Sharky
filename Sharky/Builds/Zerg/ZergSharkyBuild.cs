@@ -14,7 +14,7 @@
             EnemyData = defaultSharkyBot.EnemyData;
         }
 
-        protected void SendDroneForHatchery(int frame, bool natural = true)
+        protected virtual void SendDroneForHatchery(int frame, bool natural = true)
         {
             if (natural && UnitCountService.EquivalentTypeCount(UnitTypes.ZERG_HATCHERY) == 1 && MacroData.Minerals > 180 && FrameToTimeConverter.GetTime(frame).TotalMinutes < 3)
             {
@@ -41,11 +41,6 @@
                 {
                     SendDroneForHatchery((int)observation.Observation.GameLoop);
                 }
-            }
-
-            if ((QuickBuildOrders?.IsFinished ?? true) && BuildOptions.ZergBuildOptions.PrepositionDroneForThirdHatch)
-            {
-                SendDroneForHatchery((int)observation.Observation.GameLoop, false);
             }
         }
     }

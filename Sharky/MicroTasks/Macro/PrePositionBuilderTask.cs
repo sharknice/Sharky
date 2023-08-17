@@ -19,13 +19,13 @@
             MicroTaskData = defaultSharkyBot.MicroTaskData;
 
             UnitCommanders = new List<UnitCommander>();
-            LastSendFrame = -1000;
+            LastSendFrame = 0;
             started = false;
         }
 
         public void SendBuilder(Point2D buildPoint, int frame)
         {
-            if (BuildPosition == null || (BuildPosition.X != buildPoint.X && BuildPosition.Y != buildPoint.Y) || frame - LastSendFrame > 250) // only do this every ~10 seconds
+            if (BuildPosition == null || (BuildPosition.X != buildPoint.X && BuildPosition.Y != buildPoint.Y) || frame - LastSendFrame > 224) // only do this every ~10 seconds
             {
                 BuildPosition = buildPoint;
                 LastSendFrame = frame;
@@ -42,7 +42,7 @@
             {
                 if (started)
                 {
-                    Disable();
+                    DisableWithoutChangingRoles();
                     return;
                 }
                 foreach (var commander in commanders.OrderBy(c => c.Value.Claimed).ThenBy(c => c.Value.UnitCalculation.Unit.BuffIds.Count()).ThenBy(c => Vector2.DistanceSquared(c.Value.UnitCalculation.Position, BuildPosition.ToVector2())).ThenBy(c => DistanceToResourceCenter(c)))
@@ -51,7 +51,7 @@
                     {
                         commander.Value.UnitRole = UnitRole.PreBuild;
                         commander.Value.Claimed = true;
-                        foreach(var task in MicroTaskData)
+                        foreach (var task in MicroTaskData)
                         {
                             task.Value.StealUnit(commander.Value);
                         }
@@ -63,24 +63,30 @@
             }
         }
 
-        public override IEnumerable<SC2APIProtocol.Action> PerformActions(int frame)
+        public override IEnumerable<SC2Action> PerformActions(int frame)
         {
-            var actions = new List<SC2APIProtocol.Action>();
+            var actions = new List<SC2Action>();
 
-            bool done = false;
+            var commander = UnitCommanders.FirstOrDefault();
 
-            foreach (var commander in UnitCommanders)
+            if (commander is not null)
             {
+                if (commander.UnitRole == UnitRole.Build)
+                {
+                    DisableWithoutChangingRoles();
+                    return actions;
+                }
+                else
                 if (commander.UnitRole != UnitRole.PreBuild)
                 {
-                    done = true;
+                    Disable();
+                    return actions;
                 }
                 else
                 {
                     if (commander.UnitCalculation.Unit.Orders.Any(o => (o.AbilityId == (uint)Abilities.HARVEST_GATHER_DRONE || o.AbilityId == (uint)Abilities.HARVEST_GATHER_PROBE || o.AbilityId == (uint)Abilities.HARVEST_GATHER_SCV) && commander.UnitCalculation.Unit.Orders.Count() > 1))
                     {
                         actions.AddRange(commander.Order(frame, Abilities.STOP));
-                        continue;
                     }
 
                     var enemyWorker = commander.UnitCalculation.NearbyEnemies.Take(25).FirstOrDefault(e => e.UnitClassifications.Contains(UnitClassification.Worker) && e.FrameLastSeen == frame);
@@ -91,7 +97,6 @@
                         {
                             actions.AddRange(attack);
                             commander.UnitRole = UnitRole.Attack;
-                            continue;
                         }
                     }
 
@@ -101,10 +106,6 @@
                         actions.AddRange(action);
                     }
                 }
-            }
-            if (done)
-            {
-                Disable();
             }
 
             return actions;
@@ -119,6 +120,12 @@
             }
             UnitCommanders.Clear();
 
+            Enabled = false;
+        }
+
+        public void DisableWithoutChangingRoles()
+        {
+            UnitCommanders.Clear();
             Enabled = false;
         }
 
