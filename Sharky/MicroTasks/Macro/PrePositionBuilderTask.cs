@@ -4,6 +4,7 @@
     {
         SharkyUnitData SharkyUnitData;
         MicroTaskData MicroTaskData;
+        EnemyData EnemyData;
 
         public Point2D BuildPosition { get; set; }
 
@@ -17,9 +18,10 @@
 
             SharkyUnitData = defaultSharkyBot.SharkyUnitData;
             MicroTaskData = defaultSharkyBot.MicroTaskData;
+            EnemyData = defaultSharkyBot.EnemyData;
 
             UnitCommanders = new List<UnitCommander>();
-            LastSendFrame = 0;
+            LastSendFrame = -1000; // some builds immediately send worker
             started = false;
         }
 
@@ -73,7 +75,14 @@
             {
                 if (commander.UnitRole == UnitRole.Build)
                 {
-                    DisableWithoutChangingRoles();
+                    if (EnemyData.SelfRace == Race.Zerg)
+                    {
+                        DisableWithoutChangingRoles();
+                    }
+                    else
+                    {
+                        Disable();
+                    }
                     return actions;
                 }
                 else
