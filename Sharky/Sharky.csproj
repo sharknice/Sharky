@@ -247,6 +247,9 @@
     <None Update="StaticData\pathing\Ancient CisternAIE.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="StaticData\pathing\Bot Micro Arena.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="StaticData\pathing\Dragon ScalesAIE.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
