@@ -258,7 +258,7 @@
             StasisWardPlacement = new StasisWardPlacement(this);
             WorkerBuilderService = new WorkerBuilderService(this);
             SimCityService = new SimCityService(this);
-            BuildingBuilder = new BuildingBuilder(ActiveUnitData, TargetingData, BuildingPlacement, SharkyUnitData, BaseData, MicroTaskData, BuildingService, MapDataService, WorkerBuilderService);
+            BuildingBuilder = new BuildingBuilder(ActiveUnitData, TargetingData, BuildingPlacement, SharkyUnitData, BaseData, MicroTaskData, BuildingService, MapDataService, WorkerBuilderService, AreaService);
 
             WarpInPlacement = new WarpInPlacement(ActiveUnitData, DebugService, MapData, MapDataService, BuildingService);
             DefaultProducerSelector = new SimpleProducerSelector();
@@ -302,7 +302,7 @@
             var archonMicroController = new ArchonMicroController(this, SharkySimplePathFinder, MicroPriority.AttackForward, false);
             var colossusMicroController = new ColossusMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
             var darkTemplarMicroController = new DarkTemplarMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
-            var disruptorMicroController = new DisruptorMicroController(this, SharkySimplePathFinder, MicroPriority.StayOutOfRange, false, SharkyPathFinder);
+            var disruptorMicroController = new DisruptorMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false, SharkyPathFinder);
             var disruptorPhasedMicroController = new DisruptorPhasedMicroController(this, SharkySimplePathFinder, MicroPriority.AttackForward, false, SharkyPathFinder);
             var highTemplarMicroController = new HighTemplarMicroController(this, SharkySimplePathFinder, MicroPriority.StayOutOfRange, false);
             var mothershipMicroController = new MothershipMicroController(this, SharkySimplePathFinder, MicroPriority.StayOutOfRange, false);
@@ -537,7 +537,7 @@
             AttackDataManager = new AttackDataManager(AttackData, ActiveUnitData, attackTask, TargetPriorityService, TargetingData, MacroData, BaseData, DebugService);
             Managers.Add(AttackDataManager);
 
-            BuildProxyService = new BuildProxyService(MacroData, BuildingBuilder, SharkyUnitData, ActiveUnitData, Morpher, MicroTaskData);
+            BuildProxyService = new BuildProxyService(this);
             BuildAddOnSwapService = new BuildAddOnSwapService(MacroData, ActiveUnitData, SharkyUnitData, BuildingService, BuildingPlacement);
             BuildingCancelService = new BuildingCancelService(ActiveUnitData, MacroData);
             UpgradeRequestCancellingService = new UpgradeRequestCancellingService(this);

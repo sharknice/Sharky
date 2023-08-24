@@ -8,17 +8,23 @@
         ActiveUnitData ActiveUnitData;
         Morpher Morpher;
         MicroTaskData MicroTaskData;
+        AreaService AreaService;
+        MapDataService MapDataService;
+        BuildingService BuildingService;
 
         int lastFailFrame;
 
-        public BuildProxyService(MacroData macroData, IBuildingBuilder buildingBuilder, SharkyUnitData sharkyUnitData, ActiveUnitData activeUnitData, Morpher morpher, MicroTaskData microTaskData)
+        public BuildProxyService(DefaultSharkyBot defaultSharkyBot)
         {
-            MacroData = macroData;
-            BuildingBuilder = buildingBuilder;
-            SharkyUnitData = sharkyUnitData;
-            ActiveUnitData = activeUnitData;
-            Morpher = morpher;
-            MicroTaskData = microTaskData;
+            MacroData = defaultSharkyBot.MacroData;
+            BuildingBuilder = defaultSharkyBot.BuildingBuilder;
+            SharkyUnitData = defaultSharkyBot.SharkyUnitData;
+            ActiveUnitData = defaultSharkyBot.ActiveUnitData;
+            Morpher = defaultSharkyBot.Morpher;
+            MicroTaskData = defaultSharkyBot.MicroTaskData;
+            AreaService = defaultSharkyBot.AreaService;
+            MapDataService = defaultSharkyBot.MapDataService;
+            BuildingService = defaultSharkyBot.BuildingService;
 
             lastFailFrame = 0;
         }

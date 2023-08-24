@@ -95,7 +95,7 @@
 
             if (OffensiveAbility(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
 
-            if (MicroPriority == MicroPriority.StayOutOfRange)
+            if (ShouldStayOutOfRange(commander, frame))
             {
                 return AttackStayOutOfRange(commander, target, defensivePoint, groupCenter, bestTarget, formation, frame);
             }
@@ -534,7 +534,7 @@
         protected virtual bool GetHighGroundVision(UnitCommander commander, Point2D target, Point2D defensivePoint, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
-            if (MicroPriority == MicroPriority.StayOutOfRange || MicroPriority == MicroPriority.JustLive || !commander.UnitCalculation.NearbyAllies.Any()) { return false; }
+            if (ShouldStayOutOfRange(commander, frame) || MicroPriority == MicroPriority.JustLive || !commander.UnitCalculation.NearbyAllies.Any()) { return false; }
             if (!commander.UnitCalculation.Unit.IsFlying && commander.UnitCalculation.Unit.UnitType != (uint)UnitTypes.PROTOSS_COLOSSUS)
             {
                 if (bestTarget != null && !MapDataService.SelfVisible(bestTarget.Unit.Pos) && MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos) != MapDataService.MapHeight(bestTarget.Unit.Pos))
@@ -569,7 +569,7 @@
 
             if (GetHighGroundVision(commander, target, defensivePoint, bestTarget, frame, out action)) { return true; }
 
-            if (MicroPriority == MicroPriority.StayOutOfRange || MicroPriority == MicroPriority.JustLive || !commander.UnitCalculation.NearbyAllies.Any()) { return false; }
+            if (ShouldStayOutOfRange(commander, frame) || MicroPriority == MicroPriority.JustLive || !commander.UnitCalculation.NearbyAllies.Any()) { return false; }
             if (!commander.UnitCalculation.Unit.IsFlying && commander.UnitCalculation.Unit.UnitType != (uint)UnitTypes.PROTOSS_COLOSSUS)
             {
                 var badChokes = TargetingData.ChokePoints.Bad.Where(b => Vector2.DistanceSquared(b.Center, targetToSupport.UnitCalculation.Position) < 100 || Vector2.DistanceSquared(b.Center, commander.UnitCalculation.Position) < 100);
@@ -889,7 +889,7 @@
                     return true;
                 }
             }
-            else if (MicroPriority == MicroPriority.LiveAndAttack || MicroPriority == MicroPriority.StayOutOfRange)
+            else if (MicroPriority == MicroPriority.LiveAndAttack || ShouldStayOutOfRange(commander, frame))
             {
                 if (WorkerEscapeSurround(commander, target, defensivePoint, frame, out action)) { return true; }
 
@@ -2781,7 +2781,7 @@
 
             if (OffensiveAbility(commander, supportPoint, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
 
-            if (MicroPriority == MicroPriority.StayOutOfRange)
+            if (ShouldStayOutOfRange(commander, frame))
             {
                 if (SpecialCaseRetreat(commander, supportPoint, defensivePoint, frame, out action)) { return action; }
                 if (MoveAway(commander, supportPoint, defensivePoint, frame, out action)) { return action; }
@@ -2820,6 +2820,11 @@
 
             if (AvoidDeceleration(commander, supportPoint, true, frame, out action)) { return action; }
             return commander.Order(frame, Abilities.ATTACK, supportPoint);
+        }
+
+        protected virtual bool ShouldStayOutOfRange(UnitCommander commander, int frame)
+        {
+            return MicroPriority == MicroPriority.StayOutOfRange;
         }
 
         protected virtual bool DoNotSuicide(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
@@ -3022,7 +3027,7 @@
                 if (AttackBestTargetInRange(commander, target, bestTarget, frame, out action)) { return action; }
                 if (bestTarget != null && bestTarget.UnitClassifications.Contains(UnitClassification.Worker))
                 {
-                    if (MicroPriority == MicroPriority.StayOutOfRange && AvoidAllDamage(commander, target, defensivePoint, frame, out action)) { return action; }
+                    if (ShouldStayOutOfRange(commander, frame) && AvoidAllDamage(commander, target, defensivePoint, frame, out action)) { return action; }
 
                     if (AttackBestTarget(commander, target, defensivePoint, null, bestTarget, frame, out action)) { return action; }
                 }
@@ -3222,7 +3227,7 @@
 
             if (OffensiveAbility(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
 
-            if (MicroPriority == MicroPriority.StayOutOfRange)
+            if (ShouldStayOutOfRange(commander, frame))
             {
                 return AttackStayOutOfRange(commander, target, defensivePoint, groupCenter, bestTarget, formation, frame);
             }

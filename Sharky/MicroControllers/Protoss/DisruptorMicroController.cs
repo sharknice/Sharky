@@ -230,5 +230,10 @@
             action = commander.Order(frame, Abilities.MOVE, avoidPoint);
             return true;
         }
+
+        protected override bool ShouldStayOutOfRange(UnitCommander commander, int frame)
+        {
+            return MicroPriority == MicroPriority.StayOutOfRange || !commander.AbilityOffCooldown(Abilities.EFFECT_PURIFICATIONNOVA, frame, SharkyOptions.FramesPerSecond, SharkyUnitData);
+        }
     }
 }

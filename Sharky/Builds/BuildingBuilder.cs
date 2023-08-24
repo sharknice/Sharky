@@ -12,10 +12,11 @@
 
         BuildingService BuildingService;
         MapDataService MapDataService;
+        AreaService AreaService;
 
         Point2D HadRoomLastPosition;
 
-        public BuildingBuilder(ActiveUnitData activeUnitData, TargetingData targetingData, IBuildingPlacement buildingPlacement, SharkyUnitData sharkyUnitData, BaseData baseData, MicroTaskData microTaskData, BuildingService buildingService, MapDataService mapDataService, WorkerBuilderService workerBuilderService)
+        public BuildingBuilder(ActiveUnitData activeUnitData, TargetingData targetingData, IBuildingPlacement buildingPlacement, SharkyUnitData sharkyUnitData, BaseData baseData, MicroTaskData microTaskData, BuildingService buildingService, MapDataService mapDataService, WorkerBuilderService workerBuilderService, AreaService areaService)
         {
             ActiveUnitData = activeUnitData;
             TargetingData = targetingData;
@@ -27,6 +28,7 @@
             BuildingService = buildingService;
             MapDataService = mapDataService;
             WorkerBuilderService = workerBuilderService;
+            AreaService = areaService;
         }
 
         public List<SC2Action> BuildBuilding(MacroData macroData, UnitTypes unitType, BuildingTypeData unitData, Point2D generalLocation = null, bool ignoreMineralProximity = false, float maxDistance = 50, List<UnitCommander> workerPool = null, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.None, bool allowBlockBase = false)
@@ -74,6 +76,17 @@
                         {
                             worker.UnitRole = UnitRole.Build;
                         }
+
+                        if (CouldGetStuckBuilding(worker, placementLocation, ignoreMineralProximity, allowBlockBase))
+                        {
+                            var probeSpot = GetLocationToAvoidGettingStuckBuilding(placementLocation);
+                            if (probeSpot != null)
+                            {
+                                var safeAction = worker.Order(macroData.Frame, Abilities.MOVE, probeSpot, allowConflict: true);
+                                safeAction.AddRange(worker.Order(macroData.Frame, unitData.Ability, placementLocation, queue: true));
+                                return safeAction;
+                            }
+                        }                      
                         
                         return worker.Order(macroData.Frame, unitData.Ability, placementLocation, allowConflict: true);
                     }
@@ -227,6 +240,44 @@
             }
 
             return buildLocation;
+        }
+
+        protected bool CouldGetStuckBuilding(UnitCommander commander, Point2D spot, bool ignoreMineralProximity, bool allowBlockBase)
+        {
+            if ((ignoreMineralProximity || allowBlockBase) && commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE)
+            {
+                if (GetValidPoint(commander.UnitCalculation.Position.X, commander.UnitCalculation.Position.Y, -1, 3) == null || GetValidPoint(spot.X, spot.Y, -1, 3) == null)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        Point2D GetValidPoint(float x, float y, int baseHeight, float size = 2f)
+        {
+            if (x >= 0 && y >= 0 && x < MapDataService.MapData.MapWidth && y < MapDataService.MapData.MapHeight && (baseHeight == -1 || MapDataService.MapHeight((int)x, (int)y) == baseHeight))
+            {
+                if (BuildingService.AreaBuildable(x, y, size / 2.0f))
+                {
+                    if (!BuildingService.Blocked(x, y, 1, 0f))
+                    {
+                        if (!BuildingService.HasAnyCreep(x, y, size / 2.0f))
+                        {
+                            return new Point2D { X = x, Y = y };
+                        }
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        Point2D GetLocationToAvoidGettingStuckBuilding(Point2D buildSpot)
+        {
+            var spots = AreaService.GetTargetArea(buildSpot, 4).Where(p => GetValidPoint(p.X, p.Y, -1, 3) != null);
+            var gatewaySpots = spots.Where(s => Vector2.Distance(s.ToVector2(), buildSpot.ToVector2()) > 3).OrderBy(s => Vector2.Distance(s.ToVector2(), buildSpot.ToVector2()));
+            return gatewaySpots.FirstOrDefault();
         }
     }
 }
