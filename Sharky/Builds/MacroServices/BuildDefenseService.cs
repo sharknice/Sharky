@@ -89,27 +89,29 @@
                 {
                     var unitData = SharkyUnitData.BuildingData[unit.Key];
 
-                    var orderedBuildings = ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
-                    foreach (var baseLocation in BaseData.SelfBases)
+                    if (unitData.Minerals <= MacroData.Minerals && unitData.Gas <= MacroData.VespeneGas)
                     {
-                        if (baseLocation.MineralLineDefenseUnbuildableFrame < MacroData.Frame - 100)
+                        var orderedBuildings = ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
+                        foreach (var baseLocation in BaseData.SelfBases)
                         {
-                            if (ActiveUnitData.SelfUnits.Count(u => u.Value.Unit.UnitType == (uint)unit.Key && Vector2.DistanceSquared(u.Value.Position, new Vector2(baseLocation.Location.X, baseLocation.Location.Y)) < MacroData.DefensiveBuildingMaximumDistance * MacroData.DefensiveBuildingMaximumDistance) + orderedBuildings < unit.Value)
+                            if (baseLocation.MineralLineDefenseUnbuildableFrame < MacroData.Frame - 100)
                             {
-                                var command = BuildingBuilder.BuildBuilding(MacroData, unit.Key, unitData, baseLocation.Location, false, MacroData.DefensiveBuildingMaximumDistance, wallOffType: BuildOptions.WallOffType);
-                                if (command != null)
+                                if (ActiveUnitData.SelfUnits.Count(u => u.Value.Unit.UnitType == (uint)unit.Key && Vector2.DistanceSquared(u.Value.Position, new Vector2(baseLocation.Location.X, baseLocation.Location.Y)) < MacroData.DefensiveBuildingMaximumDistance * MacroData.DefensiveBuildingMaximumDistance) + orderedBuildings < unit.Value)
                                 {
-                                    commands.AddRange(command);
-                                    return commands;
-                                }
-                                else
-                                {
-                                    baseLocation.MineralLineDefenseUnbuildableFrame = MacroData.Frame;
+                                    var command = BuildingBuilder.BuildBuilding(MacroData, unit.Key, unitData, baseLocation.Location, false, MacroData.DefensiveBuildingMaximumDistance, wallOffType: BuildOptions.WallOffType);
+                                    if (command != null)
+                                    {
+                                        commands.AddRange(command);
+                                        return commands;
+                                    }
+                                    else
+                                    {
+                                        baseLocation.MineralLineDefenseUnbuildableFrame = MacroData.Frame;
+                                    }
                                 }
                             }
                         }
                     }
-
                 }
             }
 
