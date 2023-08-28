@@ -719,6 +719,9 @@
 
         protected virtual bool MoveToAttackTarget(UnitCommander commander, UnitCalculation bestTarget, Formation formation, int frame, out List<SC2APIProtocol.Action> action)
         {
+            action = null;
+            if (bestTarget == null) { return false; }
+
             if (commander.UnitCalculation.Unit.IsFlying && bestTarget.Attributes.Contains(SC2APIProtocol.Attribute.Structure) || 
                 commander.UnitCalculation.Unit.Shield < commander.UnitCalculation.Unit.ShieldMax || commander.UnitCalculation.Unit.Health < commander.UnitCalculation.Unit.HealthMax ||
                 bestTarget.EnemiesInRangeOf.Count() < 5 ||
