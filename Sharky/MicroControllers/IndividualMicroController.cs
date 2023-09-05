@@ -14,7 +14,7 @@
         protected UnitDataService UnitDataService;
         protected TargetingData TargetingData;
         protected TargetingService TargetingService;
-        protected AttackPathingService AttackPathingService;
+        public AttackPathingService AttackPathingService;
         protected AttackData AttackData;
         protected ChatService ChatService;
         protected TagService TagService;
@@ -24,6 +24,7 @@
         public bool GroupUpEnabled { get; set; }
         public bool IgnoreDistractions { get; set; }
         public bool TargetEnemyMainFirst { get; set; }
+        public bool AlwaysUsePathing { get; set; }
         public HashSet<UnitTypes> AvoidedUnitTypes { get; set; } = new HashSet<UnitTypes>();
 
         protected float GroupUpDistanceSmall;
@@ -1705,7 +1706,7 @@
 
         protected virtual List<SC2APIProtocol.Action> AttackToTarget(UnitCommander commander, Point2D target, int frame)
         {
-            if (commander.UnitCalculation.NearbyAllies.Any(a => a.Attributes.Contains(SC2APIProtocol.Attribute.Structure)) && Vector2.DistanceSquared(commander.UnitCalculation.Position, target.ToVector2()) > 400)
+            if (!AlwaysUsePathing && commander.UnitCalculation.NearbyAllies.Any(a => a.Attributes.Contains(SC2APIProtocol.Attribute.Structure)) && Vector2.DistanceSquared(commander.UnitCalculation.Position, target.ToVector2()) > 400)
             {
                 return commander.Order(frame, Abilities.ATTACK, target);
             }

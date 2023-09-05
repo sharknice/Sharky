@@ -2,7 +2,7 @@
 {
     public class AttackPathingService
     {
-        MapDataService MapDataService;
+        protected MapDataService MapDataService;
 
         public AttackPathingService(DefaultSharkyBot defaultSharkyBot)
         {
@@ -10,7 +10,7 @@
         }
 
 
-        public PathData GetNearestPath(Vector2 start, Vector2 end)
+        public virtual PathData GetNearestPath(Vector2 start, Vector2 end)
         {
             var startHeight = MapDataService.MapHeight(start);
             var endHeight = MapDataService.MapHeight(end);
@@ -18,7 +18,7 @@
             if (MapDataService.MapData.PathData == null) { return null; }
 
             var startPaths = MapDataService.MapData.PathData.Where(data => data.Path.Any(p => Vector2.DistanceSquared(p, start) <= 25 && MapDataService.MapHeight(p) == startHeight));
-            var best = startPaths.FirstOrDefault(data => data.Path.Any(p => Vector2.DistanceSquared(p, end) <= 25 && MapDataService.MapHeight(p) == endHeight));
+            var best = startPaths.FirstOrDefault();
             if (best == null)
             {
                 best = startPaths.FirstOrDefault(data => data.Path.Any(p => Vector2.DistanceSquared(p, end) <= 50 && MapDataService.MapHeight(p) == endHeight));
@@ -28,6 +28,11 @@
                 }
             }
 
+            return GetPathData(start, end, startHeight, endHeight, best);
+        }
+
+        protected PathData GetPathData(Vector2 start, Vector2 end, int startHeight, int endHeight, PathData best)
+        {
             List<Vector2> path;
             var pathStart = best.Path.OrderBy(p => Vector2.DistanceSquared(p, start)).FirstOrDefault(p => MapDataService.MapHeight(p) == startHeight);
             var pathEnd = best.Path.OrderBy(p => Vector2.DistanceSquared(p, end)).FirstOrDefault(p => MapDataService.MapHeight(p) == endHeight);
@@ -47,7 +52,6 @@
             }
 
             return new PathData { StartPosition = start, EndPosition = end, Path = path };
-
         }
 
         public Point2D GetNextPointToTarget(UnitCommander commander, Point2D target, int frame)

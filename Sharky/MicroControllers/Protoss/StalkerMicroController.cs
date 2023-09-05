@@ -2,7 +2,6 @@
 {
     public class StalkerMicroController : IndividualMicroController
     {
-        // TODO: use get blink avoid point, 8 distance from current position opposite direction of enemy, make sure it's in vision
         public StalkerMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled)
             : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled)
         {

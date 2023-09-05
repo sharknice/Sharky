@@ -37,5 +37,26 @@
             var y = (int)point.Y;
             return area.Any(p => p.X == x && p.Y == y);
         }
+
+        public List<Point2D> GetAllArea(Point2D point, int size = 25)
+        {
+            var points = new List<Point2D>();
+
+            for (var x = -size; x < size; x++)
+            {
+                for (var y = -size; y < size; y++)
+                {
+                    if (x + point.X > 0 && x + point.X < MapDataService.MapData.MapWidth && y + point.Y > 0 && y + point.Y < MapDataService.MapData.MapHeight)
+                    {
+                        if (MapDataService.PathWalkable(x + (int)point.X, y + (int)point.Y))
+                        {
+                            points.Add(new Point2D { X = x + (int)point.X, Y = y + (int)point.Y });
+                        }
+                    }
+                }
+            }
+
+            return points;
+        }
     }
 }
