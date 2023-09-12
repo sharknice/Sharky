@@ -27,7 +27,7 @@ namespace SharkyTerranExampleBot.Builds
 
             MacroData.AddOnSwaps[this.Name() + "reactor"] = new AddOnSwap(UnitTypes.TERRAN_FACTORYREACTOR, UnitTypes.TERRAN_FACTORY, UnitTypes.TERRAN_STARPORT, true);
 
-            var defenseSquadTask = (DefenseSquadTask)MicroTaskData["DefenseSquadTask"];
+            var defenseSquadTask = (DefenseSquadTask)MicroTaskData[typeof(DefenseSquadTask).Name];
             defenseSquadTask.DesiredUnitsClaims = new List<DesiredUnitsClaim> { new DesiredUnitsClaim(UnitTypes.TERRAN_MARINE, 1) };
             defenseSquadTask.Enable();
         }

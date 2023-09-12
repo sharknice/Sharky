@@ -41,7 +41,7 @@
 
             LastFrame = MacroData.Frame;
 
-            if (MacroData.DesiredExtraBaseSimCityPylons > 0 && MacroData.Minerals >= 100)
+            if (MacroData.ProtossMacroData.DesiredExtraBaseSimCityPylons > 0 && MacroData.Minerals >= 100)
             {
                 foreach (var data in BaseData.SelfBases.Where(b => !(b.Location.X == TargetingData.SelfMainBasePoint.X && b.Location.Y == TargetingData.SelfMainBasePoint.Y) && !(b.Location.X == TargetingData.NaturalBasePoint.X && b.Location.Y == TargetingData.NaturalBasePoint.Y)))
                 {
@@ -57,7 +57,7 @@
                 }
             }
 
-            if (MacroData.DesiredExtraBaseSimCityCannons > 0 && MacroData.Minerals >= 150 && UnitCountService.Completed(UnitTypes.PROTOSS_FORGE) > 0)
+            if (MacroData.ProtossMacroData.DesiredExtraBaseSimCityCannons > 0 && MacroData.Minerals >= 150 && UnitCountService.Completed(UnitTypes.PROTOSS_FORGE) > 0)
             {
                 foreach (var data in BaseData.SelfBases.Where(b => !(b.Location.X == TargetingData.SelfMainBasePoint.X && b.Location.Y == TargetingData.SelfMainBasePoint.Y) && !(b.Location.X == TargetingData.NaturalBasePoint.X && b.Location.Y == TargetingData.NaturalBasePoint.Y)))
                 {
@@ -73,7 +73,7 @@
                 }
             }
 
-            if (MacroData.DesiredExtraBaseSimCityBatteries > 0 && MacroData.Minerals >= 100 && UnitCountService.Completed(UnitTypes.PROTOSS_CYBERNETICSCORE) > 0)
+            if (MacroData.ProtossMacroData.DesiredExtraBaseSimCityBatteries > 0 && MacroData.Minerals >= 100 && UnitCountService.Completed(UnitTypes.PROTOSS_CYBERNETICSCORE) > 0)
             {
                 foreach (var data in BaseData.SelfBases.Where(b => !(b.Location.X == TargetingData.SelfMainBasePoint.X && b.Location.Y == TargetingData.SelfMainBasePoint.Y) && !(b.Location.X == TargetingData.NaturalBasePoint.X && b.Location.Y == TargetingData.NaturalBasePoint.Y)))
                 {

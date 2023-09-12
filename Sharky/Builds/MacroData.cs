@@ -37,11 +37,6 @@
         public Dictionary<UnitTypes, int> DesiredAddOnCounts;
         public Dictionary<UnitTypes, bool> BuildAddOns;
 
-        public List<UnitTypes> NexusUnits;
-        public List<UnitTypes> GatewayUnits;
-        public List<UnitTypes> RoboticsFacilityUnits;
-        public List<UnitTypes> StargateUnits;
-
         public List<UnitTypes> CommandCenterUnits;
         public List<UnitTypes> BarracksUnits;
         public List<UnitTypes> FactoryUnits;
@@ -50,21 +45,13 @@
         public List<UnitTypes> HatcheryUnits;
         public List<UnitTypes> LarvaUnits;
 
-        public int DesiredPylons;
-        public bool BuildPylon;
-        public int DesiredPylonsAtEveryBase;
-        public int DesiredPylonsAtNextBase;
-        public int DesiredPylonsAtDefensivePoint;
-        public int DesiredPylonsAtEveryMineralLine;
         public bool BuildSupplyDepot;
         public int DesiredSupplyDepots;
         public bool BuildOverlord;
         public int DesiredOverlords;
         public int DesiredMacroCommandCenters;
 
-        public int DesiredExtraBaseSimCityPylons;
-        public int DesiredExtraBaseSimCityCannons;
-        public int DesiredExtraBaseSimCityBatteries;
+        public ProtossMacroData ProtossMacroData { get; set; } = new ProtossMacroData();
 
         public Dictionary<string, ProxyData> Proxies { get; set; }
         public Dictionary<string, AddOnSwap> AddOnSwaps { get; set; }

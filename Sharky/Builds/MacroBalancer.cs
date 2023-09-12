@@ -40,10 +40,10 @@
             if (!BuildOptions.StrictSupplyCount)
             {
                 var productionCapacity = UnitCountService.Count(UnitTypes.PROTOSS_NEXUS) + (UnitCountService.EquivalentTypeCount(UnitTypes.PROTOSS_GATEWAY) * 2) + (UnitCountService.Count(UnitTypes.PROTOSS_ROBOTICSFACILITY) * 6) + (UnitCountService.Count(UnitTypes.PROTOSS_STARGATE) * 6);
-                MacroData.DesiredPylons = (int)Math.Ceiling(((MacroData.FoodUsed - (UnitCountService.Completed(UnitTypes.PROTOSS_NEXUS) * 15)) / 8.0) + (productionCapacity / 8.0));
+                MacroData.ProtossMacroData.DesiredPylons = (int)Math.Ceiling(((MacroData.FoodUsed - (UnitCountService.Completed(UnitTypes.PROTOSS_NEXUS) * 15)) / 8.0) + (productionCapacity / 8.0));
             }
 
-            MacroData.BuildPylon = MacroData.DesiredPylons > UnitCountService.Count(UnitTypes.PROTOSS_PYLON) + ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.BUILD_PYLON));
+            MacroData.ProtossMacroData.BuildPylon = MacroData.ProtossMacroData.DesiredPylons > UnitCountService.Count(UnitTypes.PROTOSS_PYLON) + ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.BUILD_PYLON));
         }
 
         void BalanceSupplyDepots()
@@ -215,7 +215,7 @@
             if (BuildOptions.OnlyBuildWorkersWithExtraMinerals && MacroData.BuildUnits[workerType])
             {
                 MacroData.BuildUnits[workerType] = false;
-                if (!MacroData.BuildAddOns.Any(e => e.Value) && !MacroData.BuildDefensiveBuildings.Any(e => e.Value) && !MacroData.BuildGas && !MacroData.BuildOverlord && !MacroData.BuildProduction.Any(e => e.Value) && !MacroData.BuildPylon && !MacroData.BuildSupplyDepot && !MacroData.BuildTech.Any(e => e.Value))
+                if (!MacroData.BuildAddOns.Any(e => e.Value) && !MacroData.BuildDefensiveBuildings.Any(e => e.Value) && !MacroData.BuildGas && !MacroData.BuildOverlord && !MacroData.BuildProduction.Any(e => e.Value) && !MacroData.ProtossMacroData.BuildPylon && !MacroData.BuildSupplyDepot && !MacroData.BuildTech.Any(e => e.Value))
                 {
                     if (!MacroData.BuildUnits.Any(e => e.Value) || MacroData.Minerals > 450)
                     {
@@ -237,38 +237,38 @@
             var unitTypes = new List<UnitTypes>();
             for (int index = 0; index < nexuss; index++)
             {
-                unitTypes.AddRange(MacroData.NexusUnits);
+                unitTypes.AddRange(MacroData.ProtossMacroData.NexusUnits);
             }
             for (int index = 0; index < gateways; index++)
             {
-                unitTypes.AddRange(MacroData.GatewayUnits);
+                unitTypes.AddRange(MacroData.ProtossMacroData.GatewayUnits);
             }
             for (int index = 0; index < robos; index++)
             {
-                unitTypes.AddRange(MacroData.RoboticsFacilityUnits);
+                unitTypes.AddRange(MacroData.ProtossMacroData.RoboticsFacilityUnits);
             }
             for (int index = 0; index < stargates; index++)
             {
-                unitTypes.AddRange(MacroData.StargateUnits);
+                unitTypes.AddRange(MacroData.ProtossMacroData.StargateUnits);
             }
 
             BalanceProduction(unitTypes);
 
-            if (MacroData.NexusUnits.Where(u => MacroData.BuildUnits[u]).Count() > 1)
+            if (MacroData.ProtossMacroData.NexusUnits.Where(u => MacroData.BuildUnits[u]).Count() > 1)
             {
-                BalanceProduction(MacroData.NexusUnits);
+                BalanceProduction(MacroData.ProtossMacroData.NexusUnits);
             }
-            if (MacroData.GatewayUnits.Where(u => MacroData.BuildUnits[u]).Count() > 1)
+            if (MacroData.ProtossMacroData.GatewayUnits.Where(u => MacroData.BuildUnits[u]).Count() > 1)
             {
-                BalanceProduction(MacroData.GatewayUnits);
+                BalanceProduction(MacroData.ProtossMacroData.GatewayUnits);
             }
-            if (MacroData.RoboticsFacilityUnits.Where(u => MacroData.BuildUnits[u]).Count() > 1)
+            if (MacroData.ProtossMacroData.RoboticsFacilityUnits.Where(u => MacroData.BuildUnits[u]).Count() > 1)
             {
-                BalanceProduction(MacroData.RoboticsFacilityUnits);
+                BalanceProduction(MacroData.ProtossMacroData.RoboticsFacilityUnits);
             }
-            if (MacroData.StargateUnits.Where(u => MacroData.BuildUnits[u]).Count() > 1)
+            if (MacroData.ProtossMacroData.StargateUnits.Where(u => MacroData.BuildUnits[u]).Count() > 1)
             {
-                BalanceProduction(MacroData.StargateUnits);
+                BalanceProduction(MacroData.ProtossMacroData.StargateUnits);
             }
         }
 

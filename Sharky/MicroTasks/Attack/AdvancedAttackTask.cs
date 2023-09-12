@@ -109,7 +109,7 @@
                     {
                         commander.Value.Claimed = true;
                         UnitCommanders.Add(commander.Value);
-                        if (MainAttackers.Count() == 0 && MainAttackers.Contains((UnitTypes)commander.Value.UnitCalculation.Unit.UnitType) && !commander.Value.UnitCalculation.Unit.IsHallucination) // TODO: need to move units over when they change from corruptor to broodlord
+                        if (!MainUnits.Any() && MainAttackers.Contains((UnitTypes)commander.Value.UnitCalculation.Unit.UnitType) && !commander.Value.UnitCalculation.Unit.IsHallucination) // TODO: need to move units over when they change from corruptor to broodlord
                         {
                             commander.Value.UnitRole = UnitRole.Leader;
                             MainUnits.Add(commander.Value);
@@ -232,7 +232,7 @@
             var actions = new List<SC2APIProtocol.Action>();
 
             var hiddenBase = TargetingData.HiddenEnemyBase;
-            if (MainUnits.Count() > 0)
+            if (MainUnits.Any())
             {
                 AttackData.ArmyPoint = TargetingService.GetArmyPoint(MainUnits);
             }
@@ -265,7 +265,7 @@
             {
                 System.Console.WriteLine($"AdvancedAttackTask closerenemies queries {stopwatch.ElapsedMilliseconds}");
             }
-            if (attackingEnemies.Count() > 0)
+            if (attackingEnemies.Any())
             {
                 if (stopwatch.ElapsedMilliseconds > 100)
                 {
@@ -279,7 +279,7 @@
                     closerEnemies = attackingEnemies.Where(e => Vector2.DistanceSquared(e.Position, armyVector) < distanceToAttackPoint);
                 }
                 var defendToDeath = MacroData.FoodUsed > 175;
-                if (closerEnemies.Count() > 0)
+                if (closerEnemies.Any())
                 {
                     if (stopwatch.ElapsedMilliseconds > 100)
                     {
@@ -311,7 +311,7 @@
                 {
                     var attackVector = new Vector2(TargetingData.AttackPoint.X, TargetingData.AttackPoint.Y);
                     var closerSelfUnits = UnitCommanders.Where(u => attackingEnemies.Any(e => Vector2.DistanceSquared(u.UnitCalculation.Position, attackVector) > Vector2.DistanceSquared(u.UnitCalculation.Position, e.Position)));
-                    if (closerSelfUnits.Count() > 0)
+                    if (closerSelfUnits.Any())
                     {
                         actions.AddRange(DefenseArmySplitter.SplitArmy(frame, attackingEnemies, TargetingData.AttackPoint, closerSelfUnits, defendToDeath));
                     }
@@ -368,7 +368,7 @@
                 if (TargetingData.AttackState == AttackState.Kill || !AttackData.UseAttackDataManager)
                 {
                     var attackingEnemies = supportUnits.SelectMany(c => c.UnitCalculation.NearbyEnemies).Distinct();
-                    if (AllowSplitWhileKill && attackingEnemies.Count() > 0)
+                    if (AllowSplitWhileKill && attackingEnemies.Any())
                     {
                         var splitActions = AttackArmySplitter.SplitArmy(frame, attackingEnemies, TargetingData.AttackPoint, supportUnits, false);
                         actions.AddRange(splitActions);

@@ -2,6 +2,8 @@
 using Sharky;
 using Sharky.Builds.Terran;
 using Sharky.DefaultBot;
+using Sharky.EnemyStrategies;
+using Sharky.MicroTasks;
 using System.Collections.Generic;
 
 namespace SharkyTerranExampleBot.Builds
@@ -21,13 +23,13 @@ namespace SharkyTerranExampleBot.Builds
 
             BuildOptions.StrictGasCount = true;
 
-            MicroTaskData["WorkerScoutTask"].Enable();
-            MicroTaskData["ProxyScoutTask"].Enable();
+            MicroTaskData[typeof(WorkerScoutTask).Name].Enable();
+            MicroTaskData[typeof(ProxyScoutTask).Name].Enable();
         }
 
         public override List<string> CounterTransition(int frame)
         {
-            if (UnitCountService.EnemyCount(UnitTypes.ZERG_HATCHERY) > 1 || EnemyData.EnemyStrategies["Proxy"].Active)
+            if (UnitCountService.EnemyCount(UnitTypes.ZERG_HATCHERY) > 1 || EnemyData.EnemyStrategies[typeof(Proxy).Name].Active)
             {
                 return new List<string> { "HellionRush" };
             }

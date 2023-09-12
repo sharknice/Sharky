@@ -4,10 +4,13 @@
     {
         protected int PickupRange = 5;
 
+        MacroData MacroData;
+
         public WarpPrismMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled)
             : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled)
         {
             AvoidDamageDistance = 3;
+            MacroData = defaultSharkyBot.MacroData;
         }
 
         public override List<SC2APIProtocol.Action> Attack(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
@@ -184,6 +187,8 @@
         bool StartWarping(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
+
+            if (MacroData.FoodUsed >= 198) { return false; }
 
             if (commander.UnitCalculation.Unit.Shield < commander.UnitCalculation.Unit.ShieldMax)
             {

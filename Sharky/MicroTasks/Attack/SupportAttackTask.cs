@@ -125,16 +125,16 @@
             if (!hiddenBase && TargetingData.HiddenEnemyBase)
             {
                 ResetClaimedUnits();
-                if (MicroTaskData.ContainsKey("FindHiddenBaseTask"))
+                if (MicroTaskData.ContainsKey(typeof(FindHiddenBaseTask).Name))
                 {
-                    MicroTaskData["FindHiddenBaseTask"].Enable();
+                    MicroTaskData[typeof(FindHiddenBaseTask).Name].Enable();
                 }
             }
             else if (hiddenBase && !TargetingData.HiddenEnemyBase)
             {
-                if (MicroTaskData.ContainsKey("FindHiddenBaseTask"))
+                if (MicroTaskData.ContainsKey(typeof(FindHiddenBaseTask).Name))
                 {
-                    MicroTaskData["FindHiddenBaseTask"].Disable();
+                    MicroTaskData[typeof(FindHiddenBaseTask).Name].Disable();
                 }
             }
 

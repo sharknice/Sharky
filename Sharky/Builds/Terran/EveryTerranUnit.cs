@@ -20,14 +20,8 @@
             BuildOptions.StrictSupplyCount = true;
             MacroData.DesiredGases = 0;
 
-            if (MicroTaskData.ContainsKey("WorkerScoutTask"))
-            {
-                WorkerScoutTask = (WorkerScoutTask)MicroTaskData["WorkerScoutTask"];
-            }
-            if (MicroTaskData.ContainsKey("ProxyScoutTask"))
-            {
-                ProxyScoutTask = (ProxyScoutTask)MicroTaskData["ProxyScoutTask"];
-            }
+            WorkerScoutTask = (WorkerScoutTask)MicroTaskData[typeof(WorkerScoutTask).Name];
+            ProxyScoutTask = (ProxyScoutTask)MicroTaskData[typeof(ProxyScoutTask).Name];
         }
 
         public override void OnFrame(ResponseObservation observation)

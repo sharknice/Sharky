@@ -76,7 +76,7 @@
 
             if (UnitCountService.Count(UnitTypes.PROTOSS_STALKER) > 0)
             {
-                MacroData.DesiredPylonsAtDefensivePoint = 1;
+                MacroData.ProtossMacroData.DesiredPylonsAtDefensivePoint = 1;
                 MacroData.DesiredDefensiveBuildingsAtDefensivePoint[UnitTypes.PROTOSS_SHIELDBATTERY] = 1;
             }
             if (UnitCountService.Count(UnitTypes.PROTOSS_STALKER) >= 2)
@@ -89,7 +89,7 @@
             }
             if (UnitCountService.Count(UnitTypes.PROTOSS_STALKER) >= 4)
             {
-                MacroData.DesiredPylonsAtDefensivePoint = 2;
+                MacroData.ProtossMacroData.DesiredPylonsAtDefensivePoint = 2;
                 MacroData.DesiredDefensiveBuildingsAtDefensivePoint[UnitTypes.PROTOSS_SHIELDBATTERY] = 4;
             }
 

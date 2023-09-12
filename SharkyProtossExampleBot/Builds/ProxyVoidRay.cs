@@ -51,7 +51,7 @@ namespace SharkyProtossExampleBot.Builds
                 UnitTypes.PROTOSS_VOIDRAY,
             };
 
-            var defenseSquadTask = (DefenseSquadTask)MicroTaskData["DefenseSquadTask"];
+            var defenseSquadTask = (DefenseSquadTask)MicroTaskData[typeof(DefenseSquadTask).Name];
             defenseSquadTask.DesiredUnitsClaims = new List<DesiredUnitsClaim> { new DesiredUnitsClaim(UnitTypes.PROTOSS_STALKER, 1) };
             defenseSquadTask.Enable();
 
@@ -92,9 +92,9 @@ namespace SharkyProtossExampleBot.Builds
 
             if (MacroData.FoodUsed >= 14)
             {
-                if (MacroData.DesiredPylons < 1)
+                if (MacroData.ProtossMacroData.DesiredPylons < 1)
                 {
-                    MacroData.DesiredPylons = 1;
+                    MacroData.ProtossMacroData.DesiredPylons = 1;
                 }
             }
             if (MacroData.FoodUsed >= 16)
@@ -113,9 +113,9 @@ namespace SharkyProtossExampleBot.Builds
             }
             if (MacroData.FoodUsed >= 19)
             {
-                if (MacroData.DesiredPylons < 2)
+                if (MacroData.ProtossMacroData.DesiredPylons < 2)
                 {
-                    MacroData.DesiredPylons = 2;
+                    MacroData.ProtossMacroData.DesiredPylons = 2;
                 }
                 if (ChronoData.ChronodUnits.Contains(UnitTypes.PROTOSS_PROBE))
                 {

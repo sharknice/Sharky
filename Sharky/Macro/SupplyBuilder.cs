@@ -32,7 +32,7 @@
 
             var begin = Stopwatch.GetTimestamp();
 
-            if (MacroData.BuildPylon)
+            if (MacroData.ProtossMacroData.BuildPylon)
             {
                 var requireSameHeight = BaseData.SelfBases.Count == 1;
                 var unitData = SharkyUnitData.BuildingData[UnitTypes.PROTOSS_PYLON];

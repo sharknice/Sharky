@@ -110,6 +110,16 @@
             AttackData.AttackWhenOverwhelm = true;
             AttackData.RequireMaxOut = false;
 
+            ResetBuild();
+
+            if (MicroTaskData.ContainsKey(typeof(AttackTask).Name))
+            {
+                MicroTaskData[typeof(AttackTask).Name].Enable();
+            }
+        }
+
+        protected void ResetBuild()
+        {
             foreach (var u in MacroData.Units)
             {
                 MacroData.DesiredUnitCounts[u] = 0;
@@ -130,23 +140,22 @@
                 MacroData.DesiredDefensiveBuildingsAtNextBase[u] = 0;
                 MacroData.DesiredDefensiveBuildingsAtEveryMineralLine[u] = 0;
             }
+            foreach (var u in MacroData.DesiredUpgrades)
+            {
+                MacroData.DesiredUpgrades[u.Key] = false;
+            }
 
-            if (MacroData.Race == SC2APIProtocol.Race.Protoss)
+            if (MacroData.Race == Race.Protoss)
             {
                 MacroData.DesiredProductionCounts[UnitTypes.PROTOSS_NEXUS] = 1;
             }
-            else if (MacroData.Race == SC2APIProtocol.Race.Terran)
+            else if (MacroData.Race == Race.Terran)
             {
                 MacroData.DesiredProductionCounts[UnitTypes.TERRAN_COMMANDCENTER] = 1;
             }
-            else if (MacroData.Race == SC2APIProtocol.Race.Zerg)
+            else if (MacroData.Race == Race.Zerg)
             {
                 MacroData.DesiredProductionCounts[UnitTypes.ZERG_HATCHERY] = 1;
-            }
-
-            if (MicroTaskData.ContainsKey(typeof(AttackTask).Name))
-            {
-                MicroTaskData[typeof(AttackTask).Name].Enable();
             }
         }
 

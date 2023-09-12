@@ -61,10 +61,10 @@
                     MacroData.DesiredDefensiveBuildingsCounts[UnitTypes.PROTOSS_SHIELDBATTERY] = 1;
                 }
 
-                MacroData.DesiredPylonsAtDefensivePoint = 1;
-                MacroData.DesiredPylonsAtEveryBase = 1;
-                MacroData.DesiredPylonsAtNextBase = 1;
-                MacroData.DesiredPylonsAtEveryMineralLine = 1;
+                MacroData.ProtossMacroData.DesiredPylonsAtDefensivePoint = 1;
+                MacroData.ProtossMacroData.DesiredPylonsAtEveryBase = 1;
+                MacroData.ProtossMacroData.DesiredPylonsAtNextBase = 1;
+                MacroData.ProtossMacroData.DesiredPylonsAtEveryMineralLine = 1;
 
                 MacroData.DesiredDefensiveBuildingsAtDefensivePoint[UnitTypes.PROTOSS_PHOTONCANNON] = 1;
                 MacroData.DesiredDefensiveBuildingsAtDefensivePoint[UnitTypes.PROTOSS_SHIELDBATTERY] = 1;

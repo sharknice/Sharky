@@ -17,7 +17,7 @@
 
             if (MapDataService.MapData.PathData == null) { return null; }
 
-            var startPaths = MapDataService.MapData.PathData.Where(data => data.Path.Any(p => Vector2.DistanceSquared(p, start) <= 25 && MapDataService.MapHeight(p) == startHeight));
+            var startPaths = MapDataService.MapData.PathData.Where(data => data.Path.Any(p => Vector2.DistanceSquared(p, start) <= 25 && MapDataService.MapHeight(p) == startHeight) && data.Path.Any(p => Vector2.DistanceSquared(p, end) <= 25 && MapDataService.MapHeight(p) == endHeight));
             var best = startPaths.FirstOrDefault();
             if (best == null)
             {
@@ -34,8 +34,13 @@
         protected PathData GetPathData(Vector2 start, Vector2 end, int startHeight, int endHeight, PathData best)
         {
             List<Vector2> path;
-            var pathStart = best.Path.OrderBy(p => Vector2.DistanceSquared(p, start)).FirstOrDefault(p => MapDataService.MapHeight(p) == startHeight);
-            var pathEnd = best.Path.OrderBy(p => Vector2.DistanceSquared(p, end)).FirstOrDefault(p => MapDataService.MapHeight(p) == endHeight);
+            var pathStart = best.Path.Where(p => MapDataService.MapHeight(p) == startHeight).OrderBy(p => Vector2.DistanceSquared(p, start)).FirstOrDefault();
+            var pathEnd = best.Path.Where(p => MapDataService.MapHeight(p) == endHeight).OrderBy(p => Vector2.DistanceSquared(p, end)).FirstOrDefault();
+
+            if (pathStart == Vector2.Zero || pathEnd == Vector2.Zero)
+            {
+                return null;
+            }
 
             // return the list from start to end, path may need to be reversed
             var startIndex = best.Path.FindIndex(p => p == pathStart);

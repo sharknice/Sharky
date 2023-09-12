@@ -1,4 +1,6 @@
-﻿namespace Sharky.MicroTasks
+﻿using System.ComponentModel.Design;
+
+namespace Sharky.MicroTasks
 {
     public class WorkerScoutGasStealTask : MicroTask
     {
@@ -23,6 +25,7 @@
         protected ActiveUnitData ActiveUnitData;
         protected SharkyOptions SharkyOptions;
         protected IBuildingBuilder BuildingBuilder;
+        MicroTaskData MicroTaskData;
 
         protected MineralWalker MineralWalker;
 
@@ -50,6 +53,7 @@
             MineralWalker = defaultSharkyBot.MineralWalker;
             BuildingBuilder = defaultSharkyBot.BuildingBuilder;
             SharkyOptions = defaultSharkyBot.SharkyOptions;
+            MicroTaskData = defaultSharkyBot.MicroTaskData;
 
             UnitCommanders = new List<UnitCommander>();
 
@@ -90,6 +94,7 @@
                             var match = finishedBuilder.Value.UnitCalculation.NearbyAllies.Any(a => a.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && a.Unit.Pos.X == pos.TargetWorldSpacePos.X && a.Unit.Pos.Y == pos.TargetWorldSpacePos.Y);
                             if (match)
                             {
+                                MicroTaskData[typeof(MiningTask).Name].StealUnit(finishedBuilder.Value);
                                 finishedBuilder.Value.Claimed = true;
                                 finishedBuilder.Value.UnitRole = UnitRole.Scout;
                                 UnitCommanders.Add(finishedBuilder.Value);

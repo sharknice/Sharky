@@ -26,7 +26,7 @@
 
         public override void StartBuild(int frame)
         {
-            MacroData.DesiredPylonsAtDefensivePoint = 0;
+            MacroData.ProtossMacroData.DesiredPylonsAtDefensivePoint = 0;
             MacroData.DesiredDefensiveBuildingsAtDefensivePoint[UnitTypes.PROTOSS_SHIELDBATTERY] = 0;
 
             base.StartBuild(frame);

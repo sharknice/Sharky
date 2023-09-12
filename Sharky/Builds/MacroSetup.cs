@@ -21,15 +21,15 @@
 
             if (macroData.Race == Race.Protoss)
             {
-                macroData.NexusUnits = new List<UnitTypes> { UnitTypes.PROTOSS_PROBE, UnitTypes.PROTOSS_MOTHERSHIP };
-                macroData.GatewayUnits = new List<UnitTypes> { UnitTypes.PROTOSS_ZEALOT, UnitTypes.PROTOSS_STALKER, UnitTypes.PROTOSS_SENTRY, UnitTypes.PROTOSS_ADEPT, UnitTypes.PROTOSS_HIGHTEMPLAR, UnitTypes.PROTOSS_DARKTEMPLAR };
-                macroData.RoboticsFacilityUnits = new List<UnitTypes> { UnitTypes.PROTOSS_OBSERVER, UnitTypes.PROTOSS_IMMORTAL, UnitTypes.PROTOSS_WARPPRISM, UnitTypes.PROTOSS_COLOSSUS, UnitTypes.PROTOSS_DISRUPTOR };
-                macroData.StargateUnits = new List<UnitTypes> { UnitTypes.PROTOSS_PHOENIX, UnitTypes.PROTOSS_ORACLE, UnitTypes.PROTOSS_VOIDRAY, UnitTypes.PROTOSS_TEMPEST, UnitTypes.PROTOSS_CARRIER };
+                macroData.ProtossMacroData.NexusUnits = new List<UnitTypes> { UnitTypes.PROTOSS_PROBE, UnitTypes.PROTOSS_MOTHERSHIP };
+                macroData.ProtossMacroData.GatewayUnits = new List<UnitTypes> { UnitTypes.PROTOSS_ZEALOT, UnitTypes.PROTOSS_STALKER, UnitTypes.PROTOSS_SENTRY, UnitTypes.PROTOSS_ADEPT, UnitTypes.PROTOSS_HIGHTEMPLAR, UnitTypes.PROTOSS_DARKTEMPLAR };
+                macroData.ProtossMacroData.RoboticsFacilityUnits = new List<UnitTypes> { UnitTypes.PROTOSS_OBSERVER, UnitTypes.PROTOSS_IMMORTAL, UnitTypes.PROTOSS_WARPPRISM, UnitTypes.PROTOSS_COLOSSUS, UnitTypes.PROTOSS_DISRUPTOR };
+                macroData.ProtossMacroData.StargateUnits = new List<UnitTypes> { UnitTypes.PROTOSS_PHOENIX, UnitTypes.PROTOSS_ORACLE, UnitTypes.PROTOSS_VOIDRAY, UnitTypes.PROTOSS_TEMPEST, UnitTypes.PROTOSS_CARRIER };
 
-                macroData.Units.AddRange(macroData.NexusUnits);
-                macroData.Units.AddRange(macroData.GatewayUnits);
-                macroData.Units.AddRange(macroData.RoboticsFacilityUnits);
-                macroData.Units.AddRange(macroData.StargateUnits);
+                macroData.Units.AddRange(macroData.ProtossMacroData.NexusUnits);
+                macroData.Units.AddRange(macroData.ProtossMacroData.GatewayUnits);
+                macroData.Units.AddRange(macroData.ProtossMacroData.RoboticsFacilityUnits);
+                macroData.Units.AddRange(macroData.ProtossMacroData.StargateUnits);
                 macroData.Units.Add(UnitTypes.PROTOSS_ARCHON);
             }
             else if (macroData.Race == Race.Terran)

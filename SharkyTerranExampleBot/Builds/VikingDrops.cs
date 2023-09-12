@@ -4,6 +4,7 @@ using Sharky.Builds;
 using Sharky.Builds.Terran;
 using Sharky.DefaultBot;
 using SharkyTerranExampleBot.Builds.BuildServices;
+using SharkyTerranExampleBot.MicroTasks;
 
 namespace SharkyTerranExampleBot.Builds
 {
@@ -23,10 +24,7 @@ namespace SharkyTerranExampleBot.Builds
             BuildOptions.StrictGasCount = true;
             MacroData.DesiredGases = 0;
 
-            if (!MicroTaskData["VikingDropTask"].Enabled)
-            {
-                MicroTaskData["VikingDropTask"].Enable();
-            }
+            MicroTaskData[typeof(VikingDropTask).Name].Enable();          
         }
 
         public override void OnFrame(ResponseObservation observation)

@@ -32,17 +32,11 @@
                 desiredUnitsClaim = new DesiredUnitsClaim(UnitTypes.PROTOSS_STALKER, 1);
             }
 
-            if (MicroTaskData.ContainsKey("DefenseSquadTask"))
-            {
-                var defenseSquadTask = (DefenseSquadTask)MicroTaskData["DefenseSquadTask"];
-                defenseSquadTask.DesiredUnitsClaims = new List<DesiredUnitsClaim> { desiredUnitsClaim };
-                defenseSquadTask.Enable();
+            var defenseSquadTask = (DefenseSquadTask)MicroTaskData[typeof(DefenseSquadTask).Name];
+            defenseSquadTask.DesiredUnitsClaims = new List<DesiredUnitsClaim> { desiredUnitsClaim };
+            defenseSquadTask.Enable();
 
-                if (MicroTaskData.ContainsKey("AttackTask"))
-                {
-                    MicroTaskData["AttackTask"].ResetClaimedUnits();
-                }
-            }
+            MicroTaskData[typeof(AttackTask).Name].ResetClaimedUnits();
         }
 
         public override void OnFrame(ResponseObservation observation)

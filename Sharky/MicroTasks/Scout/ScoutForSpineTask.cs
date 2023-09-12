@@ -46,7 +46,7 @@
             {
                 if ((!commander.Value.Claimed || commander.Value.UnitRole == UnitRole.Minerals || commander.Value.UnitRole == UnitRole.None) && commander.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker))
                 {
-                    MicroTaskData["MiningTask"].StealUnit(commander.Value);
+                    MicroTaskData[typeof(MiningTask).Name].StealUnit(commander.Value);
 
                     commander.Value.Claimed = true;
                     commander.Value.UnitRole = UnitRole.Scout;
