@@ -12,6 +12,7 @@
         protected TagService TagService;
         protected ChatService ChatService;
         protected UnitCountService UnitCountService;
+        protected RequirementService RequirementService;
 
         protected FrameToTimeConverter FrameToTimeConverter;
         
@@ -37,6 +38,7 @@
             FrameToTimeConverter = defaultSharkyBot.FrameToTimeConverter;
             BuildingRequestCancellingService = defaultSharkyBot.BuildingRequestCancellingService;
             UpgradeRequestCancellingService = defaultSharkyBot.UpgradeRequestCancellingService;
+            RequirementService = defaultSharkyBot.RequirementService;
 
             if (defaultSharkyBot.MicroTaskData.ContainsKey(typeof(PrePositionBuilderTask).Name))
             {

@@ -27,9 +27,9 @@
         {
         }
 
-        public override IEnumerable<SC2APIProtocol.Action> PerformActions(int frame)
+        public override IEnumerable<SC2Action> PerformActions(int frame)
         {
-            var commands = new List<SC2APIProtocol.Action>();
+            var commands = new List<SC2Action>();
 
             if (MacroData.Minerals < 100 || MacroData.FoodLeft < 2) { return commands; }
 

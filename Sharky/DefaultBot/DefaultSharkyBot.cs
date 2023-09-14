@@ -64,6 +64,7 @@
         public RecordService RecordService { get; set; }
         public IBuildDecisionService BuildDecisionService { get; set; }
         public ProxyLocationService ProxyLocationService { get; set; }
+        public RequirementService RequirementService { get; set; }
         public UnitCountService UnitCountService { get; set; }
         public DamageService DamageService { get; set; }
         public TargetingService TargetingService { get; set; }
@@ -94,6 +95,7 @@
         public IBuildingPlacement TerranBuildingPlacement { get; set; }
         public IBuildingPlacement ProtossDefensiveGridPlacement { get; set; }
         public IBuildingPlacement ProtossProxyGridPlacement { get; set; }
+        public IBuildingPlacement GatewayCannonPlacement { get; set; }
         public IBuildingPlacement ProtectNexusPylonPlacement { get; set; }
         public IBuildingPlacement ProtectNexusCannonPlacement { get; set; }
         public IBuildingPlacement ProtectNexusBatteryPlacement { get; set; }
@@ -204,7 +206,8 @@
             SharkyAdvancedPathFinder = new SharkyAdvancedPathFinder(new Roy_T.AStar.Paths.PathFinder(), MapData, MapDataService, DebugService);
             NoPathFinder = new SharkyNoPathFinder();
 
-            UnitCountService = new UnitCountService(ActiveUnitData, SharkyUnitData, FrameToTimeConverter, SharkyOptions);
+            RequirementService = new RequirementService(ActiveUnitData, SharkyUnitData);
+            UnitCountService = new UnitCountService(ActiveUnitData, SharkyUnitData, FrameToTimeConverter);
             DamageService = new DamageService();
             BuildingService = new BuildingService(MapData, ActiveUnitData, TargetingData, BaseData, SharkyUnitData);
 
@@ -241,6 +244,7 @@
             ProtossPylonGridPlacement = new ProtossPylonGridPlacement(BaseData, MapDataService, DebugService, BuildingService);
             ProtossProductionGridPlacement = new ProtossProductionGridPlacement(BaseData, ActiveUnitData, MapDataService, DebugService, BuildingService);
             TerranProductionGridPlacement = new TerranProductionGridPlacement(BaseData, MapDataService, DebugService, BuildingService);
+            GatewayCannonPlacement = new GatewayCannonPlacement(this);
             ProtectNexusPylonPlacement = new ProtectNexusPylonPlacement(this);
             ProtectNexusCannonPlacement = new ProtectNexusCannonPlacement(this);
             ProtectNexusBatteryPlacement = new ProtectNexusBatteryPlacement(this);

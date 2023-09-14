@@ -61,6 +61,19 @@
                 }
             }
 
+            if (commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.VOIDRAYSWARMDAMAGEBOOST))
+            {
+                if (!commander.UnitCalculation.EnemiesInRange.Any(e => e.Attributes.Contains(SC2Attribute.Armored)))
+                {
+                    if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.Retreat || !commander.UnitCalculation.NearbyEnemies.Any(e => e.Attributes.Contains(SC2Attribute.Armored)))
+                    {
+                        TagService.TagAbility("cancel_prismatic");
+                        action = commander.Order(frame, Abilities.CANCEL);
+                        return true;
+                    }
+                }
+            }
+
             return false;
         }
 

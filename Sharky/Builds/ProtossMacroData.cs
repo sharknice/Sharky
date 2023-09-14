@@ -17,5 +17,7 @@
         public int DesiredExtraBaseSimCityPylons;
         public int DesiredExtraBaseSimCityCannons;
         public int DesiredExtraBaseSimCityBatteries;
+
+        public bool ExtraBasesGatewayCannonSimCity;
     }
 }

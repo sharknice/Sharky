@@ -5,14 +5,12 @@
         ActiveUnitData ActiveUnitData;
         SharkyUnitData SharkyUnitData;
         FrameToTimeConverter FrameToTimeConverter;
-        SharkyOptions SharkyOptions;
 
-        public UnitCountService(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, FrameToTimeConverter frameToTimeConverter, SharkyOptions sharkyOptions)
+        public UnitCountService(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, FrameToTimeConverter frameToTimeConverter)
         {
             ActiveUnitData = activeUnitData;
             SharkyUnitData = sharkyUnitData;
             FrameToTimeConverter = frameToTimeConverter;
-            SharkyOptions = sharkyOptions;
         }
 
         public int Count(UnitTypes unitType)
