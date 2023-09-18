@@ -462,30 +462,31 @@
                 {
                     if (MacroData.Minerals >= 100 && ProbeCommander.UnitCalculation.NearbyEnemies.Any(e => (e.Unit.UnitType == (uint)UnitTypes.ZERG_ROACH || e.Unit.UnitType == (uint)UnitTypes.ZERG_ZERGLING) && e.FrameLastSeen > frame - 50 && Vector2.DistanceSquared(WallData.Block.ToVector2(), e.Position) < 25))
                     {
-                        Console.WriteLine("ProtossDoorTask: Blocking Wall with pylon");
-                        var probeCommand = ProbeCommander.Order(frame, Abilities.BUILD_PYLON, WallData.Block);
-                        if (probeCommand != null)
+                        if (ProbeCommander.UnitCalculation.NearbyAllies.Count(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_PHOTONCANNON && a.Unit.BuildProgress == 1) < ProbeCommander.UnitCalculation.NearbyEnemies.Count(e => (e.Unit.UnitType == (uint)UnitTypes.ZERG_ROACH || e.Unit.UnitType == (uint)UnitTypes.ZERG_ZERGLING)))
                         {
-                            commands.AddRange(probeCommand);
-                        }
+                            Console.WriteLine("ProtossDoorTask: Blocking Wall with pylon");
+                            var probeCommand = ProbeCommander.Order(frame, Abilities.BUILD_PYLON, WallData.Block);
+                            if (probeCommand != null)
+                            {
+                                commands.AddRange(probeCommand);
+                            }
 
-                        return commands;
+                            return commands;
+                        }
                     }
-                    else
+
+                    var spot = ProbeSpot;
+                    if (MacroData.Minerals < 100)
                     {
-                        var spot = ProbeSpot;
-                        if (MacroData.Minerals < 100)
-                        {
-                            spot = WallData.Block;
-                        }
-                        var probeCommand = ProbeCommander.Order(frame, Abilities.MOVE, spot);
-                        if (probeCommand != null)
-                        {
-                            commands.AddRange(probeCommand);
-                        }
-
-                        return commands;
+                        spot = WallData.Block;
                     }
+                    var probeCommandM = ProbeCommander.Order(frame, Abilities.MOVE, spot);
+                    if (probeCommandM != null)
+                    {
+                        commands.AddRange(probeCommandM);
+                    }
+
+                    return commands;               
                 }
             }
             return commands;

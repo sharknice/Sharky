@@ -173,7 +173,7 @@
                 return true;
             }
 
-            if (BaseData.SelfBases.All(b => !b.MineralMiningInfo.Any(m => m.Workers.Count() > 0)))
+            if (BaseData.SelfBases.All(b => !b.MineralMiningInfo.Any(m => m.Workers.Any())))
             {
                 TargetingData.AttackState = AttackState.Kill;
                 DebugService.DrawText("Attacking: not mining");

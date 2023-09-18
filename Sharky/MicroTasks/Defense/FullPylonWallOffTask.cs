@@ -14,7 +14,7 @@
 
         public override void ClaimUnits(Dictionary<ulong, UnitCommander> commanders)
         {
-            if (UnitCommanders.Count() < 1 && ProbeSpot != null && !Complete)
+            if (!UnitCommanders.Any() && ProbeSpot != null && !Complete)
             {
                 foreach (var commander in commanders.OrderBy(c => c.Value.Claimed).ThenBy(c => c.Value.UnitCalculation.Unit.BuffIds.Count()).ThenBy(c => DistanceToResourceCenter(c)))
                 {

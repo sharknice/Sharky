@@ -267,7 +267,7 @@
                 }
 
 
-                if (commander.RetreatPath.Count() < 1 || Vector2.DistanceSquared(commander.RetreatPath.Last(), new Vector2(StagingPoint.X, StagingPoint.Y)) > 9)
+                if (!commander.RetreatPath.Any() || Vector2.DistanceSquared(commander.RetreatPath.Last(), new Vector2(StagingPoint.X, StagingPoint.Y)) > 9)
                 {
                     if (Left || Right)
                     {

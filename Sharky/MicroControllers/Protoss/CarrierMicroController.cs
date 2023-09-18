@@ -30,7 +30,7 @@ namespace Sharky.MicroControllers.Protoss
             return base.Support(commander, supportTargets, target, defensivePoint, groupCenter, frame);
         }
 
-        protected override bool WeaponReady(UnitCommander commander, int frame)
+        public override bool WeaponReady(UnitCommander commander, int frame)
         {
             return true;
         }

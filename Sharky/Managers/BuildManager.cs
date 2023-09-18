@@ -133,7 +133,7 @@
             var frame = (int)observation.Observation.GameLoop;
 
             var counterTransition = CurrentBuild.CounterTransition(frame);
-            if (counterTransition != null && counterTransition.Count() > 0)
+            if (counterTransition != null && counterTransition.Any())
             {
                 BuildSequence = counterTransition;
                 SwitchBuild(BuildSequence[0], frame);

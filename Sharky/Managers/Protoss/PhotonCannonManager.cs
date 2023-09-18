@@ -43,7 +43,7 @@
             var existingAttackOrder = commander.UnitCalculation.Unit.Orders.Where(o => o.AbilityId == (uint)Abilities.ATTACK || o.AbilityId == (uint)Abilities.ATTACK_ATTACK).FirstOrDefault();
 
             var oneShotKills = commander.UnitCalculation.EnemiesInRange.Where(a => a.FrameLastSeen == frame && a.Unit.Health + a.Unit.Shield < 20);
-            if (oneShotKills.Count() > 0)
+            if (oneShotKills.Any())
             {
                 if (existingAttackOrder != null)
                 {

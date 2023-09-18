@@ -40,7 +40,7 @@
 
         public override void ClaimUnits(Dictionary<ulong, UnitCommander> commanders)
         {
-            if (UnitCommanders.Count() < 1 && BuildPosition != null)
+            if (!UnitCommanders.Any() && BuildPosition != null)
             {
                 if (started)
                 {

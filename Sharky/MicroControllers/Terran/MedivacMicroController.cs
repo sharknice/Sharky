@@ -7,7 +7,7 @@
         {
         }
 
-        protected override bool OffensiveAbility(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
+        public override bool OffensiveAbility(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -33,7 +33,7 @@
             return false;
         }
 
-        protected override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
+        public override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -48,7 +48,7 @@
         }
 
 
-        protected override bool WeaponReady(UnitCommander commander, int frame)
+        public override bool WeaponReady(UnitCommander commander, int frame)
         {
             return false;
         }
@@ -141,7 +141,7 @@
                     && u.NearbyEnemies.Any(e => DistanceSquared(u, e) < 225)
                 ).OrderBy(u => DistanceSquared(u.NearbyEnemies.OrderBy(e => DistanceSquared(e, u)).First(), u));
 
-            if (friendlies.Count() > 0)
+            if (friendlies.Any())
             {
                 return friendlies.First();
             }
@@ -151,13 +151,13 @@
             //get ally closest to target
             friendlies = supportableUnits.Where(u => u.UnitClassifications.Contains(UnitClassification.ArmyUnit)).OrderBy(u => DistanceSquared(u.NearbyEnemies.OrderBy(e => DistanceSquared(e, u)).FirstOrDefault(), u));
 
-            if (friendlies.Count() > 0)
+            if (friendlies.Any())
             {
                 return friendlies.First();
             }
 
 
-            if (friendlies.Count() > 0)
+            if (friendlies.Any())
             {
                 return friendlies.First();
             }

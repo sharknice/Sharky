@@ -114,7 +114,7 @@
                 return true;
             }
 
-            if (commander.UnitCalculation.EnemiesThreateningDamage.Count() > 0 && !commander.UnitCalculation.TargetPriorityCalculation.Overwhelm && MicroPriority != MicroPriority.AttackForward && commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.Retreat)
+            if (commander.UnitCalculation.EnemiesThreateningDamage.Any() && !commander.UnitCalculation.TargetPriorityCalculation.Overwhelm && MicroPriority != MicroPriority.AttackForward && commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.Retreat)
             {
                 return false;
             }
@@ -280,7 +280,7 @@
             return true;
         }
 
-        protected override bool WeaponReady(UnitCommander commander, int frame)
+        public override bool WeaponReady(UnitCommander commander, int frame)
         {
             return commander.UnitCalculation.Unit.WeaponCooldown < 2;
         }
@@ -320,7 +320,7 @@
             return action;
         }
 
-        protected override bool AvoidDeceleration(UnitCommander commander, Point2D target, bool attackMove, int frame, out List<SC2APIProtocol.Action> action)
+        public override bool AvoidDeceleration(UnitCommander commander, Point2D target, bool attackMove, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = commander.Order(frame, Abilities.MOVE, target, allowSpam: true);
             return true;

@@ -143,11 +143,11 @@
                 (e.NearbyEnemies.Any(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter) || u.UnitClassifications.Contains(UnitClassification.ProductionStructure) || u.UnitClassifications.Contains(UnitClassification.DefensiveStructure))) 
                 && (e.NearbyEnemies.Count(b => b.Attributes.Contains(SC2APIProtocol.Attribute.Structure)) >= e.NearbyAllies.Count(b => b.Attributes.Contains(SC2APIProtocol.Attribute.Structure)))).Where(e => e.Unit.UnitType != (uint)UnitTypes.TERRAN_KD8CHARGE);
 
-            if (attackingEnemies.Count() > 0)
+            if (attackingEnemies.Any())
             {
                 var attackingEnemyVector = TargetingService.GetArmyPoint(attackingEnemies).ToVector2();
 
-                if (attackingEnemies.Count() > 0)
+                if (attackingEnemies.Any())
                 {
                     defenders = UnitCommanders.Where(c => Vector2.DistanceSquared(c.UnitCalculation.Position, attackingEnemyVector) < Vector2.DistanceSquared(c.UnitCalculation.Position, LoadingLocation.ToVector2()));
                     if (defenders.Any())
@@ -198,7 +198,7 @@
                     actions.AddRange(MicroController.Attack(attackers, LoadingLocation, LoadingLocation, null, frame));
                 }
             }
-            else if (warpPrisms.Count() > 0)
+            else if (warpPrisms.Any())
             {
                 foreach (var commander in warpPrisms)
                 {
@@ -378,7 +378,7 @@
                 }
             }
 
-            if (warpPrism.UnitCalculation.Unit.Passengers.Count() > 0)
+            if (warpPrism.UnitCalculation.Unit.Passengers.Any())
             {
                 if (AreaService.InArea(warpPrism.UnitCalculation.Unit.Pos, DropArea))
                 {
@@ -395,14 +395,14 @@
                 return WarpPrismMicroController.Retreat(warpPrism, DefensiveLocation, null, frame);
             }
 
-            if (droppedAttackers.Count() > 0)
+            if (droppedAttackers.Any())
             {
                 List<SC2APIProtocol.Action> action = null;
                 WarpPrismMicroController.SupportArmy(warpPrism, TargetLocation, DropLocation, null, frame, out action, droppedAttackers.Select(c => c.UnitCalculation));
                 return action;
             }
 
-            if (unDroppedAttackers.Count() > 0)
+            if (unDroppedAttackers.Any())
             {
                 List<SC2APIProtocol.Action> action = null;
                 WarpPrismMicroController.SupportArmy(warpPrism, TargetLocation, DefensiveLocation, null, frame, out action, unDroppedAttackers.Select(c => c.UnitCalculation));

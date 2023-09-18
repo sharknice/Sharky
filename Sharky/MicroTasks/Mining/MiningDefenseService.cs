@@ -44,7 +44,7 @@
                 if (selfBase.ResourceCenter != null && ActiveUnitData.Commanders.ContainsKey(selfBase.ResourceCenter.Tag) && ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Count(e => e.Unit.UnitType != (uint)UnitTypes.TERRAN_REAPER) > 0) // reapers are handled by the ReaperMiningDefenseTask
                 {
                     var flyingBuildings = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Take(25).Where(u => u.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && u.Unit.IsFlying);
-                    if (flyingBuildings.Count() > 0)
+                    if (flyingBuildings.Any())
                     {
                         var nearbyWorkers = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyAllies.Take(25).Where(a => a.UnitClassifications.Contains(UnitClassification.Worker));
                         var commanders = ActiveUnitData.Commanders.Where(c => nearbyWorkers.Any(w => w.Unit.Tag == c.Key));
@@ -69,7 +69,7 @@
                         var enemyGroundDamage = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Take(25).Where(e => e.DamageGround).Sum(e => e.Damage);
                         var nearbyWorkers = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyAllies.Take(25).Where(a => a.UnitClassifications.Contains(UnitClassification.Worker));
                         var commanders = ActiveUnitData.Commanders.Where(c => nearbyWorkers.Any(w => w.Unit.Tag == c.Key));
-                        if (commanders.Count() < 1) { continue; }
+                        if (!commanders.Any()) { continue; }
 
                         if (ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyAllies.Take(25).Where(e => e.DamageGround || e.UnitClassifications.Contains(UnitClassification.Worker)).Sum(e => e.Damage) > enemyGroundDamage || BaseData.SelfBases.Count() == 1)
                         {
@@ -156,7 +156,7 @@
                                 desiredWorkers = (enemyBuildings.Count() * 4) + workers.Count();
 
                                 var enemy = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Where(u => !u.Unit.IsFlying).OrderBy(u => Vector2.DistanceSquared(u.Position, new Vector2(selfBase.Location.X, selfBase.Location.Y))).FirstOrDefault();
-                                if (enemyBuildings.Count() > 0 && !enemyBuildings.Any(u => u.Unit.UnitType == (uint)UnitTypes.PROTOSS_PHOTONCANNON && u.Unit.Shield == u.Unit.ShieldMax && u.Unit.BuildProgress == 1))
+                                if (enemyBuildings.Any() && !enemyBuildings.Any(u => u.Unit.UnitType == (uint)UnitTypes.PROTOSS_PHOTONCANNON && u.Unit.Shield == u.Unit.ShieldMax && u.Unit.BuildProgress == 1))
                                 { // TODO: test this
                                     while (commanders.Count(c => c.Value.UnitRole == UnitRole.Defend) < desiredWorkers && commanders.Count(c => c.Value.UnitRole == UnitRole.Defend) < commanders.Count())
                                     {
@@ -324,7 +324,7 @@
                             continue;
                         }
                     }
-                    else if (commander.UnitCalculation.EnemiesThreateningDamage.Count() > 0 && (commander.UnitCalculation.Unit.Health < commander.UnitCalculation.Unit.HealthMax || commander.UnitCalculation.Unit.Shield < commander.UnitCalculation.Unit.ShieldMax))
+                    else if (commander.UnitCalculation.EnemiesThreateningDamage.Any() && (commander.UnitCalculation.Unit.Health < commander.UnitCalculation.Unit.HealthMax || commander.UnitCalculation.Unit.Shield < commander.UnitCalculation.Unit.ShieldMax))
                     {
                         if (commander.UnitCalculation.Unit.Health + commander.UnitCalculation.Unit.Shield <= (commander.UnitCalculation.EnemiesThreateningDamage.First().Damage * 2) || commander.UnitCalculation.UnitTypeData.MovementSpeed < commander.UnitCalculation.EnemiesThreateningDamage.First().UnitTypeData.MovementSpeed)
                         {
@@ -378,7 +378,7 @@
                             actions.AddRange(action);
                         }
                     }
-                    else if (commander.UnitRole != UnitRole.Build && commander.UnitCalculation.Unit.WeaponCooldown == 0 && commander.UnitCalculation.EnemiesInRange.Count() > 0)
+                    else if (commander.UnitRole != UnitRole.Build && commander.UnitCalculation.Unit.WeaponCooldown == 0 && commander.UnitCalculation.EnemiesInRange.Any())
                     {
                         var action = commander.Order(frame, Abilities.ATTACK, null, commander.UnitCalculation.EnemiesInRange.OrderBy(e => e.Unit.Health + e.Unit.Shield).FirstOrDefault().Unit.Tag);
                         if (action != null)

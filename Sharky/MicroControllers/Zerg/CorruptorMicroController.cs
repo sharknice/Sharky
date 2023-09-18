@@ -7,7 +7,7 @@
         {
         }
 
-        protected override bool OffensiveAbility(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
+        public override bool OffensiveAbility(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -17,7 +17,7 @@
                 return true;
             }
 
-            if (commander.UnitCalculation.EnemiesInRange.Count() > 0 || commander.UnitCalculation.EnemiesInRangeOfAvoid.Count() > 0)
+            if (commander.UnitCalculation.EnemiesInRange.Any() || commander.UnitCalculation.EnemiesInRangeOfAvoid.Any())
             {
                 return false;
             }

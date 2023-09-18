@@ -279,6 +279,15 @@
             return MapData.Map[x,y].TerrainHeight;
         }
 
+        public bool IsOnCreep(Point2D point)
+        {
+            if (point == null || point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
+            {
+                return false;
+            }
+            return MapData.Map[(int)point.X, (int)point.Y].HasCreep;
+        }
+
         public bool IsOnCreep(Point point)
         {
             if (point == null || point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
@@ -295,6 +304,15 @@
                 return 0;
             }
             return MapData.Map[(int)point.X,(int)point.Y].EnemyAirDpsInRange;
+        }
+
+        public float EnemyAirDpsInRange(Point2D point)
+        {
+            if (point == null || point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
+            {
+                return 0;
+            }
+            return MapData.Map[(int)point.X, (int)point.Y].EnemyAirDpsInRange;
         }
 
         public float EnemyGroundSplashDpsInRange(Point point)

@@ -130,7 +130,7 @@
 
             var attacks = commander.UnitCalculation.NearbyEnemies.Take(25).Where(u => AttackersFilter(commander, u));
 
-            if (attacks.Count() > 0)
+            if (attacks.Any())
             {
                 var damages = new Dictionary<ulong, float>();
                 foreach (var enemyAttack in attacks.Where(e => !e.Unit.IsFlying))

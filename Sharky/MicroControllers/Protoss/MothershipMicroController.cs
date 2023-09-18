@@ -36,7 +36,7 @@
             return base.Support(commander, supportTargets, target, defensivePoint, groupCenter, frame);
         }
 
-        protected override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
+        public override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -54,7 +54,7 @@
             return false;
         }
 
-        bool TimeWarp(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
+        protected bool TimeWarp(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -81,10 +81,10 @@
 
         Point2D GetTimeWarpLocation(UnitCommander commander)
         {
-            var enemiesInRange = commander.UnitCalculation.NearbyEnemies.Take(25).Where(e => !e.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position) < TimeWarpRange * TimeWarpRange);
+            var enemiesInRange = commander.UnitCalculation.NearbyEnemies.Where(e => e.Damage > 0 && Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position) < TimeWarpRange * TimeWarpRange);
 
             var damageCounts = new Dictionary<Point, float>();
-            foreach (var enemyAttack in commander.UnitCalculation.NearbyEnemies)
+            foreach (var enemyAttack in enemiesInRange)
             {
                 float damageReduction = 0;
                 foreach (var hitEnemy in enemiesInRange)

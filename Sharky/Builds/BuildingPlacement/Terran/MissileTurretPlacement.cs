@@ -23,7 +23,7 @@
             var reference = new Vector2(x, y);
             var nearestBase = BaseData.BaseLocations.OrderBy(b => Vector2.DistanceSquared(new Vector2(b.Location.X, b.Location.Y), reference)).FirstOrDefault();
 
-            if (nearestBase != null && nearestBase.MineralLineLocation != null && nearestBase.MineralFields != null && nearestBase.MineralFields.Count() > 0)
+            if (nearestBase != null && nearestBase.MineralLineLocation != null && nearestBase.MineralFields != null && nearestBase.MineralFields.Any())
             {
                 var referenceAngle = GetAngle(nearestBase.Location.X, nearestBase.Location.Y, nearestBase.MineralLineLocation.X, nearestBase.MineralLineLocation.Y);
 

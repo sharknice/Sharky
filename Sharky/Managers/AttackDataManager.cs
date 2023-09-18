@@ -60,14 +60,14 @@
             }
 
             // attack if no workers mining minerals or if no bases
-            if (!BaseData.SelfBases.Any(b => b.MineralMiningInfo.Any(m => m.Workers.Count() > 0)))
+            if (!BaseData.SelfBases.Any(b => b.MineralMiningInfo.Any(m => m.Workers.Any())))
             {
                 AttackData.Attacking = true;
                 DebugService.DrawText("Attacking: no base");
                 return null;
             }
 
-            if (AttackTask.UnitCommanders.Count() < 1)
+            if (!AttackTask.UnitCommanders.Any())
             {
                 AttackData.Attacking = false;
                 if (AttackData.TargetPriorityCalculation != null)
@@ -82,7 +82,7 @@
             var enemyUnits = ActiveUnitData.EnemyUnits.Values.Where(e => (e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && Vector2.DistanceSquared(new Vector2(TargetingData.MainDefensePoint.X, TargetingData.MainDefensePoint.Y), e.Position) > 400)
             || (e.UnitClassifications.Contains(UnitClassification.DefensiveStructure) && Vector2.DistanceSquared(attackVector, e.Position) < 625));
 
-            if (enemyUnits.Count() < 1)
+            if (!enemyUnits.Any())
             {
                 var priority = TargetPriorityService.CalculateTargetPriority(AttackTask.UnitCommanders.Select(c => c.UnitCalculation), ActiveUnitData.EnemyUnits.Values.Where(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit)));
                 AttackData.TargetPriorityCalculation = priority;

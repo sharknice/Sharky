@@ -171,11 +171,11 @@
             return false;
         }
 
-        protected override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
+        public override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
-            if (commander.UnitCalculation.Unit.Health + commander.UnitCalculation.Unit.Shield < 6 && !(WeaponReady(commander, frame) && commander.UnitCalculation.EnemiesInRange.Count() > 0))
+            if (commander.UnitCalculation.Unit.Health + commander.UnitCalculation.Unit.Shield < 6 && !(WeaponReady(commander, frame) && commander.UnitCalculation.EnemiesInRange.Any()))
             {
                 if (AvoidDamage(commander, target, defensivePoint, frame, out action))
                 {
@@ -194,7 +194,7 @@
             return false;
         }
 
-        protected override bool WeaponReady(UnitCommander commander, int frame)
+        public override bool WeaponReady(UnitCommander commander, int frame)
         {
             return commander.UnitCalculation.Unit.WeaponCooldown < 1;
         }
@@ -208,10 +208,10 @@
             var attacks = commander.UnitCalculation.EnemiesInRange.Where(e => priorityAttacks.Any(p => p.Unit.Tag == e.Unit.Tag) && AttackersFilter(commander, e));
 
             UnitCalculation bestAttack = null;
-            if (attacks.Count() > 0)
+            if (attacks.Any())
             {
                 var oneShotKills = attacks.Where(a => a.Unit.Health + a.Unit.Shield < GetDamage(commander.UnitCalculation.Weapons, a.Unit, a.UnitTypeData));
-                if (oneShotKills.Count() > 0)
+                if (oneShotKills.Any())
                 {
                     if (existingAttackOrder != null)
                     {
@@ -243,7 +243,7 @@
             }
 
             attacks = priorityAttacks;
-            if (attacks.Count() > 0)
+            if (attacks.Any())
             {
                 bestAttack = attacks.OrderBy(a => Vector2.DistanceSquared(commander.UnitCalculation.Position, a.Position)).FirstOrDefault();
                 if (bestAttack != null)

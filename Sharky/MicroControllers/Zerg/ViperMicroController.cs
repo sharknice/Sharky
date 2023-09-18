@@ -50,7 +50,7 @@
         {
         }
 
-        protected override bool OffensiveAbility(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
+        public override bool OffensiveAbility(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -116,13 +116,13 @@
                         !enemyAttack.Unit.BuffIds.Contains((uint)Buffs.BLINDINGCLOUD) && !enemyAttack.Unit.BuffIds.Contains((uint)Buffs.BLINDINGCLOUDSTRUCTURE) &&
                                 InRange(enemyAttack.Position, commander.UnitCalculation.Position, 11 + enemyAttack.Unit.Radius + commander.UnitCalculation.Unit.Radius));
 
-            if (attacks.Count() > 0)
+            if (attacks.Any())
             {
                 var bestAttack = GetBestAttack(commander.UnitCalculation, attacks, attacks, 3);
                 if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.WinAir)
                 {
                     var airAttackers = attacks.Where(u => u.DamageAir);
-                    if (airAttackers.Count() > 0)
+                    if (airAttackers.Any())
                     {
                         var air = GetBestAttack(commander.UnitCalculation, airAttackers, attacks, 3);
                         if (air != null)
@@ -134,7 +134,7 @@
                 else if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.WinGround)
                 {
                     var groundAttackers = attacks.Where(u => u.DamageGround);
-                    if (groundAttackers.Count() > 0)
+                    if (groundAttackers.Any())
                     {
                         var ground = GetBestAttack(commander.UnitCalculation, groundAttackers, attacks, 3);
                         if (ground != null)
@@ -229,13 +229,13 @@
                         !enemyAttack.Unit.BuffIds.Contains((uint)Buffs.PARASITICBOMB) &&
                                 InRange(enemyAttack.Position, commander.UnitCalculation.Position, 12 + enemyAttack.Unit.Radius + commander.UnitCalculation.Unit.Radius));
 
-            if (attacks.Count() > 0)
+            if (attacks.Any())
             {
                 var bestAttack = GetBestAttackUnit(commander.UnitCalculation, attacks, attacks, 3);
                 if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.WinAir)
                 {
                     var airAttackers = attacks.Where(u => u.DamageAir);
-                    if (airAttackers.Count() > 0)
+                    if (airAttackers.Any())
                     {
                         var air = GetBestAttackUnit(commander.UnitCalculation, airAttackers, attacks, 3);
                         if (air > 0)
@@ -247,7 +247,7 @@
                 else if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.WinGround)
                 {
                     var groundAttackers = attacks.Where(u => u.DamageGround);
-                    if (groundAttackers.Count() > 0)
+                    if (groundAttackers.Any())
                     {
                         var ground = GetBestAttackUnit(commander.UnitCalculation, groundAttackers, attacks, 3);
                         if (ground > 0)
@@ -268,7 +268,7 @@
             return false;
         }
 
-        protected override bool WeaponReady(UnitCommander commander, int frame)
+        public override bool WeaponReady(UnitCommander commander, int frame)
         {
             return false;
         }

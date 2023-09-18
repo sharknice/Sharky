@@ -50,10 +50,10 @@
 
             foreach (var split in ArmySplits)
             {
-                if (split.SelfGroup.Count() > 0)
+                if (split.SelfGroup.Any())
                 {
                     var groupPoint = TargetingService.GetArmyPoint(split.SelfGroup);
-                    if (split.SelfGroup.Count() == 0)
+                    if (!split.SelfGroup.Any())
                     {
                         groupPoint = null;
                     }
@@ -82,7 +82,7 @@
                 }
             }
 
-            if (AvailableCommanders.Count() > 0)
+            if (AvailableCommanders.Any())
             {
                 var groupPoint = TargetingService.GetArmyPoint(AvailableCommanders);
                 if (AttackData.Attacking)
@@ -122,7 +122,7 @@
             foreach (var enemyGroup in enemyGroups)
             {
                 var selfGroup = DefenseService.GetDefenseGroup(enemyGroup, AvailableCommanders, defendToDeath);
-                if (selfGroup.Count() > 0)
+                if (selfGroup.Any())
                 {
                     AvailableCommanders.RemoveAll(a => selfGroup.Any(s => a.UnitCalculation.Unit.Tag == s.UnitCalculation.Unit.Tag));
                 }

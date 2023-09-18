@@ -38,13 +38,13 @@
             if (attacks.Count > 0)
             {
                 var oneShotKills = attacks.OrderBy(a => GetPurificationNovaDamage(a.Unit, SharkyUnitData.UnitData[(UnitTypes)a.Unit.UnitType])).ThenByDescending(u => u.Dps);
-                if (oneShotKills.Count() > 0)
+                if (oneShotKills.Any())
                 {
                     var bestAttack = GetBestAttack(commander.UnitCalculation, oneShotKills, attacks, range, frame);
                     if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.WinAir)
                     {
                         var airAttackers = oneShotKills.Where(u => u.DamageAir);
-                        if (airAttackers.Count() > 0)
+                        if (airAttackers.Any())
                         {
                             var air = GetBestAttack(commander.UnitCalculation, airAttackers, attacks, range, frame);
                             if (air != null)
@@ -56,7 +56,7 @@
                     else if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.WinGround)
                     {
                         var groundAttackers = oneShotKills.Where(u => u.DamageGround);
-                        if (groundAttackers.Count() > 0)
+                        if (groundAttackers.Any())
                         {
                             var ground = GetBestAttack(commander.UnitCalculation, groundAttackers, attacks, range, frame);
                             if (ground != null)

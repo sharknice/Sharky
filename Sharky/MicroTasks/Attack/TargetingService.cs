@@ -51,7 +51,7 @@
                 // can't find enemy base, choose a random base location
                 TargetingData.HiddenEnemyBase = true;
                 var bases = BaseData.BaseLocations.Where(b => !MapDataService.SelfVisible(b.Location));
-                if (bases.Count() == 0)
+                if (!bases.Any())
                 {
                     // find a random spot on the map and check there
                     return new Point2D { X = new Random().Next(0, MapDataService.MapData.MapWidth), Y = new Random().Next(0, MapDataService.MapData.MapHeight) };
@@ -78,11 +78,11 @@
         }
         Point2D GetArmyPoint(IEnumerable<Vector2> vectors, float trimRangeSquared)
         {
-            if (vectors.Count() > 0)
+            if (vectors.Any())
             {
                 var average = new Vector2(vectors.Average(v => v.X), vectors.Average(v => v.Y));
                 var trimmed = vectors.Where(v => Vector2.DistanceSquared(average, v) < trimRangeSquared);
-                if (trimmed.Count() > 0)
+                if (trimmed.Any())
                 {
                     var trimmedAverage = new Point2D { X = trimmed.Average(v => v.X), Y = trimmed.Average(v => v.Y) };
                     return trimmedAverage;

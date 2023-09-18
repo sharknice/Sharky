@@ -2,8 +2,8 @@
 {
     public class OracleMicroController : IndividualMicroController
     {
-        float RevelationRange = 9;
-        float RevelationRadius = 6;
+        protected float RevelationRange = 9;
+        protected float RevelationRadius = 6;
 
         StasisWardPlacement StasisWardPlacement;
 
@@ -13,7 +13,7 @@
             StasisWardPlacement = defaultSharkyBot.StasisWardPlacement;
         }
 
-        protected override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
+        public override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
             commander.SkipFrame = false;
@@ -109,11 +109,11 @@
 
         Point2D GetBestRevelationLocation(UnitCommander commander)
         {
-            var enemiesInRange = commander.UnitCalculation.NearbyEnemies.Take(25).Where(e => !e.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position) < RevelationRange * RevelationRange);
+            var enemiesInRange = commander.UnitCalculation.NearbyEnemies.Where(e => !e.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position) < RevelationRange * RevelationRange);
 
-            if (enemiesInRange.Count() == 0)
+            if (!enemiesInRange.Any())
             {
-                enemiesInRange = commander.UnitCalculation.NearbyEnemies.Take(25).Where(e => !e.Attributes.Contains(SC2APIProtocol.Attribute.Structure));
+                enemiesInRange = commander.UnitCalculation.NearbyEnemies.Where(e => !e.Attributes.Contains(SC2APIProtocol.Attribute.Structure));
                 if (enemiesInRange.Count() == 0)
                 {
                     return null;
@@ -121,7 +121,7 @@
             }
 
             var hitCounts = new Dictionary<Point, float>();
-            foreach (var enemyAttack in commander.UnitCalculation.NearbyEnemies.Take(25))
+            foreach (var enemyAttack in commander.UnitCalculation.NearbyEnemies)
             {
                 float hits = 0;
                 foreach (var hitEnemy in enemiesInRange)
@@ -139,7 +139,7 @@
             return new Point2D { X = position.X, Y = position.Y }; // TODO: if there are any cloaked units, go for the spot that hits the most cloaked units
         }
 
-        protected override bool WeaponReady(UnitCommander commander, int frame)
+        public override bool WeaponReady(UnitCommander commander, int frame)
         {
             if (commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.ORACLEWEAPON))
             {
@@ -179,7 +179,7 @@
             return true;
         }
 
-        protected override bool OffensiveAbility(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
+        public override bool OffensiveAbility(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 

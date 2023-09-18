@@ -20,17 +20,17 @@
                 return true;
             }
 
-            if (original.Wins.Count() > 0 && original.Losses.Count() == 0 && original.Ties.Count() == 0)
+            if (original.Wins.Any() && original.Losses.Count() == 0 && original.Ties.Count() == 0)
             {
                 return false; // always win, keep using it
             }
 
-            if (original.Losses.Count() > 0 && current.Losses.Count() == 0 && current.Ties.Count() == 0)
+            if (original.Losses.Any() && current.Losses.Count() == 0 && current.Ties.Count() == 0)
             {
                 return true; // not a perfect record, give another build a chance
             }
 
-            if (original.Losses.Count() == 0 && current.Losses.Count() > 0)
+            if (original.Losses.Count() == 0 && current.Losses.Any())
             {
                 return false; // if it has losses it isn't better than one without losses
             }
@@ -50,11 +50,11 @@
 
         protected bool WonLastGame(Record record)
         {
-            if (record.Wins.Count() > 0 && record.Losses.Count() == 0)
+            if (record.Wins.Any() && record.Losses.Count() == 0)
             {
                 return true;
             }
-            if (record.Wins.Count() > 0 && record.Losses.Count() > 0)
+            if (record.Wins.Any() && record.Losses.Any())
             {
                 return record.Wins.OrderByDescending(x => x).First() < record.Losses.OrderByDescending(x => x).First();
             }
@@ -75,7 +75,7 @@
             var record = RecordService.GetRecord(mapGames);
             Console.WriteLine($"Same enemy, same map: {record.Wins.Count()}-{record.Losses.Count()}-{record.Ties.Count()}");
             debugMessage.Add($"Same enemy, same map: {record.Wins.Count()}-{record.Losses.Count()}-{record.Ties.Count()}");
-            if (mapGames.Count() > 0)
+            if (mapGames.Any())
             {
                 // check games on this map
                 foreach (var buildSequence in buildSequences)
@@ -99,7 +99,7 @@
                 // check games on other maps
                 foreach (var buildSequence in buildSequences)
                 {
-                    if (RecordService.GetSequenceRecord(mapGames, buildSequence).Losses.Count() > 0) { continue; }
+                    if (RecordService.GetSequenceRecord(mapGames, buildSequence).Losses.Any()) { continue; }
                     var buildRecord = RecordService.GetSequenceRecord(enemyBot.Games.Where(g => g.EnemyRace == enemyRace), buildSequence);
                     Debug.WriteLine($"{string.Join(" ", buildSequence)} {buildRecord.Wins.Count()}-{buildRecord.Ties.Count()}-{buildRecord.Losses.Count()}");
                     if (BetterBuild(bestRecord, buildRecord))
@@ -123,7 +123,7 @@
                     // check games on this map from other bots of the same race
                     foreach (var buildSequence in buildSequences)
                     {
-                        if (RecordService.GetSequenceRecord(mapGames, buildSequence).Losses.Count() > 0) { continue; }
+                        if (RecordService.GetSequenceRecord(mapGames, buildSequence).Losses.Any()) { continue; }
                         var buildRecord = RecordService.GetSequenceRecord(enemyBots.SelectMany(b => b.Games).Where(g => g.EnemyRace == enemyRace).Where(g => g.MapName == map), buildSequence);
                         if (BetterBuild(bestRecord, buildRecord))
                         {
@@ -143,7 +143,7 @@
                     // check games on other maps from other bots of the same race
                     foreach (var buildSequence in buildSequences)
                     {
-                        if (RecordService.GetSequenceRecord(mapGames, buildSequence).Losses.Count() > 0) { continue; }
+                        if (RecordService.GetSequenceRecord(mapGames, buildSequence).Losses.Any()) { continue; }
                         var buildRecord = RecordService.GetSequenceRecord(enemyBots.SelectMany(b => b.Games).Where(g => g.EnemyRace == enemyRace), buildSequence);
                         if (BetterBuild(bestRecord, buildRecord))
                         {

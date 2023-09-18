@@ -116,6 +116,7 @@
                         }
                         else
                         {
+                            commander.Value.UnitRole = UnitRole.None;
                             SupportUnits.Add(commander.Value);
                         }
                     }
@@ -152,7 +153,7 @@
             if (claimedScvs < desiredScvs)
             {
                 var targetVector = new Vector2(TargetingData.AttackPoint.X, TargetingData.AttackPoint.Y);
-                foreach (var commander in commanders.Where(c => c.Value.Claimed && c.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_SCV && (c.Value.UnitRole == UnitRole.Minerals || c.Value.UnitRole == UnitRole.None) && c.Value.UnitCalculation.Unit.BuffIds.Count() == 0).OrderBy(c => Vector2.DistanceSquared(c.Value.UnitCalculation.Position, targetVector)))
+                foreach (var commander in commanders.Where(c => c.Value.Claimed && c.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_SCV && (c.Value.UnitRole == UnitRole.Minerals || c.Value.UnitRole == UnitRole.None) && !c.Value.UnitCalculation.Unit.BuffIds.Any()).OrderBy(c => Vector2.DistanceSquared(c.Value.UnitCalculation.Position, targetVector)))
                 {
                     commander.Value.Claimed = true;
                     commander.Value.UnitRole = UnitRole.Support;
@@ -328,7 +329,7 @@
 
             HandleHiddenBuildings(hiddenBase);
 
-            if (MainUnits.Count(m => !m.UnitCalculation.Loaded) > 0)
+            if (MainUnits.Any(m => !m.UnitCalculation.Loaded))
             {
                 OrderMainUnitsWithSupportUnits(frame, actions, MainUnits, SupportUnits);
             }
@@ -349,7 +350,7 @@
             SupportUnits.RemoveAll(u => undeadTypes.Contains((UnitTypes)u.UnitCalculation.Unit.UnitType));
             MainUnits.RemoveAll(u => undeadTypes.Contains((UnitTypes)u.UnitCalculation.Unit.UnitType));
 
-            if (MainUnits.Count() == 0)
+            if (!MainUnits.Any())
             {
                 var mainUnit = SupportUnits.FirstOrDefault(commander => MainAttackers.Contains((UnitTypes)commander.UnitCalculation.Unit.UnitType) && !commander.UnitCalculation.Unit.IsHallucination);
                 if (mainUnit != null)

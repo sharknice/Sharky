@@ -10,13 +10,13 @@
         public override List<SC2APIProtocol.Action> Attack(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
             var enemyWorkers = commander.UnitCalculation.NearbyEnemies.Where(u => u.UnitClassifications.Contains(UnitClassification.Worker));
-            if (enemyWorkers.Count() > 0)
+            if (enemyWorkers.Any())
             {
                 // if any are building something
                 var buildings = commander.UnitCalculation.NearbyEnemies.Where(u => u.Attributes.Contains(SC2Attribute.Structure) && u.Unit.BuildProgress < 1);
                 var builders = enemyWorkers.Where(w => buildings.Any(b => Vector2.DistanceSquared(w.Position, b.Position) <= b.Unit.Radius + w.Unit.Radius)).OrderBy(w => w.Unit.Health);
 
-                if (builders.Count() > 0)
+                if (builders.Any())
                 {
                     return commander.Order(frame, Abilities.ATTACK, null, builders.First().Unit.Tag);
                 }
@@ -25,7 +25,7 @@
                 return commander.Order(frame, Abilities.ATTACK, null, enemyWorker.Unit.Tag);
             }
             var enemyBuildings = commander.UnitCalculation.NearbyEnemies.Take(25).Where(u => u.Attributes.Contains(SC2Attribute.Structure)).OrderBy(b => b.Unit.Health);
-            if (enemyBuildings.Count() > 0)
+            if (enemyBuildings.Any())
             {
                 var pylon = enemyBuildings.Where(b => b.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON).FirstOrDefault();
                 if (pylon != null)

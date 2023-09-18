@@ -97,7 +97,7 @@
                 }
                 else
                 {
-                    if (ScoutPoints.Count() > 0)
+                    if (ScoutPoints.Any())
                     {
                         action = ReaperController.Scout(commander, ScoutPoints.FirstOrDefault(), TargetingData.MainDefensePoint, frame);
                     }

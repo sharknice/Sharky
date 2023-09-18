@@ -93,7 +93,7 @@
             }
 
             var hiddenBase = TargetingData.HiddenEnemyBase;
-            if (mainUnits.Count() > 0)
+            if (mainUnits.Any())
             {
                 AttackData.ArmyPoint = TargetingService.GetArmyPoint(mainUnits);
             }
@@ -104,7 +104,7 @@
             TargetingData.AttackPoint = TargetingService.UpdateAttackPoint(AttackData.ArmyPoint, TargetingData.AttackPoint);
 
             var attackingEnemies = ActiveUnitData.SelfUnits.Where(u => u.Value.UnitClassifications.Contains(UnitClassification.ResourceCenter) || u.Value.UnitClassifications.Contains(UnitClassification.ProductionStructure) || u.Value.UnitClassifications.Contains(UnitClassification.DefensiveStructure)).SelectMany(u => u.Value.NearbyEnemies).Distinct();
-            if (attackingEnemies.Count() > 0)
+            if (attackingEnemies.Any())
             {
                 var armyPoint = new Vector2(AttackData.ArmyPoint.X, AttackData.ArmyPoint.Y);
                 var distanceToAttackPoint = Vector2.DistanceSquared(armyPoint, new Vector2(TargetingData.AttackPoint.X, TargetingData.AttackPoint.Y));
@@ -113,7 +113,7 @@
                 {
                     closerEnemies = attackingEnemies.Where(e => Vector2.DistanceSquared(e.Position, armyPoint) < distanceToAttackPoint);
                 }
-                if (closerEnemies.Count() > 0)
+                if (closerEnemies.Any())
                 {
                     actions = ArmySplitter.SplitArmy(frame, closerEnemies, TargetingData.AttackPoint, mainUnits.Concat(supportUnits), false);
                     stopwatch.Stop();
@@ -140,7 +140,7 @@
 
             actions.AddRange(DistractionSquadService.TakeAction(frame));
 
-            if (mainUnits.Count() > 0)
+            if (mainUnits.Any())
             {
                 if (AttackData.Attacking)
                 {

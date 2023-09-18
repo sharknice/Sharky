@@ -128,7 +128,7 @@ namespace Sharky.MicroTasks
                 }
                 return commands;
             }
-            else if (attackingEnemies.Count() > 0)
+            else if (attackingEnemies.Any())
             {
                 var attackingEnemyVector = TargetingService.GetArmyPoint(attackingEnemies).ToVector2();
                 defenders = UnitCommanders.Where(c => Vector2.DistanceSquared(c.UnitCalculation.Position, attackingEnemyVector) < Vector2.DistanceSquared(c.UnitCalculation.Position, TargetingData.EnemyMainBasePoint.ToVector2()));
@@ -247,10 +247,10 @@ namespace Sharky.MicroTasks
                 }
             }
 
-            if (HarassInfos.Count() > 0)
+            if (HarassInfos.Any())
             {
                 var unasignedCommanders = UnitCommanders.Where(u => !HarassInfos.Any(info => info.Harassers.Any(h => h.UnitCalculation.Unit.Tag == u.UnitCalculation.Unit.Tag))).ToList();
-                while (unasignedCommanders.Count() > 0)
+                while (unasignedCommanders.Any())
                 {
                     foreach (var info in HarassInfos.OrderBy(h => h.Harassers.Count()).ThenBy(h => HighestFrame(h)))
                     {

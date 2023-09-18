@@ -482,7 +482,7 @@
         {
             var range = allyAttack.Range;
 
-            if (allyAttack.Weapons.Count() > 0)
+            if (allyAttack.Weapons.Any())
             {
                 var weapons = allyAttack.Weapons;
                 var unit = enemyAttack.Unit;

@@ -76,7 +76,7 @@
 
                     if (distanceSquared > 100)
                     {
-                        if (commander.UnitCalculation.EnemiesThreateningDamage.Count() > 0)
+                        if (commander.UnitCalculation.EnemiesThreateningDamage.Any())
                         {
                             if (Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(TargetingData.ForwardDefensePoint.X, TargetingData.ForwardDefensePoint.Y)) < 225)
                             {
@@ -177,10 +177,10 @@
                 HarassGroupInfo.RemoveAll(h => h.HarassInfo.BaseLocation.Location.X == baseLocation.Location.X && h.HarassInfo.BaseLocation.Location.Y == baseLocation.Location.Y);
             }
 
-            if (HarassGroupInfo.Count() > 0 && UnitCommanders.Any(u => u.UnitRole == UnitRole.None))
+            if (HarassGroupInfo.Any() && UnitCommanders.Any(u => u.UnitRole == UnitRole.None))
             {
                 var unasignedCommanders = UnitCommanders.Where(u => u.UnitRole == UnitRole.None).ToList();
-                if (unasignedCommanders.Count() > 0)
+                if (unasignedCommanders.Any())
                 {
                     foreach (var info in HarassGroupInfo)
                     {

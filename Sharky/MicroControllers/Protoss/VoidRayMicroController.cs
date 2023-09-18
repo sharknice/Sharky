@@ -6,9 +6,10 @@
             :base(defaultSharkyBot, pathFinder, microPriority, groupUpEnabled)
         {
             MaximumSupportDistanceSqaured = 25f;
+            AvoidDamageDistance = 5;
         }
 
-        protected override bool WeaponReady(UnitCommander commander, int frame)
+        public override bool WeaponReady(UnitCommander commander, int frame)
         {
             return true;
         }
@@ -34,7 +35,7 @@
             return base.AvoidTargettedDamage(commander, target, defensivePoint, frame, out action);
         }
 
-        protected override bool OffensiveAbility(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
+        public override bool OffensiveAbility(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -107,6 +108,44 @@
                 }
             }
             return base.Retreat(commander, defensivePoint, groupCenter, frame);
+        }
+
+        protected override bool MaintainRange(UnitCommander commander, Point2D defensivePoint, int frame, out List<SC2Action> action)
+        {
+            action = null;
+            return false;
+        }
+
+        protected override bool DoFreeDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2Action> action)
+        {
+            action = null;
+
+            if (commander.UnitCalculation.NearbyEnemies.Any(e => e.DamageAir))
+            {
+                return false;
+            }
+
+            return base.MaintainRange(commander, defensivePoint, frame, out action);
+        }
+
+        protected override bool Retreat(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2Action> action)
+        {
+            action = null;
+
+            if (commander.UnitCalculation.NearbyEnemies.Any(e => e.DamageAir))
+            {
+                if (commander.RetreatPathFrame + 2 < frame || commander.RetreatPathIndex >= commander.RetreatPath.Count())
+                {
+                    commander.RetreatPath = SharkyPathFinder.GetSafeAirPath(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y, defensivePoint.X, defensivePoint.Y, frame);
+                    commander.RetreatPathFrame = frame;
+                    commander.RetreatPathIndex = 1;
+                }
+
+                if (FollowPath(commander, frame, out action)) { return true; }
+            }
+
+            action = MoveToTarget(commander, defensivePoint, frame);
+            return true;
         }
     }
 }

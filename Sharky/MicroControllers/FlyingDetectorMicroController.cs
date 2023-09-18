@@ -8,7 +8,7 @@
             LooseFormationDistance = 10;
         }
 
-        protected override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
+        public override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -53,7 +53,7 @@
             return null;
         }
 
-        protected override bool WeaponReady(UnitCommander commander, int frame)
+        public override bool WeaponReady(UnitCommander commander, int frame)
         {
             return false;
         }
@@ -152,7 +152,7 @@
             return true;
         }
 
-        protected UnitCalculation GetSupportTarget(UnitCommander commander, Point2D target, Point2D defensivePoint, IEnumerable<UnitCalculation> supportableUnits = null)
+        protected virtual UnitCalculation GetSupportTarget(UnitCommander commander, Point2D target, Point2D defensivePoint, IEnumerable<UnitCalculation> supportableUnits = null)
         {
             if (supportableUnits == null)
             {
@@ -168,7 +168,7 @@
                     && u.NearbyEnemies.Any(e => DistanceSquared(u, e) < 225)
                 ).OrderBy(u => DistanceSquared(u.NearbyEnemies.OrderBy(e => DistanceSquared(e, u)).First(), u));
 
-            if (friendlies.Count() > 0)
+            if (friendlies.Any())
             {
                 return friendlies.First();
             }
@@ -182,7 +182,7 @@
                                 && u.NearbyEnemies.Any(e => DistanceSquared(u, e) < 225)
                             ).OrderBy(u => DistanceSquared(u.NearbyEnemies.OrderBy(e => DistanceSquared(e, u)).FirstOrDefault(), u));
 
-            if (friendlies.Count() > 0)
+            if (friendlies.Any())
             {
                 return friendlies.First();
             }
@@ -193,7 +193,7 @@
                             && !otherDetectors.Any(o => DistanceSquared(o, u) < 64)
                             ).OrderBy(u => DistanceSquared(u.NearbyEnemies.OrderBy(e => DistanceSquared(e, u)).FirstOrDefault(), u));
 
-            if (friendlies.Count() > 0)
+            if (friendlies.Any())
             {
                 return friendlies.First();
             }
@@ -203,7 +203,7 @@
             friendlies = supportableUnits.Where(u => u.UnitClassifications.Contains(UnitClassification.ArmyUnit)
                             ).OrderBy(u => DistanceSquared(u.NearbyEnemies.OrderBy(e => DistanceSquared(e, u)).FirstOrDefault(), u));
 
-            if (friendlies.Count() > 0)
+            if (friendlies.Any())
             {
                 return friendlies.First();
             }

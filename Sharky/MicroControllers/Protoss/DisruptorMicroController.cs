@@ -12,7 +12,7 @@
             NovaPathFinder = novaPathFinder;
         }
 
-        protected override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
+        public override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -29,7 +29,7 @@
             return false;
         }
 
-        protected override bool OffensiveAbility(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
+        public override bool OffensiveAbility(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -66,13 +66,13 @@
             if (attacks.Count > 0)
             {
                 var oneShotKills = attacks.OrderByDescending(a => GetPurificationNovaDamage(a.Unit, SharkyUnitData.UnitData[(UnitTypes)a.Unit.UnitType])).ThenByDescending(u => u.Dps);
-                if (oneShotKills.Count() > 0)
+                if (oneShotKills.Any())
                 {
                     var bestAttack = GetBestAttack(commander.UnitCalculation, oneShotKills, attacks, frame);
                     if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.WinAir)
                     {
                         var airAttackers = oneShotKills.Where(u => u.DamageAir);
-                        if (airAttackers.Count() > 0)
+                        if (airAttackers.Any())
                         {
                             var air = GetBestAttack(commander.UnitCalculation, airAttackers, attacks, frame);
                             if (air != null)
@@ -84,7 +84,7 @@
                     else if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.WinGround)
                     {
                         var groundAttackers = oneShotKills.Where(u => u.DamageGround);
-                        if (groundAttackers.Count() > 0)
+                        if (groundAttackers.Any())
                         {
                             var ground = GetBestAttack(commander.UnitCalculation, groundAttackers, attacks, frame);
                             if (ground != null)
@@ -95,7 +95,7 @@
                     }
                     else
                     {
-                        if (oneShotKills.Count() > 0)
+                        if (oneShotKills.Any())
                         {
                             var any = GetBestAttack(commander.UnitCalculation, oneShotKills, attacks, frame);
                             if (any != null)
@@ -118,7 +118,7 @@
             return false;
         }
 
-        protected override bool WeaponReady(UnitCommander commander, int frame)
+        public override bool WeaponReady(UnitCommander commander, int frame)
         {
             return false;
         }

@@ -30,7 +30,7 @@
         {
             if (!Enabled) { return; }
 
-            if (DistractionSquad.Count() > 0)
+            if (DistractionSquad.Any())
             {
                 var deadUnits = DistractionSquad.Count(d => !otherUnits.Any(u => d.UnitCalculation.Unit.Tag == u.UnitCalculation.Unit.Tag));
                 if (deadUnits > 0)

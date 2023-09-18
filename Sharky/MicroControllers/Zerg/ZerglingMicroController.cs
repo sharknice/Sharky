@@ -8,7 +8,7 @@
             AvoidDamageDistance = 5;
         }
 
-        protected override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
+        public override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -35,7 +35,7 @@
             if (attacks.Any())
             {
                 var oneShotKills = attacks.Where(a => a.Unit.Health + a.Unit.Shield < GetDamage(commander.UnitCalculation.Weapons, a.Unit, a.UnitTypeData) && !a.Unit.BuffIds.Contains((uint)Buffs.IMMORTALOVERLOAD));
-                if (oneShotKills.Count() > 0)
+                if (oneShotKills.Any())
                 {
                     if (existingAttackOrder != null)
                     {
@@ -69,7 +69,7 @@
             attacks = commander.UnitCalculation.NearbyEnemies.Where(enemyAttack => enemyAttack.Unit.DisplayType == DisplayType.Visible && !AvoidedUnitTypes.Contains((UnitTypes)enemyAttack.Unit.UnitType) && DamageService.CanDamage(commander.UnitCalculation, enemyAttack) && !InRange(enemyAttack.Position, commander.UnitCalculation.Position, range + enemyAttack.Unit.Radius + commander.UnitCalculation.Unit.Radius));
 
             var safeAttacks = attacks.Where(a => a.Damage < commander.UnitCalculation.Unit.Health);
-            if (safeAttacks.Count() > 0)
+            if (safeAttacks.Any())
             {
                 var bestOutOfRangeAttack = GetBestTargetFromList(commander, safeAttacks, existingAttackOrder);
                 if (bestOutOfRangeAttack != null && (bestOutOfRangeAttack.UnitClassifications.Contains(UnitClassification.ArmyUnit) || bestOutOfRangeAttack.UnitClassifications.Contains(UnitClassification.DefensiveStructure)))

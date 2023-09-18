@@ -102,7 +102,7 @@
                 structures = structures.Where(u => Vector2.DistanceSquared(u.Value.Position, vector) < 400);
             }
             var attackingEnemies = structures.SelectMany(u => u.Value.NearbyEnemies).Distinct().Where(e => ActiveUnitData.EnemyUnits.ContainsKey(e.Unit.Tag));
-            if (attackingEnemies.Count() > 0)
+            if (attackingEnemies.Any())
             {
                 if (UnitCommanders.Count() == 0)
                 {
@@ -162,7 +162,7 @@
 
         private void StopDefendingWithWorkers()
         {
-            if (WorkerDefenders.Count() > 0)
+            if (WorkerDefenders.Any())
             {
                 foreach (var defender in WorkerDefenders)
                 {
@@ -175,7 +175,7 @@
         private List<SC2Action> DefendWithWorkers(IEnumerable<UnitCalculation> attackingEnemies, int frame)
         {
             var bunkersInProgress = attackingEnemies.Where(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_BUNKER && (e.Unit.BuildProgress < 1 || (e.Unit.HasHealth && e.Unit.Health < 100)) && Vector2.DistanceSquared(e.Position, new Vector2(TargetingData.SelfMainBasePoint.X, TargetingData.SelfMainBasePoint.Y)) < 1600);
-            if (bunkersInProgress.Count() > 0)
+            if (bunkersInProgress.Any())
             {
                 var bunker = bunkersInProgress.OrderByDescending(u => u.Unit.BuildProgress).FirstOrDefault();
                 // attack with 8 workers

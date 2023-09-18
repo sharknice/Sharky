@@ -8,7 +8,7 @@
             GroupUpDistance = 5;
         }
 
-        protected override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
+        public override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -35,7 +35,7 @@
                 return false;
             }
 
-            if (commander.UnitCalculation.EnemiesInRangeOfAvoid.Count() > 0 && commander.UnitCalculation.EnemiesInRangeOfAvoid.All(e => e.Range > 2))
+            if (commander.UnitCalculation.EnemiesInRangeOfAvoid.Any() && commander.UnitCalculation.EnemiesInRangeOfAvoid.All(e => e.Range > 2))
             {
                 return false;
             }
@@ -52,7 +52,7 @@
                 return false;
             }
 
-            if (commander.UnitCalculation.EnemiesInRangeOfAvoid.Count() > 0 && commander.UnitCalculation.EnemiesInRangeOfAvoid.All(e => e.Range > 2))
+            if (commander.UnitCalculation.EnemiesInRangeOfAvoid.Any() && commander.UnitCalculation.EnemiesInRangeOfAvoid.All(e => e.Range > 2))
             {
                 return false;
             }
@@ -60,7 +60,7 @@
             return base.AvoidDamage(commander, target, defensivePoint, frame, out action);
         }
 
-        protected override bool WeaponReady(UnitCommander commander, int frame)
+        public override bool WeaponReady(UnitCommander commander, int frame)
         {
             return commander.UnitCalculation.Unit.WeaponCooldown < 5 || commander.UnitCalculation.Unit.WeaponCooldown > 15; // a zealot has 2 attacks, so we do this because after one attack the cooldown starts over instead of both
         }

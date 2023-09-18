@@ -114,13 +114,13 @@
             if (unitData.Minerals <= macroData.Minerals && unitData.Gas <= macroData.VespeneGas)
             {
                 var building = ActiveUnitData.Commanders.Where(c => unitData.ProducingUnits.Contains((UnitTypes)c.Value.UnitCalculation.Unit.UnitType) && !c.Value.UnitCalculation.Unit.IsActive && c.Value.UnitCalculation.Unit.BuildProgress == 1 && !c.Value.UnitCalculation.Unit.HasAddOnTag);
-                if (building.Count() > 0)
+                if (building.Any())
                 {
                     if (location != null)
                     {
                         building = building.Where(b => Vector2.DistanceSquared(new Vector2(location.X, location.Y), b.Value.UnitCalculation.Position) <= maxDistance * maxDistance);
                     }
-                    if (building.Count() > 0)
+                    if (building.Any())
                     {
                         var addOnSwap = macroData.AddOnSwaps.Values.FirstOrDefault(a => a.Started && !a.Completed && (a.AddOnBuilder == null || a.AddOnBuilder.UnitCalculation.Unit.Tag == building.FirstOrDefault().Value.UnitCalculation.Unit.Tag) && a.AddOnTaker != null && (uint)a.DesiredAddOnBuilder == building.FirstOrDefault().Value.UnitCalculation.Unit.UnitType);
 
@@ -163,7 +163,7 @@
                     {
                         building = building.Where(b => Vector2.DistanceSquared(new Vector2(location.X, location.Y), b.Value.UnitCalculation.Position) <= maxDistance * maxDistance);
                     }
-                    if (building.Count() > 0)
+                    if (building.Any())
                     {
                         var addOnSwap = macroData.AddOnSwaps.Values.FirstOrDefault(a => a.Started && !a.Completed && (a.AddOnBuilder == null || a.AddOnBuilder.UnitCalculation.Unit.Tag == building.FirstOrDefault().Value.UnitCalculation.Unit.Tag) && a.AddOnTaker != null && (uint)a.DesiredAddOnBuilder == building.FirstOrDefault().Value.UnitCalculation.Unit.UnitType);
                         if (addOnSwap != null)

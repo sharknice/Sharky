@@ -51,7 +51,7 @@
         {
             var grid = GetGroundDamageGrid(frame);
             var path = GetPath(grid, startX, startY, endX, endY);
-            if (path.Count() == 0)
+            if (!path.Any())
             {
                 var cells = MapDataService.GetCells(startX, startY, 1);
                 var best = cells.Where(c => c.Walkable).OrderBy(c => c.EnemyGroundDpsInRange).FirstOrDefault();
@@ -116,26 +116,37 @@
 
         public List<Vector2> GetSafeAirPath(float startX, float startY, float endX, float endY, int frame)
         {
+            if (Vector2.DistanceSquared(new Vector2(startX, startY), new Vector2(endX, endY)) < 4)
+            {
+                return GetSafeAirFallback(startX, startY, endX, endY);
+            }
             var grid = GetAirDamageGrid(frame);
             var path = GetPath(grid, startX, startY, endX, endY);
-            if (path.Count() == 0)
+            if (!path.Any())
             {
-                var cells = MapDataService.GetCells(startX, startY, 1);
-                var best = cells.OrderBy(c => c.EnemyAirDpsInRange).FirstOrDefault();
-                if (best != null)
-                {
-                    path = new List<Vector2> { new Vector2(startX, startY), new Vector2(best.X, best.Y) };
-                }
+                path = GetSafeAirFallback(startX, startY, endX, endY);
             }
 
             return path;
+        }
+
+        private List<Vector2> GetSafeAirFallback(float startX, float startY, float endX, float endY)
+        {
+            var cells = MapDataService.GetCells(startX, startY, 1);
+            var best = cells.OrderBy(c => c.EnemyAirDpsInRange).ThenBy(c => Vector2.DistanceSquared(new Vector2(c.X, c.Y), new Vector2(endX, endY))).FirstOrDefault();
+            if (best != null)
+            {
+                return new List<Vector2> { new Vector2(startX, startY), new Vector2(best.X, best.Y) };
+            }
+
+            return new List<Vector2> { new Vector2(startX, startY), new Vector2(endX, endY) };
         }
 
         public List<Vector2> GetUndetectedGroundPath(float startX, float startY, float endX, float endY, int frame)
         {
             var grid = GetGroundDetectionGrid(frame);
             var path = GetPath(grid, startX, startY, endX, endY);
-            if (path.Count() == 0)
+            if (!path.Any())
             {
                 var cells = MapDataService.GetCells(startX, startY, 1);
                 var best = cells.Where(c => c.Walkable).OrderBy(c => c.EnemyGroundDpsInRange).FirstOrDefault();

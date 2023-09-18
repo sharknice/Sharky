@@ -8,7 +8,7 @@
 
         }
 
-        protected override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
+        public override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -25,7 +25,7 @@
                     return false;
                 }
 
-                if (commander.UnitCalculation.Unit.Energy > 25 && (commander.UnitCalculation.EnemiesInRangeOf.Count() > 0 || commander.UnitCalculation.NearbyEnemies.Any(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_HIGHTEMPLAR))) // if enemies can hit it, cloak
+                if (commander.UnitCalculation.Unit.Energy > 25 && (commander.UnitCalculation.EnemiesInRangeOf.Any() || commander.UnitCalculation.NearbyEnemies.Any(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_HIGHTEMPLAR))) // if enemies can hit it, cloak
                 {
                     TagService.TagAbility("banshee_cloak");
                     action = commander.Order(frame, Abilities.BEHAVIOR_CLOAKON);
@@ -90,7 +90,7 @@
             if (attacks.Any())
             {
                 var oneShotKills = attacks.Where(a => a.Unit.Health + a.Unit.Shield < GetDamage(commander.UnitCalculation.Weapons, a.Unit, a.UnitTypeData));
-                if (oneShotKills.Count() > 0)
+                if (oneShotKills.Any())
                 {
                     if (existingAttackOrder != null)
                     {

@@ -24,7 +24,7 @@
             return base.Attack(commander, target, defensivePoint, groupCenter, frame);
         }
 
-        protected override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
+        public override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -137,7 +137,7 @@
                     }
                 }
 
-                foreach (var friendly in friendliesInRange.Where(f => f.EnemiesInRangeOf.Count() > 0 && f.Range > 2).OrderBy(f => f.Unit.Shield).ThenBy(f => f.Unit.Health))
+                foreach (var friendly in friendliesInRange.Where(f => f.EnemiesInRangeOf.Any() && f.Range > 2).OrderBy(f => f.Unit.Shield).ThenBy(f => f.Unit.Health))
                 {
                     if (commander.UnitCalculation.Unit.CargoSpaceMax - commander.UnitCalculation.Unit.CargoSpaceTaken >= UnitDataService.CargoSize((UnitTypes)friendly.Unit.UnitType))
                     {
@@ -242,7 +242,7 @@
 
             if (friendly.Unit.UnitType == (uint)UnitTypes.PROTOSS_ZEALOT)
             {
-                if (friendly.Unit.Shield > 0 || friendly.EnemiesInRange.Count() > 0)
+                if (friendly.Unit.Shield > 0 || friendly.EnemiesInRange.Any())
                 {
                     return false;
                 }
@@ -371,7 +371,7 @@
                     && u.NearbyEnemies.Any(e => DistanceSquared(u, e) < 225)
                 ).OrderBy(u => DistanceSquared(u.NearbyEnemies.OrderBy(e => DistanceSquared(e, u)).First(), u));
 
-            if (friendlies.Count() > 0)
+            if (friendlies.Any())
             {
                 return friendlies.First();
             }
@@ -385,7 +385,7 @@
                                 && u.NearbyEnemies.Any(e => DistanceSquared(u, e) < 225)
                             ).OrderBy(u => DistanceSquared(u.NearbyEnemies.OrderBy(e => DistanceSquared(e, u)).FirstOrDefault(), u));
 
-            if (friendlies.Count() > 0)
+            if (friendlies.Any())
             {
                 return friendlies.First();
             }
@@ -396,7 +396,7 @@
                             && !otherWarpPrisms.Any(o => DistanceSquared(o, u) < 64)
                             ).OrderBy(u => DistanceSquared(u.NearbyEnemies.OrderBy(e => DistanceSquared(e, u)).FirstOrDefault(), u));
 
-            if (friendlies.Count() > 0)
+            if (friendlies.Any())
             {
                 return friendlies.First();
             }
@@ -406,7 +406,7 @@
             friendlies = supportableUnits.Where(u => u.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !u.Unit.IsFlying
                             ).OrderBy(u => DistanceSquared(u.NearbyEnemies.OrderBy(e => DistanceSquared(e, u)).FirstOrDefault(), u));
 
-            if (friendlies.Count() > 0)
+            if (friendlies.Any())
             {
                 return friendlies.First();
             }
@@ -492,7 +492,7 @@
             {
                 return action;
             }
-            if (commander.UnitCalculation.NearbyEnemies.Count() > 0)
+            if (commander.UnitCalculation.NearbyEnemies.Any())
             {
                 if (Retreat(commander, defensivePoint, defensivePoint, frame, out action)) { return action; }
             }
@@ -518,7 +518,7 @@
                 return false;
             }
 
-            var nexuses = BaseData.SelfBases.Where(u => u.ResourceCenter != null && u.ResourceCenter.BuildProgress == 1 && u.MineralMiningInfo.Count() > 0).OrderBy(u => u.MineralMiningInfo.Sum(m => m.Workers.Count) / u.MineralMiningInfo.Count()).ThenBy(u => Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(u.Location.X, u.Location.Y)));
+            var nexuses = BaseData.SelfBases.Where(u => u.ResourceCenter != null && u.ResourceCenter.BuildProgress == 1 && u.MineralMiningInfo.Any()).OrderBy(u => u.MineralMiningInfo.Sum(m => m.Workers.Count) / u.MineralMiningInfo.Count()).ThenBy(u => Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(u.Location.X, u.Location.Y)));
 
             //foreach (var nexusBase in BaseData.Bases)
             //{

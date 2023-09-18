@@ -18,7 +18,7 @@
             };
         }
 
-        protected override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
+        public override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -56,7 +56,7 @@
             return false;
         }
 
-        protected override bool WeaponReady(UnitCommander commander, int frame)
+        public override bool WeaponReady(UnitCommander commander, int frame)
         {
             if (commander.LastLockOn == null || (frame - commander.LastLockOn.EndFrame) > (4.3 * SharkyOptions.FramesPerSecond))
             {
@@ -110,7 +110,7 @@
             return false;
         }
 
-        protected override bool OffensiveAbility(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
+        public override bool OffensiveAbility(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -186,10 +186,10 @@
             var attacks = commander.UnitCalculation.NearbyEnemies.Where(e => priorityDamagers.Any(p => p.Unit.Tag == e.Unit.Tag)).Where(u => u.Unit.DisplayType == DisplayType.Visible && AttackersFilter(commander, u) && Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position) <= 7 * 7 && (u.SimulatedHitpoints > 200 || !u.Unit.BuffIds.Contains((uint)Buffs.LOCKON)));
 
             UnitCalculation bestAttack = null;
-            if (attacks.Count() > 0)
+            if (attacks.Any())
             {
                 var oneShotKills = attacks.Where(a => a.Unit.Health + a.Unit.Shield < GetDamage(commander.UnitCalculation.Weapons, a.Unit, a.UnitTypeData) && !a.Unit.BuffIds.Contains((uint)Buffs.IMMORTALOVERLOAD));
-                if (oneShotKills.Count() > 0)
+                if (oneShotKills.Any())
                 {
                     if (existingAttackOrder != null)
                     {
@@ -221,7 +221,7 @@
             }
 
             attacks = priorityDamagers;
-            if (attacks.Count() > 0)
+            if (attacks.Any())
             {
                 bestAttack = GetBestTargetFromList(commander, attacks, existingAttackOrder);
                 if (bestAttack != null)
@@ -232,8 +232,8 @@
             }
 
             // defend proxy units/buildings
-            attacks = commander.UnitCalculation.NearbyEnemies.Where(e => e.EnemiesInRange.Count() > 0);
-            if (attacks.Count() > 0)
+            attacks = commander.UnitCalculation.NearbyEnemies.Where(e => e.EnemiesInRange.Any());
+            if (attacks.Any())
             {
                 bestAttack = GetBestTargetFromList(commander, attacks, existingAttackOrder);
                 if (bestAttack != null)
@@ -244,7 +244,7 @@
             }
 
             attacks = commander.UnitCalculation.EnemiesInRange.Where(e => priorityOther.Any(p => p.Unit.Tag == e.Unit.Tag));
-            if (attacks.Count() > 0)
+            if (attacks.Any())
             {
                 bestAttack = GetBestTargetFromList(commander, attacks, existingAttackOrder);
                 if (bestAttack != null)
@@ -255,7 +255,7 @@
             }
 
             attacks = commander.UnitCalculation.EnemiesInRange.Where(e => priorityOther.Any(p => p.Unit.Tag == e.Unit.Tag));
-            if (attacks.Count() > 0)
+            if (attacks.Any())
             {
                 bestAttack = GetBestTargetFromList(commander, attacks, existingAttackOrder);
                 if (bestAttack != null)
@@ -266,7 +266,7 @@
             }
 
             attacks = priorityOther;
-            if (attacks.Count() > 0)
+            if (attacks.Any())
             {
                 bestAttack = GetBestTargetFromList(commander, attacks, existingAttackOrder);
                 if (bestAttack != null)

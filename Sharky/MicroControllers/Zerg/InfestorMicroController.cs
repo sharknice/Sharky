@@ -44,7 +44,7 @@
         {
         }
 
-        protected override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
+        public override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -169,13 +169,13 @@
             //if (attacks.Count > 0)
             //{
             //    var victims = attacks.OrderByDescending(u => u.Dps);
-            //    if (victims.Count() > 0)
+            //    if (victims.Any())
             //    {
             //        var bestAttack = GetBestAttack(commander.UnitCalculation, victims, attacks);
             //        if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.WinAir)
             //        {
             //            var airAttackers = victims.Where(u => u.DamageAir);
-            //            if (airAttackers.Count() > 0)
+            //            if (airAttackers.Any())
             //            {
             //                var air = GetBestAttack(commander.UnitCalculation, airAttackers, attacks);
             //                if (air != null)
@@ -187,7 +187,7 @@
             //        else if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.WinGround)
             //        {
             //            var groundAttackers = victims.Where(u => u.DamageGround);
-            //            if (groundAttackers.Count() > 0)
+            //            if (groundAttackers.Any())
             //            {
             //                var ground = GetBestAttack(commander.UnitCalculation, groundAttackers, attacks);
             //                if (ground != null)
@@ -198,7 +198,7 @@
             //        }
             //        else
             //        {
-            //            if (victims.Count() > 0)
+            //            if (victims.Any())
             //            {
             //                var any = GetBestAttack(commander.UnitCalculation, victims, attacks);
             //                if (any != null)
@@ -249,13 +249,13 @@
             if (attacks.Count > 0)
             {
                 var victims = attacks.OrderByDescending(u => u.Dps);
-                if (victims.Count() > 0)
+                if (victims.Any())
                 {
                     var bestAttack = GetBestAttack(commander.UnitCalculation, victims, attacks);
                     if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.WinAir)
                     {
                         var airAttackers = victims.Where(u => u.DamageAir);
-                        if (airAttackers.Count() > 0)
+                        if (airAttackers.Any())
                         {
                             var air = GetBestAttack(commander.UnitCalculation, airAttackers, attacks);
                             if (air != null)
@@ -267,7 +267,7 @@
                     else if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.WinGround)
                     {
                         var groundAttackers = victims.Where(u => u.DamageGround);
-                        if (groundAttackers.Count() > 0)
+                        if (groundAttackers.Any())
                         {
                             var ground = GetBestAttack(commander.UnitCalculation, groundAttackers, attacks);
                             if (ground != null)
@@ -278,7 +278,7 @@
                     }
                     else
                     {
-                        if (victims.Count() > 0)
+                        if (victims.Any())
                         {
                             var any = GetBestAttack(commander.UnitCalculation, victims, attacks);
                             if (any != null)
@@ -300,7 +300,7 @@
             return false;
         }
 
-        protected override bool OffensiveAbility(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2Action> action)
+        public override bool OffensiveAbility(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2Action> action)
         {
             action = null;
 
@@ -323,7 +323,7 @@
             return false;
         }
 
-        protected override bool WeaponReady(UnitCommander commander, int frame)
+        public override bool WeaponReady(UnitCommander commander, int frame)
         {
             return false;
         }

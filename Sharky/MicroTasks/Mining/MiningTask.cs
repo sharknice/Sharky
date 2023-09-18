@@ -196,7 +196,7 @@
                 {
                     foreach (var info in selfBase.GasMiningInfo)
                     {
-                        while (info.Workers.Count() > gasSaturationCount && info.Workers.Count() > 0)
+                        while (info.Workers.Count() > gasSaturationCount && info.Workers.Any())
                         {
                             info.Workers.RemoveAt(0);
                         }
@@ -246,7 +246,7 @@
                                 idleWorkers = UnitCommanders.Where(c => c.UnitRole == UnitRole.Gas && workers.Any(w => w.Unit.Tag == c.UnitCalculation.Unit.Tag)).OrderBy(c => Vector2.DistanceSquared(vector, c.UnitCalculation.Position));
                             }
                         }
-                        if (idleWorkers.Count() > 0)
+                        if (idleWorkers.Any())
                         {
                             var worker = idleWorkers.FirstOrDefault();
                             worker.UnitRole = UnitRole.Minerals;
@@ -257,7 +257,7 @@
                     }
                 }
             }
-            else if (unsaturatedRefineries.Count() > 0 && saturatedRefineries.Count() < BuildOptions.MaxActiveGasCount)
+            else if (unsaturatedRefineries.Any() && saturatedRefineries.Count() < BuildOptions.MaxActiveGasCount)
             {
                 foreach (var selfBase in BaseData.SelfBases)
                 {
@@ -276,7 +276,7 @@
                                     idleWorkers = UnitCommanders.Where(c => c.UnitRole == UnitRole.Minerals && workers.Any(w => w.Unit.Tag == c.UnitCalculation.Unit.Tag)).OrderBy(c => Vector2.DistanceSquared(gasVector, c.UnitCalculation.Position));
                                 }
                             }
-                            if (idleWorkers.Count() > 0)
+                            if (idleWorkers.Any())
                             {
                                 var worker = idleWorkers.FirstOrDefault();
                                 worker.UnitRole = UnitRole.Gas;
@@ -323,7 +323,7 @@
             var unsaturated = BaseData.SelfBases.Where(b => b.ResourceCenter != null && b.ResourceCenter.BuildProgress == 1 && b.MineralMiningInfo.Any(m => m.Workers.Count() < 2));
             var overSaturated = BaseData.SelfBases.Where(b => b.ResourceCenter != null && b.ResourceCenter.BuildProgress == 1 && b.MineralMiningInfo.Any(m => m.Workers.Count() > 2));
 
-            if (unsaturated.Count() > 0 && overSaturated.Count() > 0)
+            if (unsaturated.Any() && overSaturated.Any())
             {
                 foreach (var selfBase in unsaturated)
                 {

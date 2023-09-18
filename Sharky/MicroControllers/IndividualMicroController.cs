@@ -332,7 +332,7 @@
             if (DoFreeDamage(commander, defensivePoint, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
 
             // TODO: setup a concave above the ramp if there is a ramp, get earch grid point on high ground, make sure at least one unit on each point
-            if (commander.UnitCalculation.NearbyEnemies.Count() > 0 || Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(defensivePoint.X, defensivePoint.Y)) > 25 || MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos) < MapDataService.MapHeight(defensivePoint))
+            if (commander.UnitCalculation.NearbyEnemies.Any() || Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(defensivePoint.X, defensivePoint.Y)) > 25 || MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos) < MapDataService.MapHeight(defensivePoint))
             {
                 if (Retreat(commander, defensivePoint, defensivePoint, frame, out action)) { return action; }
                 return MoveToTarget(commander, defensivePoint, frame);
@@ -385,7 +385,7 @@
         {
             action = null;
 
-            if (commander.UnitCalculation.EnemiesThreateningDamage.Count() == 0)
+            if (!commander.UnitCalculation.EnemiesThreateningDamage.Any())
             {
                 if (!commander.UnitCalculation.NearbyEnemies.Any(e => DamageService.CanDamage(e, commander.UnitCalculation) && (e.UnitTypeData.MovementSpeed >= commander.UnitCalculation.UnitTypeData.MovementSpeed || e.Range >= commander.UnitCalculation.Range)))
                 {
@@ -451,7 +451,7 @@
 
             if (SpecialCaseMove(commander, target, defensivePoint, groupCenter, bestTarget, formation, frame, out action)) { return true; }
 
-            if (!(formation == Formation.Loose && commander.UnitCalculation.NearbyAllies.Count() > 5))
+            if (!(formation == Formation.Loose && commander.UnitCalculation.NearbyAllies.Count > 5))
             {
                 if (MoveAway(commander, target, defensivePoint, frame, out action)) { return true; }
             }
@@ -459,7 +459,7 @@
             return NavigateToTarget(commander, target, groupCenter, bestTarget, formation, frame, out action);
         }
 
-        protected virtual bool SpecialCaseMove(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, Formation formation, int frame, out List<SC2APIProtocol.Action> action)
+        public virtual bool SpecialCaseMove(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, Formation formation, int frame, out List<SC2APIProtocol.Action> action)
         {
             if (GetUnstuck(commander, target, defensivePoint, frame, out action)) { return true; }
             if (DealWithInterferenceMatrix(commander, target, defensivePoint, frame, out action)) { return true; }
@@ -541,7 +541,7 @@
                 if (bestTarget != null && !MapDataService.SelfVisible(bestTarget.Unit.Pos) && MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos) != MapDataService.MapHeight(bestTarget.Unit.Pos))
                 {
                     var badChokes = TargetingData.ChokePoints.Bad.Where(b => Vector2.DistanceSquared(b.Center, bestTarget.Position) < 100 || Vector2.DistanceSquared(b.Center, commander.UnitCalculation.Position) < 100);
-                    if (badChokes.Count() > 0)
+                    if (badChokes.Any())
                     {
                         var chokePoint = badChokes.OrderBy(b => Vector2.DistanceSquared(b.Center, target.ToVector2())).First();
                         var distanceToBestTarget = Vector2.DistanceSquared(bestTarget.Position, commander.UnitCalculation.Position);
@@ -574,7 +574,7 @@
             if (!commander.UnitCalculation.Unit.IsFlying && commander.UnitCalculation.Unit.UnitType != (uint)UnitTypes.PROTOSS_COLOSSUS)
             {
                 var badChokes = TargetingData.ChokePoints.Bad.Where(b => Vector2.DistanceSquared(b.Center, targetToSupport.UnitCalculation.Position) < 100 || Vector2.DistanceSquared(b.Center, commander.UnitCalculation.Position) < 100);
-                if (badChokes.Count() > 0)
+                if (badChokes.Any())
                 {
                     var chokePoint = badChokes.OrderBy(b => Vector2.DistanceSquared(b.Center, target.ToVector2())).First();
                     if (Vector2.Distance(chokePoint.Center, targetToSupport.UnitCalculation.Position) <= targetToSupport.UnitCalculation.Range + 1)
@@ -597,7 +597,7 @@
             action = null;
             if (commander.UnitCalculation.Unit.ShieldMax > 0 && commander.UnitCalculation.Unit.Shield < 10)
             {
-                var shieldBatttery = commander.UnitCalculation.NearbyAllies.Where(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_SHIELDBATTERY && a.Unit.BuildProgress == 1 && a.Unit.Energy > 5 && a.Unit.Orders.Count() == 0).OrderBy(b => Vector2.DistanceSquared(commander.UnitCalculation.Position, b.Position)).FirstOrDefault();
+                var shieldBatttery = commander.UnitCalculation.NearbyAllies.Where(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_SHIELDBATTERY && a.Unit.BuildProgress == 1 && a.Unit.Energy > 5 && !a.Unit.Orders.Any()).OrderBy(b => Vector2.DistanceSquared(commander.UnitCalculation.Position, b.Position)).FirstOrDefault();
                 if (shieldBatttery != null)
                 {
                     if (Vector2.DistanceSquared(commander.UnitCalculation.Position, shieldBatttery.Position) > 35)
@@ -661,7 +661,7 @@
             return true;
         }
 
-        protected virtual bool AvoidDeceleration(UnitCommander commander, Point2D target, bool attackMove, int frame, out List<SC2APIProtocol.Action> action)
+        public virtual bool AvoidDeceleration(UnitCommander commander, Point2D target, bool attackMove, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -725,12 +725,12 @@
 
             if (commander.UnitCalculation.Unit.IsFlying && bestTarget.Attributes.Contains(SC2APIProtocol.Attribute.Structure) || 
                 commander.UnitCalculation.Unit.Shield < commander.UnitCalculation.Unit.ShieldMax || commander.UnitCalculation.Unit.Health < commander.UnitCalculation.Unit.HealthMax ||
-                bestTarget.EnemiesInRangeOf.Count() < 5 ||
+                bestTarget.EnemiesInRangeOf.Count < 5 ||
                 (!commander.UnitCalculation.TargetPriorityCalculation.Overwhelm && MicroPriority != MicroPriority.AttackForward && 
                 (commander.UnitCalculation.Unit.IsFlying || commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_REAPER || commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_COLOSSUS || MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos) == MapDataService.MapHeight(bestTarget.Unit.Pos))))
             {
                 if (SharkyUnitData.NoWeaponCooldownTypes.Contains((UnitTypes)commander.UnitCalculation.Unit.UnitType) ||
-                    (commander.UnitCalculation.EnemiesThreateningDamage.Count() == 0 && !DamageService.CanDamage(bestTarget, commander.UnitCalculation)))
+                    (!commander.UnitCalculation.EnemiesThreateningDamage.Any() && !DamageService.CanDamage(bestTarget, commander.UnitCalculation)))
                 {
                     var point = new Point2D { X = bestTarget.Position.X, Y = bestTarget.Position.Y };
                     if (AvoidDeceleration(commander, point, false, frame, out action)) { return true; }
@@ -740,7 +740,7 @@
                 }
 
                 Point2D attackPoint;
-                if (MicroPriority == MicroPriority.AttackForward || commander.UnitCalculation.Unit.IsHallucination || (formation == Formation.Loose && commander.UnitCalculation.NearbyAllies.Count() >= 5))
+                if (MicroPriority == MicroPriority.AttackForward || commander.UnitCalculation.Unit.IsHallucination || (formation == Formation.Loose && commander.UnitCalculation.NearbyAllies.Count >= 5))
                 {
                     attackPoint = new Point2D { X = bestTarget.Position.X, Y = bestTarget.Position.Y };
                 }
@@ -856,10 +856,10 @@
                 }
             }
 
-            if (formation == Formation.Tight && commander.UnitCalculation.NearbyEnemies.Count() > 0)
+            if (formation == Formation.Tight && commander.UnitCalculation.NearbyEnemies.Any())
             {
                 var vectors = commander.UnitCalculation.NearbyAllies.Where(a => (!a.Unit.IsFlying && !commander.UnitCalculation.Unit.IsFlying && a.UnitClassifications.Contains(UnitClassification.ArmyUnit)) || (commander.UnitCalculation.Unit.IsFlying && a.Unit.UnitType == commander.UnitCalculation.Unit.UnitType)).Where(a => Vector2.DistanceSquared(a.Position, commander.UnitCalculation.Position) < GroupUpDistance * GroupUpDistance).Select(u => u.Position);
-                if (vectors.Count() > 0)
+                if (vectors.Any())
                 {
                     var max = 1f;
                     if (!commander.UnitCalculation.Unit.IsFlying)
@@ -918,15 +918,15 @@
         {
             action = null;
 
-            if (commander.UnitCalculation.Range < 3 || MicroPriority == MicroPriority.AttackForward || (formation == Formation.Loose && commander.UnitCalculation.NearbyAllies.Count() >= 5)) { return false; }
+            if (commander.UnitCalculation.Range < 3 || MicroPriority == MicroPriority.AttackForward || (formation == Formation.Loose && commander.UnitCalculation.NearbyAllies.Count >= 5)) { return false; }
 
             if (commander.UnitCalculation.Unit.IsHallucination) { return false; }
             if (commander.UnitCalculation.Unit.Shield > 75 && commander.UnitCalculation.Unit.Health > 75) { return false; }
 
             var speed = commander.UnitCalculation.UnitTypeData.MovementSpeed;
-            if (commander.UnitCalculation.EnemiesThreateningDamage.Count(e => e.UnitTypeData.MovementSpeed <= speed && e.EnemiesInRange.Count() <= 1) > 0) // if ally is already in range of the enemy shoot it because it's going to shoot ally
+            if (commander.UnitCalculation.EnemiesThreateningDamage.Any(e => e.UnitTypeData.MovementSpeed <= speed && e.EnemiesInRange.Count <= 1)) // if ally is already in range of the enemy shoot it because it's going to shoot ally
             {
-                if (commander.UnitCalculation.EnemiesInRangeOf.Count() == 0 && commander.UnitCalculation.EnemiesThreateningDamage.Any(e => e.Range >= commander.UnitCalculation.Range || e.UnitTypeData.MovementSpeed >= speed)) // TODO: factor in creep and other speed buffs
+                if (!commander.UnitCalculation.EnemiesInRangeOf.Any() && commander.UnitCalculation.EnemiesThreateningDamage.Any(e => e.Range >= commander.UnitCalculation.Range || e.UnitTypeData.MovementSpeed >= speed)) // TODO: factor in creep and other speed buffs
                 {
                     return false;
                 }
@@ -952,7 +952,7 @@
 
                 if (avoidPoint != defensivePoint && avoidPoint != target)
                 {
-                    if (!WeaponReady(commander, frame) && commander.UnitCalculation.EnemiesInRangeOf.Count() == 0 && AvoidDeceleration(commander, avoidPoint, false, frame, out action)) { return true; }
+                    if (!WeaponReady(commander, frame) && !commander.UnitCalculation.EnemiesInRangeOf.Any() && AvoidDeceleration(commander, avoidPoint, false, frame, out action)) { return true; }
 
                     action = commander.Order(frame, Abilities.MOVE, avoidPoint);
                     return true;
@@ -1008,7 +1008,7 @@
         {
             action = null;
 
-            if (attacks.Count() > 0)
+            if (attacks.Any())
             {
                 var attack = attacks.OrderBy(e => Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position) - (e.Range * e.Range)).FirstOrDefault();  // enemies that are closest to being outranged
                 var range = UnitDataService.GetRange(attack.Unit);
@@ -1179,7 +1179,7 @@
                     }
                 }
 
-                if (commander.RetreatPathFrame + 2 < frame || commander.RetreatPathIndex >= commander.RetreatPath.Count())
+                if (commander.RetreatPathFrame + 2 < frame || commander.RetreatPathIndex >= commander.RetreatPath.Count)
                 {
                     if (commander.UnitCalculation.Unit.IsFlying)
                     {
@@ -1204,7 +1204,7 @@
         {
             action = null;
 
-            if (commander.RetreatPath.Count() > 0)
+            if (commander.RetreatPath.Any())
             {
                 if (SharkyOptions.Debug)
                 {
@@ -1215,7 +1215,7 @@
                     }
                 }
 
-                if (commander.RetreatPathIndex < commander.RetreatPath.Count())
+                if (commander.RetreatPathIndex < commander.RetreatPath.Count)
                 {
                     var point = commander.RetreatPath[commander.RetreatPathIndex];
                     DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = commander.UnitCalculation.Unit.Pos.Z }, 1, new Color { R = 0, G = 0, B = 255 });
@@ -1272,10 +1272,10 @@
             var attacks = commander.UnitCalculation.EnemiesInRange.Where(u => u.Unit.DisplayType == DisplayType.Visible && AttackersFilter(commander, u)); // units that are in range right now
 
             UnitCalculation bestAttack = null;
-            if (attacks.Count() > 0)
+            if (attacks.Any())
             {
                 var oneShotKills = attacks.Where(a => PredictedHealth(a) < GetDamage(commander.UnitCalculation.Weapons, a.Unit, a.UnitTypeData) && !a.Unit.BuffIds.Contains((uint)Buffs.IMMORTALOVERLOAD));
-                if (oneShotKills.Count() > 0)
+                if (oneShotKills.Any())
                 {
                     if (existingAttackOrder != null)
                     {
@@ -1331,8 +1331,8 @@
             var outOfRangeAttacks = commander.UnitCalculation.NearbyEnemies.Where(enemyAttack => !commander.UnitCalculation.EnemiesInRange.Any(e => e.Unit.Tag == enemyAttack.Unit.Tag)
                 && enemyAttack.Unit.DisplayType == DisplayType.Visible && DamageService.CanDamage(commander.UnitCalculation, enemyAttack) && !AvoidedUnitTypes.Contains((UnitTypes)enemyAttack.Unit.UnitType) && AttackersFilter(commander, enemyAttack));
 
-            attacks = outOfRangeAttacks.Where(enemyAttack => enemyAttack.EnemiesInRange.Count() > 0 && enemyAttack.Unit.UnitType != (uint)UnitTypes.PROTOSS_INTERCEPTOR);
-            if (attacks.Count() > 0)
+            attacks = outOfRangeAttacks.Where(enemyAttack => enemyAttack.EnemiesInRange.Any() && enemyAttack.Unit.UnitType != (uint)UnitTypes.PROTOSS_INTERCEPTOR);
+            if (attacks.Any())
             {
                 var bestOutOfRangeAttack = GetBestTargetFromList(commander, attacks, existingAttackOrder);
                 if (bestOutOfRangeAttack != null && (bestOutOfRangeAttack.UnitClassifications.Contains(UnitClassification.ArmyUnit) || bestOutOfRangeAttack.UnitClassifications.Contains(UnitClassification.DefensiveStructure)))
@@ -1350,7 +1350,7 @@
             //            (DamageService.CanDamage(u, commander.UnitCalculation) && (Vector2.DistanceSquared(enemyAttack.Position, u.Position) < (u.Range * u.Range) ||
             //            Vector2.DistanceSquared(commander.UnitCalculation.Position, u.Position) < (u.Range * u.Range)))));
             attacks = outOfRangeAttacks;
-            if (attacks.Count() > 0)
+            if (attacks.Any())
             {
                 var bestOutOfRangeAttack = GetBestTargetFromList(commander, attacks, existingAttackOrder);
                 if (bestOutOfRangeAttack != null && (bestOutOfRangeAttack.UnitClassifications.Contains(UnitClassification.ArmyUnit) || bestOutOfRangeAttack.UnitClassifications.Contains(UnitClassification.DefensiveStructure)))
@@ -1372,10 +1372,10 @@
                 return new UnitCalculation(fakeMainBase, new List<Unit>(), SharkyUnitData, SharkyOptions, UnitDataService, MapDataService.IsOnCreep(fakeMainBase.Pos), frame);
             }
             var unitsNearEnemyMain = ActiveUnitData.EnemyUnits.Values.Where(e => !AvoidedUnitTypes.Contains((UnitTypes)e.Unit.UnitType) && e.Unit.UnitType != (uint)UnitTypes.ZERG_LARVA && InRange(new Vector2(target.X, target.Y), e.Position, 20));
-            if (unitsNearEnemyMain.Count() > 0 && InRange(new Vector2(target.X, target.Y), commander.UnitCalculation.Position, 100))
+            if (unitsNearEnemyMain.Any() && InRange(new Vector2(target.X, target.Y), commander.UnitCalculation.Position, 100))
             {
                 attacks = unitsNearEnemyMain.Where(enemyAttack => enemyAttack.Unit.DisplayType == DisplayType.Visible && DamageService.CanDamage(commander.UnitCalculation, enemyAttack) && AttackersFilter(commander, enemyAttack));
-                if (attacks.Count() > 0)
+                if (attacks.Any())
                 {
                     var bestMainAttack = GetBestTargetFromList(commander, attacks, existingAttackOrder);
                     if (bestMainAttack != null && (bestMainAttack.UnitClassifications.Contains(UnitClassification.ArmyUnit) || bestMainAttack.UnitClassifications.Contains(UnitClassification.DefensiveStructure)))
@@ -1414,10 +1414,10 @@
             var attacks = commander.UnitCalculation.EnemiesInRange.Where(e => priorityDamagers.Any(p => p.Unit.Tag == e.Unit.Tag));
 
             UnitCalculation bestAttack = null;
-            if (attacks.Count() > 0)
+            if (attacks.Any())
             {
                 var oneShotKills = attacks.Where(a => a.Unit.Health + a.Unit.Shield < GetDamage(commander.UnitCalculation.Weapons, a.Unit, a.UnitTypeData) && !a.Unit.BuffIds.Contains((uint)Buffs.IMMORTALOVERLOAD));
-                if (oneShotKills.Count() > 0)
+                if (oneShotKills.Any())
                 {
                     if (existingAttackOrder != null)
                     {
@@ -1449,7 +1449,7 @@
             }
 
             attacks = priorityDamagers;
-            if (attacks.Count() > 0)
+            if (attacks.Any())
             {
                 bestAttack = GetBestTargetFromList(commander, attacks, existingAttackOrder);
                 if (bestAttack != null)
@@ -1460,8 +1460,8 @@
             }
 
             // defend proxy units/buildings
-            attacks = commander.UnitCalculation.NearbyEnemies.Where(e => e.EnemiesInRange.Count() > 0);
-            if (attacks.Count() > 0)
+            attacks = commander.UnitCalculation.NearbyEnemies.Where(e => e.EnemiesInRange.Any());
+            if (attacks.Any())
             {
                 bestAttack = GetBestTargetFromList(commander, attacks, existingAttackOrder);
                 if (bestAttack != null)
@@ -1472,7 +1472,7 @@
             }
 
             attacks = commander.UnitCalculation.EnemiesInRange.Where(e => priorityOther.Any(p => p.Unit.Tag == e.Unit.Tag));
-            if (attacks.Count() > 0)
+            if (attacks.Any())
             {
                 bestAttack = GetBestTargetFromList(commander, attacks, existingAttackOrder);
                 if (bestAttack != null)
@@ -1483,7 +1483,7 @@
             }
 
             attacks = commander.UnitCalculation.EnemiesInRange.Where(e => priorityOther.Any(p => p.Unit.Tag == e.Unit.Tag));
-            if (attacks.Count() > 0)
+            if (attacks.Any())
             {
                 bestAttack = GetBestTargetFromList(commander, attacks, existingAttackOrder);
                 if (bestAttack != null)
@@ -1494,7 +1494,7 @@
             }
 
             attacks = priorityOther;
-            if (attacks.Count() > 0)
+            if (attacks.Any())
             {
                 bestAttack = GetBestTargetFromList(commander, attacks, existingAttackOrder);
                 if (bestAttack != null)
@@ -1573,7 +1573,7 @@
                 action = commander.Order(frame, Abilities.ATTACK, targetTag: bestTarget.Unit.Tag);
                 return true;
             }
-            if (commander.UnitCalculation.EnemiesThreateningDamage.Count() > 0 && !commander.UnitCalculation.TargetPriorityCalculation.Overwhelm && MicroPriority != MicroPriority.AttackForward && commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.Retreat)
+            if (commander.UnitCalculation.EnemiesThreateningDamage.Any() && !commander.UnitCalculation.TargetPriorityCalculation.Overwhelm && MicroPriority != MicroPriority.AttackForward && commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.Retreat)
             {
                 return false;
             }
@@ -1706,7 +1706,7 @@
 
         protected virtual List<SC2APIProtocol.Action> AttackToTarget(UnitCommander commander, Point2D target, int frame)
         {
-            if (!AlwaysUsePathing && commander.UnitCalculation.NearbyAllies.Any(a => a.Attributes.Contains(SC2APIProtocol.Attribute.Structure)) && Vector2.DistanceSquared(commander.UnitCalculation.Position, target.ToVector2()) > 400)
+            if (!AlwaysUsePathing && commander.UnitCalculation.NearbyAllies.Any(a => a.Attributes.Contains(SC2APIProtocol.Attribute.Structure)) && Vector2.DistanceSquared(commander.UnitCalculation.Position, target.ToVector2()) > 400 && !(commander.UnitRole == UnitRole.Leader && commander.UnitCalculation.NearbyAllies.Any(a => !a.Unit.IsFlying)))
             {
                 return commander.Order(frame, Abilities.ATTACK, target);
             }
@@ -1728,7 +1728,7 @@
                 return false;
             }
 
-            if (frame > SharkyOptions.FramesPerSecond * 10 * 60 && ActiveUnitData.EnemyUnits.Count() < 10)
+            if (frame > SharkyOptions.FramesPerSecond * 10 * 60 && ActiveUnitData.EnemyUnits.Count < 10)
             {
                 return false; // stop grouping up when searching for the last enemy units to finish the game
             }
@@ -1821,7 +1821,7 @@
             return false;
         }
 
-        protected virtual UnitCalculation GetBestTargetFromList(UnitCommander commander, IEnumerable<UnitCalculation> attacks, UnitOrder existingAttackOrder)
+        public virtual UnitCalculation GetBestTargetFromList(UnitCommander commander, IEnumerable<UnitCalculation> attacks, UnitOrder existingAttackOrder)
         {
             if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.KillDetection)
             {
@@ -1938,7 +1938,7 @@
             {
                 var airAttackers = attacks.Where(u => u.DamageAir && AirAttackersFilter(commander, u));
 
-                if (airAttackers.Count() > 0)
+                if (airAttackers.Any())
                 {
                     var bestDpsReduction = GetBestDpsReduction(commander, weapon, airAttackers, attacks);
 
@@ -1973,7 +1973,7 @@
             else if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.WinGround)
             {
                 var groundAttackers = attacks.Where(u => u.DamageGround && u.Unit.UnitType != (uint)UnitTypes.ZERG_BROODLING && (!u.UnitClassifications.Contains(UnitClassification.Worker) || u.EnemiesInRange.Any(e => e.Unit.Tag == commander.UnitCalculation.Unit.Tag)) && GroundAttackersFilter(commander, u));
-                if (groundAttackers.Count() > 0)
+                if (groundAttackers.Any())
                 {
                     var bestDpsReduction = GetBestDpsReduction(commander, weapon, groundAttackers, attacks);
 
@@ -2003,7 +2003,7 @@
             }
 
             var threats = attacks.Where(enemyAttack => enemyAttack.Damage > 0 && DamageService.CanDamage(enemyAttack, commander.UnitCalculation) && enemyAttack.Unit.UnitType != (uint)UnitTypes.ZERG_BROODLING && (!enemyAttack.UnitClassifications.Contains(UnitClassification.Worker) || enemyAttack.EnemiesInRange.Any(e => e.Unit.Tag == commander.UnitCalculation.Unit.Tag)) && GroundAttackersFilter(commander, enemyAttack) && AirAttackersFilter(commander, enemyAttack));
-            if (threats.Count() > 0)
+            if (threats.Any())
             {
                 var bestDpsReduction = GetBestDpsReduction(commander, weapon, threats, attacks);
                 if (existingAttackOrder != null)
@@ -2049,7 +2049,7 @@
             }
 
             var workers = attacks.Where(enemyAttack => enemyAttack.UnitClassifications.Contains(UnitClassification.Worker) && GroundAttackersFilter(commander, enemyAttack)).OrderBy(u => u.Unit.Health).ThenBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position));
-            if (workers.Count() > 0)
+            if (workers.Any())
             {
                 if (existingAttackOrder != null)
                 {
@@ -2116,6 +2116,7 @@
 
         protected float TimeToKill(Weapon weapon, Unit unit, UnitTypeData unitTypeData)
         {
+            if (weapon == null) { return 999f; }
             float bonus = 0;
             if (unit.BuffIds.Contains((uint)Buffs.IMMORTALOVERLOAD))
             {
@@ -2125,7 +2126,7 @@
             return (unit.Health + unit.Shield + bonus) / (damage / weapon.Speed);
         }
 
-        protected virtual float GetDamage(List<Weapon> weapons, Unit unit, UnitTypeData unitTypeData)
+        public virtual float GetDamage(List<Weapon> weapons, Unit unit, UnitTypeData unitTypeData)
         {
             Weapon weapon;
             if (unit.IsFlying || unit.UnitType == (uint)UnitTypes.PROTOSS_COLOSSUS || unit.BuffIds.Contains((uint)Buffs.GRAVITONBEAM))
@@ -2178,24 +2179,24 @@
             return damage * weapon.Attacks;
         }
 
-        protected virtual bool WeaponReady(UnitCommander commander, int frame)
+        public virtual bool WeaponReady(UnitCommander commander, int frame)
         {
             return commander.UnitCalculation.Unit.WeaponCooldown < 2;
         }
 
-        protected virtual bool OffensiveAbility(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
+        public virtual bool OffensiveAbility(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
             return false;
         }
 
-        protected virtual bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
+        public virtual bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
             return false;
         }
 
-        protected virtual Formation GetDesiredFormation(UnitCommander commander)
+        public virtual Formation GetDesiredFormation(UnitCommander commander)
         {
             if (commander.UnitCalculation.Unit.IsFlying)
             {
@@ -2206,7 +2207,7 @@
                 else
                 {
                     var nearbyFlyingAllies = commander.UnitCalculation.NearbyAllies.Where(a => a.Unit.UnitType == commander.UnitCalculation.Unit.UnitType);
-                    if (nearbyFlyingAllies.Count() > 0)
+                    if (nearbyFlyingAllies.Any())
                     {
                         return Formation.Tight;
                     }
@@ -2235,7 +2236,7 @@
 
             if (commander.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker))
             {
-                if (commander.UnitCalculation.EnemiesInRangeOf.Count() > 0)
+                if (commander.UnitCalculation.EnemiesInRangeOf.Any())
                 {
                     var selfBase = BaseData.SelfBases.FirstOrDefault();
                     if (selfBase != null)
@@ -2253,7 +2254,7 @@
             return false;
         }
 
-        protected virtual bool AvoidTargettedOneHitKills(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
+        public virtual bool AvoidTargettedOneHitKills(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
             var attack = commander.UnitCalculation.Attackers.Where(a => a.Damage > commander.UnitCalculation.Unit.Health + commander.UnitCalculation.Unit.Shield).OrderBy(e => Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position) - (e.Range * e.Range)).FirstOrDefault();
@@ -2269,7 +2270,7 @@
                     {
                         return false; // just kill it before it kills you
                     }
-                    if (attack.EnemiesInRange.Count() > 0)
+                    if (attack.EnemiesInRange.Any())
                     {
                         return false; // other units are in range, it is probably attacking them so get some extra damage in
                     }
@@ -2515,7 +2516,7 @@
 
             var lockOnRange = 7;
             var enemyCyclones = commander.UnitCalculation.NearbyEnemies.Where(u => u.Unit.UnitType == (uint)UnitTypes.TERRAN_CYCLONE && InRange(commander.UnitCalculation.Position, u.Position, commander.UnitCalculation.Unit.Radius + lockOnRange));
-            if (enemyCyclones.Count() > 0 && MicroPriority != MicroPriority.StayOutOfRange && (commander.UnitCalculation.TargetPriorityCalculation.AirWinnability > 1 || commander.UnitCalculation.TargetPriorityCalculation.GroundWinnability > 1))
+            if (enemyCyclones.Any() && MicroPriority != MicroPriority.StayOutOfRange && (commander.UnitCalculation.TargetPriorityCalculation.AirWinnability > 1 || commander.UnitCalculation.TargetPriorityCalculation.GroundWinnability > 1))
             {
                 var cycloneDps = enemyCyclones.Sum(e => e.Dps);
                 var otherDps = commander.UnitCalculation.NearbyEnemies.Where(u => u.Unit.UnitType != (uint)UnitTypes.TERRAN_CYCLONE && InRange(commander.UnitCalculation.Position, u.Position, commander.UnitCalculation.Unit.Radius + lockOnRange)).Sum(e => e.Dps);
@@ -2758,7 +2759,7 @@
             var formation = GetDesiredFormation(commander);
             var bestTarget = GetBestTarget(commander, unitToSupport, supportPoint, frame);
 
-            if (commander.UnitCalculation.NearbyEnemies.Count(e => e.FrameLastSeen == frame) == 0)
+            if (!commander.UnitCalculation.NearbyEnemies.Any(e => e.FrameLastSeen == frame))
             {
                 if (commander.UnitCalculation.Unit.IsFlying)
                 {
@@ -2793,7 +2794,7 @@
 
             bool weaponReady = WeaponReady(commander, frame);
 
-            if (weaponReady && commander.UnitCalculation.EnemiesInRange.Count() > 0 || (bestTarget != null && bestTarget.EnemiesInRange.Any(e => supportTargets.Any(s => s.UnitCalculation.Unit.Tag == e.Unit.Tag))))
+            if (weaponReady && commander.UnitCalculation.EnemiesInRange.Any() || (bestTarget != null && bestTarget.EnemiesInRange.Any(e => supportTargets.Any(s => s.UnitCalculation.Unit.Tag == e.Unit.Tag))))
             {
                 if (AttackBestTarget(commander, supportPoint, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
             }
@@ -2805,7 +2806,7 @@
             var distanceSquredToSupportUnit = Vector2.DistanceSquared(unitToSupport.UnitCalculation.Position, commander.UnitCalculation.Position);
             // don't initiate the attack, just defend yourself and the support target
             // TODO: only attack unitToSupport.UnitCalculation.EnemiesInRangeOf
-            if (weaponReady && distanceSquredToSupportUnit < MaximumSupportDistanceSqaured && unitToSupport.UnitCalculation.EnemiesInRangeOf.Count() > 0)
+            if (weaponReady && distanceSquredToSupportUnit < MaximumSupportDistanceSqaured && unitToSupport.UnitCalculation.EnemiesInRangeOf.Any())
             {
                 if (AttackBestTarget(commander, supportPoint, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
             }
@@ -2837,7 +2838,7 @@
 
             if (commander.UnitCalculation.TargetPriorityCalculation.Overwhelm || MicroPriority == MicroPriority.AttackForward || commander.UnitCalculation.Unit.IsHallucination) { return false; }
 
-            if (commander.UnitCalculation.EnemiesThreateningDamage.Count() > 0 || commander.UnitCalculation.EnemiesInRangeOfAvoid.Count() > 0)
+            if (commander.UnitCalculation.EnemiesThreateningDamage.Any() || commander.UnitCalculation.EnemiesInRangeOfAvoid.Any())
             {
                 if ((commander.UnitCalculation.Unit.IsFlying && commander.UnitCalculation.TargetPriorityCalculation.AirWinnability < 1) ||
                     (!commander.UnitCalculation.Unit.IsFlying && commander.UnitCalculation.TargetPriorityCalculation.GroundWinnability < 1) ||
@@ -2859,49 +2860,10 @@
             return false;
         }
 
-        protected virtual UnitCommander GetSupportTarget(UnitCommander commander, IEnumerable<UnitCommander> supportTargets, Point2D target, Point2D defensivePoint)
+        public virtual UnitCommander GetSupportTarget(UnitCommander commander, IEnumerable<UnitCommander> supportTargets, Point2D target, Point2D defensivePoint)
         {
             // support targets are ordered before they're passed in
             return supportTargets.FirstOrDefault();
-
-            if (supportTargets == null)
-            {
-                return null;
-            }
-
-            // out of nearby allies within 15 range
-            // select the friendlies with enemies in 15 range
-            // order by closest to the enemy
-            var friendlies = supportTargets.Where(c => Vector2.DistanceSquared(c.UnitCalculation.Position, commander.UnitCalculation.Position) < 225
-                    && c.UnitCalculation.NearbyEnemies.Any(e => Vector2.DistanceSquared(c.UnitCalculation.Position, e.Position) < 225)
-                ).OrderBy(u => Vector2.DistanceSquared(u.UnitCalculation.NearbyEnemies.OrderBy(e => Vector2.DistanceSquared(e.Position, u.UnitCalculation.Position)).First().Position, u.UnitCalculation.Position));
-
-            if (friendlies.Count() > 0)
-            {
-                return friendlies.First();
-            }
-
-            // if none
-            // get any allies
-            // select the friendies with enemies in 15 range
-            // order by closest to the enemy
-            friendlies = supportTargets.Where(u => u.UnitCalculation.NearbyEnemies.Any(e => Vector2.DistanceSquared(u.UnitCalculation.Position, e.Position) < 225)).OrderBy(u => Vector2.DistanceSquared(u.UnitCalculation.NearbyEnemies.OrderBy(e => Vector2.DistanceSquared(e.Position, u.UnitCalculation.Position)).First().Position, u.UnitCalculation.Position));
-
-            if (friendlies.Count() > 0)
-            {
-                return friendlies.First();
-            }
-
-            // if still none
-            //get ally closest to target
-            friendlies = supportTargets.OrderBy(u => Vector2.DistanceSquared(u.UnitCalculation.Position, new Vector2(target.X, target.Y)));
-
-            if (friendlies.Count() > 0)
-            {
-                return friendlies.First();
-            }
-
-            return null;
         }
 
         protected virtual Point2D GetSupportSpot(UnitCommander commander, UnitCalculation unitToSupport, Point2D target, Point2D defensivePoint)
@@ -2938,10 +2900,10 @@
             var attacks = commander.UnitCalculation.EnemiesInRange.Where(u => u.Unit.DisplayType == DisplayType.Visible && AttackersFilter(commander, u)); // units that are in range right now
 
             UnitCalculation bestAttack = null;
-            if (attacks.Count() > 0)
+            if (attacks.Any())
             {
                 var oneShotKills = attacks.Where(a => PredictedHealth(a) < GetDamage(commander.UnitCalculation.Weapons, a.Unit, a.UnitTypeData) && !a.Unit.BuffIds.Contains((uint)Buffs.IMMORTALOVERLOAD));
-                if (oneShotKills.Count() > 0)
+                if (oneShotKills.Any())
                 {
                     if (existingAttackOrder != null)
                     {
@@ -2979,7 +2941,7 @@
             }
 
             attacks = unitToSupport.UnitCalculation.EnemiesInRangeOf.Where(enemyAttack => enemyAttack.Unit.DisplayType == DisplayType.Visible && DamageService.CanDamage(commander.UnitCalculation, enemyAttack) && !InRange(enemyAttack.Position, commander.UnitCalculation.Position, range + enemyAttack.Unit.Radius + commander.UnitCalculation.Unit.Radius) && AttackersFilter(commander, enemyAttack));
-            if (attacks.Count() > 0)
+            if (attacks.Any())
             {
                 var bestOutOfRangeAttack = GetBestTargetFromList(commander, attacks, existingAttackOrder);
                 if (bestOutOfRangeAttack != null && (bestOutOfRangeAttack.UnitClassifications.Contains(UnitClassification.ArmyUnit) || bestOutOfRangeAttack.UnitClassifications.Contains(UnitClassification.DefensiveStructure)))
@@ -2994,7 +2956,7 @@
             }
 
             attacks = commander.UnitCalculation.EnemiesInRangeOf.Where(enemyAttack => enemyAttack.Unit.DisplayType == DisplayType.Visible && DamageService.CanDamage(commander.UnitCalculation, enemyAttack) && !InRange(enemyAttack.Position, commander.UnitCalculation.Position, range + enemyAttack.Unit.Radius + commander.UnitCalculation.Unit.Radius) && AttackersFilter(commander, enemyAttack));
-            if (attacks.Count() > 0)
+            if (attacks.Any())
             {
                 var bestOutOfRangeAttack = GetBestTargetFromList(commander, attacks, existingAttackOrder);
                 if (bestOutOfRangeAttack != null && (bestOutOfRangeAttack.UnitClassifications.Contains(UnitClassification.ArmyUnit) || bestOutOfRangeAttack.UnitClassifications.Contains(UnitClassification.DefensiveStructure)))
@@ -3058,7 +3020,7 @@
             if (attacks.Count > 0)
             {
                 var oneShotKills = attacks.Where(a => PredictedHealth(a) < GetDamage(commander.UnitCalculation.Weapons, a.Unit, a.UnitTypeData));
-                if (oneShotKills.Count() > 0)
+                if (oneShotKills.Any())
                 {
                     if (existingAttackOrder != null)
                     {

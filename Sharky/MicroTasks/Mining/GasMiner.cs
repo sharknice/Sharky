@@ -23,7 +23,7 @@
                 var baseVector = new Vector2(selfBase.ResourceCenter.Pos.X, selfBase.ResourceCenter.Pos.Y);
                 foreach (var miningInfo in selfBase.GasMiningInfo)
                 {
-                    if (miningInfo.Workers.Count() > 0 && miningInfo.ResourceUnit.VespeneContents == 0)
+                    if (miningInfo.Workers.Any() && miningInfo.ResourceUnit.VespeneContents == 0)
                     {
                         foreach (var worker in miningInfo.Workers)
                         {

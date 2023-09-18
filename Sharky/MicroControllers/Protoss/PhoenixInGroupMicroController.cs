@@ -24,7 +24,7 @@
                 var attacks = commander.UnitCalculation.NearbyEnemies.Where(u => u.Unit.DisplayType == DisplayType.Visible && (u.Unit.IsFlying || (!u.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && !u.Attributes.Contains(SC2APIProtocol.Attribute.Massive))) && AttackersFilter(commander, u)); // units that are in range right now
 
                 UnitCalculation bestAttack = null;
-                if (attacks.Count() > 0)
+                if (attacks.Any())
                 {
                     bestAttack = GetBestTargetFromList(commander, attacks, existingAttackOrder);
                     if (bestAttack != null)
@@ -42,10 +42,10 @@
                     return new UnitCalculation(fakeMainBase, new List<Unit>(), SharkyUnitData, SharkyOptions, UnitDataService, MapDataService.IsOnCreep(fakeMainBase.Pos), frame);
                 }
                 var unitsNearEnemyMain = ActiveUnitData.EnemyUnits.Values.Where(e => !AvoidedUnitTypes.Contains((UnitTypes)e.Unit.UnitType) && e.Unit.UnitType != (uint)UnitTypes.ZERG_LARVA && InRange(new Vector2(target.X, target.Y), e.Position, 20));
-                if (unitsNearEnemyMain.Count() > 0 && InRange(new Vector2(target.X, target.Y), commander.UnitCalculation.Position, 100))
+                if (unitsNearEnemyMain.Any() && InRange(new Vector2(target.X, target.Y), commander.UnitCalculation.Position, 100))
                 {
                     attacks = unitsNearEnemyMain.Where(enemyAttack => enemyAttack.Unit.DisplayType == DisplayType.Visible && (enemyAttack.Unit.IsFlying || (!enemyAttack.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && !enemyAttack.Attributes.Contains(SC2APIProtocol.Attribute.Massive))) && AttackersFilter(commander, enemyAttack));
-                    if (attacks.Count() > 0)
+                    if (attacks.Any())
                     {
                         var bestMainAttack = GetBestTargetFromList(commander, attacks, existingAttackOrder);
                         if (bestMainAttack != null)
@@ -180,7 +180,7 @@
                 return true;
             }
 
-            if (commander.UnitCalculation.EnemiesThreateningDamage.Count() > 0 && !commander.UnitCalculation.TargetPriorityCalculation.Overwhelm && MicroPriority != MicroPriority.AttackForward && commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.Retreat)
+            if (commander.UnitCalculation.EnemiesThreateningDamage.Any() && !commander.UnitCalculation.TargetPriorityCalculation.Overwhelm && MicroPriority != MicroPriority.AttackForward && commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.Retreat)
             {
                 return false;
             }
@@ -354,7 +354,7 @@
             return true;
         }
 
-        protected override bool WeaponReady(UnitCommander commander, int frame)
+        public override bool WeaponReady(UnitCommander commander, int frame)
         {
             return commander.UnitCalculation.Unit.WeaponCooldown < 2;
         }
@@ -385,7 +385,7 @@
             return commander.Order(frame, Abilities.MOVE, defensivePoint);
         }
 
-        protected override bool AvoidDeceleration(UnitCommander commander, Point2D target, bool attackMove, int frame, out List<SC2APIProtocol.Action> action)
+        public override bool AvoidDeceleration(UnitCommander commander, Point2D target, bool attackMove, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
             return false;
@@ -424,7 +424,7 @@
             if (DoFreeDamage(commander, defensivePoint, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
 
             // TODO: setup a concave above the ramp if there is a ramp, get earch grid point on high ground, make sure at least one unit on each point
-            if (commander.UnitCalculation.NearbyEnemies.Count() > 0 || Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(defensivePoint.X, defensivePoint.Y)) > 25 || MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos) < MapDataService.MapHeight(defensivePoint))
+            if (commander.UnitCalculation.NearbyEnemies.Any() || Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(defensivePoint.X, defensivePoint.Y)) > 25 || MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos) < MapDataService.MapHeight(defensivePoint))
             {
                 if (Retreat(commander, defensivePoint, defensivePoint, frame, out action)) { return action; }
                 return commander.Order(frame, Abilities.MOVE, defensivePoint);

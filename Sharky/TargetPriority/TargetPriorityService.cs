@@ -50,7 +50,7 @@
             var enemyDps = enemies.Sum(e => e.SimulatedDamagePerSecond(allyAttributes, true, true));
 
             var rangedAllies = allies.Where(e => e.Range > 2);
-            if (rangedAllies.Count() > 0)
+            if (rangedAllies.Any())
             {
                 var fastestEnemy = enemies.OrderByDescending(e => e.UnitTypeData.MovementSpeed).FirstOrDefault();
                 if (fastestEnemy == null || rangedAllies.Any(a => a.UnitTypeData.MovementSpeed >= fastestEnemy.UnitTypeData.MovementSpeed))

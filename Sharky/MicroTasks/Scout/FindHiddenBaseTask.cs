@@ -48,7 +48,7 @@
 
             AssignHarassers();
 
-            foreach (var scoutInfo in ScoutInfos.Where(s => s.Harassers.Count() > 0))
+            foreach (var scoutInfo in ScoutInfos.Where(s => s.Harassers.Any()))
             {
                 foreach (var commander in scoutInfo.Harassers)
                 {
@@ -156,7 +156,7 @@
 
             foreach (var scoutInfo in ScoutInfos)
             {
-                if (unasignedCommanders.Count() > 0)
+                if (unasignedCommanders.Any())
                 {
                     foreach (var info in ScoutInfos.Where(h => h.Harassers.Count() == 0).OrderBy(i => i.LastClearedFrame))
                     {
@@ -174,9 +174,9 @@
                 }
             }
 
-            if (HarassInfos.Count() > 0)
+            if (HarassInfos.Any())
             {
-                while (unasignedCommanders.Count() > 0)
+                while (unasignedCommanders.Any())
                 {
                     foreach (var info in HarassInfos.OrderBy(h => h.Harassers.Count()).ThenBy(h => HighestFrame(h)))
                     {
