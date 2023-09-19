@@ -141,6 +141,15 @@
                 Abilities.HARVEST_GATHER_PROBE,
                 Abilities.HARVEST_GATHER_SCV
             };
+            SharkyUnitData.ZergMorphUnitAbilities = new HashSet<Abilities>
+            {
+                Abilities.TRAIN_BANELING,
+                Abilities.MORPH_BROODLORD,
+                Abilities.MORPH_LURKER,
+                Abilities.MORPH_OVERLORDTRANSPORT,
+                Abilities.MORPH_OVERSEER,
+                Abilities.MORPH_RAVAGER,
+            };
 
             SharkyUnitData.GroundSplashDamagers = new HashSet<UnitTypes>
             {
