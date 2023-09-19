@@ -24,7 +24,13 @@
         {
             if (commander.UnitCalculation.Unit.Energy >= 125)
             {
-                var activeBuilding = commander.UnitCalculation.NearbyEnemies.Take(25).FirstOrDefault(e => e.Unit.IsActive && e.Attributes.Contains(SC2Attribute.Structure) && !e.Unit.BuffIds.Contains((uint)Buffs.CONTAMINATED));
+                var activeBuilding = commander.UnitCalculation.NearbyEnemies.Take(25).FirstOrDefault(e => e.Unit.IsActive 
+                && e.Attributes.Contains(SC2Attribute.Structure) 
+                && !e.Unit.BuffIds.Contains((uint)Buffs.CONTAMINATED) 
+                && e.Unit.UnitType != (int)UnitTypes.ZERG_CREEPTUMOR
+                && e.Unit.UnitType != (int)UnitTypes.ZERG_CREEPTUMORBURROWED
+                && e.Unit.UnitType != (int)UnitTypes.ZERG_CREEPTUMORQUEEN);
+                
                 if (activeBuilding != null)
                 {
                     TagService.TagAbility("contaminate");

@@ -81,5 +81,16 @@
             action = commander.Order(frame, Abilities.MOVE, avoidPoint);
             return true;
         }
+
+        protected override float GetMovementSpeed(UnitCommander commander)
+        {
+            var speed = commander.UnitCalculation.UnitTypeData.MovementSpeed * 1.4f;
+
+            if (commander.UnitCalculation.IsOnCreep)
+            {
+                speed *= 1.3f;
+            }
+            return speed;
+        }
     }
 }

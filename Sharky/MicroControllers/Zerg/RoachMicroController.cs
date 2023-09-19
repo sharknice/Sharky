@@ -70,13 +70,29 @@
         protected override float GetMovementSpeed(UnitCommander commander)
         {
             var speed = commander.UnitCalculation.UnitTypeData.MovementSpeed * 1.4f;
-            if (SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.GLIALRECONSTITUTION))
+
+            if (commander.UnitCalculation.Unit.IsBurrowed)
             {
-                speed += 1.05f;
+                if (SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.GLIALRECONSTITUTION))
+                {
+                    if (commander.UnitCalculation.IsOnCreep)
+                        speed = 4.4f;
+                    else
+                        speed = 2.8f;
+                }
+                else
+                    speed = 0.001f; // return small number to be safe and not divide by zero
             }
-            if (commander.UnitCalculation.IsOnCreep)
+            else
             {
-                speed *= 1.3f;
+                if (SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.GLIALRECONSTITUTION))
+                {
+                    speed += 1.05f;
+                }
+                if (commander.UnitCalculation.IsOnCreep)
+                {
+                    speed *= 1.3f;
+                }
             }
             return speed;
         }
