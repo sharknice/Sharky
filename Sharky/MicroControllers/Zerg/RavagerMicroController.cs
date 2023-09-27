@@ -28,6 +28,7 @@
                 { UnitTypes.ZERG_NYDUSCANAL, 13 },
                 { UnitTypes.ZERG_NYDUSNETWORK, 13 },
                 { UnitTypes.ZERG_BROODLORDCOCOON, 13 },
+                { UnitTypes.ZERG_BROODLORD, 13 },
                 { UnitTypes.ZERG_SPINECRAWLER, 13 },
 
                 { UnitTypes.PROTOSS_COLOSSUS, 5 },
