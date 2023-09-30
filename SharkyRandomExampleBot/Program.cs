@@ -29,6 +29,8 @@ defaultSharkyBot.MicroTaskData[typeof(QueenCreepTask).Name].Enable();
 defaultSharkyBot.MicroTaskData[typeof(QueenDefendTask).Name].Enable();
 defaultSharkyBot.MicroTaskData[typeof(QueenInjectTask).Name].Enable();
 
+defaultSharkyBot.SharkyOptions.ControlCamera = true;
+
 var sharkyExampleBot = defaultSharkyBot.CreateBot();
 
 var myRace = Race.Random;

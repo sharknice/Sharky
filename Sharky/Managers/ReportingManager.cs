@@ -6,6 +6,7 @@
     public class ReportingManager : SharkyManager
     {
         DateTime StartTime;
+        DateTime LastLogTime;
 
         private readonly DefaultSharkyBot DefaultSharkyBot;
 
@@ -13,6 +14,8 @@
         /// Which Nth frame should be logged
         /// </summary>
         private readonly int logFrameInterval;
+
+        private readonly float LogInterval;
 
         /// <summary>
         /// Creates instance of reporting manager.
@@ -22,12 +25,14 @@
         public ReportingManager(DefaultSharkyBot defaultSharkyBot, float logInterval = 10.0f)
         {
             DefaultSharkyBot = defaultSharkyBot;
+            LogInterval = logInterval;
             logFrameInterval = (int)(logInterval * defaultSharkyBot.SharkyOptions.FramesPerSecond);
         }
 
         public override void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)
         {
             StartTime = DateTime.Now;
+            LastLogTime = DateTime.Now;
         }
 
         public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
@@ -54,6 +59,8 @@
             Console.WriteLine(new String('=', 20));
             Console.WriteLine($"Frame {frame} report, elapsed game time: {elapsedTime}, real time: {elapsedRealTime.ToString(@"hh\:mm\:ss")}, {Math.Round(elapsedTime.TotalSeconds / (double)elapsedRealTime.TotalSeconds, 2):f2}X speed, {Process.GetCurrentProcess().WorkingSet64 / 1024 / 1024} MiB memory used");
             Console.WriteLine($"Average Frames, calculation: {Math.Round(DefaultSharkyBot.PerformanceData.TotalFrameCalculationTime / frame)} ms, game: {Math.Round(elapsedRealTime.TotalMilliseconds / frame)} ms ({Math.Round(frame / (double)elapsedRealTime.TotalSeconds)} fps)");
+            LogIntervalPerformance(frame);
+
             var larva = "";
             if (DefaultSharkyBot.EnemyData.SelfRace == Race.Zerg)
             {
@@ -122,6 +129,18 @@
                 if (entry.Value > 0 || amountHave > 0 || amountHaveInProgress > 0)
                     Console.WriteLine($"    [{entry.Key}]={entry.Value} ({amountHave} have, {amountHaveInProgress} in progress)");
             }
+            if (DefaultSharkyBot.EnemyData.SelfRace == Race.Protoss)
+            {
+                Console.WriteLine("  Protosss Macro Data:");
+                Console.WriteLine($"    [DesiredExtraBaseSimCityBatteries]={DefaultSharkyBot.MacroData.ProtossMacroData.DesiredExtraBaseSimCityBatteries}");
+                Console.WriteLine($"    [DesiredExtraBaseSimCityCannons]={DefaultSharkyBot.MacroData.ProtossMacroData.DesiredExtraBaseSimCityCannons}");
+                Console.WriteLine($"    [DesiredExtraBaseSimCityPylons]={DefaultSharkyBot.MacroData.ProtossMacroData.DesiredExtraBaseSimCityPylons}");
+                Console.WriteLine($"    [DesiredPylons]={DefaultSharkyBot.MacroData.ProtossMacroData.DesiredPylons}");
+                Console.WriteLine($"    [DesiredPylonsAtDefensivePoint]={DefaultSharkyBot.MacroData.ProtossMacroData.DesiredPylonsAtDefensivePoint}");
+                Console.WriteLine($"    [DesiredPylonsAtEveryBase]={DefaultSharkyBot.MacroData.ProtossMacroData.DesiredPylonsAtEveryBase}");
+                Console.WriteLine($"    [ExtraBasesGatewayCannonSimCity]={DefaultSharkyBot.MacroData.ProtossMacroData.ExtraBasesGatewayCannonSimCity}");
+                Console.WriteLine($"    [DesiredPylonsAtNextBase]={DefaultSharkyBot.MacroData.ProtossMacroData.DesiredPylonsAtNextBase}");
+            }
             Console.WriteLine("  Desired upgrades:");
             foreach (var entry in DefaultSharkyBot.MacroData.DesiredUpgrades.OrderBy(x => Enum.GetName(typeof(Upgrades), x.Key)))
             {
@@ -163,6 +182,14 @@
             CheckCommanders();
             PrintTasks(frame);
             Console.WriteLine(new String('=', 20));
+        }
+
+        private void LogIntervalPerformance(int frame)
+        {
+            var elapsedRealTime = DateTime.Now - LastLogTime;
+            var frames = DefaultSharkyBot.SharkyOptions.FramesPerSecond * LogInterval;
+            Console.WriteLine($"Last {LogInterval}s game time, {elapsedRealTime.ToString(@"hh\:mm\:ss")} real time, {Math.Round(LogInterval / (double)elapsedRealTime.TotalSeconds, 2):f2}X speed, {Math.Round(DefaultSharkyBot.PerformanceData.TotalFrameCalculationTime / frames)} ms, game: {Math.Round(elapsedRealTime.TotalMilliseconds / frames)} ms ({Math.Round(frames / (double)elapsedRealTime.TotalSeconds)} fps)");
+            LastLogTime = DateTime.Now;
         }
 
         private string FormatElapsedTime(int frames)

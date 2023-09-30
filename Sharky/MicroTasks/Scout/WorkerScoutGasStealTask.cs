@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.Design;
-
-namespace Sharky.MicroTasks
+﻿namespace Sharky.MicroTasks
 {
     public class WorkerScoutGasStealTask : MicroTask
     {
@@ -25,12 +23,14 @@ namespace Sharky.MicroTasks
         protected ActiveUnitData ActiveUnitData;
         protected SharkyOptions SharkyOptions;
         protected IBuildingBuilder BuildingBuilder;
+        CameraManager CameraManager;
         MicroTaskData MicroTaskData;
 
         protected MineralWalker MineralWalker;
 
         protected List<Point2D> ScoutPoints;
         protected List<Point2D> EnemyMainArea;
+        protected List<Point2D> DangerArea;
 
         protected IIndividualMicroController IndividualMicroController;
 
@@ -54,6 +54,7 @@ namespace Sharky.MicroTasks
             BuildingBuilder = defaultSharkyBot.BuildingBuilder;
             SharkyOptions = defaultSharkyBot.SharkyOptions;
             MicroTaskData = defaultSharkyBot.MicroTaskData;
+            CameraManager = defaultSharkyBot.CameraManager;
 
             UnitCommanders = new List<UnitCommander>();
 
@@ -129,18 +130,19 @@ namespace Sharky.MicroTasks
             if (ScoutPoints == null)
             {
                 EnemyMainArea = AreaService.GetTargetArea(TargetingData.EnemyMainBasePoint);
+                DangerArea = EnemyMainArea.Where(p => Vector2.DistanceSquared(p.ToVector2(), TargetingData.EnemyMainBasePoint.ToVector2()) < 100 && Vector2.DistanceSquared(p.ToVector2(), BaseData.EnemyBaseLocations.FirstOrDefault().MineralLineLocation.ToVector2()) < 100).ToList();
+                EnemyMainArea.RemoveAll(p => Vector2.DistanceSquared(p.ToVector2(), TargetingData.EnemyMainBasePoint.ToVector2()) < 100 && Vector2.DistanceSquared(p.ToVector2(), BaseData.EnemyBaseLocations.FirstOrDefault().MineralLineLocation.ToVector2()) < 100);
                 ScoutPoints = new List<Point2D>();
                 ScoutPoints.AddRange(EnemyMainArea);
                 ScoutPoints.Add(BaseData.EnemyBaseLocations.Skip(1).First().Location);
             }
 
-            var mainVector = new Vector2(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y);
-            var points = ScoutPoints.OrderBy(p => MapDataService.LastFrameVisibility(p)).ThenByDescending(p => Vector2.DistanceSquared(mainVector, new Vector2(p.X, p.Y)));
+            var mainVector = TargetingData.EnemyMainBasePoint.ToVector2();
 
-            foreach (var point in points)
-            {
-                //DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
-            }
+            //foreach (var point in ScoutPoints)
+            //{
+            //    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
+            //}
 
             bool disable = false;
 
@@ -164,7 +166,7 @@ namespace Sharky.MicroTasks
                 {
                     continue;
                 }
-                
+
 
                 if (StealGas && MacroData.Minerals >= 75 && commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE)
                 {
@@ -179,6 +181,7 @@ namespace Sharky.MicroTasks
                                     var gasSteal = commander.Order(frame, Abilities.BUILD_ASSIMILATOR, null, gas.Tag);
                                     if (gasSteal != null)
                                     {
+                                        CameraManager.SetCamera(gas.Pos);
                                         commands.AddRange(gasSteal);
                                         continue;
                                     }
@@ -201,6 +204,7 @@ namespace Sharky.MicroTasks
                             var wallBlock = commander.Order(frame, Abilities.BUILD_PYLON, point);
                             if (wallBlock != null)
                             {
+                                CameraManager.SetCamera(point);
                                 commands.AddRange(wallBlock);
                                 continue;
                             }
@@ -225,6 +229,7 @@ namespace Sharky.MicroTasks
                                     var expansionBlock = commander.Order(frame, Abilities.BUILD_PYLON, expansion.Location);
                                     if (expansionBlock != null)
                                     {
+                                        CameraManager.SetCamera(expansion.Location);
                                         commands.AddRange(expansionBlock);
                                         continue;
                                     }
@@ -241,6 +246,7 @@ namespace Sharky.MicroTasks
                             var hidenPylonOrder = commander.Order(frame, Abilities.BUILD_PYLON, hideLocation);
                             if (hidenPylonOrder != null)
                             {
+                                CameraManager.SetCamera(hideLocation);
                                 commands.AddRange(hidenPylonOrder);
                                 continue;
                             }
@@ -271,6 +277,7 @@ namespace Sharky.MicroTasks
                                     {
                                         if (MacroData.Minerals >= 100 && Vector2.DistanceSquared(vector, commander.UnitCalculation.Position) < 4 && !commander.UnitCalculation.NearbyAllies.Any(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && a.Unit.Pos.X == production.X && a.Unit.Pos.Y == production.Y))
                                         {
+                                            CameraManager.SetCamera(production);
                                             commands.AddRange(commander.Order(frame, Abilities.BUILD_PYLON, new Point2D { X = production.X, Y = production.Y }));
                                             continue;
                                         }
@@ -295,28 +302,43 @@ namespace Sharky.MicroTasks
                     // if worker building building nearby, attack it
                     if (commander.UnitCalculation.Unit.Shield > 5)
                     {
-                        var enemy = commander.UnitCalculation.NearbyEnemies.FirstOrDefault(e => 
-                            e.Unit.UnitType == (uint)UnitTypes.TERRAN_SCV && 
+                        var enemy = commander.UnitCalculation.NearbyEnemies.FirstOrDefault(e =>
+                            e.Unit.UnitType == (uint)UnitTypes.TERRAN_SCV &&
                                 e.NearbyAllies.Any(a => a.Unit.BuildProgress < 1 && Vector2.DistanceSquared(a.Position, e.Position) < ((e.Unit.Radius + a.Unit.Radius + 1) * (e.Unit.Radius + a.Unit.Radius + 1)))
                             );
                         if (enemy != null)
                         {
+                            CameraManager.SetCamera(enemy.Position);
                             commands.AddRange(commander.Order(frame, Abilities.ATTACK, targetTag: enemy.Unit.Tag));
                             continue;
                         }
                     }
                 }
 
-                if (commander.UnitCalculation.Unit.Shield > 15 && commander.UnitCalculation.NearbyEnemies.Any() && (commander.UnitCalculation.NearbyAllies.Any(a => a.UnitClassifications.Contains(UnitClassification.ArmyUnit)) || (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ResourceCenter) && e.Unit.BuildProgress == 1) && commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker)))))
+                if (frame % 50 == 0)
                 {
-                    commands.AddRange(commander.Order(frame, Abilities.ATTACK, points.FirstOrDefault()));
-                    continue;
+                    CameraManager.SetCamera(commander.UnitCalculation.Position);
                 }
 
-                var action = commander.Order(frame, Abilities.MOVE, points.FirstOrDefault());
-                if (action != null)
+                var points = ScoutPoints.Where(p => Vector2.DistanceSquared(p.ToVector2(), commander.UnitCalculation.Position) < 36).OrderBy(p => MapDataService.LastFrameAlliesTouched(p)).ThenBy(p => Vector2.DistanceSquared(p.ToVector2(), mainVector)).ThenBy(p => Vector2.DistanceSquared(commander.UnitCalculation.Position, p.ToVector2()));
+                var navpoint = points.FirstOrDefault(p => !MapDataService.PathBlocked(p.ToVector2()));
+                if (navpoint == null)
                 {
-                    commands.AddRange(action);
+                    navpoint = ScoutPoints.OrderBy(p => MapDataService.LastFrameAlliesTouched(p)).ThenBy(p => Vector2.DistanceSquared(p.ToVector2(), mainVector)).ThenBy(p => Vector2.DistanceSquared(commander.UnitCalculation.Position, p.ToVector2())).FirstOrDefault();
+                }
+                if (navpoint != null)
+                {
+                    if (commander.UnitCalculation.Unit.Shield > 15 && commander.UnitCalculation.NearbyEnemies.Any() && (commander.UnitCalculation.NearbyAllies.Any(a => a.UnitClassifications.Contains(UnitClassification.ArmyUnit)) || (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ResourceCenter) && e.Unit.BuildProgress == 1) && commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker)))))
+                    {
+                        commands.AddRange(commander.Order(frame, Abilities.ATTACK, navpoint));
+                        continue;
+                    }
+
+                    var action = commander.Order(frame, Abilities.MOVE, navpoint);
+                    if (action != null)
+                    {
+                        commands.AddRange(action);
+                    }
                 }
             }
 

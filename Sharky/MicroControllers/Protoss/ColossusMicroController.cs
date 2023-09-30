@@ -1,6 +1,7 @@
-﻿namespace Sharky.MicroControllers.Protoss
+﻿using System.Linq;
+
+namespace Sharky.MicroControllers.Protoss
 {
-    // TODO: make hallucinations move farther forward than rest of army when there is splash damage, do not allow them to be close enough to friendly to take splash
     public class ColossusMicroController : IndividualMicroController
     {
         CollisionCalculator CollisionCalculator;
@@ -54,6 +55,36 @@
             var attackStart = new Vector2(start.X + (length * dy), start.Y - (length * dx));
             var attackEnd = new Vector2(start.X - (length * dy), start.Y + (length * dx));
             return new LineSegment { Start = attackStart, End = attackEnd };
+        }
+
+        public override List<SC2APIProtocol.Action> MoveToTarget(UnitCommander commander, Point2D target, int frame)
+        {
+            return commander.Order(frame, Abilities.MOVE, target);
+        }
+
+        protected override List<SC2APIProtocol.Action> AttackToTarget(UnitCommander commander, Point2D target, int frame)
+        {
+            return commander.Order(frame, Abilities.ATTACK, target);
+        }
+
+        public override bool FollowPath(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
+
+            var point = commander.RetreatPath.LastOrDefault();
+            if (point != Vector2.Zero)
+            {
+                action = commander.Order(frame, Abilities.MOVE, new Point2D { X = point.X, Y = point.Y });
+
+                if (Vector2.DistanceSquared(commander.UnitCalculation.Position, point) < 4)
+                {
+                    commander.RetreatPathIndex = commander.RetreatPath.Count;
+                }
+
+                return true;
+            }
+
+            return false;
         }
     }
 }

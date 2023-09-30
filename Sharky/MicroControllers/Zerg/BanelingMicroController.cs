@@ -19,7 +19,7 @@
         // TODO: while retreating if nearby enemies just attack
         // TODO: if no targets left follow enemy drones in case they gorup together, if no enemy drones left go to group center or nearest friendly unit that isn't a baneling
 
-        protected override bool AttackBestTarget(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
+        public override bool AttackBestTarget(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             if (AttackBestTargetInRange(commander, target, bestTarget, frame, out action))
             {
@@ -52,7 +52,7 @@
             return true;
         }
 
-        protected override bool AttackBestTargetInRange(UnitCommander commander, Point2D target, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
+        public override bool AttackBestTargetInRange(UnitCommander commander, Point2D target, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
             if (bestTarget != null)
@@ -122,7 +122,7 @@
             return false;
         }
 
-        protected override UnitCalculation GetBestTarget(UnitCommander commander, Point2D target, int frame)
+        public override UnitCalculation GetBestTarget(UnitCommander commander, Point2D target, int frame)
         {
             var existingAttackOrder = commander.UnitCalculation.Unit.Orders.Where(o => o.AbilityId == (uint)Abilities.ATTACK || o.AbilityId == (uint)Abilities.ATTACK_ATTACK).FirstOrDefault();
 
@@ -206,7 +206,7 @@
             return base.AvoidDamage(commander, target, defensivePoint, frame, out action);
         }
 
-        protected override bool Retreat(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
+        public override bool Retreat(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             if (commander.UnitCalculation.EnemiesInRangeOf.Count(e => !e.Unit.IsFlying) > 3)
             {

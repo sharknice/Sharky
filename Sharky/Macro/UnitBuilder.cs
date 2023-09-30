@@ -12,6 +12,7 @@
 
         UnitCountService UnitCountService;
         SharkyOptions SharkyOptions;
+        CameraManager CameraManager;
 
         IBuildingPlacement WarpInPlacement;
         IProducerSelector ProducerSelector;
@@ -28,6 +29,7 @@
             SharkyOptions = defaultSharkyBot.SharkyOptions;
             BuildOptions = defaultSharkyBot.BuildOptions;
             EnemyData = defaultSharkyBot.EnemyData;
+            CameraManager = defaultSharkyBot.CameraManager;
 
             WarpInPlacement = warpInPlacement;
             ProducerSelector = defaultProducerSelector;
@@ -83,6 +85,7 @@
                                 var action = producer.Order(MacroData.Frame, Abilities.RESEARCH_WARPGATE);
                                 if (action != null)
                                 {
+                                    CameraManager.SetCamera(producer.UnitCalculation.Position);
                                     commands.AddRange(action);
                                     return commands;
                                 }
@@ -106,6 +109,7 @@
                                     var action = producer.Order(MacroData.Frame, unitData.WarpInAbility, location);
                                     if (action != null)
                                     {
+                                        CameraManager.SetCamera(location);
                                         commands.AddRange(action);
                                         return commands;
                                     }
@@ -121,6 +125,7 @@
                                 var action = producer.Order(MacroData.Frame, unitData.Ability, allowSpam: allowSpam);
                                 if (action != null)
                                 {
+                                    CameraManager.SetCamera(producer.UnitCalculation.Position);
                                     commands.AddRange(action);
                                     return commands;
                                 }
@@ -141,6 +146,7 @@
                             var action = commanders.First().Value.Merge(commanders.Last().Value.UnitCalculation.Unit.Tag);
                             if (action != null)
                             {
+                                CameraManager.SetCamera(commanders.First().Value.UnitCalculation.Position);
                                 commanders.First().Value.UnitRole = UnitRole.Morph;
                                 commanders.Last().Value.UnitRole = UnitRole.Morph;
                                 commands.Add(action);

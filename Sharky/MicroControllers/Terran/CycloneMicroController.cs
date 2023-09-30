@@ -138,7 +138,7 @@
             return false;
         }
 
-        protected override void UpdateState(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, Formation formation, int frame)
+        public override void UpdateState(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, Formation formation, int frame)
         {       
             if (commander.LastLockOn != null && commander.LastLockOn.EndFrame > frame)
             {
@@ -170,7 +170,7 @@
             }
         }
 
-        protected override UnitCalculation GetBestTarget(UnitCommander commander, Point2D target, int frame)
+        public override UnitCalculation GetBestTarget(UnitCommander commander, Point2D target, int frame)
         {
 
             var existingAttackOrder = commander.UnitCalculation.Unit.Orders.Where(o => o.AbilityId == (uint)Abilities.ATTACK || o.AbilityId == (uint)Abilities.ATTACK_ATTACK).FirstOrDefault();

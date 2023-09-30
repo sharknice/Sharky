@@ -2,10 +2,12 @@
 {
     public class HighTemplarMicroController : IndividualMicroController
     {
-        private int StormRangeSquared = 82;
+        private int StormRangeSquared = 100; // little extra range for splash
         private double StormRadius = 1.5;
         private int FeedbackRangeSquared = 121; // actually range 10, but give an extra 1 range to get first feedback in
         private int lastStormFrame = 0;
+
+        private Dictionary<ulong, int> FeedBacks = new Dictionary<ulong, int>();
 
         public HighTemplarMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled)
             : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled)
@@ -101,8 +103,20 @@
                 return false;
             }
 
+            if (commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.EFFECT_PSISTORM) || commander.LastAbility == Abilities.EFFECT_PSISTORM && commander.LastOrderFrame + 10 > frame) 
+            {
+                var tag = commander.UnitCalculation.Unit.Orders.FirstOrDefault(o => o.AbilityId == (uint)Abilities.EFFECT_PSISTORM);
+                if (tag != null)
+                {
+                    FeedBacks[tag.TargetUnitTag] = frame;
+                }
+                return true;
+            }
+
+            RemoveExpiredFeedbacks(frame);
+
             var vector = commander.UnitCalculation.Position;
-            var enemiesInRange = commander.UnitCalculation.NearbyEnemies.Where(e => e.Unit.Energy > 1 && e.Unit.DisplayType == DisplayType.Visible && Vector2.DistanceSquared(e.Position, vector) < FeedbackRangeSquared).OrderByDescending(e => e.Unit.Energy);
+            var enemiesInRange = commander.UnitCalculation.NearbyEnemies.Where(e => e.Unit.Energy > 1 && e.FrameLastSeen == frame && !FeedBacks.ContainsKey(e.Unit.Tag) && Vector2.DistanceSquared(e.Position, vector) < FeedbackRangeSquared).OrderByDescending(e => e.Unit.Energy).ThenBy(e => Vector2.DistanceSquared(e.Position, vector));
 
             var oneShotKill = enemiesInRange.Where(e => e.Unit.Energy * .5 > e.Unit.Health + e.Unit.Shield).FirstOrDefault();
             if (oneShotKill != null)
@@ -122,11 +136,21 @@
 
             if (target != null && target.Unit.Energy >= 50)
             {
+                FeedBacks[target.Unit.Tag] = frame;
                 action = commander.Order(frame, Abilities.EFFECT_FEEDBACK, null, target.Unit.Tag);
                 return true;
             }
 
             return false;
+        }
+
+        private void RemoveExpiredFeedbacks(int frame)
+        {
+            var expired = FeedBacks.Where(f => f.Value + 10 < frame).Select(f => f.Key).ToList();
+            foreach (var tag in expired)
+            {
+                FeedBacks.Remove(tag);
+            }
         }
 
         bool Storm(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
@@ -150,7 +174,7 @@
                 }
             }
 
-            var enemies = commander.UnitCalculation.NearbyEnemies.Take(25).Where(a => !a.Attributes.Contains(SC2Attribute.Structure) && !a.Unit.BuffIds.Contains((uint)Buffs.PSISTORM) && !a.Unit.BuffIds.Contains((uint)Buffs.ORACLESTASISTRAPTARGET) && a.Unit.UnitType != (uint)UnitTypes.PROTOSS_ADEPTPHASESHIFT).OrderByDescending(u => u.Unit.Health);
+            var enemies = commander.UnitCalculation.NearbyEnemies.Where(a => !a.Attributes.Contains(SC2Attribute.Structure) && !a.Unit.BuffIds.Contains((uint)Buffs.PSISTORM) && !a.Unit.BuffIds.Contains((uint)Buffs.ORACLESTASISTRAPTARGET) && a.Unit.UnitType != (uint)UnitTypes.PROTOSS_ADEPTPHASESHIFT && Vector2.DistanceSquared(commander.UnitCalculation.Position, a.Position) < StormRangeSquared).OrderByDescending(u => u.Unit.Health);
             if (enemies.Count() > 2)
             {
                 var bestAttack = GetBestAttack(commander.UnitCalculation, enemies);
@@ -172,14 +196,14 @@
             foreach (var enemyAttack in enemies)
             {
                 int hitCount = 0;
-                foreach (var splashedEnemy in enemyAttack.NearbyAllies.Take(25).Where(a => !a.Attributes.Contains(SC2Attribute.Structure) && !a.Unit.BuffIds.Contains((uint)Buffs.PSISTORM)))
+                foreach (var splashedEnemy in enemyAttack.NearbyAllies.Where(a => !a.Attributes.Contains(SC2Attribute.Structure) && !a.Unit.BuffIds.Contains((uint)Buffs.PSISTORM)))
                 {
                     if (Vector2.DistanceSquared(splashedEnemy.Position, enemyAttack.Position) < (splashedEnemy.Unit.Radius + StormRadius) * (splashedEnemy.Unit.Radius + StormRadius))
                     {
                         hitCount++;
                     }
                 }
-                foreach (var splashedAlly in potentialAttack.NearbyAllies.Take(25).Where(a => !a.Attributes.Contains(SC2Attribute.Structure)))
+                foreach (var splashedAlly in potentialAttack.NearbyAllies.Where(a => !a.Attributes.Contains(SC2Attribute.Structure)))
                 {
                     if (Vector2.DistanceSquared(splashedAlly.Position, enemyAttack.Position) < (splashedAlly.Unit.Radius + StormRadius) * (splashedAlly.Unit.Radius + StormRadius))
                     {

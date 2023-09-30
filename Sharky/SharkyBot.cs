@@ -12,6 +12,7 @@
 
         List<SC2Action> Actions;
 
+        DateTime StartTime;
 
         public SharkyBot(List<IManager> managers, DebugService debugService, FrameToTimeConverter frameToTimeConverter, SharkyOptions sharkyOptions, PerformanceData performanceData, ChatService chatService, TagService tagService)
         {
@@ -42,6 +43,8 @@
             PerformanceData.TotalFrameCalculationTime = 0;
 
             TagService.TagVersion();
+
+            StartTime = DateTime.Now;
         }
 
         public void OnEnd(ResponseObservation observation, Result result)
@@ -57,8 +60,12 @@
             {
                 frames = (int)observation.Observation.GameLoop;
             }
-            Console.WriteLine($"Total Frames: {frames} {FrameToTimeConverter.GetTime(frames)}");
-            Console.WriteLine($"Average Frame Time: {PerformanceData.TotalFrameCalculationTime / frames}");
+            var elapsedTime = FrameToTimeConverter.GetTime(frames);
+            var elapsedRealTime = DateTime.Now - StartTime;
+
+            Console.WriteLine($"Total Frames: {frames}, elapsed game time: {elapsedTime}, real time: {elapsedRealTime.ToString(@"hh\:mm\:ss")}, {Math.Round(elapsedTime.TotalSeconds / (double)elapsedRealTime.TotalSeconds, 2):f2}X speed, {Process.GetCurrentProcess().WorkingSet64 / 1024 / 1024} MiB memory used");
+            Console.WriteLine($"Average Frame Time: {Math.Round(PerformanceData.TotalFrameCalculationTime / frames)} ms, game: {Math.Round(elapsedRealTime.TotalMilliseconds / frames)} ms ({Math.Round(frames / (double)elapsedRealTime.TotalSeconds)} fps)");
+
         }
 
         public IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
@@ -125,7 +132,7 @@
                 var end = Stopwatch.GetTimestamp();
                 var endTime = (end - begin) / (double)Stopwatch.Frequency * 1000.0;
                 PerformanceData.TotalFrameCalculationTime += endTime;
-                DebugService.DrawText($"OnFrame: {endTime}");
+                DebugService.DrawText($"OnFrame: {(int)endTime}");
             }
             catch (Exception exception)
             {

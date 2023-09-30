@@ -84,7 +84,7 @@
             return false;
         }
 
-        protected override bool MoveToAttackOnCooldown(UnitCommander commander, UnitCalculation bestTarget, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
+        public override bool MoveToAttackOnCooldown(UnitCommander commander, UnitCalculation bestTarget, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -199,7 +199,7 @@
             return commander.UnitCalculation.Unit.WeaponCooldown < 1;
         }
 
-        protected override UnitCalculation GetBestTarget(UnitCommander commander, Point2D target, int frame)
+        public override UnitCalculation GetBestTarget(UnitCommander commander, Point2D target, int frame)
         {
             var existingAttackOrder = commander.UnitCalculation.Unit.Orders.Where(o => o.AbilityId == (uint)Abilities.ATTACK || o.AbilityId == (uint)Abilities.ATTACK_ATTACK).FirstOrDefault();
 

@@ -242,6 +242,28 @@
                     MicroTaskData[typeof(AttackTask).Name].StealUnit(commander);
                 }
             }
+
+            if (MicroTaskData.ContainsKey(typeof(DefenseSquadTask).Name))
+            {
+                foreach (var commander in MicroTaskData[typeof(DefenseSquadTask).Name].UnitCommanders.OrderBy(c => Vector2.DistanceSquared(c.UnitCalculation.Position, vector)))
+                {
+                    var unitType = commander.UnitCalculation.Unit.UnitType;
+                    foreach (var desiredUnitClaim in DesiredUnitsClaims)
+                    {
+                        if ((uint)desiredUnitClaim.UnitType == unitType && !commander.UnitCalculation.Unit.IsHallucination && UnitCommanders.Count(u => u.UnitCalculation.Unit.UnitType == (uint)desiredUnitClaim.UnitType) < desiredUnitClaim.Count)
+                        {
+                            commander.Claimed = true;
+                            commander.UnitRole = UnitRole.Defend;
+                            UnitCommanders.Add(commander);
+                        }
+                    }
+                }
+
+                foreach (var commander in UnitCommanders)
+                {
+                    MicroTaskData[typeof(DefenseSquadTask).Name].StealUnit(commander);
+                }
+            }
         }
 
         void StealFromMiningTask()

@@ -33,16 +33,11 @@ namespace SharkyProtossExampleBot.Builds
 
         public override void OnFrame(ResponseObservation observation)
         {
-            if (UnitCountService.Completed(UnitTypes.PROTOSS_PYLON) > 0)
+            var completedPylons = UnitCountService.Completed(UnitTypes.PROTOSS_PYLON);
+            if (completedPylons > 0)
             {
-                if (MacroData.DesiredProductionCounts[UnitTypes.PROTOSS_GATEWAY] < 2)
-                {
-                    MacroData.DesiredProductionCounts[UnitTypes.PROTOSS_GATEWAY] = 2;
-                }
-            }
-            if (UnitCountService.Completed(UnitTypes.PROTOSS_PYLON) >= 2)
-            {
-                if (MacroData.DesiredProductionCounts[UnitTypes.PROTOSS_GATEWAY] < 4)
+                MacroData.DesiredProductionCounts[UnitTypes.PROTOSS_GATEWAY] = 2;
+                if (completedPylons >= 2)
                 {
                     MacroData.DesiredProductionCounts[UnitTypes.PROTOSS_GATEWAY] = 4;
                 }

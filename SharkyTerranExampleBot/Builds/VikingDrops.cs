@@ -81,14 +81,14 @@ namespace SharkyTerranExampleBot.Builds
         {
             if (UnitCountService.EquivalentTypeCount(UnitTypes.TERRAN_STARPORT) > 0)
             {
-                if (UnitCountService.EquivalentTypeCompleted(UnitTypes.TERRAN_STARPORT) > 0)
+                if (RequirementService.HaveCompleted(UnitTypes.TERRAN_STARPORT))
                 {
                     if (MacroData.DesiredAddOnCounts[UnitTypes.TERRAN_STARPORTREACTOR] < UnitCountService.EquivalentTypeCompleted(UnitTypes.TERRAN_STARPORT))
                     {
                         MacroData.DesiredAddOnCounts[UnitTypes.TERRAN_STARPORTREACTOR] = UnitCountService.EquivalentTypeCompleted(UnitTypes.TERRAN_STARPORT);
                     }
 
-                    if (UnitCountService.EquivalentTypeCompleted(UnitTypes.TERRAN_STARPORTREACTOR) > 0)
+                    if (RequirementService.HaveCompleted(UnitTypes.TERRAN_STARPORTREACTOR))
                     {
                         if (MacroData.DesiredUnitCounts[UnitTypes.TERRAN_MEDIVAC] < 2)
                         {

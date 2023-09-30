@@ -45,6 +45,7 @@
         Regroup,
         BlockExpansion,
         Leader,
+        NextLeader,
         Disband,
         RunAway,
         Chase,

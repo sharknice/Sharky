@@ -63,7 +63,7 @@
 
             if (AttackData.RequireBank)
             {
-                if (MacroData.Minerals < 2000 || MacroData.VespeneGas < 1000)
+                if (MacroData.Minerals < AttackData.RequiredMineralBank || MacroData.VespeneGas < AttackData.RequiredVespeneBank)
                 {
                     TargetingData.AttackState = AttackState.Retreat;
                     DebugService.DrawText("Retreating: require 2000 mineral and 1000 vespene gas bank");

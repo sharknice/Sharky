@@ -7,16 +7,18 @@
         ChronoData ChronoData;
         EnemyData EnemyData;
         TagService TagService;
+        CameraManager CameraManager;
         float OverchargeRangeSquared = 100;
         float RestoreRangeSquared = 36;
 
-        public NexusManager(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, ChronoData chronoData, EnemyData enemyData, TagService tagService)
+        public NexusManager(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, ChronoData chronoData, EnemyData enemyData, TagService tagService, CameraManager cameraManager)
         {
             ActiveUnitData = activeUnitData;
             SharkyUnitData = sharkyUnitData;
             ChronoData = chronoData;
             EnemyData = enemyData;
             TagService = tagService;
+            CameraManager = cameraManager;
         }
 
         public override IEnumerable<SC2Action> OnFrame(ResponseObservation observation)
@@ -65,6 +67,7 @@
                 {
                     if (shieldBattery.NearbyAllies.Any(a => a.Unit.BuildProgress == 1 && a.EnemiesInRangeOf.Any() && a.Unit.Shield < 5 && Vector2.DistanceSquared(shieldBattery.Position, a.Position) < RestoreRangeSquared))
                     {
+                        CameraManager.SetCamera(shieldBattery.Position);
                         return nexus.Order(frame, Abilities.BATTERYOVERCHARGE, null, shieldBattery.Unit.Tag);
                     }
                 }
@@ -85,6 +88,7 @@
                     var building = ActiveUnitData.SelfUnits.Where(u => u.Value.Unit.IsPowered && !u.Value.Unit.BuffIds.Contains((uint)Buffs.CHRONOBOOST) && upgradeData.ProducingUnits.Contains((UnitTypes)u.Value.Unit.UnitType) && u.Value.Unit.Orders.Any(o => o.AbilityId == (uint)upgradeData.Ability)).FirstOrDefault().Value;
                     if (building != null)
                     {
+                        CameraManager.SetCamera(building.Position);
                         return nexus.Order(frame, Abilities.CHRONOBOOST, null, building.Unit.Tag);
                     }
                 }
@@ -95,6 +99,7 @@
                     var building = ActiveUnitData.SelfUnits.Where(u => (u.Value.Unit.IsPowered || u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS) && !u.Value.Unit.BuffIds.Contains((uint)Buffs.CHRONOBOOST) && trainingData.ProducingUnits.Contains((UnitTypes)u.Value.Unit.UnitType) && u.Value.Unit.Orders.Any(o => o.AbilityId == (uint)trainingData.Ability)).FirstOrDefault().Value;
                     if (building != null)
                     {
+                        CameraManager.SetCamera(building.Position);
                         return nexus.Order(frame, Abilities.CHRONOBOOST, null, building.Unit.Tag);
                     }
                 }

@@ -36,6 +36,10 @@
                         weapon.Range = 9;
                     }
                 }
+                else if (unitType == UnitTypes.ZERG_HYDRALISK && MacroData.Frame > SharkyOptions.FramesPerSecond * 10 * 60)
+                {
+                    weapon.Range = 6;
+                }
                 else if (unitType == UnitTypes.TERRAN_MISSILETURRET && MacroData.Frame > SharkyOptions.FramesPerSecond * 10 * 60)
                 {
                     weapon.Range = 8;

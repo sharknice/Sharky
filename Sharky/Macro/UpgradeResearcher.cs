@@ -5,12 +5,14 @@
         MacroData MacroData;
         ActiveUnitData ActiveUnitData;
         SharkyUnitData SharkyUnitData;
+        CameraManager CameraManager;
 
         public UpgradeResearcher(DefaultSharkyBot defaultSharkyBot)
         {
             MacroData = defaultSharkyBot.MacroData;
             ActiveUnitData = defaultSharkyBot.ActiveUnitData;
             SharkyUnitData = defaultSharkyBot.SharkyUnitData;
+            CameraManager = defaultSharkyBot.CameraManager;
         }
 
         public List<SC2Action> ResearchUpgrades()
@@ -30,6 +32,7 @@
                         {
                             if (upgradeData.Minerals <= MacroData.Minerals && upgradeData.Gas <= MacroData.VespeneGas)
                             {
+                                CameraManager.SetCamera(building.First().Value.UnitCalculation.Position);
                                 commands.AddRange(building.First().Value.Order(MacroData.Frame, upgradeData.Ability));
                             }
                         }

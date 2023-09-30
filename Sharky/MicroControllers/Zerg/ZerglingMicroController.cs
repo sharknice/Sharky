@@ -23,7 +23,7 @@
             return false;
         }
 
-        protected override UnitCalculation GetBestTarget(UnitCommander commander, Point2D target, int frame)
+        public override UnitCalculation GetBestTarget(UnitCommander commander, Point2D target, int frame)
         {
             var existingAttackOrder = commander.UnitCalculation.Unit.Orders.Where(o => o.AbilityId == (uint)Abilities.ATTACK || o.AbilityId == (uint)Abilities.ATTACK_ATTACK).FirstOrDefault();
 

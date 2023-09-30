@@ -355,7 +355,7 @@
 
             Vector = vector / (FrameLastSeen - frame);
             AverageVector = Vector;
-            Velocity = Vector.LengthSquared();
+            Velocity = Vector.Length();
             AverageVelocity = Velocity;
             FrameFirstSeen = previous.FrameFirstSeen;
         }

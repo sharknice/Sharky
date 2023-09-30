@@ -183,5 +183,11 @@
             var y = CloakRange * Math.Sin(angle);
             return new Point2D { X = unitToSupport.Position.X + (float)x, Y = unitToSupport.Position.Y - (float)y };
         }
+
+        protected override bool DoFreeDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
+            return false;
+        }
     }
 }

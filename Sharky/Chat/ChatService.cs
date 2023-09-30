@@ -6,19 +6,33 @@
         SharkyOptions SharkyOptions;
         ActiveChatData ActiveChatData;
         EnemyData EnemyData;
+        MacroData MacroData;
 
-        public ChatService(IChatDataService chatDataService, SharkyOptions sharkyOptions, ActiveChatData activeChatData, EnemyData enemyData)
+        int ChatTypeLastSentFrame;
+        int MaxChatTypeFrequency;
+
+        public ChatService(DefaultSharkyBot defaultSharkyBot)
         {
-            ChatDataService = chatDataService;
-            SharkyOptions = sharkyOptions;
-            ActiveChatData = activeChatData;
-            EnemyData = enemyData;
+            ChatDataService = defaultSharkyBot.ChatDataService;
+            SharkyOptions = defaultSharkyBot.SharkyOptions;
+            ActiveChatData = defaultSharkyBot.ActiveChatData;
+            EnemyData = defaultSharkyBot.EnemyData;
+            MacroData = defaultSharkyBot.MacroData;
+
+            MaxChatTypeFrequency = (int)(SharkyOptions.FramesPerSecond * 15);
+            ChatTypeLastSentFrame = -MaxChatTypeFrequency;
         }
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public async void SendChatType(string chatType, bool instant = false)
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
+            if (ChatTypeLastSentFrame + MaxChatTypeFrequency > MacroData.Frame)
+            {
+                return;
+            }
+            ChatTypeLastSentFrame = MacroData.Frame;
+
             var lastGame = EnemyData?.EnemyPlayer.Games.FirstOrDefault();
             if (lastGame != null)
             {

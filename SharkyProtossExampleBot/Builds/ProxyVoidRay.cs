@@ -122,7 +122,7 @@ namespace SharkyProtossExampleBot.Builds
                     ChronoData.ChronodUnits.Remove(UnitTypes.PROTOSS_PROBE);
                 }
             }
-            if (UnitCountService.Completed(UnitTypes.PROTOSS_GATEWAY) > 0)
+            if (RequirementService.HaveEquivalentCompleted(UnitTypes.PROTOSS_GATEWAY))
             {
                 if (MacroData.DesiredTechCounts[UnitTypes.PROTOSS_CYBERNETICSCORE] < 1)
                 {
@@ -131,7 +131,7 @@ namespace SharkyProtossExampleBot.Builds
                 ProxyTask.Enable();
                 MacroData.Proxies[ProxyTask.ProxyName].DesiredPylons = 1;
             }
-            if (UnitCountService.Completed(UnitTypes.PROTOSS_CYBERNETICSCORE) > 0)
+            if (RequirementService.HaveCompleted(UnitTypes.PROTOSS_CYBERNETICSCORE))
             {
                 if (MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_STALKER] < 1)
                 {
@@ -173,7 +173,7 @@ namespace SharkyProtossExampleBot.Builds
                     }
                 }
             }
-            if (UnitCountService.Completed(UnitTypes.PROTOSS_STARGATE) > 0)
+            if (RequirementService.HaveCompleted(UnitTypes.PROTOSS_STARGATE))
             {
                 if (MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_VOIDRAY] < 10)
                 {

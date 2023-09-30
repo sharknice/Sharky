@@ -9,6 +9,8 @@
         SharkyOptions SharkyOptions;
         MapDataService MapDataService;
 
+        public bool GroupingEnabled { get; set; }
+
         public AdvancedMicroController(DefaultSharkyBot defaultSharkyBot)
         {
             MicroData = defaultSharkyBot.MicroData;
@@ -24,7 +26,7 @@
             var actions = new List<SC2APIProtocol.Action>();
             Vector2 groupVector = Vector2.Zero;
             var centerHeight = -1;
-            if (groupCenter != null && frame > SharkyOptions.FramesPerSecond * 3 * 60)
+            if (GroupingEnabled && groupCenter != null && frame > SharkyOptions.FramesPerSecond * 3 * 60)
             {
                 centerHeight = MapDataService.MapHeight(groupCenter);
                 groupVector = new Vector2(groupCenter.X, groupCenter.Y);
@@ -55,7 +57,7 @@
             var actions = new List<SC2APIProtocol.Action>();
             Vector2 groupVector = Vector2.Zero;
             var centerHeight = -1;
-            if (groupCenter != null)
+            if (GroupingEnabled && (groupCenter != null))
             {
                 centerHeight = MapDataService.MapHeight(groupCenter);
                 groupVector = new Vector2(groupCenter.X, groupCenter.Y);
@@ -110,20 +112,18 @@
         {
             var actions = new List<SC2APIProtocol.Action>();
 
-            var stopwatch1 = new Stopwatch();
-            stopwatch1.Start();
+            var stopwatchTotal = Stopwatch.StartNew();
+            var stopwatch1 = Stopwatch.StartNew();
 
             var targetVector = new Vector2(target.X, target.Y);
             Vector2 groupVector = Vector2.Zero;
             var centerHeight = -1;
-            if (groupCenter != null)
+            if (GroupingEnabled && groupCenter != null)
             {
                 centerHeight = MapDataService.MapHeight(groupCenter);
                 groupVector = new Vector2(groupCenter.X, groupCenter.Y);
             }
-            var friendlies = supportTargets.OrderByDescending(c => c.UnitCalculation.EnemiesInRangeOf.Count()).ThenByDescending(c => c.UnitCalculation.EnemiesInRange.Count()).ThenByDescending(c => c.UnitCalculation.NearbyEnemies.Count()).ThenBy(c => Vector2.DistanceSquared(c.UnitCalculation.Position, targetVector));
 
-            stopwatch1.Stop();
             if (stopwatch1.ElapsedMilliseconds > 100)
             {
                 System.Console.WriteLine($"Support start {stopwatch1.ElapsedMilliseconds}");
@@ -147,11 +147,11 @@
 
                 if (MicroData.IndividualMicroControllers.TryGetValue((UnitTypes)commander.UnitCalculation.Unit.UnitType, out var individualMicroController))
                 {
-                    action = individualMicroController.Support(commander, friendlies, target, defensivePoint, groupCenter, frame);
+                    action = individualMicroController.Support(commander, supportTargets, target, defensivePoint, groupCenter, frame);
                 }
                 else
                 {
-                    action = MicroData.IndividualMicroController.Support(commander, friendlies, target, defensivePoint, groupCenter, frame);
+                    action = MicroData.IndividualMicroController.Support(commander, supportTargets, target, defensivePoint, groupCenter, frame);
                 }
                 if (action != null) { actions.AddRange(action); }
 
@@ -167,18 +167,18 @@
                 index++;
             }
 
-            stopwatch1.Stop();
-            if (stopwatch1.ElapsedMilliseconds > 100)
+            if (stopwatchTotal.ElapsedMilliseconds > 100)
             {
-                System.Console.WriteLine($"Support end {stopwatch1.ElapsedMilliseconds}");
+                System.Console.WriteLine($"Support end {stopwatchTotal.ElapsedMilliseconds}");
             }
-            stopwatch1.Restart();
 
             return actions;
         }
 
         void SetState(UnitCommander commander, Vector2 groupVector, int groupThreshold, int centerHeight)
         {
+            if (!GroupingEnabled) { return; }
+
             if (groupVector == Vector2.Zero || commander.UnitCalculation.NearbyAllies.Count() > groupThreshold || centerHeight != MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos))
             {
                 commander.CommanderState = CommanderState.None;
@@ -201,7 +201,7 @@
             var actions = new List<SC2APIProtocol.Action>();
             Vector2 groupVector = Vector2.Zero;
             var centerHeight = -1;
-            if (groupCenter != null && frame > SharkyOptions.FramesPerSecond * 3 * 60)
+            if (GroupingEnabled && groupCenter != null && frame > SharkyOptions.FramesPerSecond * 3 * 60)
             {
                 centerHeight = MapDataService.MapHeight(groupCenter);
                 groupVector = new Vector2(groupCenter.X, groupCenter.Y);

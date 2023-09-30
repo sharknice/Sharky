@@ -107,7 +107,7 @@
             return null;
         }
 
-        protected override bool AttackBestTarget(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
+        public override bool AttackBestTarget(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             if (AttackBestTargetInRange(commander, target, bestTarget, frame, out action))
             {
@@ -201,7 +201,7 @@
             return true;
         }
 
-        protected override bool Retreat(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
+        public override bool Retreat(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -324,7 +324,7 @@
             return true;
         }
 
-        protected override UnitCalculation GetBestTarget(UnitCommander commander, Point2D target, int frame)
+        public override UnitCalculation GetBestTarget(UnitCommander commander, Point2D target, int frame)
         {
             if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.KillWorkers && commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker)))
             {

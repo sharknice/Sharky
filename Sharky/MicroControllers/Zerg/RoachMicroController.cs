@@ -27,7 +27,7 @@
             return ManageBurrow(commander, defensivePoint, frame) ?? base.Attack(commander, target, defensivePoint, groupCenter, frame);
         }
 
-        protected override bool Retreat(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2Action> action)
+        public override bool Retreat(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2Action> action)
         {
             action = ManageBurrow(commander, defensivePoint, frame);
             if (action is null) return base.Retreat(commander, target, defensivePoint, frame, out action);

@@ -26,6 +26,7 @@
         public MicroManager MicroManager { get; set; }
         public EnemyStrategyManager EnemyStrategyManager { get; set; }
         public BuildManager BuildManager { get; set; }
+        public CameraManager CameraManager { get; set; }
         public AttackDataManager AttackDataManager { get; set; }
 
         public VespeneGasBuilder VespeneGasBuilder { get; set; }
@@ -155,7 +156,7 @@
             SharkyOptions = new SharkyOptions { Debug = debug, DebugMicroTaskUnits = true, FramesPerSecond = framesPerSecond, TagOptions = new TagOptions(), LogPerformance = false, GameStatusReportingEnabled = true, GeneratePathing = false, GeneratePathingPrecision = (10, 10) };
             FrameToTimeConverter = new FrameToTimeConverter(SharkyOptions);
             MacroData = new MacroData();
-            AttackData = new AttackData { ArmyFoodAttack = 30, ArmyFoodRetreat = 25, Attacking = false, UseAttackDataManager = true, CustomAttackFunction = true, RetreatTrigger = 1f, AttackTrigger = 1.5f, RequireDetection = false, ContainBelowKill = true, RequireMaxOut = false, AttackWhenMaxedOut = true, RequireBank = false, AttackWhenOverwhelm = true, GroupUpEnabled = true, ContainTrigger = 1.5f, KillTrigger = 3f };
+            AttackData = new AttackData { ArmyFoodAttack = 30, ArmyFoodRetreat = 25, Attacking = false, UseAttackDataManager = true, CustomAttackFunction = true, RetreatTrigger = 1f, AttackTrigger = 1.5f, RequireDetection = false, ContainBelowKill = true, RequireMaxOut = false, AttackWhenMaxedOut = true, RequireBank = false, RequiredMineralBank = 2000, RequiredVespeneBank = 1000, AttackWhenOverwhelm = true, GroupUpEnabled = true, ContainTrigger = 1.5f, KillTrigger = 3f };
             TargetingData = new TargetingData { HiddenEnemyBase = false };
             BaseData = new BaseData();
             MapData = new MapData();
@@ -179,13 +180,16 @@
             ChatDataService = new ChatDataService();
             EnemyNameService = new EnemyNameService();
             DebugService = new DebugService(SharkyOptions, ActiveUnitData, MacroData);
-            ChatService = new ChatService(ChatDataService, SharkyOptions, ActiveChatData, EnemyData);
+            ChatService = new ChatService(this);
             TagService = new TagService(ChatService, SharkyOptions, VersionService, MacroData, FrameToTimeConverter);
             DebugManager = new DebugManager(gameConnection, SharkyOptions, DebugService, MapData, TargetingData, ActiveUnitData, EnemyData, ChatService, TagService, SharkyUnitData);
             Managers.Add(DebugManager);
 
             ReportingManager = new ReportingManager(this);
             Managers.Add(ReportingManager);
+
+            CameraManager = new CameraManager(this);
+            Managers.Add(CameraManager);
 
             UpgradeDataService = new UpgradeDataService();
             BuildingDataService = new BuildingDataService();
@@ -262,7 +266,7 @@
             StasisWardPlacement = new StasisWardPlacement(this);
             WorkerBuilderService = new WorkerBuilderService(this);
             SimCityService = new SimCityService(this);
-            BuildingBuilder = new BuildingBuilder(ActiveUnitData, TargetingData, BuildingPlacement, SharkyUnitData, BaseData, MicroTaskData, BuildingService, MapDataService, WorkerBuilderService, AreaService);
+            BuildingBuilder = new BuildingBuilder(ActiveUnitData, TargetingData, BuildingPlacement, SharkyUnitData, BaseData, MicroTaskData, BuildingService, MapDataService, WorkerBuilderService, AreaService, CameraManager);
 
             WarpInPlacement = new WarpInPlacement(ActiveUnitData, DebugService, MapData, MapDataService, BuildingService);
             DefaultProducerSelector = new SimpleProducerSelector();
@@ -273,7 +277,7 @@
             BuildDefenseService = new BuildDefenseService(MacroData, BuildingBuilder, SharkyUnitData, ActiveUnitData, BaseData, TargetingData, BuildOptions, BuildingService);
 
             ChronoData = new ChronoData();
-            NexusManager = new NexusManager(ActiveUnitData, SharkyUnitData, ChronoData, EnemyData, TagService);
+            NexusManager = new NexusManager(ActiveUnitData, SharkyUnitData, ChronoData, EnemyData, TagService, CameraManager);
             Managers.Add(NexusManager);
             ShieldBatteryManager = new ShieldBatteryManager(ActiveUnitData, EnemyData);
             Managers.Add(ShieldBatteryManager);
@@ -474,6 +478,7 @@
             var denyExpansionsTask = new DenyExpansionsTask(this, false, 1.1f);
             var darkTemplarHarassTask = new DarkTemplarHarassTask(BaseData, TargetingData, MapDataService, darkTemplarMicroController, 2, false);
             var defensiveZealotWarpInTask = new DefensiveZealotWarpInTask(this, false, .5f);
+            var defensiveStalkerZealotWarpInTask = new DefensiveStalkerZealotWarpInTask(this, false, .49f);
             var reaperMiningDefenseTask = new ReaperMiningDefenseTask(this, true, .5f);
             var cannonRushDefenseTask = new CannonRushDefenseTask(this, true, .5f);
             var overlordScoutTask = new OverlordScoutTask(this, true, 0.9f);
@@ -482,7 +487,7 @@
             var scoutForSpineTask = new ScoutForSpineTask(this, false, 0.5f);
             var protossDoorTask = new ProtossDoorTask(this, false, -0.5f);
             var zealotHarassTask = new ZealotHarassTask(this, false, 0.5f, zealotMicroController);
-            var clearFutureExpansionTask = new ClearFutureExpansionTask(this, new List<DesiredUnitsClaim>(), 0.1f, false);
+            var clearFutureExpansionTask = new ClearFutureExpansionTask(this, new List<DesiredUnitsClaim>(), -0.1f, false);
             var bunkerReadyToRepairTask = new BunkerReadyToRepairTask(this, workerDefenseMicroController, false, 0.1f);
 
             MicroTaskData[defenseSquadTask.GetType().Name] = defenseSquadTask;
@@ -521,6 +526,7 @@
             MicroTaskData[denyExpansionsTask.GetType().Name] = denyExpansionsTask;
             MicroTaskData[darkTemplarHarassTask.GetType().Name] = darkTemplarHarassTask;
             MicroTaskData[defensiveZealotWarpInTask.GetType().Name] = defensiveZealotWarpInTask;
+            MicroTaskData[defensiveStalkerZealotWarpInTask.GetType().Name] = defensiveStalkerZealotWarpInTask;
             MicroTaskData[reaperMiningDefenseTask.GetType().Name] = reaperMiningDefenseTask;
             MicroTaskData[cannonRushDefenseTask.GetType().Name] = cannonRushDefenseTask;
             MicroTaskData[overlordScoutTask.GetType().Name] = overlordScoutTask;
@@ -608,6 +614,7 @@
                 [nameof(BanelingDrops)] = new BanelingDrops(this),
                 [nameof(NydusNetworkStrategy)] = new NydusNetworkStrategy(this),
                 [nameof(MassQueen)] = new MassQueen(this),
+                [nameof(OverlordSpeed)] = new OverlordSpeed(this),
             };
 
             EnemyStrategyManager = new EnemyStrategyManager(this);
@@ -692,7 +699,7 @@
                 ["Transition"] = zergSequences
             };
 
-            MacroBalancer = new MacroBalancer(BuildOptions, ActiveUnitData, MacroData, SharkyUnitData, BaseData, UnitCountService);
+            MacroBalancer = new MacroBalancer(BuildOptions, ActiveUnitData, MacroData, SharkyUnitData, BaseData, UnitCountService, SharkyOptions);
             BuildChoices = new Dictionary<Race, BuildChoices>
             {
                 { Race.Protoss, new BuildChoices { Builds = protossBuilds, BuildSequences = protossBuildSequences } },

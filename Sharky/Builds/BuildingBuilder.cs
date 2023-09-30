@@ -13,10 +13,11 @@
         BuildingService BuildingService;
         MapDataService MapDataService;
         AreaService AreaService;
+        CameraManager CameraManager;
 
         Point2D HadRoomLastPosition;
 
-        public BuildingBuilder(ActiveUnitData activeUnitData, TargetingData targetingData, IBuildingPlacement buildingPlacement, SharkyUnitData sharkyUnitData, BaseData baseData, MicroTaskData microTaskData, BuildingService buildingService, MapDataService mapDataService, WorkerBuilderService workerBuilderService, AreaService areaService)
+        public BuildingBuilder(ActiveUnitData activeUnitData, TargetingData targetingData, IBuildingPlacement buildingPlacement, SharkyUnitData sharkyUnitData, BaseData baseData, MicroTaskData microTaskData, BuildingService buildingService, MapDataService mapDataService, WorkerBuilderService workerBuilderService, AreaService areaService, CameraManager cameraManager)
         {
             ActiveUnitData = activeUnitData;
             TargetingData = targetingData;
@@ -25,10 +26,12 @@
             BaseData = baseData;
             MicroTaskData = microTaskData;
 
+
             BuildingService = buildingService;
             MapDataService = mapDataService;
             WorkerBuilderService = workerBuilderService;
             AreaService = areaService;
+            CameraManager = cameraManager;
         }
 
         public List<SC2Action> BuildBuilding(MacroData macroData, UnitTypes unitType, BuildingTypeData unitData, Point2D generalLocation = null, bool ignoreMineralProximity = false, float maxDistance = 50, List<UnitCommander> workerPool = null, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.None, bool allowBlockBase = false)
@@ -77,6 +80,8 @@
                             worker.UnitRole = UnitRole.Build;
                         }
 
+                        CameraManager.SetCamera(placementLocation);
+
                         if (CouldGetStuckBuilding(worker, placementLocation, ignoreMineralProximity, allowBlockBase))
                         {
                             var probeSpot = GetLocationToAvoidGettingStuckBuilding(placementLocation);
@@ -86,8 +91,8 @@
                                 safeAction.AddRange(worker.Order(macroData.Frame, unitData.Ability, placementLocation, queue: true));
                                 return safeAction;
                             }
-                        }                      
-                        
+                        }
+
                         return worker.Order(macroData.Frame, unitData.Ability, placementLocation, allowConflict: true);
                     }
                 }

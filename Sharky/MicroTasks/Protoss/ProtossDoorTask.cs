@@ -393,7 +393,7 @@
                 }
                 return commander.Order(frame, Abilities.HOLDPOSITION);
             }
-            else if (commander.UnitCalculation.NearbyEnemies.Any())
+            else if (commander.UnitCalculation.NearbyEnemies.Any(e => !e.Unit.IsFlying && e.FrameLastSeen == frame))
             {
                 var changeling = commander.UnitCalculation.EnemiesInRange.FirstOrDefault(e => e.Unit.UnitType == (uint)UnitTypes.ZERG_CHANGELINGZEALOT);
                 if (changeling != null)

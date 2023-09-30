@@ -7,6 +7,7 @@
         BaseData BaseData;
         SharkyUnitData SharkyUnitData;
         TargetingData TargetingData;
+        CameraManager CameraManager;
 
         IBuildingBuilder BuildingBuilder;
 
@@ -17,6 +18,7 @@
             BaseData = defaultSharkyBot.BaseData;
             SharkyUnitData = defaultSharkyBot.SharkyUnitData;
             TargetingData = defaultSharkyBot.TargetingData;
+            CameraManager = defaultSharkyBot.CameraManager;
 
             BuildingBuilder = buildingBuilder;
         }
@@ -42,6 +44,7 @@
                             var command = BuildingBuilder.BuildGas(MacroData, unitData, actualGyser.Unit);
                             if (command != null)
                             {
+                                CameraManager.SetCamera(actualGyser.Position);
                                 commands.AddRange(command);
                                 return commands;
                             }

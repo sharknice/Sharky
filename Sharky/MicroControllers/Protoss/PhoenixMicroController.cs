@@ -8,7 +8,7 @@
 
         }
 
-        protected override bool AttackBestTarget(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
+        public override bool AttackBestTarget(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             if (AttackBestTargetInRange(commander, target, bestTarget, frame, out action))
             {
@@ -39,7 +39,7 @@
                 return true;
             }
 
-            var vectors = commander.UnitCalculation.NearbyAllies.Take(25).Where(a => (!a.Unit.IsFlying && !commander.UnitCalculation.Unit.IsFlying) || (a.Unit.IsFlying && commander.UnitCalculation.Unit.IsFlying)).Select(u => u.Position);
+            var vectors = commander.UnitCalculation.NearbyAllies.Where(a => (!a.Unit.IsFlying && !commander.UnitCalculation.Unit.IsFlying) || (a.Unit.IsFlying && commander.UnitCalculation.Unit.IsFlying)).Select(u => u.Position);
             if (vectors.Any())
             {
                 var center = new Point2D { X = vectors.Average(v => v.X), Y = vectors.Average(v => v.Y) };
@@ -74,7 +74,7 @@
                 return false;
             }
 
-            if (commander.UnitCalculation.NearbyEnemies.Take(25).Any(e => e.Unit.BuffIds.Contains((uint)Buffs.GRAVITONBEAM))) // only have one unit lifted at a time
+            if (commander.UnitCalculation.NearbyEnemies.Any(e => e.Unit.BuffIds.Contains((uint)Buffs.GRAVITONBEAM))) // only have one unit lifted at a time
             {
                 return false;
             }
@@ -96,7 +96,7 @@
 
             var range = 4;
 
-            var attacks = commander.UnitCalculation.NearbyEnemies.Take(25).Where(u => u.Unit.DisplayType != DisplayType.Hidden && !u.Unit.IsFlying && !u.Attributes.Contains(SC2APIProtocol.Attribute.Massive) && !u.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && !u.Unit.BuffIds.Contains((uint)Buffs.GRAVITONBEAM)
+            var attacks = commander.UnitCalculation.NearbyEnemies.Where(u => u.Unit.DisplayType != DisplayType.Hidden && !u.Unit.IsFlying && !u.Attributes.Contains(SC2APIProtocol.Attribute.Massive) && !u.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && !u.Unit.BuffIds.Contains((uint)Buffs.GRAVITONBEAM)
                 && (u.EnemiesInRange.Count() > 1 || (u.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED || u.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANK || u.Unit.UnitType == (uint)UnitTypes.TERRAN_CYCLONE || u.Unit.UnitType == (uint)UnitTypes.PROTOSS_IMMORTAL || u.Unit.UnitType == (uint)UnitTypes.PROTOSS_DISRUPTOR) && u.EnemiesInRange.Any()));
 
             if (attacks.Any())
@@ -120,7 +120,7 @@
                 }
             }
 
-            attacks = commander.UnitCalculation.NearbyEnemies.Take(25).Where(u => u.Unit.DisplayType != DisplayType.Hidden && !u.Unit.IsFlying && !u.Attributes.Contains(SC2APIProtocol.Attribute.Massive) && !u.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && !u.Unit.BuffIds.Contains((uint)Buffs.GRAVITONBEAM) && !InRange(u.Position, commander.UnitCalculation.Position, range)
+            attacks = commander.UnitCalculation.NearbyEnemies.Where(u => u.Unit.DisplayType != DisplayType.Hidden && !u.Unit.IsFlying && !u.Attributes.Contains(SC2APIProtocol.Attribute.Massive) && !u.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && !u.Unit.BuffIds.Contains((uint)Buffs.GRAVITONBEAM) && !InRange(u.Position, commander.UnitCalculation.Position, range)
                 && u.EnemiesInRange.Count() > 1); // units that are not in range right now
 
             if (attacks.Any())
@@ -132,7 +132,7 @@
                 }
             }
 
-            if (!commander.UnitCalculation.NearbyEnemies.Take(25).Any(e => e.DamageAir) && commander.UnitCalculation.NearbyAllies.Take(25).Any(a => a.DamageAir))
+            if (!commander.UnitCalculation.NearbyEnemies.Any(e => e.DamageAir) && commander.UnitCalculation.NearbyAllies.Any(a => a.DamageAir))
             {
                 attacks = commander.UnitCalculation.NearbyEnemies.Where(u => u.Unit.DisplayType != DisplayType.Hidden && !u.Unit.IsFlying && !u.Attributes.Contains(SC2APIProtocol.Attribute.Massive) && !u.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && !u.Unit.BuffIds.Contains((uint)Buffs.GRAVITONBEAM));
                 if (attacks.Any())

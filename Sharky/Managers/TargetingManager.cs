@@ -314,6 +314,13 @@
                     TargetingData.SelfMainBasePoint = farthestBase.Location;
                 }
                 baseCount = BaseData.SelfBases.Count();
+
+                var target = TargetingData.AttackPoint.ToVector2();
+                var closest = ActiveUnitData.Commanders.Values.Where(u => u.UnitRole != UnitRole.BlockExpansion && u.UnitCalculation.UnitClassifications.Contains(UnitClassification.DefensiveStructure) || u.UnitCalculation.UnitClassifications.Contains(UnitClassification.ResourceCenter)).OrderBy(u => Vector2.DistanceSquared(u.UnitCalculation.Position, target)).FirstOrDefault();
+                if (closest != null)
+                {
+                    TargetingData.ForwardDefensePoint = closest.UnitCalculation.Position.ToPoint2D();
+                }
             }
             foreach (var task in MacroData.Proxies)
             {

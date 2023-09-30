@@ -128,7 +128,7 @@
             return base.MaintainRange(commander, defensivePoint, frame, out action);
         }
 
-        protected override bool Retreat(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2Action> action)
+        public override bool Retreat(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2Action> action)
         {
             action = null;
 

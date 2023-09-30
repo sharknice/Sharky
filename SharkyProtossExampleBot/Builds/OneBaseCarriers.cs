@@ -54,7 +54,7 @@ namespace SharkyProtossExampleBot.Builds
             SendProbeForFirstGateway(frame);
             SendProbeForCyberneticsCore(frame);
 
-            if (UnitCountService.Completed(UnitTypes.PROTOSS_PYLON) > 0)
+            if (RequirementService.HaveCompleted(UnitTypes.PROTOSS_PYLON))
             {
                 if (MacroData.DesiredProductionCounts[UnitTypes.PROTOSS_GATEWAY] < 1)
                 {
@@ -81,7 +81,7 @@ namespace SharkyProtossExampleBot.Builds
                         MacroData.DesiredTechCounts[UnitTypes.PROTOSS_FORGE] = 1;
                     }
 
-                    if (UnitCountService.Completed(UnitTypes.PROTOSS_CYBERNETICSCORE) > 0)
+                    if (RequirementService.HaveCompleted(UnitTypes.PROTOSS_CYBERNETICSCORE))
                     {
                         if (!WallOffTask.Enabled)
                         {
@@ -100,7 +100,7 @@ namespace SharkyProtossExampleBot.Builds
                     }
                 }
 
-                if (UnitCountService.Completed(UnitTypes.PROTOSS_STARGATE) > 0)
+                if (RequirementService.HaveCompleted(UnitTypes.PROTOSS_STARGATE))
                 {
                     if (MacroData.DesiredTechCounts[UnitTypes.PROTOSS_FLEETBEACON] < 1)
                     {
@@ -112,7 +112,7 @@ namespace SharkyProtossExampleBot.Builds
                         MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_ORACLE] = 1;
                     }
 
-                    if (UnitCountService.Completed(UnitTypes.PROTOSS_FLEETBEACON) > 0)
+                    if (RequirementService.HaveCompleted(UnitTypes.PROTOSS_FLEETBEACON))
                     {
                         if (MacroData.DesiredUnitCounts[UnitTypes.PROTOSS_CARRIER] < 12)
                         {
@@ -125,7 +125,7 @@ namespace SharkyProtossExampleBot.Builds
                     }
                 }
 
-                if (UnitCountService.Completed(UnitTypes.PROTOSS_FORGE) > 0)
+                if (RequirementService.HaveCompleted(UnitTypes.PROTOSS_FORGE))
                 {
                     if (MacroData.DesiredDefensiveBuildingsAtDefensivePoint[UnitTypes.PROTOSS_PHOTONCANNON] < 3)
                     {

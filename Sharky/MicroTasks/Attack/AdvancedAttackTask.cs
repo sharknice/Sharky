@@ -1,4 +1,6 @@
-﻿namespace Sharky.MicroTasks.Attack
+﻿using System.Diagnostics;
+
+namespace Sharky.MicroTasks.Attack
 {
     public class AdvancedAttackTask : MicroTask, IAttackTask
     {
@@ -17,10 +19,12 @@
 
         ArmySplitter DefenseArmySplitter;
         ArmySplitter AttackArmySplitter;
+        CameraManager CameraManager;
 
         public List<UnitTypes> MainAttackers { get; set; }
         public List<UnitCommander> MainUnits { get; set; }
         public List<UnitCommander> SupportUnits { get; set; }
+        UnitCommander NextLeader { get; set; }
 
         public Dictionary<string, IAttackSubTask> SubTasks { get; set; }
 
@@ -28,6 +32,9 @@
 
         public bool OnlyDefendBuildings { get; set; }
         public bool AllowSplitWhileKill { get; set; }
+        public bool DeathBallMode { get; set; }
+
+        bool BaseUnderAttack { get; set; }
 
 
         public AdvancedAttackTask(DefaultSharkyBot defaultSharkyBot, EnemyCleanupService enemyCleanupService, List<UnitTypes> mainAttackerTypes, float priority, bool enabled = true)
@@ -41,6 +48,7 @@
             TargetingService = defaultSharkyBot.TargetingService;
             UnitCountService = defaultSharkyBot.UnitCountService;
             SharkyUnitData = defaultSharkyBot.SharkyUnitData;
+            CameraManager = defaultSharkyBot.CameraManager;
 
             EnemyCleanupService = enemyCleanupService;
 
@@ -107,9 +115,19 @@
                 {
                     if (commander.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.ArmyUnit) || commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_ADEPTPHASESHIFT || commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_DISRUPTORPHASED)
                     {
+                        CameraManager.SetCamera(commander.Value.UnitCalculation.Position);
+
                         commander.Value.Claimed = true;
                         UnitCommanders.Add(commander.Value);
-                        if (!MainUnits.Any() && MainAttackers.Contains((UnitTypes)commander.Value.UnitCalculation.Unit.UnitType) && !commander.Value.UnitCalculation.Unit.IsHallucination) // TODO: need to move units over when they change from corruptor to broodlord
+
+                        var idealLeader = MainAttackers.FirstOrDefault();
+                        if (commander.Value.UnitCalculation.Unit.UnitType == (uint)idealLeader && !MainUnits.Any(c => c.UnitCalculation.Unit.UnitType == (uint)idealLeader))
+                        {
+                            commander.Value.UnitRole = UnitRole.NextLeader;
+                            SupportUnits.Add(commander.Value);
+                            NextLeader = commander.Value;
+                        }
+                        else if (!MainUnits.Any() && MainAttackers.Contains((UnitTypes)commander.Value.UnitCalculation.Unit.UnitType) && !commander.Value.UnitCalculation.Unit.IsHallucination)
                         {
                             commander.Value.UnitRole = UnitRole.Leader;
                             MainUnits.Add(commander.Value);
@@ -227,10 +245,11 @@
 
         public override IEnumerable<SC2APIProtocol.Action> PerformActions(int frame)
         {
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
-
             var actions = new List<SC2APIProtocol.Action>();
+
+            if (!UnitCommanders.Any() && !SubTasks.Any()) { return actions; }
+
+            UpdateLeader();
 
             var hiddenBase = TargetingData.HiddenEnemyBase;
             if (MainUnits.Any())
@@ -243,37 +262,32 @@
             }
             TargetingData.AttackPoint = TargetingService.UpdateAttackPoint(AttackData.ArmyPoint, TargetingData.AttackPoint);
 
-
-            stopwatch.Stop();
-            if (stopwatch.ElapsedMilliseconds > 100)
-            {
-                System.Console.WriteLine($"AdvancedAttackTask Points {stopwatch.ElapsedMilliseconds}");
-            }
-            stopwatch.Restart();
-
             var attackingEnemies = ActiveUnitData.EnemyUnits.Values.Where(e => e.FrameLastSeen > frame - 100 &&
-                    (e.NearbyEnemies.Any(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter) || u.UnitClassifications.Contains(UnitClassification.ProductionStructure) || u.UnitClassifications.Contains(UnitClassification.DefensiveStructure)) ||
+                    (e.NearbyEnemies.Any(u => u.Attributes.Contains(SC2Attribute.Structure) && u.Unit.UnitType != (uint)UnitTypes.ZERG_CREEPTUMORBURROWED && u.Unit.UnitType != (uint)UnitTypes.ZERG_CREEPTUMOR && u.Unit.UnitType != (uint)UnitTypes.TERRAN_KD8CHARGE && u.Unit.UnitType != (uint)UnitTypes.PROTOSS_ORACLESTASISTRAP && u.UnitTypeData.Attributes.Contains(SC2Attribute.Structure)) ||
                     (e.TargetPriorityCalculation.OverallWinnability < .5f && EnemyAttackers.Any(ea => ea.Unit.Tag == e.Unit.Tag))
                 ) && (e.NearbyEnemies.Count(b => b.Attributes.Contains(SC2Attribute.Structure)) >= e.NearbyAllies.Count(b => b.Attributes.Contains(SC2Attribute.Structure)))
-            ).Where(e => e.Unit.UnitType != (uint)UnitTypes.TERRAN_KD8CHARGE);
+            );
 
             if (OnlyDefendBuildings)
             {
                 attackingEnemies = ActiveUnitData.EnemyUnits.Values.Where(e => e.FrameLastSeen > frame - 100 && e.NearbyEnemies.Any(u => (u.UnitClassifications.Contains(UnitClassification.ResourceCenter) || u.UnitClassifications.Contains(UnitClassification.ProductionStructure) || u.UnitClassifications.Contains(UnitClassification.DefensiveStructure)) && u.EnemiesThreateningDamage.Any()));
             }
 
-            if (stopwatch.ElapsedMilliseconds > 100)
+            if (DeathBallMode)
             {
-                System.Console.WriteLine($"AdvancedAttackTask closerenemies queries {stopwatch.ElapsedMilliseconds}");
+                attackingEnemies = attackingEnemies.Where(e => e.Damage > 0 && e.EnemiesInRange.Any() && !e.Unit.IsHallucination && e.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELING && e.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELINGZEALOT && e.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELINGMARINE && e.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELINGMARINESHIELD && e.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELINGZERGLING && e.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELINGZERGLINGWINGS);
             }
+
+            var attackPoint = TargetingData.AttackPoint;
+            BaseUnderAttack = false;
+
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
             if (attackingEnemies.Any())
             {
-                if (stopwatch.ElapsedMilliseconds > 100)
-                {
-                    System.Console.WriteLine($"AdvancedAttackTask closerenemies count {stopwatch.ElapsedMilliseconds}");
-                }
                 var armyVector = new Vector2(AttackData.ArmyPoint.X, AttackData.ArmyPoint.Y);
-                var distanceToAttackPoint = Vector2.DistanceSquared(armyVector, new Vector2(TargetingData.AttackPoint.X, TargetingData.AttackPoint.Y));
+                var distanceToAttackPoint = Vector2.DistanceSquared(armyVector, attackPoint.ToVector2());
                 var closerEnemies = attackingEnemies;
                 if (AttackData.Attacking)
                 {
@@ -282,65 +296,140 @@
                 var defendToDeath = MacroData.FoodUsed > 175;
                 if (closerEnemies.Any())
                 {
-                    if (stopwatch.ElapsedMilliseconds > 100)
+                    if (DeathBallMode)
                     {
-                        System.Console.WriteLine($"AdvancedAttackTask closerenemies second count {stopwatch.ElapsedMilliseconds}");
+                        var baseUnderAttack = ActiveUnitData.SelfUnits.Values.Where(a => (a.UnitClassifications.Contains(UnitClassification.DefensiveStructure) || a.UnitClassifications.Contains(UnitClassification.ResourceCenter)) && a.EnemiesInRangeOf.Any());
+                        if (baseUnderAttack.Any())
+                        {
+                            attackPoint = baseUnderAttack.OrderBy(e => Vector2.DistanceSquared(e.Position, armyVector)).FirstOrDefault().Position.ToPoint2D();
+                            BaseUnderAttack = true;
+                        }
+                        else
+                        {
+                            attackPoint = closerEnemies.OrderBy(e => Vector2.DistanceSquared(e.Position, armyVector)).FirstOrDefault().Position.ToPoint2D();
+                        }
+                        if (stopwatch.ElapsedMilliseconds > 100)
+                        {
+                            System.Console.WriteLine($"AdvancedAttackTask DeathBallMode attackPoint {stopwatch.ElapsedMilliseconds}");
+                        }
                     }
-                    actions = DefenseArmySplitter.SplitArmy(frame, closerEnemies, TargetingData.AttackPoint, MainUnits.Concat(SupportUnits), defendToDeath);
-                    if (stopwatch.ElapsedMilliseconds > 100)
+                    else
                     {
-                        System.Console.WriteLine($"AdvancedAttackTask closerenemies splitarmy {stopwatch.ElapsedMilliseconds}");
-                    }
-                    foreach (var subTask in SubTasks.Where(t => t.Value.Enabled).OrderBy(t => t.Value.Priority))
-                    {
-                        var subActions = subTask.Value.SplitArmy(frame, closerEnemies, TargetingData.AttackPoint, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint);
-                        actions.AddRange(subActions);
-                    }
+                        actions = DefenseArmySplitter.SplitArmy(frame, closerEnemies, attackPoint, MainUnits.Concat(SupportUnits), defendToDeath);
+                        if (stopwatch.ElapsedMilliseconds > 100)
+                        {
+                            System.Console.WriteLine($"AdvancedAttackTask closerenemies splitarmy {stopwatch.ElapsedMilliseconds}");
+                        }
+                        foreach (var subTask in SubTasks.Where(t => t.Value.Enabled).OrderBy(t => t.Value.Priority))
+                        {
+                            var subActions = subTask.Value.SplitArmy(frame, closerEnemies, attackPoint, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint);
+                            actions.AddRange(subActions);
+                        }
 
-                    stopwatch.Stop();
-                    if (stopwatch.ElapsedMilliseconds > 100)
-                    {
-                        System.Console.WriteLine($"AdvancedAttackTask closerenemies {stopwatch.ElapsedMilliseconds}");
-                    }
-                    stopwatch.Restart();
+                        stopwatch.Stop();
+                        if (stopwatch.ElapsedMilliseconds > 100)
+                        {
+                            System.Console.WriteLine($"AdvancedAttackTask closerenemies {stopwatch.ElapsedMilliseconds}");
+                        }
+                        stopwatch.Restart();
 
-                    RemoveTemporaryUnits();
-                    EnemyAttackers = attackingEnemies.Where(e => e.FrameLastSeen > frame - 100 && (e.EnemiesInRangeOf.Any() || e.EnemiesInRange.Any())).ToList();
-                    return actions;
+                        RemoveTemporaryUnits();
+                        UpdateEnemyAttackers(frame, attackingEnemies);
+                        return actions;
+                    }
                 }
-                else
+                else if (!DeathBallMode)
                 {
-                    var attackVector = new Vector2(TargetingData.AttackPoint.X, TargetingData.AttackPoint.Y);
+                    var attackVector = attackPoint.ToVector2();
                     var closerSelfUnits = UnitCommanders.Where(u => attackingEnemies.Any(e => Vector2.DistanceSquared(u.UnitCalculation.Position, attackVector) > Vector2.DistanceSquared(u.UnitCalculation.Position, e.Position)));
                     if (closerSelfUnits.Any())
                     {
-                        actions.AddRange(DefenseArmySplitter.SplitArmy(frame, attackingEnemies, TargetingData.AttackPoint, closerSelfUnits, defendToDeath));
+                        actions.AddRange(DefenseArmySplitter.SplitArmy(frame, attackingEnemies, attackPoint, closerSelfUnits, defendToDeath));
+                    }
+                    if (stopwatch.ElapsedMilliseconds > 100)
+                    {
+                        System.Console.WriteLine($"AdvancedAttackTask attackingenemies splitarmy {stopwatch.ElapsedMilliseconds}");
                     }
                 }
 
-                stopwatch.Stop();
                 if (stopwatch.ElapsedMilliseconds > 100)
                 {
                     System.Console.WriteLine($"AdvancedAttackTask attackingenemies end {stopwatch.ElapsedMilliseconds}");
                 }
-                stopwatch.Restart();
             }
-            EnemyAttackers = attackingEnemies.Where(e => e.FrameLastSeen > frame - 100 && (e.EnemiesInRangeOf.Any() || e.EnemiesInRange.Any())).ToList();
+            stopwatch.Restart();
+
+            UpdateEnemyAttackers(frame, attackingEnemies);
 
             HandleHiddenBuildings(hiddenBase);
 
+            if (stopwatch.ElapsedMilliseconds > 100)
+            {
+                System.Console.WriteLine($"AdvancedAttackTask updatestuff {stopwatch.ElapsedMilliseconds}");
+            }
+            stopwatch.Restart();
+
+
             if (MainUnits.Any(m => !m.UnitCalculation.Loaded))
             {
-                OrderMainUnitsWithSupportUnits(frame, actions, MainUnits, SupportUnits);
+                OrderMainUnitsWithSupportUnits(frame, actions, MainUnits, SupportUnits, attackPoint);
             }
             else
             {
-                OrderSupportUnitsWithoutMainUnits(frame, actions, SupportUnits);
+                OrderSupportUnitsWithoutMainUnits(frame, actions, SupportUnits, attackPoint);
             }
 
             RemoveTemporaryUnits();
 
+            if (stopwatch.ElapsedMilliseconds > 100)
+            {
+                System.Console.WriteLine($"AdvancedAttackTask everything end {stopwatch.ElapsedMilliseconds}");
+            }
+
             return actions;
+        }
+
+        private void UpdateLeader()
+        {
+            if (NextLeader != null)
+            {
+                var currentLeader = MainUnits.FirstOrDefault();
+                if (currentLeader == null)
+                {
+                    SwapLeader(currentLeader);
+                }
+                else
+                {
+                    if (Vector2.DistanceSquared(NextLeader.UnitCalculation.Position, currentLeader.UnitCalculation.Position) < 36)
+                    {
+                        SwapLeader(currentLeader);
+                    }
+                }
+            }
+        }
+
+        private void SwapLeader(UnitCommander currentLeader)
+        {
+            SupportUnits.Remove(NextLeader);
+            NextLeader.UnitRole = UnitRole.Leader;
+            MainUnits.Add(NextLeader);
+
+            MainUnits.Remove(currentLeader);
+            currentLeader.UnitRole = UnitRole.None;
+            SupportUnits.Add(currentLeader);
+            NextLeader = null;
+        }
+
+        private void UpdateEnemyAttackers(int frame, IEnumerable<UnitCalculation> attackingEnemies)
+        {
+            if (DeathBallMode)
+            {
+                EnemyAttackers = new List<UnitCalculation>();
+            }
+            else
+            {
+                EnemyAttackers = attackingEnemies.Where(e => e.FrameLastSeen > frame - 100 && (e.EnemiesInRangeOf.Any() || e.EnemiesInRange.Any())).ToList();
+            }
         }
 
         private void RemoveTemporaryUnits()
@@ -352,85 +441,148 @@
 
             if (!MainUnits.Any())
             {
-                var mainUnit = SupportUnits.FirstOrDefault(commander => MainAttackers.Contains((UnitTypes)commander.UnitCalculation.Unit.UnitType) && !commander.UnitCalculation.Unit.IsHallucination);
-                if (mainUnit != null)
+                foreach (var mainType in MainAttackers)
                 {
-                    SupportUnits.Remove(mainUnit);
-                    mainUnit.UnitRole = UnitRole.Leader;
-                    MainUnits.Add(mainUnit);
+                    var mainUnit = SupportUnits.FirstOrDefault(commander => (UnitTypes)commander.UnitCalculation.Unit.UnitType == mainType && !commander.UnitCalculation.Unit.IsHallucination);
+                    if (mainUnit != null)
+                    {
+                        SupportUnits.Remove(mainUnit);
+                        mainUnit.UnitRole = UnitRole.Leader;
+                        MainUnits.Add(mainUnit);
+                        break;
+                    }
                 }
+
             }
         }
 
-        private void OrderSupportUnitsWithoutMainUnits(int frame, List<SC2Action> actions, IEnumerable<UnitCommander> supportUnits)
+        private void OrderSupportUnitsWithoutMainUnits(int frame, List<SC2Action> actions, IEnumerable<UnitCommander> supportUnits, Point2D attackPoint)
         {
-            if (AttackData.Attacking)
+            var stopwatch = Stopwatch.StartNew();
+
+            if (DeathBallDefending(attackPoint))
             {
-                if (TargetingData.AttackState == AttackState.Kill || !AttackData.UseAttackDataManager)
+                actions.AddRange(MicroController.Attack(supportUnits, attackPoint, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame));
+                foreach (var subTask in SubTasks.Where(t => t.Value.Enabled).OrderBy(t => t.Value.Priority))
+                {
+                    actions.AddRange(subTask.Value.Attack(attackPoint, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame));
+                }
+            }
+            else if (AttackData.Attacking)
+            {
+                if (TargetingData.AttackState == AttackState.Kill || !AttackData.UseAttackDataManager || DeathBallMode)
                 {
                     var attackingEnemies = supportUnits.SelectMany(c => c.UnitCalculation.NearbyEnemies).Distinct();
                     if (AllowSplitWhileKill && attackingEnemies.Any())
                     {
-                        var splitActions = AttackArmySplitter.SplitArmy(frame, attackingEnemies, TargetingData.AttackPoint, supportUnits, false);
+                        var splitActions = AttackArmySplitter.SplitArmy(frame, attackingEnemies, attackPoint, supportUnits, false);
                         actions.AddRange(splitActions);
                     }
                     else
                     {
-                        actions.AddRange(MicroController.Attack(supportUnits, TargetingData.AttackPoint, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame));
+                        actions.AddRange(MicroController.Attack(supportUnits, attackPoint, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame));
                     }
                     foreach (var subTask in SubTasks.Where(t => t.Value.Enabled).OrderBy(t => t.Value.Priority))
                     {
-                        actions.AddRange(subTask.Value.Attack(TargetingData.AttackPoint, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame));
+                        actions.AddRange(subTask.Value.Attack(attackPoint, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame));
                     }
                 }
                 else if (TargetingData.AttackState == AttackState.Contain)
                 {
-                    actions.AddRange(MicroController.Retreat(supportUnits, TargetingData.AttackPoint, AttackData.ArmyPoint, frame));
+                    actions.AddRange(MicroController.Retreat(supportUnits, attackPoint, AttackData.ArmyPoint, frame));
                     foreach (var subTask in SubTasks.Where(t => t.Value.Enabled).OrderBy(t => t.Value.Priority))
                     {
-                        actions.AddRange(subTask.Value.Retreat(TargetingData.AttackPoint, AttackData.ArmyPoint, frame));
+                        actions.AddRange(subTask.Value.Retreat(attackPoint, AttackData.ArmyPoint, frame));
                     }
                 }
             }
             else
             {
-                var cleanupActions = EnemyCleanupService.CleanupEnemies(supportUnits, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame);
-                if (cleanupActions != null)
+                if (DeathBallMode)
                 {
-                    actions.AddRange(cleanupActions);
+                    actions.AddRange(MicroController.Retreat(supportUnits, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame));
                 }
                 else
                 {
-                    actions.AddRange(MicroController.Retreat(supportUnits, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame));
+                    var cleanupActions = EnemyCleanupService.CleanupEnemies(supportUnits, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame);
+                    if (cleanupActions != null)
+                    {
+                        actions.AddRange(cleanupActions);
+                    }
+                    else
+                    {
+                        actions.AddRange(MicroController.Retreat(supportUnits, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame));
+                    }
                 }
                 foreach (var subTask in SubTasks.Where(t => t.Value.Enabled).OrderBy(t => t.Value.Priority))
                 {
                     actions.AddRange(subTask.Value.Retreat(TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame));
                 }
             }
+
+            stopwatch.Stop();
+            if (stopwatch.ElapsedMilliseconds > 100)
+            {
+                System.Console.WriteLine($"AdvancedAttackTask OrderSupportUnitsWithoutMainUnits {stopwatch.ElapsedMilliseconds}");
+            }
         }
 
-        private void OrderMainUnitsWithSupportUnits(int frame, List<SC2Action> actions, IEnumerable<UnitCommander> mainUnits, IEnumerable<UnitCommander> supportUnits)
+        private bool DeathBallDefending(Point2D attackPoint)
         {
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
+            if (DeathBallMode)
+            {
+                if (BaseUnderAttack && !AttackData.Attacking) 
+                { 
+                    return true;
+                }
 
-            var supportAttackPoint = TargetingData.AttackPoint;
+                if (!(TargetingData.AttackPoint.X == attackPoint.X && TargetingData.AttackPoint.Y == attackPoint.Y))
+                {
+                    var leader = MainUnits.FirstOrDefault();
+                    if (leader == null)
+                    {
+                        leader = UnitCommanders.FirstOrDefault();
+                    }
+
+                    if (leader != null)
+                    {
+                        return leader.UnitCalculation.TargetPriorityCalculation.Overwhelm;
+                    }
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private void OrderMainUnitsWithSupportUnits(int frame, List<SC2Action> actions, IEnumerable<UnitCommander> mainUnits, IEnumerable<UnitCommander> supportUnits, Point2D attackPoint)
+        {
+            var stopwatch = Stopwatch.StartNew();
+
+            var supportAttackPoint = attackPoint;
             var mainUnit = mainUnits.FirstOrDefault();
             if (mainUnit != null)
             {
                 supportAttackPoint = new Point2D { X = mainUnit.UnitCalculation.Position.X, Y = mainUnit.UnitCalculation.Position.Y };
             }
 
-            if (AttackData.Attacking)
+            if (DeathBallDefending(attackPoint))
             {
-                if (TargetingData.AttackState == AttackState.Kill || TargetingData.AttackState == AttackState.None)
+                actions.AddRange(MicroController.Retreat(mainUnits, attackPoint, AttackData.ArmyPoint, frame));
+                actions.AddRange(MicroController.Support(supportUnits, mainUnits, supportAttackPoint, TargetingData.ForwardDefensePoint, supportAttackPoint, frame));
+                foreach (var subTask in SubTasks.Where(t => t.Value.Enabled).OrderBy(t => t.Value.Priority))
                 {
-                    actions.AddRange(MicroController.Attack(mainUnits, TargetingData.AttackPoint, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame));
+                    actions.AddRange(subTask.Value.Support(mainUnits, attackPoint, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame));
+                }
+            }
+            else if (AttackData.Attacking)
+            {
+                if (TargetingData.AttackState == AttackState.Kill || TargetingData.AttackState == AttackState.None || DeathBallMode)
+                {
+                    actions.AddRange(MicroController.Attack(mainUnits, attackPoint, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame));
                     actions.AddRange(MicroController.Support(supportUnits, mainUnits, supportAttackPoint, TargetingData.ForwardDefensePoint, supportAttackPoint, frame));
                     foreach (var subTask in SubTasks.Where(t => t.Value.Enabled).OrderBy(t => t.Value.Priority))
                     {
-                        actions.AddRange(subTask.Value.Support(mainUnits, TargetingData.AttackPoint, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame));
+                        actions.AddRange(subTask.Value.Support(mainUnits, attackPoint, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame));
                     }
                 }
                 else
@@ -445,16 +597,25 @@
             }
             else
             {
-                var cleanupActions = EnemyCleanupService.CleanupEnemies(mainUnits.Concat(supportUnits), TargetingData.ForwardDefensePoint, supportAttackPoint, frame);
-                if (cleanupActions != null)
-                {
-                    actions.AddRange(cleanupActions);
-                }
-                else
+                if (DeathBallMode)
                 {
                     actions.AddRange(MicroController.Retreat(mainUnits, TargetingData.ForwardDefensePoint, null, frame));
                     actions.AddRange(MicroController.Support(supportUnits, mainUnits, supportAttackPoint, TargetingData.ForwardDefensePoint, supportAttackPoint, frame));
                 }
+                else
+                {
+                    var cleanupActions = EnemyCleanupService.CleanupEnemies(mainUnits.Concat(supportUnits), TargetingData.ForwardDefensePoint, supportAttackPoint, frame);
+                    if (cleanupActions != null)
+                    {
+                        actions.AddRange(cleanupActions);
+                    }
+                    else
+                    {
+                        actions.AddRange(MicroController.Retreat(mainUnits, TargetingData.ForwardDefensePoint, null, frame));
+                        actions.AddRange(MicroController.Support(supportUnits, mainUnits, supportAttackPoint, TargetingData.ForwardDefensePoint, supportAttackPoint, frame));
+                    }
+                }
+
                 foreach (var subTask in SubTasks.Where(t => t.Value.Enabled).OrderBy(t => t.Value.Priority))
                 {
                     actions.AddRange(subTask.Value.SupportRetreat(mainUnits, supportAttackPoint, supportAttackPoint, null, frame));

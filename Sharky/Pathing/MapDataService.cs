@@ -297,6 +297,15 @@
             return MapData.Map[(int)point.X,(int)point.Y].HasCreep;
         }
 
+        public bool PathBlocked(Vector2 point)
+        {
+            if (point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
+            {
+                return true;
+            }
+            return MapData.Map[(int)point.X, (int)point.Y].PathBlocked;
+        }
+
         public float EnemyAirDpsInRange(Point point)
         {
             if (point == null || point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
