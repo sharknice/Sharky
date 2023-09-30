@@ -50,5 +50,6 @@
 
         public HashSet<Abilities> MiningAbilities { get; set; }
         public HashSet<Abilities> GatheringAbilities { get; set; }
+        public HashSet<Abilities> ZergMorphUnitAbilities { get; set; }
     }
 }

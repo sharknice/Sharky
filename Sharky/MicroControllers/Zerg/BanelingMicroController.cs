@@ -215,5 +215,19 @@
             }
             return base.Retreat(commander, target, defensivePoint, frame, out action);
         }
+
+        protected override float GetMovementSpeed(UnitCommander commander)
+        {
+            var speed = commander.UnitCalculation.UnitTypeData.MovementSpeed * 1.4f;
+            if (SharkyUnitData.ResearchedUpgrades.Contains((int)Upgrades.CENTRIFICALHOOKS))
+            {
+                speed += 0.63f;
+            }
+            if (commander.UnitCalculation.IsOnCreep)
+            {
+                speed *= 1.3f;
+            }
+            return speed;
+        }
     }
 }

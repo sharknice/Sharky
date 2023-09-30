@@ -220,7 +220,7 @@
                 return true;
             }
 
-            if (commander.UnitCalculation.Unit.Energy < 125 || frame < lastParasiticBombFrame + 15)
+            if (commander.UnitCalculation.Unit.Energy < 125 || frame < lastParasiticBombFrame + 7)
             {
                 return false;
             }

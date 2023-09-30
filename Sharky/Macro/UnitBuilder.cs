@@ -9,6 +9,7 @@
         AttackData AttackData;
         BuildOptions BuildOptions;
         EnemyData EnemyData;
+        MicroTaskData MicroTaskData;
 
         UnitCountService UnitCountService;
         SharkyOptions SharkyOptions;
@@ -29,6 +30,7 @@
             SharkyOptions = defaultSharkyBot.SharkyOptions;
             BuildOptions = defaultSharkyBot.BuildOptions;
             EnemyData = defaultSharkyBot.EnemyData;
+            MicroTaskData = defaultSharkyBot.MicroTaskData;
             CameraManager = defaultSharkyBot.CameraManager;
 
             WarpInPlacement = warpInPlacement;
@@ -125,6 +127,12 @@
                                 var action = producer.Order(MacroData.Frame, unitData.Ability, allowSpam: allowSpam);
                                 if (action != null)
                                 {
+                                    if (SharkyUnitData.ZergMorphUnitAbilities.Contains(unitData.Ability))
+                                    {
+                                        MicroTaskData.StealCommanderFromAllTasks(producer);
+                                        producer.UnitRole = UnitRole.Morph;
+                                        producer.Claimed = false;
+                                    }
                                     CameraManager.SetCamera(producer.UnitCalculation.Position);
                                     commands.AddRange(action);
                                     return commands;
