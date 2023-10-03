@@ -11,7 +11,7 @@
         List<HarassInfo> HarassInfos { get; set; }
         List<ScoutInfo> ScoutInfos { get; set; }
 
-        public FindHiddenBaseTask(BaseData baseData, TargetingData targetingData, MapDataService mapDataService, IIndividualMicroController individualMicroController, int desiredCount = 15, bool enabled = true, float priority = -1f)
+        public FindHiddenBaseTask(BaseData baseData, TargetingData targetingData, MapDataService mapDataService, IIndividualMicroController individualMicroController, int desiredCount = 50, bool enabled = true, float priority = -1f)
         {
             BaseData = baseData;
             TargetingData = targetingData;

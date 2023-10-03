@@ -35,6 +35,7 @@
                         {
                             TagService.TagAbility("shadowstrike");
                             var avoidPoint = GetGroundAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, attack.Unit.Pos, target, defensivePoint, attack.Range + attack.Unit.Radius + commander.UnitCalculation.Unit.Radius + AvoidDamageDistance + 4);
+                            CameraManager.SetCamera(avoidPoint);
                             action = commander.Order(frame, Abilities.EFFECT_SHADOWSTRIDE, avoidPoint);
                             return true;
                         }
@@ -59,7 +60,8 @@
                     var x = bestTarget.Unit.Radius * Math.Cos(bestTarget.Unit.Facing);
                     var y = bestTarget.Unit.Radius * Math.Sin(bestTarget.Unit.Facing);
                     var blinkPoint = new Point2D { X = bestTarget.Unit.Pos.X + (float)x, Y = bestTarget.Unit.Pos.Y - (float)y };
-
+                    TagService.TagAbility("shadowstrike");
+                    CameraManager.SetCamera(blinkPoint);
                     action = commander.Order(frame, Abilities.EFFECT_SHADOWSTRIDE, blinkPoint);
                     return true;
                 }

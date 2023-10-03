@@ -53,6 +53,7 @@
                                 if (commander.UnitCalculation.EnemiesInRange.Where(e => e.Attributes.Contains(SC2Attribute.Armored)).Sum(e => e.Unit.Health) > 200)
                                 {
                                     TagService.TagAbility("prismatic");
+                                    CameraManager.SetCamera(commander.UnitCalculation.Position);
                                     action = commander.Order(frame, Abilities.EFFECT_VOIDRAYPRISMATICALIGNMENT);
                                     return true;
                                 }
@@ -69,6 +70,7 @@
                     if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.Retreat || !commander.UnitCalculation.NearbyEnemies.Any(e => e.Attributes.Contains(SC2Attribute.Armored)))
                     {
                         TagService.TagAbility("cancel_prismatic");
+                        CameraManager.SetCamera(commander.UnitCalculation.Position);
                         action = commander.Order(frame, Abilities.CANCEL);
                         return true;
                     }

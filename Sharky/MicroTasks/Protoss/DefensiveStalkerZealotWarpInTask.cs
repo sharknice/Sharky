@@ -9,6 +9,8 @@
 
         WarpInPlacement WarpInPlacement;
 
+        public int MaxCount { get; set; } = 10;
+
         public DefensiveStalkerZealotWarpInTask(DefaultSharkyBot defaultSharkyBot, bool enabled, float priority)
         {
             ActiveUnitData = defaultSharkyBot.ActiveUnitData;
@@ -32,6 +34,8 @@
             var commands = new List<SC2Action>();
 
             if (MacroData.Minerals < 100 || MacroData.FoodLeft < 2) { return commands; }
+
+            if (ActiveUnitData.SelfUnits.Values.Count(u => u.Unit.UnitType == (uint)UnitTypes.PROTOSS_ZEALOT || u.Unit.UnitType == (uint)UnitTypes.PROTOSS_STALKER) >= MaxCount) { return commands; }
 
             var idleWarpGate = ActiveUnitData.Commanders.Values.FirstOrDefault(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPGATE && c.WarpInOffCooldown(frame, SharkyOptions.FramesPerSecond, SharkyUnitData));
             if (idleWarpGate == null)

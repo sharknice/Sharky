@@ -56,6 +56,7 @@
 
             if (commander.UnitCalculation.NearbyEnemies.Count(e => e.Range > 1 && e.FrameLastSeen == frame && e.EnemiesInRange.Any()) > 5)
             {
+                CameraManager.SetCamera(commander.UnitCalculation.Position);
                 action = commander.Order(frame, Abilities.EFFECT_GUARDIANSHIELD);
                 return true;
             }
@@ -75,6 +76,7 @@
             {
                 if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && MapDataService.MapHeight(e.Unit.Pos) > height) && commander.UnitCalculation.NearbyEnemies.Count(e => e.FrameLastSeen == frame) > 2)
                 {
+                    CameraManager.SetCamera(commander.UnitCalculation.Position);
                     action = commander.Order(frame, Abilities.HALLUCINATION_COLOSSUS);
                     return true;
                 }
@@ -82,6 +84,7 @@
 
             if (commander.UnitCalculation.NearbyEnemies.Count(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && e.FrameLastSeen == frame) > 3 && !commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Detector)))
             {
+                CameraManager.SetCamera(commander.UnitCalculation.Position);
                 action = commander.Order(frame, Abilities.HALLUCINATION_ARCHON);
                 return true;
             }

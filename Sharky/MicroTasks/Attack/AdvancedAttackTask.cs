@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-namespace Sharky.MicroTasks.Attack
+﻿namespace Sharky.MicroTasks.Attack
 {
     public class AdvancedAttackTask : MicroTask, IAttackTask
     {
@@ -251,7 +249,6 @@ namespace Sharky.MicroTasks.Attack
 
             UpdateLeader();
 
-            var hiddenBase = TargetingData.HiddenEnemyBase;
             if (MainUnits.Any())
             {
                 AttackData.ArmyPoint = TargetingService.GetArmyPoint(MainUnits);
@@ -361,7 +358,7 @@ namespace Sharky.MicroTasks.Attack
 
             UpdateEnemyAttackers(frame, attackingEnemies);
 
-            HandleHiddenBuildings(hiddenBase);
+            HandleHiddenBuildings();
 
             if (stopwatch.ElapsedMilliseconds > 100)
             {
@@ -413,11 +410,14 @@ namespace Sharky.MicroTasks.Attack
             SupportUnits.Remove(NextLeader);
             NextLeader.UnitRole = UnitRole.Leader;
             MainUnits.Add(NextLeader);
-
-            MainUnits.Remove(currentLeader);
-            currentLeader.UnitRole = UnitRole.None;
-            SupportUnits.Add(currentLeader);
             NextLeader = null;
+
+            if (currentLeader != null) 
+            {
+                MainUnits.Remove(currentLeader);
+                currentLeader.UnitRole = UnitRole.None;
+                SupportUnits.Add(currentLeader);
+            }
         }
 
         private void UpdateEnemyAttackers(int frame, IEnumerable<UnitCalculation> attackingEnemies)
@@ -629,22 +629,14 @@ namespace Sharky.MicroTasks.Attack
             }
         }
 
-        void HandleHiddenBuildings(bool hiddenBase)
+        void HandleHiddenBuildings()
         {
-            if (!MicroTaskData.ContainsKey(typeof(FindHiddenBaseTask).Name))
-            {
-                return;
-            }
-            if (!hiddenBase && TargetingData.HiddenEnemyBase)
+            if (TargetingData.HiddenEnemyBase && !MicroTaskData[typeof(FindHiddenBaseTask).Name].Enabled)
             {
                 ResetClaimedUnits();
                 MicroTaskData[typeof(FindHiddenBaseTask).Name].Enable();
             }
-            else if (hiddenBase && !TargetingData.HiddenEnemyBase && ActiveUnitData.EnemyUnits.Any())
-            {
-                MicroTaskData[typeof(FindHiddenBaseTask).Name].Disable();
-            }
-            if (MicroTaskData[typeof(FindHiddenBaseTask).Name].Enabled && ActiveUnitData.EnemyUnits.Any(e => e.Value.Attributes.Contains(SC2Attribute.Structure)))
+            else if (!TargetingData.HiddenEnemyBase && MicroTaskData[typeof(FindHiddenBaseTask).Name].Enabled)
             {
                 MicroTaskData[typeof(FindHiddenBaseTask).Name].Disable();
             }

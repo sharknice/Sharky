@@ -28,6 +28,26 @@
             return ActiveUnitData.EnemyUnits.Count(u => u.Value.Unit.UnitType == (uint)unitType && u.Value.Unit.BuildProgress == 1 && !u.Value.Unit.IsHallucination);
         }
 
+        public bool EnemyHas(UnitTypes unitType)
+        {
+            return ActiveUnitData.EnemyUnits.Any(u =>  (uint)unitType == u.Value.Unit.UnitType && !u.Value.Unit.IsHallucination);
+        }
+
+        public bool EnemyHas(List<UnitTypes> unitTypes)
+        {
+            return ActiveUnitData.EnemyUnits.Any(u => unitTypes.Any(t => (uint)t == u.Value.Unit.UnitType) && !u.Value.Unit.IsHallucination);
+        }
+
+        public bool EnemyHasCompleted(UnitTypes unitType)
+        {
+            return ActiveUnitData.EnemyUnits.Any(u => (uint)unitType == u.Value.Unit.UnitType && u.Value.Unit.BuildProgress == 1 && !u.Value.Unit.IsHallucination);
+        }
+
+        public bool EnemyHasCompleted(List<UnitTypes> unitTypes)
+        {
+            return ActiveUnitData.EnemyUnits.Any(u => unitTypes.Any(t => (uint)t == u.Value.Unit.UnitType) && u.Value.Unit.BuildProgress == 1 && !u.Value.Unit.IsHallucination);
+        }
+
         public int UnitsDoneAndInProgressCount(UnitTypes unitType)
         {
             return EquivalentTypeCount(unitType) + UnitsInProgressCount(unitType);

@@ -100,6 +100,7 @@
             var revelationLocation = GetBestRevelationLocation(commander);
             if (revelationLocation != null)
             {
+                CameraManager.SetCamera(revelationLocation);
                 action = commander.Order(frame, Abilities.EFFECT_ORACLEREVELATION, revelationLocation);
                 return true;
             }
@@ -220,6 +221,7 @@
 
             if (commander.UnitCalculation.EnemiesInRange.Any(e => e.Unit.Tag == bestTarget.Unit.Tag))
             {
+                CameraManager.SetCamera(commander.UnitCalculation.Position);
                 action = commander.Order(frame, Abilities.BEHAVIOR_PULSARBEAMON);
                 return true;
             }
@@ -265,6 +267,7 @@
                         var stasis = commander.Order(frame, Abilities.BUILD_STASISTRAP, location, allowSpam: true);
                         if (stasis != null)
                         {
+                            CameraManager.SetCamera(location);
                             action = stasis;
                             return true;
                         }

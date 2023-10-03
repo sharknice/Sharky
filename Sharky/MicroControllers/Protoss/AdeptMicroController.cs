@@ -20,6 +20,7 @@
             if (commander.AbilityOffCooldown(Abilities.EFFECT_ADEPTPHASESHIFT, frame, SharkyOptions.FramesPerSecond, SharkyUnitData))
             {
                 TagService.TagAbility("shade");
+                CameraManager.SetCamera(commander.UnitCalculation.Position);
                 action = commander.Order(frame, Abilities.EFFECT_ADEPTPHASESHIFT, target);
                 return true;
             }

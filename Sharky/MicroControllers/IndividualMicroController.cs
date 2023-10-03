@@ -2288,24 +2288,6 @@
                     }
                 }
 
-                // probably don't want this for one hit kills, just avoid the damage outright?
-                //if (commander.RetreatPathFrame + 2 < frame)
-                //{
-                //    if (commander.UnitCalculation.Unit.IsFlying)
-                //    {
-                //        commander.RetreatPath = SharkyPathFinder.GetSafeAirPath(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y, defensivePoint.X, defensivePoint.Y, frame);
-                //    }
-                //    else
-                //    {
-                //        commander.RetreatPath = SharkyPathFinder.GetSafeGroundPath(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y, defensivePoint.X, defensivePoint.Y, frame);
-                //    }
-                //    commander.RetreatPathFrame = frame;
-                //    commander.RetreatPathIndex = 1;
-                //}
-                //if (FollowPath(commander, frame, out action))
-                //{
-                //    return true;
-                //}
                 if (commander.UnitCalculation.Unit.IsFlying)
                 {
                     var avoidPoint = GetAirAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, attack.Unit.Pos, target, defensivePoint, attack.Range + attack.Unit.Radius + commander.UnitCalculation.Unit.Radius + 4);

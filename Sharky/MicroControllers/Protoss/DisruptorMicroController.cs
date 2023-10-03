@@ -108,6 +108,7 @@
                     if (bestAttack != null)
                     {
                         TagService.TagAbility("purification");
+                        CameraManager.SetCamera(bestAttack);
                         action = commander.Order(frame, Abilities.EFFECT_PURIFICATIONNOVA, bestAttack);
                         lastPurificationFrame = frame;
                         return true;

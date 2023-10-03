@@ -1,4 +1,6 @@
-﻿namespace Sharky.MicroControllers.Protoss
+﻿using static Google.Protobuf.Reflection.SourceCodeInfo.Types;
+
+namespace Sharky.MicroControllers.Protoss
 {
     public class PhoenixMicroController : IndividualMicroController
     {
@@ -83,6 +85,7 @@
             if (bestGravitonTarget != null && bestGravitonTarget.FrameLastSeen + 1 >= frame)
             {
                 TagService.TagAbility("graviton");
+                CameraManager.SetCamera(bestGravitonTarget.Position);
                 action = commander.Order(frame, Abilities.EFFECT_GRAVITONBEAM, null, bestGravitonTarget.Unit.Tag);
                 return true;
             }

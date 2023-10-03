@@ -137,6 +137,7 @@
             if (target != null && target.Unit.Energy >= 50)
             {
                 FeedBacks[target.Unit.Tag] = frame;
+                CameraManager.SetCamera(target.Unit.Pos);
                 action = commander.Order(frame, Abilities.EFFECT_FEEDBACK, null, target.Unit.Tag);
                 return true;
             }
@@ -181,6 +182,7 @@
 
                 if (bestAttack != null)
                 {
+                    CameraManager.SetCamera(bestAttack);
                     action = commander.Order(frame, Abilities.EFFECT_PSISTORM, bestAttack);
                     lastStormFrame = frame;
                     return true;

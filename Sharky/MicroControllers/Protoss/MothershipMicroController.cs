@@ -75,6 +75,7 @@
                 return false;
             }
 
+            CameraManager.SetCamera(point);
             action = commander.Order(frame, Abilities.EFFECT_TIMEWARP, point);
             return true;
         }
