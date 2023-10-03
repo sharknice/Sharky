@@ -464,7 +464,6 @@
                     {
                         if (ProbeCommander.UnitCalculation.NearbyAllies.Count(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_PHOTONCANNON && a.Unit.BuildProgress == 1) < ProbeCommander.UnitCalculation.NearbyEnemies.Count(e => (e.Unit.UnitType == (uint)UnitTypes.ZERG_ROACH || e.Unit.UnitType == (uint)UnitTypes.ZERG_ZERGLING)))
                         {
-                            Console.WriteLine("ProtossDoorTask: Blocking Wall with pylon");
                             var probeCommand = ProbeCommander.Order(frame, Abilities.BUILD_PYLON, WallData.Block);
                             if (probeCommand != null)
                             {

@@ -11,6 +11,7 @@ var defaultSharkyBot = new DefaultSharkyBot(gameConnection);
 
 var protossBuildChoices = new ProtossBuildChoices(defaultSharkyBot);
 defaultSharkyBot.BuildChoices[Race.Protoss] = protossBuildChoices.BuildChoices;
+defaultSharkyBot.SharkyOptions.ControlCamera = true;
 
 var sharkyExampleBot = defaultSharkyBot.CreateBot();
 

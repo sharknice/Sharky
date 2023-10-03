@@ -445,7 +445,7 @@
             var findHiddenBaseTask = new FindHiddenBaseTask(BaseData, TargetingData, MapDataService, individualMicroController, 15, false, 0.5f);
             var proxyScoutTask = new ProxyScoutTask(SharkyUnitData, TargetingData, BaseData, MacroData, SharkyOptions, BuildingBuilder, false, 0.5f, workerProxyScoutMicroController);
             var miningDefenseService = new MiningDefenseService(this, workerDefenseMicroController);
-            var miningTask = new MiningTask(SharkyUnitData, BaseData, ActiveUnitData, 1, miningDefenseService, MacroData, BuildOptions, MicroTaskData, new MineralMiner(this), new GasMiner(this), EnemyData);
+            var miningTask = new MiningTask(this, 1, miningDefenseService, new MineralMiner(this), new GasMiner(this));
             var queenInjectTask = new QueenInjectTask(this, 1.0f, queenMicroController, false);
             var queenCreepTask = new QueenCreepTask(this, 1.1f, queenMicroController, false);
             var changelingScout = new ChangelingScoutTask(this, false, 0.25f);

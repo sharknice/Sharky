@@ -46,27 +46,6 @@
             Enabled = true;
         }
 
-        public MiningTask(SharkyUnitData sharkyUnitData, BaseData baseData, ActiveUnitData activeUnitData, float priority, MiningDefenseService miningDefenseService, MacroData macroData, BuildOptions buildOptions, MicroTaskData microTaskData, MineralMiner mineralMiner, GasMiner gasMiner, EnemyData enemyData)
-        {
-            SharkyUnitData = sharkyUnitData;
-            BaseData = baseData;
-            ActiveUnitData = activeUnitData;
-            Priority = priority;
-            MiningDefenseService = miningDefenseService;
-            MacroData = macroData;
-            BuildOptions = buildOptions;
-            MicroTaskData = microTaskData;
-            EnemyData = enemyData;
-
-            MineralMiner = mineralMiner;
-            GasMiner = gasMiner;
-
-            LowMineralsHighGas = false;
-
-            UnitCommanders = new List<UnitCommander>();
-            Enabled = true;
-        }
-
         public override void ClaimUnits(Dictionary<ulong, UnitCommander> commanders)
         {
             foreach (var commander in commanders.Where(c => !c.Value.Claimed))
