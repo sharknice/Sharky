@@ -1,4 +1,6 @@
-﻿namespace Sharky.Builds
+﻿using Sharky.Helper;
+
+namespace Sharky.Builds
 {
     public class MacroSetup
     {
@@ -59,7 +61,7 @@
                 macroData.Units.Add(UnitTypes.ZERG_OVERLORDTRANSPORT);
             }
 
-            macroData.DesiredUnitCounts = new Dictionary<UnitTypes, int>();
+            macroData.DesiredUnitCounts = new Dictionary<UnitTypes, ValueRange>();
             macroData.BuildUnits = new Dictionary<UnitTypes, bool>();
             foreach (var unitType in macroData.Units)
             {
@@ -70,7 +72,7 @@
 
         void SetupProduction(MacroData macroData)
         {
-            macroData.DesiredProductionCounts = new Dictionary<UnitTypes, int>();
+            macroData.DesiredProductionCounts = new Dictionary<UnitTypes, ValueRange>();
             macroData.BuildProduction = new Dictionary<UnitTypes, bool>();
             if (macroData.Race == Race.Protoss)
             {
@@ -113,7 +115,7 @@
 
         void SetupMorphs(MacroData macroData)
         {
-            macroData.DesiredMorphCounts = new Dictionary<UnitTypes, int>();
+            macroData.DesiredMorphCounts = new Dictionary<UnitTypes, ValueRange>();
             macroData.Morph = new Dictionary<UnitTypes, bool>();
             if (macroData.Race == Race.Protoss)
             {
@@ -141,7 +143,7 @@
 
         void SetupTech(MacroData macroData)
         {
-            macroData.DesiredTechCounts = new Dictionary<UnitTypes, int>();
+            macroData.DesiredTechCounts = new Dictionary<UnitTypes, ValueRange>();
             macroData.BuildTech = new Dictionary<UnitTypes, bool>();
 
             if (macroData.Race == Race.Protoss)
@@ -172,7 +174,7 @@
 
         void SetupAddOns(MacroData macroData)
         {
-            macroData.DesiredAddOnCounts = new Dictionary<UnitTypes, int>();
+            macroData.DesiredAddOnCounts = new Dictionary<UnitTypes, ValueRange>();
             macroData.BuildAddOns = new Dictionary<UnitTypes, bool>();
 
             if (macroData.Race == Race.Terran)
@@ -195,12 +197,12 @@
 
         void SetupDefensiveBuildings(MacroData macroData)
         {
-            macroData.DesiredDefensiveBuildingsCounts = new Dictionary<UnitTypes, int>();
+            macroData.DesiredDefensiveBuildingsCounts = new Dictionary<UnitTypes, ValueRange>();
             macroData.BuildDefensiveBuildings = new Dictionary<UnitTypes, bool>();
-            macroData.DesiredDefensiveBuildingsAtDefensivePoint = new Dictionary<UnitTypes, int>();
-            macroData.DesiredDefensiveBuildingsAtEveryBase = new Dictionary<UnitTypes, int>();
-            macroData.DesiredDefensiveBuildingsAtNextBase = new Dictionary<UnitTypes, int>();
-            macroData.DesiredDefensiveBuildingsAtEveryMineralLine = new Dictionary<UnitTypes, int>();
+            macroData.DesiredDefensiveBuildingsAtDefensivePoint = new Dictionary<UnitTypes, ValueRange>();
+            macroData.DesiredDefensiveBuildingsAtEveryBase = new Dictionary<UnitTypes, ValueRange>();
+            macroData.DesiredDefensiveBuildingsAtNextBase = new Dictionary<UnitTypes, ValueRange>();
+            macroData.DesiredDefensiveBuildingsAtEveryMineralLine = new Dictionary<UnitTypes, ValueRange>();
             macroData.DefensiveBuildingMaximumDistance = 15;
             macroData.DefensiveBuildingMineralLineMaximumDistance = 10;
 

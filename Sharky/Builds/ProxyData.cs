@@ -1,4 +1,6 @@
-﻿namespace Sharky.Builds
+﻿using Sharky.Helper;
+
+namespace Sharky.Builds
 {
     public class ProxyData
     {
@@ -9,31 +11,31 @@
             MaximumBuildingDistance = 15;
             DesiredPylons = 0;
 
-            DesiredMorphCounts = new Dictionary<UnitTypes, int>();
+            DesiredMorphCounts = new Dictionary<UnitTypes, ValueRange>();
             foreach (var productionType in macroData.Morphs)
             {
                 DesiredMorphCounts[productionType] = 0;
             }
 
-            DesiredProductionCounts = new Dictionary<UnitTypes, int>();
+            DesiredProductionCounts = new Dictionary<UnitTypes, ValueRange>();
             foreach (var productionType in macroData.Production)
             {
                 DesiredProductionCounts[productionType] = 0;
             }
 
-            DesiredTechCounts = new Dictionary<UnitTypes, int>();
+            DesiredTechCounts = new Dictionary<UnitTypes, ValueRange>();
             foreach (var techType in macroData.Tech)
             {
                 DesiredTechCounts[techType] = 0;
             }
 
-            DesiredAddOnCounts = new Dictionary<UnitTypes, int>();
+            DesiredAddOnCounts = new Dictionary<UnitTypes, ValueRange>();
             foreach (var techType in macroData.AddOns)
             {
                 DesiredAddOnCounts[techType] = 0;
             }
 
-            DesiredDefensiveBuildingsCounts = new Dictionary<UnitTypes, int>();
+            DesiredDefensiveBuildingsCounts = new Dictionary<UnitTypes, ValueRange>();
             foreach (var defensiveBuildingsType in macroData.DefensiveBuildings)
             {
                 DesiredDefensiveBuildingsCounts[defensiveBuildingsType] = 0;
@@ -46,13 +48,13 @@
         public Point2D Location { get; set; }
         public float MaximumBuildingDistance { get; set; }
 
-        public Dictionary<UnitTypes, int> DesiredProductionCounts;
-        public Dictionary<UnitTypes, int> DesiredMorphCounts;
-        public Dictionary<UnitTypes, int> DesiredTechCounts;
-        public Dictionary<UnitTypes, int> DesiredDefensiveBuildingsCounts;
-        public Dictionary<UnitTypes, int> DesiredAddOnCounts;
+        public Dictionary<UnitTypes, ValueRange> DesiredProductionCounts;
+        public Dictionary<UnitTypes, ValueRange> DesiredMorphCounts;
+        public Dictionary<UnitTypes, ValueRange> DesiredTechCounts;
+        public Dictionary<UnitTypes, ValueRange> DesiredDefensiveBuildingsCounts;
+        public Dictionary<UnitTypes, ValueRange> DesiredAddOnCounts;
 
-        public int DesiredPylons;
+        public ValueRange DesiredPylons;
 
         // TODO: hard coded data
         public HardCodedBuildingData HardCodedBuildingData { get; set; }
