@@ -132,7 +132,14 @@
             {
                 if (targetPriority.OverallWinnability <= AttackData.KillTrigger)
                 {
-                    TargetingData.AttackState = AttackState.Contain;
+                    if (targetPriority.OverallWinnability <= AttackData.RetreatTrigger)
+                    {
+                        TargetingData.AttackState = AttackState.Retreat;
+                    }
+                    else if (AttackData.ContainBelowKill)
+                    {
+                        TargetingData.AttackState = AttackState.Contain;
+                    }
                 }
             }
             else
@@ -152,6 +159,13 @@
 
         protected virtual bool AttackEdgeCase()
         {
+            if (MacroData.Minerals > AttackData.MaxMineralBankEdgeCase)
+            {
+                TargetingData.AttackState = AttackState.Kill;
+                DebugService.DrawText($"Attacking: > {AttackData.MaxMineralBankEdgeCase} max mineral bank");
+                return true;
+            }
+
             if (AttackData.AttackWhenMaxedOut && MacroData.FoodUsed > 185)
             {
                 TargetingData.AttackState = AttackState.Kill;

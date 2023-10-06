@@ -12,6 +12,7 @@
         MacroData MacroData;
         HarassPathingService HarassPathingService;
         FrameToTimeConverter FrameToTimeConverter;
+        CameraManager CameraManager;
 
         IIndividualMicroController IndividualMicroController;
 
@@ -40,6 +41,7 @@
             SharkyUnitData = defaultSharkyBot.SharkyUnitData;
             MacroData = defaultSharkyBot.MacroData;
             FrameToTimeConverter = defaultSharkyBot.FrameToTimeConverter;
+            CameraManager = defaultSharkyBot.CameraManager;
             IndividualMicroController = microController;
             DesiredCount = desiredCount;
             Priority = priority;
@@ -138,6 +140,7 @@
                         var action = IndividualMicroController.HarassWorkers(commander, Target, defensivePoint, frame);
                         if (action != null)
                         {
+                            CameraManager.SetCamera(commander.UnitCalculation.Position);
                             commands.AddRange(action);
                         }
                         continue;
@@ -148,6 +151,7 @@
                         var action = IndividualMicroController.Attack(commander, Target, defensivePoint, null, frame);
                         if (action != null)
                         {
+                            CameraManager.SetCamera(commander.UnitCalculation.Position);
                             commands.AddRange(action);
                         }
                         continue;
@@ -159,6 +163,10 @@
                 // avoid damage
                 if (commander.UnitCalculation.EnemiesThreateningDamage.Any())
                 {
+                    if (frame % 50 == 0)
+                    {
+                        CameraManager.SetCamera(commander.UnitCalculation.Position);
+                    }
                     if (!Undetected(commander) && commander.UnitCalculation.Unit.Health < commander.UnitCalculation.Unit.HealthMax)
                     {
                         var action = IndividualMicroController.NavigateToPoint(commander, Target, defensivePoint, null, frame);

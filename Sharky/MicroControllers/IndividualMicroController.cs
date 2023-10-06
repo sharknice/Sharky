@@ -1798,6 +1798,7 @@
                     bestTarget.IncomingDamage += GetDamage(commander.UnitCalculation.Weapons, bestTarget.Unit, bestTarget.UnitTypeData);
                     if (WeaponReady(commander, frame))
                     {
+                        if (commander.UnitRole == UnitRole.Leader) { CameraManager.SetCamera(bestTarget.Position); }
                         action = commander.Order(frame, Abilities.ATTACK, null, bestTarget.Unit.Tag);
                         commander.LastInRangeAttackFrame = frame;
                     }
@@ -1813,6 +1814,7 @@
                     var bestInRange = GetBestTargetFromList(commander, commander.UnitCalculation.EnemiesInRange.Where(e => e.FrameLastSeen == frame && e.Unit.UnitType != (uint)UnitTypes.PROTOSS_INTERCEPTOR), null);
                     if (bestInRange != null)
                     {
+                        if (commander.UnitRole == UnitRole.Leader) { CameraManager.SetCamera(bestTarget.Position); }
                         action = commander.Order(frame, Abilities.ATTACK, null, bestInRange.Unit.Tag);
                         commander.LastInRangeAttackFrame = frame;
                         return true;

@@ -22,6 +22,11 @@
         public bool AttackWhenOverwhelm { get; set; }
         public bool GroupUpEnabled { get; set; }
 
+        /// <summary>
+        /// if minerals exceed this amount attack no matter what
+        /// </summary>
+        public int MaxMineralBankEdgeCase { get; set; }
+
         public TargetPriorityCalculation TargetPriorityCalculation { get; set; }
     }
 }

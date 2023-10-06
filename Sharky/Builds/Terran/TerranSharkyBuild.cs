@@ -57,7 +57,7 @@
 
         protected void SendScvForFirstBarracks(int frame)
         {
-            if (UnitCountService.EquivalentTypeCompleted(UnitTypes.TERRAN_SUPPLYDEPOT) == 1 && UnitCountService.Count(UnitTypes.TERRAN_BARRACKS) == 0)
+            if (UnitCountService.EquivalentTypeCompleted(UnitTypes.TERRAN_SUPPLYDEPOT) == 1 && UnitCountService.EquivalentTypeCount(UnitTypes.TERRAN_BARRACKS) == 0)
             {
                 if (MapDataService != null && MapDataService.MapData.WallData != null)
                 {

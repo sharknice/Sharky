@@ -47,6 +47,7 @@
                         && Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position) <= 100).OrderByDescending(e => e.Unit.Energy).ThenBy(e => e.Unit.Health).FirstOrDefault();
                     if (target != null)
                     {
+                        CameraManager.SetCamera(target.Position);
                         action = commander.Order(frame, Abilities.INTERFERENCEMATRIX, targetTag: target.Unit.Tag);
                         return true;
                     }

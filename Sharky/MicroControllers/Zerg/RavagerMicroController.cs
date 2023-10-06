@@ -158,6 +158,7 @@
 
                     if (bestAttack != null)
                     {
+                        CameraManager.SetCamera(bestAttack);
                         TagService.TagAbility("bile");
                         action = commander.Order(frame, Abilities.EFFECT_CORROSIVEBILE, bestAttack);
                         lastBileFrame = frame;

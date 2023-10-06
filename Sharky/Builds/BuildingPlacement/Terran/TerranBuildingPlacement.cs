@@ -227,6 +227,15 @@
                     {
                         point.X = (float)Math.Round(point.X * 2.0) / 2f;
                         point.Y = (float)Math.Round(point.Y * 2.0) / 2f;
+
+                        if (point.X % 1 == 0)
+                        {
+                            point.X += .5f;
+                        }
+                        if (point.Y % 1 == 0)
+                        {
+                            point.Y += .5f;
+                        }
                     }
                     else
                     {
@@ -238,6 +247,10 @@
                     {
                         var mineralFields = ActiveUnitData.NeutralUnits.Where(u => SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType) || SharkyUnitData.GasGeyserTypes.Contains((UnitTypes)u.Value.Unit.UnitType));
                         var squared = (1 + minimumMineralProximinity + (size / 2f)) * (1 + minimumMineralProximinity + (size / 2f));
+                        if (size == 6)
+                        {
+                            squared = 64;
+                        }
                         var vector = new Vector2(point.X, point.Y);
                         var clashes = mineralFields.Where(u => Vector2.DistanceSquared(u.Value.Position, vector) < squared);
 

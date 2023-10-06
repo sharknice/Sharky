@@ -71,6 +71,7 @@
                 if (!commander.UnitCalculation.EnemiesInRange.Any(e => e.FrameLastSeen > frame - 25))
                 {
                     LastUnseigeFrame = frame;
+                    CameraManager.SetCamera(commander.UnitCalculation.Position);
                     action = commander.Order(frame, Abilities.MORPH_UNSIEGE);
                     return true;
                 }

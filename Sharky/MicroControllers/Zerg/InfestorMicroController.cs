@@ -127,6 +127,7 @@
 
                 if (bestAttack > 0)
                 {
+                    CameraManager.SetCamera(commander.UnitCalculation.Position);
                     action = commander.Order(frame, Abilities.EFFECT_NEURALPARASITE, targetTag: bestAttack);
                     lastNeuralFrame = frame;
                     return true;
@@ -290,6 +291,7 @@
 
                     if (bestAttack != null)
                     {
+                        CameraManager.SetCamera(bestAttack);
                         action = commander.Order(frame, Abilities.EFFECT_FUNGALGROWTH, bestAttack);
                         lastFungalFrame = frame;
                         return true;

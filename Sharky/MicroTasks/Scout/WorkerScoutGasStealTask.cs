@@ -174,7 +174,7 @@
                     {
                         foreach (var enemyBase in BaseData.EnemyBases.Where(enemyBase => enemyBase.ResourceCenter != null && enemyBase.ResourceCenter.BuildProgress == 1))
                         {
-                            foreach (var gas in enemyBase.VespeneGeysers.Where(g => g.Alliance == Alliance.Neutral))
+                            foreach (var gas in enemyBase.VespeneGeysers.Where(g => g.Alliance == Alliance.Neutral && MapDataService.SelfVisible(g.Pos)))
                             {
                                 if (Vector2.DistanceSquared(new Vector2(gas.Pos.X, gas.Pos.Y), commander.UnitCalculation.Position) < 400 && commander.UnitCalculation.NearbyEnemies.Count(e => e.UnitClassifications.Contains(UnitClassification.Worker)) > 5)
                                 {
@@ -320,7 +320,7 @@
                     CameraManager.SetCamera(commander.UnitCalculation.Position);
                 }
 
-                var points = ScoutPoints.Where(p => Vector2.DistanceSquared(p.ToVector2(), commander.UnitCalculation.Position) < 36).OrderBy(p => MapDataService.LastFrameAlliesTouched(p)).ThenBy(p => Vector2.DistanceSquared(p.ToVector2(), mainVector)).ThenBy(p => Vector2.DistanceSquared(commander.UnitCalculation.Position, p.ToVector2()));
+                var points = ScoutPoints.Where(p => Vector2.DistanceSquared(p.ToVector2(), commander.UnitCalculation.Position) < 36 || Vector2.DistanceSquared(p.ToVector2(), mainVector) < 36).OrderBy(p => MapDataService.LastFrameAlliesTouched(p)).ThenBy(p => Vector2.DistanceSquared(p.ToVector2(), mainVector)).ThenBy(p => Vector2.DistanceSquared(commander.UnitCalculation.Position, p.ToVector2()));
                 var navpoint = points.FirstOrDefault(p => !MapDataService.PathBlocked(p.ToVector2()));
                 if (navpoint == null)
                 {

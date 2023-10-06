@@ -38,6 +38,20 @@
             {
                 commands.AddRange(LandFloatingBuildings());
             }
+            else
+            {
+                if (MacroData.AddOnSwaps.Count(s => s.Value.Started && !s.Value.Completed) > 1)
+                {
+                    Console.WriteLine("Cancelling AddonSwaps");
+                    foreach (var pair in MacroData.AddOnSwaps)
+                    {
+                        pair.Value.Started = true;
+                        pair.Value.Completed = true;
+                    }
+                }
+
+            }
+
 
             return commands;
         }

@@ -49,6 +49,7 @@
 
                 if (enemiesTooClose.Count() > enemiesInSiegeRange.Count() - enemiesTooClose.Count()) { return false; }
 
+                CameraManager.SetCamera(commander.UnitCalculation.Position);
                 TagService.TagAbility("siege");
                 action = commander.Order(frame, Abilities.MORPH_SIEGEMODE);
                 return true;

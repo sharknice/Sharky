@@ -33,6 +33,7 @@
                 
                 if (activeBuilding != null)
                 {
+                    CameraManager.SetCamera(activeBuilding.Position);
                     TagService.TagAbility("contaminate");
                     action = commander.Order(frame, Abilities.EFFECT_CONTAMINATE, targetTag: activeBuilding.Unit.Tag);
                     return true;
@@ -47,6 +48,7 @@
         {
             if (commander.UnitCalculation.Unit.Energy >= 170)
             {
+                CameraManager.SetCamera(commander.UnitCalculation.Position);
                 TagService.TagAbility("changeling");
                 action = commander.Order(frame, Abilities.EFFECT_SPAWNCHANGELING);
                 return true;

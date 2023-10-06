@@ -31,6 +31,7 @@
 
             if (commander.UnitCalculation.NearbyEnemies.Any() || commander.UnitCalculation.NearbyAllies.Count() > 10 || Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(TargetingData.AttackPoint.X, TargetingData.AttackPoint.Y)) < 1600)
             {
+                CameraManager.SetCamera(commander.UnitCalculation.Position);
                 TagService.TagAbility("locust");
                 action = commander.Order(frame, Abilities.EFFECT_SPAWNLOCUSTS, TargetingData.AttackPoint);
                 return true;

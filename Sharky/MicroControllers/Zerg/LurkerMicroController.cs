@@ -17,6 +17,7 @@
 
             if (groundEnemiesInRange.Any())
             {
+                CameraManager.SetCamera(commander.UnitCalculation.Position);
                 action = commander.Order(frame, Abilities.BURROWDOWN_LURKER);
                 return true;
             }

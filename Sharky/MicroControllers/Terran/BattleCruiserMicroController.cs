@@ -45,6 +45,7 @@
             var target = enemiesInRange.FirstOrDefault();
             if (target != null)
             {
+                CameraManager.SetCamera(target.Position);
                 action = commander.Order(frame, Abilities.EFFECT_YAMATOGUN, null, target.Unit.Tag);
                 return true;
             }
@@ -65,6 +66,7 @@
             var target = BaseData.SelfBases.Where(b => b.MineralMiningInfo != null && b.ResourceCenter != null && b.MineralMiningInfo.Any(m => m.Workers.Any()) && Vector2.DistanceSquared(b.MineralLineLocation.ToVector2(), commander.UnitCalculation.Position) > 625).OrderBy(b => b.ResourceCenter.Health).FirstOrDefault();
             if (target != null)
             {
+                CameraManager.SetCamera(target.MineralLineLocation);
                 action = commander.Order(frame, Abilities.EFFECT_TACTICALJUMP, target.MineralLineLocation);
                 return true;
             }

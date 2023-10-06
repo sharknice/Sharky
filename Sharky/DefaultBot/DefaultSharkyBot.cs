@@ -156,7 +156,7 @@
             SharkyOptions = new SharkyOptions { Debug = debug, DebugMicroTaskUnits = true, FramesPerSecond = framesPerSecond, TagOptions = new TagOptions(), LogPerformance = false, GameStatusReportingEnabled = true, GeneratePathing = false, GeneratePathingPrecision = (10, 10) };
             FrameToTimeConverter = new FrameToTimeConverter(SharkyOptions);
             MacroData = new MacroData();
-            AttackData = new AttackData { ArmyFoodAttack = 30, ArmyFoodRetreat = 25, Attacking = false, UseAttackDataManager = true, CustomAttackFunction = true, RetreatTrigger = 1f, AttackTrigger = 1.5f, RequireDetection = false, ContainBelowKill = true, RequireMaxOut = false, AttackWhenMaxedOut = true, RequireBank = false, RequiredMineralBank = 2000, RequiredVespeneBank = 1000, AttackWhenOverwhelm = true, GroupUpEnabled = true, ContainTrigger = 1.5f, KillTrigger = 3f };
+            AttackData = new AttackData { ArmyFoodAttack = 30, ArmyFoodRetreat = 25, Attacking = false, UseAttackDataManager = true, CustomAttackFunction = true, RetreatTrigger = 1f, AttackTrigger = 1.5f, RequireDetection = false, ContainBelowKill = true, RequireMaxOut = false, AttackWhenMaxedOut = true, RequireBank = false, RequiredMineralBank = 2000, RequiredVespeneBank = 1000, MaxMineralBankEdgeCase = 10000, AttackWhenOverwhelm = true, GroupUpEnabled = true, ContainTrigger = 1.5f, KillTrigger = 3f };
             TargetingData = new TargetingData { HiddenEnemyBase = false };
             BaseData = new BaseData();
             MapData = new MapData();

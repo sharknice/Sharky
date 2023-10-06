@@ -97,6 +97,7 @@
 
                 if (buildings.Any())
                 {
+                    CameraManager.SetCamera(buildings.First().Value.Position);
                     action = commander.Order(frame, Abilities.EFFECT_VIPERCONSUME, null, buildings.First().Key);
                     return true;
                 }
@@ -201,6 +202,7 @@
 
                 if (bestAttack > 0)
                 {
+                    CameraManager.SetCamera(commander.UnitCalculation.Position);
                     action = commander.Order(frame, Abilities.EFFECT_ABDUCT, targetTag: bestAttack);
                     lastAbductFrame = frame;
                     return true;
@@ -259,6 +261,7 @@
 
                 if (bestAttack > 0)
                 {
+                    CameraManager.SetCamera(commander.UnitCalculation.Position);
                     action = commander.Order(frame, Abilities.EFFECT_PARASITICBOMB, targetTag: bestAttack);
                     lastParasiticBombFrame = frame;
                     return true;

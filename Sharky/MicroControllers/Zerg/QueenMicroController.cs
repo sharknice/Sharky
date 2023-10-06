@@ -52,6 +52,7 @@
             var transfuseTarget = FindTransfuseTarget(commander.UnitCalculation);
             if (transfuseTarget.Item1 != null)
             {
+                CameraManager.SetCamera(transfuseTarget.Item1.Pos);
                 TagService.TagAbility("transfuse");
                 action = commander.Order(frame, Abilities.EFFECT_TRANSFUSION, targetTag: transfuseTarget.Item1.Tag);
                 return true;

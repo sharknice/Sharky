@@ -36,6 +36,7 @@
 
             if (building != null)
             {
+                CameraManager.SetCamera(commander.UnitCalculation.Position);
                 action = commander.Order(frame, Abilities.EFFECT_CAUSTICSPRAY, targetTag: building.Unit.Tag);
                 TagService.TagAbility("caustic");
                 return true;

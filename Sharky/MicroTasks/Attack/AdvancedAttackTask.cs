@@ -295,7 +295,7 @@
                 {
                     if (DeathBallMode)
                     {
-                        var baseUnderAttack = ActiveUnitData.SelfUnits.Values.Where(a => (a.UnitClassifications.Contains(UnitClassification.DefensiveStructure) || a.UnitClassifications.Contains(UnitClassification.ResourceCenter)) && a.EnemiesInRangeOf.Any());
+                        var baseUnderAttack = ActiveUnitData.SelfUnits.Values.Where(a => (a.UnitClassifications.Contains(UnitClassification.DefensiveStructure) && a.EnemiesInRangeOf.Any()) || (a.UnitClassifications.Contains(UnitClassification.ResourceCenter) && a.NearbyEnemies.Any(e => e.Damage > 0)));
                         if (baseUnderAttack.Any())
                         {
                             attackPoint = baseUnderAttack.OrderBy(e => Vector2.DistanceSquared(e.Position, armyVector)).FirstOrDefault().Position.ToPoint2D();

@@ -63,6 +63,7 @@
 
                 if (commander.UnitCalculation.EnemiesInRange.Sum(e => e.Unit.Health + e.Unit.Shield) > 100) // stim if more than 100 hitpoints in range
                 {
+                    CameraManager.SetCamera(commander.UnitCalculation.Position);
                     TagService.TagAbility("stim");
                     action = commander.Order(frame, Abilities.EFFECT_STIM);
                     return true;

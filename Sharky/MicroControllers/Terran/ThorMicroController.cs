@@ -25,6 +25,7 @@
             if (EnemyData.EnemyRace == Race.Protoss)
             {
                 TagService.TagAbility("high_impact");
+                CameraManager.SetCamera(commander.UnitCalculation.Position);
                 action = commander.Order(frame, Abilities.MORPH_THORHIGHIMPACTMODE);
                 return true;
             }
@@ -33,6 +34,7 @@
                 if (commander.UnitCalculation.NearbyEnemies.Any(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_BATTLECRUISER))
                 {
                     TagService.TagAbility("high_impact");
+                    CameraManager.SetCamera(commander.UnitCalculation.Position);
                     action = commander.Order(frame, Abilities.MORPH_THORHIGHIMPACTMODE);
                     return true;
                 }

@@ -40,7 +40,7 @@
             WallDataService = defaultSharkyBot.WallDataService;
             AttackPathingService = defaultSharkyBot.AttackPathingService;
 
-            baseCount = 0;
+            baseCount = 1;
             LastUpdateFrame = -10000;
             TargetingData.ChokePoints = new ChokePoints();
             TargetingData.WallOffBasePosition = WallOffBasePosition.Current;
@@ -111,7 +111,7 @@
             MapData.PathData = BaseToBasePathingService.GetBaseToBasePathingData(gameInfo.MapName);
         }
 
-        
+
 
         /// <summary>
         /// Stores enemy army center in TargetingData.EnemyArmyCenter.

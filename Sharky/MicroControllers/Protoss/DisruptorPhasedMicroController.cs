@@ -68,6 +68,7 @@
 
                     if (bestAttack != null)
                     {
+                        CameraManager.SetCamera(bestAttack);
                         action = commander.Order(frame, Abilities.MOVE, bestAttack);
                         return true;
                     }

@@ -32,6 +32,12 @@
             return ActiveUnitData.SelfUnits.Values.Any(u => equivalentTypes.Contains((UnitTypes)u.Unit.UnitType) && u.Unit.BuildProgress == 1);
         }
 
+        public bool HaveEquivalent(UnitTypes buildingType)
+        {
+            var equivalentTypes = GetEquivalentTypes(buildingType);
+            return ActiveUnitData.SelfUnits.Values.Any(u => equivalentTypes.Contains((UnitTypes)u.Unit.UnitType));
+        }
+
         public List<UnitTypes> GetEquivalentTypes(UnitTypes unitType)
         {
             var types = new List<UnitTypes> { unitType };

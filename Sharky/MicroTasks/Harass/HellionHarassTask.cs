@@ -11,6 +11,7 @@
         FrameToTimeConverter FrameToTimeConverter;
         MapDataService MapDataService;
         EnemyData EnemyData;
+        CameraManager CameraManager;
 
         public IIndividualMicroController HellionMicroController { get; set; }
         public IIndividualMicroController ReaperMicroController { get; set; }
@@ -39,6 +40,7 @@
             FrameToTimeConverter = defaultSharkyBot.FrameToTimeConverter;
             MapDataService = defaultSharkyBot.MapDataService;
             EnemyData = defaultSharkyBot.EnemyData;
+            CameraManager = defaultSharkyBot.CameraManager;
 
             HellionMicroController = hellionMicroController;
             ReaperMicroController = reaperMicroController;
@@ -229,6 +231,7 @@
                 // kill any workers in range
                 if (commander.UnitCalculation.Unit.WeaponCooldown < 2 && commander.UnitCalculation.EnemiesInRange.Any(e => e.FrameLastSeen == frame && e.UnitClassifications.Contains(UnitClassification.Worker)))
                 {
+                    CameraManager.SetCamera(commander.UnitCalculation.Position);
                     var action = HellionMicroController.HarassWorkers(commander, AttackPoint, TargetingData.MainDefensePoint, frame);
                     if (action != null)
                     {
@@ -249,6 +252,7 @@
                 // kill clumps of workers
                 if (commander.UnitCalculation.EnemiesInRange.Count(e => e.FrameLastSeen == frame && e.UnitClassifications.Contains(UnitClassification.Worker)) > 2)
                 {
+                    CameraManager.SetCamera(commander.UnitCalculation.Position);
                     var action = HellionMicroController.HarassWorkers(commander, AttackPoint, TargetingData.MainDefensePoint, frame);
                     if (action != null)
                     {

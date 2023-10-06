@@ -73,6 +73,7 @@
                     {
                         TagService.TagAbility("kd8charge");
                         var point = new Point2D { X = bestTarget.Position.X, Y = bestTarget.Position.Y };
+                        CameraManager.SetCamera(point);
                         action = commander.Order(frame, Abilities.EFFECT_KD8CHARGE, point);
                         return true;
                     }
