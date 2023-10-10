@@ -9,6 +9,8 @@
         public bool BlockWall { get; set; }
         public bool BlockAddons { get; set; }
         public bool RecallProbe { get; set; }
+        public bool OnlyBlockOnce { get; set; }
+        bool BlockedOnce = false;
 
         protected SharkyUnitData SharkyUnitData;
         protected TargetingData TargetingData;
@@ -68,6 +70,7 @@
             BlockWall = false;
             BlockAddons = false;
             RecallProbe = false;
+            OnlyBlockOnce = false;
             IndividualMicroController = individualMicroController;
         }
 
@@ -195,7 +198,7 @@
                 {
                     var enemyBase = BaseData.EnemyBaseLocations.FirstOrDefault();
 
-                    if (BlockAddons && EnemyData.EnemyRace == Race.Terran)
+                    if (BlockAddons && EnemyData.EnemyRace == Race.Terran && !(BlockedOnce && OnlyBlockOnce))
                     {
                         var buildingWithoutAddon = commander.UnitCalculation.NearbyEnemies.Where(e => (e.Unit.UnitType == (uint)UnitTypes.TERRAN_BARRACKS || e.Unit.UnitType == (uint)UnitTypes.TERRAN_FACTORY || e.Unit.UnitType == (uint)UnitTypes.TERRAN_STARPORT) && !e.Unit.HasAddOnTag && BuildingBuilder.HasRoomForAddon(e.Unit)).OrderBy(e => Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position)).FirstOrDefault();
                         if (buildingWithoutAddon != null)
@@ -206,6 +209,7 @@
                             {
                                 CameraManager.SetCamera(point);
                                 commands.AddRange(wallBlock);
+                                BlockedOnce = true;
                                 continue;
                             }
                         }

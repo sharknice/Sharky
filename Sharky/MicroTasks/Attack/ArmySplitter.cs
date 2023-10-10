@@ -36,7 +36,7 @@
             LastSplitFrame = -1000;
         }
 
-        public List<SC2APIProtocol.Action> SplitArmy(int frame, IEnumerable<UnitCalculation> closerEnemies, Point2D attackPoint, IEnumerable<UnitCommander> unitCommanders, bool defendToDeath)
+        public List<SC2APIProtocol.Action> SplitArmy(int frame, IEnumerable<UnitCalculation> closerEnemies, Point2D attackPoint, IEnumerable<UnitCommander> unitCommanders, bool defendToDeath, bool useEverything = false)
         {
             var actions = new List<SC2APIProtocol.Action>();
 
@@ -44,7 +44,7 @@
 
             if (LastSplitFrame + 25 < frame)
             {
-                ReSplitArmy(frame, closerEnemies, attackPoint, unitCommanders, defendToDeath);
+                ReSplitArmy(frame, closerEnemies, attackPoint, unitCommanders, defendToDeath, useEverything);
                 LastSplitFrame = frame;
             }
 
@@ -114,7 +114,7 @@
             return actions;
         }
 
-        void ReSplitArmy(int frame, IEnumerable<UnitCalculation> closerEnemies, Point2D attackPoint, IEnumerable<UnitCommander> unitCommanders, bool defendToDeath)
+        void ReSplitArmy(int frame, IEnumerable<UnitCalculation> closerEnemies, Point2D attackPoint, IEnumerable<UnitCommander> unitCommanders, bool defendToDeath, bool useEverything)
         {
             ArmySplits = new List<ArmySplits>();
             var enemyGroups = DefenseService.GetEnemyGroups(closerEnemies);
@@ -129,12 +129,21 @@
                 ArmySplits.Add(new ArmySplits { EnemyGroup = enemyGroup, SelfGroup = selfGroup });
             }
 
-
-            if (!AttackData.Attacking && AvailableCommanders.Any())
+            if ((!AttackData.Attacking || useEverything) && AvailableCommanders.Any())
             {
                 foreach (var split in ArmySplits)
                 {
                     var additions = DefenseService.OverwhelmSplit(split, AvailableCommanders);
+                    split.SelfGroup.AddRange(additions);
+                    AvailableCommanders.RemoveAll(a => additions.Any(s => s.UnitCalculation.Unit.Tag == a.UnitCalculation.Unit.Tag));
+                }
+            }
+
+            if (useEverything && AvailableCommanders.Any())
+            {
+                foreach (var split in ArmySplits)
+                {
+                    var additions = AvailableCommanders;
                     split.SelfGroup.AddRange(additions);
                     AvailableCommanders.RemoveAll(a => additions.Any(s => s.UnitCalculation.Unit.Tag == a.UnitCalculation.Unit.Tag));
                 }

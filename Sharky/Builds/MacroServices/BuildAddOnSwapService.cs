@@ -8,6 +8,9 @@
         BuildingService BuildingService;
         IBuildingPlacement BuildingPlacement;
 
+        int LastStart = 0;
+        int MultipleStart = 0;
+
         public BuildAddOnSwapService(MacroData macroData, ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, BuildingService buildingService, IBuildingPlacement buildingPlacement)
         {
             MacroData = macroData;
@@ -34,6 +37,17 @@
                 }
             }
 
+            if (LastStart > 0 && MacroData.Frame - LastStart > 1200)
+            {
+                Console.WriteLine("Cancelling AddonSwaps, took too long");
+                foreach (var pair in MacroData.AddOnSwaps)
+                {
+                    pair.Value.Started = true;
+                    pair.Value.Completed = true;
+                    LastStart = 0;
+                }
+            }
+
             if (!MacroData.AddOnSwaps.Any(s => s.Value.Started && !s.Value.Completed))
             {
                 commands.AddRange(LandFloatingBuildings());
@@ -42,16 +56,19 @@
             {
                 if (MacroData.AddOnSwaps.Count(s => s.Value.Started && !s.Value.Completed) > 1)
                 {
-                    Console.WriteLine("Cancelling AddonSwaps");
-                    foreach (var pair in MacroData.AddOnSwaps)
+                    if (MultipleStart == 0) { MultipleStart = MacroData.Frame; }
+                    if (MultipleStart > 0 && MacroData.Frame - MultipleStart > 1200)
                     {
-                        pair.Value.Started = true;
-                        pair.Value.Completed = true;
+                        Console.WriteLine("Cancelling AddonSwaps, more than 1 active");
+                        foreach (var pair in MacroData.AddOnSwaps)
+                        {
+                            pair.Value.Started = true;
+                            pair.Value.Completed = true;
+                            LastStart = 0;
+                        }
                     }
                 }
-
             }
-
 
             return commands;
         }
@@ -78,7 +95,7 @@
                     }
                     else
                     {
-                        var location = BuildingPlacement.FindPlacement(floater.UnitCalculation.Position.ToPoint2D(), (UnitTypes)floater.UnitCalculation.Unit.UnitType, 3);
+                        var location = BuildingPlacement.FindPlacement(floater.UnitCalculation.Position.ToPoint2D(), (UnitTypes)floater.UnitCalculation.Unit.UnitType, 5);
                         var command = floater.Order(MacroData.Frame, Abilities.LAND, location);
                         if (command != null)
                         {
@@ -99,6 +116,7 @@
                     if (addOnSwap.AddOnTaker.UnitCalculation.Unit.HasAddOnTag && addOnSwap.AddOnTaker.UnitCalculation.Unit.AddOnTag == addOnSwap.AddOn.UnitCalculation.Unit.Tag)
                     {
                         addOnSwap.Completed = true;
+                        LastStart = 0;
                     }
                 }
             }
@@ -148,11 +166,16 @@
                     {
                         command = addOnSwap.AddOnBuilder.Order(MacroData.Frame, Abilities.LIFT);
                     }
+                    else if (addOnSwap.AddOnTaker != null && Vector2.DistanceSquared(addOnSwap.AddOnTaker.UnitCalculation.Position, addOnSwap.AddOnBuilder.UnitCalculation.Position) < 1)
+                    {
+                        command = addOnSwap.AddOnBuilder.Order(MacroData.Frame, Abilities.LIFT);
+                    }
                 }
 
                 if (command != null)
                 {
                     commands.AddRange(command);
+                    if (LastStart == 0) { LastStart = MacroData.Frame; }
                 }
             }
 
@@ -182,6 +205,7 @@
                 if (command != null)
                 {
                     commands.AddRange(command);
+                    if (LastStart == 0) { LastStart = MacroData.Frame; }
                 }
             }
 

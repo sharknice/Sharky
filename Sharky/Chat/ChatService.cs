@@ -24,7 +24,7 @@
         }
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-        public async void SendChatType(string chatType, bool instant = false)
+        public async void SendChatType(string chatType, bool instant = false, List<KeyValuePair<string, string>> parameters = null)
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
             if (ChatTypeLastSentFrame + MaxChatTypeFrequency > MacroData.Frame)
@@ -43,7 +43,7 @@
 
             if (data != null)
             {
-                var messages = ChatDataService.GetChatTypeMessage(data, ActiveChatData.EnemyName);
+                var messages = ChatDataService.GetChatTypeMessage(data, ActiveChatData.EnemyName, parameters);
                 SendChatMessages(messages);
             }
         }

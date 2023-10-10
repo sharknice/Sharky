@@ -443,7 +443,7 @@
             var workerScoutGasStealTask = new WorkerScoutGasStealTask(this, false, 0.5f, workerDefenseMicroController);
             var reaperScoutTask = new ReaperScoutTask(this, false, 0.5f);
             var findHiddenBaseTask = new FindHiddenBaseTask(BaseData, TargetingData, MapDataService, individualMicroController, 15, false, 0.5f);
-            var proxyScoutTask = new ProxyScoutTask(SharkyUnitData, TargetingData, BaseData, MacroData, SharkyOptions, BuildingBuilder, false, 0.5f, workerProxyScoutMicroController);
+            var proxyScoutTask = new ProxyScoutTask(this, false, 0.5f, workerProxyScoutMicroController);
             var miningDefenseService = new MiningDefenseService(this, workerDefenseMicroController);
             var miningTask = new MiningTask(this, 1, miningDefenseService, new MineralMiner(this), new GasMiner(this));
             var queenInjectTask = new QueenInjectTask(this, 1.0f, queenMicroController, false);

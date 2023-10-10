@@ -32,7 +32,7 @@
 
             var counterGroup = new List<UnitCommander>();
 
-            foreach (var commander in unitCommanders.Where(c => CanSplitCommander(c)))
+            foreach (var commander in unitCommanders.Where(c => defendToDeath || CanSplitCommander(c)))
             {
                 if ((hasGround && commander.UnitCalculation.DamageGround) || (hasAir && commander.UnitCalculation.DamageAir) || (cloakable && (commander.UnitCalculation.UnitClassifications.Contains(UnitClassification.Detector) || commander.UnitCalculation.UnitClassifications.Contains(UnitClassification.DetectionCaster))) || commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PHOENIX)
                 {

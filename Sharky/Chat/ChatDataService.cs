@@ -59,7 +59,7 @@
             return chatData;
         }
 
-        public List<string> GetChatTypeMessage(ChatTypeData chatTypeData, string enemyName)
+        public List<string> GetChatTypeMessage(ChatTypeData chatTypeData, string enemyName, List<KeyValuePair<string, string>> parameters = null)
         {
             var responses = chatTypeData.Messages[Random.Next(chatTypeData.Messages.Count)];
             var name = enemyName;
@@ -70,6 +70,14 @@
             for (var index = 0; index < responses.Count; index++)
             {
                 responses[index] = responses[index].Replace("{name}", name);
+
+                if (parameters != null)
+                {
+                    foreach (var parameter in parameters)
+                    {
+                        responses[index] = responses[index].Replace("{" + parameter.Key + "}", parameter.Value);
+                    }
+                }
             }
             return responses;
         }

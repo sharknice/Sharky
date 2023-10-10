@@ -120,7 +120,7 @@
                         commander.UnitCalculation.TargetPriorityCalculation.TargetPriority = TargetPriority.Attack;
                     }
                 }
-                actions.AddRange(ArmySplitter.SplitArmy(frame, attackingEnemies, TargetingData.MainDefensePoint, UnitCommanders, true));
+                actions.AddRange(ArmySplitter.SplitArmy(frame, attackingEnemies, TargetingData.MainDefensePoint, UnitCommanders, true, true));
                 stopwatch.Stop();
                 lastFrameTime = stopwatch.ElapsedMilliseconds;
                 return actions;

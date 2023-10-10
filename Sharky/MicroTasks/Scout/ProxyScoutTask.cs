@@ -1,4 +1,6 @@
-﻿namespace Sharky.MicroTasks
+﻿using Sharky.DefaultBot;
+
+namespace Sharky.MicroTasks
 {
     public class ProxyScoutTask : MicroTask
     {
@@ -7,6 +9,7 @@
         BaseData BaseData;
         SharkyOptions SharkyOptions;
         MacroData MacroData;
+        BuildingService BuildingService;
         IBuildingBuilder BuildingBuilder;
         IIndividualMicroController IndividualMicroController;
 
@@ -16,17 +19,17 @@
 
         List<Point2D> ScoutLocations { get; set; }
         int ScoutLocationIndex { get; set; }
-
         bool LateGame;
 
-        public ProxyScoutTask(SharkyUnitData sharkyUnitData, TargetingData targetingData, BaseData baseData, MacroData macroData, SharkyOptions sharkyOptions, IBuildingBuilder buildingBuilder, bool enabled, float priority, IIndividualMicroController individualMicroController)
+        public ProxyScoutTask(DefaultSharkyBot defaultSharkyBot, bool enabled, float priority, IIndividualMicroController individualMicroController)
         {
-            SharkyUnitData = sharkyUnitData;
-            TargetingData = targetingData;
-            BaseData = baseData;
-            SharkyOptions = sharkyOptions;
-            BuildingBuilder = buildingBuilder;
-            MacroData = macroData;
+            SharkyUnitData = defaultSharkyBot.SharkyUnitData;
+            TargetingData = defaultSharkyBot.TargetingData;
+            BaseData = defaultSharkyBot.BaseData;
+            SharkyOptions = defaultSharkyBot.SharkyOptions;
+            BuildingBuilder = defaultSharkyBot.BuildingBuilder;
+            BuildingService = defaultSharkyBot.BuildingService;
+            MacroData = defaultSharkyBot.MacroData;
             Priority = priority;
             IndividualMicroController = individualMicroController;
 
@@ -89,7 +92,7 @@
             {
                 if (commander.UnitRole != UnitRole.Scout) { commander.UnitRole = UnitRole.Scout; }
 
-                if (commander.UnitCalculation.NearbyEnemies.Take(25).Any(e => e.FrameLastSeen == frame && (e.UnitClassifications.Contains(UnitClassification.Worker) || e.Attributes.Contains(SC2Attribute.Structure))) && commander.UnitCalculation.NearbyEnemies.Count() < 5)
+                if (commander.UnitCalculation.NearbyEnemies.Any(e => e.FrameLastSeen == frame && (e.UnitClassifications.Contains(UnitClassification.Worker) || e.Attributes.Contains(SC2Attribute.Structure))) && commander.UnitCalculation.NearbyEnemies.Count() < 5)
                 {
                     if (BlockAddons && (MacroData.Minerals > 100 || commander.LastAbility == Abilities.BUILD_PYLON) && commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE)
                     {
@@ -99,11 +102,14 @@
                             if (buildingWithoutAddon.Unit.BuildProgress >= .75f || commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit)))
                             {
                                 var point = new Point2D { X = buildingWithoutAddon.Unit.Pos.X + 2.5f, Y = buildingWithoutAddon.Unit.Pos.Y - .5f };
-                                var wallBlock = commander.Order(frame, Abilities.BUILD_PYLON, point);
-                                if (wallBlock != null)
+                                if (!BuildingService.BlocksResourceCenter(point.X, point.Y, 1))
                                 {
-                                    commands.AddRange(wallBlock);
-                                    continue;
+                                    var wallBlock = commander.Order(frame, Abilities.BUILD_PYLON, point);
+                                    if (wallBlock != null)
+                                    {
+                                        commands.AddRange(wallBlock);
+                                        continue;
+                                    }
                                 }
                             }
                         }
