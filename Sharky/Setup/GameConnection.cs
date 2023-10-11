@@ -315,11 +315,11 @@
             }
         }
 
-        public async Task RunSinglePlayer(ISharkyBot bot, string map, Race myRace, Race opponentRace, Difficulty opponentDifficulty, AIBuild aIBuild, int randomSeed = -1, string opponentID = "test", bool realTime = false, string botName = "bot")
+        public async Task RunSinglePlayer(ISharkyBot bot, string map, Race myRace, Race opponentRace, Difficulty opponentDifficulty, AIBuild aIBuild, int port = 5678, int randomSeed = -1, string opponentID = "test", bool realTime = false, string botName = "bot")
         {
             readSettings();
-            StartSC2Instance(5678);
-            await Connect(5678);
+            StartSC2Instance(port);
+            await Connect(port);
             await CreateGame(map, opponentRace, opponentDifficulty, aIBuild, randomSeed, realTime);
             var playerId = await JoinGame(myRace);
             await Run(bot, playerId, opponentID, botName);
