@@ -675,6 +675,13 @@
         public override void PrintReport(int frame)
         {
             base.PrintReport(frame);
+
+            Console.WriteLine("    Main Units:");
+            foreach (var unit in MainUnits)
+            {
+                Console.WriteLine($"{unit.UnitCalculation.Unit.UnitType} {unit.UnitCalculation.Unit.Tag}");
+            }
+
             if (DefenseArmySplitter.ArmySplits == null) { return; }
 
             System.Console.WriteLine($"    Defensive Splits:");

@@ -4,10 +4,10 @@
     {
         private int StormRangeSquared = 100; // little extra range for splash
         private double StormRadius = 1.5;
-        private int FeedbackRangeSquared = 121; // actually range 10, but give an extra 1 range to get first feedback in
+        protected int FeedbackRangeSquared = 121; // actually range 10, but give an extra 1 range to get first feedback in
         private int lastStormFrame = 0;
 
-        private Dictionary<ulong, int> FeedBacks = new Dictionary<ulong, int>();
+        protected Dictionary<ulong, int> FeedBacks = new Dictionary<ulong, int>();
 
         public HighTemplarMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled)
             : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled)
@@ -103,9 +103,9 @@
                 return false;
             }
 
-            if (commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.EFFECT_PSISTORM) || commander.LastAbility == Abilities.EFFECT_PSISTORM && commander.LastOrderFrame + 10 > frame) 
+            if (commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.EFFECT_FEEDBACK) || commander.LastAbility == Abilities.EFFECT_FEEDBACK && commander.LastOrderFrame + 10 > frame) 
             {
-                var tag = commander.UnitCalculation.Unit.Orders.FirstOrDefault(o => o.AbilityId == (uint)Abilities.EFFECT_PSISTORM);
+                var tag = commander.UnitCalculation.Unit.Orders.FirstOrDefault(o => o.AbilityId == (uint)Abilities.EFFECT_FEEDBACK);
                 if (tag != null)
                 {
                     FeedBacks[tag.TargetUnitTag] = frame;

@@ -39,7 +39,7 @@
                             MapDataService.SelfVisible(new Point2D { X = bestTarget.Unit.Pos.X, Y = bestTarget.Unit.Pos.Y + 7 }) && MapDataService.SelfVisible(new Point2D { X = bestTarget.Unit.Pos.X, Y = bestTarget.Unit.Pos.Y - 7 }))
                         {
                             TagService.TagAbility("blink");
-                            CameraManager.SetCamera(point);
+                            CameraManager.SetCamera(point.ToVector2(), commander.UnitCalculation.Position);
                             action = commander.Order(frame, Abilities.EFFECT_BLINK_STALKER, point);
                             return true;
                         }
@@ -64,7 +64,7 @@
                     {
                         var avoidPoint = GetGroundAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, cyclone.Unit.Pos, target, defensivePoint, 15f + cyclone.Unit.Radius + commander.UnitCalculation.Unit.Radius + AvoidDamageDistance + 4);
                         TagService.TagAbility("blink");
-                        CameraManager.SetCamera(avoidPoint);
+                        CameraManager.SetCamera(avoidPoint.ToVector2(), commander.UnitCalculation.Position);
                         action = commander.Order(frame, Abilities.EFFECT_BLINK_STALKER, avoidPoint);
                         return true;
                     }
@@ -75,7 +75,7 @@
                 {
                     var avoidPoint = GetGroundAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, attack.Unit.Pos, target, defensivePoint, attack.Range + attack.Unit.Radius + commander.UnitCalculation.Unit.Radius + AvoidDamageDistance + 4);
                     TagService.TagAbility("blink");
-                    CameraManager.SetCamera(avoidPoint);
+                    CameraManager.SetCamera(avoidPoint.ToVector2(), commander.UnitCalculation.Position);
                     action = commander.Order(frame, Abilities.EFFECT_BLINK_STALKER, avoidPoint);
                     return true;
                 }
@@ -113,7 +113,7 @@
 
                     var avoidPoint = GetGroundAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, attack.Unit.Pos, target, defensivePoint, attack.Range + attack.Unit.Radius + commander.UnitCalculation.Unit.Radius + AvoidDamageDistance + 4);
                     TagService.TagAbility("blink");
-                    CameraManager.SetCamera(avoidPoint);
+                    CameraManager.SetCamera(avoidPoint.ToVector2(), commander.UnitCalculation.Position);
                     action = commander.Order(frame, Abilities.EFFECT_BLINK_STALKER, avoidPoint);
                     return true;
                 }
@@ -141,7 +141,7 @@
                     {
                         var avoidPoint = GetGroundAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, cyclone.Unit.Pos, target, defensivePoint, 15f + cyclone.Unit.Radius + commander.UnitCalculation.Unit.Radius + AvoidDamageDistance + 4);
                         TagService.TagAbility("blink");
-                        CameraManager.SetCamera(avoidPoint);
+                        CameraManager.SetCamera(avoidPoint.ToVector2(), commander.UnitCalculation.Position);
                         action = commander.Order(frame, Abilities.EFFECT_BLINK_STALKER, avoidPoint);
                         return true;
                     }
