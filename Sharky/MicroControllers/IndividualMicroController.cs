@@ -1697,6 +1697,11 @@
 
         public virtual List<SC2APIProtocol.Action> MoveToTarget(UnitCommander commander, Point2D target, int frame)
         {
+            if (!MapDataService.PathWalkable(target))
+            {
+                return commander.Order(frame, Abilities.MOVE, target);
+            }
+
             if (commander.UnitCalculation.NearbyAllies.Any(a => a.Attributes.Contains(SC2APIProtocol.Attribute.Structure)) && Vector2.DistanceSquared(commander.UnitCalculation.Position, target.ToVector2()) > 400)
             {
                 return commander.Order(frame, Abilities.MOVE, target);
@@ -1708,6 +1713,11 @@
 
         protected virtual List<SC2APIProtocol.Action> AttackToTarget(UnitCommander commander, Point2D target, int frame)
         {
+            if (!MapDataService.PathWalkable(target))
+            {
+                return commander.Order(frame, Abilities.ATTACK, target);
+            }
+
             if (!AlwaysUsePathing && commander.UnitCalculation.NearbyAllies.Any(a => a.Attributes.Contains(SC2APIProtocol.Attribute.Structure)) && Vector2.DistanceSquared(commander.UnitCalculation.Position, target.ToVector2()) > 400 && !(commander.UnitRole == UnitRole.Leader && commander.UnitCalculation.NearbyAllies.Any(a => !a.Unit.IsFlying)))
             {
                 return commander.Order(frame, Abilities.ATTACK, target);
@@ -1798,7 +1808,7 @@
                     bestTarget.IncomingDamage += GetDamage(commander.UnitCalculation.Weapons, bestTarget.Unit, bestTarget.UnitTypeData);
                     if (WeaponReady(commander, frame))
                     {
-                        if (commander.UnitRole == UnitRole.Leader) { CameraManager.SetCamera(bestTarget.Position); }
+                        if (commander.UnitRole == UnitRole.Leader) { CameraManager.SetCamera(commander.UnitCalculation.Position, bestTarget.Position); }
                         action = commander.Order(frame, Abilities.ATTACK, null, bestTarget.Unit.Tag);
                         commander.LastInRangeAttackFrame = frame;
                     }
@@ -1814,7 +1824,7 @@
                     var bestInRange = GetBestTargetFromList(commander, commander.UnitCalculation.EnemiesInRange.Where(e => e.FrameLastSeen == frame && e.Unit.UnitType != (uint)UnitTypes.PROTOSS_INTERCEPTOR), null);
                     if (bestInRange != null)
                     {
-                        if (commander.UnitRole == UnitRole.Leader) { CameraManager.SetCamera(bestTarget.Position); }
+                        if (commander.UnitRole == UnitRole.Leader) { CameraManager.SetCamera(commander.UnitCalculation.Position, bestTarget.Position); }
                         action = commander.Order(frame, Abilities.ATTACK, null, bestInRange.Unit.Tag);
                         commander.LastInRangeAttackFrame = frame;
                         return true;
