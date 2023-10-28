@@ -94,6 +94,12 @@
                     DebugService.DebugCreep();
                 }
 
+                match = Regex.Match(chatReceived.Message.ToLower(), "camera");
+                if (match.Success)
+                {
+                    SharkyOptions.ControlCamera = !SharkyOptions.ControlCamera;
+                }
+
                 match = Regex.Match(chatReceived.Message.ToLower(), "spawn enemy wall");
                 if (match.Success)
                 {
