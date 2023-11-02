@@ -1,6 +1,6 @@
 ﻿namespace Sharky.Helper
 {
-    public struct ValueRange
+    public readonly struct ValueRange
     {
         private readonly int min;
         private readonly int max;
@@ -12,24 +12,25 @@
 
         public readonly string Key { get => key; }
 
-        public ValueRange(int min, int max, string key = null)
+        public ValueRange(int min, int max)
         {
+            key = Guid.NewGuid().ToString();
+
             this.min = min;
             this.max = max;
-            this.key = key;
         }
 
         public static implicit operator ValueRange(int x) => new(x, x);
 
         public static implicit operator int(ValueRange v) => ValueCallbackService.GetValue(v);
 
-        public static bool operator <(ValueRange v, int b) => ValueCallbackService.GetValue(v) < b;
+        public static bool operator <(ValueRange v, int b) => v < b;
 
-        public static bool operator >(ValueRange v, int b) => ValueCallbackService.GetValue(v) > b;
+        public static bool operator >(ValueRange v, int b) => v > b;
 
-        public static bool operator <=(ValueRange v, int b) => ValueCallbackService.GetValue(v) <= b;
+        public static bool operator <=(ValueRange v, int b) => v <= b;
 
-        public static bool operator >=(ValueRange v, int b) => ValueCallbackService.GetValue(v) >= b;
+        public static bool operator >=(ValueRange v, int b) => v >= b;
 
         public static ValueRange operator ++(ValueRange v) => new(v.min + 1, v.max + 1);
 
