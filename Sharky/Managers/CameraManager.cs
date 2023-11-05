@@ -38,6 +38,16 @@
             return null;
         }
 
+        public void SetCamera(Unit unit)
+        {
+            SetCamera(unit.Pos);
+        }
+
+        public void SetCamera(UnitCommander unit)
+        {
+            SetCamera(unit.UnitCalculation.Unit);
+        }
+
         public void SetCamera(Vector2 position)
         {
             SetCamera(position.ToPoint());
