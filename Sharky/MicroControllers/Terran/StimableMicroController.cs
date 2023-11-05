@@ -97,7 +97,7 @@
             return false;
         }
 
-        protected override float GetMovementSpeed(UnitCommander commander)
+        public override float GetMovementSpeed(UnitCommander commander)
         {
             if (Stiming(commander))
             {

@@ -88,8 +88,12 @@
 
             if (commander.CurrentPath == null || (int)commander.CurrentPath.EndPosition.X != (int)target.X || (int)commander.CurrentPath.EndPosition.Y != (int)target.Y || commander.CurrentPathIndex >= commander.CurrentPath.Path.Count || Vector2.DistanceSquared(commander.UnitCalculation.Position, commander.CurrentPath.Path[commander.CurrentPathIndex]) > 100)
             {
-                commander.CurrentPath = GetNearestPath(commander.UnitCalculation.Position, target.ToVector2());
-                commander.CurrentPathIndex = 0;
+                if (commander.RetreatPathFrame + 20 < frame)
+                {
+                    commander.CurrentPath = GetNearestPath(commander.UnitCalculation.Position, target.ToVector2());
+                    commander.CurrentPathIndex = 0;
+                    commander.RetreatPathFrame = frame;
+                }
             }
 
             if (commander.CurrentPath != null && commander.CurrentPathIndex < commander.CurrentPath.Path.Count - 1 && commander.CurrentPath.EndPosition.X == target.X && commander.CurrentPath.EndPosition.Y == target.Y)

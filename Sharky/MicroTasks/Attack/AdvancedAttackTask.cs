@@ -100,6 +100,24 @@
 
         public override void ClaimUnits(Dictionary<ulong, UnitCommander> commanders)
         {
+            if (MainAttackers.Any() && !MainUnits.Any())
+            {
+                foreach (var commander in commanders)
+                {
+                    if (!commander.Value.Claimed)
+                    {
+                        if (MainAttackers.Contains((UnitTypes)commander.Value.UnitCalculation.Unit.UnitType) && !commander.Value.UnitCalculation.Unit.IsHallucination)
+                        {
+                            commander.Value.Claimed = true;
+                            UnitCommanders.Add(commander.Value);
+                            commander.Value.UnitRole = UnitRole.Leader;
+                            MainUnits.Add(commander.Value);
+                            break;
+                        }
+                    }
+                }
+            }
+
             foreach (var subTask in SubTasks.Where(t => t.Value.Enabled).OrderBy(t => t.Value.Priority))
             {
                 subTask.Value.ClaimUnits(commanders);
@@ -338,7 +356,7 @@
                 else if (!DeathBallMode)
                 {
                     var attackVector = attackPoint.ToVector2();
-                    var closerSelfUnits = UnitCommanders.Where(u => attackingEnemies.Any(e => Vector2.DistanceSquared(u.UnitCalculation.Position, attackVector) > Vector2.DistanceSquared(u.UnitCalculation.Position, e.Position)));
+                    var closerSelfUnits = SupportUnits.Where(u => attackingEnemies.Any(e => Vector2.DistanceSquared(u.UnitCalculation.Position, attackVector) > Vector2.DistanceSquared(u.UnitCalculation.Position, e.Position)));
                     if (closerSelfUnits.Any())
                     {
                         actions.AddRange(DefenseArmySplitter.SplitArmy(frame, attackingEnemies, attackPoint, closerSelfUnits, defendToDeath));
@@ -562,7 +580,7 @@
             var mainUnit = mainUnits.FirstOrDefault();
             if (mainUnit != null)
             {
-                supportAttackPoint = new Point2D { X = mainUnit.UnitCalculation.Position.X, Y = mainUnit.UnitCalculation.Position.Y };
+                supportAttackPoint = mainUnit.UnitCalculation.Position.ToPoint2D();
             }
 
             if (DeathBallDefending(attackPoint))
@@ -571,7 +589,7 @@
                 actions.AddRange(MicroController.Support(supportUnits, mainUnits, supportAttackPoint, TargetingData.ForwardDefensePoint, supportAttackPoint, frame));
                 foreach (var subTask in SubTasks.Where(t => t.Value.Enabled).OrderBy(t => t.Value.Priority))
                 {
-                    actions.AddRange(subTask.Value.Support(mainUnits, attackPoint, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame));
+                    actions.AddRange(subTask.Value.Support(mainUnits, supportAttackPoint, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame));
                 }
             }
             else if (AttackData.Attacking)
@@ -582,7 +600,7 @@
                     actions.AddRange(MicroController.Support(supportUnits, mainUnits, supportAttackPoint, TargetingData.ForwardDefensePoint, supportAttackPoint, frame));
                     foreach (var subTask in SubTasks.Where(t => t.Value.Enabled).OrderBy(t => t.Value.Priority))
                     {
-                        actions.AddRange(subTask.Value.Support(mainUnits, attackPoint, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame));
+                        actions.AddRange(subTask.Value.Support(mainUnits, supportAttackPoint, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame));
                     }
                 }
                 else
@@ -669,7 +687,7 @@
 
         public IEnumerable<UnitCommander> GetAvailableCommanders()
         {
-            return SupportUnits.Concat(MainUnits);
+            return SupportUnits;
         }
 
         public override void PrintReport(int frame)
@@ -700,6 +718,15 @@
                 {
                     System.Console.WriteLine($"     [{(UnitTypes)group.Key}]={group.Count()}");
                 }
+            }
+        }
+
+        public override void DebugUnits(DebugService debugService)
+        {
+            base.DebugUnits(debugService);
+            foreach (var subTask in SubTasks)
+            {
+                subTask.Value.DebugUnits(debugService);
             }
         }
     }

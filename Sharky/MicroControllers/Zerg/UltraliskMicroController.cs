@@ -7,7 +7,7 @@
         {
         }
 
-        protected override float GetMovementSpeed(UnitCommander commander)
+        public override float GetMovementSpeed(UnitCommander commander)
         {
             var speed = commander.UnitCalculation.UnitTypeData.MovementSpeed * 1.4f;
             if (SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.ANABOLICSYNTHESIS))

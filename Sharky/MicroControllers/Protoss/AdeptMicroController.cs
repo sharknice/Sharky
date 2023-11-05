@@ -28,29 +28,6 @@
             return false;
         }
 
-        public override List<SC2Action> NavigateToPoint(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
-        {
-            List<SC2APIProtocol.Action> action = null;
-
-            var bestTarget = GetBestHarassTarget(commander, target);
-
-            if (SpecialCaseMove(commander, target, defensivePoint, null, bestTarget, Formation.Normal, frame, out action)) { return action; }
-            if (PreOffenseOrder(commander, target, defensivePoint, null, bestTarget, frame, out action)) { return action; }
-            if (AvoidTargettedOneHitKills(commander, target, defensivePoint, frame, out action)) { return action; }
-            if (OffensiveAbility(commander, target, defensivePoint, null, bestTarget, frame, out action)) { return action; }
-
-            if (WeaponReady(commander, frame))
-            {
-                if (AttackBestTargetInRange(commander, target, bestTarget, frame, out action)) { return action; }
-            }
-
-            if (AvoidAllDamage(commander, target, defensivePoint, frame, out action)) { return action; }
-
-            NavigateToTarget(commander, target, groupCenter, null, Formation.Normal, frame, out action);
-
-            return action;
-        }
-
         protected override float GetWeaponCooldown(UnitCommander commander, UnitCalculation enemy)
         {
             if (SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.ADEPTPIERCINGATTACK))

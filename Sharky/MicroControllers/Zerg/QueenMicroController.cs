@@ -89,7 +89,7 @@
             return ((unitToHeal != null && (healAnything || (unitToHeal.HealthMax - unitToHeal.Health > minMissingHealthNormal))) ? unitToHeal : null, walkToHeal);
         }
 
-        protected override float GetMovementSpeed(UnitCommander commander)
+        public override float GetMovementSpeed(UnitCommander commander)
         {
             if (commander.UnitCalculation.IsOnCreep)
             {

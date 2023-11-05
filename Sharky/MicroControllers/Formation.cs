@@ -4,6 +4,7 @@
     {
         Normal,
         Tight,
-        Loose
+        Loose,
+        Arc
     }
 }

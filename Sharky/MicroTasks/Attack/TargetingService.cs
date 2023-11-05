@@ -10,6 +10,7 @@
         int EnemyBuildingCount = 0;
 
         public bool TargetMainFirst { get; set; }
+        public bool AvoidEnemyMain { get; set; }
 
         public TargetingService(ActiveUnitData activeUnitData, MapDataService mapDataService, BaseData baseData, TargetingData targetingData)
         {
@@ -35,14 +36,34 @@
                 TargetingData.HiddenEnemyBase = false;
                 EnemyBuildingCount = currentEnemyBuildingCount;
 
-                var enemyBuilding = ActiveUnitData.EnemyUnits.Where(e => !e.Value.Unit.IsFlying && e.Value.Unit.UnitType != (uint)UnitTypes.ZERG_CREEPTUMORBURROWED && e.Value.Unit.UnitType != (uint)UnitTypes.ZERG_CREEPTUMOR && e.Value.Unit.UnitType != (uint)UnitTypes.TERRAN_KD8CHARGE && e.Value.UnitTypeData.Attributes.Contains(SC2APIProtocol.Attribute.Structure)).OrderByDescending(e => Vector2.DistanceSquared(e.Value.Position, TargetingData.EnemyArmyCenter)).FirstOrDefault().Value;
+                var ordered = ActiveUnitData.EnemyUnits.Where(e => !e.Value.Unit.IsFlying && e.Value.Unit.UnitType != (uint)UnitTypes.ZERG_CREEPTUMORBURROWED && e.Value.Unit.UnitType != (uint)UnitTypes.ZERG_CREEPTUMOR && e.Value.Unit.UnitType != (uint)UnitTypes.TERRAN_KD8CHARGE && e.Value.UnitTypeData.Attributes.Contains(SC2APIProtocol.Attribute.Structure)).OrderByDescending(e => Vector2.DistanceSquared(e.Value.Position, TargetingData.EnemyArmyCenter));
+
+                UnitCalculation enemyBuilding = null;
+                if (AvoidEnemyMain)
+                {
+                    var height = MapDataService.MapHeight(TargetingData.EnemyMainBasePoint);
+                    var vector = TargetingData.EnemyMainBasePoint.ToVector2();
+                    enemyBuilding = ordered.Where(e => height != MapDataService.MapHeight(e.Value.Position) || Vector2.DistanceSquared(vector, e.Value.Position) > 225).FirstOrDefault().Value;
+                }
+                else
+                {
+                    enemyBuilding = ordered.FirstOrDefault().Value;
+                }
+
                 if (enemyBuilding != null)
                 {
                     return new Point2D { X = enemyBuilding.Unit.Pos.X, Y = enemyBuilding.Unit.Pos.Y };
                 }
                 else
                 {
-                    attackPoint = TargetingData.EnemyMainBasePoint;
+                    if (AvoidEnemyMain)
+                    {
+                        attackPoint = BaseData.EnemyNaturalBase.Location;
+                    }
+                    else
+                    {
+                        attackPoint = TargetingData.EnemyMainBasePoint;
+                    }
                 }
             }
 
@@ -69,6 +90,22 @@
         {
             var vectors = armyUnits.Select(u => u.UnitCalculation.Position);
             return GetArmyPoint(vectors, trimRangeSquared);
+        }
+
+        public Point2D GetWalkableArmyPoint(IEnumerable<UnitCommander> armyUnits, float trimRangeSquared = 100)
+        {
+            var vectors = armyUnits.Select(u => u.UnitCalculation.Position);
+            var point = GetArmyPoint(vectors, trimRangeSquared);
+            if (MapDataService.PathWalkable(point))
+            {
+                return point;
+            }
+            var closest = armyUnits.OrderBy(c => Vector2.DistanceSquared(point.ToVector2(), c.UnitCalculation.Position)).FirstOrDefault();
+            if (closest != null)
+            {
+                return closest.UnitCalculation.Position.ToPoint2D();
+            }
+            return point;
         }
 
         public Point2D GetArmyPoint(IEnumerable<UnitCalculation> armyUnits, float trimRangeSquared = 100)

@@ -78,7 +78,7 @@
             return MoveToTarget(commander, target, frame);
         }
 
-        protected override UnitCalculation GetBestHarassTarget(UnitCommander commander, Point2D target)
+        public override UnitCalculation GetBestHarassTarget(UnitCommander commander, Point2D target)
         {
             var existingAttackOrder = commander.UnitCalculation.Unit.Orders.Where(o => o.AbilityId == (uint)Abilities.ATTACK || o.AbilityId == (uint)Abilities.ATTACK_ATTACK).FirstOrDefault();
 
@@ -140,7 +140,7 @@
             return bestAttack;
         }
 
-        protected override float GetMovementSpeed(UnitCommander commander)
+        public override float GetMovementSpeed(UnitCommander commander)
         {
             if (SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.BANSHEESPEED))
             {

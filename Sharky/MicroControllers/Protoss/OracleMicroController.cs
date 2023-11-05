@@ -3,6 +3,7 @@
     public class OracleMicroController : IndividualMicroController
     {
         protected float RevelationRange = 9;
+        protected float RevelationRangeSquared;
         protected float RevelationRadius = 6;
 
         StasisWardPlacement StasisWardPlacement;
@@ -11,6 +12,7 @@
             : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled, avoidDamageDistance)
         {
             StasisWardPlacement = defaultSharkyBot.StasisWardPlacement;
+            RevelationRangeSquared = RevelationRange * RevelationRange;
         }
 
         public override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)

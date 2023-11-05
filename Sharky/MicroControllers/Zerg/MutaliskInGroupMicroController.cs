@@ -292,7 +292,7 @@
             return commander.UnitCalculation.Unit.WeaponCooldown < 2;
         }
 
-        protected override bool AvoidPointlessDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, Formation formation, int frame, out List<SC2APIProtocol.Action> action)
+        public override bool AvoidPointlessDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, Formation formation, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
             return false;

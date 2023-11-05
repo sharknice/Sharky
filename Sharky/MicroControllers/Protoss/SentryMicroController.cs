@@ -90,5 +90,11 @@
             }
             return false;
         }
+
+        public override bool ContinueInRangeAttack(UnitCommander commander, int frame, out List<SC2Action> action)
+        {
+            action = null;
+            return false;
+        }
     }
 }

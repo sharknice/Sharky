@@ -10,7 +10,7 @@
             UnitData = unitData;
         }
 
-        protected override bool AvoidPointlessDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, Formation formation, int frame, out List<SC2Action> action)
+        public override bool AvoidPointlessDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, Formation formation, int frame, out List<SC2Action> action)
         {
             action = null;
 
@@ -67,7 +67,7 @@
             return null;
         }
 
-        protected override float GetMovementSpeed(UnitCommander commander)
+        public override float GetMovementSpeed(UnitCommander commander)
         {
             var speed = commander.UnitCalculation.UnitTypeData.MovementSpeed * 1.4f;
 

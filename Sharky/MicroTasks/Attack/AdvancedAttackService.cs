@@ -13,8 +13,13 @@
         protected TargetingService TargetingService;
         protected DebugService DebugService;
         protected MapDataService MapDataService;
+        protected SharkyOptions SharkyOptions;
 
         IEnumerable<UnitCalculation>? EnemiesNearArmy;
+
+        int TemporarilyRetreatStartFrame { get; set; }
+        float TemporarilyRetreatDuration { get; set; }
+
 
         public AdvancedAttackService(DefaultSharkyBot defaultSharkyBot, IMicroTask attackTask)
         {
@@ -27,8 +32,15 @@
             TargetingService = defaultSharkyBot.TargetingService;
             DebugService = defaultSharkyBot.DebugService;
             MapDataService = defaultSharkyBot.MapDataService;
+            SharkyOptions = defaultSharkyBot.SharkyOptions;
 
             AttackTask = attackTask;
+        }
+
+        public void TemporarilyRetreat(int frame, float seconds)
+        {
+            TemporarilyRetreatStartFrame = frame;
+            TemporarilyRetreatDuration = seconds * SharkyOptions.FramesPerSecond;
         }
 
         public bool Attack()
@@ -53,6 +65,11 @@
                 TargetingData.AttackState = AttackState.Retreat;
                 DebugService.DrawText("Retreating: no army");
                 return;
+            }
+
+            if (TemporarilyRetreatStartFrame + TemporarilyRetreatDuration > MacroData.Frame)
+            {
+                TargetingData.AttackState = AttackState.Retreat;
             }
 
             if (AttackEdgeCase())

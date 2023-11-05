@@ -164,6 +164,10 @@
             {
                 SimulatedHitpoints += 500;
             }
+            if (unit.IsHallucination)
+            {
+                SimulatedHitpoints = SimulatedHitpoints / 2f;
+            }
 
             if (sharkyUnitData.ZergTypes.Contains((UnitTypes)Unit.UnitType))
             {
@@ -180,6 +184,14 @@
             else if (Unit.UnitType == (uint)UnitTypes.ZERG_QUEEN && Unit.Energy >= 50)
             {
                 SimulatedHealPerSecond = 20;
+            }
+            else if (Unit.UnitType == (uint)UnitTypes.PROTOSS_SHIELDBATTERY && unit.BuffIds.Contains((uint)Buffs.BATTERYOVERCHARGE))
+            {
+                SimulatedHealPerSecond = 150;
+            }
+            else if (Unit.UnitType == (uint)UnitTypes.PROTOSS_SHIELDBATTERY && unit.Energy > 5)
+            {
+                SimulatedHealPerSecond = 50;
             }
             else
             {
@@ -256,6 +268,11 @@
 
         public float SimulatedDamagePerSecond(IEnumerable<SC2APIProtocol.Attribute> includedAttributes, bool air, bool ground)
         {
+            if (Unit.IsHallucination)
+            {
+                return 0;
+            }
+
             if (Unit.UnitType == (uint)UnitTypes.TERRAN_BUNKER && Unit.BuildProgress == 1) // assume 4 marines
             {
                 return 24 / 0.61f;

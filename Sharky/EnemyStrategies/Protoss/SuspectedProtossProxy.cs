@@ -18,7 +18,7 @@
             {
                 if (MapDataService.SelfVisible(BaseData.EnemyBaseLocations.FirstOrDefault().Location))
                 {
-                    if (UnitCountService.EnemyCount(UnitTypes.PROTOSS_PYLON) == 0)
+                    if (UnitCountService.EnemyCount(UnitTypes.PROTOSS_PYLON) == 0 && UnitCountService.EnemyCount(UnitTypes.PROTOSS_GATEWAY) == 0)
                     {
                         return true;
                     }

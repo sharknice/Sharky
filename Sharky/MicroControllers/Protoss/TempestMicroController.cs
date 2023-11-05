@@ -45,7 +45,7 @@
             return true;
         }
 
-        protected override Point2D GetPositionFromRange(UnitCommander commander, Point target, Point position, float range, float angleOffset = 0)
+        public override Point2D GetPositionFromRange(UnitCommander commander, Point target, Point position, float range, float angleOffset = 0)
         {
             if (range > 10 && !commander.UnitCalculation.NearbyEnemies.Any(e => e.Unit.IsFlying))
             {

@@ -284,7 +284,7 @@
             PhotonCannonManager = new PhotonCannonManager(ActiveUnitData, EnemyData);
             Managers.Add(PhotonCannonManager);
 
-            RallyPointManager = new RallyPointManager(ActiveUnitData, TargetingData, MapData, WallService);
+            RallyPointManager = new RallyPointManager(this);
             Managers.Add(RallyPointManager);
 
             OrbitalManager = new OrbitalManager(ActiveUnitData, BaseData, EnemyData, MacroData, UnitCountService, TagService, ChatService, ResourceCenterLocator, MapDataService, SharkyUnitData);
@@ -591,7 +591,9 @@
                 [nameof(FastForge)] = new FastForge(this),
                 [nameof(FastStargate)] = new FastStargate(this),
                 [nameof(SuspectedProtossProxy)] = new SuspectedProtossProxy(this),
-                [nameof(SuspectedFourGate)] = new SuspectedFourGate(this),           
+                [nameof(SuspectedFourGate)] = new SuspectedFourGate(this),
+                [nameof(PylonWallBlock)] = new PylonWallBlock(this),
+                [nameof(GasSteal)] = new GasSteal(this),
 
                 [nameof(MarineRush)] = new MarineRush(this),
                 [nameof(BunkerRush)] = new BunkerRush(this),

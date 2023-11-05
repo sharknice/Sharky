@@ -41,7 +41,7 @@
 
             foreach (var pylon in ActiveUnitData.SelfUnits.Values.Where(u => u.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && u.Unit.BuildProgress >= 1))
             {
-                if (pylon.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !e.Unit.IsFlying && !e.Unit.IsHallucination && e.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELING && e.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELINGZEALOT && e.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELINGMARINE && e.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELINGMARINESHIELD && e.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELINGZERGLING && e.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELINGZERGLINGWINGS))
+                if (pylon.NearbyEnemies.Any(e => e.FrameLastSeen == frame && e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !e.Unit.IsFlying && !e.Unit.IsHallucination && e.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELING && e.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELINGZEALOT))
                 {
                     if (pylon.TargetPriorityCalculation.GroundWinnability < 1 || !pylon.NearbyAllies.Any(a => a.UnitClassifications.Contains(UnitClassification.ArmyUnit)))
                     {
