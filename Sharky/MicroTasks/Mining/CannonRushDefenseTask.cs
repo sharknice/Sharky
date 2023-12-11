@@ -6,6 +6,7 @@
         TargetingData TargetingData;
         EnemyData EnemyData;
         MicroTaskData MicroTaskData;
+        RequirementService RequirementService;
 
         int LastClaimFrame;
 
@@ -15,8 +16,9 @@
             EnemyData = defaultSharkyBot.EnemyData;
             TargetingData = defaultSharkyBot.TargetingData;
             MicroTaskData = defaultSharkyBot.MicroTaskData;
+            RequirementService = defaultSharkyBot.RequirementService;
 
-            Priority = priority;
+           Priority = priority;
 
             UnitCommanders = new List<UnitCommander>();
             Enabled = enabled;
@@ -31,6 +33,12 @@
         public override IEnumerable<SC2APIProtocol.Action> PerformActions(int frame)
         {
             if (EnemyData.EnemyRace == SC2APIProtocol.Race.Zerg || EnemyData.EnemyRace == SC2APIProtocol.Race.Terran || TargetingData.SelfMainBasePoint == null)
+            {
+                Disable();
+                return new List<SC2APIProtocol.Action>();
+            }
+
+            if (EnemyData.SelfRace == Race.Protoss && !UnitCommanders.Any() && RequirementService.HaveCompleted(UnitTypes.PROTOSS_CYBERNETICSCORE))
             {
                 Disable();
                 return new List<SC2APIProtocol.Action>();

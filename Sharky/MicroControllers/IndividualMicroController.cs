@@ -3268,5 +3268,15 @@
 
             return false;
         }
+
+        public virtual Point2D GetAttackPosition(UnitCommander commander, UnitCalculation bestTarget, int frame)
+        {
+            return bestTarget.Position.ToPoint2D();
+        }
+
+        public virtual float GetDesiredAttackRange(UnitCommander commander, UnitCalculation bestTarget, int frame)
+        {
+            return commander.UnitCalculation.Range + commander.UnitCalculation.Unit.Radius + bestTarget.Unit.Radius;
+        }
     }
 }

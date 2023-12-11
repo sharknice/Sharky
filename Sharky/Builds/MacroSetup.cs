@@ -202,7 +202,7 @@
             macroData.DesiredDefensiveBuildingsAtNextBase = new Dictionary<UnitTypes, int>();
             macroData.DesiredDefensiveBuildingsAtEveryMineralLine = new Dictionary<UnitTypes, int>();
             macroData.DefensiveBuildingMaximumDistance = 15;
-            macroData.DefensiveBuildingMineralLineMaximumDistance = 10;
+            macroData.DefensiveBuildingMineralLineMaximumDistance = 6;
 
             if (macroData.Race == Race.Protoss)
             {

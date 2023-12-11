@@ -12,9 +12,12 @@
         MineralWalker MineralWalker;
         EnemyData EnemyData;
 
-        public bool Enabled { get; set; }
+        /// <summary>
+        /// enemies workers will not deal with in this service, because they are handled in another MicroTask.
+        /// </summary>
+        public HashSet<UnitTypes> IgnoredThreatTypes = new HashSet<UnitTypes> { UnitTypes.TERRAN_REAPER };
 
-        // TODO: run away from oracles with weapon active
+        public bool Enabled { get; set; }
 
         public MiningDefenseService(DefaultSharkyBot defaultSharkyBot, IIndividualMicroController workerMicroController)
         {
@@ -41,12 +44,12 @@
 
             foreach (var selfBase in BaseData.SelfBases)
             {
-                if (selfBase.ResourceCenter != null && ActiveUnitData.Commanders.ContainsKey(selfBase.ResourceCenter.Tag) && ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Count(e => e.Unit.UnitType != (uint)UnitTypes.TERRAN_REAPER) > 0) // reapers are handled by the ReaperMiningDefenseTask
+                if (selfBase.ResourceCenter != null && ActiveUnitData.Commanders.ContainsKey(selfBase.ResourceCenter.Tag) && ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Any(e => !IgnoredThreatTypes.Contains((UnitTypes)e.Unit.UnitType)))
                 {
-                    var flyingBuildings = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Take(25).Where(u => u.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && u.Unit.IsFlying);
+                    var flyingBuildings = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Where(u => u.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && u.Unit.IsFlying);
                     if (flyingBuildings.Any())
                     {
-                        var nearbyWorkers = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyAllies.Take(25).Where(a => a.UnitClassifications.Contains(UnitClassification.Worker));
+                        var nearbyWorkers = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyAllies.Where(a => a.UnitClassifications.Contains(UnitClassification.Worker));
                         var commanders = ActiveUnitData.Commanders.Where(c => nearbyWorkers.Any(w => w.Unit.Tag == c.Key));
                         preventBuildingLanding = true;
                         foreach (var flyingBuilding in flyingBuildings)
@@ -64,14 +67,14 @@
                         }
                     }
 
-                    if (!ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyAllies.Take(25).Any(a => a.UnitClassifications.Contains(UnitClassification.ArmyUnit)) && (ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Take(25).Any(e => e.UnitClassifications.Contains(UnitClassification.Worker) || e.Attributes.Contains(SC2APIProtocol.Attribute.Structure))))
+                    if (!ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyAllies.Any(a => a.UnitClassifications.Contains(UnitClassification.ArmyUnit)) && (ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker) || e.Attributes.Contains(SC2APIProtocol.Attribute.Structure))))
                     {
                         var enemyGroundDamage = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Take(25).Where(e => e.DamageGround).Sum(e => e.Damage);
                         var nearbyWorkers = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyAllies.Take(25).Where(a => a.UnitClassifications.Contains(UnitClassification.Worker));
                         var commanders = ActiveUnitData.Commanders.Where(c => nearbyWorkers.Any(w => w.Unit.Tag == c.Key));
                         if (!commanders.Any()) { continue; }
 
-                        if (ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyAllies.Take(25).Where(e => e.DamageGround || e.UnitClassifications.Contains(UnitClassification.Worker)).Sum(e => e.Damage) > enemyGroundDamage || BaseData.SelfBases.Count() == 1)
+                        if (ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyAllies.Where(e => e.DamageGround || e.UnitClassifications.Contains(UnitClassification.Worker)).Sum(e => e.Damage) > enemyGroundDamage || BaseData.SelfBases.Count() == 1)
                         {
                             int desiredWorkers = 0;
                             var combatUnits = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Take(25).Where(u => u.UnitClassifications.Contains(UnitClassification.ArmyUnit));
@@ -326,6 +329,18 @@
                     }
                     else if (commander.UnitCalculation.EnemiesThreateningDamage.Any() && (commander.UnitCalculation.Unit.Health < commander.UnitCalculation.Unit.HealthMax || commander.UnitCalculation.Unit.Shield < commander.UnitCalculation.Unit.ShieldMax))
                     {
+                        var openTransport = commander.UnitCalculation.NearbyAllies.FirstOrDefault(a => a.Unit.HasCargoSpaceMax && a.Unit.CargoSpaceTaken < a.Unit.CargoSpaceMax && Vector2.DistanceSquared(a.Position, commander.UnitCalculation.Position) < 25);
+                        if (openTransport != null)
+                        {
+                            var saveAction = commander.Order(frame, Abilities.SMART, targetTag: openTransport.Unit.Tag);
+                            commander.UnitRole = UnitRole.Defend;
+                            if (saveAction != null)
+                            {
+                                actions.AddRange(saveAction);
+                            }
+                            continue;
+                        }
+
                         if (commander.UnitCalculation.Unit.Health + commander.UnitCalculation.Unit.Shield <= (commander.UnitCalculation.EnemiesThreateningDamage.First().Damage * 2) || commander.UnitCalculation.UnitTypeData.MovementSpeed < commander.UnitCalculation.EnemiesThreateningDamage.First().UnitTypeData.MovementSpeed)
                         {
                             var enemy = commander.UnitCalculation.EnemiesThreateningDamage.FirstOrDefault();

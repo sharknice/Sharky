@@ -63,7 +63,7 @@
                 var healthRequired = 15;
                 if (UnitCommanders.Count(c => c.UnitRole == UnitRole.ChaseReaper) < 3)
                 {
-                    healthRequired = 25;
+                    healthRequired = 33;
                 }
                 if (EnemyReaper == null || commander.UnitCalculation.Unit.Health + commander.UnitCalculation.Unit.Shield <= healthRequired || !commander.UnitCalculation.NearbyAllies.Any(a => a.UnitClassifications.Contains(UnitClassification.ResourceCenter)))
                 {

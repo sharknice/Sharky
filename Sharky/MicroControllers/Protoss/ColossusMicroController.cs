@@ -1,6 +1,4 @@
-﻿using System.Linq;
-
-namespace Sharky.MicroControllers.Protoss
+﻿namespace Sharky.MicroControllers.Protoss
 {
     public class ColossusMicroController : IndividualMicroController
     {
@@ -18,6 +16,17 @@ namespace Sharky.MicroControllers.Protoss
             {
                 return base.DealWithSiegedTanks(commander, target, defensivePoint, frame, out action);
             }
+            if (!WeaponReady(commander, frame))
+            {
+                var attack = commander.UnitCalculation.EnemiesInRangeOfAvoid.Where(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED).OrderBy(e => Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+                if (attack != null)
+                {
+                    var avoidPoint = GetGroundAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, attack.Unit.Pos, target, defensivePoint, attack.Range + attack.Unit.Radius + commander.UnitCalculation.Unit.Radius + 5);
+                    action = commander.Order(frame, Abilities.MOVE, avoidPoint);
+                    return true;
+                }
+            }
+
             action = null;
             return false;
         }

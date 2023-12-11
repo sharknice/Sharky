@@ -46,13 +46,19 @@
 
         public virtual void Enable()
         {
+            if (Enabled) { return; }
             Enabled = true;
+            Console.WriteLine($"Enable {GetType().Name}");
         }
 
         public virtual void Disable()
         {
+            if (!Enabled) { return; }
+
+            Console.WriteLine($"Disable {GetType().Name}");
+            PrintReport(1);
             ResetClaimedUnits();
-            Enabled = false;
+            Enabled = false;         
         }
 
         public virtual void RemoveDeadUnits(List<ulong> deadUnits)

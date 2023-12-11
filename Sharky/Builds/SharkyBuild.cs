@@ -159,6 +159,8 @@
             {
                 MacroData.DesiredProductionCounts[UnitTypes.ZERG_HATCHERY] = 1;
             }
+
+            BuildOptions.StrictWorkerCount = false;
         }
 
         public virtual void EndBuild(int frame)

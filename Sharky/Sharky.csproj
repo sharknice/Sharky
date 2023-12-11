@@ -43,6 +43,9 @@
     <None Update="StaticData\opponents\Dovahkiin.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="StaticData\opponents\Phobos.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="StaticData\opponents\PerilousProtossBot.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

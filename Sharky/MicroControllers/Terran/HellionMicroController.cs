@@ -97,7 +97,7 @@
             return MoveToTarget(commander, target, frame);
         }
 
-        private Point2D GetBestAttackPosition(UnitCommander commander, IEnumerable<UnitCalculation> primaryTargets, int frame)
+        protected Point2D GetBestAttackPosition(UnitCommander commander, IEnumerable<UnitCalculation> primaryTargets, int frame)
         {
             var weapon = UnitDataService.GetWeapon(commander.UnitCalculation.Unit);
             float splashRadius = 0.15f - commander.UnitCalculation.Unit.Radius;

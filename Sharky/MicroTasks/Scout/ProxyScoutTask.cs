@@ -12,6 +12,7 @@ namespace Sharky.MicroTasks
         BuildingService BuildingService;
         IBuildingBuilder BuildingBuilder;
         IIndividualMicroController IndividualMicroController;
+        MapDataService MapDataService;
 
         bool started { get; set; }
 
@@ -32,6 +33,7 @@ namespace Sharky.MicroTasks
             MacroData = defaultSharkyBot.MacroData;
             Priority = priority;
             IndividualMicroController = individualMicroController;
+            MapDataService = defaultSharkyBot.MapDataService;
 
             UnitCommanders = new List<UnitCommander>();
             Enabled = enabled;
@@ -141,6 +143,7 @@ namespace Sharky.MicroTasks
                     {
                         commands.AddRange(action);
                     }
+                    continue;
                 }
                 else if (Vector2.DistanceSquared(new Vector2(ScoutLocations[ScoutLocationIndex].X, ScoutLocations[ScoutLocationIndex].Y), commander.UnitCalculation.Position) < 4)
                 {
@@ -152,10 +155,21 @@ namespace Sharky.MicroTasks
                 }
                 else
                 {
-                    var action = IndividualMicroController.Scout(commander, ScoutLocations[ScoutLocationIndex], TargetingData.ForwardDefensePoint, frame);
-                    if (action != null)
+                    if (commander.UnitCalculation.NearbyEnemies.Any(e => e.FrameLastSeen == frame))
                     {
-                        commands.AddRange(action);
+                        var action = IndividualMicroController.Scout(commander, ScoutLocations[ScoutLocationIndex], TargetingData.ForwardDefensePoint, frame);
+                        if (action != null)
+                        {
+                            commands.AddRange(action);
+                        }
+                    }
+                    else
+                    {
+                        var action = commander.Order(frame, Abilities.MOVE, ScoutLocations[ScoutLocationIndex]);
+                        if (action != null)
+                        {
+                            commands.AddRange(action);
+                        }
                     }
                 }
             }
@@ -175,11 +189,14 @@ namespace Sharky.MicroTasks
 
         List<Point2D> GetPointsForLocation(BaseLocation baseLocation)
         {
-            var points = new List<Point2D>();
-            points.Add(new Point2D { X = baseLocation.Location.X - 5, Y = baseLocation.Location.Y - 5 });
-            points.Add(new Point2D { X = baseLocation.Location.X - 5, Y = baseLocation.Location.Y + 5 });
-            points.Add(new Point2D { X = baseLocation.Location.X + 5, Y = baseLocation.Location.Y + 5 });
-            points.Add(new Point2D { X = baseLocation.Location.X + 5, Y = baseLocation.Location.Y - 5 });
+            var points = new List<Point2D>
+            {
+                new Point2D { X = baseLocation.Location.X - 5, Y = baseLocation.Location.Y - 5 },
+                new Point2D { X = baseLocation.Location.X - 5, Y = baseLocation.Location.Y + 5 },
+                new Point2D { X = baseLocation.Location.X + 5, Y = baseLocation.Location.Y + 5 },
+                new Point2D { X = baseLocation.Location.X + 5, Y = baseLocation.Location.Y - 5 }
+            };
+            points.RemoveAll(p => !MapDataService.PathWalkable(p));
             return points;
         }
     }

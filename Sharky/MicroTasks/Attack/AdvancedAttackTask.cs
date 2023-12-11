@@ -1,4 +1,6 @@
-﻿namespace Sharky.MicroTasks.Attack
+﻿using System.ComponentModel.Design;
+
+namespace Sharky.MicroTasks.Attack
 {
     public class AdvancedAttackTask : MicroTask, IAttackTask
     {
@@ -102,17 +104,32 @@
         {
             if (MainAttackers.Any() && !MainUnits.Any())
             {
-                foreach (var commander in commanders)
+                var possible = UnitCommanders.Where(commander => MainAttackers.Contains((UnitTypes)commander.UnitCalculation.Unit.UnitType));
+                if (AttackData.ArmyPoint != null && possible.Any())
                 {
-                    if (!commander.Value.Claimed)
+                    var best = possible.OrderBy(c => Vector2.DistanceSquared(c.UnitCalculation.Position, AttackData.ArmyPoint.ToVector2())).FirstOrDefault();
+                    foreach (var subtask in SubTasks)
                     {
-                        if (MainAttackers.Contains((UnitTypes)commander.Value.UnitCalculation.Unit.UnitType) && !commander.Value.UnitCalculation.Unit.IsHallucination)
+                        subtask.Value.StealUnit(best);
+                    }
+                    best.Claimed = true;
+                    best.UnitRole = UnitRole.Leader;
+                    MainUnits.Add(best);
+                }
+                else
+                {
+                    foreach (var commander in commanders)
+                    {
+                        if (!commander.Value.Claimed)
                         {
-                            commander.Value.Claimed = true;
-                            UnitCommanders.Add(commander.Value);
-                            commander.Value.UnitRole = UnitRole.Leader;
-                            MainUnits.Add(commander.Value);
-                            break;
+                            if (MainAttackers.Contains((UnitTypes)commander.Value.UnitCalculation.Unit.UnitType) && !commander.Value.UnitCalculation.Unit.IsHallucination)
+                            {
+                                commander.Value.Claimed = true;
+                                UnitCommanders.Add(commander.Value);
+                                commander.Value.UnitRole = UnitRole.Leader;
+                                MainUnits.Add(commander.Value);
+                                break;
+                            }
                         }
                     }
                 }

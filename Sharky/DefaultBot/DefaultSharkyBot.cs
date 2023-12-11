@@ -231,7 +231,7 @@
             MapManager = new MapManager(MapData, ActiveUnitData, SharkyOptions, SharkyUnitData, DebugService, WallDataService);
             Managers.Add(MapManager);
 
-            BaseManager = new BaseManager(SharkyUnitData, ActiveUnitData, SharkyPathFinder, UnitCountService, BaseData);
+            BaseManager = new BaseManager(SharkyUnitData, ActiveUnitData, SharkyPathFinder, UnitCountService, BaseData, MapDataService);
             Managers.Add(BaseManager);
 
             AttackPathingService = new AttackPathingService(this);
@@ -273,8 +273,8 @@
             ZergProducerSelector = new ZergProducerSelector(this);
 
             Morpher = new Morpher(ActiveUnitData, TargetingData);
-            BuildPylonService = new BuildPylonService(MacroData, BuildingBuilder, SharkyUnitData, ActiveUnitData, BaseData, TargetingData, BuildingService);
-            BuildDefenseService = new BuildDefenseService(MacroData, BuildingBuilder, SharkyUnitData, ActiveUnitData, BaseData, TargetingData, BuildOptions, BuildingService);
+            BuildPylonService = new BuildPylonService(MacroData, BuildingBuilder, SharkyUnitData, ActiveUnitData, BaseData, TargetingData, BuildingService, MapDataService);
+            BuildDefenseService = new BuildDefenseService(MacroData, BuildingBuilder, SharkyUnitData, ActiveUnitData, BaseData, TargetingData, BuildOptions, BuildingService, MapDataService);
 
             ChronoData = new ChronoData();
             NexusManager = new NexusManager(ActiveUnitData, SharkyUnitData, ChronoData, EnemyData, TagService, CameraManager);
@@ -360,6 +360,8 @@
             var battleCruiserMicroController = new BattleCruiserMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
             var ravenMicroController = new RavenMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
             var medivacMicroController = new MedivacMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
+            var widowMineMicroController = new WidowMineMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
+            var widowMineBurrowedMicroController = new WidowMineBurrowedMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
 
             var workerDefenseMicroController = new IndividualMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false, 3);
             var workerProxyScoutMicroController = new WorkerScoutMicroController(this, SharkyAdvancedPathFinder, MicroPriority.AttackForward, false);
@@ -430,7 +432,9 @@
                 { UnitTypes.TERRAN_BANSHEE, bansheeMicroController },
                 { UnitTypes.TERRAN_BATTLECRUISER, battleCruiserMicroController },
                 { UnitTypes.TERRAN_RAVEN, ravenMicroController },
-                { UnitTypes.TERRAN_MEDIVAC, medivacMicroController }
+                { UnitTypes.TERRAN_MEDIVAC, medivacMicroController },
+                { UnitTypes.TERRAN_WIDOWMINE, widowMineMicroController },
+                { UnitTypes.TERRAN_WIDOWMINEBURROWED, widowMineBurrowedMicroController }
             };
 
             MicroData = new MicroData { IndividualMicroControllers = individualMicroControllers, IndividualMicroController = individualMicroController };

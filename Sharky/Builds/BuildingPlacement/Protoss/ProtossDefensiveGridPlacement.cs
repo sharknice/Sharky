@@ -31,6 +31,10 @@
                 }
 
                 var baseHeight = MapDataService.MapHeight(powerSource.UnitCalculation.Unit.Pos);
+                if (requireSameHeight && baseHeight != MapDataService.MapHeight(target))
+                {
+                    continue;
+                }
                 var xStart = powerSource.UnitCalculation.Unit.Pos.X;
                 var yStart = powerSource.UnitCalculation.Unit.Pos.Y + 6f;
 

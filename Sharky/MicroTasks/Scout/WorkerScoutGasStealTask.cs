@@ -9,6 +9,7 @@
         public bool BlockWall { get; set; }
         public bool BlockAddons { get; set; }
         public bool RecallProbe { get; set; }
+        public bool ScoutEntireAreaBeforeAttacking { get; set; }
         public bool OnlyBlockOnce { get; set; }
         bool BlockedOnce = false;
 
@@ -37,6 +38,8 @@
         protected IIndividualMicroController IndividualMicroController;
 
         protected bool started { get; set; }
+
+        UnitCalculation Pylon { get; set; }
 
 
         public WorkerScoutGasStealTask(DefaultSharkyBot defaultSharkyBot, bool enabled, float priority, IIndividualMicroController individualMicroController)
@@ -71,6 +74,7 @@
             BlockAddons = false;
             RecallProbe = false;
             OnlyBlockOnce = false;
+            ScoutEntireAreaBeforeAttacking = true;
             IndividualMicroController = individualMicroController;
         }
 
@@ -80,7 +84,6 @@
             {
                 if (started)
                 {
-                    Disable();
                     return;
                 }
 
@@ -142,15 +145,27 @@
 
             var mainVector = TargetingData.EnemyMainBasePoint.ToVector2();
 
-            //foreach (var point in ScoutPoints)
-            //{
-            //    DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
-            //}
-
             bool disable = false;
 
             foreach (var commander in UnitCommanders)
             {
+                if (OnlyBlockOnce && BlockedOnce)
+                {
+                    var pylon = commander.UnitCalculation.NearbyAllies.FirstOrDefault(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON);
+                    if (pylon != null)
+                    {
+                        Pylon = pylon;
+                    }
+                    if (Pylon != null && Pylon.Unit.Shield < 25 && Pylon.Unit.BuildProgress > .95f)
+                    {
+                        var pylonCommander = ActiveUnitData.Commanders.Values.FirstOrDefault(c => c.UnitCalculation.Unit.Tag == Pylon.Unit.Tag);
+                        if (pylonCommander != null)
+                        {
+                            commands.AddRange(pylonCommander.Order(frame, Abilities.CANCEL));
+                        }
+                    }
+                }
+
                 if (commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.BUILD_ASSIMILATOR) || commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.BUILD_PYLON))
                 {
                     continue;
@@ -334,8 +349,11 @@
                 {
                     if (commander.UnitCalculation.Unit.Shield > 15 && commander.UnitCalculation.NearbyEnemies.Any() && (commander.UnitCalculation.NearbyAllies.Any(a => a.UnitClassifications.Contains(UnitClassification.ArmyUnit)) || (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ResourceCenter) && e.Unit.BuildProgress == 1) && commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker)))))
                     {
-                        commands.AddRange(commander.Order(frame, Abilities.ATTACK, navpoint));
-                        continue;
+                        if (!ScoutEntireAreaBeforeAttacking || ScoutPoints.All(p => MapDataService.LastFrameVisibility(p) > 100))
+                        {
+                            commands.AddRange(commander.Order(frame, Abilities.ATTACK, navpoint));
+                            continue;
+                        }
                     }
 
                     var action = commander.Order(frame, Abilities.MOVE, navpoint);
@@ -346,12 +364,40 @@
                 }
             }
 
+            if (!UnitCommanders.Any() && started)
+            {
+                disable = true;
+            }
+
             if (disable)
             {
+                if (Pylon != null)
+                {
+                    var pylonCommander = ActiveUnitData.Commanders.Values.FirstOrDefault(c => c.UnitCalculation.Unit.Tag == Pylon.Unit.Tag);
+                    if (pylonCommander != null)
+                    {
+                        commands.AddRange(pylonCommander.Order(frame, Abilities.CANCEL));
+                    }
+                }
+
                 Disable();
             }
 
             return commands;
+        }
+
+        public override void Disable()
+        {
+            if (Pylon != null)
+            {
+                var pylonCommander = ActiveUnitData.Commanders.Values.FirstOrDefault(c => c.UnitCalculation.Unit.Tag == Pylon.Unit.Tag);
+                if (pylonCommander != null)
+                {
+                    pylonCommander.UnitRole = UnitRole.Die;
+                }
+            }
+
+            base.Disable();
         }
 
         private bool TryRecallProbe(UnitCommander commander, int frame, List<SC2APIProtocol.Action> commands, bool disable)

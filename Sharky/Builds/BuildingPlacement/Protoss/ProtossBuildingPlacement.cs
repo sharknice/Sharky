@@ -75,7 +75,7 @@
             }
             else
             {
-                return FindProductionPlacement(target, size, maxDistance, mineralProximity, wallOffType, requireVision, allowBlockBase);
+                return FindProductionPlacement(target, size, maxDistance, mineralProximity, wallOffType, requireVision, allowBlockBase, requireSameHeight);
             }
         }
 
@@ -163,7 +163,7 @@
             return false;
         }
 
-        public Point2D FindProductionPlacement(Point2D target, float size, float maxDistance, float minimumMineralProximinity = 2, WallOffType wallOffType = WallOffType.None, bool requireVision = false, bool allowBlockBase = true)
+        public Point2D FindProductionPlacement(Point2D target, float size, float maxDistance, float minimumMineralProximinity = 2, WallOffType wallOffType = WallOffType.None, bool requireVision = false, bool allowBlockBase = true, bool requireSameHeight = false)
         {
             if (!allowBlockBase && size == 3)
             {
@@ -176,7 +176,7 @@
                 var selfBase = BaseData.BaseLocations.FirstOrDefault(b => (b.Location.X == target.X && b.Location.Y == target.Y) && !(b.Location.X == TargetingData.SelfMainBasePoint.X && b.Location.Y == TargetingData.SelfMainBasePoint.Y) && !(b.Location.X == TargetingData.NaturalBasePoint.X && b.Location.Y == TargetingData.NaturalBasePoint.Y));
                 if (selfBase != null)
                 {
-                    var location = ProtectNexusCannonPlacement.FindPlacement(target, UnitTypes.PROTOSS_PHOTONCANNON, 1);
+                    var location = ProtectNexusCannonPlacement.FindPlacement(target, UnitTypes.PROTOSS_PHOTONCANNON, 1, requireSameHeight: requireSameHeight);
                     if (location != null)
                     {
                         return location;
@@ -197,6 +197,8 @@
                     return gridPlacement;
                 }
             }
+
+            var startHeight = MapDataService.MapHeight(target);
 
             var targetVector = new Vector2(target.X, target.Y);
             var powerSources = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && c.UnitCalculation.Unit.BuildProgress == 1).OrderBy(c => Vector2.DistanceSquared(c.UnitCalculation.Position, targetVector));
@@ -275,17 +277,20 @@
                                 {
                                     if (!BlocksWall(vector))
                                     {
-                                        if (!LastLocations.Any(l => l.X == x && l.Y == y))
+                                        if (!requireSameHeight || MapDataService.MapHeight(point) == startHeight)
                                         {
-                                            DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
-
-                                            LastLocations.Add(point);
-                                            if (LastLocations.Count() > 5)
+                                            if (!LastLocations.Any(l => l.X == x && l.Y == y))
                                             {
-                                                LastLocations.RemoveAt(0);
-                                            }
+                                                DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
 
-                                            return point;
+                                                LastLocations.Add(point);
+                                                if (LastLocations.Count() > 5)
+                                                {
+                                                    LastLocations.RemoveAt(0);
+                                                }
+
+                                                return point;
+                                            }
                                         }
                                     }
                                 }
@@ -296,6 +301,11 @@
                     }
                     radius += 1;
                 }
+            }
+
+            if (requireSameHeight)
+            {
+                return null;
             }
             return FindProductionPlacementTryHarder(target, size, maxDistance, minimumMineralProximinity, allowBlockBase);
         }

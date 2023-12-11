@@ -40,6 +40,15 @@
                         {
                             if (worker.LastTargetTag != miningInfo.ResourceUnit.Tag && worker.LastAbility != Abilities.SMART)
                             {
+                                if (worker.UnitCalculation.Unit.BuffIds.Any(b => SharkyUnitData.CarryingResourceBuffs.Contains((Buffs)b)))
+                                {
+                                    var returnAction = worker.Order(frame, Abilities.HARVEST_RETURN);
+                                    if (returnAction != null)
+                                    {
+                                        actions.AddRange(returnAction);
+                                    }
+                                    continue;
+                                }
                                 var action = worker.Order(frame, Abilities.SMART, null, miningInfo.ResourceUnit.Tag, false);
                                 if (action != null)
                                 {
@@ -56,7 +65,7 @@
 
                             if (distanceSquared > 25 || distanceSquared < 10 || !onPath)
                             {
-                                var action = worker.Order(frame, Abilities.HARVEST_RETURN, null, 0);
+                                var action = worker.Order(frame, Abilities.HARVEST_RETURN);
                                 if (action != null)
                                 {
                                     actions.AddRange(action);

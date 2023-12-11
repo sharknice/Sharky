@@ -11,7 +11,7 @@
 
         protected bool GotWallData;
         protected WallData WallData;
-        protected Point2D ProbeSpot;
+        protected Point2D ProbeSpot { get; set; }
 
         protected bool BlockedChatSent;
 
@@ -164,8 +164,8 @@
                     PlacementPoints.Add(WallData.Block);
 
                     var angle = System.Math.Atan2(WallData.Block.Y - baseLocation.Y, baseLocation.X - WallData.Block.X);
-                    var x = System.Math.Cos(angle);
-                    var y = System.Math.Sin(angle);
+                    var x = 2 * System.Math.Cos(angle);
+                    var y = 2 * System.Math.Sin(angle);
                     ProbeSpot = new Point2D { X = WallData.Block.X + (float)x, Y = WallData.Block.Y - (float)y };
                 }
             }
