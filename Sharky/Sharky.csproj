@@ -253,13 +253,10 @@
     <None Update="StaticData\opponents\zUnkP.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="StaticData\pathing\Ancient CisternAIE.zip">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="StaticData\pathing\Bot Micro Arena.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="StaticData\pathing\Dragon ScalesAIE.zip">
+    <None Update="StaticData\pathing\Equilibrium AIE.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="StaticData\pathing\GoldenauraAIE.zip">
@@ -268,10 +265,10 @@
     <None Update="StaticData\pathing\GresvanAIE.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="StaticData\pathing\Hardwire AIE.json">
+    <None Update="StaticData\pathing\Hard Lead AIE.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="StaticData\pathing\InfestationStationAIE.zip">
+    <None Update="StaticData\pathing\Hardwire AIE.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="StaticData\pathing\Inside and OutAIE.json">
@@ -280,7 +277,10 @@
     <None Update="StaticData\pathing\MoondanceAIE.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="StaticData\pathing\Royal BloodAIE.zip">
+    <None Update="StaticData\pathing\Oceanborn AIE.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="StaticData\pathing\Site Delta AIE.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="StaticData\pathing\StargazersAIE.json">
