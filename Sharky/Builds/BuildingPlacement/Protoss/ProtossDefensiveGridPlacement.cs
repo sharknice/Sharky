@@ -6,6 +6,7 @@
         BuildingService BuildingService;
         ActiveUnitData ActiveUnitData;
         BuildOptions BuildOptions;
+        SharkyUnitData SharkyUnitData;
 
         List<Point2D> LastLocations;
 
@@ -15,6 +16,7 @@
             BuildingService = defaultSharkyBot.BuildingService;
             ActiveUnitData = defaultSharkyBot.ActiveUnitData;
             BuildOptions = defaultSharkyBot.BuildOptions;
+            SharkyUnitData = defaultSharkyBot.SharkyUnitData;
 
             LastLocations = new List<Point2D>();
         }
@@ -42,7 +44,7 @@
                 var x = xStart;
                 while (x - xStart < 7)
                 {
-                    var point = GetValidPointInColumn(x, size, baseHeight, yStart, maxDistance, targetVector, allowBlockBase);
+                    var point = GetValidPointInColumn(x, size, baseHeight, yStart, maxDistance, targetVector, allowBlockBase, ignoreResourceProximity);
                     if (closest == null || point != null && Vector2.DistanceSquared(new Vector2(point.X, point.Y), targetVector) < Vector2.DistanceSquared(new Vector2(closest.X, closest.Y), targetVector))
                     {
                         closest = point;
@@ -52,7 +54,7 @@
                 x = xStart - 1;
                 while (xStart - x < 7)
                 {
-                    var point = GetValidPointInColumn(x, size, baseHeight, yStart, maxDistance, targetVector, allowBlockBase);
+                    var point = GetValidPointInColumn(x, size, baseHeight, yStart, maxDistance, targetVector, allowBlockBase, ignoreResourceProximity);
                     if (closest == null || point != null && Vector2.DistanceSquared(new Vector2(point.X, point.Y), targetVector) < Vector2.DistanceSquared(new Vector2(closest.X, closest.Y), targetVector))
                     {
                         closest = point;
@@ -74,28 +76,28 @@
             return null;
         }
 
-        Point2D GetValidPointInColumn(float x, float size, int baseHeight, float yStart, float maxDistance, Vector2 target, bool allowBlockBase)
+        Point2D GetValidPointInColumn(float x, float size, int baseHeight, float yStart, float maxDistance, Vector2 target, bool allowBlockBase, bool ignoreResourceProximity)
         {
             Point2D closest = null;
             var y = yStart;
             while (y - yStart < 7)
             {
-                var point = GetValidPoint(x, y, size, baseHeight, maxDistance, target, allowBlockBase);
+                var point = GetValidPoint(x, y, size, baseHeight, maxDistance, target, allowBlockBase, ignoreResourceProximity);
                 if (closest == null || point != null && Vector2.DistanceSquared(new Vector2(point.X, point.Y), target) < Vector2.DistanceSquared(new Vector2(closest.X, closest.Y), target))
                 {
                     closest = point;
                 }
-                var point2 = GetValidPoint(x + 3, y + 2, size, baseHeight, maxDistance, target, allowBlockBase);
+                var point2 = GetValidPoint(x + 3, y + 2, size, baseHeight, maxDistance, target, allowBlockBase, ignoreResourceProximity);
                 if (closest == null || point2 != null && Vector2.DistanceSquared(new Vector2(point2.X, point2.Y), target) < Vector2.DistanceSquared(new Vector2(closest.X, closest.Y), target))
                 {
                     closest = point2;
                 }
-                var point3 = GetValidPoint(x + 1, y + 5, size, baseHeight, maxDistance, target, allowBlockBase);
+                var point3 = GetValidPoint(x + 1, y + 5, size, baseHeight, maxDistance, target, allowBlockBase, ignoreResourceProximity);
                 if (closest == null || point3 != null && Vector2.DistanceSquared(new Vector2(point3.X, point3.Y), target) < Vector2.DistanceSquared(new Vector2(closest.X, closest.Y), target))
                 {
                     closest = point3;
                 }
-                var point4 = GetValidPoint(x - 2, y + 4, size, baseHeight, maxDistance, target, allowBlockBase);
+                var point4 = GetValidPoint(x - 2, y + 4, size, baseHeight, maxDistance, target, allowBlockBase, ignoreResourceProximity);
                 if (closest == null || point4 != null && Vector2.DistanceSquared(new Vector2(point4.X, point4.Y), target) < Vector2.DistanceSquared(new Vector2(closest.X, closest.Y), target))
                 {
                     closest = point4;
@@ -105,22 +107,22 @@
             y = yStart - 1;
             while (yStart - y < 7)
             {
-                var point = GetValidPoint(x, y, size, baseHeight, maxDistance, target, allowBlockBase);
+                var point = GetValidPoint(x, y, size, baseHeight, maxDistance, target, allowBlockBase, ignoreResourceProximity);
                 if (closest == null || point != null && Vector2.DistanceSquared(new Vector2(point.X, point.Y), target) < Vector2.DistanceSquared(new Vector2(closest.X, closest.Y), target))
                 {
                     closest = point;
                 }
-                var point2 = GetValidPoint(x + 3, y + 2, size, baseHeight, maxDistance, target, allowBlockBase);
+                var point2 = GetValidPoint(x + 3, y + 2, size, baseHeight, maxDistance, target, allowBlockBase, ignoreResourceProximity);
                 if (closest == null || point2 != null && Vector2.DistanceSquared(new Vector2(point2.X, point2.Y), target) < Vector2.DistanceSquared(new Vector2(closest.X, closest.Y), target))
                 {
                     closest = point2;
                 }
-                var point3 = GetValidPoint(x + 1, y + 5, size, baseHeight, maxDistance, target, allowBlockBase);
+                var point3 = GetValidPoint(x + 1, y + 5, size, baseHeight, maxDistance, target, allowBlockBase, ignoreResourceProximity);
                 if (closest == null || point3 != null && Vector2.DistanceSquared(new Vector2(point3.X, point3.Y), target) < Vector2.DistanceSquared(new Vector2(closest.X, closest.Y), target))
                 {
                     closest = point3;
                 }
-                var point4 = GetValidPoint(x - 2, y + 4, size, baseHeight, maxDistance, target, allowBlockBase);
+                var point4 = GetValidPoint(x - 2, y + 4, size, baseHeight, maxDistance, target, allowBlockBase, ignoreResourceProximity);
                 if (closest == null || point4 != null && Vector2.DistanceSquared(new Vector2(point4.X, point4.Y), target) < Vector2.DistanceSquared(new Vector2(closest.X, closest.Y), target))
                 {
                     closest = point4;
@@ -130,12 +132,15 @@
             return closest;
         }
 
-        Point2D GetValidPoint(float x, float y, float size, int baseHeight, float maxDistance, Vector2 target, bool allowBlockBase)
+        Point2D GetValidPoint(float x, float y, float size, int baseHeight, float maxDistance, Vector2 target, bool allowBlockBase, bool ignoreResourceProximity)
         {
             if (LastLocations.Any(l => l.X == x && l.Y == y))
             {
                 return null;
             }
+
+            var mineralProximity = 2;
+            if (ignoreResourceProximity) { mineralProximity = 0; };
 
             var vector = new Vector2(x, y);
             if (x >= 0 && y >= 0 && x < MapDataService.MapData.MapWidth && y < MapDataService.MapData.MapHeight &&
@@ -162,6 +167,20 @@
                 if (BuildingService.InRangeOfEnemy(x, y, size))
                 {
                     return null;
+                }
+
+                if (mineralProximity > 0)
+                {
+                    var mineralFields = ActiveUnitData.NeutralUnits.Where(u => SharkyUnitData.MineralFieldTypes.Contains((UnitTypes)u.Value.Unit.UnitType));
+                    var gasFields = ActiveUnitData.NeutralUnits.Where(u => SharkyUnitData.GasGeyserTypes.Contains((UnitTypes)u.Value.Unit.UnitType));
+                    var squared = (.5f + mineralProximity + (size / 2f)) * (.5f + mineralProximity + (size / 2f));
+                    var gasSquared = (2.5f + mineralProximity + (size / 2f)) * (2.5f + mineralProximity + (size / 2f));
+                    var clashes = mineralFields.Where(u => Vector2.DistanceSquared(u.Value.Position, vector) < squared);
+                    var gasClashes = gasFields.Where(u => Vector2.DistanceSquared(u.Value.Position, vector) < gasSquared);
+                    if (clashes.Any() || gasClashes.Any())
+                    {
+                        return null;
+                    }
                 }
 
                 if (ActiveUnitData.Commanders.Values.Any(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && c.UnitCalculation.Unit.BuildProgress == 1 && Vector2.DistanceSquared(c.UnitCalculation.Position, vector) < 42.25))

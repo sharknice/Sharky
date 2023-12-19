@@ -44,6 +44,10 @@
                 {
                     weapon.Range = 8;
                 }
+                else if (unitType == UnitTypes.ZERG_HYDRALISK && MacroData.Frame > SharkyOptions.FramesPerSecond * 10 * 60)
+                {
+                    weapon.Range = 7;
+                }
                 else if (unitType == UnitTypes.TERRAN_PLANETARYFORTRESS && MacroData.Frame > SharkyOptions.FramesPerSecond * 10 * 60)
                 {
                     weapon.Range = 7;

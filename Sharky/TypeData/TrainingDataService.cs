@@ -10,7 +10,7 @@
                 { UnitTypes.TERRAN_BARRACKSREACTOR, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.TERRAN_BARRACKS }, Minerals = 50, Gas = 50, Ability = Abilities.BUILD_REACTOR_BARRACKS, IsAddOn = true } },
 
                 { UnitTypes.PROTOSS_PROBE, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_NEXUS }, Minerals = 50, Food = 1, Ability = Abilities.TRAIN_PROBE } },
-                { UnitTypes.PROTOSS_MOTHERSHIP, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_NEXUS }, Minerals = 400, Gas = 400, Food = 8, Ability = Abilities.TRAIN_MOTHERSHIP } },
+                { UnitTypes.PROTOSS_MOTHERSHIP, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_NEXUS }, Minerals = 300, Gas = 300, Food = 6, Ability = Abilities.TRAIN_MOTHERSHIP } },
                 { UnitTypes.PROTOSS_ZEALOT, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_GATEWAY, UnitTypes.PROTOSS_WARPGATE }, Minerals = 100, Food = 2, Ability = Abilities.TRAIN_ZEALOT, WarpInAbility = Abilities.TRAINWARP_ZEALOT } },
                 { UnitTypes.PROTOSS_SENTRY, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_GATEWAY, UnitTypes.PROTOSS_WARPGATE }, Minerals = 50, Gas = 100, Food = 2, Ability = Abilities.TRAIN_SENTRY, WarpInAbility = Abilities.TRAINWARP_SENTRY } },
                 { UnitTypes.PROTOSS_STALKER, new TrainingTypeData { ProducingUnits = new HashSet<UnitTypes> { UnitTypes.PROTOSS_GATEWAY, UnitTypes.PROTOSS_WARPGATE }, Minerals = 125, Gas = 50, Food = 2, Ability = Abilities.TRAIN_STALKER, WarpInAbility = Abilities.TRAINWARP_STALKER } },

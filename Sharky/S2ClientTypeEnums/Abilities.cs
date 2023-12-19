@@ -497,6 +497,9 @@
         /// <summary>
         /// shows up on units that were ordered to morph into an archon
         /// </summary>
-        MORPH_ARCHON2 = 1767
+        MORPH_ARCHON2 = 1767,
+        MOTHERSHIPMASSRECALL = 2368,
+        MOTHERSHIPCLOAK = 4439
+
     }
 }

@@ -438,21 +438,24 @@
             var vectors = baseLocation.MineralFields.Select(m => new Vector2(m.Pos.X, m.Pos.Y));
             baseLocation.MineralLineLocation = new Point2D { X = vectors.Average(v => v.X), Y = vectors.Average(v => v.Y) };
 
+            var distance = 6f;
+
             var angle = Math.Atan2(baseLocation.Location.Y - baseLocation.MineralLineLocation.Y, baseLocation.MineralLineLocation.X - baseLocation.Location.X);
-            baseLocation.MineralLineBuildingLocation = new Point2D { X = baseLocation.MineralLineLocation.X + (float)(3 * Math.Cos(angle)), Y = baseLocation.MineralLineLocation.Y - (float)(3 * Math.Sin(angle)) };
-            baseLocation.BehindMineralLineLocation = new Point2D { X = baseLocation.MineralLineLocation.X + (float)(3 * Math.Cos(angle)), Y = baseLocation.MineralLineLocation.Y - (float)(3 * Math.Sin(angle)) };
             var height = MapDataService.MapHeight(baseLocation.Location);
-            if (MapDataService.MapHeight(baseLocation.MineralLineBuildingLocation) != height)
+
+            baseLocation.MiddleMineralLocation = new Point2D { X = baseLocation.MineralLineLocation.X + (float)(3 * Math.Cos(angle)), Y = baseLocation.MineralLineLocation.Y - (float)(3 * Math.Sin(angle)) };
+
+            while (distance > 0)
             {
-                baseLocation.MineralLineBuildingLocation = new Point2D { X = baseLocation.MineralLineLocation.X + (float)(2 * Math.Cos(angle)), Y = baseLocation.MineralLineLocation.Y - (float)(2 * Math.Sin(angle)) };
-                baseLocation.BehindMineralLineLocation = new Point2D { X = baseLocation.MineralLineLocation.X + (float)(2 * Math.Cos(angle)), Y = baseLocation.MineralLineLocation.Y - (float)(2 * Math.Sin(angle)) };
+                baseLocation.MineralLineBuildingLocation = new Point2D { X = baseLocation.MineralLineLocation.X + (float)(distance * Math.Cos(angle)), Y = baseLocation.MineralLineLocation.Y - (float)(distance * Math.Sin(angle)) };
+                baseLocation.BehindMineralLineLocation = new Point2D { X = baseLocation.MineralLineLocation.X + (float)(distance * Math.Cos(angle)), Y = baseLocation.MineralLineLocation.Y - (float)(distance * Math.Sin(angle)) };
+                if (MapDataService.MapHeight(baseLocation.MineralLineBuildingLocation) == height)
+                {
+                    break;
+                }
+                distance--;
             }
-            baseLocation.MiddleMineralLocation = new Point2D { X = baseLocation.MineralLineLocation.X + (float)(1 * Math.Cos(angle)), Y = baseLocation.MineralLineLocation.Y - (float)(1 * Math.Sin(angle)) };
-            if (MapDataService.MapHeight(baseLocation.MineralLineBuildingLocation) != height)
-            {
-                baseLocation.MineralLineBuildingLocation = baseLocation.MiddleMineralLocation;
-                baseLocation.BehindMineralLineLocation = baseLocation.MiddleMineralLocation;
-            }
+            
         }
 
         void DetermineFinalLocation(BaseLocation baseLocation, List<Unit> gasses)

@@ -40,6 +40,12 @@
         {
             action = null;
 
+            if (Cloak(commander, frame, out action))
+            {
+                TagService.TagAbility("mothershipcloak");
+                return true;
+            }
+
             if (TimeWarp(commander, frame, out action))
             {
                 TagService.TagAbility("timewarp");
@@ -48,6 +54,30 @@
 
             if (SupportArmy(commander, target, defensivePoint, groupCenter, frame, out action))
             {
+                return true;
+            }
+
+            return false;
+        }
+
+        protected bool Cloak(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
+
+            if (!commander.AbilityOffCooldown(Abilities.MOTHERSHIPCLOAK, frame, SharkyOptions.FramesPerSecond, SharkyUnitData))
+            {
+                return false;
+            }
+
+            if (MapDataService.InEnemyDetection(commander.UnitCalculation.Unit.Pos))
+            {
+                return false;
+            }
+
+            if (commander.UnitCalculation.NearbyAllies.Any(a => a.EnemiesInRangeOf.Any() && Vector2.DistanceSquared(a.Position, commander.UnitCalculation.Position) < 36))
+            {
+                CameraManager.SetCamera(commander.UnitCalculation.Position);
+                action = commander.Order(frame, Abilities.MOTHERSHIPCLOAK);
                 return true;
             }
 
@@ -63,7 +93,12 @@
                 return true;
             }
 
-            if (commander.UnitCalculation.Unit.Energy < 100 || !commander.AbilityOffCooldown(Abilities.EFFECT_TIMEWARP, frame, SharkyOptions.FramesPerSecond, SharkyUnitData))
+            if (commander.LastAbility == Abilities.EFFECT_TIMEWARP && frame - 5 > commander.LastOrderFrame)
+            {
+                return true;
+            }
+
+            if (!commander.AbilityOffCooldown(Abilities.EFFECT_TIMEWARP, frame, SharkyOptions.FramesPerSecond, SharkyUnitData))
             {
                 return false;
             }
@@ -107,7 +142,7 @@
             {
                 if (location.Value < 50)
                 {
-                    return null;
+                    continue;
                 }
 
                 var placement = new Point2D { X = location.Key.X, Y = location.Key.Y };
