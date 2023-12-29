@@ -8,7 +8,7 @@
         EnemyData EnemyData;
         TagService TagService;
         CameraManager CameraManager;
-        float OverchargeRangeSquared = 100;
+        float OverchargeRangeSquared = 144;
         float RestoreRangeSquared = 36;
 
         public NexusManager(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, ChronoData chronoData, EnemyData enemyData, TagService tagService, CameraManager cameraManager)

@@ -292,6 +292,9 @@
     <None Update="StaticData\wall\partial\blood.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="StaticData\wall\partial\equilibrium.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="StaticData\wall\partial\infestation.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
