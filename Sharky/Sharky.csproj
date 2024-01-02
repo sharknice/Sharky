@@ -292,6 +292,12 @@
     <None Update="StaticData\wall\partial\blood.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="StaticData\wall\partial\sitedelta.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="StaticData\wall\partial\oceanborn.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="StaticData\wall\partial\hardlead.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

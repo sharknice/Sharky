@@ -341,6 +341,17 @@
 
                 var points = ScoutPoints.Where(p => Vector2.DistanceSquared(p.ToVector2(), commander.UnitCalculation.Position) < 36 || Vector2.DistanceSquared(p.ToVector2(), mainVector) < 36).OrderBy(p => MapDataService.LastFrameAlliesTouched(p)).ThenBy(p => Vector2.DistanceSquared(p.ToVector2(), mainVector)).ThenBy(p => Vector2.DistanceSquared(commander.UnitCalculation.Position, p.ToVector2()));
                 var navpoint = points.FirstOrDefault(p => !MapDataService.PathBlocked(p.ToVector2()));
+                if (EnemyData.EnemyRace == Race.Zerg)
+                {
+                    var baseLocation = BaseData.EnemyBaseLocations.FirstOrDefault();
+                    if (baseLocation != null)
+                    {
+                        if (MapDataService.LastFrameAlliesTouched(baseLocation.BehindMineralLineLocation) < 1)
+                        {
+                            navpoint = baseLocation.BehindMineralLineLocation;
+                        }
+                    }
+                }
                 if (navpoint == null)
                 {
                     navpoint = ScoutPoints.OrderBy(p => MapDataService.LastFrameAlliesTouched(p)).ThenBy(p => Vector2.DistanceSquared(p.ToVector2(), mainVector)).ThenBy(p => Vector2.DistanceSquared(commander.UnitCalculation.Position, p.ToVector2())).FirstOrDefault();
