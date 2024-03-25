@@ -16,6 +16,7 @@
 
         private List<PathData> LoadGeneratedMapPathData(string mapName)
         {
+            var simplifiedName = mapName.ToLower().Replace(" ", "");
             string[] folders = new string[]
             {
                 GetCustomStaticPathingDataFolder(),
@@ -38,6 +39,23 @@
                 if (File.Exists(fileName))
                 {
                     return LoadPathDataZip(fileName);
+                }
+
+                foreach (var file in Directory.GetFiles(folder))
+                {
+                    var simplifiedFileName = FilePath.GetFileName(file).ToLower().Replace(" ", "");
+                    if (simplifiedName == simplifiedFileName)
+                    {
+                        return LoadPathDataJson(file);
+                    }
+                    if (simplifiedName + ".json" == simplifiedFileName)
+                    {
+                        return LoadPathDataJson(file);
+                    }
+                    if (simplifiedName + ".zip" == simplifiedFileName)
+                    {
+                        return LoadPathDataZip(file);
+                    }
                 }
             }
             return null;

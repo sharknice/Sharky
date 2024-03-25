@@ -93,6 +93,14 @@
                 BaseData.BaseLocations.RemoveAll(b => b.Location.X == 72.5f && b.Location.Y == 14.5f); // unreachable base unless rocks are destroyed
             }
 
+            var index = 0;
+            while (index < BaseData.BaseLocations.Count)
+            {
+                var vector = BaseData.BaseLocations[index].Location.ToVector2();
+                BaseData.BaseLocations.RemoveAll(b => Vector2.Distance(b.Location.ToVector2(), vector) < 9 && Vector2.Distance(b.Location.ToVector2(), vector) > 0);
+                index++;
+            }
+
             var startingUnit = observation.Observation.RawData.Units.FirstOrDefault(u => u.Alliance == Alliance.Self && SharkyUnitData.ResourceCenterTypes.Contains((UnitTypes)u.UnitType));
             var enemystartingLocation = gameInfo.StartRaw.StartLocations.LastOrDefault();
 

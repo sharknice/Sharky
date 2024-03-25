@@ -141,6 +141,10 @@
             var x = offsetDistance * Math.Cos(angle);
             var y = offsetDistance * Math.Sin(angle);
             var location = new Point2D { X = baseLocation.X + (float)x, Y = baseLocation.Y - (float)y };
+            if (MapDataService.MapData.MapName.ToLower().Contains("delta"))
+            {
+                location = orderedLocations.Take(proxyBase).Last().BehindMineralLineLocation;
+            }
             if (MapDataService.PathWalkable(location))
             {
                 return location;

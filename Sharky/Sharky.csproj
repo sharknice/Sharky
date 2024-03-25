@@ -250,6 +250,12 @@
     <None Update="StaticData\opponents\Zoe.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="StaticData\opponents\EPNRoach.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="StaticData\opponents\Neonka.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="StaticData\opponents\zUnkP.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
