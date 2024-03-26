@@ -85,20 +85,30 @@
             foreach (var location in BaseData.BaseLocations)
             {
                 DetermineFinalLocation(location, gasses);
-                SetMineralLineLocation(location);
-            }
-
-            if (gameInfo.MapName.ToLower().Contains("blackburn"))
-            {
-                BaseData.BaseLocations.RemoveAll(b => b.Location.X == 72.5f && b.Location.Y == 14.5f); // unreachable base unless rocks are destroyed
             }
 
             var index = 0;
             while (index < BaseData.BaseLocations.Count)
             {
                 var vector = BaseData.BaseLocations[index].Location.ToVector2();
+                var sameBases = BaseData.BaseLocations.Where(b => Vector2.Distance(b.Location.ToVector2(), vector) < 9 && Vector2.Distance(b.Location.ToVector2(), vector) > 0);
+                foreach (var sameBase in sameBases)
+                {
+                    BaseData.BaseLocations[index].MineralFields.AddRange(sameBase.MineralFields);
+                    BaseData.BaseLocations[index].VespeneGeysers.AddRange(sameBase.VespeneGeysers);
+                }
                 BaseData.BaseLocations.RemoveAll(b => Vector2.Distance(b.Location.ToVector2(), vector) < 9 && Vector2.Distance(b.Location.ToVector2(), vector) > 0);
                 index++;
+            }
+
+            foreach (var location in BaseData.BaseLocations)
+            {
+                SetMineralLineLocation(location);
+            }
+
+            if (gameInfo.MapName.ToLower().Contains("blackburn"))
+            {
+                BaseData.BaseLocations.RemoveAll(b => b.Location.X == 72.5f && b.Location.Y == 14.5f); // unreachable base unless rocks are destroyed
             }
 
             var startingUnit = observation.Observation.RawData.Units.FirstOrDefault(u => u.Alliance == Alliance.Self && SharkyUnitData.ResourceCenterTypes.Contains((UnitTypes)u.UnitType));

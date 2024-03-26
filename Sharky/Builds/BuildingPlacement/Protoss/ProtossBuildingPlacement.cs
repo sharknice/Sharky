@@ -116,6 +116,9 @@
                 {
                     var point = new Point2D { X = x + (float)(radius * Math.Cos(angle)), Y = y + (float)(radius * Math.Sin(angle)) };
 
+                    point.X = (float)Math.Round(point.X * 2, MidpointRounding.AwayFromZero) / 2;
+                    point.Y = (float)Math.Round(point.Y * 2, MidpointRounding.AwayFromZero) / 2;
+
                     if (PointOk(point, minimumMineralProximinity, reference, requireSameHeight, allowBlockBase, maxDistance))
                     {
                         return point;

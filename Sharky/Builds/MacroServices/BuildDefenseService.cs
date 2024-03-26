@@ -1,4 +1,6 @@
-﻿namespace Sharky.Builds.MacroServices
+﻿using Sharky.Builds.BuildingPlacement;
+
+namespace Sharky.Builds.MacroServices
 {
     public class BuildDefenseService
     {
@@ -11,10 +13,11 @@
         BuildOptions BuildOptions;
         BuildingService BuildingService;
         MapDataService MapDataService;
+        WallService WallService;
 
         int defensivePointLastFailFrame;
 
-        public BuildDefenseService(MacroData macroData, IBuildingBuilder buildingBuilder, SharkyUnitData sharkyUnitData, ActiveUnitData activeUnitData, BaseData baseData, TargetingData targetingData, BuildOptions buildOptions, BuildingService buildingService, MapDataService mapDataService)
+        public BuildDefenseService(MacroData macroData, IBuildingBuilder buildingBuilder, SharkyUnitData sharkyUnitData, ActiveUnitData activeUnitData, BaseData baseData, TargetingData targetingData, BuildOptions buildOptions, BuildingService buildingService, MapDataService mapDataService, WallService wallService)
         {
             MacroData = macroData;
             BuildingBuilder = buildingBuilder;
@@ -25,8 +28,10 @@
             BuildOptions = buildOptions;
             BuildingService = buildingService;
             MapDataService = mapDataService;
+            WallService = wallService;
 
             defensivePointLastFailFrame = 0;
+            WallService = wallService;
         }
 
         public List<SC2Action> BuildDefensiveBuildings()
@@ -62,7 +67,10 @@
                     if (unit.Value > 0)
                     {
                         var unitData = SharkyUnitData.BuildingData[unit.Key];
-                        if (ActiveUnitData.SelfUnits.Count(u => u.Value.Unit.UnitType == (uint)unit.Key && Vector2.DistanceSquared(u.Value.Position, new Vector2(TargetingData.ForwardDefensePoint.X, TargetingData.ForwardDefensePoint.Y)) < MacroData.DefensiveBuildingMaximumDistance * MacroData.DefensiveBuildingMaximumDistance && MapDataService.MapHeight(u.Value.Position) == height) + ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability)) < unit.Value)
+                        var matchedBuildings = ActiveUnitData.SelfUnits.Where(u => u.Value.Unit.UnitType == (uint)unit.Key && Vector2.DistanceSquared(u.Value.Position, new Vector2(TargetingData.ForwardDefensePoint.X, TargetingData.ForwardDefensePoint.Y)) < MacroData.DefensiveBuildingMaximumDistance * MacroData.DefensiveBuildingMaximumDistance && MapDataService.MapHeight(u.Value.Position) == height);
+                        int builtCount = GetBuildingCount(matchedBuildings, unit.Key);
+
+                        if (builtCount + ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability)) < unit.Value)
                         {
                             var command = BuildingBuilder.BuildBuilding(MacroData, unit.Key, unitData, TargetingData.ForwardDefensePoint, false, MacroData.DefensiveBuildingMaximumDistance, wallOffType: BuildOptions.WallOffType, requireSameHeight: true);
                             if (command != null)
@@ -80,6 +88,60 @@
             }
 
             return commands;
+        }
+
+        private int GetBuildingCount(IEnumerable<KeyValuePair<ulong, UnitCalculation>> matchedBuildings, UnitTypes unitType)
+        {
+            var count = matchedBuildings.Count();
+            if (BuildOptions.WallOffType == WallOffType.None || MapDataService.MapData.WallData == null) { return count; }
+
+            var baseLocation = WallService.GetBaseLocation();
+            if (baseLocation == null) { return count; }
+
+            WallData wallData = null;
+            if (BuildOptions.WallOffType == WallOffType.Partial)
+            {
+                wallData = MapDataService.MapData.WallData.FirstOrDefault(b => b.BasePosition.X == baseLocation.X && b.BasePosition.Y == baseLocation.Y);
+            }
+            else if (BuildOptions.WallOffType == WallOffType.Terran)
+            {
+                wallData = MapDataService.MapData.WallData.FirstOrDefault(b => b.BasePosition.X == baseLocation.X && b.BasePosition.Y == baseLocation.Y);
+                if (wallData == null)
+                {
+                    var firstBase = BaseData.SelfBases.FirstOrDefault();
+                    if (firstBase != null)
+                    {
+                        wallData = MapDataService.MapData.WallData.FirstOrDefault(b => b.BasePosition.X == firstBase.Location.X && b.BasePosition.Y == firstBase.Location.Y);
+                    }
+                }
+            }
+
+            if (wallData == null) { return count; }
+
+            var otherBuildings = ActiveUnitData.SelfUnits.Values.Where(c => c.Unit.UnitType == (uint)unitType && !matchedBuildings.Any(m => m.Value.Unit.Tag == c.Unit.Tag));
+            if (unitType == UnitTypes.TERRAN_BUNKER)
+            {
+                foreach (var spot in wallData.Bunkers)
+                {
+                    if (otherBuildings.Any(b => b.Unit.Pos.X == spot.X && b.Unit.Pos.Y == spot.Y))
+                    {
+                        count++;
+                    }
+                }
+            }
+            else
+            {
+                foreach (var spot in wallData.WallSegments)
+                {
+                    if (otherBuildings.Any(b => b.Unit.Pos.X == spot.Position.X && b.Unit.Pos.Y == spot.Position.Y))
+                    {
+                        count++;
+                    }
+                }
+            }
+            
+
+            return count;
         }
 
         public List<SC2Action> BuildDefensiveBuildingsAtEveryBase()

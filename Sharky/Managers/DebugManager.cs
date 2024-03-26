@@ -94,12 +94,6 @@
                     DebugService.DebugCreep();
                 }
 
-                match = Regex.Match(chatReceived.Message.ToLower(), "camera");
-                if (match.Success)
-                {
-                    SharkyOptions.ControlCamera = !SharkyOptions.ControlCamera;
-                }
-
                 match = Regex.Match(chatReceived.Message.ToLower(), "spawn enemy wall");
                 if (match.Success)
                 {
@@ -224,6 +218,12 @@
                     var y = float.Parse(match.Groups[2].Value);
                     DebugService.SetCamera(new Point { X = x, Y = y, Z = camera.Z });
                     return;
+                }
+
+                match = Regex.Match(chatReceived.Message.ToLower(), "camera");
+                if (match.Success)
+                {
+                    SharkyOptions.ControlCamera = !SharkyOptions.ControlCamera;
                 }
 
                 match = Regex.Match(chatReceived.Message.ToLower(), "kill friendly (.*)");

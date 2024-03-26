@@ -69,7 +69,7 @@
                 return false;
             }
 
-            if (MapDataService.InEnemyDetection(commander.UnitCalculation.Unit.Pos))
+            if (commander.UnitCalculation.Unit.Shield > 50 && MapDataService.InEnemyDetection(commander.UnitCalculation.Unit.Pos))
             {
                 return false;
             }
