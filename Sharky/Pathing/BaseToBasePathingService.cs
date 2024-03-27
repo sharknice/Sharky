@@ -41,20 +41,23 @@
                     return LoadPathDataZip(fileName);
                 }
 
-                foreach (var file in Directory.GetFiles(folder))
+                if (Directory.Exists(folder))
                 {
-                    var simplifiedFileName = FilePath.GetFileName(file).ToLower().Replace(" ", "");
-                    if (simplifiedName == simplifiedFileName)
+                    foreach (var file in Directory.GetFiles(folder))
                     {
-                        return LoadPathDataJson(file);
-                    }
-                    if (simplifiedName + ".json" == simplifiedFileName)
-                    {
-                        return LoadPathDataJson(file);
-                    }
-                    if (simplifiedName + ".zip" == simplifiedFileName)
-                    {
-                        return LoadPathDataZip(file);
+                        var simplifiedFileName = FilePath.GetFileName(file).ToLower().Replace(" ", "");
+                        if (simplifiedName == simplifiedFileName)
+                        {
+                            return LoadPathDataJson(file);
+                        }
+                        if (simplifiedName + ".json" == simplifiedFileName)
+                        {
+                            return LoadPathDataJson(file);
+                        }
+                        if (simplifiedName + ".zip" == simplifiedFileName)
+                        {
+                            return LoadPathDataZip(file);
+                        }
                     }
                 }
             }
