@@ -116,7 +116,7 @@
             RemoveExpiredFeedbacks(frame);
 
             var vector = commander.UnitCalculation.Position;
-            var enemiesInRange = commander.UnitCalculation.NearbyEnemies.Where(e => e.Unit.Energy > 1 && e.FrameLastSeen == frame && !FeedBacks.ContainsKey(e.Unit.Tag) && Vector2.DistanceSquared(e.Position, vector) < FeedbackRangeSquared).OrderByDescending(e => e.Unit.Energy).ThenBy(e => Vector2.DistanceSquared(e.Position, vector));
+            var enemiesInRange = commander.UnitCalculation.NearbyEnemies.Where(e => e.Unit.Energy > 1 && !e.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && e.FrameLastSeen == frame && !FeedBacks.ContainsKey(e.Unit.Tag) && Vector2.DistanceSquared(e.Position, vector) < FeedbackRangeSquared).OrderByDescending(e => e.Unit.Energy).ThenBy(e => Vector2.DistanceSquared(e.Position, vector));
 
             var oneShotKill = enemiesInRange.Where(e => e.Unit.Energy * .5 > e.Unit.Health + e.Unit.Shield).FirstOrDefault();
             if (oneShotKill != null)

@@ -6,6 +6,7 @@
         SharkyUnitData SharkyUnitData;
         CollisionCalculator CollisionCalculator;
         DebugService DebugService;
+        Dictionary<ulong, int> OffPathTimes = new Dictionary<ulong, int>();
 
         public MineralMiner(DefaultSharkyBot defaultSharkyBot)
         {
@@ -46,15 +47,24 @@
 
         List<SC2APIProtocol.Action> GatherMinerals(int frame, MiningInfo miningInfo, Vector2 mineralVector, UnitCommander worker, Vector2 workerVector, List<SC2APIProtocol.Unit> mineralFields)
         {
+            if (!OffPathTimes.ContainsKey(worker.UnitCalculation.Unit.Tag))
+            {
+                OffPathTimes[worker.UnitCalculation.Unit.Tag] = 0;
+            }
+
             var touchingWorker = worker.UnitCalculation.NearbyAllies.Take(25).Any(w => Vector2.DistanceSquared(workerVector, w.Position) < .5f && !w.UnitClassifications.Contains(UnitClassification.Worker));
             var distanceSquared = Vector2.DistanceSquared(mineralVector, workerVector);
             var onPath = CollisionCalculator.Collides(worker.UnitCalculation.Position, 2, new Vector2(miningInfo.DropOffPoint.X, miningInfo.DropOffPoint.Y), new Vector2(miningInfo.HarvestPoint.X, miningInfo.HarvestPoint.Y));
-            if (distanceSquared < 2 || distanceSquared > 6 || touchingWorker || !onPath)
+            if (OffPathTimes[worker.UnitCalculation.Unit.Tag] > 0 || distanceSquared < 2 || distanceSquared > 6 || touchingWorker || !onPath)
             {
                 var actions = worker.Order(frame, Abilities.HARVEST_GATHER, null, miningInfo.ResourceUnit.Tag, false);
                 actions.AddRange(worker.Order(frame, Abilities.MOVE, miningInfo.DropOffPoint, 0, false, true));
                 if (!onPath)
                 {
+                    if (frame > 100 && distanceSquared < 36)
+                    {
+                        OffPathTimes[worker.UnitCalculation.Unit.Tag]++;
+                    }
                     DebugService.DrawSphere(worker.UnitCalculation.Unit.Pos);
                 }
                 return actions;
@@ -78,6 +88,11 @@
             }
             else if (distanceSquared < 10)
             {
+                if (OffPathTimes.TryGetValue(worker.UnitCalculation.Unit.Tag, out int offTime) && offTime > 0)
+                {
+                    OffPathTimes[worker.UnitCalculation.Unit.Tag] = offTime - 1;                
+                }
+
                 var actions = worker.Order(frame, Abilities.HARVEST_RETURN);
                 actions.AddRange(worker.Order(frame, Abilities.MOVE, miningInfo.HarvestPoint, 0, false, true));
                 return actions;

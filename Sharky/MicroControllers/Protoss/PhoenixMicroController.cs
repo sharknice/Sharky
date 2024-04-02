@@ -1,6 +1,4 @@
-﻿using static Google.Protobuf.Reflection.SourceCodeInfo.Types;
-
-namespace Sharky.MicroControllers.Protoss
+﻿namespace Sharky.MicroControllers.Protoss
 {
     public class PhoenixMicroController : IndividualMicroController
     {
