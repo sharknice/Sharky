@@ -2,7 +2,7 @@
 {
     public class DisruptorMicroController : IndividualMicroController
     {
-        int PurificationNovaRange = 13;
+        protected int PurificationNovaRange = 13;
         private int lastPurificationFrame = 0;
         protected IPathFinder NovaPathFinder;
 
@@ -54,9 +54,9 @@
             var attacks = new List<UnitCalculation>();
             var center = commander.UnitCalculation.Position;
 
-            foreach (var enemyAttack in commander.UnitCalculation.NearbyEnemies.Where(e => !e.Unit.IsFlying && !e.Unit.BuffIds.Contains((uint)Buffs.ORACLESTASISTRAPTARGET)))
+            foreach (var enemyAttack in commander.UnitCalculation.NearbyEnemies.Where(e => !e.Unit.IsFlying && !e.Unit.BuffIds.Contains((uint)Buffs.ORACLESTASISTRAPTARGET) && !e.Unit.IsHallucination))
             {
-                if (enemyAttack.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELING && enemyAttack.Unit.UnitType != (uint)UnitTypes.ZERG_CREEPTUMORBURROWED && 
+                if (enemyAttack.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELING && enemyAttack.Unit.UnitType != (uint)UnitTypes.ZERG_CREEPTUMORBURROWED && enemyAttack.Unit.UnitType != (uint)UnitTypes.ZERG_BROODLING && 
                     InRange(enemyAttack.Position, commander.UnitCalculation.Position, PurificationNovaRange + enemyAttack.Unit.Radius + commander.UnitCalculation.Unit.Radius)) // TODO: do actual pathing to see if the shot can make it there, if a wall is in the way it can't
                 {
                     attacks.Add(enemyAttack);

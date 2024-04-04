@@ -35,6 +35,7 @@
         protected float LooseFormationDistance;
         protected float GroupUpStateDistanceSquared;
         protected float MaximumSupportDistanceSqaured;
+        protected float FollowPathProximitySquared;
 
         public IndividualMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder pathFinder, MicroPriority microPriority, bool groupUpEnabled, float avoidDamageDistance = 2f, bool ignoreDistractions = true)
         {
@@ -69,6 +70,7 @@
             GroupUpStateDistanceSquared = 100f;
             IgnoreDistractions = ignoreDistractions;
             MaximumSupportDistanceSqaured = 225f;
+            FollowPathProximitySquared = 4;
         }
 
         public virtual List<SC2Action> Attack(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
@@ -1250,7 +1252,7 @@
                     //}
                     action = commander.Order(frame, Abilities.MOVE, new Point2D { X = point.X, Y = point.Y });
 
-                    if (Vector2.DistanceSquared(commander.UnitCalculation.Position, point) < 4)
+                    if (Vector2.DistanceSquared(commander.UnitCalculation.Position, point) < FollowPathProximitySquared)
                     {
                         commander.RetreatPathIndex++;
                     }
