@@ -1,7 +1,4 @@
-﻿using Sharky.MicroTasks.Harass;
-using System.ComponentModel.Design;
-
-namespace Sharky.MicroTasks
+﻿namespace Sharky.MicroTasks
 {
     public class ReaperWorkerHarassTask : MicroTask
     {

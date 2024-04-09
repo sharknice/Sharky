@@ -312,7 +312,10 @@
                         {
                             continue;
                         }
-                        allyAttack.Value.EnemiesInRange.Add(enemyAttack.Value);
+                        if (!enemyAttack.Value.Unit.BuffIds.Contains((uint)Buffs.NEURALPARASITE))
+                        {
+                            allyAttack.Value.EnemiesInRange.Add(enemyAttack.Value);
+                        }
                         enemyAttack.Value.EnemiesInRangeOf.Add(allyAttack.Value);
                     }
                     if (DamageService.CanDamage(enemyAttack.Value, allyAttack.Value))
@@ -337,7 +340,10 @@
                     if (Vector2.DistanceSquared(allyAttack.Value.Position, enemyAttack.Value.Position) <= NearbyDistance * NearbyDistance)
                     {
                         enemyAttack.Value.NearbyEnemies.Add(allyAttack.Value);
-                        allyAttack.Value.NearbyEnemies.Add(enemyAttack.Value);
+                        if (!enemyAttack.Value.Unit.BuffIds.Contains((uint)Buffs.NEURALPARASITE))
+                        {
+                            allyAttack.Value.NearbyEnemies.Add(enemyAttack.Value);
+                        }
                     }
                 }
 

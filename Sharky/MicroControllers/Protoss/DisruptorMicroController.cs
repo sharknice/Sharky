@@ -3,7 +3,7 @@
     public class DisruptorMicroController : IndividualMicroController
     {
         protected int PurificationNovaRange = 13;
-        private int lastPurificationFrame = 0;
+        protected int lastPurificationFrame = 0;
         protected IPathFinder NovaPathFinder;
 
         public DisruptorMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled, IPathFinder novaPathFinder)

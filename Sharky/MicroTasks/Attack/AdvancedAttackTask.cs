@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.Design;
-
-namespace Sharky.MicroTasks.Attack
+﻿namespace Sharky.MicroTasks.Attack
 {
     public class AdvancedAttackTask : MicroTask, IAttackTask
     {
@@ -10,6 +8,7 @@ namespace Sharky.MicroTasks.Attack
         MicroTaskData MicroTaskData;
         MacroData MacroData;
         SharkyUnitData SharkyUnitData;
+        EnemyData EnemyData;
 
         IMicroController MicroController;
 
@@ -20,6 +19,7 @@ namespace Sharky.MicroTasks.Attack
         ArmySplitter DefenseArmySplitter;
         ArmySplitter AttackArmySplitter;
         CameraManager CameraManager;
+        MapDataService MapDataService;
 
         public List<UnitTypes> MainAttackers { get; set; }
         public List<UnitCommander> MainUnits { get; set; }
@@ -33,6 +33,7 @@ namespace Sharky.MicroTasks.Attack
         public bool OnlyDefendBuildings { get; set; }
         public bool AllowSplitWhileKill { get; set; }
         public bool DeathBallMode { get; set; }
+        public bool DeathBallClearCreep { get; set; }
 
         bool BaseUnderAttack { get; set; }
 
@@ -44,11 +45,13 @@ namespace Sharky.MicroTasks.Attack
             ActiveUnitData = defaultSharkyBot.ActiveUnitData;
             MicroTaskData = defaultSharkyBot.MicroTaskData;
             MacroData = defaultSharkyBot.MacroData;
+            EnemyData = defaultSharkyBot.EnemyData;
             MicroController = defaultSharkyBot.MicroController;
             TargetingService = defaultSharkyBot.TargetingService;
             UnitCountService = defaultSharkyBot.UnitCountService;
             SharkyUnitData = defaultSharkyBot.SharkyUnitData;
             CameraManager = defaultSharkyBot.CameraManager;
+            MapDataService = defaultSharkyBot.MapDataService;
 
             EnemyCleanupService = enemyCleanupService;
 
@@ -307,7 +310,7 @@ namespace Sharky.MicroTasks.Attack
 
             if (DeathBallMode)
             {
-                attackingEnemies = attackingEnemies.Where(e => e.Damage > 0 && e.EnemiesInRange.Any() && !e.Unit.IsHallucination && e.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELING && e.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELINGZEALOT && e.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELINGMARINE && e.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELINGMARINESHIELD && e.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELINGZERGLING && e.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELINGZERGLINGWINGS);
+                attackingEnemies = attackingEnemies.Where(e => e.Damage > 0 && e.EnemiesInRange.Any(u => ActiveUnitData.Commanders.ContainsKey(u.Unit.Tag) && ActiveUnitData.Commanders[u.Unit.Tag].UnitRole != UnitRole.Proxy) && !e.Unit.IsHallucination && e.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELING && e.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELINGZEALOT && e.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELINGMARINE && e.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELINGMARINESHIELD && e.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELINGZERGLING && e.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELINGZERGLINGWINGS);
             }
 
             var attackPoint = TargetingData.AttackPoint;
@@ -634,8 +637,17 @@ namespace Sharky.MicroTasks.Attack
             {
                 if (DeathBallMode)
                 {
-                    actions.AddRange(MicroController.Retreat(mainUnits, TargetingData.ForwardDefensePoint, null, frame));
-                    actions.AddRange(MicroController.Support(supportUnits, mainUnits, supportAttackPoint, TargetingData.ForwardDefensePoint, supportAttackPoint, frame));
+                    if (DeathBallShouldClearKeep(mainUnits, supportUnits))
+                    {
+                        var nearestCreep = GetCreepTarget();
+                        actions.AddRange(MicroController.Attack(mainUnits, nearestCreep, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame)); // might want to make this retareat, test it out and see how it works as attack first
+                        actions.AddRange(MicroController.Support(supportUnits, mainUnits, supportAttackPoint, TargetingData.ForwardDefensePoint, supportAttackPoint, frame));
+                    }
+                    else
+                    {
+                        actions.AddRange(MicroController.Retreat(mainUnits, TargetingData.ForwardDefensePoint, null, frame));
+                        actions.AddRange(MicroController.Support(supportUnits, mainUnits, supportAttackPoint, TargetingData.ForwardDefensePoint, supportAttackPoint, frame));
+                    }
                 }
                 else
                 {
@@ -662,6 +674,23 @@ namespace Sharky.MicroTasks.Attack
             {
                 System.Console.WriteLine($"AdvancedAttackTask OrderMainUnitsWithSupportUnits {stopwatch.ElapsedMilliseconds}");
             }
+        }
+
+        private bool DeathBallShouldClearKeep(IEnumerable<UnitCommander> mainUnits, IEnumerable<UnitCommander> supportUnits)
+        {
+            if (!DeathBallClearCreep || EnemyData.EnemyRace != Race.Zerg || MacroData.FoodUsed < 190) { return false; }
+
+            if (mainUnits.Any(c => c.UnitCalculation.Unit.Shield < c.UnitCalculation.Unit.ShieldMax/2)) 
+            {
+                return false;
+            }
+
+            if (supportUnits.Sum(c => c.UnitCalculation.Unit.Shield) > supportUnits.Sum(c => c.UnitCalculation.Unit.ShieldMax) * .9)
+            {
+                return true;
+            }
+
+            return false;
         }
 
         void HandleHiddenBuildings()
@@ -745,6 +774,35 @@ namespace Sharky.MicroTasks.Attack
             {
                 subTask.Value.DebugUnits(debugService);
             }
+        }
+
+        private Point2D GetCreepTarget()
+        {
+            var area = GetCreepLocations();
+            var closest = area.OrderBy(p => Vector2.DistanceSquared(p, TargetingData.ForwardDefensePoint.ToVector2())).FirstOrDefault();
+            if (closest != Vector2.Zero)
+            {
+                return closest.ToPoint2D();
+            }
+            return TargetingData.ForwardDefensePoint;
+        }
+
+        List<Vector2> GetCreepLocations()
+        {
+            var points = new List<Vector2>();
+
+            for (var x = 0; x < MapDataService.MapData.MapWidth; x++)
+            {
+                for (var y = 0; y < MapDataService.MapData.MapHeight; y++)
+                {
+                    if (MapDataService.MapData.Map[x, y].HasCreep)
+                    {
+                        points.Add(new Vector2(x, y));
+                    }
+                }
+            }
+
+            return points;
         }
     }
 }
