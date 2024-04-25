@@ -108,7 +108,7 @@
             var probeClaim = DesiredUnitsClaims.FirstOrDefault(c => c.UnitType == UnitTypes.PROTOSS_PROBE);
             if (probeClaim != null && probeClaim.Count > UnitCommanders.Count(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE))
             {
-                var commander = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && !c.UnitCalculation.Unit.BuffIds.Any(b => SharkyUnitData.CarryingResourceBuffs.Contains((Buffs)b))).Where(c => (c.UnitRole == UnitRole.None || c.UnitRole == UnitRole.Minerals) && !c.UnitCalculation.Unit.Orders.Any(o => SharkyUnitData.BuildingData.Values.Any(b => (uint)b.Ability == o.AbilityId))).FirstOrDefault();
+                var commander = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.Worker) && !c.UnitCalculation.Unit.BuffIds.Any(b => SharkyUnitData.CarryingResourceBuffs.Contains((Buffs)b))).Where(c => (c.UnitRole == UnitRole.None || c.UnitRole == UnitRole.Minerals) && !c.UnitCalculation.Unit.Orders.Any(o => SharkyUnitData.BuildingData.Values.Any(b => (uint)b.Ability == o.AbilityId))).FirstOrDefault();
 
                 if (commander != null)
                 {
@@ -140,7 +140,7 @@
             IEnumerable<UnitCommander> defenders = new List<UnitCommander>();
 
             var attackingEnemies = ActiveUnitData.EnemyUnits.Values.Where(e => e.FrameLastSeen > frame - 100 &&
-                (e.NearbyEnemies.Any(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter) || u.UnitClassifications.Contains(UnitClassification.ProductionStructure) || u.UnitClassifications.Contains(UnitClassification.DefensiveStructure))) 
+                (e.NearbyEnemies.Any(u => u.UnitClassifications.HasFlag(UnitClassification.ResourceCenter) || u.UnitClassifications.HasFlag(UnitClassification.ProductionStructure) || u.UnitClassifications.HasFlag(UnitClassification.DefensiveStructure))) 
                 && (e.NearbyEnemies.Count(b => b.Attributes.Contains(SC2APIProtocol.Attribute.Structure)) >= e.NearbyAllies.Count(b => b.Attributes.Contains(SC2APIProtocol.Attribute.Structure)))).Where(e => e.Unit.UnitType != (uint)UnitTypes.TERRAN_KD8CHARGE);
 
             if (attackingEnemies.Any())
@@ -340,7 +340,7 @@
         {
             if (MapDataService.SelfVisible(TargetLocation))
             {
-                if (!ActiveUnitData.EnemyUnits.Any(e => Vector2.DistanceSquared(new Vector2(TargetLocation.X, TargetLocation.Y), e.Value.Position) < 100) || (EndAfterMainBaseGone && !ActiveUnitData.EnemyUnits.Any(e => e.Value.UnitClassifications.Contains(UnitClassification.ResourceCenter) && Vector2.DistanceSquared(new Vector2(TargetLocation.X, TargetLocation.Y), e.Value.Position) < 100)))
+                if (!ActiveUnitData.EnemyUnits.Any(e => Vector2.DistanceSquared(new Vector2(TargetLocation.X, TargetLocation.Y), e.Value.Position) < 100) || (EndAfterMainBaseGone && !ActiveUnitData.EnemyUnits.Any(e => e.Value.UnitClassifications.HasFlag(UnitClassification.ResourceCenter) && Vector2.DistanceSquared(new Vector2(TargetLocation.X, TargetLocation.Y), e.Value.Position) < 100)))
                 {
                     Disable();
                     Completed = true;

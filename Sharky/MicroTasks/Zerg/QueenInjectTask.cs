@@ -116,7 +116,7 @@
 
         private void UpdateHatcheriesList(Dictionary<ulong, UnitCommander> commanders)
         {
-            foreach (var hatchery in commanders.Values.Where(u => u.UnitCalculation.Unit.BuildProgress > 0.9 && u.UnitCalculation.UnitClassifications.Contains(UnitClassification.ResourceCenter)))
+            foreach (var hatchery in commanders.Values.Where(u => u.UnitCalculation.Unit.BuildProgress > 0.9 && u.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.ResourceCenter)))
             {
                 var existing = HatcheryQueenPairing.FirstOrDefault(d => d.Hatchery.UnitCalculation.Unit.Tag == hatchery.UnitCalculation.Unit.Tag);
                 if (existing == null)

@@ -19,7 +19,7 @@
 
         public Point2D GetResourceCenterLocation(bool canHaveCreep)
         {
-            var resourceCenters = ActiveUnitData.SelfUnits.Values.Where(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter));
+            var resourceCenters = ActiveUnitData.SelfUnits.Values.Where(u => u.UnitClassifications.HasFlag(UnitClassification.ResourceCenter));
             var openBases = BaseData.BaseLocations.Where(b => !resourceCenters.Any(r => Vector2.DistanceSquared(r.Position, new Vector2(b.Location.X, b.Location.Y)) < 25 || r.Unit.Orders.Any(o => o.TargetWorldSpacePos != null && o.TargetWorldSpacePos.X == b.Location.X && o.TargetWorldSpacePos.Y == b.Location.Y)));
 
             foreach (var openBase in openBases)

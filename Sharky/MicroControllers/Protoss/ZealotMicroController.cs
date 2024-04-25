@@ -12,7 +12,7 @@
         {
             action = null;
 
-            if (WeaponReady(commander, frame) && commander.UnitCalculation.EnemiesInRangeOf.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) || e.UnitClassifications.Contains(UnitClassification.Worker) || e.UnitClassifications.Contains(UnitClassification.DefensiveStructure)))
+            if (WeaponReady(commander, frame) && commander.UnitCalculation.EnemiesInRangeOf.Any(e => e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) || e.UnitClassifications.HasFlag(UnitClassification.Worker) || e.UnitClassifications.HasFlag(UnitClassification.DefensiveStructure)))
             {
                 return AttackBestTargetInRange(commander, target, bestTarget, frame, out action);
             }
@@ -74,7 +74,7 @@
 
             if (bestTarget.Unit.UnitType == (uint)UnitTypes.TERRAN_REAPER)
             {
-                if (commander.UnitCalculation.NearbyAllies.Any(a => a.UnitClassifications.Contains(UnitClassification.ArmyUnit) && Vector2.DistanceSquared(a.Position, bestTarget.Position) < Vector2.DistanceSquared(commander.UnitCalculation.Position, bestTarget.Position)))
+                if (commander.UnitCalculation.NearbyAllies.Any(a => a.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) && Vector2.DistanceSquared(a.Position, bestTarget.Position) < Vector2.DistanceSquared(commander.UnitCalculation.Position, bestTarget.Position)))
                 {
                     return null;
                 }

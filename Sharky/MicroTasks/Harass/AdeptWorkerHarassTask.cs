@@ -71,7 +71,7 @@
 
                     if (Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(EnemyMain.X, EnemyMain.Y)) < 100)
                     {
-                        if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker)))
+                        if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.Worker)))
                         {
                             var action = AdeptMicroController.HarassWorkers(commander, EnemyMain, EnemyExpansion, frame);
                             if (action != null)
@@ -88,7 +88,7 @@
                             }
                         }
                     }
-                    else if (Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(EnemyExpansion.X, EnemyExpansion.Y)) < 100 && commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker)))
+                    else if (Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(EnemyExpansion.X, EnemyExpansion.Y)) < 100 && commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.Worker)))
                     {
                         var action = AdeptMicroController.HarassWorkers(commander, EnemyExpansion, EnemyMain, frame);
                         if (action != null)

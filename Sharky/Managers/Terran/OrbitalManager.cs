@@ -117,7 +117,7 @@
                 var undetectedEnemy = ActiveUnitData.EnemyUnits.Where(e => e.Value.Unit.DisplayType == DisplayType.Hidden).OrderByDescending(e => e.Value.EnemiesInRangeOf.Count()).FirstOrDefault();
                 if (undetectedEnemy.Value != null && undetectedEnemy.Value.EnemiesInRangeOf.Any())
                 {
-                    if (!undetectedEnemy.Value.EnemiesInRangeOf.All(a => a.Unit.UnitType == (uint)UnitTypes.TERRAN_BANSHEE && a.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker))))
+                    if (!undetectedEnemy.Value.EnemiesInRangeOf.All(a => a.Unit.UnitType == (uint)UnitTypes.TERRAN_BANSHEE && a.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.Worker))))
                     {
                         LastScanFrame = frame;
                         TagService.TagAbility("scan");
@@ -151,7 +151,7 @@
         {
             if ((orbital.UnitCalculation.Unit.Energy >= 50 && !EnemyData.EnemyStrategies[typeof(InvisibleAttacks).Name].Detected && !EnemyData.EnemyStrategies[typeof(InvisibleAttacksSuspected).Name].Detected) || orbital.UnitCalculation.Unit.Energy > 95)
             {
-                var highestMineralPatch = BaseData.SelfBases.Where(b => b.ResourceCenter != null && b.ResourceCenter.BuildProgress > .99 && b.MineralFields.Any() && ActiveUnitData.SelfUnits.ContainsKey(b.ResourceCenter.Tag) && ActiveUnitData.SelfUnits[b.ResourceCenter.Tag].NearbyEnemies.Count(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit)) < 2).SelectMany(m => m.MineralFields).OrderByDescending(m => m.MineralContents).FirstOrDefault();
+                var highestMineralPatch = BaseData.SelfBases.Where(b => b.ResourceCenter != null && b.ResourceCenter.BuildProgress > .99 && b.MineralFields.Any() && ActiveUnitData.SelfUnits.ContainsKey(b.ResourceCenter.Tag) && ActiveUnitData.SelfUnits[b.ResourceCenter.Tag].NearbyEnemies.Count(e => e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit)) < 2).SelectMany(m => m.MineralFields).OrderByDescending(m => m.MineralContents).FirstOrDefault();
                 if (highestMineralPatch != null)
                 {
                     TagService.TagAbility("mule");

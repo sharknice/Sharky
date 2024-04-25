@@ -19,7 +19,7 @@
 
             foreach (var building in ActiveUnitData.Commanders.Where(c => c.Value.UnitCalculation.Unit.BuildProgress < 1 && c.Value.UnitCalculation.Unit.BuildProgress > 0 && c.Value.UnitCalculation.Attributes.Contains(SC2Attribute.Structure) && c.Value.UnitCalculation.Unit.BuildProgress == c.Value.UnitCalculation.PreviousUnit.BuildProgress))
             {
-                if (building.Value.UnitCalculation.EnemiesInRangeOf.Count() > building.Value.UnitCalculation.NearbyAllies.Count(a => a.UnitClassifications.Contains(UnitClassification.ArmyUnit) || a.UnitClassifications.Contains(UnitClassification.DefensiveStructure)))
+                if (building.Value.UnitCalculation.EnemiesInRangeOf.Count() > building.Value.UnitCalculation.NearbyAllies.Count(a => a.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) || a.UnitClassifications.HasFlag(UnitClassification.DefensiveStructure)))
                 {
                     continue; // do not send scvs to suicide
                 }
@@ -50,7 +50,7 @@
             IEnumerable<UnitCommander> availableWorkers;
             if (workers == null)
             {
-                availableWorkers = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && !c.UnitCalculation.Unit.BuffIds.Any(b => SharkyUnitData.CarryingResourceBuffs.Contains((Buffs)b))).Where(c => (c.UnitRole == UnitRole.PreBuild || c.UnitRole == UnitRole.None || c.UnitRole == UnitRole.Minerals) && !c.UnitCalculation.Unit.Orders.Any(o => SharkyUnitData.BuildingData.Values.Any(b => (uint)b.Ability == o.AbilityId))).OrderBy(p => Vector2.DistanceSquared(p.UnitCalculation.Position, new Vector2(location.X, location.Y)));
+                availableWorkers = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.Worker) && !c.UnitCalculation.Unit.BuffIds.Any(b => SharkyUnitData.CarryingResourceBuffs.Contains((Buffs)b))).Where(c => (c.UnitRole == UnitRole.PreBuild || c.UnitRole == UnitRole.None || c.UnitRole == UnitRole.Minerals) && !c.UnitCalculation.Unit.Orders.Any(o => SharkyUnitData.BuildingData.Values.Any(b => (uint)b.Ability == o.AbilityId))).OrderBy(p => Vector2.DistanceSquared(p.UnitCalculation.Position, new Vector2(location.X, location.Y)));
             }
             else
             {

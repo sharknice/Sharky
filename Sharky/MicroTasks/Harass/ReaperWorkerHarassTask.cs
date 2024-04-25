@@ -66,7 +66,7 @@
             IEnumerable<UnitCommander> defenders = new List<UnitCommander>();
 
             var attackingEnemies = ActiveUnitData.EnemyUnits.Values.Where(e => e.FrameLastSeen > frame - 100 && !e.Unit.IsFlying && e.Range < 3 &&
-                (e.NearbyEnemies.Any(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter) || u.UnitClassifications.Contains(UnitClassification.ProductionStructure) || u.UnitClassifications.Contains(UnitClassification.DefensiveStructure))) && 
+                (e.NearbyEnemies.Any(u => u.UnitClassifications.HasFlag(UnitClassification.ResourceCenter) || u.UnitClassifications.HasFlag(UnitClassification.ProductionStructure) || u.UnitClassifications.HasFlag(UnitClassification.DefensiveStructure))) && 
                 (e.NearbyEnemies.Count(b => b.Attributes.Contains(SC2APIProtocol.Attribute.Structure)) >= e.NearbyAllies.Count(b => b.Attributes.Contains(SC2APIProtocol.Attribute.Structure)))).Where(e => e.Unit.UnitType != (uint)UnitTypes.TERRAN_KD8CHARGE);
 
             var enemyReapers = ActiveUnitData.EnemyUnits.Values.Where(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_REAPER);
@@ -95,7 +95,7 @@
                 defenders = UnitCommanders.Where(c => !reaperVReapers.Contains(c));
                 foreach (var commander in defenders)
                 {
-                    if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker)) && !commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) || e.UnitClassifications.Contains(UnitClassification.DefensiveStructure) || (e.Unit.UnitType == (uint)UnitTypes.TERRAN_BARRACKS && e.Unit.IsActive && !e.NearbyEnemies.Any(sa => sa.Unit.UnitType == (uint)UnitTypes.TERRAN_MARAUDER))))
+                    if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.Worker)) && !commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) || e.UnitClassifications.HasFlag(UnitClassification.DefensiveStructure) || (e.Unit.UnitType == (uint)UnitTypes.TERRAN_BARRACKS && e.Unit.IsActive && !e.NearbyEnemies.Any(sa => sa.Unit.UnitType == (uint)UnitTypes.TERRAN_MARAUDER))))
                     {
                         var harassAction = MicroController.HarassWorkers(commander, attackingEnemyVector.ToPoint2D(), TargetingData.ForwardDefensePoint, frame);
                         if (harassAction != null)
@@ -163,7 +163,7 @@
                         }
                         continue;
                     }
-                    if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker)) && !commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) || e.UnitClassifications.Contains(UnitClassification.DefensiveStructure) || (e.Unit.UnitType == (uint)UnitTypes.TERRAN_BARRACKS && e.Unit.IsActive && !e.NearbyEnemies.Any(sa => sa.Unit.UnitType == (uint)UnitTypes.TERRAN_MARAUDER))))
+                    if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.Worker)) && !commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) || e.UnitClassifications.HasFlag(UnitClassification.DefensiveStructure) || (e.Unit.UnitType == (uint)UnitTypes.TERRAN_BARRACKS && e.Unit.IsActive && !e.NearbyEnemies.Any(sa => sa.Unit.UnitType == (uint)UnitTypes.TERRAN_MARAUDER))))
                     {
                         var action = MicroController.HarassWorkers(commander, harassInfo.BaseLocation.MineralLineLocation, TargetingData.ForwardDefensePoint, frame);
                         if (action != null)
@@ -186,7 +186,7 @@
                             harassInfo.Harassers.Remove(commander);
                             return commands;
                         }
-                        else if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && e.DamageGround && Vector2.DistanceSquared(new Vector2(harassInfo.BaseLocation.MineralLineLocation.X, harassInfo.BaseLocation.MineralLineLocation.Y), e.Position) < 100))
+                        else if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) && e.DamageGround && Vector2.DistanceSquared(new Vector2(harassInfo.BaseLocation.MineralLineLocation.X, harassInfo.BaseLocation.MineralLineLocation.Y), e.Position) < 100))
                         {
                             if (commander.UnitCalculation.TargetPriorityCalculation.GroundWinnability < 1 && commander.UnitCalculation.Unit.Health < commander.UnitCalculation.Unit.HealthMax)
                             {
@@ -207,7 +207,7 @@
 
                         if (commander.RetreatPath.Count() == 0)
                         {
-                            if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && e.DamageGround && Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position) < 120))
+                            if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) && e.DamageGround && Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position) < 120))
                             {
                                 harassInfo.LastPathFailedFrame = frame;
                                 harassInfo.Harassers.Remove(commander);

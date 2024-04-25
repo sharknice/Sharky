@@ -39,7 +39,7 @@
 
             var unitData = SharkyUnitData.BuildingData[UnitTypes.PROTOSS_PYLON];
 
-            var orderedBuildings = ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
+            var orderedBuildings = ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
             foreach (var baseLocation in BaseData.SelfBases)
             {
                 if (baseLocation.MineralLineDefenseUnbuildableFrame < MacroData.Frame - 100)
@@ -70,7 +70,7 @@
 
             var unitData = SharkyUnitData.BuildingData[UnitTypes.PROTOSS_PYLON];
 
-            var orderedBuildings = ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
+            var orderedBuildings = ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
             var baseLocation = BuildingService.GetNextBaseLocation();
 
             if (baseLocation != null && baseLocation.MineralLineDefenseUnbuildableFrame < MacroData.Frame - 100)
@@ -101,7 +101,7 @@
 
             var unitData = SharkyUnitData.BuildingData[UnitTypes.PROTOSS_PYLON];
 
-            var orderedBuildings = ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
+            var orderedBuildings = ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
             foreach (var baseLocation in BaseData.SelfBases)
             {
                 var height = MapDataService.MapHeight(baseLocation.MineralLineBuildingLocation);
@@ -131,7 +131,7 @@
             {
                 var unitData = SharkyUnitData.BuildingData[UnitTypes.PROTOSS_PYLON];
 
-                var orderedBuildings = ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
+                var orderedBuildings = ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
                 var height = MapDataService.MapHeight(TargetingData.ForwardDefensePoint);
                 if (ActiveUnitData.SelfUnits.Count(u => u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && Vector2.DistanceSquared(u.Value.Position, new Vector2(TargetingData.ForwardDefensePoint.X, TargetingData.ForwardDefensePoint.Y)) < MacroData.DefensiveBuildingMineralLineMaximumDistance * MacroData.DefensiveBuildingMineralLineMaximumDistance && MapDataService.MapHeight(u.Value.Position) == height) + orderedBuildings < MacroData.ProtossMacroData.DesiredPylonsAtDefensivePoint)
                 {

@@ -14,7 +14,7 @@
         {
             ScoutLocations = new List<Point2D>();
 
-            foreach (var baseLocation in BaseData.EnemyBaseLocations.Where(b => !ActiveUnitData.EnemyUnits.Any(e => e.Value.UnitClassifications.Contains(UnitClassification.ResourceCenter) && Vector2.DistanceSquared(e.Value.Position, new Vector2(b.Location.X, b.Location.Y)) < 50) && !ActiveUnitData.SelfUnits.Any(e => e.Value.UnitClassifications.Contains(UnitClassification.ResourceCenter) && Vector2.DistanceSquared(e.Value.Position, new Vector2(b.Location.X, b.Location.Y)) < 50)))
+            foreach (var baseLocation in BaseData.EnemyBaseLocations.Where(b => !ActiveUnitData.EnemyUnits.Any(e => e.Value.UnitClassifications.HasFlag(UnitClassification.ResourceCenter) && Vector2.DistanceSquared(e.Value.Position, new Vector2(b.Location.X, b.Location.Y)) < 50) && !ActiveUnitData.SelfUnits.Any(e => e.Value.UnitClassifications.HasFlag(UnitClassification.ResourceCenter) && Vector2.DistanceSquared(e.Value.Position, new Vector2(b.Location.X, b.Location.Y)) < 50)))
             {
                 ScoutLocations.Add(baseLocation.MineralLineLocation);
             }

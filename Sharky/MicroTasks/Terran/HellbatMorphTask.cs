@@ -22,7 +22,7 @@
         {
             var commands = new List<SC2APIProtocol.Action>();
 
-            var hellions = ActiveUnitData.SelfUnits.Values.Where(u => u.Unit.UnitType == (uint)UnitTypes.TERRAN_HELLION && (u.NearbyEnemies.Any() || u.NearbyAllies.Any(a => a.UnitClassifications.Contains(UnitClassification.ArmyUnit) && Vector2.DistanceSquared(a.Position, u.Position) < 9)));
+            var hellions = ActiveUnitData.SelfUnits.Values.Where(u => u.Unit.UnitType == (uint)UnitTypes.TERRAN_HELLION && (u.NearbyEnemies.Any() || u.NearbyAllies.Any(a => a.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) && Vector2.DistanceSquared(a.Position, u.Position) < 9)));
             if (hellions.Any())
             {
                 var command = new ActionRawUnitCommand();

@@ -192,7 +192,7 @@
 
             if (unitToSupport == null)
             {
-                unitToSupport = commander.UnitCalculation.NearbyAllies.Where(u => u.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !u.Unit.IsHallucination && u.EnemiesInRangeOf.Any()).OrderByDescending(u => u.EnemiesInRangeOf.Count()).FirstOrDefault();
+                unitToSupport = commander.UnitCalculation.NearbyAllies.Where(u => u.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) && !u.Unit.IsHallucination && u.EnemiesInRangeOf.Any()).OrderByDescending(u => u.EnemiesInRangeOf.Count()).FirstOrDefault();
 
                 if (unitToSupport == null)
                 {

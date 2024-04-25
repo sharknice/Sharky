@@ -133,8 +133,8 @@
 
                 if (commander.UnitCalculation.Unit.Health == commander.UnitCalculation.Unit.HealthMax || Undetected(commander) || !commander.UnitCalculation.EnemiesThreateningDamage.Any())
                 {
-                    if (commander.UnitCalculation.EnemiesInRange.Any(e => e.FrameLastSeen == frame && e.UnitClassifications.Contains(UnitClassification.Worker)) ||
-                        (commander.UnitCalculation.NearbyEnemies.Count(e => e.FrameLastSeen == frame && e.UnitClassifications.Contains(UnitClassification.Worker)) > 2 && !commander.UnitCalculation.NearbyEnemies.Any(e => e.DamageAir)))
+                    if (commander.UnitCalculation.EnemiesInRange.Any(e => e.FrameLastSeen == frame && e.UnitClassifications.HasFlag(UnitClassification.Worker)) ||
+                        (commander.UnitCalculation.NearbyEnemies.Count(e => e.FrameLastSeen == frame && e.UnitClassifications.HasFlag(UnitClassification.Worker)) > 2 && !commander.UnitCalculation.NearbyEnemies.Any(e => e.DamageAir)))
                     {
                         // kill free workers
                         var action = IndividualMicroController.HarassWorkers(commander, Target, defensivePoint, frame);
@@ -199,7 +199,7 @@
                 // at target
 
                 // harass workers
-                if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker)))
+                if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.Worker)))
                 {
                     var action = IndividualMicroController.HarassWorkers(commander, Target, defensivePoint, frame);
                     if (action != null)
@@ -222,10 +222,10 @@
                 }
 
                 // if no nearby workers move on(if no activeunitdata any enemy workers on whole map, attack any enemies nearby), 
-                if (!commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker)))
+                if (!commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.Worker)))
                 {
                     // if nothing is here move on, or if workers elsewhere go kill them
-                    if (!commander.UnitCalculation.NearbyEnemies.Any() || ActiveUnitData.EnemyUnits.Any(e => e.Value.UnitClassifications.Contains(UnitClassification.Worker)))
+                    if (!commander.UnitCalculation.NearbyEnemies.Any() || ActiveUnitData.EnemyUnits.Any(e => e.Value.UnitClassifications.HasFlag(UnitClassification.Worker)))
                     {
                         GetNextTarget(frame);
                         continue;
@@ -262,7 +262,7 @@
             {
                 return false;
             }
-            if (MapDataService.SelfVisible(new Point2D { X = target.X, Y = target.Y, }) && !commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker) && (Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position) <= 100)))
+            if (MapDataService.SelfVisible(new Point2D { X = target.X, Y = target.Y, }) && !commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.Worker) && (Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position) <= 100)))
             {
                 return false;
             }

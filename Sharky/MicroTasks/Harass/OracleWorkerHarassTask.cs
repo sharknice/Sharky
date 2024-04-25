@@ -126,7 +126,7 @@
                 var commanderVector = commander.UnitCalculation.Position;
                 var targetVector = new Vector2(Target.X, Target.Y);
 
-                if ((commander.UnitCalculation.Unit.Energy > 50 || commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.ORACLEWEAPON) || commander.LastAbility == Abilities.BUILD_STASISTRAP) && commander.UnitCalculation.EnemiesInRangeOfAvoid.Count(e => e.Unit.UnitType != (uint)UnitTypes.TERRAN_BUNKER) == 0 && commander.UnitCalculation.NearbyEnemies.Count(e => e.UnitClassifications.Contains(UnitClassification.Worker)) > 0)
+                if ((commander.UnitCalculation.Unit.Energy > 50 || commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.ORACLEWEAPON) || commander.LastAbility == Abilities.BUILD_STASISTRAP) && commander.UnitCalculation.EnemiesInRangeOfAvoid.Count(e => e.Unit.UnitType != (uint)UnitTypes.TERRAN_BUNKER) == 0 && commander.UnitCalculation.NearbyEnemies.Count(e => e.UnitClassifications.HasFlag(UnitClassification.Worker)) > 0)
                 {
                     if (StasisTrapWorkers && commander.UnitCalculation.Unit.Energy >= 50 && !commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.ORACLEWEAPON))
                     {
@@ -146,7 +146,7 @@
                             }
                         }
                     }
-                    else if (commander.UnitCalculation.EnemiesInRange.Count(e => e.UnitClassifications.Contains(UnitClassification.Worker)) > 1 || (commander.UnitCalculation.NearbyEnemies.Count(e => e.UnitClassifications.Contains(UnitClassification.Worker) && !e.Unit.BuffIds.Contains((uint)Buffs.ORACLESTASISTRAPTARGET)) > 2 && !commander.UnitCalculation.NearbyEnemies.Any(e => e.DamageAir && e.Unit.BuildProgress == 1)))
+                    else if (commander.UnitCalculation.EnemiesInRange.Count(e => e.UnitClassifications.HasFlag(UnitClassification.Worker)) > 1 || (commander.UnitCalculation.NearbyEnemies.Count(e => e.UnitClassifications.HasFlag(UnitClassification.Worker) && !e.Unit.BuffIds.Contains((uint)Buffs.ORACLESTASISTRAPTARGET)) > 2 && !commander.UnitCalculation.NearbyEnemies.Any(e => e.DamageAir && e.Unit.BuildProgress == 1)))
                     {
                         var action = OracleMicroController.HarassWorkers(commander, Target, defensivePoint, frame);
                         if (action != null)
@@ -212,7 +212,7 @@
                 if (!commander.UnitCalculation.NearbyAllies.Any() && commander.UnitCalculation.EnemiesInRangeOf.Any(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_PHOENIX))
                 {
                     // no escape, just kill as many workers as possible
-                    if ((commander.UnitCalculation.Unit.Energy > 30 || commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.ORACLEWEAPON)) && commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker) && !e.Unit.BuffIds.Contains((uint)Buffs.ORACLESTASISTRAPTARGET)))
+                    if ((commander.UnitCalculation.Unit.Energy > 30 || commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.ORACLEWEAPON)) && commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.Worker) && !e.Unit.BuffIds.Contains((uint)Buffs.ORACLESTASISTRAPTARGET)))
                     {
                         var action = OracleMicroController.HarassWorkers(commander, Target, defensivePoint, frame);
                         if (action != null)
@@ -341,7 +341,7 @@
             {
                 return false;
             }
-            if (MapDataService.SelfVisible(new Point2D { X = target.X, Y = target.Y, }) && !commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker) && (Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position) <= 100)))
+            if (MapDataService.SelfVisible(new Point2D { X = target.X, Y = target.Y, }) && !commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.Worker) && (Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position) <= 100)))
             {
                 return false;
             }
@@ -355,7 +355,7 @@
         void GetNextTarget(int frame)
         {
             var target = BaseData.BaseLocations.OrderBy(b => Vector2.DistanceSquared(new Vector2(b.Location.X, b.Location.Y), new Vector2(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y))).Skip(TargetIndex + 1).FirstOrDefault();
-            if (ActiveUnitData.SelfUnits.Values.Any(u => u.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS && u.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit))))
+            if (ActiveUnitData.SelfUnits.Values.Any(u => u.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS && u.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit))))
             {
                 target = BaseData.EnemyBaseLocations.FirstOrDefault();
             }

@@ -118,7 +118,7 @@ namespace Sharky
             // TODO: use targeting instead?
 
             // Use resource centers if we can
-            var centerPositions = units.Values.Where(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter)).Select(u => u.Unit.Pos);
+            var centerPositions = units.Values.Where(u => u.UnitClassifications.HasFlag(UnitClassification.ResourceCenter)).Select(u => u.Unit.Pos);
 
             if (!centerPositions.Any())
             {

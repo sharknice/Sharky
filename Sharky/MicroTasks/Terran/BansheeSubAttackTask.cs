@@ -152,7 +152,7 @@
             {
                 ReportResults();
 
-                if (SwitchRolesAfterWorkersMassacred && Groups.Any(g => g.GroupRole == GroupRole.HarassMineralLines) && Kills.Values.Count(k => k.UnitClassifications.Contains(UnitClassification.Worker)) > 20 && ActiveUnitData.EnemyUnits.Values.Count(e => e.UnitClassifications.Contains(UnitClassification.Worker)) < 3)
+                if (SwitchRolesAfterWorkersMassacred && Groups.Any(g => g.GroupRole == GroupRole.HarassMineralLines) && Kills.Values.Count(k => k.UnitClassifications.HasFlag(UnitClassification.Worker)) > 20 && ActiveUnitData.EnemyUnits.Values.Count(e => e.UnitClassifications.HasFlag(UnitClassification.Worker)) < 3)
                 {
                     foreach (var group in Groups)
                     {

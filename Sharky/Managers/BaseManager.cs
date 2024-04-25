@@ -246,7 +246,7 @@
         {
             if (BaseData.SelfBases.Count() != UnitCountService.EquivalentTypeCount(UnitTypes.PROTOSS_NEXUS) + UnitCountService.EquivalentTypeCount(UnitTypes.TERRAN_COMMANDCENTER) + UnitCountService.EquivalentTypeCount(UnitTypes.ZERG_HATCHERY))
             {
-                var resourceCenters = ActiveUnitData.SelfUnits.Values.Where(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter) && !u.Unit.IsFlying);
+                var resourceCenters = ActiveUnitData.SelfUnits.Values.Where(u => u.UnitClassifications.HasFlag(UnitClassification.ResourceCenter) && !u.Unit.IsFlying);
                 BaseData.SelfBases = BaseData.BaseLocations.Where(b => resourceCenters.Any(r => Vector2.DistanceSquared(r.Position, new Vector2(b.Location.X, b.Location.Y)) < 25)).ToList();
                 foreach (var selfBase in BaseData.SelfBases)
                 {
@@ -269,7 +269,7 @@
                 }
                 else
                 {
-                    var resourceCenter = ActiveUnitData.SelfUnits.Values.Where(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter)).FirstOrDefault(r => Vector2.DistanceSquared(r.Position, new Vector2(selfBase.Location.X, selfBase.Location.Y)) < 25);
+                    var resourceCenter = ActiveUnitData.SelfUnits.Values.Where(u => u.UnitClassifications.HasFlag(UnitClassification.ResourceCenter)).FirstOrDefault(r => Vector2.DistanceSquared(r.Position, new Vector2(selfBase.Location.X, selfBase.Location.Y)) < 25);
                     if (resourceCenter != null)
                     {
                         selfBase.ResourceCenter = resourceCenter.Unit;
@@ -395,7 +395,7 @@
         {
             if (BaseData.EnemyBases.Count() != UnitCountService.EquivalentEnemyTypeCount(UnitTypes.PROTOSS_NEXUS) + UnitCountService.EquivalentEnemyTypeCount(UnitTypes.TERRAN_COMMANDCENTER) + UnitCountService.EquivalentEnemyTypeCount(UnitTypes.ZERG_HATCHERY))
             {
-                var resourceCenters = ActiveUnitData.EnemyUnits.Values.Where(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter));
+                var resourceCenters = ActiveUnitData.EnemyUnits.Values.Where(u => u.UnitClassifications.HasFlag(UnitClassification.ResourceCenter));
                 BaseData.EnemyBases = BaseData.BaseLocations.Where(b => resourceCenters.Any(r => Vector2.DistanceSquared(r.Position, new Vector2(b.Location.X, b.Location.Y)) < 25)).ToList();
                 foreach (var enemyBase in BaseData.EnemyBases)
                 {
@@ -435,7 +435,7 @@
                 }
                 else
                 {
-                    var enemyBases = ActiveUnitData.EnemyUnits.Values.Where(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter));
+                    var enemyBases = ActiveUnitData.EnemyUnits.Values.Where(u => u.UnitClassifications.HasFlag(UnitClassification.ResourceCenter));
                     if (enemyBases.Any() && enemyBase?.Location != null)
                     {
                         var eb = enemyBases.FirstOrDefault(r => Vector2.DistanceSquared(r.Position, new Vector2(enemyBase.Location.X, enemyBase.Location.Y)) < 25);

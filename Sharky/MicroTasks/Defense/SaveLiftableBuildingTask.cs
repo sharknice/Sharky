@@ -72,7 +72,7 @@
                         }
                         else
                         {
-                            if (UnitCountService.Count(UnitTypes.TERRAN_SCV) == 0 && commander.UnitCalculation.UnitClassifications.Contains(UnitClassification.ResourceCenter) && commander.UnitCalculation.EnemiesInRangeOfAvoid.Count() == 0)
+                            if (UnitCountService.Count(UnitTypes.TERRAN_SCV) == 0 && commander.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.ResourceCenter) && commander.UnitCalculation.EnemiesInRangeOfAvoid.Count() == 0)
                             {
                                 if (!commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId > 0 && o.AbilityId != (uint)Abilities.MOVE))
                                 {

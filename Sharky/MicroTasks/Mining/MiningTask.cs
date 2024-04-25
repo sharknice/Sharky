@@ -50,7 +50,7 @@
         {
             foreach (var commander in commanders.Where(c => !c.Value.Claimed))
             {
-                if (commander.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && !UnitCommanders.Any(c => c.UnitCalculation.Unit.Tag == commander.Key))
+                if (commander.Value.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.Worker) && !UnitCommanders.Any(c => c.UnitCalculation.Unit.Tag == commander.Key))
                 {
                     commander.Value.Claimed = true;
                     UnitCommanders.Add(commander.Value);
@@ -95,7 +95,7 @@
                 commands.AddRange(OverSaturatedWithExtraIdleWorkers(frame));
             }
 
-            if (MacroData.Minerals < 300 && UnitCommanders.Any() && !BaseData.SelfBases.Any() && !ActiveUnitData.SelfUnits.Values.Any(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter)))
+            if (MacroData.Minerals < 300 && UnitCommanders.Any() && !BaseData.SelfBases.Any() && !ActiveUnitData.SelfUnits.Values.Any(u => u.UnitClassifications.HasFlag(UnitClassification.ResourceCenter)))
             {
                 AttackWithWorkers();
             }
@@ -221,7 +221,7 @@
                             if (ActiveUnitData.SelfUnits.ContainsKey(selfBase.ResourceCenter.Tag))
                             {
                                 var unitCalculation = ActiveUnitData.SelfUnits[selfBase.ResourceCenter.Tag];
-                                var workers = unitCalculation.NearbyAllies.Where(c => c.UnitClassifications.Contains(UnitClassification.Worker) && !c.Unit.BuffIds.Any(b => SharkyUnitData.CarryingMineralBuffs.Contains((Buffs)b)));
+                                var workers = unitCalculation.NearbyAllies.Where(c => c.UnitClassifications.HasFlag(UnitClassification.Worker) && !c.Unit.BuffIds.Any(b => SharkyUnitData.CarryingMineralBuffs.Contains((Buffs)b)));
                                 idleWorkers = UnitCommanders.Where(c => c.UnitRole == UnitRole.Gas && workers.Any(w => w.Unit.Tag == c.UnitCalculation.Unit.Tag)).OrderBy(c => Vector2.DistanceSquared(vector, c.UnitCalculation.Position));
                             }
                         }
@@ -251,7 +251,7 @@
                                 if (ActiveUnitData.SelfUnits.ContainsKey(info.ResourceUnit.Tag))
                                 {
                                     var unitCalculation = ActiveUnitData.SelfUnits[info.ResourceUnit.Tag];
-                                    var workers = unitCalculation.NearbyAllies.Where(c => c.UnitClassifications.Contains(UnitClassification.Worker) && !c.Unit.BuffIds.Any(b => SharkyUnitData.CarryingMineralBuffs.Contains((Buffs)b)));
+                                    var workers = unitCalculation.NearbyAllies.Where(c => c.UnitClassifications.HasFlag(UnitClassification.Worker) && !c.Unit.BuffIds.Any(b => SharkyUnitData.CarryingMineralBuffs.Contains((Buffs)b)));
                                     idleWorkers = UnitCommanders.Where(c => c.UnitRole == UnitRole.Minerals && workers.Any(w => w.Unit.Tag == c.UnitCalculation.Unit.Tag)).OrderBy(c => Vector2.DistanceSquared(gasVector, c.UnitCalculation.Position));
                                 }
                             }
@@ -568,7 +568,7 @@
 
         UnitCommander GetOutOfPlaceBase()
         {
-            return ActiveUnitData.Commanders.Values.FirstOrDefault(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.ResourceCenter) && c.UnitCalculation.Unit.BuildProgress > .75f && !BaseData.SelfBases.Any(b => b.ResourceCenter != null && b.ResourceCenter.Tag == c.UnitCalculation.Unit.Tag));
+            return ActiveUnitData.Commanders.Values.FirstOrDefault(c => c.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.ResourceCenter) && c.UnitCalculation.Unit.BuildProgress > .75f && !BaseData.SelfBases.Any(b => b.ResourceCenter != null && b.ResourceCenter.Tag == c.UnitCalculation.Unit.Tag));
         }
 
         private void AttackWithWorker(UnitCommander worker)
@@ -598,11 +598,11 @@
                 var attackTask = MicroTaskData[typeof(AttackTask).Name];
                 if (attackTask.Enabled)
                 {
-                    var canWork = MacroData.Minerals < 300 && UnitCommanders.Any() && !BaseData.SelfBases.Any() && !ActiveUnitData.SelfUnits.Values.Any(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter));
+                    var canWork = MacroData.Minerals < 300 && UnitCommanders.Any() && !BaseData.SelfBases.Any() && !ActiveUnitData.SelfUnits.Values.Any(u => u.UnitClassifications.HasFlag(UnitClassification.ResourceCenter));
                     if (!canWork) { return; }
 
                     var tags = new List<ulong>();
-                    foreach (var worker in attackTask.UnitCommanders.Where(u => u.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && u.UnitRole != UnitRole.Proxy && (u.UnitCalculation.NearbyEnemies.Count(e => e.FrameFirstSeen == frame) == 0 || !u.UnitCalculation.NearbyAllies.Any(a => a.Attributes.Contains(SC2APIProtocol.Attribute.Structure))) && u.UnitRole == UnitRole.Attack))
+                    foreach (var worker in attackTask.UnitCommanders.Where(u => u.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.Worker) && u.UnitRole != UnitRole.Proxy && (u.UnitCalculation.NearbyEnemies.Count(e => e.FrameFirstSeen == frame) == 0 || !u.UnitCalculation.NearbyAllies.Any(a => a.Attributes.Contains(SC2APIProtocol.Attribute.Structure))) && u.UnitRole == UnitRole.Attack))
                     {
                         worker.UnitRole = UnitRole.None;
                         worker.Claimed = false;

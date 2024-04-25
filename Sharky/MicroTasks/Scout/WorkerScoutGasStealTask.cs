@@ -87,7 +87,7 @@
                     return;
                 }
 
-                var workers = commanders.Where(commander => commander.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker));
+                var workers = commanders.Where(commander => commander.Value.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.Worker));
                 var scouter = workers.FirstOrDefault(commander => !commander.Value.Claimed);
                 if (scouter.Value == null)
                 {
@@ -171,7 +171,7 @@
                     continue;
                 }
 
-                if (commander.UnitCalculation.Unit.ShieldMax > 5 && (commander.UnitCalculation.Unit.Shield < 5 || (commander.UnitCalculation.Unit.Shield < commander.UnitCalculation.Unit.ShieldMax && commander.UnitCalculation.EnemiesInRangeOf.Count(e => !e.UnitClassifications.Contains(UnitClassification.Worker)) > 0)))
+                if (commander.UnitCalculation.Unit.ShieldMax > 5 && (commander.UnitCalculation.Unit.Shield < 5 || (commander.UnitCalculation.Unit.Shield < commander.UnitCalculation.Unit.ShieldMax && commander.UnitCalculation.EnemiesInRangeOf.Count(e => !e.UnitClassifications.HasFlag(UnitClassification.Worker)) > 0)))
                 {
                     if (MineralWalker.MineralWalkHome(commander, frame, out List<SC2APIProtocol.Action> mineralWalk))
                     {
@@ -194,7 +194,7 @@
                         {
                             foreach (var gas in enemyBase.VespeneGeysers.Where(g => g.Alliance == Alliance.Neutral && MapDataService.SelfVisible(g.Pos)))
                             {
-                                if (Vector2.DistanceSquared(new Vector2(gas.Pos.X, gas.Pos.Y), commander.UnitCalculation.Position) < 400 && commander.UnitCalculation.NearbyEnemies.Count(e => e.UnitClassifications.Contains(UnitClassification.Worker)) > 5)
+                                if (Vector2.DistanceSquared(new Vector2(gas.Pos.X, gas.Pos.Y), commander.UnitCalculation.Position) < 400 && commander.UnitCalculation.NearbyEnemies.Count(e => e.UnitClassifications.HasFlag(UnitClassification.Worker)) > 5)
                                 {
                                     var gasSteal = commander.Order(frame, Abilities.BUILD_ASSIMILATOR, null, gas.Tag);
                                     if (gasSteal != null)
@@ -243,7 +243,7 @@
                             var expansionVector = new Vector2(expansion.Location.X, expansion.Location.Y);
                             if (Vector2.DistanceSquared(expansionVector, commander.UnitCalculation.Position) < 225)
                             {
-                                if (!commander.UnitCalculation.NearbyAllies.Any(a => Vector2.DistanceSquared(expansionVector, a.Position) < 9) && !commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ResourceCenter) && !e.Unit.IsFlying && Vector2.DistanceSquared(expansionVector, e.Position) < 2))
+                                if (!commander.UnitCalculation.NearbyAllies.Any(a => Vector2.DistanceSquared(expansionVector, a.Position) < 9) && !commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.ResourceCenter) && !e.Unit.IsFlying && Vector2.DistanceSquared(expansionVector, e.Position) < 2))
                                 {
                                     var expansionBlock = commander.Order(frame, Abilities.BUILD_PYLON, expansion.Location);
                                     if (expansionBlock != null)
@@ -358,7 +358,7 @@
                 }
                 if (navpoint != null)
                 {
-                    if (commander.UnitCalculation.Unit.Shield > 15 && commander.UnitCalculation.NearbyEnemies.Any() && (commander.UnitCalculation.NearbyAllies.Any(a => a.UnitClassifications.Contains(UnitClassification.ArmyUnit)) || (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ResourceCenter) && e.Unit.BuildProgress == 1) && commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker)))))
+                    if (commander.UnitCalculation.Unit.Shield > 15 && commander.UnitCalculation.NearbyEnemies.Any() && (commander.UnitCalculation.NearbyAllies.Any(a => a.UnitClassifications.HasFlag(UnitClassification.ArmyUnit)) || (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.ResourceCenter) && e.Unit.BuildProgress == 1) && commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.Worker)))))
                     {
                         if (!ScoutEntireAreaBeforeAttacking || ScoutPoints.All(p => MapDataService.LastFrameVisibility(p) > 100))
                         {
@@ -417,7 +417,7 @@
 
             if (frame > 1.9 * 60 * SharkyOptions.FramesPerSecond)
             {
-                if (commander.UnitCalculation.NearbyEnemies.Count(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit)) == 1 && commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ProductionStructure)))
+                if (commander.UnitCalculation.NearbyEnemies.Count(e => e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit)) == 1 && commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.ProductionStructure)))
                 {
                     var nexus = ActiveUnitData.Commanders.Values.FirstOrDefault(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS && c.UnitCalculation.Unit.BuildProgress == 1 && c.UnitCalculation.Unit.Energy >= 50);
                     if (nexus != null)

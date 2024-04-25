@@ -149,7 +149,7 @@
             {
                 if (!commander.Value.Claimed)
                 {
-                    if (commander.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.ArmyUnit) || commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_ADEPTPHASESHIFT || commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_DISRUPTORPHASED)
+                    if (commander.Value.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) || commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_ADEPTPHASESHIFT || commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_DISRUPTORPHASED)
                     {
                         CameraManager.SetCamera(commander.Value.UnitCalculation.Position);
 
@@ -305,7 +305,7 @@
 
             if (OnlyDefendBuildings)
             {
-                attackingEnemies = ActiveUnitData.EnemyUnits.Values.Where(e => e.FrameLastSeen > frame - 100 && e.NearbyEnemies.Any(u => (u.UnitClassifications.Contains(UnitClassification.ResourceCenter) || u.UnitClassifications.Contains(UnitClassification.ProductionStructure) || u.UnitClassifications.Contains(UnitClassification.DefensiveStructure)) && u.EnemiesThreateningDamage.Any()));
+                attackingEnemies = ActiveUnitData.EnemyUnits.Values.Where(e => e.FrameLastSeen > frame - 100 && e.NearbyEnemies.Any(u => (u.UnitClassifications.HasFlag(UnitClassification.ResourceCenter) || u.UnitClassifications.HasFlag(UnitClassification.ProductionStructure) || u.UnitClassifications.HasFlag(UnitClassification.DefensiveStructure)) && u.EnemiesThreateningDamage.Any()));
             }
 
             if (DeathBallMode)
@@ -333,7 +333,7 @@
                 {
                     if (DeathBallMode)
                     {
-                        var baseUnderAttack = ActiveUnitData.SelfUnits.Values.Where(a => (a.UnitClassifications.Contains(UnitClassification.DefensiveStructure) && a.EnemiesInRangeOf.Any()) || (a.UnitClassifications.Contains(UnitClassification.ResourceCenter) && a.NearbyEnemies.Any(e => e.Damage > 0)));
+                        var baseUnderAttack = ActiveUnitData.SelfUnits.Values.Where(a => (a.UnitClassifications.HasFlag(UnitClassification.DefensiveStructure) && a.EnemiesInRangeOf.Any()) || (a.UnitClassifications.HasFlag(UnitClassification.ResourceCenter) && a.NearbyEnemies.Any(e => e.Damage > 0)));
                         if (baseUnderAttack.Any())
                         {
                             attackPoint = baseUnderAttack.OrderBy(e => Vector2.DistanceSquared(e.Position, armyVector)).FirstOrDefault().Position.ToPoint2D();

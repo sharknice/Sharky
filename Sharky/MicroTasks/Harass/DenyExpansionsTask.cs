@@ -105,7 +105,7 @@
                     }
                     else
                     {
-                        if (distanceSquared > 4 && commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ResourceCenter) || e.UnitClassifications.Contains(UnitClassification.Worker)))
+                        if (distanceSquared > 4 && commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.ResourceCenter) || e.UnitClassifications.HasFlag(UnitClassification.Worker)))
                         {
                             var enemy = GetEnemyBuildingScv(commander.UnitCalculation.NearbyEnemies);
                             if (enemy != null)

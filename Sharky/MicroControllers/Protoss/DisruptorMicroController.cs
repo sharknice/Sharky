@@ -169,7 +169,7 @@
             // only go for 3+ unit clumps unless against queens, thors, or tanks, or if no other friendly army to kill enemy
             if (!unitCalculation.EnemiesThreateningDamage.Any() &&
                 best.Value < 3 && 
-                unitCalculation.NearbyAllies.Take(25).Any(u => u.UnitClassifications.Contains(UnitClassification.ArmyUnit) && u.Unit.UnitType != (uint)UnitTypes.PROTOSS_DISRUPTOR) && 
+                unitCalculation.NearbyAllies.Take(25).Any(u => u.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) && u.Unit.UnitType != (uint)UnitTypes.PROTOSS_DISRUPTOR) && 
                 !enemies.Any(e => e.Unit.UnitType == (uint)UnitTypes.ZERG_QUEEN || e.Unit.UnitType == (uint)UnitTypes.TERRAN_THOR || e.Unit.UnitType == (uint)UnitTypes.TERRAN_THORAP || e.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANK || e.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED))
             {
                 return null;

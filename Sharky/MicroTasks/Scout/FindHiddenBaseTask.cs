@@ -29,7 +29,7 @@
             {
                 foreach (var commander in commanders)
                 {
-                    if (!commander.Value.Claimed && (commander.Value.UnitCalculation.Unit.IsFlying || commander.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.ArmyUnit)))
+                    if (!commander.Value.Claimed && (commander.Value.UnitCalculation.Unit.IsFlying || commander.Value.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.ArmyUnit)))
                     {
                         commander.Value.Claimed = true;
                         UnitCommanders.Add(commander.Value);

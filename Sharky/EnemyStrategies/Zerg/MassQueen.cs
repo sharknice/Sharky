@@ -10,7 +10,7 @@
         {
             if (EnemyData.EnemyRace != SC2APIProtocol.Race.Zerg || MadeRegularArmy) { return false; }
 
-            if (ActiveUnitData.EnemyUnits.Values.Count(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && e.Unit.UnitType != (uint)UnitTypes.ZERG_QUEEN && e.Unit.UnitType != (uint)UnitTypes.ZERG_QUEENBURROWED) > 10)
+            if (ActiveUnitData.EnemyUnits.Values.Count(e => e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) && e.Unit.UnitType != (uint)UnitTypes.ZERG_QUEEN && e.Unit.UnitType != (uint)UnitTypes.ZERG_QUEENBURROWED) > 10)
             {
                 MadeRegularArmy = true;
             }

@@ -61,7 +61,7 @@
 
             if (commander.UnitRole != UnitRole.Defend)
             {
-                var hiddenUnits = ActiveUnitData.EnemyUnits.Values.Where(e => (e.Unit.DisplayType == DisplayType.Hidden || e.UnitClassifications.Contains(UnitClassification.Cloakable)) && !e.Unit.BuffIds.Contains((uint)Buffs.ORACLEREVELATION)).OrderBy(e => Vector2.DistanceSquared(pos, e.Position));
+                var hiddenUnits = ActiveUnitData.EnemyUnits.Values.Where(e => (e.Unit.DisplayType == DisplayType.Hidden || e.UnitClassifications.HasFlag(UnitClassification.Cloakable)) && !e.Unit.BuffIds.Contains((uint)Buffs.ORACLEREVELATION)).OrderBy(e => Vector2.DistanceSquared(pos, e.Position));
                 var hiddenByAllies = hiddenUnits.FirstOrDefault(e => e.NearbyEnemies.Any(e => !e.Unit.IsHallucination));
                 if (hiddenByAllies != null)
                 {
@@ -258,7 +258,7 @@
                 return false;
             }
 
-            if (commander.UnitCalculation.NearbyAllies.Count() > 10 && commander.UnitCalculation.NearbyEnemies.Count(e => !e.Unit.IsFlying && e.UnitClassifications.Contains(UnitClassification.ArmyUnit)) > 10)
+            if (commander.UnitCalculation.NearbyAllies.Count() > 10 && commander.UnitCalculation.NearbyEnemies.Count(e => !e.Unit.IsFlying && e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit)) > 10)
             {
                 var existingStasisWard = commander.UnitCalculation.NearbyAllies.FirstOrDefault(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_ORACLESTASISTRAP);
                 if (existingStasisWard == null)
@@ -282,11 +282,11 @@
 
         public override bool AttackBestTarget(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
-            if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker)))
+            if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.Worker)))
             {
                 commander.UnitCalculation.TargetPriorityCalculation.TargetPriority = TargetPriority.KillWorkers;
 
-                var quickKill = commander.UnitCalculation.NearbyEnemies.Where(e => e.UnitClassifications.Contains(UnitClassification.Worker) && e.SimulatedHitpoints <= 5).OrderBy(e => Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+                var quickKill = commander.UnitCalculation.NearbyEnemies.Where(e => e.UnitClassifications.HasFlag(UnitClassification.Worker) && e.SimulatedHitpoints <= 5).OrderBy(e => Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position)).FirstOrDefault();
                 if (quickKill != null && Vector2.DistanceSquared(quickKill.Position, commander.UnitCalculation.Position) < (commander.UnitCalculation.Range + 2) * (commander.UnitCalculation.Range + 2))
                 {
                     action = commander.Order(frame, Abilities.ATTACK, targetTag: quickKill.Unit.Tag);
@@ -305,7 +305,7 @@
         public override bool AttackBestTargetInRange(UnitCommander commander, Point2D target, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
-            if (bestTarget != null && (bestTarget.UnitClassifications.Contains(UnitClassification.Worker) || !commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker))))
+            if (bestTarget != null && (bestTarget.UnitClassifications.HasFlag(UnitClassification.Worker) || !commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.Worker))))
             {
                 if (commander.UnitCalculation.EnemiesInRange.Any(e => e.Unit.Tag == bestTarget.Unit.Tag) && bestTarget.Unit.DisplayType == DisplayType.Visible)
                 {

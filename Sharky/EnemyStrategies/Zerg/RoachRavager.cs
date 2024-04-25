@@ -8,7 +8,7 @@
         {
             if (EnemyData.EnemyRace != SC2APIProtocol.Race.Zerg) { return false; }
 
-            if (ActiveUnitData.EnemyUnits.Values.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && e.Unit.UnitType != (uint)UnitTypes.ZERG_ROACH && e.Unit.UnitType != (uint)UnitTypes.ZERG_RAVAGER && e.Unit.UnitType != (uint)UnitTypes.ZERG_RAVAGERCOCOON))
+            if (ActiveUnitData.EnemyUnits.Values.Any(e => e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) && e.Unit.UnitType != (uint)UnitTypes.ZERG_ROACH && e.Unit.UnitType != (uint)UnitTypes.ZERG_RAVAGER && e.Unit.UnitType != (uint)UnitTypes.ZERG_RAVAGERCOCOON))
             {
                 return false;
             }

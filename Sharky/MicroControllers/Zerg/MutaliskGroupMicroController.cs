@@ -56,12 +56,12 @@
                 if (harass)
                 {
                     target = GetNextTargetPoint(leader, target);
-                    if (leader.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker)) && (!leader.UnitCalculation.TargetPriorityCalculation.Overwhelm || !leader.UnitCalculation.NearbyAllies.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) || e.UnitClassifications.Contains(UnitClassification.DefensiveStructure))))
+                    if (leader.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.Worker)) && (!leader.UnitCalculation.TargetPriorityCalculation.Overwhelm || !leader.UnitCalculation.NearbyAllies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) || e.UnitClassifications.HasFlag(UnitClassification.DefensiveStructure))))
                     {
                         leader.UnitCalculation.TargetPriorityCalculation.TargetPriority = TargetPriority.KillWorkers;
                     }
                     // if enemies threatening damage and no free kills run away
-                    if (leader.UnitCalculation.Unit.Health < leader.UnitCalculation.Unit.HealthMax / 2 && leader.UnitCalculation.EnemiesThreateningDamage.Any() && !leader.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker)))
+                    if (leader.UnitCalculation.Unit.Health < leader.UnitCalculation.Unit.HealthMax / 2 && leader.UnitCalculation.EnemiesThreateningDamage.Any() && !leader.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.Worker)))
                     {
                         foreach(var commander in commanders)
                         {

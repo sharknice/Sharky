@@ -402,7 +402,7 @@
 
         public BaseLocation GetNextBaseLocation()
         {
-            var resourceCenters = ActiveUnitData.SelfUnits.Values.Where(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter));
+            var resourceCenters = ActiveUnitData.SelfUnits.Values.Where(u => u.UnitClassifications.HasFlag(UnitClassification.ResourceCenter));
             var openBases = BaseData.BaseLocations.Where(b => !resourceCenters.Any(r => Vector2.DistanceSquared(r.Position, new Vector2(b.Location.X, b.Location.Y)) < 25));
 
             foreach (var openBase in openBases)
@@ -422,7 +422,7 @@
 
         public IEnumerable<UnitCalculation> GetMineralsBlockingNextBase()
         {
-            var resourceCenters = ActiveUnitData.SelfUnits.Values.Where(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter));
+            var resourceCenters = ActiveUnitData.SelfUnits.Values.Where(u => u.UnitClassifications.HasFlag(UnitClassification.ResourceCenter));
             var openBases = BaseData.BaseLocations.Where(b => !resourceCenters.Any(r => Vector2.DistanceSquared(r.Position, new Vector2(b.Location.X, b.Location.Y)) < 25));
 
             foreach (var openBase in openBases)

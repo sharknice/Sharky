@@ -61,7 +61,7 @@
                 if (commander.UnitCalculation.Unit.Energy >= 50 && frame - LastForceFieldFrame > 20)
                 {
                     var probeHeight = MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos);
-                    if (commander.UnitCalculation.NearbyEnemies.Any(e => e.FrameLastSeen >= frame - 1 && e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !e.Attributes.Contains(SC2APIProtocol.Attribute.Massive) && !e.Unit.IsFlying && e.Unit.UnitType != (uint)UnitTypes.PROTOSS_ADEPTPHASESHIFT && probeHeight > MapDataService.MapHeight(e.Unit.Pos)))
+                    if (commander.UnitCalculation.NearbyEnemies.Any(e => e.FrameLastSeen >= frame - 1 && e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) && !e.Attributes.Contains(SC2APIProtocol.Attribute.Massive) && !e.Unit.IsFlying && e.Unit.UnitType != (uint)UnitTypes.PROTOSS_ADEPTPHASESHIFT && probeHeight > MapDataService.MapHeight(e.Unit.Pos)))
                     {
                         LastForceFieldFrame = frame;
                         var action = commander.Order(frame, Abilities.EFFECT_FORCEFIELD, ForceFieldPoint);

@@ -31,7 +31,7 @@
 
             if (commander.UnitCalculation.Unit.Energy < 40 ||
                 (!SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.PSISTORMTECH) && !commander.UnitCalculation.NearbyEnemies.Any(e => e.Unit.Energy > 10) && // stay in the back if can't use spells on anything
-                commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit)) && commander.UnitCalculation.NearbyAllies.Count(a => a.UnitClassifications.Contains(UnitClassification.ArmyUnit)) > 2))
+                commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit)) && commander.UnitCalculation.NearbyAllies.Count(a => a.UnitClassifications.HasFlag(UnitClassification.ArmyUnit)) > 2))
             {
                 if (Retreat(commander, target, defensivePoint, frame, out action)) { return true; }
             }
@@ -127,7 +127,7 @@
             var target = enemiesInRange.FirstOrDefault(e => e.Unit.UnitType != (uint)UnitTypes.ZERG_OVERSEER && e.Unit.Energy > 50);
             if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.KillDetection)
             {
-                var detector = enemiesInRange.FirstOrDefault(e => e.UnitClassifications.Contains(UnitClassification.Detector));
+                var detector = enemiesInRange.FirstOrDefault(e => e.UnitClassifications.HasFlag(UnitClassification.Detector));
                 if (detector != null)
                 {
                     target = detector;

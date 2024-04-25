@@ -11,7 +11,7 @@
 
             if (Expired) { return false; }
 
-            if (ActiveUnitData.EnemyUnits.Values.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && e.Unit.UnitType != (uint)UnitTypes.PROTOSS_ZEALOT))
+            if (ActiveUnitData.EnemyUnits.Values.Any(e => e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) && e.Unit.UnitType != (uint)UnitTypes.PROTOSS_ZEALOT))
             {
                 Expired = true;
                 return false;

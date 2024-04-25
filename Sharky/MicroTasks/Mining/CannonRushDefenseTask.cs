@@ -47,7 +47,7 @@
             var commands = new List<SC2APIProtocol.Action>();
 
             var enemyCannons = ActiveUnitData.EnemyUnits.Values.Where(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_PHOTONCANNON && !e.NearbyAllies.Any(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS)).OrderBy(c => Vector2.DistanceSquared(new Vector2(TargetingData.SelfMainBasePoint.X, TargetingData.SelfMainBasePoint.Y), c.Position)).Where(c => Vector2.DistanceSquared(new Vector2(TargetingData.SelfMainBasePoint.X, TargetingData.SelfMainBasePoint.Y), c.Position) < 2500);
-            var enemyPylons = ActiveUnitData.EnemyUnits.Values.Where(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && !e.NearbyAllies.Any(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS) && !e.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit))).OrderBy(c => Vector2.DistanceSquared(new Vector2(TargetingData.SelfMainBasePoint.X, TargetingData.SelfMainBasePoint.Y), c.Position)).Where(c => Vector2.DistanceSquared(new Vector2(TargetingData.SelfMainBasePoint.X, TargetingData.SelfMainBasePoint.Y), c.Position) < 2500);
+            var enemyPylons = ActiveUnitData.EnemyUnits.Values.Where(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && !e.NearbyAllies.Any(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS) && !e.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit))).OrderBy(c => Vector2.DistanceSquared(new Vector2(TargetingData.SelfMainBasePoint.X, TargetingData.SelfMainBasePoint.Y), c.Position)).Where(c => Vector2.DistanceSquared(new Vector2(TargetingData.SelfMainBasePoint.X, TargetingData.SelfMainBasePoint.Y), c.Position) < 2500);
 
             if (!enemyCannons.Any(e => e.Unit.BuildProgress == 1 && e.Unit.Shield > 5) && (enemyPylons.Any() || enemyCannons.Any(e => e.Unit.BuildProgress < 1 || e.Unit.Shield <= 5)))
             {
@@ -115,7 +115,7 @@
         {
             if (LastClaimFrame > frame - 3 || UnitCommanders.Count() > 9) { return; }
 
-            var worker = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && 
+            var worker = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.Worker) && 
                 (c.UnitRole == UnitRole.Minerals || c.UnitRole == UnitRole.Gas) && 
                 c.UnitCalculation.Unit.Health + c.UnitCalculation.Unit.Shield >= 40).OrderBy(c => Vector2.DistanceSquared(c.UnitCalculation.Position, enemyCannon.Position)).FirstOrDefault();
 

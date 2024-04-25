@@ -59,7 +59,7 @@
                 }
 
                 bestAttack = GetBestTargetFromList(commander, attacks, existingAttackOrder);
-                if (bestAttack != null && (bestAttack.UnitClassifications.Contains(UnitClassification.ArmyUnit) || bestAttack.UnitClassifications.Contains(UnitClassification.DefensiveStructure) || (bestAttack.UnitClassifications.Contains(UnitClassification.Worker) && bestAttack.EnemiesInRange.Any(e => e.Unit.Tag == commander.UnitCalculation.Unit.Tag))))
+                if (bestAttack != null && (bestAttack.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) || bestAttack.UnitClassifications.HasFlag(UnitClassification.DefensiveStructure) || (bestAttack.UnitClassifications.HasFlag(UnitClassification.Worker) && bestAttack.EnemiesInRange.Any(e => e.Unit.Tag == commander.UnitCalculation.Unit.Tag))))
                 {
                     commander.BestTarget = bestAttack;
                     return bestAttack;
@@ -72,7 +72,7 @@
             if (safeAttacks.Any())
             {
                 var bestOutOfRangeAttack = GetBestTargetFromList(commander, safeAttacks, existingAttackOrder);
-                if (bestOutOfRangeAttack != null && (bestOutOfRangeAttack.UnitClassifications.Contains(UnitClassification.ArmyUnit) || bestOutOfRangeAttack.UnitClassifications.Contains(UnitClassification.DefensiveStructure)))
+                if (bestOutOfRangeAttack != null && (bestOutOfRangeAttack.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) || bestOutOfRangeAttack.UnitClassifications.HasFlag(UnitClassification.DefensiveStructure)))
                 {
                     commander.BestTarget = bestOutOfRangeAttack;
                     return bestOutOfRangeAttack;
@@ -91,12 +91,12 @@
             if (attacks.Any())
             {
                 var bestOutOfRangeAttack = GetBestTargetFromList(commander, attacks, existingAttackOrder);
-                if (bestOutOfRangeAttack != null && (bestOutOfRangeAttack.UnitClassifications.Contains(UnitClassification.ArmyUnit) || bestOutOfRangeAttack.UnitClassifications.Contains(UnitClassification.DefensiveStructure)))
+                if (bestOutOfRangeAttack != null && (bestOutOfRangeAttack.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) || bestOutOfRangeAttack.UnitClassifications.HasFlag(UnitClassification.DefensiveStructure)))
                 {
                     var movementSpeed = GetMovementSpeed(commander);
                     if (bestOutOfRangeAttack.Unit.UnitType == (uint)UnitTypes.TERRAN_REAPER && movementSpeed < bestOutOfRangeAttack.UnitTypeData.MovementSpeed)
                     {
-                        if (commander.UnitCalculation.NearbyAllies.Any(a => a.UnitClassifications.Contains(UnitClassification.ArmyUnit) && Vector2.DistanceSquared(a.Position, bestOutOfRangeAttack.Position) < Vector2.DistanceSquared(commander.UnitCalculation.Position, bestOutOfRangeAttack.Position)))
+                        if (commander.UnitCalculation.NearbyAllies.Any(a => a.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) && Vector2.DistanceSquared(a.Position, bestOutOfRangeAttack.Position) < Vector2.DistanceSquared(commander.UnitCalculation.Position, bestOutOfRangeAttack.Position)))
                         {
                             bestOutOfRangeAttack = GetBestTargetFromList(commander, attacks.Where(a => a.UnitTypeData.MovementSpeed <= movementSpeed), existingAttackOrder);
                         }
@@ -125,7 +125,7 @@
                 if (attacks.Any())
                 {
                     var bestMainAttack = GetBestTargetFromList(commander, attacks, existingAttackOrder);
-                    if (bestMainAttack != null && (bestMainAttack.UnitClassifications.Contains(UnitClassification.ArmyUnit) || bestMainAttack.UnitClassifications.Contains(UnitClassification.DefensiveStructure) || bestMainAttack.UnitClassifications.Contains(UnitClassification.Worker)))
+                    if (bestMainAttack != null && (bestMainAttack.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) || bestMainAttack.UnitClassifications.HasFlag(UnitClassification.DefensiveStructure) || bestMainAttack.UnitClassifications.HasFlag(UnitClassification.Worker)))
                     {
                         commander.BestTarget = bestMainAttack;
                         return bestMainAttack;

@@ -24,7 +24,7 @@
         public float SimulatedHitpoints { get; set; }
         public float SimulatedHealPerSecond { get; set; }
         public IEnumerable<SC2APIProtocol.Attribute> Attributes { get; set; }
-       
+
         /// <summary>
         /// Position this unit will be in the next frame
         /// </summary>
@@ -68,7 +68,7 @@
         /// </summary>
         public List<UnitCalculation> Targeters { get; set; }
 
-        public List<UnitClassification> UnitClassifications { get; set; }
+        public UnitClassification UnitClassifications { get; set; }
         public TargetPriorityCalculation TargetPriorityCalculation { get; set; }
         public UnitTypeData UnitTypeData { get; set; }
         public int FrameLastSeen { get; set; }
@@ -209,22 +209,22 @@
 
             Attributes = UnitTypeData.Attributes;
 
-            UnitClassifications = new List<UnitClassification>();
+            UnitClassifications = UnitClassification.None;
             if (UnitTypeData.Attributes.Contains(SC2APIProtocol.Attribute.Structure))
             {
                 if (sharkyUnitData.ResourceCenterTypes.Contains((UnitTypes)unit.UnitType))
                 {
-                    UnitClassifications.Add(UnitClassification.ResourceCenter);
-                    UnitClassifications.Add(UnitClassification.ProductionStructure);
+                    UnitClassifications |= (UnitClassification.ResourceCenter);
+                    UnitClassifications |= (UnitClassification.ProductionStructure);
                 }
                 if (sharkyUnitData.DefensiveStructureTypes.Contains((UnitTypes)unit.UnitType))
                 {
-                    UnitClassifications.Add(UnitClassification.DefensiveStructure);
+                    UnitClassifications |= (UnitClassification.DefensiveStructure);
                 }
             }
             else if (unit.UnitType == (uint)UnitTypes.TERRAN_SCV || unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE || unit.UnitType == (uint)UnitTypes.ZERG_DRONE)
             {
-                UnitClassifications.Add(UnitClassification.Worker);
+                UnitClassifications |= (UnitClassification.Worker);
             }
             else if (unit.UnitType == (uint)UnitTypes.ZERG_QUEEN || unit.UnitType == (uint)UnitTypes.TERRAN_MULE || unit.UnitType == (uint)UnitTypes.ZERG_OVERLORD || unit.UnitType == (uint)UnitTypes.ZERG_LARVA || unit.UnitType == (uint)UnitTypes.ZERG_EGG)
             {
@@ -233,25 +233,25 @@
             else if (Damage > 0 || unit.EnergyMax > 0 || unit.CargoSpaceMax > 0 || sharkyUnitData.DetectionTypes.Contains((UnitTypes)unit.UnitType) ||
                 unit.UnitType == (uint)UnitTypes.ZERG_SWARMHOSTBURROWEDMP || unit.UnitType == (uint)UnitTypes.ZERG_SWARMHOSTMP || unit.UnitType == (uint)UnitTypes.PROTOSS_DISRUPTOR || unit.UnitType == (uint)UnitTypes.PROTOSS_DISRUPTORPHASED)
             {
-                UnitClassifications.Add(UnitClassification.ArmyUnit);
+                UnitClassifications |= (UnitClassification.ArmyUnit);
             }
 
             if (unit.UnitType == (uint)UnitTypes.ZERG_QUEEN && unit.Alliance == Alliance.Enemy)
             {
-                UnitClassifications.Add(UnitClassification.ArmyUnit);
+                UnitClassifications |= (UnitClassification.ArmyUnit);
             }
 
             if (sharkyUnitData.DetectionTypes.Contains((UnitTypes)unit.UnitType))
             {
-                UnitClassifications.Add(UnitClassification.Detector);
+                UnitClassifications |= (UnitClassification.Detector);
             }
             if (sharkyUnitData.AbilityDetectionTypes.Contains((UnitTypes)unit.UnitType))
             {
-                UnitClassifications.Add(UnitClassification.DetectionCaster);
+                UnitClassifications |= (UnitClassification.DetectionCaster);
             }
             if (sharkyUnitData.CloakableAttackers.Contains((UnitTypes)unit.UnitType))
             {
-                UnitClassifications.Add(UnitClassification.Cloakable);
+                UnitClassifications |= (UnitClassification.Cloakable);
             }
 
             EnemiesInRange = new List<UnitCalculation>();

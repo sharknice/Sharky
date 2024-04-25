@@ -28,13 +28,13 @@
             var enemyAttributes = enemyGroup.SelectMany(e => e.Attributes).Distinct();
             var hasGround = enemyGroup.Any(e => !e.Unit.IsFlying);
             var hasAir = enemyGroup.Any(e => e.Unit.IsFlying);
-            var cloakable = enemyGroup.Any(e => e.UnitClassifications.Contains(UnitClassification.Cloakable));
+            var cloakable = enemyGroup.Any(e => e.UnitClassifications.HasFlag(UnitClassification.Cloakable));
 
             var counterGroup = new List<UnitCommander>();
 
             foreach (var commander in unitCommanders.Where(c => defendToDeath || CanSplitCommander(c)))
             {
-                if ((hasGround && commander.UnitCalculation.DamageGround) || (hasAir && commander.UnitCalculation.DamageAir) || (cloakable && (commander.UnitCalculation.UnitClassifications.Contains(UnitClassification.Detector) || commander.UnitCalculation.UnitClassifications.Contains(UnitClassification.DetectionCaster))) || commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PHOENIX)
+                if ((hasGround && commander.UnitCalculation.DamageGround) || (hasAir && commander.UnitCalculation.DamageAir) || (cloakable && (commander.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.Detector) || commander.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.DetectionCaster))) || commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PHOENIX)
                 {
                     counterGroup.Add(commander);
 
@@ -115,14 +115,14 @@
             var enemyAttributes = split.EnemyGroup.SelectMany(e => e.Attributes).Distinct();
             var hasGround = split.EnemyGroup.Any(e => !e.Unit.IsFlying);
             var hasAir = split.EnemyGroup.Any(e => e.Unit.IsFlying);
-            var cloakable = split.EnemyGroup.Any(e => e.UnitClassifications.Contains(UnitClassification.Cloakable));
+            var cloakable = split.EnemyGroup.Any(e => e.UnitClassifications.HasFlag(UnitClassification.Cloakable));
 
             var counterGroup = new List<UnitCommander>();
             counterGroup.AddRange(split.SelfGroup);
 
             foreach (var commander in availableCommanders.Where(c => CanSplitCommander(c)))
             {
-                if ((hasGround && commander.UnitCalculation.DamageGround) || (hasAir && commander.UnitCalculation.DamageAir) || (cloakable && (commander.UnitCalculation.UnitClassifications.Contains(UnitClassification.Detector) || commander.UnitCalculation.UnitClassifications.Contains(UnitClassification.DetectionCaster))) || commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PHOENIX)
+                if ((hasGround && commander.UnitCalculation.DamageGround) || (hasAir && commander.UnitCalculation.DamageAir) || (cloakable && (commander.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.Detector) || commander.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.DetectionCaster))) || commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PHOENIX)
                 {
                     reinforcements.Add(commander);
                     counterGroup.Add(commander);

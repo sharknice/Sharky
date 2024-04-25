@@ -139,7 +139,7 @@
                 var vector = new Vector2(ProbeSpot.X, ProbeSpot.Y);
                 foreach (var commander in commanders.Where(c => c.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE).OrderBy(c => c.Value.Claimed).ThenBy(c => c.Value.UnitCalculation.Unit.BuffIds.Count()).ThenBy(u => Vector2.DistanceSquared(vector, u.Value.UnitCalculation.Position)))
                 {
-                    if (commander.Value.UnitRole != UnitRole.Gas && (!commander.Value.Claimed || commander.Value.UnitRole == UnitRole.Minerals) && commander.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && !commander.Value.UnitCalculation.Unit.BuffIds.Any(b => SharkyUnitData.CarryingResourceBuffs.Contains((Buffs)b)) && commander.Value.UnitRole != UnitRole.Build)
+                    if (commander.Value.UnitRole != UnitRole.Gas && (!commander.Value.Claimed || commander.Value.UnitRole == UnitRole.Minerals) && commander.Value.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.Worker) && !commander.Value.UnitCalculation.Unit.BuffIds.Any(b => SharkyUnitData.CarryingResourceBuffs.Contains((Buffs)b)) && commander.Value.UnitRole != UnitRole.Build)
                     {
                         if (Vector2.DistanceSquared(commander.Value.UnitCalculation.Position, new Vector2(ProbeSpot.X, ProbeSpot.Y)) < 400)
                         {
@@ -223,7 +223,7 @@
             {
                 if (frame - BlockPylon.UnitCalculation.FrameFirstSeen > SharkyOptions.FramesPerSecond * 60 * 2)
                 {
-                    if (!BlockPylon.UnitCalculation.NearbyEnemies.Any() || (BlockPylon.UnitCalculation.TargetPriorityCalculation.OverallWinnability > 5 && BlockPylon.UnitCalculation.NearbyAllies.Count(a => a.UnitClassifications.Contains(UnitClassification.ArmyUnit)) > BlockPylon.UnitCalculation.NearbyEnemies.Count(a => a.UnitClassifications.Contains(UnitClassification.ArmyUnit))))
+                    if (!BlockPylon.UnitCalculation.NearbyEnemies.Any() || (BlockPylon.UnitCalculation.TargetPriorityCalculation.OverallWinnability > 5 && BlockPylon.UnitCalculation.NearbyAllies.Count(a => a.UnitClassifications.HasFlag(UnitClassification.ArmyUnit)) > BlockPylon.UnitCalculation.NearbyEnemies.Count(a => a.UnitClassifications.HasFlag(UnitClassification.ArmyUnit))))
                     {
                         BlockPylon.UnitRole = UnitRole.Die;
                     }
@@ -364,7 +364,7 @@
                 var doorVector = new Vector2(DoorSpot.X, DoorSpot.Y);
                 if (DoorCommander == commander &&commander.UnitCalculation.NearbyEnemies.Any(e => Vector2.DistanceSquared(e.Position, doorVector) < 4))
                 {
-                    var betterDoor = commander.UnitCalculation.NearbyAllies.Where(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !e.Unit.IsFlying && Vector2.DistanceSquared(e.Position, doorVector) < 1).OrderBy(e => Vector2.DistanceSquared(e.Position, doorVector)).FirstOrDefault();
+                    var betterDoor = commander.UnitCalculation.NearbyAllies.Where(e => e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) && !e.Unit.IsFlying && Vector2.DistanceSquared(e.Position, doorVector) < 1).OrderBy(e => Vector2.DistanceSquared(e.Position, doorVector)).FirstOrDefault();
                     if (betterDoor != null)
                     {
                         var betterDoorCommander = ActiveUnitData.Commanders.Values.FirstOrDefault(c => c.UnitCalculation.Unit.Tag == betterDoor.Unit.Tag);

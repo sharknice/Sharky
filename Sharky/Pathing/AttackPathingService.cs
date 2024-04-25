@@ -67,7 +67,7 @@
                 return target;
             }
 
-            if (commander.UnitCalculation.NearbyAllies.Any(a => a.UnitClassifications.Contains(UnitClassification.ResourceCenter)))
+            if (commander.UnitCalculation.NearbyAllies.Any(a => a.UnitClassifications.HasFlag(UnitClassification.ResourceCenter)))
             {
                 commander.CurrentPath = null;
                 return target;

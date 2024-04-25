@@ -129,7 +129,7 @@
                 if (Vector2.DistanceSquared(new Vector2(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y), commander.UnitCalculation.Position) > 100)
                 {
                     if (bestTarget == null) { return false; }
-                    if (!bestTarget.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !bestTarget.UnitClassifications.Contains(UnitClassification.DefensiveStructure) && !bestTarget.UnitClassifications.Contains(UnitClassification.Worker))
+                    if (!bestTarget.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) && !bestTarget.UnitClassifications.HasFlag(UnitClassification.DefensiveStructure) && !bestTarget.UnitClassifications.HasFlag(UnitClassification.Worker))
                     {
                         return false;
                     }
@@ -326,7 +326,7 @@
 
         public override UnitCalculation GetBestTarget(UnitCommander commander, Point2D target, int frame)
         {
-            if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.KillWorkers && commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker)))
+            if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.KillWorkers && commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.Worker)))
             {
                 return base.GetBestHarassTarget(commander, target);
             }
@@ -335,9 +335,9 @@
 
         protected UnitCalculation GetSecondBestTarget(UnitCommander commander, Point2D target, int frame, UnitCalculation bestTarget)
         {
-            if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.KillWorkers && commander.UnitCalculation.NearbyEnemies.Count(e => e.UnitClassifications.Contains(UnitClassification.Worker)) > 1)
+            if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.KillWorkers && commander.UnitCalculation.NearbyEnemies.Count(e => e.UnitClassifications.HasFlag(UnitClassification.Worker)) > 1)
             {
-                return GetBestTargetFromList(commander, commander.UnitCalculation.NearbyEnemies.Where(e => bestTarget.Unit.Tag != e.Unit.Tag && e.UnitClassifications.Contains(UnitClassification.Worker)), null);
+                return GetBestTargetFromList(commander, commander.UnitCalculation.NearbyEnemies.Where(e => bestTarget.Unit.Tag != e.Unit.Tag && e.UnitClassifications.HasFlag(UnitClassification.Worker)), null);
             }
             return GetBestTargetFromList(commander, commander.UnitCalculation.NearbyEnemies.Where(e => bestTarget.Unit.Tag != e.Unit.Tag), null);
         }

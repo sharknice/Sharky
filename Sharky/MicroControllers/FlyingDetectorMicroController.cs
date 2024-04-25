@@ -156,13 +156,13 @@
         {
             if (supportableUnits == null)
             {
-                supportableUnits = ActiveUnitData.SelfUnits.Values.Where(u => u.Unit.UnitType != commander.UnitCalculation.Unit.UnitType && u.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !u.Unit.IsHallucination);
+                supportableUnits = ActiveUnitData.SelfUnits.Values.Where(u => u.Unit.UnitType != commander.UnitCalculation.Unit.UnitType && u.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) && !u.Unit.IsHallucination);
             }
 
             // no allies that already have a friendly observer within 4 range
-            var otherDetectors = ActiveUnitData.SelfUnits.Values.Where(u => u.Unit.Tag != commander.UnitCalculation.Unit.Tag && (u.Unit.UnitType == commander.UnitCalculation.Unit.UnitType || u.UnitClassifications.Contains(UnitClassification.DetectionCaster) || u.UnitClassifications.Contains(UnitClassification.Detector)));
+            var otherDetectors = ActiveUnitData.SelfUnits.Values.Where(u => u.Unit.Tag != commander.UnitCalculation.Unit.Tag && (u.Unit.UnitType == commander.UnitCalculation.Unit.UnitType || u.UnitClassifications.HasFlag(UnitClassification.DetectionCaster) || u.UnitClassifications.HasFlag(UnitClassification.Detector)));
 
-            var friendlies = supportableUnits.Where(u => u.UnitClassifications.Contains(UnitClassification.ArmyUnit)
+            var friendlies = supportableUnits.Where(u => u.UnitClassifications.HasFlag(UnitClassification.ArmyUnit)
                 && !otherDetectors.Any(o => DistanceSquared(o, u) < 16)
                     && Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position) < 225
                     && u.NearbyEnemies.Any(e => DistanceSquared(u, e) < 225)
@@ -177,7 +177,7 @@
             // get any allies
             // select the friendies with enemies in 15 range
             // order by closest to the enemy
-            friendlies = supportableUnits.Where(u => u.UnitClassifications.Contains(UnitClassification.ArmyUnit)
+            friendlies = supportableUnits.Where(u => u.UnitClassifications.HasFlag(UnitClassification.ArmyUnit)
                             && !otherDetectors.Any(o => DistanceSquared(o, u) < 64)
                                 && u.NearbyEnemies.Any(e => DistanceSquared(u, e) < 225)
                             ).OrderBy(u => DistanceSquared(u.NearbyEnemies.OrderBy(e => DistanceSquared(e, u)).FirstOrDefault(), u));
@@ -189,7 +189,7 @@
 
             // if still none
             //get ally closest to target
-            friendlies = supportableUnits.Where(u => u.UnitClassifications.Contains(UnitClassification.ArmyUnit)
+            friendlies = supportableUnits.Where(u => u.UnitClassifications.HasFlag(UnitClassification.ArmyUnit)
                             && !otherDetectors.Any(o => DistanceSquared(o, u) < 64)
                             ).OrderBy(u => DistanceSquared(u.NearbyEnemies.OrderBy(e => DistanceSquared(e, u)).FirstOrDefault(), u));
 
@@ -200,7 +200,7 @@
 
             // if still none
             //get ally closest to target even if there is another detector nearby
-            friendlies = supportableUnits.Where(u => u.UnitClassifications.Contains(UnitClassification.ArmyUnit)
+            friendlies = supportableUnits.Where(u => u.UnitClassifications.HasFlag(UnitClassification.ArmyUnit)
                             ).OrderBy(u => DistanceSquared(u.NearbyEnemies.OrderBy(e => DistanceSquared(e, u)).FirstOrDefault(), u));
 
             if (friendlies.Any())

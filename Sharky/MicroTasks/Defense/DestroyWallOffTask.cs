@@ -25,7 +25,7 @@
                 if (point != null)
                 {
                     var vector = new Vector2(point.X, point.Y);
-                    foreach (var commander in commanders.Where(c => !c.Value.Claimed && c.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.ArmyUnit)).OrderBy(c => Vector2.DistanceSquared(vector, c.Value.UnitCalculation.Position)))
+                    foreach (var commander in commanders.Where(c => !c.Value.Claimed && c.Value.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.ArmyUnit)).OrderBy(c => Vector2.DistanceSquared(vector, c.Value.UnitCalculation.Position)))
                     {
                         commander.Value.Claimed = true;
                         commander.Value.UnitRole = UnitRole.WallOff;
