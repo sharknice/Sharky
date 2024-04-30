@@ -160,9 +160,12 @@
             return BaseData.BaseLocations.Count(b => Vector2.DistanceSquared(new Vector2(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y), new Vector2(b.Location.X, b.Location.Y)) < 1200);
         }
 
-        public CliffProxyData GetCliffProxyData(float offsetDistance = 0)
+        public CliffProxyData GetCliffProxyData(float offsetDistance = 0, Point2D outsideProxyLocation = null)
         {
-            var outsideProxyLocation = GetCliffProxyLocation(offsetDistance);
+            if (outsideProxyLocation == null)
+            {
+                outsideProxyLocation = GetCliffProxyLocation(offsetDistance);
+            }
             var targetLocation = TargetingData.EnemyMainBasePoint;
 
             var angle = Math.Atan2(targetLocation.Y - outsideProxyLocation.Y, outsideProxyLocation.X - targetLocation.X);

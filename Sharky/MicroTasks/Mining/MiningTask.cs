@@ -598,7 +598,8 @@
                 var attackTask = MicroTaskData[typeof(AttackTask).Name];
                 if (attackTask.Enabled)
                 {
-                    var canWork = MacroData.Minerals < 300 && UnitCommanders.Any() && !BaseData.SelfBases.Any() && !ActiveUnitData.SelfUnits.Values.Any(u => u.UnitClassifications.HasFlag(UnitClassification.ResourceCenter));
+                    var canWork = MacroData.Minerals < 300 && UnitCommanders.Any() && !BaseData.SelfBases.Any() && ActiveUnitData.SelfUnits.Values.Any(u => u.UnitClassifications.HasFlag(UnitClassification.ResourceCenter));
+
                     if (!canWork) { return; }
 
                     var tags = new List<ulong>();

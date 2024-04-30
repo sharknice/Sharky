@@ -50,6 +50,7 @@
         RunAway,
         Chase,
         SaveEnergy,
-        Cancel
+        Cancel,
+        Save
     }
 }

@@ -93,7 +93,7 @@ namespace Sharky.Builds.MacroServices
         private int GetBuildingCount(IEnumerable<KeyValuePair<ulong, UnitCalculation>> matchedBuildings, UnitTypes unitType)
         {
             var count = matchedBuildings.Count();
-            if (BuildOptions.WallOffType == WallOffType.None || MapDataService.MapData.WallData == null) { return count; }
+            if (BuildOptions.WallOffType == WallOffType.None || MapDataService?.MapData?.WallData == null) { return count; }
 
             var baseLocation = WallService.GetBaseLocation();
             if (baseLocation == null) { return count; }
@@ -119,7 +119,7 @@ namespace Sharky.Builds.MacroServices
             if (wallData == null) { return count; }
 
             var otherBuildings = ActiveUnitData.SelfUnits.Values.Where(c => c.Unit.UnitType == (uint)unitType && !matchedBuildings.Any(m => m.Value.Unit.Tag == c.Unit.Tag));
-            if (unitType == UnitTypes.TERRAN_BUNKER)
+            if (unitType == UnitTypes.TERRAN_BUNKER && wallData.Bunkers != null)
             {
                 foreach (var spot in wallData.Bunkers)
                 {
@@ -129,7 +129,7 @@ namespace Sharky.Builds.MacroServices
                     }
                 }
             }
-            else
+            else if (wallData.WallSegments != null)
             {
                 foreach (var spot in wallData.WallSegments)
                 {

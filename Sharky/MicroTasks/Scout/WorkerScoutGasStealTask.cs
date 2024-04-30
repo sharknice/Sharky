@@ -173,7 +173,7 @@
 
                 if (commander.UnitCalculation.Unit.ShieldMax > 5 && (commander.UnitCalculation.Unit.Shield < 5 || (commander.UnitCalculation.Unit.Shield < commander.UnitCalculation.Unit.ShieldMax && commander.UnitCalculation.EnemiesInRangeOf.Count(e => !e.UnitClassifications.HasFlag(UnitClassification.Worker)) > 0)))
                 {
-                    if (MineralWalker.MineralWalkHome(commander, frame, out List<SC2APIProtocol.Action> mineralWalk))
+                    if (MineralWalker.MineralWalkNoWhere(commander, frame, out List<SC2Action> mineralWalk))
                     {
                         commands.AddRange(mineralWalk);
                         continue;
