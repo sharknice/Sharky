@@ -15,8 +15,8 @@
 
         public TargetPriorityCalculation CalculateTargetPriority(UnitCalculation unitCalculation, int frame)
         {
-            var allies = unitCalculation.NearbyAllies.Where(e => e.Unit.BuildProgress == 1 && (e.UnitClassifications.Contains(UnitClassification.DefensiveStructure) || e.UnitClassifications.Contains(UnitClassification.ArmyUnit) || e.Unit.UnitType == (uint)UnitTypes.ZERG_QUEEN)).Concat(new List<UnitCalculation> { unitCalculation });
-            var enemies = unitCalculation.NearbyEnemies.Where(e => e.Unit.BuildProgress == 1 && (e.UnitClassifications.Contains(UnitClassification.DefensiveStructure) || e.UnitClassifications.Contains(UnitClassification.ArmyUnit) || e.Unit.UnitType == (uint)UnitTypes.ZERG_QUEEN));
+            var allies = unitCalculation.NearbyAllies.Where(e => e.Unit.BuildProgress == 1 && (e.UnitClassifications.HasFlag(UnitClassification.DefensiveStructure) || e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) || e.Unit.UnitType == (uint)UnitTypes.ZERG_QUEEN)).Concat(new List<UnitCalculation> { unitCalculation });
+            var enemies = unitCalculation.NearbyEnemies.Where(e => e.Unit.BuildProgress == 1 && (e.UnitClassifications.HasFlag(UnitClassification.DefensiveStructure) || e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) || e.Unit.UnitType == (uint)UnitTypes.ZERG_QUEEN));
 
             var calculation = CalculateTargetPriority(allies, enemies);
 
@@ -287,8 +287,8 @@
         public TargetPriorityCalculation CalculateGeneralTargetPriority()
         {
             var attackVector = new Vector2(TargetingData.AttackPoint.X, TargetingData.AttackPoint.Y);
-            var enemyUnits = ActiveUnitData.EnemyUnits.Values.Where(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) || e.Unit.UnitType == (uint)UnitTypes.ZERG_QUEEN || (e.UnitClassifications.Contains(UnitClassification.DefensiveStructure) && Vector2.DistanceSquared(attackVector, e.Position) < 625)); // every enemy unit no matter where it is, defensive structures within 25 range of attack point
-            var friendlyUnits = ActiveUnitData.SelfUnits.Values.Where(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit));
+            var enemyUnits = ActiveUnitData.EnemyUnits.Values.Where(e => e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) || e.Unit.UnitType == (uint)UnitTypes.ZERG_QUEEN || (e.UnitClassifications.HasFlag(UnitClassification.DefensiveStructure) && Vector2.DistanceSquared(attackVector, e.Position) < 625)); // every enemy unit no matter where it is, defensive structures within 25 range of attack point
+            var friendlyUnits = ActiveUnitData.SelfUnits.Values.Where(e => e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit));
             return CalculateTargetPriority(friendlyUnits, enemyUnits);
         }
     }

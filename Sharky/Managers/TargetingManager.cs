@@ -123,7 +123,7 @@
 
             foreach (var enemy in ActiveUnitData.EnemyUnits)
             {
-                if (enemy.Value.UnitClassifications.Contains(UnitClassification.ArmyUnit))
+                if (enemy.Value.UnitClassifications.HasFlag(UnitClassification.ArmyUnit))
                 {
                     TargetingData.EnemyArmyCenter += enemy.Value.Position;
                     count++;
@@ -258,7 +258,7 @@
 
             if (baseCount != BaseData.SelfBases.Count())
             {
-                var resourceCenters = ActiveUnitData.SelfUnits.Values.Where(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter) && !u.Unit.IsFlying);
+                var resourceCenters = ActiveUnitData.SelfUnits.Values.Where(u => u.UnitClassifications.HasFlag(UnitClassification.ResourceCenter) && !u.Unit.IsFlying);
                 var ordered = BaseData.BaseLocations.Where(b => resourceCenters.Any(r => Vector2.DistanceSquared(r.Position, new Vector2(b.Location.X, b.Location.Y)) < 25)).OrderBy(b => GetDistance(b));
                 //var ordered = BaseData.BaseLocations.Where(b => resourceCenters.Any(r => Vector2.DistanceSquared(r.Position, new Vector2(b.Location.X, b.Location.Y)) < 25)).OrderBy(b => Vector2.DistanceSquared(new Vector2(b.Location.X, b.Location.Y), new Vector2(TargetingData.AttackPoint.X, TargetingData.AttackPoint.Y)));
                 var closestBase = ordered.FirstOrDefault();
@@ -316,7 +316,7 @@
                 baseCount = BaseData.SelfBases.Count();
 
                 var target = TargetingData.AttackPoint.ToVector2();
-                var closest = ActiveUnitData.Commanders.Values.Where(u => u.UnitRole != UnitRole.BlockExpansion && u.UnitCalculation.UnitClassifications.Contains(UnitClassification.DefensiveStructure) || u.UnitCalculation.UnitClassifications.Contains(UnitClassification.ResourceCenter)).OrderBy(u => Vector2.DistanceSquared(u.UnitCalculation.Position, target)).FirstOrDefault();
+                var closest = ActiveUnitData.Commanders.Values.Where(u => u.UnitRole != UnitRole.BlockExpansion && u.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.DefensiveStructure) || u.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.ResourceCenter)).OrderBy(u => Vector2.DistanceSquared(u.UnitCalculation.Position, target)).FirstOrDefault();
                 if (closest != null)
                 {
                     TargetingData.ForwardDefensePoint = closest.UnitCalculation.Position.ToPoint2D();

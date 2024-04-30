@@ -181,7 +181,7 @@
                 // attack with 8 workers
                 if (WorkerDefenders.Count() == 0)
                 {
-                    var closestWokrers = ActiveUnitData.Commanders.Where(u => u.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && u.Value.UnitRole == UnitRole.Minerals).OrderBy(d => Vector2.DistanceSquared(d.Value.UnitCalculation.Position, bunker.Position)).Take(7 + bunker.NearbyAllies.Count());
+                    var closestWokrers = ActiveUnitData.Commanders.Where(u => u.Value.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.Worker) && u.Value.UnitRole == UnitRole.Minerals).OrderBy(d => Vector2.DistanceSquared(d.Value.UnitCalculation.Position, bunker.Position)).Take(7 + bunker.NearbyAllies.Count());
                     WorkerDefenders.AddRange(closestWokrers.Select(c => c.Value));
                     foreach (var worker in WorkerDefenders)
                     {

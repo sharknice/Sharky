@@ -349,7 +349,7 @@
 
             var best = killCounts.OrderByDescending(x => x.Value).FirstOrDefault();
 
-            if (best.Value < 3 && unitCalculation.NearbyAllies.Take(25).Any(u => u.UnitClassifications.Contains(UnitClassification.ArmyUnit) && u.Unit.UnitType != (uint)UnitTypes.ZERG_INFESTOR) && unitCalculation.Unit.Health > 20) // only attack if going to kill 3+ units or no army to help defend
+            if (best.Value < 3 && unitCalculation.NearbyAllies.Take(25).Any(u => u.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) && u.Unit.UnitType != (uint)UnitTypes.ZERG_INFESTOR) && unitCalculation.Unit.Health > 20) // only attack if going to kill 3+ units or no army to help defend
             {
                 return null;
             }

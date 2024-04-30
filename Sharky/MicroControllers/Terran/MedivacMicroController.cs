@@ -133,11 +133,11 @@
                 supportableUnits = commander.UnitCalculation.NearbyAllies.Where(a => a.Unit.Health < a.Unit.HealthMax && a.Attributes.Contains(SC2Attribute.Biological));
                 if (!supportableUnits.Any())
                 {
-                    supportableUnits = ActiveUnitData.SelfUnits.Values.Where(u => u.Unit.UnitType != commander.UnitCalculation.Unit.UnitType && u.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !u.Unit.IsHallucination);
+                    supportableUnits = ActiveUnitData.SelfUnits.Values.Where(u => u.Unit.UnitType != commander.UnitCalculation.Unit.UnitType && u.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) && !u.Unit.IsHallucination);
                 }
             }
 
-            var friendlies = supportableUnits.Where(u => u.UnitClassifications.Contains(UnitClassification.ArmyUnit) && u.Attributes.Contains(SC2Attribute.Biological) && u.Unit.Health < u.Unit.HealthMax
+            var friendlies = supportableUnits.Where(u => u.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) && u.Attributes.Contains(SC2Attribute.Biological) && u.Unit.Health < u.Unit.HealthMax
                     && Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position) < 225
                     && u.NearbyEnemies.Any(e => DistanceSquared(u, e) < 225)
                 ).OrderBy(u => DistanceSquared(u.NearbyEnemies.OrderBy(e => DistanceSquared(e, u)).First(), u));
@@ -150,7 +150,7 @@
 
             // if still none
             //get ally closest to target
-            friendlies = supportableUnits.Where(u => u.UnitClassifications.Contains(UnitClassification.ArmyUnit)).OrderBy(u => DistanceSquared(u.NearbyEnemies.OrderBy(e => DistanceSquared(e, u)).FirstOrDefault(), u));
+            friendlies = supportableUnits.Where(u => u.UnitClassifications.HasFlag(UnitClassification.ArmyUnit)).OrderBy(u => DistanceSquared(u.NearbyEnemies.OrderBy(e => DistanceSquared(e, u)).FirstOrDefault(), u));
 
             if (friendlies.Any())
             {

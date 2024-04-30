@@ -201,7 +201,7 @@
         {
             Console.WriteLine("Enemy Units:");
             var enemyUnitGroups = DefaultSharkyBot.ActiveUnitData.EnemyUnits.GroupBy(x => x.Value.Unit.UnitType);
-            var army = enemyUnitGroups.Where(g => g.FirstOrDefault().Value.UnitClassifications.Contains(UnitClassification.ArmyUnit));
+            var army = enemyUnitGroups.Where(g => g.FirstOrDefault().Value.UnitClassifications.HasFlag(UnitClassification.ArmyUnit));
             Console.WriteLine("  Army:");
             foreach (var group in army.OrderBy(x => Enum.GetName(typeof(UnitTypes), x.Key)))
             {
@@ -213,7 +213,7 @@
             {
                 Console.WriteLine($"    [{(UnitTypes)group.Key}]={group.Count()}");
             }
-            var workers = enemyUnitGroups.Where(g => g.FirstOrDefault().Value.UnitClassifications.Contains(UnitClassification.Worker));
+            var workers = enemyUnitGroups.Where(g => g.FirstOrDefault().Value.UnitClassifications.HasFlag(UnitClassification.Worker));
             Console.WriteLine("  Workers:");
             foreach (var group in workers)
             {

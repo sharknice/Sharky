@@ -52,7 +52,7 @@
             {
                 foreach (var commander in harassInfo.Harassers)
                 {           
-                    if (commander.UnitCalculation.Unit.Shield == commander.UnitCalculation.Unit.ShieldMax && !MapDataService.InEnemyDetection(commander.UnitCalculation.Unit.Pos) && commander.UnitCalculation.NearbyEnemies.Take(25).Any(e => e.UnitClassifications.Contains(UnitClassification.Worker) && !MapDataService.InEnemyDetection(e.Unit.Pos)))
+                    if (commander.UnitCalculation.Unit.Shield == commander.UnitCalculation.Unit.ShieldMax && !MapDataService.InEnemyDetection(commander.UnitCalculation.Unit.Pos) && commander.UnitCalculation.NearbyEnemies.Take(25).Any(e => e.UnitClassifications.HasFlag(UnitClassification.Worker) && !MapDataService.InEnemyDetection(e.Unit.Pos)))
                     {
                         var action = DarkTemplarMicroController.HarassWorkers(commander, harassInfo.BaseLocation.MineralLineLocation, TargetingData.ForwardDefensePoint, frame);
                         if (action != null)
@@ -74,7 +74,7 @@
                             harassInfo.Harassers.Remove(commander);
                             return commands;
                         }
-                        else if (commander.UnitCalculation.NearbyEnemies.Take(25).Any(e => e.UnitClassifications.Contains(UnitClassification.Detector) && Vector2.DistanceSquared(new Vector2(harassInfo.BaseLocation.MineralLineLocation.X, harassInfo.BaseLocation.MineralLineLocation.Y), e.Position) < 100))
+                        else if (commander.UnitCalculation.NearbyEnemies.Take(25).Any(e => e.UnitClassifications.HasFlag(UnitClassification.Detector) && Vector2.DistanceSquared(new Vector2(harassInfo.BaseLocation.MineralLineLocation.X, harassInfo.BaseLocation.MineralLineLocation.Y), e.Position) < 100))
                         {
                             if (commander.UnitCalculation.TargetPriorityCalculation.GroundWinnability < 1 && commander.UnitCalculation.Unit.Shield < commander.UnitCalculation.Unit.ShieldMax)
                             {
@@ -102,7 +102,7 @@
 
                         if (commander.RetreatPath.Count() == 0)
                         {
-                            if (commander.UnitCalculation.NearbyEnemies.Take(25).Any(e => e.UnitClassifications.Contains(UnitClassification.Detector) && Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position) < 120))
+                            if (commander.UnitCalculation.NearbyEnemies.Take(25).Any(e => e.UnitClassifications.HasFlag(UnitClassification.Detector) && Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position) < 120))
                             {
                                 harassInfo.LastPathFailedFrame = frame;
                                 harassInfo.Harassers.Remove(commander);

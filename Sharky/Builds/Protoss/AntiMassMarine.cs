@@ -104,7 +104,7 @@
 
         public override bool Transition(int frame)
         {
-            if (ActiveUnitData.EnemyUnits.Any(e => e.Value.UnitClassifications.Contains(UnitClassification.ArmyUnit) && e.Value.Unit.UnitType != (uint)UnitTypes.TERRAN_MARINE))
+            if (ActiveUnitData.EnemyUnits.Any(e => e.Value.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) && e.Value.Unit.UnitType != (uint)UnitTypes.TERRAN_MARINE))
             {
                 return true;
             }

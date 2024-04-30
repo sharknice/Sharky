@@ -1,4 +1,6 @@
-﻿namespace Sharky.Managers
+﻿using Sharky.Algorithm;
+
+namespace Sharky.Managers
 {
     public class UnitManager : SharkyManager
     {
@@ -19,6 +21,7 @@
         ActiveUnitData ActiveUnitData;
 
         int TargetPriorityCalculationFrame;
+
 
         public UnitManager(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, BaseData baseData, EnemyData enemyData, SharkyOptions sharkyOptions, TargetPriorityService targetPriorityService, CollisionCalculator collisionCalculator, MapDataService mapDataService, DebugService debugService, DamageService damageService, UnitDataService unitDataService)
         {
@@ -299,55 +302,72 @@
                 ClearUnitCalculations(enemyAttack);
             }
 
+
+            KDTree2<UnitCalculation> enemyUnits = new KDTree2<UnitCalculation>();
+            foreach (var enemyAttack in ActiveUnitData.EnemyUnits.Values)
+            {
+                enemyUnits.Add(enemyAttack, enemyAttack.Position);
+            }
+            enemyUnits.Build();
+
+            KDTree2<UnitCalculation> selfUnits = new KDTree2<UnitCalculation>();
+            foreach (var allyAttack in ActiveUnitData.SelfUnits.Values)
+            {
+                selfUnits.Add(allyAttack, allyAttack.Position);
+            }
+            selfUnits.Build();
+
+
             foreach (var allyAttack in ActiveUnitData.SelfUnits)
             {
                 if (allyAttack.Value.FrameLastSeen != frame) { continue; }
 
-                foreach (var enemyAttack in ActiveUnitData.EnemyUnits)
+                enemyUnits.ForRange(allyAttack.Value.Position, NearbyDistance, (enemyAttack) =>
                 {
-                    var range = GetRange(allyAttack, enemyAttack);
-                    if (DamageService.CanDamage(allyAttack.Value, enemyAttack.Value) && Vector2.DistanceSquared(allyAttack.Value.Position, enemyAttack.Value.Position) <= (range + allyAttack.Value.Unit.Radius + enemyAttack.Value.Unit.Radius) * (range + allyAttack.Value.Unit.Radius + enemyAttack.Value.Unit.Radius))
+                    var range = GetRange(allyAttack.Value, enemyAttack);
+                    var distanceSquared = Vector2.DistanceSquared(allyAttack.Value.Position, enemyAttack.Position);
+                    if (DamageService.CanDamage(allyAttack.Value, enemyAttack) && distanceSquared <= (range + allyAttack.Value.Unit.Radius + enemyAttack.Unit.Radius) * (range + allyAttack.Value.Unit.Radius + enemyAttack.Unit.Radius))
                     {
-                        if (allyAttack.Value.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED && Vector2.DistanceSquared(allyAttack.Value.Position, enemyAttack.Value.Position) < 4)
+                        if (allyAttack.Value.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED && distanceSquared < 4)
                         {
-                            continue;
+                            return;
                         }
-                        if (!enemyAttack.Value.Unit.BuffIds.Contains((uint)Buffs.NEURALPARASITE))
+                        if (!enemyAttack.Unit.BuffIds.Contains((uint)Buffs.NEURALPARASITE))
                         {
-                            allyAttack.Value.EnemiesInRange.Add(enemyAttack.Value);
+                            allyAttack.Value.EnemiesInRange.Add(enemyAttack);
                         }
-                        enemyAttack.Value.EnemiesInRangeOf.Add(allyAttack.Value);
+                        enemyAttack.EnemiesInRangeOf.Add(allyAttack.Value);
                     }
-                    if (DamageService.CanDamage(enemyAttack.Value, allyAttack.Value))
+                    if (DamageService.CanDamage(enemyAttack, allyAttack.Value))
                     {
-                        range = GetRange(enemyAttack, allyAttack);
-                        var distanceSquared = Vector2.DistanceSquared(allyAttack.Value.Position, enemyAttack.Value.Position);
-                        if (distanceSquared <= (AvoidRange + range + allyAttack.Value.Unit.Radius + enemyAttack.Value.Unit.Radius) * (AvoidRange + range + allyAttack.Value.Unit.Radius + enemyAttack.Value.Unit.Radius))
+                        range = GetRange(enemyAttack, allyAttack.Value);
+                        if (distanceSquared <= (AvoidRange + range + allyAttack.Value.Unit.Radius + enemyAttack.Unit.Radius) * (AvoidRange + range + allyAttack.Value.Unit.Radius + enemyAttack.Unit.Radius))
                         {
-                            if (enemyAttack.Value.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED && distanceSquared < 4)
+                            if (enemyAttack.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED && distanceSquared < 4)
                             {
-                                continue;
+                                return;
                             }
-                            allyAttack.Value.EnemiesInRangeOfAvoid.Add(enemyAttack.Value);
-                            if (distanceSquared <= (range + allyAttack.Value.Unit.Radius + enemyAttack.Value.Unit.Radius) * (range + allyAttack.Value.Unit.Radius + enemyAttack.Value.Unit.Radius))
+                            allyAttack.Value.EnemiesInRangeOfAvoid.Add(enemyAttack);
+                            if (distanceSquared <= (range + allyAttack.Value.Unit.Radius + enemyAttack.Unit.Radius) * (range + allyAttack.Value.Unit.Radius + enemyAttack.Unit.Radius))
                             {
-                                enemyAttack.Value.EnemiesInRange.Add(allyAttack.Value);
-                                allyAttack.Value.EnemiesInRangeOf.Add(enemyAttack.Value);
+                                enemyAttack.EnemiesInRange.Add(allyAttack.Value);
+                                allyAttack.Value.EnemiesInRangeOf.Add(enemyAttack);
                             }
                         }
                     }
 
-                    if (Vector2.DistanceSquared(allyAttack.Value.Position, enemyAttack.Value.Position) <= NearbyDistance * NearbyDistance)
+                    enemyAttack.NearbyEnemies.Add(allyAttack.Value);
+                    if (!enemyAttack.Unit.BuffIds.Contains((uint)Buffs.NEURALPARASITE))
                     {
-                        enemyAttack.Value.NearbyEnemies.Add(allyAttack.Value);
-                        if (!enemyAttack.Value.Unit.BuffIds.Contains((uint)Buffs.NEURALPARASITE))
-                        {
-                            allyAttack.Value.NearbyEnemies.Add(enemyAttack.Value);
-                        }
+                        allyAttack.Value.NearbyEnemies.Add(enemyAttack);
                     }
-                }
+                });
 
-                allyAttack.Value.NearbyAllies = ActiveUnitData.SelfUnits.Where(a => a.Key != allyAttack.Key && Vector2.DistanceSquared(allyAttack.Value.Position, a.Value.Position) <= NearbyDistance * NearbyDistance).Select(a => a.Value).ToList();
+                selfUnits.ForRange(allyAttack.Value.Position, NearbyDistance, (u) =>
+                {
+                    if (allyAttack.Key != u.Unit.Tag)
+                        allyAttack.Value.NearbyAllies.Add(u);
+                });
                 allyAttack.Value.Loaded = false;
 
                 if (ActiveUnitData.Commanders.TryGetValue(allyAttack.Value.Unit.Tag, out var commander))
@@ -436,7 +456,11 @@
 
             foreach (var enemyAttack in ActiveUnitData.EnemyUnits)
             {
-                enemyAttack.Value.NearbyAllies = ActiveUnitData.EnemyUnits.Where(a => a.Key != enemyAttack.Key && Vector2.DistanceSquared(enemyAttack.Value.Position, a.Value.Position) <= NearbyDistance * NearbyDistance).Select(a => a.Value).ToList();
+                enemyUnits.ForRange(enemyAttack.Value.Position, NearbyDistance, (u) =>
+                {
+                    if (enemyAttack.Key != u.Unit.Tag)
+                        enemyAttack.Value.NearbyAllies.Add(u);
+                });
             }
 
             if (TargetPriorityCalculationFrame + 10 < frame)
@@ -447,7 +471,7 @@
                     {
                         var priorityCalculation = TargetPriorityService.CalculateTargetPriority(selfUnit.Value, frame);
                         selfUnit.Value.TargetPriorityCalculation = priorityCalculation;
-                        foreach (var nearbyUnit in selfUnit.Value.NearbyAllies.Where(a => a.NearbyEnemies.Count() == selfUnit.Value.NearbyAllies.Count()))
+                        foreach (var nearbyUnit in selfUnit.Value.NearbyAllies.Where(a => a.NearbyEnemies.Count == selfUnit.Value.NearbyAllies.Count))
                         {
                             nearbyUnit.TargetPriorityCalculation = priorityCalculation;
                         }
@@ -521,7 +545,7 @@
 
             foreach (var enemyAttack in unitCalculation.EnemiesInRangeOfAvoid)
             {
-                if (DamageService.CanDamage(enemyAttack, unitCalculation) 
+                if (DamageService.CanDamage(enemyAttack, unitCalculation)
                     && CollisionCalculator.Collides(unitCalculation.Position, unitCalculation.Unit.Radius, enemyAttack.Start, enemyAttack.End))
                 {
                     attacks.Add(enemyAttack);
@@ -537,7 +561,7 @@
 
             foreach (var enemyAttack in unitCalculation.NearbyEnemies)
             {
-                if (DamageService.CanDamage(enemyAttack, unitCalculation) 
+                if (DamageService.CanDamage(enemyAttack, unitCalculation)
                     && CollisionCalculator.Collides(unitCalculation.Position, unitCalculation.Unit.Radius, enemyAttack.Start, enemyAttack.EndPlusFive))
                 {
                     attacks.Add(enemyAttack);

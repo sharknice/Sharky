@@ -97,7 +97,7 @@
         {
             List<SC2APIProtocol.Action> action = null;
 
-            if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Detector)))
+            if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.Detector)))
             {
                 if (commander.RetreatPathFrame + 2 < frame)
                 {

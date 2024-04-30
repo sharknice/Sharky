@@ -46,7 +46,7 @@
 
                 foreach (var commander in commanders)
                 {
-                    if (!commander.Value.Claimed && commander.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && !commander.Value.UnitCalculation.Unit.BuffIds.Any(b => SharkyUnitData.CarryingResourceBuffs.Contains((Buffs)b)))
+                    if (!commander.Value.Claimed && commander.Value.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.Worker) && !commander.Value.UnitCalculation.Unit.BuffIds.Any(b => SharkyUnitData.CarryingResourceBuffs.Contains((Buffs)b)))
                     {
                         if (commander.Value.UnitCalculation.Unit.Orders.Any(o => !SharkyUnitData.MiningAbilities.Contains((Abilities)o.AbilityId)))
                         {
@@ -92,7 +92,7 @@
                     }
                 }
 
-                if (commander.UnitCalculation.NearbyEnemies.Count() > 1 && (commander.UnitCalculation.Unit.Shield + commander.UnitCalculation.Unit.Health == commander.UnitCalculation.Unit.ShieldMax + commander.UnitCalculation.Unit.HealthMax) && !commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit)))
+                if (commander.UnitCalculation.NearbyEnemies.Count() > 1 && (commander.UnitCalculation.Unit.Shield + commander.UnitCalculation.Unit.Health == commander.UnitCalculation.Unit.ShieldMax + commander.UnitCalculation.Unit.HealthMax) && !commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit)))
                 {
                     var enemy = GetEnemyBuildingScv(commander.UnitCalculation.NearbyEnemies);
                     if (enemy != null)

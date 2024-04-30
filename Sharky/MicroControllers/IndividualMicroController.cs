@@ -232,7 +232,7 @@
             {
                 var safe = true;
                 var closestEnemy = commander.UnitCalculation.NearbyEnemies.OrderBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position)).FirstOrDefault();
-                if (closestEnemy != null && !closestEnemy.UnitClassifications.Contains(UnitClassification.Worker))
+                if (closestEnemy != null && !closestEnemy.UnitClassifications.HasFlag(UnitClassification.Worker))
                 {
                     if (DamageService.CanDamage(closestEnemy, commander.UnitCalculation) && (closestEnemy.Range >= commander.UnitCalculation.Range || closestEnemy.UnitTypeData.MovementSpeed > commander.UnitCalculation.UnitTypeData.MovementSpeed))
                     {
@@ -273,7 +273,7 @@
                 if (WeaponReady(commander, frame) && (commander.UnitCalculation.Unit.Shield + commander.UnitCalculation.Unit.Health) > (commander.UnitCalculation.Unit.ShieldMax + (commander.UnitCalculation.Unit.HealthMax / 2.0f)))
                 {
                     var bestTarget = GetBestTarget(commander, target, frame);
-                    if (bestTarget != null && bestTarget.UnitClassifications.Contains(UnitClassification.Worker) && commander.UnitCalculation.EnemiesInRange.Any(e => e.Unit.Tag == bestTarget.Unit.Tag))
+                    if (bestTarget != null && bestTarget.UnitClassifications.HasFlag(UnitClassification.Worker) && commander.UnitCalculation.EnemiesInRange.Any(e => e.Unit.Tag == bestTarget.Unit.Tag))
                     {
                         if (AttackBestTarget(commander, target, defensivePoint, target, bestTarget, frame, out action))
                         {
@@ -673,7 +673,7 @@
             action = null;
 
             // if air unit or worker (units with acceleration) and within X distance of target move at a 45 degree angle from target to avoid decelerating
-            if (commander.UnitCalculation.Unit.IsFlying || commander.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker))
+            if (commander.UnitCalculation.Unit.IsFlying || commander.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.Worker))
             {
                 if (Vector2.DistanceSquared(new Vector2(target.X, target.Y), commander.UnitCalculation.Position) < 4)
                 {
@@ -865,7 +865,7 @@
 
             if (formation == Formation.Tight && commander.UnitCalculation.NearbyEnemies.Any())
             {
-                var vectors = commander.UnitCalculation.NearbyAllies.Where(a => (!a.Unit.IsFlying && !commander.UnitCalculation.Unit.IsFlying && a.UnitClassifications.Contains(UnitClassification.ArmyUnit)) || (commander.UnitCalculation.Unit.IsFlying && a.Unit.UnitType == commander.UnitCalculation.Unit.UnitType)).Where(a => Vector2.DistanceSquared(a.Position, commander.UnitCalculation.Position) < GroupUpDistance * GroupUpDistance).Select(u => u.Position);
+                var vectors = commander.UnitCalculation.NearbyAllies.Where(a => (!a.Unit.IsFlying && !commander.UnitCalculation.Unit.IsFlying && a.UnitClassifications.HasFlag(UnitClassification.ArmyUnit)) || (commander.UnitCalculation.Unit.IsFlying && a.Unit.UnitType == commander.UnitCalculation.Unit.UnitType)).Where(a => Vector2.DistanceSquared(a.Position, commander.UnitCalculation.Position) < GroupUpDistance * GroupUpDistance).Select(u => u.Position);
                 if (vectors.Any())
                 {
                     var max = 1f;
@@ -1083,7 +1083,7 @@
         {
             action = null;
 
-            var attacks = commander.UnitCalculation.NearbyEnemies.Where(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && DamageService.CanDamage(e, commander.UnitCalculation));
+            var attacks = commander.UnitCalculation.NearbyEnemies.Where(e => e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) && DamageService.CanDamage(e, commander.UnitCalculation));
             if (AvoidDamageList(commander, target, defensivePoint, attacks, frame, alwaysRun, out action)) { return true; }
 
             return false;
@@ -1306,7 +1306,7 @@
                 }
 
                 bestAttack = GetBestTargetFromList(commander, attacks.Where(a => a.Unit.UnitType != (uint)UnitTypes.PROTOSS_INTERCEPTOR), existingAttackOrder);
-                if (bestAttack != null && (bestAttack.UnitClassifications.Contains(UnitClassification.ArmyUnit) || bestAttack.UnitClassifications.Contains(UnitClassification.DefensiveStructure) || (bestAttack.UnitClassifications.Contains(UnitClassification.Worker) && bestAttack.EnemiesInRange.Any(e => e.Unit.Tag == commander.UnitCalculation.Unit.Tag))))
+                if (bestAttack != null && (bestAttack.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) || bestAttack.UnitClassifications.HasFlag(UnitClassification.DefensiveStructure) || (bestAttack.UnitClassifications.HasFlag(UnitClassification.Worker) && bestAttack.EnemiesInRange.Any(e => e.Unit.Tag == commander.UnitCalculation.Unit.Tag))))
                 {
                     if (bestAttack.Unit.UnitType != (uint)UnitTypes.TERRAN_SCV && bestAttack.Unit.UnitType != (uint)UnitTypes.TERRAN_MULE && bestAttack.Repairers.Any())
                     {
@@ -1342,7 +1342,7 @@
             if (attacks.Any())
             {
                 var bestOutOfRangeAttack = GetBestTargetFromList(commander, attacks, existingAttackOrder);
-                if (bestOutOfRangeAttack != null && (bestOutOfRangeAttack.UnitClassifications.Contains(UnitClassification.ArmyUnit) || bestOutOfRangeAttack.UnitClassifications.Contains(UnitClassification.DefensiveStructure)))
+                if (bestOutOfRangeAttack != null && (bestOutOfRangeAttack.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) || bestOutOfRangeAttack.UnitClassifications.HasFlag(UnitClassification.DefensiveStructure)))
                 {
                     commander.BestTarget = bestOutOfRangeAttack;
                     return bestOutOfRangeAttack;
@@ -1360,7 +1360,7 @@
             if (attacks.Any())
             {
                 var bestOutOfRangeAttack = GetBestTargetFromList(commander, attacks, existingAttackOrder);
-                if (bestOutOfRangeAttack != null && (bestOutOfRangeAttack.UnitClassifications.Contains(UnitClassification.ArmyUnit) || bestOutOfRangeAttack.UnitClassifications.Contains(UnitClassification.DefensiveStructure)))
+                if (bestOutOfRangeAttack != null && (bestOutOfRangeAttack.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) || bestOutOfRangeAttack.UnitClassifications.HasFlag(UnitClassification.DefensiveStructure)))
                 {
                     commander.BestTarget = bestOutOfRangeAttack;
                     return bestOutOfRangeAttack;
@@ -1385,7 +1385,7 @@
                 if (attacks.Any())
                 {
                     var bestMainAttack = GetBestTargetFromList(commander, attacks, existingAttackOrder);
-                    if (bestMainAttack != null && (bestMainAttack.UnitClassifications.Contains(UnitClassification.ArmyUnit) || bestMainAttack.UnitClassifications.Contains(UnitClassification.DefensiveStructure)))
+                    if (bestMainAttack != null && (bestMainAttack.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) || bestMainAttack.UnitClassifications.HasFlag(UnitClassification.DefensiveStructure)))
                     {
                         commander.BestTarget = bestMainAttack;
                         return bestMainAttack;
@@ -1599,7 +1599,7 @@
                     {
                         priorityEnemyMain = true;
                         if (bestTarget == null || bestTarget.Unit.Tag == commander.UnitCalculation.Unit.Tag) { return false; }
-                        if ((!bestTarget.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !bestTarget.UnitClassifications.Contains(UnitClassification.DefensiveStructure) && !bestTarget.UnitClassifications.Contains(UnitClassification.Worker)))
+                        if ((!bestTarget.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) && !bestTarget.UnitClassifications.HasFlag(UnitClassification.DefensiveStructure) && !bestTarget.UnitClassifications.HasFlag(UnitClassification.Worker)))
                         {
                             return false;
                         }
@@ -1893,7 +1893,7 @@
 
             if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.KillWorkers)
             {
-                var scvs = attacks.Where(u => u.UnitClassifications.Contains(UnitClassification.Worker)).OrderBy(u => u.Unit.Health).ThenBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position));
+                var scvs = attacks.Where(u => u.UnitClassifications.HasFlag(UnitClassification.Worker)).OrderBy(u => u.Unit.Health).ThenBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position));
                 if (existingAttackOrder != null)
                 {
                     var existing = scvs.FirstOrDefault(u => u.Unit.Tag == existingAttackOrder.TargetUnitTag);
@@ -1991,7 +1991,7 @@
             }
             else if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.WinGround)
             {
-                var groundAttackers = attacks.Where(u => u.DamageGround && u.Unit.UnitType != (uint)UnitTypes.ZERG_BROODLING && (!u.UnitClassifications.Contains(UnitClassification.Worker) || u.EnemiesInRange.Any(e => e.Unit.Tag == commander.UnitCalculation.Unit.Tag)) && GroundAttackersFilter(commander, u));
+                var groundAttackers = attacks.Where(u => u.DamageGround && u.Unit.UnitType != (uint)UnitTypes.ZERG_BROODLING && (!u.UnitClassifications.HasFlag(UnitClassification.Worker) || u.EnemiesInRange.Any(e => e.Unit.Tag == commander.UnitCalculation.Unit.Tag)) && GroundAttackersFilter(commander, u));
                 if (groundAttackers.Any())
                 {
                     var bestDpsReduction = GetBestDpsReduction(commander, weapon, groundAttackers, attacks);
@@ -2021,7 +2021,7 @@
                 }
             }
 
-            var threats = attacks.Where(enemyAttack => enemyAttack.Damage > 0 && DamageService.CanDamage(enemyAttack, commander.UnitCalculation) && enemyAttack.Unit.UnitType != (uint)UnitTypes.ZERG_BROODLING && (!enemyAttack.UnitClassifications.Contains(UnitClassification.Worker) || enemyAttack.EnemiesInRange.Any(e => e.Unit.Tag == commander.UnitCalculation.Unit.Tag)) && GroundAttackersFilter(commander, enemyAttack) && AirAttackersFilter(commander, enemyAttack));
+            var threats = attacks.Where(enemyAttack => enemyAttack.Damage > 0 && DamageService.CanDamage(enemyAttack, commander.UnitCalculation) && enemyAttack.Unit.UnitType != (uint)UnitTypes.ZERG_BROODLING && (!enemyAttack.UnitClassifications.HasFlag(UnitClassification.Worker) || enemyAttack.EnemiesInRange.Any(e => e.Unit.Tag == commander.UnitCalculation.Unit.Tag)) && GroundAttackersFilter(commander, enemyAttack) && AirAttackersFilter(commander, enemyAttack));
             if (threats.Any())
             {
                 var bestDpsReduction = GetBestDpsReduction(commander, weapon, threats, attacks);
@@ -2052,7 +2052,7 @@
                 }
             }
 
-            var defensiveBuildings = attacks.Where(enemyAttack => enemyAttack.UnitClassifications.Contains(UnitClassification.DefensiveStructure) && GroundAttackersFilter(commander, enemyAttack)).OrderBy(u => u.Unit.Health).ThenBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position));
+            var defensiveBuildings = attacks.Where(enemyAttack => enemyAttack.UnitClassifications.HasFlag(UnitClassification.DefensiveStructure) && GroundAttackersFilter(commander, enemyAttack)).OrderBy(u => u.Unit.Health).ThenBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position));
             var defensiveBuilding = defensiveBuildings.FirstOrDefault();
             if (commander.BestTarget != null)
             {
@@ -2067,7 +2067,7 @@
                 return defensiveBuilding;
             }
 
-            var workers = attacks.Where(enemyAttack => enemyAttack.UnitClassifications.Contains(UnitClassification.Worker) && GroundAttackersFilter(commander, enemyAttack)).OrderBy(u => u.Unit.Health).ThenBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position));
+            var workers = attacks.Where(enemyAttack => enemyAttack.UnitClassifications.HasFlag(UnitClassification.Worker) && GroundAttackersFilter(commander, enemyAttack)).OrderBy(u => u.Unit.Health).ThenBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position));
             if (workers.Any())
             {
                 if (existingAttackOrder != null)
@@ -2107,7 +2107,7 @@
                 return pylon;
             }
             var activeBuilding = orderedAttacks.Where(a => a.Unit.IsActive).FirstOrDefault();
-            if (activeBuilding != null && !activeBuilding.UnitClassifications.Contains(UnitClassification.ResourceCenter))
+            if (activeBuilding != null && !activeBuilding.UnitClassifications.HasFlag(UnitClassification.ResourceCenter))
             {
                 return activeBuilding;
             }
@@ -2263,7 +2263,7 @@
         {
             action = null;
 
-            if (commander.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker))
+            if (commander.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.Worker))
             {
                 if (commander.UnitCalculation.EnemiesInRangeOf.Any())
                 {
@@ -2940,7 +2940,7 @@
                 }
 
                 bestAttack = GetBestTargetFromList(commander, attacks, existingAttackOrder);
-                if (bestAttack != null && (bestAttack.UnitClassifications.Contains(UnitClassification.ArmyUnit) || bestAttack.UnitClassifications.Contains(UnitClassification.DefensiveStructure) || (bestAttack.UnitClassifications.Contains(UnitClassification.Worker) && bestAttack.EnemiesInRange.Any(e => e.Unit.Tag == commander.UnitCalculation.Unit.Tag))))
+                if (bestAttack != null && (bestAttack.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) || bestAttack.UnitClassifications.HasFlag(UnitClassification.DefensiveStructure) || (bestAttack.UnitClassifications.HasFlag(UnitClassification.Worker) && bestAttack.EnemiesInRange.Any(e => e.Unit.Tag == commander.UnitCalculation.Unit.Tag))))
                 {
                     commander.BestTarget = bestAttack;
                     return bestAttack;
@@ -2956,7 +2956,7 @@
             if (attacks.Any())
             {
                 var bestOutOfRangeAttack = GetBestTargetFromList(commander, attacks, existingAttackOrder);
-                if (bestOutOfRangeAttack != null && (bestOutOfRangeAttack.UnitClassifications.Contains(UnitClassification.ArmyUnit) || bestOutOfRangeAttack.UnitClassifications.Contains(UnitClassification.DefensiveStructure)))
+                if (bestOutOfRangeAttack != null && (bestOutOfRangeAttack.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) || bestOutOfRangeAttack.UnitClassifications.HasFlag(UnitClassification.DefensiveStructure)))
                 {
                     commander.BestTarget = bestOutOfRangeAttack;
                     return bestOutOfRangeAttack;
@@ -2971,7 +2971,7 @@
             if (attacks.Any())
             {
                 var bestOutOfRangeAttack = GetBestTargetFromList(commander, attacks, existingAttackOrder);
-                if (bestOutOfRangeAttack != null && (bestOutOfRangeAttack.UnitClassifications.Contains(UnitClassification.ArmyUnit) || bestOutOfRangeAttack.UnitClassifications.Contains(UnitClassification.DefensiveStructure)))
+                if (bestOutOfRangeAttack != null && (bestOutOfRangeAttack.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) || bestOutOfRangeAttack.UnitClassifications.HasFlag(UnitClassification.DefensiveStructure)))
                 {
                     commander.BestTarget = bestOutOfRangeAttack;
                     return bestOutOfRangeAttack;
@@ -3003,7 +3003,7 @@
             if (WeaponReady(commander, frame))
             {
                 if (AttackBestTargetInRange(commander, target, bestTarget, frame, out action)) { return action; }
-                if (bestTarget != null && bestTarget.UnitClassifications.Contains(UnitClassification.Worker))
+                if (bestTarget != null && bestTarget.UnitClassifications.HasFlag(UnitClassification.Worker))
                 {
                     if (ShouldStayOutOfRange(commander, frame) && AvoidAllDamage(commander, target, defensivePoint, frame, out action)) { return action; }
 
@@ -3026,7 +3026,7 @@
 
             var range = commander.UnitCalculation.Range;
 
-            var attacks = new List<UnitCalculation>(commander.UnitCalculation.EnemiesInRange.Where(u => u.Unit.DisplayType != DisplayType.Hidden && u.UnitClassifications.Contains(UnitClassification.Worker) && AttackersFilter(commander, u))); // units that are in range right now
+            var attacks = new List<UnitCalculation>(commander.UnitCalculation.EnemiesInRange.Where(u => u.Unit.DisplayType != DisplayType.Hidden && u.UnitClassifications.HasFlag(UnitClassification.Worker) && AttackersFilter(commander, u))); // units that are in range right now
 
             UnitCalculation bestAttack = null;
             if (attacks.Count > 0)
@@ -3056,7 +3056,7 @@
                 }
 
                 bestAttack = GetBestTargetFromList(commander, attacks, existingAttackOrder);
-                if (bestAttack != null && bestAttack.UnitClassifications.Contains(UnitClassification.Worker) && bestAttack.EnemiesInRange.Any(e => e.Unit.Tag == commander.UnitCalculation.Unit.Tag))
+                if (bestAttack != null && bestAttack.UnitClassifications.HasFlag(UnitClassification.Worker) && bestAttack.EnemiesInRange.Any(e => e.Unit.Tag == commander.UnitCalculation.Unit.Tag))
                 {
                     commander.BestTarget = bestAttack;
                     return bestAttack;
@@ -3066,7 +3066,7 @@
             attacks = new List<UnitCalculation>(); // nearby units not in range right now
             foreach (var enemyAttack in commander.UnitCalculation.NearbyEnemies)
             {
-                if (enemyAttack.Unit.DisplayType != DisplayType.Hidden && enemyAttack.UnitClassifications.Contains(UnitClassification.Worker) && !InRange(enemyAttack.Position, commander.UnitCalculation.Position, range + enemyAttack.Unit.Radius + commander.UnitCalculation.Unit.Radius) && AttackersFilter(commander, enemyAttack))
+                if (enemyAttack.Unit.DisplayType != DisplayType.Hidden && enemyAttack.UnitClassifications.HasFlag(UnitClassification.Worker) && !InRange(enemyAttack.Position, commander.UnitCalculation.Position, range + enemyAttack.Unit.Radius + commander.UnitCalculation.Unit.Radius) && AttackersFilter(commander, enemyAttack))
                 {
                     attacks.Add(enemyAttack);
                 }
@@ -3074,7 +3074,7 @@
             if (attacks.Count > 0)
             {
                 var bestOutOfRangeAttack = GetBestTargetFromList(commander, attacks, existingAttackOrder);
-                if (bestOutOfRangeAttack != null && (bestOutOfRangeAttack.UnitClassifications.Contains(UnitClassification.ArmyUnit) || bestOutOfRangeAttack.UnitClassifications.Contains(UnitClassification.DefensiveStructure)))
+                if (bestOutOfRangeAttack != null && (bestOutOfRangeAttack.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) || bestOutOfRangeAttack.UnitClassifications.HasFlag(UnitClassification.DefensiveStructure)))
                 {
                     commander.BestTarget = bestOutOfRangeAttack;
                     return bestOutOfRangeAttack;

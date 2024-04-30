@@ -71,20 +71,20 @@
 
             var bestTarget = GetBestHarassTarget(commander, target);
 
-            if (WeaponReady(commander, frame) && bestTarget != null && bestTarget.UnitClassifications.Contains(UnitClassification.Worker) && commander.UnitCalculation.EnemiesInRange.Any(e => e.Unit.Tag == bestTarget.Unit.Tag))
+            if (WeaponReady(commander, frame) && bestTarget != null && bestTarget.UnitClassifications.HasFlag(UnitClassification.Worker) && commander.UnitCalculation.EnemiesInRange.Any(e => e.Unit.Tag == bestTarget.Unit.Tag))
             {
                 if (AttackBestTarget(commander, target, defensivePoint, null, bestTarget, frame, out action)) { return action; }
             }
 
-            var workers = commander.UnitCalculation.NearbyEnemies.Where(e => e.UnitClassifications.Contains(UnitClassification.Worker));
+            var workers = commander.UnitCalculation.NearbyEnemies.Where(e => e.UnitClassifications.HasFlag(UnitClassification.Worker));
             if (commander.UnitCalculation.Unit.WeaponCooldown < 15 && workers.Any())
             {
                 var bestAttackPosition = GetBestAttackPosition(commander, workers, frame);                
                 return commander.Order(frame, Abilities.MOVE, bestAttackPosition);
             }
-            else if (workers.Any() && commander.UnitCalculation.EnemiesThreateningDamage.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit)))
+            else if (workers.Any() && commander.UnitCalculation.EnemiesThreateningDamage.Any(e => e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit)))
             {
-                var closestThreat = commander.UnitCalculation.EnemiesThreateningDamage.Where(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit)).OrderBy(e => Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position) - (e.Range * e.Range)).FirstOrDefault();
+                var closestThreat = commander.UnitCalculation.EnemiesThreateningDamage.Where(e => e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit)).OrderBy(e => Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position) - (e.Range * e.Range)).FirstOrDefault();
                 if (closestThreat != null && Vector2.DistanceSquared(commander.UnitCalculation.Position, target.ToVector2()) > 16 && Vector2.DistanceSquared(closestThreat.Position, target.ToVector2()) > 16)
                 {
                     return commander.Order(frame, Abilities.MOVE, target);

@@ -35,7 +35,7 @@
             float aggressivitySum = 0;
             var unitCount = 0;
 
-            var enemyArmyUnits = ActiveUnitData.EnemyUnits.Values.Where(u => u.UnitClassifications.Contains(UnitClassification.ArmyUnit));
+            var enemyArmyUnits = ActiveUnitData.EnemyUnits.Values.Where(u => u.UnitClassifications.HasFlag(UnitClassification.ArmyUnit));
 
             EnemyAggressivityData.ArmySupplySize = 0;
             foreach (var unit in enemyArmyUnits)

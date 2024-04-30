@@ -23,7 +23,7 @@
             var elapsedTime = FrameToTimeConverter.GetTime(frame);
 
             var enemyExpansions = ActiveUnitData.EnemyUnits.Values.Count(x => 
-                x.UnitClassifications.Contains(UnitClassification.ResourceCenter)
+                x.UnitClassifications.HasFlag(UnitClassification.ResourceCenter)
                 && x.Unit.Pos.ToVector2().DistanceSquared(TargetingData.EnemyMainBasePoint.ToVector2()) > 16.0f);
 
             if (enemyExpansions > 0)

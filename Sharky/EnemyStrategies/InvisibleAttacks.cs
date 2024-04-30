@@ -9,7 +9,7 @@
         /// </summary>
         public static bool IsNonObserverCloakableUnit(UnitCalculation unitCalculation)
         {
-            return unitCalculation.Unit.UnitType != (uint)UnitTypes.PROTOSS_OBSERVER && (unitCalculation.UnitClassifications.Contains(UnitClassification.Cloakable) || unitCalculation.Unit.DisplayType == DisplayType.Hidden);
+            return unitCalculation.Unit.UnitType != (uint)UnitTypes.PROTOSS_OBSERVER && (unitCalculation.UnitClassifications.HasFlag(UnitClassification.Cloakable) || unitCalculation.Unit.DisplayType == DisplayType.Hidden);
         }
 
         protected override bool Detect(int frame)

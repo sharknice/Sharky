@@ -57,7 +57,7 @@
                 if (harass)
                 {
                     target = GetNextTargetPoint(leader, target);
-                    if (leader.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker)) && (!leader.UnitCalculation.TargetPriorityCalculation.Overwhelm || !leader.UnitCalculation.NearbyAllies.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) || e.UnitClassifications.Contains(UnitClassification.DefensiveStructure))))
+                    if (leader.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.Worker)) && (!leader.UnitCalculation.TargetPriorityCalculation.Overwhelm || !leader.UnitCalculation.NearbyAllies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) || e.UnitClassifications.HasFlag(UnitClassification.DefensiveStructure))))
                     {
                         leader.UnitCalculation.TargetPriorityCalculation.TargetPriority = TargetPriority.KillWorkers;
                     }

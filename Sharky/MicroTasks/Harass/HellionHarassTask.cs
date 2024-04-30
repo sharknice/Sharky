@@ -167,7 +167,7 @@
             if (Reaper != null)
             {
                 var attackLocation = BaseData.EnemyBaseLocations.FirstOrDefault().BehindMineralLineLocation;
-                var problemForHellions = Reaper.UnitCalculation.NearbyEnemies.FirstOrDefault(e => e.FrameLastSeen == frame && e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !e.Unit.IsFlying && (e.EnemiesInRangeOf.Count(a => a.Unit.UnitType == (uint)UnitTypes.TERRAN_HELLION) > 1 || e.EnemiesInRange.Count(a => a.Unit.UnitType == (uint)UnitTypes.TERRAN_HELLION) > 1));
+                var problemForHellions = Reaper.UnitCalculation.NearbyEnemies.FirstOrDefault(e => e.FrameLastSeen == frame && e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) && !e.Unit.IsFlying && (e.EnemiesInRangeOf.Count(a => a.Unit.UnitType == (uint)UnitTypes.TERRAN_HELLION) > 1 || e.EnemiesInRange.Count(a => a.Unit.UnitType == (uint)UnitTypes.TERRAN_HELLION) > 1));
                 if (problemForHellions != null)
                 {
                     if (Reaper.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.EFFECT_KD8CHARGE) || Reaper.AbilityOffCooldown(Abilities.EFFECT_KD8CHARGE, frame, SharkyOptions.FramesPerSecond, SharkyUnitData))
@@ -229,7 +229,7 @@
                 }
 
                 // kill any workers in range
-                if (commander.UnitCalculation.Unit.WeaponCooldown < 2 && commander.UnitCalculation.EnemiesInRange.Any(e => e.FrameLastSeen == frame && e.UnitClassifications.Contains(UnitClassification.Worker)))
+                if (commander.UnitCalculation.Unit.WeaponCooldown < 2 && commander.UnitCalculation.EnemiesInRange.Any(e => e.FrameLastSeen == frame && e.UnitClassifications.HasFlag(UnitClassification.Worker)))
                 {
                     CameraManager.SetCamera(commander.UnitCalculation.Position);
                     var action = HellionMicroController.HarassWorkers(commander, AttackPoint, TargetingData.MainDefensePoint, frame);
@@ -240,7 +240,7 @@
                     continue;
                 }
                 // kill any unguarded workers
-                if (commander.UnitCalculation.Unit.WeaponCooldown < 2 && commander.UnitCalculation.NearbyEnemies.Any(e => e.FrameLastSeen == frame && e.UnitClassifications.Contains(UnitClassification.Worker)) && !commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) || e.UnitClassifications.Contains(UnitClassification.DefensiveStructure)))
+                if (commander.UnitCalculation.Unit.WeaponCooldown < 2 && commander.UnitCalculation.NearbyEnemies.Any(e => e.FrameLastSeen == frame && e.UnitClassifications.HasFlag(UnitClassification.Worker)) && !commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) || e.UnitClassifications.HasFlag(UnitClassification.DefensiveStructure)))
                 {
                     var action = HellionMicroController.HarassWorkers(commander, AttackPoint, TargetingData.MainDefensePoint, frame);
                     if (action != null)
@@ -250,7 +250,7 @@
                     continue;
                 }
                 // kill clumps of workers
-                if (commander.UnitCalculation.EnemiesInRange.Count(e => e.FrameLastSeen == frame && e.UnitClassifications.Contains(UnitClassification.Worker)) > 2)
+                if (commander.UnitCalculation.EnemiesInRange.Count(e => e.FrameLastSeen == frame && e.UnitClassifications.HasFlag(UnitClassification.Worker)) > 2)
                 {
                     CameraManager.SetCamera(commander.UnitCalculation.Position);
                     var action = HellionMicroController.HarassWorkers(commander, AttackPoint, TargetingData.MainDefensePoint, frame);
@@ -274,7 +274,7 @@
                 }
 
                 // kill workers at mineral line
-                if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker)))
+                if (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.Worker)))
                 {
                     var action = HellionMicroController.HarassWorkers(commander, AttackPoint, TargetingData.MainDefensePoint, frame);
                     if (action != null)

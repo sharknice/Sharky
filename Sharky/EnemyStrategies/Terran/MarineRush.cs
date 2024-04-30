@@ -18,7 +18,7 @@
                 return false;
             }
 
-            if (ActiveUnitData.EnemyUnits.Values.Any(e => e.UnitClassifications.Contains(UnitClassification.ResourceCenter) && e.Unit.Pos.X == BaseData.EnemyBaseLocations.Skip(1).FirstOrDefault().Location.X && e.Unit.Pos.Y == BaseData.EnemyBaseLocations.Skip(1).FirstOrDefault().Location.Y))
+            if (ActiveUnitData.EnemyUnits.Values.Any(e => e.UnitClassifications.HasFlag(UnitClassification.ResourceCenter) && e.Unit.Pos.X == BaseData.EnemyBaseLocations.Skip(1).FirstOrDefault().Location.X && e.Unit.Pos.Y == BaseData.EnemyBaseLocations.Skip(1).FirstOrDefault().Location.Y))
             {
                 return false;
             }
@@ -28,7 +28,7 @@
                 return true;
             }
 
-            if (ActiveUnitData.EnemyUnits.Values.Any(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && e.Unit.UnitType != (uint)UnitTypes.TERRAN_MARINE) || UnitCountService.EnemyCount(UnitTypes.TERRAN_MARINE) < 2)
+            if (ActiveUnitData.EnemyUnits.Values.Any(e => e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) && e.Unit.UnitType != (uint)UnitTypes.TERRAN_MARINE) || UnitCountService.EnemyCount(UnitTypes.TERRAN_MARINE) < 2)
             {
                 return false;
             }

@@ -80,7 +80,7 @@
                     detonateChoke = false;
                 }
 
-                if (targetDamage > 35 || selfDetonateDamage > 35 || detonateChoke || bestTarget.UnitClassifications.Contains(UnitClassification.DefensiveStructure))
+                if (targetDamage > 35 || selfDetonateDamage > 35 || detonateChoke || bestTarget.UnitClassifications.HasFlag(UnitClassification.DefensiveStructure))
                 {
                     if (frame > LastManualDetonationFrame + 3 && 
                         (selfDetonateDamage >= targetDamage || detonateChoke))

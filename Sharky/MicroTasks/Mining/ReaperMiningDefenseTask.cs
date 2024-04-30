@@ -65,7 +65,7 @@
                 {
                     healthRequired = 33;
                 }
-                if (EnemyReaper == null || commander.UnitCalculation.Unit.Health + commander.UnitCalculation.Unit.Shield <= healthRequired || !commander.UnitCalculation.NearbyAllies.Any(a => a.UnitClassifications.Contains(UnitClassification.ResourceCenter)))
+                if (EnemyReaper == null || commander.UnitCalculation.Unit.Health + commander.UnitCalculation.Unit.Shield <= healthRequired || !commander.UnitCalculation.NearbyAllies.Any(a => a.UnitClassifications.HasFlag(UnitClassification.ResourceCenter)))
                 {
                     commander.UnitRole = UnitRole.RunAway;
                     List<SC2APIProtocol.Action> action;
@@ -89,8 +89,8 @@
 
         private void ClaimDefenders()
         {
-            var worker = EnemyReaper.NearbyEnemies.FirstOrDefault(e => e.UnitClassifications.Contains(UnitClassification.Worker) && 
-                e.NearbyAllies.Any(a => a.UnitClassifications.Contains(UnitClassification.ResourceCenter) &&
+            var worker = EnemyReaper.NearbyEnemies.FirstOrDefault(e => e.UnitClassifications.HasFlag(UnitClassification.Worker) && 
+                e.NearbyAllies.Any(a => a.UnitClassifications.HasFlag(UnitClassification.ResourceCenter) &&
                 ActiveUnitData.Commanders.ContainsKey(e.Unit.Tag) && ActiveUnitData.Commanders[e.Unit.Tag].UnitRole != UnitRole.ChaseReaper && 
                 e.Unit.Health + e.Unit.Shield >= 40));
 
@@ -104,9 +104,9 @@
         private void GetEnemyReaper()
         {
             EnemyReaper = ActiveUnitData.EnemyUnits.Values.FirstOrDefault(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_REAPER
-                            && e.NearbyEnemies.Any(ee => ee.UnitClassifications.Contains(UnitClassification.ResourceCenter) && MapDataService.MapHeight(ee.Unit.Pos) == MapDataService.MapHeight(e.Unit.Pos) && !ee.NearbyAllies.Any(a => a.Unit.UnitType == (uint)UnitTypes.ZERG_QUEEN))
-                            && !e.NearbyAllies.Any(ee => ee.UnitClassifications.Contains(UnitClassification.ArmyUnit) || ee.Unit.UnitType == (uint)UnitTypes.ZERG_QUEEN)
-                            && !e.NearbyEnemies.Any(ee => ee.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !ee.Unit.IsFlying));
+                            && e.NearbyEnemies.Any(ee => ee.UnitClassifications.HasFlag(UnitClassification.ResourceCenter) && MapDataService.MapHeight(ee.Unit.Pos) == MapDataService.MapHeight(e.Unit.Pos) && !ee.NearbyAllies.Any(a => a.Unit.UnitType == (uint)UnitTypes.ZERG_QUEEN))
+                            && !e.NearbyAllies.Any(ee => ee.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) || ee.Unit.UnitType == (uint)UnitTypes.ZERG_QUEEN)
+                            && !e.NearbyEnemies.Any(ee => ee.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) && !ee.Unit.IsFlying));
         }
 
         public override void RemoveDeadUnits(List<ulong> deadUnits)

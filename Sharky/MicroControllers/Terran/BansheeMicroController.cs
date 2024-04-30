@@ -60,7 +60,7 @@
 
             if (PreOffenseOrder(commander, target, defensivePoint, null, bestTarget, frame, out action)) { return action; }
 
-            if (WeaponReady(commander, frame) && bestTarget != null && bestTarget.UnitClassifications.Contains(UnitClassification.Worker) && commander.UnitCalculation.EnemiesInRange.Any(e => e.Unit.Tag == bestTarget.Unit.Tag))
+            if (WeaponReady(commander, frame) && bestTarget != null && bestTarget.UnitClassifications.HasFlag(UnitClassification.Worker) && commander.UnitCalculation.EnemiesInRange.Any(e => e.Unit.Tag == bestTarget.Unit.Tag))
             {
                 if (AttackBestTarget(commander, target, defensivePoint, null, bestTarget, frame, out action)) { return action; }
             }
@@ -70,7 +70,7 @@
                 var formation = GetDesiredFormation(commander);
                 if (Move(commander, target, defensivePoint, null, bestTarget, formation, frame, out action)) { return action; }
             }
-            else if (bestTarget != null && bestTarget.UnitClassifications.Contains(UnitClassification.Worker))
+            else if (bestTarget != null && bestTarget.UnitClassifications.HasFlag(UnitClassification.Worker))
             {
                 return MoveToTarget(commander, bestTarget.Unit.Pos.ToPoint2D(), frame);
             }
@@ -84,7 +84,7 @@
 
             var range = commander.UnitCalculation.Range;
 
-            var attacks = commander.UnitCalculation.EnemiesInRange.Where(u => u.Unit.DisplayType != DisplayType.Hidden && u.UnitClassifications.Contains(UnitClassification.Worker)); // units that are in range right now
+            var attacks = commander.UnitCalculation.EnemiesInRange.Where(u => u.Unit.DisplayType != DisplayType.Hidden && u.UnitClassifications.HasFlag(UnitClassification.Worker)); // units that are in range right now
 
             UnitCalculation bestAttack = null;
             if (attacks.Any())
@@ -114,18 +114,18 @@
                 }
 
                 bestAttack = GetBestTargetFromList(commander, attacks, existingAttackOrder);
-                if (bestAttack != null && bestAttack.UnitClassifications.Contains(UnitClassification.Worker) && bestAttack.EnemiesInRange.Any(e => e.Unit.Tag == commander.UnitCalculation.Unit.Tag))
+                if (bestAttack != null && bestAttack.UnitClassifications.HasFlag(UnitClassification.Worker) && bestAttack.EnemiesInRange.Any(e => e.Unit.Tag == commander.UnitCalculation.Unit.Tag))
                 {
                     commander.BestTarget = bestAttack;
                     return bestAttack;
                 }
             }
 
-            attacks = commander.UnitCalculation.NearbyEnemies.Where(enemyAttack => enemyAttack.Unit.DisplayType != DisplayType.Hidden && enemyAttack.UnitClassifications.Contains(UnitClassification.Worker) && !InRange(enemyAttack.Position, commander.UnitCalculation.Position, range + enemyAttack.Unit.Radius + commander.UnitCalculation.Unit.Radius)); // nearby units not in range right now
+            attacks = commander.UnitCalculation.NearbyEnemies.Where(enemyAttack => enemyAttack.Unit.DisplayType != DisplayType.Hidden && enemyAttack.UnitClassifications.HasFlag(UnitClassification.Worker) && !InRange(enemyAttack.Position, commander.UnitCalculation.Position, range + enemyAttack.Unit.Radius + commander.UnitCalculation.Unit.Radius)); // nearby units not in range right now
             if (attacks.Any())
             {
                 var bestOutOfRangeAttack = GetBestTargetFromList(commander, attacks, existingAttackOrder);
-                if (bestOutOfRangeAttack != null && (bestOutOfRangeAttack.UnitClassifications.Contains(UnitClassification.ArmyUnit) || bestOutOfRangeAttack.UnitClassifications.Contains(UnitClassification.DefensiveStructure)))
+                if (bestOutOfRangeAttack != null && (bestOutOfRangeAttack.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) || bestOutOfRangeAttack.UnitClassifications.HasFlag(UnitClassification.DefensiveStructure)))
                 {
                     commander.BestTarget = bestOutOfRangeAttack;
                     return bestOutOfRangeAttack;

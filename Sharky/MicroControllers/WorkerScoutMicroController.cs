@@ -9,7 +9,7 @@
 
         public override List<SC2APIProtocol.Action> Attack(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
-            var enemyWorkers = commander.UnitCalculation.NearbyEnemies.Where(u => u.UnitClassifications.Contains(UnitClassification.Worker));
+            var enemyWorkers = commander.UnitCalculation.NearbyEnemies.Where(u => u.UnitClassifications.HasFlag(UnitClassification.Worker));
             if (enemyWorkers.Any())
             {
                 // if any are building something

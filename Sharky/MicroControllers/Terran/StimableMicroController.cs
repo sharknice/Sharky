@@ -30,7 +30,7 @@
             if (commander.UnitCalculation.Loaded)
             {
                 var bunker = ActiveUnitData.Commanders.Values.FirstOrDefault(a => a.UnitCalculation.Unit.Passengers.Any(p => p.Tag == commander.UnitCalculation.Unit.Tag));
-                if (bunker.UnitCalculation.EnemiesThreateningDamage.Any() || bunker.UnitCalculation.NearbyEnemies.Count(e => e.DamageGround && e.FrameLastSeen == frame && e.UnitClassifications.Contains(UnitClassification.ArmyUnit)) > 3)
+                if (bunker.UnitCalculation.EnemiesThreateningDamage.Any() || bunker.UnitCalculation.NearbyEnemies.Count(e => e.DamageGround && e.FrameLastSeen == frame && e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit)) > 3)
                 {
                     return false;
                 }

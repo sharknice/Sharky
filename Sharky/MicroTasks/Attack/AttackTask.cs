@@ -47,7 +47,7 @@
         {
             foreach (var commander in commanders)
             {
-                if (!commander.Value.Claimed && commander.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.ArmyUnit))
+                if (!commander.Value.Claimed && commander.Value.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.ArmyUnit))
                 {
                     commander.Value.Claimed = true;
                     UnitCommanders.Add(commander.Value);
@@ -81,7 +81,7 @@
                 }
             }
 
-            var attackingEnemies = ActiveUnitData.SelfUnits.Where(u => u.Value.UnitClassifications.Contains(UnitClassification.ResourceCenter) || u.Value.UnitClassifications.Contains(UnitClassification.ProductionStructure)).SelectMany(u => u.Value.NearbyEnemies).Distinct();
+            var attackingEnemies = ActiveUnitData.SelfUnits.Where(u => u.Value.UnitClassifications.HasFlag(UnitClassification.ResourceCenter) || u.Value.UnitClassifications.HasFlag(UnitClassification.ProductionStructure)).SelectMany(u => u.Value.NearbyEnemies).Distinct();
             if (attackingEnemies.Any())
             {
                 var armyPoint = new Vector2(AttackData.ArmyPoint.X, AttackData.ArmyPoint.Y);

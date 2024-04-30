@@ -22,7 +22,7 @@
 
             var elapsedTime = FrameToTimeConverter.GetTime(frame);
 
-            var enemyExpansions = ActiveUnitData.EnemyUnits.Values.Count(x => x.UnitClassifications.Contains(UnitClassification.ResourceCenter) 
+            var enemyExpansions = ActiveUnitData.EnemyUnits.Values.Count(x => x.UnitClassifications.HasFlag(UnitClassification.ResourceCenter) 
                 && x.Unit.Pos.ToVector2().DistanceSquared(TargetingData.EnemyMainBasePoint.ToVector2()) > 16.0f);
 
             if (BaseData.EnemyNaturalBase == null) { return false; }

@@ -40,25 +40,25 @@
                 return true;
             }
 
-            if (!commander.ParentUnitCalculation.EnemiesInRangeOfAvoid.Any(e => !e.UnitClassifications.Contains(UnitClassification.Worker)) && commander.ParentUnitCalculation.EnemiesInRange.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker)))
+            if (!commander.ParentUnitCalculation.EnemiesInRangeOfAvoid.Any(e => !e.UnitClassifications.HasFlag(UnitClassification.Worker)) && commander.ParentUnitCalculation.EnemiesInRange.Any(e => e.UnitClassifications.HasFlag(UnitClassification.Worker)))
             {
                 action = commander.Order(frame, Abilities.CANCEL, allowSpam: true);
                 return true;
             }
 
-            if (commander.UnitCalculation.EnemiesInRangeOfAvoid.Any(e => !e.UnitClassifications.Contains(UnitClassification.Worker)) && !commander.ParentUnitCalculation.EnemiesInRangeOfAvoid.Any(e => !e.UnitClassifications.Contains(UnitClassification.Worker)))
+            if (commander.UnitCalculation.EnemiesInRangeOfAvoid.Any(e => !e.UnitClassifications.HasFlag(UnitClassification.Worker)) && !commander.ParentUnitCalculation.EnemiesInRangeOfAvoid.Any(e => !e.UnitClassifications.HasFlag(UnitClassification.Worker)))
             {
                 action = commander.Order(frame, Abilities.CANCEL, allowSpam: true);
                 return true;
             }
-            if (commander.ParentUnitCalculation.EnemiesInRangeOf.Count(e => !e.UnitClassifications.Contains(UnitClassification.Worker)) < commander.UnitCalculation.EnemiesInRangeOf.Count(e => !e.UnitClassifications.Contains(UnitClassification.Worker)))
+            if (commander.ParentUnitCalculation.EnemiesInRangeOf.Count(e => !e.UnitClassifications.HasFlag(UnitClassification.Worker)) < commander.UnitCalculation.EnemiesInRangeOf.Count(e => !e.UnitClassifications.HasFlag(UnitClassification.Worker)))
             {
                 action = commander.Order(frame, Abilities.CANCEL, allowSpam: true);
                 return true;
             }
 
-            var threatToShade = commander.UnitCalculation.EnemiesThreateningDamage.Where(e => !e.UnitClassifications.Contains(UnitClassification.Worker)).Sum(e => e.Damage);
-            var threatToAdept = commander.ParentUnitCalculation.EnemiesThreateningDamage.Where(e => !e.UnitClassifications.Contains(UnitClassification.Worker)).Sum(e => e.Damage);
+            var threatToShade = commander.UnitCalculation.EnemiesThreateningDamage.Where(e => !e.UnitClassifications.HasFlag(UnitClassification.Worker)).Sum(e => e.Damage);
+            var threatToAdept = commander.ParentUnitCalculation.EnemiesThreateningDamage.Where(e => !e.UnitClassifications.HasFlag(UnitClassification.Worker)).Sum(e => e.Damage);
             if (threatToShade > threatToAdept)
             {
                 action = commander.Order(frame, Abilities.CANCEL, allowSpam: true);

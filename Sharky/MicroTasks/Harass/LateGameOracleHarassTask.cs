@@ -61,7 +61,7 @@
                                 commands.AddRange(action);
                             }
 
-                            if (MapDataService.SelfVisible(harassInfo.BaseLocation.MineralLineLocation) && !commander.UnitCalculation.NearbyEnemies.Take(25).Any(e => e.UnitClassifications.Contains(UnitClassification.Worker) && (Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position) <= 100)))
+                            if (MapDataService.SelfVisible(harassInfo.BaseLocation.MineralLineLocation) && !commander.UnitCalculation.NearbyEnemies.Take(25).Any(e => e.UnitClassifications.HasFlag(UnitClassification.Worker) && (Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position) <= 100)))
                             {
                                 harassInfo.LastClearedFrame = frame;
                                 harassInfo.Harassers.Remove(commander);
@@ -77,7 +77,7 @@
                                 }
                             }
                         }
-                        else if (!commander.UnitCalculation.NearbyEnemies.Take(25).Any(e => e.DamageAir) && commander.UnitCalculation.NearbyEnemies.Take(25).Count(e => e.UnitClassifications.Contains(UnitClassification.Worker)) > 2)  // if near woerkers and nothing can attack it just kill workers
+                        else if (!commander.UnitCalculation.NearbyEnemies.Take(25).Any(e => e.DamageAir) && commander.UnitCalculation.NearbyEnemies.Take(25).Count(e => e.UnitClassifications.HasFlag(UnitClassification.Worker)) > 2)  // if near woerkers and nothing can attack it just kill workers
                         {
                             var action = OracleMicroController.HarassWorkers(commander, harassInfo.BaseLocation.MineralLineLocation, TargetingData.ForwardDefensePoint, frame);
                             if (action != null)
@@ -121,7 +121,7 @@
             {
                 return false;
             }
-            if (MapDataService.SelfVisible(new Point2D { X = target.X, Y = target.Y, }) && !commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker) && (Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position) <= 100)))
+            if (MapDataService.SelfVisible(new Point2D { X = target.X, Y = target.Y, }) && !commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.Worker) && (Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position) <= 100)))
             {
                 return false;
             }

@@ -13,15 +13,15 @@
             action = null;
 
             if (commander.UnitCalculation.NearbyEnemies.Any() &&
-                !commander.UnitCalculation.NearbyEnemies.Any(e => e.Unit.IsFlying) && 
-                !commander.UnitCalculation.NearbyEnemies.Any(e => e.DamageGround && e.UnitClassifications.Any(c => c == UnitClassification.ArmyUnit || c == UnitClassification.DefensiveStructure) || MapDataService.MapHeight(e.Unit.Pos) != MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos)))
+                !commander.UnitCalculation.NearbyEnemies.Any(e => e.Unit.IsFlying) &&
+                !commander.UnitCalculation.NearbyEnemies.Any(e => e.DamageGround && (e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) || e.UnitClassifications.HasFlag(UnitClassification.DefensiveStructure)) || MapDataService.MapHeight(e.Unit.Pos) != MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos)))
             {
                 CameraManager.SetCamera(commander.UnitCalculation.Position);
                 TagService.TagAbility("viking_land");
                 action = commander.Order(frame, Abilities.MORPH_VIKINGASSAULTMODE);
                 return true;
             }
-            
+
             return false;
         }
 

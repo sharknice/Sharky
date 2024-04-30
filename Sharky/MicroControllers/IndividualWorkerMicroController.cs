@@ -183,7 +183,7 @@
                 }
             }
 
-            if (!commander.UnitCalculation.EnemiesInRange.Any(e => e.UnitClassifications.Contains(UnitClassification.Worker)))
+            if (!commander.UnitCalculation.EnemiesInRange.Any(e => e.UnitClassifications.HasFlag(UnitClassification.Worker)))
             {
                 if (GroupUp(commander, target, groupCenter, false, frame, out action))
                 {
@@ -203,7 +203,7 @@
         {
             var existingAttackOrder = commander.UnitCalculation.Unit.Orders.Where(o => o.AbilityId == (uint)Abilities.ATTACK || o.AbilityId == (uint)Abilities.ATTACK_ATTACK).FirstOrDefault();
 
-            var priorityAttacks = commander.UnitCalculation.NearbyEnemies.Where(e => e.Unit.DisplayType == DisplayType.Visible && e.UnitClassifications.Contains(UnitClassification.Worker));
+            var priorityAttacks = commander.UnitCalculation.NearbyEnemies.Where(e => e.Unit.DisplayType == DisplayType.Visible && e.UnitClassifications.HasFlag(UnitClassification.Worker));
 
             var attacks = commander.UnitCalculation.EnemiesInRange.Where(e => priorityAttacks.Any(p => p.Unit.Tag == e.Unit.Tag) && AttackersFilter(commander, e));
 

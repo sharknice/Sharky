@@ -86,8 +86,8 @@
                     return actions;
                 }
 
-                var detectors = UnitCommanders.Where(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Detector) || c.UnitCalculation.UnitClassifications.Contains(UnitClassification.DetectionCaster));
-                var nonDetectors = UnitCommanders.Where(c => !c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Detector) && !c.UnitCalculation.UnitClassifications.Contains(UnitClassification.DetectionCaster) && !c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker));
+                var detectors = UnitCommanders.Where(c => c.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.Detector) || c.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.DetectionCaster));
+                var nonDetectors = UnitCommanders.Where(c => !c.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.Detector) && !c.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.DetectionCaster) && !c.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.Worker));
 
                 var vector = new Vector2(NextBaseLocation.X, NextBaseLocation.Y);
 
@@ -111,7 +111,7 @@
                     }
                     else
                     {
-                        if (detector.UnitCalculation.UnitClassifications.Contains(UnitClassification.DetectionCaster))
+                        if (detector.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.DetectionCaster))
                         {
                             if (detector.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_ORACLE)
                             {
@@ -156,7 +156,7 @@
 
         private void MineOutBlockingMinerals(int frame, List<SC2APIProtocol.Action> actions)
         {
-            var workers = UnitCommanders.Where(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker));
+            var workers = UnitCommanders.Where(c => c.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.Worker));
             if (BlockingMinerals.Any())
             {
                 var mineral = BlockingMinerals.FirstOrDefault();
@@ -182,12 +182,12 @@
             }
             else
             {
-                foreach (var commander in UnitCommanders.Where(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker)))
+                foreach (var commander in UnitCommanders.Where(c => c.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.Worker)))
                 {
                     commander.UnitRole = UnitRole.None;
                     commander.Claimed = false;
                 }
-                UnitCommanders.RemoveAll(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker));
+                UnitCommanders.RemoveAll(c => c.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.Worker));
             }
         }
 
@@ -208,12 +208,12 @@
             else
             {
                 Needed = false;
-                foreach (var commander in UnitCommanders.Where(u => !u.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker)))
+                foreach (var commander in UnitCommanders.Where(u => !u.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.Worker)))
                 {
                     commander.UnitRole = UnitRole.None;
                     commander.Claimed = false;
                 }
-                UnitCommanders.RemoveAll(u => !u.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker));
+                UnitCommanders.RemoveAll(u => !u.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.Worker));
             }
         }
 
@@ -277,7 +277,7 @@
                     commander.Claimed = true;
                     commander.UnitRole = UnitRole.Defend;
                     UnitCommanders.Add(commander);
-                    if (UnitCommanders.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker)) > 1)
+                    if (UnitCommanders.Count(c => c.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.Worker)) > 1)
                     {
                         break;
                     }

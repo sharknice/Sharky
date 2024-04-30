@@ -198,7 +198,7 @@
             {
                 return false;
             }
-            if (commander.UnitCalculation.NearbyEnemies.Take(25).Any(e => e.UnitClassifications.Contains(UnitClassification.DefensiveStructure) || e.UnitClassifications.Contains(UnitClassification.ArmyUnit)))
+            if (commander.UnitCalculation.NearbyEnemies.Take(25).Any(e => e.UnitClassifications.HasFlag(UnitClassification.DefensiveStructure) || e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit)))
             {
                 return false;
             }
@@ -365,7 +365,7 @@
             // no allies that already have a friendly warp prism or warp prism phasing within 8 range
             var otherWarpPrisms = supportableUnits.Where(u => u.Unit.Tag != commander.UnitCalculation.Unit.Tag && (u.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISM || u.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISMPHASING));
 
-            var friendlies = supportableUnits.Where(u => u.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !u.Unit.IsFlying
+            var friendlies = supportableUnits.Where(u => u.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) && !u.Unit.IsFlying
                 && !otherWarpPrisms.Any(o => DistanceSquared(o, u) < 64)
                     && Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position) < 225
                     && u.NearbyEnemies.Any(e => DistanceSquared(u, e) < 225)
@@ -380,7 +380,7 @@
             // get any allies
             // select the friendies with enemies in 15 range
             // order by closest to the enemy
-            friendlies = supportableUnits.Where(u => u.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !u.Unit.IsFlying
+            friendlies = supportableUnits.Where(u => u.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) && !u.Unit.IsFlying
                             && !otherWarpPrisms.Any(o => DistanceSquared(o, u) < 64)
                                 && u.NearbyEnemies.Any(e => DistanceSquared(u, e) < 225)
                             ).OrderBy(u => DistanceSquared(u.NearbyEnemies.OrderBy(e => DistanceSquared(e, u)).FirstOrDefault(), u));
@@ -392,7 +392,7 @@
 
             // if still none
             //get ally closest to target
-            friendlies = supportableUnits.Where(u => u.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !u.Unit.IsFlying
+            friendlies = supportableUnits.Where(u => u.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) && !u.Unit.IsFlying
                             && !otherWarpPrisms.Any(o => DistanceSquared(o, u) < 64)
                             ).OrderBy(u => DistanceSquared(u.NearbyEnemies.OrderBy(e => DistanceSquared(e, u)).FirstOrDefault(), u));
 
@@ -403,7 +403,7 @@
 
             // if still none
             //get ally closest to target even if there is another warp prism nearby
-            friendlies = supportableUnits.Where(u => u.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !u.Unit.IsFlying
+            friendlies = supportableUnits.Where(u => u.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) && !u.Unit.IsFlying
                             ).OrderBy(u => DistanceSquared(u.NearbyEnemies.OrderBy(e => DistanceSquared(e, u)).FirstOrDefault(), u));
 
             if (friendlies.Any())
@@ -435,7 +435,7 @@
                         {
                             if (DamageService.CanDamage(unit, enemyAttack) && InRange(commander.UnitCalculation.Position, enemyAttack.Position, unit.Range + passengerUnit.Radius + enemyAttack.Unit.Radius) && MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos) == MapDataService.MapHeight(enemyAttack.Unit.Pos))
                             {
-                                if (!enemyAttack.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !InRange(commander.UnitCalculation.Position, enemyAttack.Position, 2 + passengerUnit.Radius + enemyAttack.Unit.Radius))
+                                if (!enemyAttack.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) && !InRange(commander.UnitCalculation.Position, enemyAttack.Position, 2 + passengerUnit.Radius + enemyAttack.Unit.Radius))
                                 {
                                     continue;
                                 }
@@ -458,7 +458,7 @@
 
             if (commander.UnitCalculation.Unit.CargoSpaceMax > commander.UnitCalculation.Unit.CargoSpaceTaken && commander.UnitCalculation.Unit.Shield + commander.UnitCalculation.Unit.Health > 50) // find more units to load
             {
-                var friendly = commander.UnitCalculation.NearbyAllies.Take(25).Where(u => !u.Unit.IsFlying && u.Unit.BuildProgress == 1 && u.UnitClassifications.Contains(UnitClassification.ArmyUnit) && !u.Loaded && commander.UnitCalculation.Unit.CargoSpaceMax - commander.UnitCalculation.Unit.CargoSpaceTaken >= UnitDataService.CargoSize((UnitTypes)u.Unit.UnitType) && u.EnemiesInRange.Count == 0 && u.EnemiesInRangeOf.Count == 0).OrderBy(u => Vector2.DistanceSquared(commander.UnitCalculation.Position, u.Position)).FirstOrDefault();
+                var friendly = commander.UnitCalculation.NearbyAllies.Take(25).Where(u => !u.Unit.IsFlying && u.Unit.BuildProgress == 1 && u.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) && !u.Loaded && commander.UnitCalculation.Unit.CargoSpaceMax - commander.UnitCalculation.Unit.CargoSpaceTaken >= UnitDataService.CargoSize((UnitTypes)u.Unit.UnitType) && u.EnemiesInRange.Count == 0 && u.EnemiesInRangeOf.Count == 0).OrderBy(u => Vector2.DistanceSquared(commander.UnitCalculation.Position, u.Position)).FirstOrDefault();
 
                 if (friendly != null)
                 {

@@ -110,9 +110,9 @@
             }
 
 
-            foreach (var unit in ActiveUnitData.SelfUnits.Values.Where(u => u.UnitClassifications.Contains(UnitClassification.ResourceCenter)))
+            foreach (var unit in ActiveUnitData.SelfUnits.Values.Where(u => u.UnitClassifications.HasFlag(UnitClassification.ResourceCenter)))
             {
-                foreach (var armyUnit in unit.NearbyAllies.Where(u => u.Unit.BuildProgress == 1 && u.Unit.Health < u.Unit.HealthMax && u.UnitClassifications.Contains(UnitClassification.ArmyUnit) && u.Attributes.Contains(SC2APIProtocol.Attribute.Mechanical)))
+                foreach (var armyUnit in unit.NearbyAllies.Where(u => u.Unit.BuildProgress == 1 && u.Unit.Health < u.Unit.HealthMax && u.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) && u.Attributes.Contains(SC2APIProtocol.Attribute.Mechanical)))
                 {
                     if (!RepairData.ContainsKey(armyUnit.Unit.Tag))
                     {
@@ -162,7 +162,7 @@
                 {
                     repair.Value.DesiredRepairers = 1;
                 }
-                if (repair.Value.UnitToRepair.UnitClassifications.Contains(UnitClassification.DefensiveStructure))
+                if (repair.Value.UnitToRepair.UnitClassifications.HasFlag(UnitClassification.DefensiveStructure))
                 {
                     repair.Value.DesiredRepairers++;
                 }

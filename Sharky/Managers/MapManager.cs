@@ -260,7 +260,7 @@
                 }
             }
 
-            foreach (var unitCalculation in ActiveUnitData.SelfUnits.Where(e => e.Value.UnitClassifications.Contains(UnitClassification.Detector) && e.Value.Unit.BuildProgress == 1))
+            foreach (var unitCalculation in ActiveUnitData.SelfUnits.Where(e => e.Value.UnitClassifications.HasFlag(UnitClassification.Detector) && e.Value.Unit.BuildProgress == 1))
             {
                 var nodes = GetNodesInRange(unitCalculation.Value.Unit.Pos, unitCalculation.Value.Unit.DetectRange + 1, MapData.MapWidth, MapData.MapHeight);
                 foreach (var node in nodes)
@@ -289,7 +289,7 @@
                 }
             }
 
-            foreach (var enemy in ActiveUnitData.EnemyUnits.Where(e => e.Value.UnitClassifications.Contains(UnitClassification.Detector) && (e.Value.Unit.BuildProgress == 1 || e.Value.Unit.BuildProgress == 0)))
+            foreach (var enemy in ActiveUnitData.EnemyUnits.Where(e => e.Value.UnitClassifications.HasFlag(UnitClassification.Detector) && (e.Value.Unit.BuildProgress == 1 || e.Value.Unit.BuildProgress == 0)))
             {
                 var nodes = GetNodesInRange(enemy.Value.Unit.Pos, 11, MapData.MapWidth, MapData.MapHeight);
                 foreach (var node in nodes)

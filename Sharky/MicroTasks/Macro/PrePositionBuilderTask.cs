@@ -49,7 +49,7 @@
                 }
                 foreach (var commander in commanders.OrderBy(c => c.Value.Claimed).ThenBy(c => c.Value.UnitCalculation.Unit.BuffIds.Count()).ThenBy(c => Vector2.DistanceSquared(c.Value.UnitCalculation.Position, BuildPosition.ToVector2())).ThenBy(c => DistanceToResourceCenter(c)))
                 {
-                    if (commander.Value.UnitRole != UnitRole.Gas && (!commander.Value.Claimed || commander.Value.UnitRole == UnitRole.Minerals) && commander.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && !commander.Value.UnitCalculation.Unit.BuffIds.Any(b => SharkyUnitData.CarryingResourceBuffs.Contains((Buffs)b)) && commander.Value.UnitRole != UnitRole.Build)
+                    if (commander.Value.UnitRole != UnitRole.Gas && (!commander.Value.Claimed || commander.Value.UnitRole == UnitRole.Minerals) && commander.Value.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.Worker) && !commander.Value.UnitCalculation.Unit.BuffIds.Any(b => SharkyUnitData.CarryingResourceBuffs.Contains((Buffs)b)) && commander.Value.UnitRole != UnitRole.Build)
                     {
                         commander.Value.UnitRole = UnitRole.PreBuild;
                         commander.Value.Claimed = true;
@@ -98,7 +98,7 @@
                         actions.AddRange(commander.Order(frame, Abilities.STOP));
                     }
 
-                    var enemyWorker = commander.UnitCalculation.NearbyEnemies.Take(25).FirstOrDefault(e => e.UnitClassifications.Contains(UnitClassification.Worker) && e.FrameLastSeen == frame);
+                    var enemyWorker = commander.UnitCalculation.NearbyEnemies.Take(25).FirstOrDefault(e => e.UnitClassifications.HasFlag(UnitClassification.Worker) && e.FrameLastSeen == frame);
                     if (enemyWorker != null)
                     {
                         var attack = commander.Order(frame, Abilities.ATTACK, targetTag: enemyWorker.Unit.Tag);
@@ -140,7 +140,7 @@
 
         float DistanceToResourceCenter(KeyValuePair<ulong, UnitCommander> commander)
         {
-            var resourceCenter = commander.Value.UnitCalculation.NearbyAllies.FirstOrDefault(a => a.UnitClassifications.Contains(UnitClassification.ResourceCenter));
+            var resourceCenter = commander.Value.UnitCalculation.NearbyAllies.FirstOrDefault(a => a.UnitClassifications.HasFlag(UnitClassification.ResourceCenter));
             if (resourceCenter != null)
             {
                 return Vector2.DistanceSquared(commander.Value.UnitCalculation.Position, resourceCenter.Position);

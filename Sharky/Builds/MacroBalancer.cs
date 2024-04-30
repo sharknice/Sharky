@@ -56,7 +56,7 @@
                 MacroData.DesiredSupplyDepots = (int)Math.Ceiling(((MacroData.FoodUsed - (UnitCountService.EquivalentTypeCount(UnitTypes.TERRAN_COMMANDCENTER) * 12)) / 8.0) + (productionCapacity / 8.0));
             }
 
-            MacroData.BuildSupplyDepot = UnitCountService.EquivalentTypeCompleted(UnitTypes.TERRAN_SUPPLYDEPOT) + ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.BUILD_SUPPLYDEPOT)) < MacroData.DesiredSupplyDepots;
+            MacroData.BuildSupplyDepot = UnitCountService.EquivalentTypeCompleted(UnitTypes.TERRAN_SUPPLYDEPOT) + ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.BUILD_SUPPLYDEPOT)) < MacroData.DesiredSupplyDepots;
         }
 
         void BalanceOverlords()
@@ -74,7 +74,7 @@
         {
             if (!BuildOptions.StrictGasCount)
             {
-                MacroData.DesiredGases = ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.ResourceCenter) && c.UnitCalculation.Unit.BuildProgress > .7) * 2;
+                MacroData.DesiredGases = ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.ResourceCenter) && c.UnitCalculation.Unit.BuildProgress > .7) * 2;
                 if (MacroData.DesiredGases > 2 && MacroData.VespeneGas > 300 && MacroData.Minerals < 150) // if we have an abundance of gas don't build more
                 {
                     MacroData.DesiredGases = 2;
@@ -84,7 +84,7 @@
             var assimilator = SharkyUnitData.BuildingData[UnitTypes.PROTOSS_ASSIMILATOR];
             var extractor = SharkyUnitData.BuildingData[UnitTypes.ZERG_EXTRACTOR];
             var refinery = SharkyUnitData.BuildingData[UnitTypes.TERRAN_REFINERY];
-            var workerOrders = ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)assimilator.Ability || o.AbilityId == (uint)extractor.Ability || o.AbilityId == (uint)refinery.Ability));
+            var workerOrders = ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)assimilator.Ability || o.AbilityId == (uint)extractor.Ability || o.AbilityId == (uint)refinery.Ability));
             var gases = BaseData.SelfBases.Sum(b => b.GasMiningInfo.Count());
             if (MacroData.Race == Race.Terran)
             {
@@ -101,7 +101,7 @@
             foreach (var u in MacroData.Tech)
             {
                 var unitData = SharkyUnitData.BuildingData[u];
-                MacroData.BuildTech[u] = UnitCountService.EquivalentTypeCount(u) + ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability)) < MacroData.DesiredTechCounts[u];
+                MacroData.BuildTech[u] = UnitCountService.EquivalentTypeCount(u) + ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability)) < MacroData.DesiredTechCounts[u];
             }
         }
 
@@ -121,11 +121,11 @@
                 var unitData = SharkyUnitData.BuildingData[u];
                 if (MacroData.Race == Race.Protoss)
                 {
-                    MacroData.BuildDefensiveBuildings[u] = UnitCountService.EquivalentTypeCount(u) + ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability)) < MacroData.DesiredDefensiveBuildingsCounts[u];
+                    MacroData.BuildDefensiveBuildings[u] = UnitCountService.EquivalentTypeCount(u) + ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability)) < MacroData.DesiredDefensiveBuildingsCounts[u];
                 }
                 else
                 {
-                    MacroData.BuildDefensiveBuildings[u] = UnitCountService.EquivalentTypeCompleted(u) + ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability)) < MacroData.DesiredDefensiveBuildingsCounts[u];
+                    MacroData.BuildDefensiveBuildings[u] = UnitCountService.EquivalentTypeCompleted(u) + ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability)) < MacroData.DesiredDefensiveBuildingsCounts[u];
                 }
             }
         }
@@ -137,15 +137,15 @@
                 var unitData = SharkyUnitData.BuildingData[u];
                 if (MacroData.Race == Race.Protoss)
                 {
-                    MacroData.BuildProduction[u] = UnitCountService.EquivalentTypeCount(u) + ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability)) < MacroData.DesiredProductionCounts[u];
+                    MacroData.BuildProduction[u] = UnitCountService.EquivalentTypeCount(u) + ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability)) < MacroData.DesiredProductionCounts[u];
                 }
                 else if (MacroData.Race == Race.Zerg)
                 {
-                    MacroData.BuildProduction[u] = UnitCountService.EquivalentTypeCount(u) + ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability)) < MacroData.DesiredProductionCounts[u];
+                    MacroData.BuildProduction[u] = UnitCountService.EquivalentTypeCount(u) + ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability)) < MacroData.DesiredProductionCounts[u];
                 }
                 else
                 {
-                    MacroData.BuildProduction[u] = UnitCountService.EquivalentTypeCompleted(u) + ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability) || (c.LastAbility != null && c.LastAbility == unitData.Ability && c.LastOrderFrame > MacroData.Frame - 5)) < MacroData.DesiredProductionCounts[u];
+                    MacroData.BuildProduction[u] = UnitCountService.EquivalentTypeCompleted(u) + ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability) || (c.LastAbility != null && c.LastAbility == unitData.Ability && c.LastOrderFrame > MacroData.Frame - 5)) < MacroData.DesiredProductionCounts[u];
                 }
             }
         }
@@ -190,7 +190,7 @@
                 var desiredWorkers = 12;
                 if (MacroData.Frame < SharkyOptions.FramesPerSecond * 10 * 60)
                 {
-                    var resourceCenters = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.UnitClassifications.Contains(UnitClassification.ResourceCenter));
+                    var resourceCenters = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.ResourceCenter));
                     var completedResourceCenters = resourceCenters.Where(n => n.UnitCalculation.Unit.BuildProgress == 1);
                     var buildingResourceCentersCount = resourceCenters.Count(n => n.UnitCalculation.Unit.BuildProgress < 1);
                     desiredWorkers = completedResourceCenters.Sum(n => n.UnitCalculation.Unit.IdealHarvesters + 6) + (buildingResourceCentersCount * 22) + 1; // +6 because gas, +1 to build

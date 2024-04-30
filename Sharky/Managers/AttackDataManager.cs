@@ -45,14 +45,14 @@
                 return null;
             }
 
-            if (ActiveUnitData.SelfUnits.Count(u => u.Value.UnitClassifications.Contains(UnitClassification.Worker)) == 0)
+            if (ActiveUnitData.SelfUnits.Count(u => u.Value.UnitClassifications.HasFlag(UnitClassification.Worker)) == 0)
             {
                 AttackData.Attacking = true;
                 DebugService.DrawText("Attacking: no workers");
                 return null;
             }
 
-            if (ActiveUnitData.SelfUnits.Count(u => u.Value.UnitClassifications.Contains(UnitClassification.ResourceCenter)) == 0)
+            if (ActiveUnitData.SelfUnits.Count(u => u.Value.UnitClassifications.HasFlag(UnitClassification.ResourceCenter)) == 0)
             {
                 AttackData.Attacking = true;
                 DebugService.DrawText("Attacking: not mining minerals");
@@ -79,12 +79,12 @@
             }
 
             var attackVector = new Vector2(TargetingData.AttackPoint.X, TargetingData.AttackPoint.Y);
-            var enemyUnits = ActiveUnitData.EnemyUnits.Values.Where(e => (e.UnitClassifications.Contains(UnitClassification.ArmyUnit) && Vector2.DistanceSquared(new Vector2(TargetingData.MainDefensePoint.X, TargetingData.MainDefensePoint.Y), e.Position) > 400)
-            || (e.UnitClassifications.Contains(UnitClassification.DefensiveStructure) && Vector2.DistanceSquared(attackVector, e.Position) < 625));
+            var enemyUnits = ActiveUnitData.EnemyUnits.Values.Where(e => (e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) && Vector2.DistanceSquared(new Vector2(TargetingData.MainDefensePoint.X, TargetingData.MainDefensePoint.Y), e.Position) > 400)
+            || (e.UnitClassifications.HasFlag(UnitClassification.DefensiveStructure) && Vector2.DistanceSquared(attackVector, e.Position) < 625));
 
             if (!enemyUnits.Any())
             {
-                var priority = TargetPriorityService.CalculateTargetPriority(AttackTask.UnitCommanders.Select(c => c.UnitCalculation), ActiveUnitData.EnemyUnits.Values.Where(e => e.UnitClassifications.Contains(UnitClassification.ArmyUnit)));
+                var priority = TargetPriorityService.CalculateTargetPriority(AttackTask.UnitCommanders.Select(c => c.UnitCalculation), ActiveUnitData.EnemyUnits.Values.Where(e => e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit)));
                 AttackData.TargetPriorityCalculation = priority;
                 AttackData.Attacking = true;
                 DebugService.DrawText("Attacking: no enemy army defending");

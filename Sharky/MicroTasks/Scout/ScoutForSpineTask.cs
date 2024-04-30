@@ -44,7 +44,7 @@
 
             foreach (var commander in commanders)
             {
-                if ((!commander.Value.Claimed || commander.Value.UnitRole == UnitRole.Minerals || commander.Value.UnitRole == UnitRole.None) && commander.Value.UnitCalculation.UnitClassifications.Contains(UnitClassification.Worker))
+                if ((!commander.Value.Claimed || commander.Value.UnitRole == UnitRole.Minerals || commander.Value.UnitRole == UnitRole.None) && commander.Value.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.Worker))
                 {
                     MicroTaskData[typeof(MiningTask).Name].StealUnit(commander.Value);
 

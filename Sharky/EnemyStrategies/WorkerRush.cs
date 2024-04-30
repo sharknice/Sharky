@@ -15,9 +15,9 @@
         {
             if (frame < SharkyOptions.FramesPerSecond * 60 * 1.75)
             {
-                if (ActiveUnitData.EnemyUnits.Values.Count(u => u.UnitClassifications.Contains(UnitClassification.Worker) && u.Position.DistanceSquared(TargetingData.EnemyMainBasePoint.ToVector2()) > (40 * 40)) > 5)
+                if (ActiveUnitData.EnemyUnits.Values.Count(u => u.UnitClassifications.HasFlag(UnitClassification.Worker) && u.Position.DistanceSquared(TargetingData.EnemyMainBasePoint.ToVector2()) > (40 * 40)) > 5)
                 {
-                    if (ActiveUnitData.EnemyUnits.Values.Count(u => u.UnitClassifications.Contains(UnitClassification.Worker) && u.Position.DistanceSquared(TargetingData.SelfMainBasePoint.ToVector2()) < (40 * 40)) < 5)
+                    if (ActiveUnitData.EnemyUnits.Values.Count(u => u.UnitClassifications.HasFlag(UnitClassification.Worker) && u.Position.DistanceSquared(TargetingData.SelfMainBasePoint.ToVector2()) < (40 * 40)) < 5)
                     {
                         if (MacroData.Proxies.Any(p => p.Value.Enabled))
                         {

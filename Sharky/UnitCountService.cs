@@ -63,7 +63,7 @@
             if (SharkyUnitData.BuildingData.ContainsKey(unitType))
             {
                 var unitData = SharkyUnitData.BuildingData[unitType];
-                var inProgress = ActiveUnitData.SelfUnits.Count(u => u.Value.UnitClassifications.Contains(UnitClassification.Worker) && u.Value.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
+                var inProgress = ActiveUnitData.SelfUnits.Count(u => u.Value.UnitClassifications.HasFlag(UnitClassification.Worker) && u.Value.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
                 return inProgress;
             }
             else if (SharkyUnitData.MorphData.ContainsKey(unitType))
