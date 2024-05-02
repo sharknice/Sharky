@@ -259,19 +259,19 @@
     <None Update="StaticData\opponents\zUnkP.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="StaticData\pathing\Bot Micro Arena.zip">
+    <None Update="StaticData\pathing\botmicroarena.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="StaticData\pathing\Equilibrium AIE.zip">
+    <None Update="StaticData\pathing\equilibrium.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="StaticData\pathing\GoldenauraAIE.zip">
+    <None Update="StaticData\pathing\goldenaura.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="StaticData\pathing\GresvanAIE.zip">
+    <None Update="StaticData\pathing\gresvan.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="StaticData\pathing\Hard Lead AIE.zip">
+    <None Update="StaticData\pathing\hardlead.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="StaticData\pathing\Hardwire AIE.json">
@@ -283,10 +283,10 @@
     <None Update="StaticData\pathing\MoondanceAIE.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="StaticData\pathing\Oceanborn AIE.zip">
+    <None Update="StaticData\pathing\oceanborn.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="StaticData\pathing\Site Delta AIE.zip">
+    <None Update="StaticData\pathing\sitedelta.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="StaticData\pathing\StargazersAIE.json">

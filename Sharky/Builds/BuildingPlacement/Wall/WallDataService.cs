@@ -2,7 +2,6 @@
 {
     public class WallDataService
     {
-        MapData MapData;
         BaseData BaseData;
 
         List<MapWallData> PartialMapWallData;
@@ -16,7 +15,6 @@
 
         public WallDataService(DefaultSharkyBot defaultSharkyBot)
         {
-            MapData = defaultSharkyBot.MapData;
             BaseData = defaultSharkyBot.BaseData;
             ChokePointService = defaultSharkyBot.ChokePointService;
             ChokePointsService = defaultSharkyBot.ChokePointsService;

@@ -15,7 +15,7 @@
         public Dictionary<Abilities, UnitTypes> UnitAbilities;
         public RepeatedField<uint> ResearchedUpgrades;
 
-        public RepeatedField<Effect> Effects;
+        public RepeatedField<Effect> Effects { get; set; }
         public Dictionary<Point2D, uint> CorrosiveBiles { get; set; }
 
         public HashSet<UnitTypes> ZergTypes { get; set; }

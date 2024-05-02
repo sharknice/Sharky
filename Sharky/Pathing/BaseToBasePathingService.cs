@@ -58,6 +58,19 @@
                         {
                             return LoadPathDataZip(file);
                         }
+
+                        simplifiedFileName = simplifiedFileName.Replace(".zip", "").Replace(".json", "");
+                        if (mapName.Replace(" ", "").ToLower().Contains(simplifiedFileName))
+                        {
+                            if (file.EndsWith(".json"))
+                            {
+                                return LoadPathDataJson(file);
+                            }
+                            else if (file.EndsWith(".zip"))
+                            {
+                                return LoadPathDataZip(file);
+                            }
+                        }
                     }
                 }
             }
