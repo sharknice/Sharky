@@ -125,6 +125,7 @@
         public IPathFinder SharkyNearPathFinder { get; set; }
         public IPathFinder SharkyAdvancedPathFinder { get; set; }
         public IPathFinder NoPathFinder { get; set; }
+        public IPathFinder SharkyWorkerScoutPathFinder { get; set; }
         public EnemyStrategyHistory EnemyStrategyHistory { get; set; }
         public ICounterTransitioner EmptyCounterTransitioner { get; set; }
         public MacroBalancer MacroBalancer { get; set; }
@@ -209,6 +210,7 @@
             SharkyNearPathFinder = new SharkyNearPathFinder(new Roy_T.AStar.Paths.PathFinder(), MapData, MapDataService, DebugService);
             SharkyAdvancedPathFinder = new SharkyAdvancedPathFinder(new Roy_T.AStar.Paths.PathFinder(), MapData, MapDataService, DebugService);
             NoPathFinder = new SharkyNoPathFinder();
+            SharkyWorkerScoutPathFinder = new SharkyWorkerScoutPathFinder(new Roy_T.AStar.Paths.PathFinder(), MapData, MapDataService, DebugService, ActiveUnitData, BaseData);
 
             RequirementService = new RequirementService(ActiveUnitData, SharkyUnitData);
             UnitCountService = new UnitCountService(ActiveUnitData, SharkyUnitData, FrameToTimeConverter);

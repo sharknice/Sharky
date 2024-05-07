@@ -16,7 +16,7 @@
 
             if (frame < SharkyOptions.FramesPerSecond * 1.5 * 60)
             {
-                if (MapDataService.SelfVisible(BaseData.EnemyBaseLocations.FirstOrDefault().Location))
+                if (MapDataService.SelfVisible(BaseData.EnemyBaseLocations.FirstOrDefault().Location) && MapDataService.LastFrameVisibility(BaseData.EnemyBaseLocations.FirstOrDefault().MineralLineLocation) > 0)
                 {
                     if (UnitCountService.EnemyCount(UnitTypes.PROTOSS_PYLON) == 0 && UnitCountService.EnemyCount(UnitTypes.PROTOSS_GATEWAY) == 0)
                     {

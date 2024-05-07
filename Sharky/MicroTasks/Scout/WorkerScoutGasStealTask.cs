@@ -35,11 +35,17 @@
         protected List<Point2D> EnemyMainArea;
         protected List<Point2D> DangerArea;
 
+        CollisionCalculator CollisionCalculator;
+
         protected IIndividualMicroController IndividualMicroController;
+        protected IPathFinder PathFinder;
 
         protected bool started { get; set; }
 
         UnitCalculation Pylon { get; set; }
+
+        List<Vector2> Path = new List<Vector2>();
+        int PathFrame = 0;
 
 
         public WorkerScoutGasStealTask(DefaultSharkyBot defaultSharkyBot, bool enabled, float priority, IIndividualMicroController individualMicroController)
@@ -60,6 +66,8 @@
             SharkyOptions = defaultSharkyBot.SharkyOptions;
             MicroTaskData = defaultSharkyBot.MicroTaskData;
             CameraManager = defaultSharkyBot.CameraManager;
+            PathFinder = defaultSharkyBot.SharkyWorkerScoutPathFinder;
+            CollisionCalculator = defaultSharkyBot.CollisionCalculator;
 
             UnitCommanders = new List<UnitCommander>();
 
@@ -149,6 +157,14 @@
 
             foreach (var commander in UnitCommanders)
             {
+                if (BlockedOnce && Vector2.Distance(commander.UnitCalculation.Position, mainVector) < 50)
+                {
+                    foreach (var pylon in commander.UnitCalculation.NearbyAllies.Where(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON))
+                    {
+                        ActiveUnitData.Commanders[pylon.Unit.Tag].UnitRole = UnitRole.BlockExpansion;
+                    }
+                }
+
                 if (OnlyBlockOnce && BlockedOnce)
                 {
                     var pylon = commander.UnitCalculation.NearbyAllies.FirstOrDefault(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON);
@@ -194,14 +210,18 @@
                         {
                             foreach (var gas in enemyBase.VespeneGeysers.Where(g => g.Alliance == Alliance.Neutral && MapDataService.SelfVisible(g.Pos)))
                             {
-                                if (Vector2.DistanceSquared(new Vector2(gas.Pos.X, gas.Pos.Y), commander.UnitCalculation.Position) < 400 && commander.UnitCalculation.NearbyEnemies.Count(e => e.UnitClassifications.HasFlag(UnitClassification.Worker)) > 5)
+                                var gasVector = gas.Pos.ToVector2();
+                                if (Vector2.DistanceSquared(gasVector, commander.UnitCalculation.Position) < 400 && commander.UnitCalculation.NearbyEnemies.Count(e => e.UnitClassifications.HasFlag(UnitClassification.Worker)) > 5)
                                 {
-                                    var gasSteal = commander.Order(frame, Abilities.BUILD_ASSIMILATOR, null, gas.Tag);
-                                    if (gasSteal != null)
+                                    if (commander.UnitCalculation.NearbyEnemies.Count(e => e.UnitClassifications.HasFlag(UnitClassification.Worker) && CollisionCalculator.Collides(e.Position, 1, commander.UnitCalculation.Position, gasVector)) < 3)
                                     {
-                                        CameraManager.SetCamera(gas.Pos);
-                                        commands.AddRange(gasSteal);
-                                        continue;
+                                        var gasSteal = commander.Order(frame, Abilities.BUILD_ASSIMILATOR, null, gas.Tag);
+                                        if (gasSteal != null)
+                                        {
+                                            CameraManager.SetCamera(gas.Pos);
+                                            commands.AddRange(gasSteal);
+                                            continue;
+                                        }
                                     }
                                 }
                             }
@@ -339,34 +359,102 @@
                     CameraManager.SetCamera(commander.UnitCalculation.Position);
                 }
 
-                var points = ScoutPoints.Where(p => Vector2.DistanceSquared(p.ToVector2(), commander.UnitCalculation.Position) < 36 || Vector2.DistanceSquared(p.ToVector2(), mainVector) < 36).OrderBy(p => MapDataService.LastFrameAlliesTouched(p)).ThenBy(p => Vector2.DistanceSquared(p.ToVector2(), mainVector)).ThenBy(p => Vector2.DistanceSquared(commander.UnitCalculation.Position, p.ToVector2()));
+                var points = ScoutPoints.Where(p => Vector2.DistanceSquared(p.ToVector2(), commander.UnitCalculation.Position) < 170 || Vector2.DistanceSquared(p.ToVector2(), mainVector) < 170).OrderBy(p => MapDataService.LastFrameVisibility(p)).ThenBy(p => Vector2.DistanceSquared(p.ToVector2(), mainVector)).ThenBy(p => Vector2.DistanceSquared(commander.UnitCalculation.Position, p.ToVector2()));
                 var navpoint = points.FirstOrDefault(p => !MapDataService.PathBlocked(p.ToVector2()));
+                if (MapDataService.LastFrameVisibility(navpoint) > 100 && !ScoutPoints.All(p => MapDataService.LastFrameVisibility(p) > 100 || MapDataService.PathBlocked(p.ToVector2())))
+                {
+                    navpoint = ScoutPoints.OrderBy(p => MapDataService.LastFrameVisibility(p)).ThenBy(p => Vector2.DistanceSquared(p.ToVector2(), mainVector)).ThenBy(p => Vector2.DistanceSquared(commander.UnitCalculation.Position, p.ToVector2())).FirstOrDefault();
+                }
                 if (EnemyData.EnemyRace == Race.Zerg)
                 {
                     var baseLocation = BaseData.EnemyBaseLocations.FirstOrDefault();
                     if (baseLocation != null)
                     {
-                        if (MapDataService.LastFrameAlliesTouched(baseLocation.BehindMineralLineLocation) < 1)
+                        if (MapDataService.LastFrameAlliesTouched(baseLocation.BehindMineralLineLocation) < 1 && MapDataService.MapHeight(commander.UnitCalculation.Position) == MapDataService.MapHeight(baseLocation.BehindMineralLineLocation) && Vector2.DistanceSquared(baseLocation.BehindMineralLineLocation.ToVector2(), commander.UnitCalculation.Position) < 400)
                         {
-                            navpoint = baseLocation.BehindMineralLineLocation;
+                            if (commander.UnitCalculation.NearbyEnemies.Count(e => e.UnitClassifications.HasFlag(UnitClassification.Worker) && CollisionCalculator.Collides(e.Position, 2, commander.UnitCalculation.Position, baseLocation.BehindMineralLineLocation.ToVector2())) > 1)
+                            {
+                                if (PathFrame + 20 < frame)
+                                {
+                                    PathFrame = frame;
+                                    Path = PathFinder.GetSafeGroundPath(commander.UnitCalculation.Position.X, commander.UnitCalculation.Position.Y, baseLocation.BehindMineralLineLocation.X, baseLocation.BehindMineralLineLocation.Y, frame);
+                                }
+                                if (Path.Count() < 3)
+                                {
+                                    commands.AddRange(commander.Order(frame, Abilities.MOVE, baseLocation.BehindMineralLineLocation));
+                                    return commands;
+                                }
+                                int index = 0;
+                                foreach (var point in Path)
+                                {
+                                    index++;
+                                    if (Vector2.DistanceSquared(point, commander.UnitCalculation.Position) > 4)
+                                    {
+                                        if (index >= Path.Count)
+                                        {
+                                            PathFrame = 0;
+                                        }
+                                        commands.AddRange(commander.Order(frame, Abilities.MOVE, point.ToPoint2D()));
+                                        return commands;
+                                    }
+                                }
+                            }
+                            commands.AddRange(commander.Order(frame, Abilities.MOVE, baseLocation.BehindMineralLineLocation));
+                            return commands;
                         }
                     }
                 }
                 if (navpoint == null)
                 {
-                    navpoint = ScoutPoints.OrderBy(p => MapDataService.LastFrameAlliesTouched(p)).ThenBy(p => Vector2.DistanceSquared(p.ToVector2(), mainVector)).ThenBy(p => Vector2.DistanceSquared(commander.UnitCalculation.Position, p.ToVector2())).FirstOrDefault();
+                    navpoint = ScoutPoints.OrderBy(p => MapDataService.LastFrameVisibility(p)).ThenBy(p => Vector2.DistanceSquared(p.ToVector2(), mainVector)).ThenBy(p => Vector2.DistanceSquared(commander.UnitCalculation.Position, p.ToVector2())).FirstOrDefault();
                 }
                 if (navpoint != null)
                 {
                     if (commander.UnitCalculation.Unit.Shield > 15 && commander.UnitCalculation.NearbyEnemies.Any() && (commander.UnitCalculation.NearbyAllies.Any(a => a.UnitClassifications.HasFlag(UnitClassification.ArmyUnit)) || (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.ResourceCenter) && e.Unit.BuildProgress == 1) && commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.Worker)))))
                     {
-                        if (!ScoutEntireAreaBeforeAttacking || ScoutPoints.All(p => MapDataService.LastFrameVisibility(p) > 100))
+                        if (!ScoutEntireAreaBeforeAttacking || ScoutPoints.All(p => MapDataService.LastFrameVisibility(p) > 100 || MapDataService.PathBlocked(p.ToVector2())))
                         {
                             commands.AddRange(commander.Order(frame, Abilities.ATTACK, navpoint));
                             continue;
                         }
                     }
 
+                    if (commander.UnitCalculation.Unit.Shield == commander.UnitCalculation.Unit.ShieldMax && commander.UnitCalculation.Unit.WeaponCooldown < 2)
+                    {
+                        var target = commander.UnitCalculation.EnemiesInRange.Where(e => e.UnitClassifications.HasFlag(UnitClassification.Worker)).OrderBy(e => e.SimulatedHitpoints).ThenBy(e => Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+                        if (target != null)
+                        {
+                            commands.AddRange(commander.Order(frame, Abilities.ATTACK, targetTag: target.Unit.Tag));
+                            return commands;
+                        }
+                    }
+
+                    if (Vector2.DistanceSquared(navpoint.ToVector2(), commander.UnitCalculation.Position) < 400 && MapDataService.MapHeight(commander.UnitCalculation.Position) == MapDataService.MapHeight(navpoint.ToVector2()) && commander.UnitCalculation.NearbyEnemies.Count(e => e.UnitClassifications.HasFlag(UnitClassification.Worker) && CollisionCalculator.Collides(e.Position, 1, commander.UnitCalculation.Position, navpoint.ToVector2())) > 1)
+                    {
+                        if (PathFrame + 20 < frame)
+                        {
+                            PathFrame = frame;
+                            Path = PathFinder.GetSafeGroundPath(commander.UnitCalculation.Position.X, commander.UnitCalculation.Position.Y, navpoint.X, navpoint.Y, frame);
+                        }
+                        if (Path.Count() > 2)
+                        {
+                            var index = 0;
+                            foreach (var point in Path)
+                            {
+                                index++;
+                                if (Vector2.DistanceSquared(point, commander.UnitCalculation.Position) > 4)
+                                {
+                                    if (index >= Path.Count)
+                                    {
+                                        PathFrame = 0;
+                                    }
+                                    commands.AddRange(commander.Order(frame, Abilities.MOVE, point.ToPoint2D()));
+                                    return commands;
+                                }
+                            }
+                        }
+                    }
+                    
                     var action = commander.Order(frame, Abilities.MOVE, navpoint);
                     if (action != null)
                     {
