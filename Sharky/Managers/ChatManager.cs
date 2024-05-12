@@ -197,7 +197,7 @@
 
         private async void GetChatResponseAsync(Chat.Chat chat, int frame)
         {
-            if (GetGameResponse(chat, frame))
+            if (GetGameResponse(chat, frame) || SharkyOptions.ApiChatOnlyUpdateEnabled)
             {
                 if (SharkyOptions.ApiChatEnabled)
                 {

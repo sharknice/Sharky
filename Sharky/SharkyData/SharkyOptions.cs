@@ -35,6 +35,7 @@
 
         public string ChatApiUrl { get; set; }
         public bool ApiChatEnabled { get; set; }
+        public bool ApiChatOnlyUpdateEnabled { get; set; }
         public bool ControlCamera { get; set; }
     }
 }

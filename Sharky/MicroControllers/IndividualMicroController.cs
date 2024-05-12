@@ -675,10 +675,16 @@
             // if air unit or worker (units with acceleration) and within X distance of target move at a 45 degree angle from target to avoid decelerating
             if (commander.UnitCalculation.Unit.IsFlying || commander.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.Worker))
             {
-                if (Vector2.DistanceSquared(new Vector2(target.X, target.Y), commander.UnitCalculation.Position) < 4)
+                var distance = Vector2.Distance(target.ToVector2(), commander.UnitCalculation.Position);
+                if (distance < 2)
                 {
                     var angle = commander.UnitCalculation.Unit.Facing + .78f;
                     var point = GetPoint(commander.UnitCalculation.Position, angle, 5);
+
+                    if (distance > 0)
+                    {
+                        point = GetPositionFromRange(target, commander.UnitCalculation.Position, 4);
+                    }
 
                     if (point.X < 0 || point.Y < 0 || PutsCommanderInDanger(commander, point))
                     {
@@ -2629,6 +2635,11 @@
         }
 
         protected virtual Point2D GetPositionFromRange(Point2D target, Point position, float range, float angleOffset = 0)
+        {
+            return GetPositionFromRange(target.X, target.Y, position.X, position.Y, range, angleOffset);
+        }
+
+        protected virtual Point2D GetPositionFromRange(Point2D target, Vector2 position, float range, float angleOffset = 0)
         {
             return GetPositionFromRange(target.X, target.Y, position.X, position.Y, range, angleOffset);
         }

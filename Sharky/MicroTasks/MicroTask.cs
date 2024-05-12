@@ -2,6 +2,7 @@
 {
     public abstract class MicroTask : IMicroTask
     {
+        public virtual bool NeverSkip { protected set { } get { return false; } }
         public int Deaths { get; protected set; }
 
         public List<UnitCommander> UnitCommanders { get; set; } = new List<UnitCommander>();

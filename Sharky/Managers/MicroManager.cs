@@ -35,7 +35,7 @@
                     System.Console.WriteLine($"{frame} ClaimUnits {microTask.GetType().Name} {stopwatch.ElapsedMilliseconds}ms, average: {microTask.TotalFrameTime / frame:F2}ms");
                 }
 
-                if (!SkipFrame)
+                if (!SkipFrame || microTask.NeverSkip)
                 {
                     LogMissingCommanders(observation, microTask);
 

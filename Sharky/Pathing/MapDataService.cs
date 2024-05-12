@@ -133,6 +133,11 @@
             return true;
         }
 
+        public bool PathFlyable(Point2D end)
+        {
+            return PathFlyable(end.X, end.Y, end.X, end.Y);
+        }
+
         public bool PathFlyable(Point start, Point2D end)
         {
             return PathFlyable(start.X, start.Y, end.X, end.Y);

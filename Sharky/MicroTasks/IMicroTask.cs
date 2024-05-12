@@ -2,6 +2,7 @@
 {
     public interface IMicroTask
     {
+        bool NeverSkip { get; }
         float Priority { get; set; }
         List<UnitCommander> UnitCommanders { get; set; }
         void ClaimUnits(Dictionary<ulong, UnitCommander> commanders);

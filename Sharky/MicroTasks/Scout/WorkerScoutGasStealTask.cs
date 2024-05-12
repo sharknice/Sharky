@@ -11,7 +11,7 @@
         public bool RecallProbe { get; set; }
         public bool ScoutEntireAreaBeforeAttacking { get; set; }
         public bool OnlyBlockOnce { get; set; }
-        bool BlockedOnce = false;
+        protected bool BlockedOnce = false;
 
         protected SharkyUnitData SharkyUnitData;
         protected TargetingData TargetingData;
@@ -26,7 +26,7 @@
         protected ActiveUnitData ActiveUnitData;
         protected SharkyOptions SharkyOptions;
         protected IBuildingBuilder BuildingBuilder;
-        CameraManager CameraManager;
+        protected CameraManager CameraManager;
         MicroTaskData MicroTaskData;
 
         protected MineralWalker MineralWalker;
@@ -410,15 +410,6 @@
                 }
                 if (navpoint != null)
                 {
-                    if (commander.UnitCalculation.Unit.Shield > 15 && commander.UnitCalculation.NearbyEnemies.Any() && (commander.UnitCalculation.NearbyAllies.Any(a => a.UnitClassifications.HasFlag(UnitClassification.ArmyUnit)) || (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.ResourceCenter) && e.Unit.BuildProgress == 1) && commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.Worker)))))
-                    {
-                        if (!ScoutEntireAreaBeforeAttacking || ScoutPoints.All(p => MapDataService.LastFrameVisibility(p) > 100 || MapDataService.PathBlocked(p.ToVector2())))
-                        {
-                            commands.AddRange(commander.Order(frame, Abilities.ATTACK, navpoint));
-                            continue;
-                        }
-                    }
-
                     if (commander.UnitCalculation.Unit.Shield == commander.UnitCalculation.Unit.ShieldMax && commander.UnitCalculation.Unit.WeaponCooldown < 2)
                     {
                         var target = commander.UnitCalculation.EnemiesInRange.Where(e => e.UnitClassifications.HasFlag(UnitClassification.Worker)).OrderBy(e => e.SimulatedHitpoints).ThenBy(e => Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position)).FirstOrDefault();
@@ -427,6 +418,11 @@
                             commands.AddRange(commander.Order(frame, Abilities.ATTACK, targetTag: target.Unit.Tag));
                             return commands;
                         }
+                    }
+
+                    if (Attack(commander, frame, commands, navpoint))
+                    {
+                        return commands;
                     }
 
                     if (Vector2.DistanceSquared(navpoint.ToVector2(), commander.UnitCalculation.Position) < 400 && MapDataService.MapHeight(commander.UnitCalculation.Position) == MapDataService.MapHeight(navpoint.ToVector2()) && commander.UnitCalculation.NearbyEnemies.Count(e => e.UnitClassifications.HasFlag(UnitClassification.Worker) && CollisionCalculator.Collides(e.Position, 1, commander.UnitCalculation.Position, navpoint.ToVector2())) > 1)
@@ -483,6 +479,20 @@
             }
 
             return commands;
+        }
+
+        protected virtual bool Attack(UnitCommander commander, int frame, List<SC2APIProtocol.Action> commands, Point2D navpoint)
+        {
+            if (commander.UnitCalculation.Unit.Shield > 15 && commander.UnitCalculation.NearbyEnemies.Any() && (commander.UnitCalculation.NearbyAllies.Any(a => a.UnitClassifications.HasFlag(UnitClassification.ArmyUnit)) || (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.ResourceCenter) && e.Unit.BuildProgress == 1) && commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.Worker)))))
+            {
+                if (!ScoutEntireAreaBeforeAttacking || ScoutPoints.All(p => MapDataService.LastFrameVisibility(p) > 100 || MapDataService.PathBlocked(p.ToVector2())))
+                {
+                    commands.AddRange(commander.Order(frame, Abilities.ATTACK, navpoint));
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public override void Disable()
