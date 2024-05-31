@@ -113,7 +113,7 @@
             var vectors = armyUnits.Select(u => u.Position);
             return GetArmyPoint(vectors, trimRangeSquared);
         }
-        Point2D GetArmyPoint(IEnumerable<Vector2> vectors, float trimRangeSquared)
+        public Point2D GetArmyPoint(IEnumerable<Vector2> vectors, float trimRangeSquared = 100)
         {
             if (vectors.Any())
             {

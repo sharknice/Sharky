@@ -59,6 +59,22 @@
             {
                 if (commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_ADEPT)
                 {
+                    if (commander.UnitCalculation.Unit.WeaponCooldown == 0)
+                    {
+                        var workerInRange = commander.UnitCalculation.EnemiesInRange.Where(e => e.UnitClassifications.HasFlag(UnitClassification.Worker)).OrderBy(e => e.Unit.Health).FirstOrDefault();
+                        if (workerInRange != null)
+                        {
+                            commands.AddRange(commander.Order(frame, Abilities.ATTACK, targetTag: workerInRange.Unit.Tag));
+                            continue;
+                        }
+                        var otherInRange = commander.UnitCalculation.EnemiesInRange.Where(e => e.Damage > 0).OrderBy(e => e.Unit.Health).FirstOrDefault();
+                        if (otherInRange != null)
+                        {
+                            commands.AddRange(commander.Order(frame, Abilities.ATTACK, targetTag: otherInRange.Unit.Tag));
+                            continue;
+                        }
+                    }
+
                     if (PrioritizeExpansion && Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(EnemyMain.X, EnemyMain.Y)) < 225 && commander.UnitCalculation.EnemiesThreateningDamage.Any())
                     {
                         var action = commander.Order(frame, Abilities.MOVE, TargetingData.MainDefensePoint);

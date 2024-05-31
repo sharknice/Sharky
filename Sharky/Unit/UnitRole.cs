@@ -27,12 +27,12 @@
         SpreadCreepWait,
 
         /// <summary>
-        /// Queen assigned to spred creep, walking towards next creep pooint
+        /// Queen assigned to spread creep, walking towards next creep point
         /// </summary>
         SpreadCreepWalk,
 
         /// <summary>
-        /// Queen assigned to creep spred, ordered to create tumor and in cast distance to the tumor position
+        /// Queen assigned to creep spread, ordered to create tumor and in cast distance to the tumor position
         /// </summary>
         SpreadCreepCast,
 

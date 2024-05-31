@@ -83,7 +83,6 @@
                     {
                         return true;
                     }
-                    
                 }
             }
 
@@ -100,7 +99,7 @@
 
             if (InRange(new Vector2(moveTo.X, moveTo.Y), commander.UnitCalculation.Position, 2) && InRange(unitToSupport.Position, commander.UnitCalculation.Position, PickupRange))
             {
-                //look at all units within pickup range, ordered by proximity to their closeest enemy
+                //look at all units within pickup range, ordered by proximity to their closest enemy
                 // get average hp + shields of back
                 // if unit is in front half weapon is off cooldown and (has below that hp + shields or could die in one hit) pick it up
                 var friendliesInRange = commander.UnitCalculation.NearbyAllies.Take(25).Where(u => !u.Loaded && InRange(u.Position, commander.UnitCalculation.Position, PickupRange)).OrderBy(u => ClosestEnemyDistance(u));

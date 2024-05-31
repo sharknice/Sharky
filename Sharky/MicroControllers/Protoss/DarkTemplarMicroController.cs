@@ -27,7 +27,7 @@
 
                 if (commander.UnitCalculation.Unit.Shield < commander.UnitCalculation.Unit.ShieldMax && commander.UnitCalculation.EnemiesThreateningDamage.Any())
                 {
-                    var blinkReady = SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.DARKTEMPLARBLINKUPGRADE) && commander.AbilityOffCooldown(Abilities.EFFECT_SHADOWSTRIDE, frame, SharkyOptions.FramesPerSecond, SharkyUnitData);
+                    var blinkReady = SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.DARKTEMPLARBLINKUPGRADE) && commander.AbilityOffCooldown(Abilities.EFFECT_SHADOWSTRIDE, frame, SharkyOptions.FramesPerSecond, SharkyUnitData) && !commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.FUNGALGROWTH);
                     if (blinkReady)
                     {
                         var attack = commander.UnitCalculation.EnemiesThreateningDamage.OrderBy(e => Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position) - (e.Range * e.Range)).FirstOrDefault();

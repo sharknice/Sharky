@@ -65,8 +65,18 @@
                     action = commander.Order(frame, Abilities.CANCEL_GRAVITONBEAM);
                     return true;
                 }
+                var tag = commander.UnitCalculation.Unit.Orders.FirstOrDefault(o => o.AbilityId == (uint)Abilities.EFFECT_GRAVITONBEAM).TargetUnitTag;
+                var liftedUnit = commander.UnitCalculation.NearbyEnemies.FirstOrDefault(e => e.Unit.Tag == tag);
+                if (liftedUnit != null)
+                {
+                    if (liftedUnit.NearbyEnemies.Any(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_DISRUPTORPHASED && e.Unit.BuffDurationRemain < 5 && Vector2.Distance(e.Position, liftedUnit.Position) < 1.375f))
+                    {
+                        action = commander.Order(frame, Abilities.CANCEL_GRAVITONBEAM);
+                        return true;
+                    }
+                }
 
-                return false;
+                return true;
             }
 
             if (commander.UnitCalculation.Unit.Energy < 50 || commander.UnitCalculation.NearbyAllies.Count() == 0)

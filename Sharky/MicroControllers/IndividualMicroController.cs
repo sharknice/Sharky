@@ -116,7 +116,7 @@
             if (WeaponReady(commander, frame))
             {
                 if (AttackBestTargetInRange(commander, target, bestTarget, frame, out action)) { return action; }
-                if (GetInFormation(commander, formation, frame, out action)) { return action; }
+                if (GetInFormation(commander, formation, target, bestTarget, frame, out action)) { return action; }
                 if (AttackBestTarget(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
             }
 
@@ -638,7 +638,7 @@
         {
             action = null;
             if (commander.UnitCalculation.Loaded) { return false; }
-            if (GetInFormation(commander, formation, frame, out action))
+            if (GetInFormation(commander, formation, target, bestTarget, frame, out action))
             {
                 return true;
             }
@@ -844,7 +844,7 @@
             return new Point2D { X = start.X + x, Y = start.Y + y };
         }
 
-        protected virtual bool GetInFormation(UnitCommander commander, Formation formation, int frame, out List<SC2APIProtocol.Action> action)
+        protected virtual bool GetInFormation(UnitCommander commander, Formation formation, Point2D target, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -2795,7 +2795,7 @@
 
                 if (formation == Formation.Loose)
                 {
-                    if (GetInFormation(commander, formation, frame, out action)) { return action; }
+                    if (GetInFormation(commander, formation, target, bestTarget, frame, out action)) { return action; }
                 }
 
                 return commander.Order(frame, Abilities.MOVE, targetTag: unitToSupport.UnitCalculation.Unit.Tag);
@@ -3231,7 +3231,7 @@
             if (WeaponReady(commander, frame))
             {
                 if (AttackBestTargetInRange(commander, target, bestTarget, frame, out action)) { return action; }
-                if (GetInFormation(commander, formation, frame, out action)) { return action; }
+                if (GetInFormation(commander, formation, target, bestTarget, frame, out action)) { return action; }
                 if (AttackBestTarget(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; } // TODO: best target within area?
             }
 

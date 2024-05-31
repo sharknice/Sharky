@@ -435,7 +435,7 @@
             }
         }
 
-        protected override bool GetInFormation(UnitCommander commander, Formation formation, int frame, out List<SC2APIProtocol.Action> action)
+        protected override bool GetInFormation(UnitCommander commander, Formation formation, Point2D target, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
             if (commander.UnitRole == UnitRole.Leader)
@@ -443,7 +443,7 @@
                 return false;
             }
 
-            return base.GetInFormation(commander, formation, frame, out action);
+            return base.GetInFormation(commander, formation, target, bestTarget, frame, out action);
         }
     }
 }

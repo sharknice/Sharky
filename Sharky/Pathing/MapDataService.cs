@@ -70,6 +70,11 @@
             return PathWalkable(point.X, point.Y, point.X, point.Y);
         }
 
+        public bool PathWalkable(Vector2 point)
+        {
+            return PathWalkable(point.X, point.Y, point.X, point.Y);
+        }
+
         public bool PathWalkable(int x, int y)
         {
             return PathWalkable(x, y, x, y);

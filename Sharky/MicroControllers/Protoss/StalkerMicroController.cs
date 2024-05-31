@@ -29,7 +29,7 @@
 
                 if (WeaponReady(commander, frame) && commander.UnitCalculation.TargetPriorityCalculation.Overwhelm)
                 {
-                    var blinkReady = SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.BLINKTECH) && commander.AbilityOffCooldown(Abilities.EFFECT_BLINK_STALKER, frame, SharkyOptions.FramesPerSecond, SharkyUnitData);
+                    var blinkReady = SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.BLINKTECH) && commander.AbilityOffCooldown(Abilities.EFFECT_BLINK_STALKER, frame, SharkyOptions.FramesPerSecond, SharkyUnitData) && !commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.FUNGALGROWTH);
                     if (blinkReady && bestTarget.FrameLastSeen == frame)
                     {
                         // only blink if can see all around unit, don't blink when entire army is hidden behind first unit
@@ -54,7 +54,7 @@
         {
             action = null;
 
-            var blinkReady = SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.BLINKTECH) && commander.AbilityOffCooldown(Abilities.EFFECT_BLINK_STALKER, frame, SharkyOptions.FramesPerSecond, SharkyUnitData);
+            var blinkReady = SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.BLINKTECH) && commander.AbilityOffCooldown(Abilities.EFFECT_BLINK_STALKER, frame, SharkyOptions.FramesPerSecond, SharkyUnitData) && !commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.FUNGALGROWTH);
             if (blinkReady)
             {
                 if (commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.LOCKON))
@@ -89,7 +89,7 @@
         {
             action = null;
 
-            var blinkReady = SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.BLINKTECH) && commander.AbilityOffCooldown(Abilities.EFFECT_BLINK_STALKER, frame, SharkyOptions.FramesPerSecond, SharkyUnitData);
+            var blinkReady = SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.BLINKTECH) && commander.AbilityOffCooldown(Abilities.EFFECT_BLINK_STALKER, frame, SharkyOptions.FramesPerSecond, SharkyUnitData) && !commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.FUNGALGROWTH);
             if (blinkReady && commander.UnitCalculation.Unit.Shield < 10)
             {
                 var attacks = new List<UnitCalculation>();
@@ -133,7 +133,7 @@
 
             if (commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.LOCKON))
             {
-                var blinkReady = SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.BLINKTECH) && commander.AbilityOffCooldown(Abilities.EFFECT_BLINK_STALKER, frame, SharkyOptions.FramesPerSecond, SharkyUnitData);
+                var blinkReady = SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.BLINKTECH) && commander.AbilityOffCooldown(Abilities.EFFECT_BLINK_STALKER, frame, SharkyOptions.FramesPerSecond, SharkyUnitData) && !commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.FUNGALGROWTH);
                 if (blinkReady)
                 {
                     var cyclone = commander.UnitCalculation.NearbyEnemies.Where(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_CYCLONE).OrderBy(e => Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position)).FirstOrDefault();

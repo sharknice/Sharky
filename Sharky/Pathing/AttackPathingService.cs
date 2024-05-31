@@ -9,7 +9,6 @@
             MapDataService = defaultSharkyBot.MapDataService;
         }
 
-
         public virtual PathData GetNearestPath(Vector2 start, Vector2 end)
         {
             var startHeight = MapDataService.MapHeight(start);
@@ -102,6 +101,38 @@
                 if (commander.UnitRole == UnitRole.Leader) { distance = 16; }
                 if (commander.CommanderState == CommanderState.Stuck) { distance = 100; }
                 if (Vector2.DistanceSquared(commander.UnitCalculation.Position, commander.CurrentPath.Path[commander.CurrentPathIndex]) < distance)
+                {
+                    commander.CurrentPathIndex++;
+                    if (commander.CurrentPathIndex >= commander.CurrentPath.Path.Count)
+                    {
+                        return target;
+                    }
+                }
+                return commander.CurrentPath.Path[commander.CurrentPathIndex].ToPoint2D();
+            }
+
+            return target;
+        }
+
+        public Point2D GetNextPointToTarget(UnitCommander commander, Point2D target, int frame, int distance)
+        {
+            if (commander.CurrentPath == null || (int)commander.CurrentPath.EndPosition.X != (int)target.X || (int)commander.CurrentPath.EndPosition.Y != (int)target.Y || commander.CurrentPathIndex >= commander.CurrentPath.Path.Count || Vector2.DistanceSquared(commander.UnitCalculation.Position, commander.CurrentPath.Path[commander.CurrentPathIndex]) > 100)
+            {
+                if (commander.RetreatPathFrame + 20 < frame)
+                {
+                    commander.CurrentPath = GetNearestPath(commander.UnitCalculation.Position, target.ToVector2());
+                    commander.CurrentPathIndex = 0;
+                    commander.RetreatPathFrame = frame;
+                }
+            }
+
+            if (commander.CurrentPath != null && commander.CurrentPathIndex < commander.CurrentPath.Path.Count - 1 && commander.CurrentPath.EndPosition.X == target.X && commander.CurrentPath.EndPosition.Y == target.Y)
+            {
+                if (commander.CommanderState == CommanderState.Stuck) 
+                { 
+                    distance = 100; 
+                }
+                while (Vector2.Distance(commander.UnitCalculation.Position, commander.CurrentPath.Path[commander.CurrentPathIndex]) < distance)
                 {
                     commander.CurrentPathIndex++;
                     if (commander.CurrentPathIndex >= commander.CurrentPath.Path.Count)
