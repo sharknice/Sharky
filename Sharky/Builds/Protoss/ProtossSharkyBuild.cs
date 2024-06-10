@@ -59,8 +59,21 @@
         {
             if (MacroData.FoodUsed >= 14 && UnitCountService.Completed(UnitTypes.PROTOSS_PYLON) == 0 && ActiveUnitData.SelfUnits.Any(u => u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && u.Value.Unit.BuildProgress > .75f))
             {
-                PrePositionBuilderTask.SendBuilder(TargetingData.ForwardDefensePoint, frame);
+                PrePositionBuilderTask.SendBuilder(GetBuildPosition(), frame);
             }
+        }
+
+        protected Point2D GetBuildPosition()
+        {
+            if (BuildOptions.WallOffType == WallOffType.None)
+            {
+                var pylon = ActiveUnitData.SelfUnits.Values.FirstOrDefault(u => u.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON);
+                if (pylon != null)
+                {
+                    return pylon.Position.ToPoint2D();
+                }
+            }
+            return TargetingData.ForwardDefensePoint;
         }
 
         protected void SendProbeForSecondGateway(int frame)
@@ -75,7 +88,7 @@
         {
             if (UnitCountService.EquivalentTypeCompleted(UnitTypes.PROTOSS_CYBERNETICSCORE) == 0 && UnitCountService.EquivalentTypeCompleted(UnitTypes.PROTOSS_GATEWAY) == 0 && ActiveUnitData.SelfUnits.Any(u => u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_GATEWAY && u.Value.Unit.BuildProgress > .90f))
             {
-                PrePositionBuilderTask.SendBuilder(TargetingData.ForwardDefensePoint, frame);
+                PrePositionBuilderTask.SendBuilder(GetBuildPosition(), frame);
             }
         }
 
