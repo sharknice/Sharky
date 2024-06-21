@@ -675,6 +675,8 @@
             // if air unit or worker (units with acceleration) and within X distance of target move at a 45 degree angle from target to avoid decelerating
             if (commander.UnitCalculation.Unit.IsFlying || commander.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.Worker))
             {
+                if (commander.UnitRole == UnitRole.Repair) { return false; }
+
                 var distance = Vector2.Distance(target.ToVector2(), commander.UnitCalculation.Position);
                 if (distance < 2)
                 {

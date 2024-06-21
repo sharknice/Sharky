@@ -172,7 +172,7 @@
                     {
                         Pylon = pylon;
                     }
-                    if (Pylon != null && Pylon.Unit.Shield < 25 && Pylon.Unit.BuildProgress > .95f)
+                    if (Pylon != null && Pylon.Unit.Shield < 25 && Pylon.Unit.BuildProgress > .95f && Pylon.Unit.BuildProgress < 1)
                     {
                         var pylonCommander = ActiveUnitData.Commanders.Values.FirstOrDefault(c => c.UnitCalculation.Unit.Tag == Pylon.Unit.Tag);
                         if (pylonCommander != null)

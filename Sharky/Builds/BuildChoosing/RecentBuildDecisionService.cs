@@ -15,7 +15,6 @@
             var originalSequence = buildSequences.FirstOrDefault(b => BuildMatcher.MatchesBuildSequence(originalGame, b));
             if (originalSequence == null)
             {
-                //Console.WriteLine($"Original game didn't match any existing build sequences: {string.Join(" ", originalGame.Builds)}");
                 return false;
             }
             if (originalSequence == currentSequence)
@@ -36,7 +35,7 @@
             return GetBestRecentBuild(relevantGames, enemyBot, buildSequences, map, enemyBots, enemyRace, myRace);
         }
 
-        private List<string> GetBestRecentBuild(List<Game> relevantGames, EnemyPlayer.EnemyPlayer enemyBot, List<List<string>> buildSequences, string map, List<EnemyPlayer.EnemyPlayer> enemyBots, Race enemyRace, Race myRace)
+        protected virtual List<string> GetBestRecentBuild(List<Game> relevantGames, EnemyPlayer.EnemyPlayer enemyBot, List<List<string>> buildSequences, string map, List<EnemyPlayer.EnemyPlayer> enemyBots, Race enemyRace, Race myRace)
         {
             // find a build we've won with and haven't lost with
             var losses = new List<Game>();
@@ -45,18 +44,10 @@
                 if (game.Result == (int)Result.Victory)
                 {
                     var sequence = buildSequences.FirstOrDefault(b => BuildMatcher.MatchesBuildSequence(game, b));
-                    if (sequence == null)
-                    {
-                        //Console.WriteLine($"Game didn't match any existing build sequences: {string.Join(" ", game.PlannedBuildSequence.Select(g => g))}");
-                    }
-                    else if (!losses.Any(loss => SameBuildSequence(buildSequences, loss, sequence)))
+                    if (sequence != null && !losses.Any(loss => SameBuildSequence(buildSequences, loss, sequence)))
                     {
                         Console.WriteLine($"Chosen Build Sequence: {string.Join(" ", sequence)}");
                         return sequence;
-                    }
-                    else
-                    {
-                        //Console.WriteLine($"Lost with: {string.Join(" ", sequence)}");
                     }
                 }
                 else
@@ -64,8 +55,6 @@
                     losses.Add(game);
                 }
             }
-
-            //Console.WriteLine($"No wins we haven't lost with");
 
             // use a build we haven't lost with yet
             foreach (var sequence in buildSequences)
@@ -75,13 +64,8 @@
                     Console.WriteLine($"Chosen Build Sequence: {string.Join(" ", sequence)}");
                     return sequence;
                 }
-                else
-                {
-                    //Console.WriteLine($"Lost with: {string.Join(" ", sequence)}");
-                }
             }
 
-            //Console.WriteLine($"Lost with every build");
 
             // lost with every build
             // keep removing the last game from the list and try this whole thing over again

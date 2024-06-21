@@ -412,7 +412,7 @@
         TRAINWARP_STALKER = 1414,  // Target: Point.
         TRAINWARP_ZEALOT = 1413,  // Target: Point.
         TRAIN_ADEPT = 922,   // Target: None.
-        TRAIN_BANELING = 80,    // Target: None.
+        TRAIN_BANELING = 4119,    // Target: None.
         TRAIN_BANSHEE = 621,   // Target: None.
         TRAIN_BATTLECRUISER = 623,   // Target: None.
         TRAIN_CARRIER = 948,   // Target: None.
