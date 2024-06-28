@@ -104,6 +104,14 @@
                                 {
                                     targetLocation = TargetingData.AttackPoint;
                                 }
+                                if (MacroData.ProtossMacroData.AlwaysWarpInAtWarpPrismsIfPossible)
+                                {
+                                    var warpPrism = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISMPHASING).OrderBy(c => Vector2.DistanceSquared(c.UnitCalculation.Position, targetLocation.ToVector2())).FirstOrDefault();
+                                    if (warpPrism != null)
+                                    {
+                                        targetLocation = warpPrism.UnitCalculation.Position.ToPoint2D();
+                                    }
+                                }
 
                                 var location = WarpInPlacement.FindPlacement(targetLocation, unitType, 1, maxDistance: 0);
                                 if (location != null)

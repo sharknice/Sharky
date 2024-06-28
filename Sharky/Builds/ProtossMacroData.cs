@@ -19,5 +19,7 @@
         public int DesiredExtraBaseSimCityBatteries;
 
         public bool ExtraBasesGatewayCannonSimCity;
+
+        public bool AlwaysWarpInAtWarpPrismsIfPossible;
     }
 }

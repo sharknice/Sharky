@@ -243,7 +243,7 @@
             {
                 if (AbilityOrderTimes.ContainsKey(warpIn.Key))
                 {
-                    if ((frame - AbilityOrderTimes[warpIn.Key] - 10) / framesPerSecond < sharkyUnitData.WarpInCooldownTimes[warpIn.Key])
+                    if (sharkyUnitData.WarpInCooldownTimes[warpIn.Key] - (frame - AbilityOrderTimes[warpIn.Key]) / framesPerSecond >= 2f)
                     {
                         return false;
                     }
