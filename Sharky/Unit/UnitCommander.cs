@@ -252,6 +252,23 @@
             return true;
         }
 
+        public float WarpInCooldown(Abilities ability, int frame, float framesPerSecond, SharkyUnitData sharkyUnitData)
+        {
+            if (AbilityOrderTimes.ContainsKey(ability))
+            {
+                var time = (frame - AbilityOrderTimes[ability]) / framesPerSecond;
+                if (time > sharkyUnitData.WarpInCooldownTimes[ability])
+                {
+                    return 0;
+                }
+                else
+                {
+                    return time / sharkyUnitData.WarpInCooldownTimes[ability];
+                }
+            }
+            return 0;
+        }
+
         public List<SC2APIProtocol.Action> UnloadSpecificUnit(int frame, Abilities ability, ulong targetTag, bool allowSpam = false)
         {
             if (!allowSpam && !AlwaysSpam && ability == LastAbility && targetTag == LastTargetTag && AbilityOrderTimes[ability] > frame - SpamFrames)

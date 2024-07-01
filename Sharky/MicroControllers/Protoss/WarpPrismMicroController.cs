@@ -6,6 +6,8 @@
 
         MacroData MacroData;
 
+        int LastWarpTransitionFrame = 0;
+
         public WarpPrismMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled)
             : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled)
         {
@@ -210,6 +212,7 @@
                 if (commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISM)
                 {
                     action = commander.Order(frame, Abilities.MORPH_WARPPRISMPHASINGMODE, allowSpam: true);
+                    LastWarpTransitionFrame = frame;
                     return true;
                 }
             }
@@ -222,7 +225,7 @@
 
             if (commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISMPHASING)
             {
-                if (commander.UnitCalculation.Unit.Shield > 75 && commander.UnitCalculation.NearbyAllies.Any(v => v.Unit.BuildProgress < 1 && Vector2.DistanceSquared(v.Position, commander.UnitCalculation.Position) < 49 && v.FrameLastSeen == frame)) // and not warping any units in
+                if (commander.UnitCalculation.Unit.Shield > 75 && commander.UnitCalculation.NearbyAllies.Any(v => v.Unit.BuildProgress < 1 && Vector2.DistanceSquared(v.Position, commander.UnitCalculation.Position) <= 49 && v.FrameLastSeen == frame) && frame - LastWarpTransitionFrame > 20) // and not warping any units in
                 {
                     return false;
                 }

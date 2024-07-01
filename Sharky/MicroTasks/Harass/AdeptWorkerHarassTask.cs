@@ -5,7 +5,7 @@
         BaseData BaseData;
         TargetingData TargetingData;
         IIndividualMicroController AdeptMicroController;
-        IIndividualMicroController AdeptShadeMicroController;
+        public IIndividualMicroController AdeptShadeMicroController { get; set; }
 
         Point2D EnemyMain { get; set; }
         Point2D EnemyExpansion { get; set; }

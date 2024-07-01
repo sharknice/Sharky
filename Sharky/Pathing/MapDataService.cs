@@ -343,6 +343,15 @@
             return MapData.Map[(int)point.X,(int)point.Y].EnemyGroundSplashDpsInRange;
         }
 
+        public float EnemyGroundSplashDpsInRange(Point2D point)
+        {
+            if (point == null || point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
+            {
+                return 0;
+            }
+            return MapData.Map[(int)point.X, (int)point.Y].EnemyGroundSplashDpsInRange;
+        }
+
         public float EnemyGroundDpsInRange(Point2D point)
         {
             if (point == null || point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
