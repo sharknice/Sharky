@@ -13,6 +13,7 @@
         public int MaxAdeptCount { get; set; }
 
         public bool PrioritizeExpansion { get; set; }
+        public bool PrioritizeLiving { get; set; }
 
         public AdeptWorkerHarassTask(BaseData baseData, TargetingData targetingData, IIndividualMicroController adeptMicroController, IIndividualMicroController adeptShadeMicroController, bool enabled = false, float priority = -1f)
         {
@@ -25,6 +26,7 @@
             UnitCommanders = new List<UnitCommander>();
             MaxAdeptCount = 100;
             PrioritizeExpansion = false;
+            PrioritizeLiving = false;
         }
 
         public override void ClaimUnits(Dictionary<ulong, UnitCommander> commanders)
@@ -73,6 +75,16 @@
                             commands.AddRange(commander.Order(frame, Abilities.ATTACK, targetTag: otherInRange.Unit.Tag));
                             continue;
                         }
+                    }
+
+                    if (PrioritizeLiving && commander.UnitCalculation.Unit.Shield == 0)
+                    {
+                        var action = commander.Order(frame, Abilities.MOVE, TargetingData.MainDefensePoint);
+                        if (action != null)
+                        {
+                            commands.AddRange(action);
+                        }
+                        continue;
                     }
 
                     if (PrioritizeExpansion && Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(EnemyMain.X, EnemyMain.Y)) < 225 && commander.UnitCalculation.EnemiesThreateningDamage.Any())
