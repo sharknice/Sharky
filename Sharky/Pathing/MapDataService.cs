@@ -129,6 +129,18 @@
                 PathWalkable(point.X - radius, point.Y - radius);
         }
 
+        public bool SameHeight(Point2D point, int radius)
+        {
+            var height = MapHeight(point);
+            return
+                height == MapHeight(point.X - radius, point.Y) &&
+                height == MapHeight(point.X + radius, point.Y) &&
+                height == MapHeight(point.X, point.Y - radius) &&
+                height == MapHeight(point.X, point.Y + radius) &&
+                height == MapHeight(point.X + radius, point.Y + radius) &&
+                height == MapHeight(point.X - radius, point.Y - radius);
+        }
+
         public bool PathFlyable(float startX, float startY, float endX, float endY)
         {
             if (endX < 0 || endY < 0 || endX >= MapData.MapWidth || endY >= MapData.MapHeight)
@@ -287,6 +299,11 @@
                 return 0;
             }
             return MapData.Map[x,y].TerrainHeight;
+        }
+
+        public int MapHeight(float x, float y)
+        {
+            return MapHeight((int)x, (int)y);
         }
 
         public bool IsOnCreep(Point2D point)

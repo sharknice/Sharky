@@ -156,7 +156,7 @@
 
             if (x >= 0 && y >= 0 && x < MapDataService.MapData.MapWidth && y < MapDataService.MapData.MapHeight)
             {
-                if (BuildingService.AreaBuildable(x, y, .75f) && !BuildingService.Blocked(x, y, .75f, 0f) && !BuildingService.BlockedByUnits(x, y, .75f, powerSource) && Powered(powerSource, x, y))
+                if (MapDataService.PathWalkable(new Point2D { X = x, Y = y, }, 1) && !BuildingService.Blocked(x, y, .75f, 0f) && !BuildingService.BlockedByUnits(x, y, .75f, powerSource) && Powered(powerSource, x, y))
                 {
                     return new Point2D { X = x, Y = y };
                 }
