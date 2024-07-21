@@ -12,11 +12,12 @@
         SharkyUnitData SharkyUnitData;
         ChatService ChatService;
         TagService TagService;
+        BaseData BaseData;
 
         bool SlowMode = false;
         int SlowTime = 0;
 
-        public DebugManager(GameConnection gameConnection, SharkyOptions sharkyOptions, DebugService debugService, MapData mapData, TargetingData targetingData, ActiveUnitData activeUnitData, EnemyData enemyData, ChatService chatService, TagService tagService, SharkyUnitData sharkyUnitData)
+        public DebugManager(GameConnection gameConnection, SharkyOptions sharkyOptions, DebugService debugService, MapData mapData, TargetingData targetingData, ActiveUnitData activeUnitData, EnemyData enemyData, ChatService chatService, TagService tagService, SharkyUnitData sharkyUnitData, BaseData baseData)
         {
             GameConnection = gameConnection;
             SharkyOptions = sharkyOptions;
@@ -28,6 +29,7 @@
             ChatService = chatService;
             TagService = tagService;
             SharkyUnitData = sharkyUnitData;
+            BaseData = baseData;
         }
 
         public override bool NeverSkip { get => true; }
@@ -124,6 +126,49 @@
                         else
                         {
                             foreach (var spot in wallData.Depots)
+                            {
+                                DebugService.SpawnUnits(UnitTypes.TERRAN_SUPPLYDEPOTLOWERED, spot, 2, 1);
+                            }
+                            foreach (var spot in wallData.Production)
+                            {
+                                DebugService.SpawnUnits(UnitTypes.TERRAN_BARRACKS, spot, 2, 1);
+                            }
+                        }
+                    }
+
+                    return;
+                }
+
+                match = Regex.Match(chatReceived.Message.ToLower(), "spawn enemy natural wall");
+                if (match.Success)
+                {
+                    foreach (var wallData in MapData.WallData.Where(w => w.BasePosition.X == BaseData.EnemyBaseLocations.Skip(1).FirstOrDefault().Location.X && w.BasePosition.Y == BaseData.EnemyBaseLocations.Skip(1).FirstOrDefault().Location.Y && w.Pylons != null))
+                    {
+                        if (EnemyData.EnemyRace == Race.Protoss)
+                        {
+                            foreach (var spot in wallData.Pylons)
+                            {
+                                DebugService.SpawnUnits(UnitTypes.PROTOSS_PYLON, spot, 2, 1);
+                            }
+                            foreach (var spot in wallData.WallSegments)
+                            {
+                                if (spot.Size == 3)
+                                {
+                                    DebugService.SpawnUnits(UnitTypes.PROTOSS_GATEWAY, spot.Position, 2, 1);
+                                }
+                                if (spot.Size == 2)
+                                {
+                                    DebugService.SpawnUnits(UnitTypes.PROTOSS_SHIELDBATTERY, spot.Position, 2, 1);
+                                }
+                            }
+                            if (wallData.Block != null)
+                            {
+                                DebugService.SpawnUnits(UnitTypes.PROTOSS_SHIELDBATTERY, wallData.Block, 2, 1);
+                            }
+                        }
+                        else if (wallData.FullDepotWall != null)
+                        {
+                            foreach (var spot in wallData.FullDepotWall)
                             {
                                 DebugService.SpawnUnits(UnitTypes.TERRAN_SUPPLYDEPOTLOWERED, spot, 2, 1);
                             }

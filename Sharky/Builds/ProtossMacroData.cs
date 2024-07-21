@@ -13,6 +13,7 @@
         public int DesiredPylonsAtNextBase;
         public int DesiredPylonsAtDefensivePoint;
         public int DesiredPylonsAtEveryMineralLine;
+        public int DesiredPylonsAtMainMineralLine;
 
         public int DesiredExtraBaseSimCityPylons;
         public int DesiredExtraBaseSimCityCannons;

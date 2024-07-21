@@ -451,10 +451,21 @@
                         }
                     }
                     
-                    var action = commander.Order(frame, Abilities.MOVE, navpoint);
-                    if (action != null)
+                    if (MapDataService.LastFrameVisibility(navpoint) > 0)
                     {
-                        commands.AddRange(action);
+                        var action = commander.Order(frame, Abilities.MOVE, navpoint);
+                        if (action != null)
+                        {
+                            commands.AddRange(action);
+                        }
+                    }
+                    else
+                    {
+                        var action = IndividualMicroController.NavigateToPoint(commander, navpoint, navpoint, null, frame);
+                        if (action != null)
+                        {
+                            commands.AddRange(action);
+                        }
                     }
                 }
             }

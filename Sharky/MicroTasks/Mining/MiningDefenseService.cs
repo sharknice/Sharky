@@ -319,7 +319,11 @@
                 var wallData = MapDataService.MapData?.WallData?.FirstOrDefault(b => b.BasePosition.X == TargetingData.NaturalBasePoint.X && b.BasePosition.Y == TargetingData.NaturalBasePoint.Y);
                 foreach (var commander in unitCommanders)
                 {
-                    if (EnemyData.SelfRace == Race.Protoss && wallData != null && commander.UnitCalculation.NearbyEnemies.Any(e => e.FrameLastSeen == frame && !e.Unit.IsFlying) && Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(wallData.Door.X, wallData.Door.Y)) < 9)
+                    if (EnemyData.SelfRace == Race.Protoss && commander.UnitCalculation.NearbyAllies.Any(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_SHIELDBATTERY && a.Unit.BuildProgress == 1 && a.Unit.IsPowered && a.Unit.Energy > 5 && Vector2.Distance(commander.UnitCalculation.Position, a.Position) < 6))
+                    {
+                        continue;
+                    }
+                    else if (EnemyData.SelfRace == Race.Protoss && wallData != null && commander.UnitCalculation.NearbyEnemies.Any(e => e.FrameLastSeen == frame && !e.Unit.IsFlying) && Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(wallData.Door.X, wallData.Door.Y)) < 9)
                     {
                         if (commander.UnitRole != UnitRole.Build && MineralWalker.MineralWalkHome(commander, frame, out List<SC2APIProtocol.Action> action))
                         {

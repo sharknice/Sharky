@@ -4,6 +4,8 @@
     {
         BaseData BaseData;
         TargetingData TargetingData;
+        ChatService ChatService;
+        SharkyUnitData SharkyUnitData;
         IIndividualMicroController AdeptMicroController;
         public IIndividualMicroController AdeptShadeMicroController { get; set; }
 
@@ -15,10 +17,15 @@
         public bool PrioritizeExpansion { get; set; }
         public bool PrioritizeLiving { get; set; }
 
-        public AdeptWorkerHarassTask(BaseData baseData, TargetingData targetingData, IIndividualMicroController adeptMicroController, IIndividualMicroController adeptShadeMicroController, bool enabled = false, float priority = -1f)
+        public Dictionary<ulong, UnitCalculation> Kills { get; private set; } = new Dictionary<ulong, UnitCalculation>();
+
+
+        public AdeptWorkerHarassTask(DefaultSharkyBot defaultSharkyBot, IIndividualMicroController adeptMicroController, IIndividualMicroController adeptShadeMicroController, bool enabled = false, float priority = -1f)
         {
-            BaseData = baseData;
-            TargetingData = targetingData;
+            BaseData = defaultSharkyBot.BaseData;
+            TargetingData = defaultSharkyBot.TargetingData;
+            ChatService = defaultSharkyBot.ChatService;
+            SharkyUnitData = defaultSharkyBot.SharkyUnitData;
             AdeptMicroController = adeptMicroController;
             AdeptShadeMicroController = adeptShadeMicroController;
             Priority = priority;
@@ -192,6 +199,18 @@
             {
                 Deaths += UnitCommanders.RemoveAll(c => c.UnitCalculation.Unit.Tag == tag && c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_ADEPT);
                 UnitCommanders.RemoveAll(c => c.UnitCalculation.Unit.Tag == tag);
+
+                var kill = UnitCommanders.Where(c => c.UnitCalculation.PreviousUnitCalculation != null).SelectMany(c => c.UnitCalculation.PreviousUnitCalculation.NearbyEnemies.Where(e => Vector2.DistanceSquared(c.UnitCalculation.Position, e.Position) < 25)).FirstOrDefault(e => e.Unit.Tag == tag);
+                if (kill != null && !SharkyUnitData.UndeadTypes.Contains((UnitTypes)kill.Unit.UnitType))
+                {
+                    Kills[tag] = kill;
+
+                    if ((Deaths * 3) < Kills.Count && Kills.Count % 10 == 0)
+                    {
+                        var parameters = new List<KeyValuePair<string, string>> { new KeyValuePair<string, string>("kills", Kills.Count.ToString()), new KeyValuePair<string, string>("deaths", Deaths.ToString()) };
+                        ChatService.SendChatType($"{GetType().Name}-mod10k0d-Success", parameters: parameters);
+                    }
+                }
             }
         }
     }

@@ -1,4 +1,4 @@
-﻿namespace Sharky.Managers.Protoss
+﻿namespace Sharky.Managers
 {
     public class CameraManager : SharkyManager
     {

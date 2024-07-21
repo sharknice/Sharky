@@ -55,6 +55,14 @@
             }
         }
 
+        protected void SendProbeForEarlyFirstPylon(int frame)
+        {
+            if (MacroData.FoodUsed == 13 && MacroData.Minerals > 44 && UnitCountService.Count(UnitTypes.PROTOSS_PYLON) == 0)
+            {
+                PrePositionBuilderTask.SendBuilder(TargetingData.ForwardDefensePoint, frame);
+            }
+        }
+
         protected void SendProbeForFirstGateway(int frame)
         {
             if (MacroData.FoodUsed >= 14 && UnitCountService.Completed(UnitTypes.PROTOSS_PYLON) == 0 && ActiveUnitData.SelfUnits.Any(u => u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && u.Value.Unit.BuildProgress > .75f))

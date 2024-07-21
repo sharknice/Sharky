@@ -105,7 +105,8 @@
             foreach (var baseLocation in BaseData.SelfBases)
             {
                 var height = MapDataService.MapHeight(baseLocation.MineralLineBuildingLocation);
-                if (ActiveUnitData.SelfUnits.Count(u => u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && Vector2.DistanceSquared(u.Value.Position, baseLocation.MineralLineBuildingLocation.ToVector2()) < MacroData.DefensiveBuildingMineralLineMaximumDistance * MacroData.DefensiveBuildingMineralLineMaximumDistance && MapDataService.MapHeight(u.Value.Position) == height) + orderedBuildings < MacroData.ProtossMacroData.DesiredPylonsAtEveryMineralLine)
+                var builtCount = ActiveUnitData.SelfUnits.Count(u => u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && Vector2.DistanceSquared(u.Value.Position, baseLocation.MineralLineBuildingLocation.ToVector2()) < MacroData.DefensiveBuildingMineralLineMaximumDistance * MacroData.DefensiveBuildingMineralLineMaximumDistance && MapDataService.MapHeight(u.Value.Position) == height);
+                if (builtCount + orderedBuildings < MacroData.ProtossMacroData.DesiredPylonsAtEveryMineralLine || (builtCount + orderedBuildings < MacroData.ProtossMacroData.DesiredPylonsAtMainMineralLine && baseLocation.Location.X == BaseData.BaseLocations.FirstOrDefault().Location.X && baseLocation.Location.Y == BaseData.BaseLocations.FirstOrDefault().Location.Y))
                 {
                     var command = BuildPylon(baseLocation.MineralLineBuildingLocation, true, MacroData.DefensiveBuildingMineralLineMaximumDistance, requireSameHeight: true);
                     if (command != null)

@@ -8,10 +8,11 @@
         EnemyData EnemyData;
         TagService TagService;
         CameraManager CameraManager;
+        BaseData BaseData;
         float OverchargeRangeSquared = 144;
         float RestoreRangeSquared = 36;
 
-        public NexusManager(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, ChronoData chronoData, EnemyData enemyData, TagService tagService, CameraManager cameraManager)
+        public NexusManager(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, ChronoData chronoData, EnemyData enemyData, TagService tagService, CameraManager cameraManager, BaseData baseData)
         {
             ActiveUnitData = activeUnitData;
             SharkyUnitData = sharkyUnitData;
@@ -19,6 +20,7 @@
             EnemyData = enemyData;
             TagService = tagService;
             CameraManager = cameraManager;
+            BaseData = baseData;
         }
 
         public override IEnumerable<SC2Action> OnFrame(ResponseObservation observation)
@@ -53,6 +55,26 @@
                 if (nexus.UnitRole != UnitRole.Defend && nexus.UnitCalculation.NearbyAllies.Any(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_SHIELDBATTERY && Vector2.DistanceSquared(nexus.UnitCalculation.Position, a.Position) <= 64))
                 {
                     nexus.UnitRole = UnitRole.Defend;
+                }
+
+                if (!nexus.RallyPointSet)
+                {
+                    var baseData = BaseData.SelfBases.FirstOrDefault(b => b.Location.X == nexus.UnitCalculation.Position.X && b.Location.Y == nexus.UnitCalculation.Position.Y);
+                    if (baseData != null && baseData.MineralMiningInfo.Any(m => m.Workers.Count() > 0))
+                    {
+                        var unsaturatedMineralPatch = baseData.MineralMiningInfo.Where(m => m.Workers.Count < 2).OrderBy(m => Vector2.DistanceSquared(m.HarvestPoint.ToVector2(), baseData.Location.ToVector2())).FirstOrDefault();
+                        if (unsaturatedMineralPatch != null)
+                        {
+                            action = nexus.Order((int)observation.Observation.GameLoop, Abilities.RALLY_BUILDING, unsaturatedMineralPatch.HarvestPoint);
+                            if (action != null)
+                            {
+                                nexus.RallyPointSet = true;
+                                actions.AddRange(action);
+                                return actions;
+                            }
+                        }
+                        nexus.RallyPointSet = true;
+                    }
                 }
             }
 

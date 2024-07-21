@@ -15,7 +15,7 @@
         ActiveUnitData ActiveUnitData;
 
         bool started { get; set; }
-        int DesiredCount { get; set; }
+        public int DesiredCount { get; set; }
         Point2D Target { get; set; }
 
         Point2D MidPoint;

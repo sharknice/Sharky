@@ -3,15 +3,17 @@
     public class MarineRush : EnemyStrategy
     {
         BaseData BaseData;
+        MapDataService MapDataService;
 
         public MarineRush(DefaultSharkyBot defaultSharkyBot) : base(defaultSharkyBot) 
         {
             BaseData = defaultSharkyBot.BaseData;
+            MapDataService = defaultSharkyBot.MapDataService;
         }
 
         protected override bool Detect(int frame)
         {
-            if (EnemyData.EnemyRace != SC2APIProtocol.Race.Terran) { return false; }
+            if (EnemyData.EnemyRace != Race.Terran) { return false; }
 
             if (frame > SharkyOptions.FramesPerSecond * 4 * 60 || UnitCountService.EnemyCount(UnitTypes.TERRAN_REFINERY) > 0 || UnitCountService.EnemyCount(UnitTypes.TERRAN_FACTORY) > 0)
             {
@@ -23,7 +25,7 @@
                 return false;
             }
 
-            if (UnitCountService.EnemyCount(UnitTypes.TERRAN_BARRACKS) >= 3 && frame < SharkyOptions.FramesPerSecond * 3 * 60)
+            if (UnitCountService.EnemyCount(UnitTypes.TERRAN_BARRACKS) >= 3 && frame < SharkyOptions.FramesPerSecond * 3 * 60 && MapDataService.SelfVisible(BaseData.BaseLocations.FirstOrDefault().Location.ToVector2(), 5))
             {
                 return true;
             }

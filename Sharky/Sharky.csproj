@@ -34,6 +34,9 @@
     <None Update="StaticData\opponents\12PoolBot.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="StaticData\opponents\Bombshaker.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="StaticData\opponents\Ender.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -41,6 +44,12 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="StaticData\opponents\Dovahkiin.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="StaticData\opponents\Clicadinha.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="StaticData\opponents\miniTerran.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="StaticData\opponents\MilkWang1.json">
@@ -164,9 +173,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="StaticData\opponents\MicroMachine.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="StaticData\opponents\MicroMachinePalacky.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="StaticData\opponents\MixedBreed.json">

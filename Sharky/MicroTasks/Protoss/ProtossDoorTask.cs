@@ -44,6 +44,8 @@
 
         UnitCommander BlockPylon;
 
+        public bool UseBuildings { get; set; }
+
         public List<SC2APIProtocol.Point2D> PlacementPoints { get; protected set; }
 
         public ProtossDoorTask(DefaultSharkyBot defaultSharkyBot, bool enabled, float priority)
@@ -73,6 +75,7 @@
             DestroyBlock = false;
             BasesDuringWallData = 1;
             LastWallKillAquireFrame = 0;
+            UseBuildings = true;
         }
 
         public override void ClaimUnits(Dictionary<ulong, UnitCommander> commanders)
@@ -306,6 +309,11 @@
             {
                 NeedProbe = false;
                 RemoveProbeCommander();
+            }
+
+            if (!UseBuildings)
+            {
+                NeedProbe = false;
             }
         }
 

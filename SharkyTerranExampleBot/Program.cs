@@ -17,7 +17,7 @@ var sharkyExampleBot = defaultSharkyBot.CreateBot();
 var myRace = Race.Terran;
 if (args.Length == 0)
 {
-    gameConnection.RunSinglePlayer(sharkyExampleBot, @"GresvanAIE.SC2Map", myRace, Race.Random, Difficulty.VeryHard, AIBuild.RandomBuild).Wait();
+    gameConnection.RunSinglePlayer(sharkyExampleBot, @"Gresvan513AIE.SC2Map", myRace, Race.Random, Difficulty.VeryHard, AIBuild.RandomBuild).Wait();
 }
 else
 {

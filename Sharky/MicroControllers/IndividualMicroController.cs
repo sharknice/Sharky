@@ -3015,7 +3015,10 @@
 
             if (WeaponReady(commander, frame))
             {
-                if (AttackBestTargetInRange(commander, target, bestTarget, frame, out action)) { return action; }
+                if (!commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.Worker)) || commander.UnitCalculation.EnemiesInRange.Any(e => e.Damage > 0 || e.Unit.Energy > 0 || e.Unit.IsActive || Vector2.Distance(e.Position, commander.UnitCalculation.Position) < 2))
+                {
+                    if (AttackBestTargetInRange(commander, target, bestTarget, frame, out action)) { return action; }
+                }
                 if (bestTarget != null && bestTarget.UnitClassifications.HasFlag(UnitClassification.Worker))
                 {
                     if (ShouldStayOutOfRange(commander, frame) && AvoidAllDamage(commander, target, defensivePoint, frame, out action)) { return action; }

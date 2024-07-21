@@ -10,6 +10,7 @@
 
         ChokePointService ChokePointService;
         ChokePointsService ChokePointsService;
+        BuildingService BuildingService;
 
         Dictionary<string, List<WallData>> GeneratedWallData;
 
@@ -18,6 +19,7 @@
             BaseData = defaultSharkyBot.BaseData;
             ChokePointService = defaultSharkyBot.ChokePointService;
             ChokePointsService = defaultSharkyBot.ChokePointsService;
+            BuildingService = defaultSharkyBot.BuildingService;
 
             PartialMapWallData = LoadMapWallData("partial");
             BlockMapWallData = LoadMapWallData("block");
@@ -323,6 +325,10 @@
                             if (data.Block == null)
                             {
                                 data.Block = new Point2D { X = baseX + 3, Y = baseY - 4 };
+                                if (!BuildingService.AreaBuildable(data.Block.X, data.Block.Y, .5f)) // maps like SiteDelta have an inside chunk missing near the ramp
+                                {
+                                    data.Block = new Point2D { X = baseX + 3, Y = baseY - 6 };
+                                }
                             }
                             if (data.Door == null)
                             {
@@ -369,6 +375,10 @@
                             if (data.Block == null)
                             {
                                 data.Block = new Point2D { X = baseX - 4, Y = baseY + 3 };
+                                if (!BuildingService.AreaBuildable(data.Block.X, data.Block.Y, .5f)) // maps like SiteDelta have an inside chunk missing near the ramp
+                                {
+                                    data.Block = new Point2D { X = baseX - 4, Y = baseY + 5 };
+                                }
                             }
                             if (data.Door == null)
                             {

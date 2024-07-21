@@ -1,4 +1,6 @@
-﻿namespace Sharky.MicroTasks
+﻿using Sharky.Extensions;
+
+namespace Sharky.MicroTasks
 {
     public class MiningTask : MicroTask
     {
@@ -19,6 +21,7 @@
 
         public bool LongDistanceMiningEnabled { get; set; }
         public bool AttackWithIdleWorkers { get; set; } = true;
+        public bool RecallDistantWorkers { get; set; } = true;
 
         bool LowMineralsHighGas;
 
@@ -278,15 +281,19 @@
             foreach (var worker in GetIdleWorkers())
             {
                 var saturationCount = 2;
-                var unsaturated = BaseData.SelfBases.Where(b => b.ResourceCenter != null && b.ResourceCenter.BuildProgress > .99 && b.MineralMiningInfo.Any(m => m.Workers.Count() < saturationCount));
+                var unsaturated = BaseData.SelfBases.Where(b => b.ResourceCenter != null && b.ResourceCenter.BuildProgress > .99 && b.MineralMiningInfo.Any(m => m.Workers.Count() < saturationCount)).OrderBy(u => Vector2.DistanceSquared(u.MiddleMineralLocation.ToVector2(), worker.UnitCalculation.Position));
 
                 foreach (var selfBase in unsaturated)
                 {
-                    foreach (var info in selfBase.MineralMiningInfo.Where(m => m.Workers.Count() < saturationCount).OrderBy(m => m.Workers.Count()))
+                    foreach (var info in selfBase.MineralMiningInfo.Where(m => m.Workers.Count() < saturationCount).OrderBy(m => m.Workers.Count()).ThenBy(m => Vector2.DistanceSquared(m.HarvestPoint.ToVector2(), worker.UnitCalculation.Position)))
                     {
                         worker.UnitRole = UnitRole.Minerals;
                         info.Workers.Add(worker);
                         MineWithIdleWorkers(frame);
+                        if (ActiveUnitData.Commanders.ContainsKey(selfBase.ResourceCenter.Tag))
+                        {
+                            ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].RallyPointSet = false;
+                        }
                         return actions;
                     }
                 }
@@ -355,10 +362,33 @@
 
             var workersPerField = UnitCommanders.Count() / (float)miningAssignments.Count();
 
-            foreach (var worker in UnitCommanders)
+            foreach (var worker in UnitCommanders.OrderByDescending(w => Vector2.DistanceSquared(w.UnitCalculation.Position, BaseData.MainBase.BehindMineralLineLocation.ToVector2())))
             {
                 worker.UnitRole = UnitRole.Minerals;
-                miningAssignments.Where(m => m.Workers.Count < Math.Ceiling(workersPerField)).OrderBy(m => m.Workers.Count()).ThenBy(m => Vector2.DistanceSquared(new Vector2(m.ResourceUnit.Pos.X, m.ResourceUnit.Pos.Y), worker.UnitCalculation.Position)).First().Workers.Add(worker);
+                miningAssignments.Where(m => m.Workers.Count < Math.Ceiling(workersPerField)).OrderBy(m => Vector2.DistanceSquared(m.ResourceUnit.Pos.ToVector2(), worker.UnitCalculation.Position)).ThenBy(m => Vector2.Distance(m.ResourceUnit.Pos.ToVector2(), BaseData.MainBase.Location.ToVector2())).First().Workers.Add(worker);
+            }
+
+            while (miningAssignments.Any(m => m.Workers.Count() == 0))
+            {
+                var empty = miningAssignments.FirstOrDefault(m => m.Workers.Count() == 0);
+                if (empty != null)
+                {
+                    var neighbor = miningAssignments.Where(m => m.Workers.Count() == 2).OrderBy(m => Vector2.Distance(m.ResourceUnit.Pos.ToVector2(), empty.ResourceUnit.Pos.ToVector2())).FirstOrDefault();
+                    if (neighbor != null)
+                    {
+                        var worker = neighbor.Workers.OrderBy(w => Vector2.Distance(w.UnitCalculation.Position, neighbor.ResourceUnit.Pos.ToVector2())).FirstOrDefault();
+                        neighbor.Workers.Remove(worker);
+                        empty.Workers.Add(worker);
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                else
+                {
+                    break;
+                }
             }
 
             return miningAssignments;
@@ -367,7 +397,7 @@
         List<SC2APIProtocol.Action> RecallWorkers(int frame)
         {
             var actions = new List<SC2APIProtocol.Action>();
-            if (BaseData.SelfBases.Count() > 1) { return actions; }
+            if (BaseData.SelfBases.Count() > 1 || !RecallDistantWorkers) { return actions; }
             foreach (var selfBase in BaseData.SelfBases.Where(b => b.ResourceCenter != null && b.ResourceCenter.UnitType == (uint)UnitTypes.PROTOSS_NEXUS && b.ResourceCenter.Energy >= 50))
             {
                 var baseVector = new Vector2(selfBase.ResourceCenter.Pos.X, selfBase.ResourceCenter.Pos.Y);

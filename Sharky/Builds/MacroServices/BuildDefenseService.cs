@@ -164,7 +164,7 @@ namespace Sharky.Builds.MacroServices
                             {
                                 if (ActiveUnitData.SelfUnits.Count(u => u.Value.Unit.UnitType == (uint)unit.Key && Vector2.DistanceSquared(u.Value.Position, new Vector2(baseLocation.Location.X, baseLocation.Location.Y)) < MacroData.DefensiveBuildingMaximumDistance * MacroData.DefensiveBuildingMaximumDistance && MapDataService.MapHeight(u.Value.Position) == height) + orderedBuildings < unit.Value)
                                 {
-                                    var command = BuildingBuilder.BuildBuilding(MacroData, unit.Key, unitData, baseLocation.Location, false, MacroData.DefensiveBuildingMaximumDistance, requireSameHeight: true, wallOffType: BuildOptions.WallOffType);
+                                    var command = BuildingBuilder.BuildBuilding(MacroData, unit.Key, unitData, baseLocation.Location, false, MacroData.DefensiveBuildingMaximumDistance, requireSameHeight: true, wallOffType: WallOffType.None);
                                     if (command != null)
                                     {
                                         commands.AddRange(command);
@@ -242,7 +242,7 @@ namespace Sharky.Builds.MacroServices
                             var height = MapDataService.MapHeight(baseLocation.MineralLineBuildingLocation);
                             if (ActiveUnitData.SelfUnits.Count(u => u.Value.Unit.UnitType == (uint)unit.Key && Vector2.DistanceSquared(u.Value.Position, baseLocation.MineralLineBuildingLocation.ToVector2()) < MacroData.DefensiveBuildingMineralLineMaximumDistance * MacroData.DefensiveBuildingMineralLineMaximumDistance && MapDataService.MapHeight(u.Value.Position) == height) + orderedBuildings < unit.Value)
                             {
-                                var command = BuildingBuilder.BuildBuilding(MacroData, unit.Key, unitData, baseLocation.MineralLineBuildingLocation, true, MacroData.DefensiveBuildingMineralLineMaximumDistance, requireSameHeight: true, wallOffType: BuildOptions.WallOffType);
+                                var command = BuildingBuilder.BuildBuilding(MacroData, unit.Key, unitData, baseLocation.MineralLineBuildingLocation, true, MacroData.DefensiveBuildingMineralLineMaximumDistance, requireSameHeight: true, wallOffType: WallOffType.None);
                                 if (command != null)
                                 {
                                     commands.AddRange(command);
