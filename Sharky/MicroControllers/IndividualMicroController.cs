@@ -1258,6 +1258,16 @@
                     //        }
                     //    }
                     //}
+
+                    if (commander.UnitCalculation.Unit.IsFlying)
+                    {
+                        var lerp = Vector2.Lerp(commander.UnitCalculation.Position, point, 3);
+                        if (MapDataService.PathFlyable(lerp))
+                        {
+                            point = lerp;
+                        }
+                    }
+
                     action = commander.Order(frame, Abilities.MOVE, new Point2D { X = point.X, Y = point.Y });
 
                     if (Vector2.DistanceSquared(commander.UnitCalculation.Position, point) < FollowPathProximitySquared)
@@ -2335,7 +2345,7 @@
             action = null;
             if ((MicroPriority == MicroPriority.AttackForward || commander.UnitCalculation.Unit.IsHallucination) && commander.UnitCalculation.Unit.Health > commander.UnitCalculation.Unit.HealthMax / 4.0) { return false; }
             var attack = commander.UnitCalculation.Attackers.OrderBy(e => Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position) - (e.Range * e.Range)).FirstOrDefault();
-            if (attack != null)
+            if (attack != null && !attack.EnemiesInRange.Any(a => a.Unit.Health + a.Unit.Shield < commander.UnitCalculation.Unit.Health + commander.UnitCalculation.Unit.Shield))
             {
                 if (commander.UnitCalculation.Unit.IsFlying)
                 {

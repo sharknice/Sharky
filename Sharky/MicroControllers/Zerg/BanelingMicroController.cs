@@ -91,6 +91,7 @@
                         }
                         TagService.TagAbility("explode");
                         action = commander.Order(frame, Abilities.EFFECT_EXPLODE);
+                        CameraManager.SetCamera(commander.UnitCalculation.Position);
                         LastManualDetonationFrame = frame;
                         return true;
                     }

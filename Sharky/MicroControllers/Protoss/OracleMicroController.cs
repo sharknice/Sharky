@@ -5,6 +5,7 @@
         protected float RevelationRange = 9;
         protected float RevelationRangeSquared;
         protected float RevelationRadius = 6;
+        AreaService AreaService;
 
         StasisWardPlacement StasisWardPlacement;
 
@@ -13,6 +14,7 @@
         {
             StasisWardPlacement = defaultSharkyBot.StasisWardPlacement;
             RevelationRangeSquared = RevelationRange * RevelationRange;
+            AreaService = defaultSharkyBot.AreaService;
         }
 
         public override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
@@ -345,26 +347,33 @@
         {
             List<SC2APIProtocol.Action> action = null;
 
-            if (commander.UnitCalculation.NearbyEnemies.Count(e => e.DamageAir) > 0)
+            if (MapDataService.EnemyAirDamageInRange(commander.UnitCalculation.Position, 3))
             {
-                if (commander.RetreatPathFrame < frame)
+                var spot = AreaService.GetAirArea(commander.UnitCalculation.Position.ToPoint2D(), 5).Where(s => !MapDataService.EnemyAirDamageInRange(s, 3)).OrderBy(s => Vector2.DistanceSquared(s.ToVector2(), target.ToVector2())).ThenBy(s => Vector2.DistanceSquared(s.ToVector2(), commander.UnitCalculation.Position)).FirstOrDefault();
+                if (spot == null)
                 {
-                    commander.RetreatPath = SharkyPathFinder.GetSafeAirPath(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y, target.X, target.Y, frame);
-                    commander.RetreatPathFrame = frame;
+                    spot = AreaService.GetAirArea(commander.UnitCalculation.Position.ToPoint2D(), 10).Where(s => !MapDataService.EnemyAirDamageInRange(s, 3)).OrderBy(s => Vector2.DistanceSquared(s.ToVector2(), target.ToVector2())).ThenBy(s => Vector2.DistanceSquared(s.ToVector2(), commander.UnitCalculation.Position)).FirstOrDefault();
+                }
+                if (spot != null)
+                {
+                    var lerp = Vector2.Lerp(commander.UnitCalculation.Position, spot.ToVector2(), 3);
+                    if (MapDataService.PathFlyable(lerp))
+                    {
+                        spot = lerp.ToPoint2D();
+                    }
+                    return commander.Order(frame, Abilities.MOVE, spot);
                 }
 
-                if (FollowPath(commander, frame, out action)) { return action; }
-            }
+                if (AvoidTargettedDamage(commander, target, defensivePoint, frame, out action))
+                {
+                    return action;
+                }
 
-            if (AvoidTargettedDamage(commander, target, defensivePoint, frame, out action))
-            {
-                return action;
-            }
-
-            if (AvoidDamage(commander, target, defensivePoint, frame, out action))
-            {
-                return action;
-            }
+                if (AvoidDamage(commander, target, defensivePoint, frame, out action))
+                {
+                    return action;
+                }
+            }           
 
             NavigateToTarget(commander, target, groupCenter, null, Formation.Normal, frame, out action);
 

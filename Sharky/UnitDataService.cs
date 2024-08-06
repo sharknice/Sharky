@@ -16,7 +16,7 @@
         public Weapon GetWeapon(Unit unit)
         {
             var unitType = (UnitTypes)unit.UnitType;
-            foreach (Weapon weapon in SharkyUnitData.UnitData[unitType].Weapons)
+            foreach (Weapon weapon in SharkyUnitData.UnitData[unitType].Weapons.OrderBy(w => w.Range))
             {
                 if (unitType == UnitTypes.PROTOSS_PHOENIX)
                 {

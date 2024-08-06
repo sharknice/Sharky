@@ -20,6 +20,16 @@
             LastLocations = new List<Point2D>();
         }
 
+        public Point2D FindPrePlacement(Point2D target, float maxDistance, float minimumMineralProximinity)
+        {
+            var position = FindPlacement(target, maxDistance, minimumMineralProximinity);
+            if (position != null)
+            {
+                LastLocations.RemoveAt(LastLocations.Count - 1);
+            }
+            return position;
+        }
+
         public Point2D FindPlacement(Point2D target, float maxDistance, float minimumMineralProximinity)
         {
             var targetVector = new Vector2(target.X, target.Y);

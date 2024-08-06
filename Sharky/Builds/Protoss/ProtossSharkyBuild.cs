@@ -8,6 +8,9 @@
         protected TargetingData TargetingData;
         protected MapDataService MapDataService;
         protected EnemyData EnemyData;
+        BaseData BaseData;
+
+        ProtossPylonGridPlacement ProtossPylonGridPlacement;
 
         public ProtossSharkyBuild(DefaultSharkyBot defaultSharkyBot, ICounterTransitioner counterTransitioner)
             : base(defaultSharkyBot)
@@ -16,7 +19,10 @@
             TargetingData = defaultSharkyBot.TargetingData;
             MapDataService = defaultSharkyBot.MapDataService;
             EnemyData = defaultSharkyBot.EnemyData;
+            BaseData = defaultSharkyBot.BaseData;
             CounterTransitioner = counterTransitioner;
+
+            ProtossPylonGridPlacement = defaultSharkyBot.ProtossPylonGridPlacement;
         }
 
         public override List<string> CounterTransition(int frame)
@@ -51,7 +57,7 @@
         {
             if (MacroData.FoodUsed == 13 && MacroData.Minerals > 94 && UnitCountService.Count(UnitTypes.PROTOSS_PYLON) == 0)
             {
-                PrePositionBuilderTask.SendBuilder(TargetingData.ForwardDefensePoint, frame);
+                PrePositionBuilderTask.SendBuilder(GetPylonPosition(), frame);
             }
         }
 
@@ -59,7 +65,7 @@
         {
             if (MacroData.FoodUsed == 13 && MacroData.Minerals > 44 && UnitCountService.Count(UnitTypes.PROTOSS_PYLON) == 0)
             {
-                PrePositionBuilderTask.SendBuilder(TargetingData.ForwardDefensePoint, frame);
+                PrePositionBuilderTask.SendBuilder(GetPylonPosition(), frame);
             }
         }
 
@@ -84,11 +90,21 @@
             return TargetingData.ForwardDefensePoint;
         }
 
+        protected Point2D GetPylonPosition()
+        {
+            if (BuildOptions.WallOffType == WallOffType.None)
+            {
+                var position = ProtossPylonGridPlacement.FindPrePlacement(BaseData.BaseLocations.FirstOrDefault().Location, 50, 50);
+                if (position != null) { return position; }
+            }
+            return TargetingData.ForwardDefensePoint;
+        }
+
         protected void SendProbeForSecondGateway(int frame)
         {
             if (UnitCountService.EquivalentTypeCount(UnitTypes.PROTOSS_GATEWAY) == 1 && MacroData.Minerals > 90)
             {
-                PrePositionBuilderTask.SendBuilder(TargetingData.ForwardDefensePoint, frame);
+                PrePositionBuilderTask.SendBuilder(GetBuildPosition(), frame);
             }
         }
 

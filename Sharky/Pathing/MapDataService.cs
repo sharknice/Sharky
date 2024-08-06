@@ -150,6 +150,11 @@
             return true;
         }
 
+        public bool PathFlyable(Vector2 end)
+        {
+            return PathFlyable(end.X, end.Y, end.X, end.Y);
+        }
+
         public bool PathFlyable(Point2D end)
         {
             return PathFlyable(end.X, end.Y, end.X, end.Y);
@@ -342,6 +347,20 @@
             return MapData.Map[(int)point.X,(int)point.Y].EnemyAirDpsInRange;
         }
 
+        public float EnemyAirDpsInRange(Vector2 point)
+        {
+            if (point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
+            {
+                return 0;
+            }
+            return MapData.Map[(int)point.X, (int)point.Y].EnemyAirDpsInRange;
+        }
+
+        public float EnemyAirDpsInRange(float x, float y)
+        {
+            return EnemyAirDpsInRange(new Point2D { X = x, Y = y });
+        }
+
         public float EnemyAirDpsInRange(Point2D point)
         {
             if (point == null || point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
@@ -403,6 +422,30 @@
                 return false;
             }
             return MapData.Map[(int)point.X,(int)point.Y].InEnemyVision;
+        }
+
+        public bool EnemyAirDamageInRange(Point2D point, float radius)
+        {
+            return
+                EnemyAirDpsInRange(point) > 0 ||
+                EnemyAirDpsInRange(point.X - radius, point.Y) > 0 ||
+                EnemyAirDpsInRange(point.X + radius, point.Y) > 0 ||
+                EnemyAirDpsInRange(point.X, point.Y - radius) > 0 ||
+                EnemyAirDpsInRange(point.X, point.Y + radius) > 0 ||
+                EnemyAirDpsInRange(point.X + radius, point.Y + radius) > 0 ||
+                EnemyAirDpsInRange(point.X - radius, point.Y - radius) > 0;
+        }
+
+        public bool EnemyAirDamageInRange(Vector2 point, float radius)
+        {
+            return
+                EnemyAirDpsInRange(point) > 0 ||
+                EnemyAirDpsInRange(point.X - radius, point.Y) > 0 ||
+                EnemyAirDpsInRange(point.X + radius, point.Y) > 0 ||
+                EnemyAirDpsInRange(point.X, point.Y - radius) > 0 ||
+                EnemyAirDpsInRange(point.X, point.Y + radius) > 0 ||
+                EnemyAirDpsInRange(point.X + radius, point.Y + radius) > 0 ||
+                EnemyAirDpsInRange(point.X - radius, point.Y - radius) > 0;
         }
     }
 }

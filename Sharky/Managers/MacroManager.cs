@@ -138,6 +138,11 @@
 
         private bool CanRunFullProduction(ResponseObservation observation)
         {
+            if (observation.Observation.GameLoop <= 5)
+            {
+                return true;
+            }
+
             var runFrequency = RunFrequency;
             if (observation.Observation.GameLoop > 6720 && TotalFrameTime / observation.Observation.GameLoop > 1)
             {

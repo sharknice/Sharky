@@ -317,6 +317,15 @@
         {
             var cells = MapDataService.GetCells(startX, startY, MaxDistance);
             var end = new Vector2(endX, endY);
+
+            var safeCells = MapDataService.GetCells(startX, startY, MaxDistance/2).Where(c => c.EnemyAirDpsInRange == 0);
+            if (safeCells.Any())
+            {
+                var safe = cells.OrderBy(c => Vector2.DistanceSquared(end, new Vector2(c.X, c.Y))).ThenBy(c => c.EnemyAirDpsInRange).FirstOrDefault();
+                var grid = GetAirGrid(frame);
+                return GetPath(grid, startX, startY, safe.X, safe.Y);
+            }
+
             var best = cells.OrderBy(c => c.EnemyAirDpsInRange).ThenBy(c => Vector2.DistanceSquared(end, new Vector2(c.X, c.Y))).FirstOrDefault();
             if (best != null)
             {
