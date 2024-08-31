@@ -252,11 +252,16 @@
             }
         }
 
-        void UpdateDefensePoint(int frame)
+        public void ForceDefensivePointUpdate(int frame)
+        {
+            UpdateDefensePoint(frame, true);
+        }
+
+        void UpdateDefensePoint(int frame, bool forceUpdate = false)
         {
             if (BaseData.SelfBases == null) { return; }
 
-            if (baseCount != BaseData.SelfBases.Count())
+            if (baseCount != BaseData.SelfBases.Count() || forceUpdate)
             {
                 var resourceCenters = ActiveUnitData.SelfUnits.Values.Where(u => u.UnitClassifications.HasFlag(UnitClassification.ResourceCenter) && !u.Unit.IsFlying);
                 var ordered = BaseData.BaseLocations.Where(b => resourceCenters.Any(r => Vector2.DistanceSquared(r.Position, new Vector2(b.Location.X, b.Location.Y)) < 25)).OrderBy(b => GetDistance(b));

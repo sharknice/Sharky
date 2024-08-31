@@ -199,13 +199,26 @@
                     return;
                 }
 
+                match = Regex.Match(chatReceived.Message.ToLower(), "spawn enemy depots");
+                if (match.Success)
+                {
+                    foreach (var wallData in MapData.WallData.Where(w => w.BasePosition.X == TargetingData.EnemyMainBasePoint.X && w.BasePosition.Y == TargetingData.EnemyMainBasePoint.Y && w.FullDepotWall != null))
+                    {
+                        foreach (var spot in wallData.FullDepotWall)
+                        {
+                            DebugService.SpawnUnits(UnitTypes.TERRAN_SUPPLYDEPOTLOWERED, spot, 2, 1);
+                        }
+                    }
+
+                    return;
+                }
+
                 match = Regex.Match(chatReceived.Message.ToLower(), "spawn enemy depot");
                 if (match.Success)
                 {
-                    foreach (var wallData in MapData.WallData.Where(w => w.BasePosition.X == TargetingData.EnemyMainBasePoint.X && w.BasePosition.Y == TargetingData.EnemyMainBasePoint.Y && w.Pylons != null))
+                    foreach (var wallData in MapData.WallData.Where(w => w.BasePosition.X == TargetingData.EnemyMainBasePoint.X && w.BasePosition.Y == TargetingData.EnemyMainBasePoint.Y && w.Depots != null && w.Depots.Any()))
                     {
                         var spot = wallData.Depots.FirstOrDefault();
-
                         DebugService.SpawnUnits(UnitTypes.TERRAN_SUPPLYDEPOTLOWERED, spot, 2, 1);
                     }
 

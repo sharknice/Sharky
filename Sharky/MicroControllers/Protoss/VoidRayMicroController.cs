@@ -149,5 +149,59 @@
             action = MoveToTarget(commander, defensivePoint, frame);
             return true;
         }
+
+        public override List<SC2APIProtocol.Action> Contain(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
+        {
+            List<SC2APIProtocol.Action> action = null;
+            if (commander.UnitCalculation.Loaded) { return action; }
+
+            if (WeaponReady(commander, frame) && !commander.UnitCalculation.EnemiesInRangeOfAvoid.Any())
+            {
+                var bestTarget = GetBestTarget(commander, target, frame);
+                if (AttackBestTargetInRange(commander, target, bestTarget, frame, out action)) { return action; }
+            }
+
+            if (SpecialCaseMove(commander, target, defensivePoint, groupCenter, null, Formation.Normal, frame, out action)) { return action; }
+
+            if (Vector2.Distance(commander.UnitCalculation.Position, target.ToVector2()) < 5 || !commander.UnitCalculation.EnemiesInRangeOfAvoid.Any())
+            {
+                return commander.Order(frame, Abilities.MOVE, target);
+            }
+
+            if (PreOffenseOrder(commander, target, defensivePoint, groupCenter, null, frame, out action)) { return action; }
+
+            if (commander.UnitCalculation.NearbyEnemies.Any(e => (e.FrameLastSeen > (frame - (SharkyOptions.FramesPerSecond * 60)) || e.Attributes.Contains(SC2APIProtocol.Attribute.Structure)) && DamageService.CanDamage(e, commander.UnitCalculation)))
+            {
+                if (commander.RetreatPathFrame + 2 < frame)
+                {
+                    if (commander.UnitCalculation.Unit.IsFlying)
+                    {
+                        commander.RetreatPath = SharkyPathFinder.GetSafeAirPath(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y, target.X, target.Y, frame);
+                        commander.RetreatPathFrame = frame;
+                    }
+                    else
+                    {
+                        commander.RetreatPath = SharkyPathFinder.GetSafeGroundPath(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y, target.X, target.Y, frame);
+                        commander.RetreatPathFrame = frame;
+                    }
+                }
+
+                if (FollowPath(commander, frame, out action)) { return action; }
+            }
+
+            if (AvoidTargettedDamage(commander, target, defensivePoint, frame, out action))
+            {
+                return action;
+            }
+
+            if (AvoidDamage(commander, target, defensivePoint, frame, out action))
+            {
+                return action;
+            }
+
+            NavigateToTarget(commander, target, groupCenter, null, Formation.Normal, frame, out action);
+
+            return action;
+        }
     }
 }

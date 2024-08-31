@@ -10,6 +10,7 @@
         List<SC2Action> Bait(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame);
         List<SC2APIProtocol.Action> HarassWorkers(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame);
         List<SC2APIProtocol.Action> NavigateToPoint(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame);
+        List<SC2APIProtocol.Action> Contain(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame);
         bool NavigateToTarget(UnitCommander commander, Point2D target, Point2D groupCenter, UnitCalculation bestTarget, Formation formation, int frame, out List<SC2APIProtocol.Action> action);
         List<SC2Action> AttackWithinArea(UnitCommander commander, List<Point2D> area, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame);
 

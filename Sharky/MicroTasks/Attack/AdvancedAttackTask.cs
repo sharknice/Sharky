@@ -32,11 +32,11 @@
 
         public bool OnlyDefendBuildings { get; set; }
         public bool AllowSplitWhileKill { get; set; }
+        public bool AllowSplit { get; set; }
         public bool DeathBallMode { get; set; }
         public bool DeathBallClearCreep { get; set; }
 
         bool BaseUnderAttack { get; set; }
-
 
         public AdvancedAttackTask(DefaultSharkyBot defaultSharkyBot, EnemyCleanupService enemyCleanupService, List<UnitTypes> mainAttackerTypes, float priority, bool enabled = true)
         {
@@ -70,6 +70,7 @@
             SubTasks = new Dictionary<string, IAttackSubTask>();
 
             AllowSplitWhileKill = true;
+            AllowSplit = true;
         }
 
         public override void ResetClaimedUnits()
@@ -319,7 +320,9 @@
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            if (attackingEnemies.Any())
+            IEnumerable<UnitCommander> splitUnits = new List<UnitCommander>();
+
+            if (AllowSplit && attackingEnemies.Any())
             {
                 var armyVector = new Vector2(AttackData.ArmyPoint.X, AttackData.ArmyPoint.Y);
                 var distanceToAttackPoint = Vector2.DistanceSquared(armyVector, attackPoint.ToVector2());
@@ -380,6 +383,7 @@
                     if (closerSelfUnits.Any())
                     {
                         actions.AddRange(DefenseArmySplitter.SplitArmy(frame, attackingEnemies, attackPoint, closerSelfUnits, defendToDeath));
+                        splitUnits = closerSelfUnits;
                     }
                     if (stopwatch.ElapsedMilliseconds > 100)
                     {
@@ -407,11 +411,11 @@
 
             if (MainUnits.Any(m => !m.UnitCalculation.Loaded))
             {
-                OrderMainUnitsWithSupportUnits(frame, actions, MainUnits, SupportUnits, attackPoint);
+                OrderMainUnitsWithSupportUnits(frame, actions, MainUnits, SupportUnits.Where(u => !splitUnits.Contains(u)), attackPoint);
             }
             else
             {
-                OrderSupportUnitsWithoutMainUnits(frame, actions, SupportUnits, attackPoint);
+                OrderSupportUnitsWithoutMainUnits(frame, actions, SupportUnits.Where(u => !splitUnits.Contains(u)), attackPoint);
             }
 
             RemoveTemporaryUnits();
@@ -508,10 +512,18 @@
             }
             else if (AttackData.Attacking)
             {
-                if (TargetingData.AttackState == AttackState.Kill || !AttackData.UseAttackDataManager || DeathBallMode)
+                if (TargetingData.AttackState == AttackState.Contain)
+                {
+                    actions.AddRange(MicroController.Contain(supportUnits, attackPoint, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame));
+                    foreach (var subTask in SubTasks.Where(t => t.Value.Enabled).OrderBy(t => t.Value.Priority))
+                    {
+                        actions.AddRange(subTask.Value.Contain(attackPoint, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame));
+                    }
+                }
+                else if (TargetingData.AttackState == AttackState.Kill || !AttackData.UseAttackDataManager || DeathBallMode)
                 {
                     var attackingEnemies = supportUnits.SelectMany(c => c.UnitCalculation.NearbyEnemies).Distinct();
-                    if (AllowSplitWhileKill && attackingEnemies.Any())
+                    if (AllowSplit && AllowSplitWhileKill && attackingEnemies.Any())
                     {
                         var splitActions = AttackArmySplitter.SplitArmy(frame, attackingEnemies, attackPoint, supportUnits, false);
                         actions.AddRange(splitActions);
@@ -523,14 +535,6 @@
                     foreach (var subTask in SubTasks.Where(t => t.Value.Enabled).OrderBy(t => t.Value.Priority))
                     {
                         actions.AddRange(subTask.Value.Attack(attackPoint, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame));
-                    }
-                }
-                else if (TargetingData.AttackState == AttackState.Contain)
-                {
-                    actions.AddRange(MicroController.Retreat(supportUnits, attackPoint, AttackData.ArmyPoint, frame));
-                    foreach (var subTask in SubTasks.Where(t => t.Value.Enabled).OrderBy(t => t.Value.Priority))
-                    {
-                        actions.AddRange(subTask.Value.Retreat(attackPoint, AttackData.ArmyPoint, frame));
                     }
                 }
             }
@@ -614,7 +618,15 @@
             }
             else if (AttackData.Attacking)
             {
-                if (TargetingData.AttackState == AttackState.Kill || TargetingData.AttackState == AttackState.None || DeathBallMode)
+                if (TargetingData.AttackState == AttackState.Contain)
+                {
+                    actions.AddRange(MicroController.Contain(UnitCommanders, attackPoint, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame));
+                    foreach (var subTask in SubTasks.Where(t => t.Value.Enabled).OrderBy(t => t.Value.Priority))
+                    {
+                        actions.AddRange(subTask.Value.Support(mainUnits, supportAttackPoint, TargetingData.ForwardDefensePoint, supportAttackPoint, frame));
+                    }
+                }
+                else if (TargetingData.AttackState == AttackState.Kill || TargetingData.AttackState == AttackState.None || DeathBallMode)
                 {
                     actions.AddRange(MicroController.Attack(mainUnits, attackPoint, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame));
                     actions.AddRange(MicroController.Support(supportUnits, mainUnits, supportAttackPoint, TargetingData.ForwardDefensePoint, supportAttackPoint, frame));

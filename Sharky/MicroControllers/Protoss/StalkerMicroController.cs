@@ -13,6 +13,22 @@
             action = null;
             if (bestTarget != null)
             {
+                if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.KillWorkers && !bestTarget.UnitClassifications.HasFlag(UnitClassification.Worker) && bestTarget.Attributes.Contains(SC2APIProtocol.Attribute.Structure))
+                {
+                    if (bestTarget.Repairers.Any())
+                    {
+                        var repairer = commander.UnitCalculation.NearbyEnemies.Where(e => bestTarget.Repairers.Any(u => u.Tag == e.Unit.Tag)).OrderBy(e => e.Unit.Health).ThenBy(e => Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+                        if (repairer != null)
+                        {
+                            bestTarget = repairer;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                }
+
                 if (commander.UnitCalculation.EnemiesInRange.Any(e => e.Unit.Tag == bestTarget.Unit.Tag) && bestTarget.Unit.DisplayType == DisplayType.Visible && MapDataService.SelfVisible(bestTarget.Unit.Pos) && bestTarget.FrameLastSeen == frame)
                 {
                     bestTarget.IncomingDamage += GetDamage(commander.UnitCalculation.Weapons, bestTarget.Unit, bestTarget.UnitTypeData);

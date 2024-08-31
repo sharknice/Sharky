@@ -57,5 +57,10 @@
                 MicroTaskData[typeof(AttackTask).Name].ResetClaimedUnits();
             }
         }
+
+        public IEnumerable<SC2Action> Contain(Point2D attackPoint, Point2D defensePoint, Point2D armyPoint, int frame)
+        {
+            return Retreat(defensePoint, armyPoint, frame);
+        }
     }
 }

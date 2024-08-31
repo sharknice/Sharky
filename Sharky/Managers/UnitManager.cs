@@ -205,7 +205,7 @@ namespace Sharky.Managers
             {
                 if (unit.Alliance == Alliance.Enemy)
                 {
-                    var repairingUnits = repairers.Where(u => u.Alliance == Alliance.Enemy && Vector2.DistanceSquared(new Vector2(u.Pos.X, u.Pos.Y), new Vector2(unit.Pos.X, unit.Pos.Y)) < (1.0 + u.Radius + unit.Radius) * (0.1 + u.Radius + unit.Radius));
+                    var repairingUnits = repairers.Where(u => u.Tag != unit.Tag && u.Alliance == Alliance.Enemy && Vector2.DistanceSquared(new Vector2(u.Pos.X, u.Pos.Y), new Vector2(unit.Pos.X, unit.Pos.Y)) < (1.0 + u.Radius + unit.Radius) * (0.1 + u.Radius + unit.Radius));
                     var attack = new UnitCalculation(unit, repairingUnits.ToList(), SharkyUnitData, SharkyOptions, UnitDataService, MapDataService.IsOnCreep(unit.Pos), frame);
                     if (ActiveUnitData.EnemyUnits.TryGetValue(unit.Tag, out UnitCalculation existing))
                     {

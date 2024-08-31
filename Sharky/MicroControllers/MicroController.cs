@@ -159,5 +159,10 @@
             }
             return actions;
         }
+
+        public List<SC2APIProtocol.Action> Contain(IEnumerable<UnitCommander> commanders, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
+        {
+            return Retreat(commanders, defensivePoint, groupCenter, frame);
+        }
     }
 }

@@ -168,6 +168,10 @@
             Console.WriteLine($"  Enemy: {DefaultSharkyBot.ActiveUnitData.EnemyDeaths} units, {DefaultSharkyBot.ActiveUnitData.EnemyResourcesLost} resources");
             var targetingPriority = DefaultSharkyBot.TargetPriorityService.CalculateGeneralTargetPriority();
             Console.WriteLine($"Target Calculation Winnablility: {targetingPriority.OverallWinnability}");
+            if (DefaultSharkyBot.AttackData?.TargetPriorityCalculation?.TargetPriority != null)
+            {
+                Console.WriteLine($"TargetPriority: {DefaultSharkyBot.AttackData.TargetPriorityCalculation.TargetPriority}");
+            }
             Console.WriteLine($"Attack Point: {DefaultSharkyBot.TargetingData.AttackPoint}");
             Console.WriteLine($"Retreat Point: {DefaultSharkyBot.TargetingData.ForwardDefensePoint}");
 
@@ -179,6 +183,7 @@
             {
                 Console.WriteLine($"Attack State: {DefaultSharkyBot.TargetingData.AttackState}");
             }
+
             CheckCommanders();
             PrintTasks(frame);
             Console.WriteLine(new String('=', 20));

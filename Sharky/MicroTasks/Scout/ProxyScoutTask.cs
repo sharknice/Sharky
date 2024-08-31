@@ -1,4 +1,5 @@
 ﻿using Sharky.DefaultBot;
+using System.ComponentModel.Design;
 
 namespace Sharky.MicroTasks
 {
@@ -69,6 +70,15 @@ namespace Sharky.MicroTasks
                     }
                 }
             }
+        }
+
+        public void ManualClaim(UnitCommander commander)
+        {
+            commander.Claimed = true;
+            commander.UnitRole = UnitRole.Scout;
+            UnitCommanders.Add(commander);
+            started = true;
+            return;
         }
 
         public override IEnumerable<SC2APIProtocol.Action> PerformActions(int frame)

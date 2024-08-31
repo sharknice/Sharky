@@ -175,7 +175,7 @@
             }
             else if (repairers.Any() && UnitTypeData.Attributes.Contains(SC2APIProtocol.Attribute.Mechanical))
             {
-                SimulatedHealPerSecond = (float)(unit.HealthMax / UnitTypeData.BuildTime) * repairers.Count();
+                SimulatedHealPerSecond = (float)(unit.HealthMax / (UnitTypeData.BuildTime / sharkyOptions.FramesPerSecond)) * repairers.Count();
             }
             else if (Unit.UnitType == (uint)UnitTypes.TERRAN_MEDIVAC && Unit.Energy > 10)
             {
@@ -308,7 +308,7 @@
 
             if (Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED)
             {
-                damage *= 5;
+                damage *= 3;
             }
             if (Unit.UnitType == (uint)UnitTypes.TERRAN_PLANETARYFORTRESS)
             {

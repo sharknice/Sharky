@@ -155,20 +155,21 @@
                 return calculation;
             }
 
-            if (calculation.GroundWinnability > calculation.AirWinnability)
+            var bunker = groundAttackingEnemies.Where(b => b.Unit.UnitType == (uint)UnitTypes.TERRAN_BUNKER).FirstOrDefault();
+            if (bunker != null && groundAttackingEnemies.Count() < 10)
             {
-                var bunker = groundAttackingEnemies.Where(b => b.Unit.UnitType == (uint)UnitTypes.TERRAN_BUNKER).FirstOrDefault();
-                if (bunker != null && groundAttackingEnemies.Count() < 10)
+                if (bunker.Unit.BuildProgress < 1 || (bunker.Repairers.Any() && bunker.Unit.Health > 50 && allyDps < bunker.Unit.Health * 2))
                 {
-                    if (bunker.Unit.BuildProgress < 1 || (bunker.Unit.Health > 100 && enemyHps > enemyDps && bunker.Repairers.Count() > 2))
-                    {
-                        calculation.TargetPriority = TargetPriority.KillWorkers;
-                        return calculation;
-                    }
-
-                    calculation.TargetPriority = TargetPriority.KillBunker;
+                    calculation.TargetPriority = TargetPriority.KillWorkers;
                     return calculation;
                 }
+
+                calculation.TargetPriority = TargetPriority.KillBunker;
+                return calculation;
+            }
+
+            if (calculation.GroundWinnability > calculation.AirWinnability)
+            {
                 calculation.TargetPriority = TargetPriority.WinGround;
             }
             else if (calculation.AirWinnability > calculation.GroundWinnability)

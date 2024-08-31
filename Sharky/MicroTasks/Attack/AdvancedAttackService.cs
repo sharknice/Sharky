@@ -114,23 +114,9 @@
             if (TargetingData.AttackState == AttackState.Contain)
             {
                 var containTargetPriority = CalculateContainTargetPriority();
-                if (targetPriority.Overwhelm || targetPriority.OverallWinnability > AttackData.KillTrigger)
+                if (targetPriority.OverallWinnability > AttackData.KillTrigger && (containTargetPriority.Overwhelm && containTargetPriority.OverallWinnability > AttackData.KillTrigger))
                 {
                     TargetingData.AttackState = AttackState.Kill;
-                }
-                else if (containTargetPriority.OverallWinnability <= AttackData.RetreatTrigger)
-                {
-                    TargetingData.AttackState = AttackState.Retreat;
-                }
-                else if (AttackData.ContainBelowKill)
-                {
-                    var targetVector = new Vector2(TargetingData.AttackPoint.X, TargetingData.AttackPoint.Y);
-                    var armyVector = new Vector2(AttackData.ArmyPoint.X, AttackData.ArmyPoint.Y);
-                    var armyDistance = Vector2.DistanceSquared(armyVector, targetVector);
-                    if (EnemiesNearArmy != null && EnemiesNearArmy.Any(e => MapDataService.SelfVisible(e.Unit.Pos) && Vector2.DistanceSquared(e.Position, targetVector) < armyDistance && Vector2.DistanceSquared(e.Position, armyVector) < Vector2.DistanceSquared(targetVector, armyVector)))
-                    {
-                        TargetingData.AttackState = AttackState.Regroup;
-                    }
                 }
                 else if (targetPriority.OverallWinnability <= AttackData.RetreatTrigger)
                 {
@@ -165,10 +151,15 @@
                 {
                     TargetingData.AttackState = AttackState.Kill;
                 }
-                else if (targetPriority.OverallWinnability >= AttackData.ContainTrigger)
+                else if (targetPriority.OverallWinnability >= AttackData.ContainTrigger && AttackData.ContainBelowKill)
                 {
                     TargetingData.AttackState = AttackState.Contain;
                 }
+            }
+
+            if (TargetingData.AttackState == AttackState.Contain && !AttackData.ContainBelowKill)
+            {
+                TargetingData.AttackState = AttackState.Retreat;
             }
 
             DebugService.DrawText($"{TargetingData.AttackState}: O:{targetPriority.OverallWinnability:0.00}, G:{targetPriority.GroundWinnability:0.00}, A:{targetPriority.AirWinnability:0.00}");
