@@ -203,5 +203,42 @@
 
             return action;
         }
+
+        public override List<SC2APIProtocol.Action> HarassWorkers(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame)
+        {
+            List<SC2APIProtocol.Action> action = null;
+            if (commander.UnitCalculation.Loaded) { return action; }
+
+            var bestTarget = GetBestHarassTarget(commander, target);
+
+            if (ContinueInRangeAttack(commander, frame, out action)) { return action; }
+
+            if (SpecialCaseMove(commander, target, defensivePoint, null, bestTarget, Formation.Normal, frame, out action)) { return action; }
+            if (PreOffenseOrder(commander, target, defensivePoint, null, bestTarget, frame, out action)) { return action; }
+            if (AvoidTargettedOneHitKills(commander, target, defensivePoint, frame, out action)) { return action; }
+            if (OffensiveAbility(commander, target, defensivePoint, null, bestTarget, frame, out action)) { return action; }
+
+            if (WeaponReady(commander, frame))
+            {
+                if (!commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.Worker)) || commander.UnitCalculation.EnemiesInRange.Any(e => e.Damage > 0 || e.Unit.Energy > 0 || e.Unit.IsActive || Vector2.Distance(e.Position, commander.UnitCalculation.Position) < 2))
+                {
+                    if (AttackBestTargetInRange(commander, target, bestTarget, frame, out action)) { return action; }
+                }
+                if (bestTarget != null && bestTarget.UnitClassifications.HasFlag(UnitClassification.Worker))
+                {
+                    if (ShouldStayOutOfRange(commander, frame) && AvoidAllDamage(commander, target, defensivePoint, frame, out action)) { return action; }
+
+                    if (AttackBestTarget(commander, target, defensivePoint, null, bestTarget, frame, out action)) { return action; }
+                }
+            }
+
+            if (!commander.UnitCalculation.TargetPriorityCalculation.Overwhelm)
+            {
+                if (AvoidEnemiesThreateningDamage(commander, target, defensivePoint, frame, true, out action)) { return action; }
+                if (AvoidArmyEnemies(commander, target, defensivePoint, frame, true, out action)) { return action; }
+            }
+
+            return commander.Order(frame, Abilities.ATTACK, target);
+        }
     }
 }

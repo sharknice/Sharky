@@ -213,7 +213,7 @@
                                 {
                                     while (commanders.Count(c => c.Value.UnitRole == UnitRole.Defend) < desiredWorkers && commanders.Count(c => c.Value.UnitRole == UnitRole.Defend) < commanders.Count())
                                     {
-                                        var commander = commanders.FirstOrDefault(c => c.Value.UnitRole != UnitRole.Defend && c.Value.UnitRole != UnitRole.PreventGasSteal).Value;
+                                        var commander = commanders.FirstOrDefault(c => c.Value.UnitRole != UnitRole.Defend && c.Value.UnitRole != UnitRole.PreventGasSteal && c.Value.UnitRole != UnitRole.Build && c.Value.UnitRole != UnitRole.Wall).Value;
                                         if (commander != null)
                                         {
                                             commander.UnitRole = UnitRole.Defend;

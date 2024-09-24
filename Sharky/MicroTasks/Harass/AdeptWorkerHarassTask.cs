@@ -16,8 +16,10 @@
 
         public bool PrioritizeExpansion { get; set; }
         public bool PrioritizeLiving { get; set; }
+        public bool ClaimMore { get; set; } = true;
 
         public Dictionary<ulong, UnitCalculation> Kills { get; private set; } = new Dictionary<ulong, UnitCalculation>();
+        public Dictionary<ulong, UnitCalculation> WorkerKills { get; private set; } = new Dictionary<ulong, UnitCalculation>();
 
 
         public AdeptWorkerHarassTask(DefaultSharkyBot defaultSharkyBot, IIndividualMicroController adeptMicroController, IIndividualMicroController adeptShadeMicroController, bool enabled = false, float priority = -1f)
@@ -38,6 +40,27 @@
 
         public override void ClaimUnits(Dictionary<ulong, UnitCommander> commanders)
         {
+            if (!ClaimMore)
+            {
+                if (!UnitCommanders.Any())
+                {
+                    Disable();
+                }
+
+                foreach (var commander in commanders)
+                {
+                    if (!commander.Value.Claimed && commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_ADEPTPHASESHIFT)
+                    {                     
+                        if (commander.Value.ParentUnitCalculation != null && UnitCommanders.Any(c => c.UnitCalculation.Unit.Tag == commander.Value.ParentUnitCalculation.Unit.Tag))
+                        {
+                            commander.Value.Claimed = true;
+                            UnitCommanders.Add(commander.Value);
+                        }                 
+                    }
+                }
+                return;
+            }
+
             foreach (var commander in commanders)
             {
                 if (!commander.Value.Claimed && (commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_ADEPT || commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_ADEPTPHASESHIFT))
@@ -205,9 +228,14 @@
                 {
                     Kills[tag] = kill;
 
-                    if ((Deaths * 3) < Kills.Count && Kills.Count % 10 == 0)
+                    if ((UnitTypes)kill.Unit.UnitType == UnitTypes.ZERG_DRONE || (UnitTypes)kill.Unit.UnitType == UnitTypes.ZERG_DRONEBURROWED || (UnitTypes)kill.Unit.UnitType == UnitTypes.TERRAN_SCV || (UnitTypes)kill.Unit.UnitType == UnitTypes.PROTOSS_PROBE)
                     {
-                        var parameters = new List<KeyValuePair<string, string>> { new KeyValuePair<string, string>("kills", Kills.Count.ToString()), new KeyValuePair<string, string>("deaths", Deaths.ToString()) };
+                        WorkerKills[tag] = kill;
+                    }
+
+                    if ((Deaths * 3) < WorkerKills.Count && WorkerKills.Count % 10 == 0)
+                    {
+                        var parameters = new List<KeyValuePair<string, string>> { new KeyValuePair<string, string>("kills", WorkerKills.Count.ToString()), new KeyValuePair<string, string>("deaths", Deaths.ToString()) };
                         ChatService.SendChatType($"{GetType().Name}-mod10k0d-Success", parameters: parameters);
                     }
                 }

@@ -471,7 +471,7 @@
             var hallucinationScoutTask = new HallucinationScoutTask(TargetingData, BaseData, MicroTaskData, false, .5f);
             var hallucinationScoutEmptyBasesTask = new HallucinationScoutEmptyBasesTask(this, false, .51f);
             var wallOffTask = new WallOffTask(SharkyUnitData, ActiveUnitData, MacroData, MapData, WallService, ChatService, false, .25f);
-            var permanentWallOffTask = new PermanentWallOffTask(SharkyUnitData, ActiveUnitData, MacroData, MapData, WallService, ChatService, false, .25f);
+            var permanentWallOffTask = new PermanentWallOffTask(SharkyUnitData, ActiveUnitData, MicroTaskData, MacroData, MapData, WallService, ChatService, false, .25f);
             var fullPylonWallOffTask = new FullPylonWallOffTask(this, false, .25f);
             var destroyWallOffTask = new DestroyWallOffTask(ActiveUnitData, false, .25f);
             var prePositionBuilderTask = new PrePositionBuilderTask(this, .25f);

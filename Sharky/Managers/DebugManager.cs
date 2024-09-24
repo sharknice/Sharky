@@ -182,6 +182,58 @@
                     return;
                 }
 
+                match = Regex.Match(chatReceived.Message.ToLower(), "spawn late game");
+                if (match.Success)
+                {
+                    foreach (var baseLocation in BaseData.BaseLocations.Take(6))
+                    {
+                        var spot = baseLocation.Location;
+                        if (!ActiveUnitData.SelfUnits.Values.Any(u => u.Unit.Pos.X == spot.X && u.Unit.Pos.Y == spot.Y))
+                        {
+                            if (EnemyData.SelfRace == Race.Protoss)
+                            {
+                                DebugService.SpawnUnits(UnitTypes.PROTOSS_NEXUS, spot, 1, 1);
+                                DebugService.SpawnUnits(UnitTypes.PROTOSS_PROBE, baseLocation.MineralLineLocation, 1, 15);                            
+                            }
+                            else if (EnemyData.SelfRace == Race.Terran)
+                            {
+                                DebugService.SpawnUnits(UnitTypes.TERRAN_ORBITALCOMMAND, spot, 1, 1);
+                                DebugService.SpawnUnits(UnitTypes.TERRAN_SCV, baseLocation.MineralLineLocation, 1, 15);
+                            }
+                            else if (EnemyData.SelfRace == Race.Zerg)
+                            {
+                                DebugService.SpawnUnits(UnitTypes.ZERG_HIVE, spot, 1, 1);
+                                DebugService.SpawnUnits(UnitTypes.ZERG_DRONE, baseLocation.MineralLineLocation, 1, 15);
+                            }
+                        }
+                    }
+
+                    foreach (var baseLocation in BaseData.EnemyBaseLocations.Take(6))
+                    {
+                        var spot = baseLocation.Location;
+                        if (!ActiveUnitData.EnemyUnits.Values.Any(u => u.Unit.Pos.X == spot.X && u.Unit.Pos.Y == spot.Y))
+                        {
+                            if (EnemyData.EnemyRace == Race.Protoss)
+                            {
+                                DebugService.SpawnUnits(UnitTypes.PROTOSS_NEXUS, spot, 2, 1);
+                                DebugService.SpawnUnits(UnitTypes.PROTOSS_PROBE, baseLocation.MineralLineLocation, 2, 15);
+                            }
+                            else if (EnemyData.EnemyRace == Race.Terran)
+                            {
+                                DebugService.SpawnUnits(UnitTypes.TERRAN_ORBITALCOMMAND, spot, 2, 1);
+                                DebugService.SpawnUnits(UnitTypes.TERRAN_SCV, baseLocation.MineralLineLocation, 2, 15);
+                            }
+                            else if (EnemyData.EnemyRace == Race.Zerg)
+                            {
+                                DebugService.SpawnUnits(UnitTypes.ZERG_HIVE, spot, 2, 1);
+                                DebugService.SpawnUnits(UnitTypes.ZERG_DRONE, baseLocation.MineralLineLocation, 2, 15);
+                            }
+                        }
+                    }
+
+                    return;
+                }
+
                 match = Regex.Match(chatReceived.Message.ToLower(), "spawn enemy depot racks");
                 if (match.Success)
                 {

@@ -609,7 +609,7 @@
 
             if (DeathBallDefending(attackPoint))
             {
-                actions.AddRange(MicroController.Retreat(mainUnits, attackPoint, AttackData.ArmyPoint, frame));
+                actions.AddRange(MicroController.Attack(mainUnits, attackPoint, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame));
                 actions.AddRange(MicroController.Support(supportUnits, mainUnits, supportAttackPoint, TargetingData.ForwardDefensePoint, supportAttackPoint, frame));
                 foreach (var subTask in SubTasks.Where(t => t.Value.Enabled).OrderBy(t => t.Value.Priority))
                 {
