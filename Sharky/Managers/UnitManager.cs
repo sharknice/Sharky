@@ -146,7 +146,7 @@ namespace Sharky.Managers
                         ActiveUnitData.EnemyResourcesLost += (int)removedEnemy.UnitTypeData.MineralCost + (int)removedEnemy.UnitTypeData.VespeneCost;
                     }
                 }
-                else if (ActiveUnitData.SelfUnits.Remove(tag, out UnitCalculation removedAlly))
+                if (ActiveUnitData.SelfUnits.Remove(tag, out UnitCalculation removedAlly))
                 {
                     if (!removedAlly.Unit.IsHallucination)
                     {

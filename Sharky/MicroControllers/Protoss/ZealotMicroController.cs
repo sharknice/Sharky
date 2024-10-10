@@ -98,9 +98,14 @@
 
             var bestTarget = GetBestHarassTarget(commander, target);
 
-            if (WeaponReady(commander, frame))
+            if (WeaponReady(commander, frame) && bestTarget != null)
             {
                 if (AttackBestTarget(commander, target, defensivePoint, null, bestTarget, frame, out action)) { return action; }
+            }
+
+            if (commander.UnitCalculation.Unit.Shield == 0 && commander.UnitCalculation.EnemiesInRangeOf.Any())
+            {
+                return Retreat(commander, defensivePoint, target, frame);
             }
 
             var formation = GetDesiredFormation(commander);
