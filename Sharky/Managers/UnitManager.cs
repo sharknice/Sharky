@@ -611,7 +611,7 @@ namespace Sharky.Managers
             {
                 if (ActiveUnitData.Commanders.ContainsKey(commander.ParentUnitCalculation.Unit.Tag))
                 {
-                    return commander.ParentUnitCalculation;
+                    return ActiveUnitData.Commanders[commander.ParentUnitCalculation.Unit.Tag].UnitCalculation;
                 }
             }
 

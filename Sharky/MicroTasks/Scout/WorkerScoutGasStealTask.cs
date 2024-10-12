@@ -37,7 +37,7 @@
 
         CollisionCalculator CollisionCalculator;
 
-        protected IIndividualMicroController IndividualMicroController;
+        protected IndividualMicroController IndividualMicroController;
         protected IPathFinder PathFinder;
 
         protected bool started { get; set; }
@@ -48,7 +48,7 @@
         int PathFrame = 0;
 
 
-        public WorkerScoutGasStealTask(DefaultSharkyBot defaultSharkyBot, bool enabled, float priority, IIndividualMicroController individualMicroController)
+        public WorkerScoutGasStealTask(DefaultSharkyBot defaultSharkyBot, bool enabled, float priority, IndividualMicroController individualMicroController)
         {
             SharkyUnitData = defaultSharkyBot.SharkyUnitData;
             TargetingData = defaultSharkyBot.TargetingData;
@@ -461,7 +461,16 @@
                     }
                     else
                     {
-                        var action = IndividualMicroController.NavigateToPoint(commander, navpoint, navpoint, null, frame);
+                        List<SC2Action> action;
+                        if (commander.UnitCalculation.Unit.Shield == commander.UnitCalculation.Unit.ShieldMax)
+                        {
+                            IndividualMicroController.NavigateToTarget(commander, navpoint, null, null, Formation.Normal, frame, out action);
+                        }
+                        else
+                        {
+                            action = IndividualMicroController.NavigateToPoint(commander, navpoint, navpoint, null, frame);
+                        }
+
                         if (action != null)
                         {
                             commands.AddRange(action);

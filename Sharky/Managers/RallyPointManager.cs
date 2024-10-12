@@ -1,4 +1,6 @@
-﻿namespace Sharky.Managers.Protoss
+﻿using SC2APIProtocol;
+
+namespace Sharky.Managers.Protoss
 {
     public class RallyPointManager : SharkyManager
     {
@@ -9,6 +11,9 @@
         MapDataService MapDataService;
         BuildingService BuildingService;
         AreaService AreaService;
+
+        bool UseCustomLocation { get; set; } = false;
+        Point2D CustomRallyLocation { get; set; }
 
         public RallyPointManager(DefaultSharkyBot defaultSharkyBot)
         {
@@ -31,25 +36,32 @@
 
                 var spot = TargetingData.MainDefensePoint;
 
-                var baseLocation = WallService.GetBaseLocation();
-                if (baseLocation != null)
+                if (UseCustomLocation)
                 {
-                    if (MapData != null && MapData.WallData != null)
+                    spot = CustomRallyLocation;
+                }
+                else
+                {
+                    var baseLocation = WallService.GetBaseLocation();
+                    if (baseLocation != null)
                     {
-                        var data = MapData.WallData.FirstOrDefault(d => d.BasePosition.X == baseLocation.X && d.BasePosition.Y == baseLocation.Y);
-                        if (data != null && data.RampCenter != null)
+                        if (MapData != null && MapData.WallData != null)
                         {
-                            var angle = Math.Atan2(rallyBuilding.UnitCalculation.Position.Y - data.RampCenter.Y, data.RampCenter.X - rallyBuilding.UnitCalculation.Position.X);
-                            var x = -2 * Math.Cos(angle);
-                            var y = -2 * Math.Sin(angle);
-                            spot = new Point2D { X = rallyBuilding.UnitCalculation.Position.X + (float)x, Y = rallyBuilding.UnitCalculation.Position.Y - (float)y };
+                            var data = MapData.WallData.FirstOrDefault(d => d.BasePosition.X == baseLocation.X && d.BasePosition.Y == baseLocation.Y);
+                            if (data != null && data.RampCenter != null)
+                            {
+                                var angle = Math.Atan2(rallyBuilding.UnitCalculation.Position.Y - data.RampCenter.Y, data.RampCenter.X - rallyBuilding.UnitCalculation.Position.X);
+                                var x = -2 * Math.Cos(angle);
+                                var y = -2 * Math.Sin(angle);
+                                spot = new Point2D { X = rallyBuilding.UnitCalculation.Position.X + (float)x, Y = rallyBuilding.UnitCalculation.Position.Y - (float)y };
+                            }
                         }
                     }
-                }
 
-                if (CouldGetStuck(spot))
-                {
-                    spot = GetLocationToAvoidGettingStuck(spot);
+                    if (CouldGetStuck(spot))
+                    {
+                        spot = GetLocationToAvoidGettingStuck(spot);
+                    }
                 }
 
                 if (spot != null)
@@ -96,6 +108,27 @@
             var spots = AreaService.GetTargetArea(buildSpot, 4).Where(p => GetValidPoint(p.X, p.Y, -1, 3) != null);
             var gatewaySpots = spots.Where(s => Vector2.Distance(s.ToVector2(), buildSpot.ToVector2()) > 3).OrderBy(s => Vector2.Distance(s.ToVector2(), buildSpot.ToVector2()));
             return gatewaySpots.FirstOrDefault();
+        }
+
+        public void SetCustomRallyPoint(Point2D spot)
+        {
+            UseCustomLocation = true;
+            CustomRallyLocation = spot;
+            UnsetRallyPoint();
+        }
+
+        public void ResetRallyPoint()
+        {
+            UseCustomLocation = false;
+            UnsetRallyPoint();
+        }
+
+        private void UnsetRallyPoint()
+        {
+            foreach (var rallyBuilding in ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_GATEWAY && c.UnitCalculation.Unit.BuildProgress == 1))
+            {
+                rallyBuilding.RallyPointSet = false;
+            }
         }
     }
 }
