@@ -46,9 +46,19 @@
             {
                 BuildOptions.WallOffType = BuildingPlacement.WallOffType.Partial;
                 BuildOptions.AllowBlockWall = false;
-                if (EnemyData.EnemyRace == Race.Zerg || EnemyData.EnemyRace == Race.Random && !MicroTaskData[typeof(ProtossDoorTask).Name].Enabled)
+                if (EnemyData.EnemyRace == Race.Zerg || EnemyData.EnemyRace == Race.Random)
                 {
-                    MicroTaskData[typeof(ProtossDoorTask).Name].Enable();
+                    if (!MicroTaskData[typeof(ProtossDoorTask).Name].Enabled)
+                    {
+                        MicroTaskData[typeof(ProtossDoorTask).Name].Enable();
+                    }
+                }
+                else
+                {
+                    if (MicroTaskData[typeof(ProtossDoorTask).Name].Enabled)
+                    {
+                        MicroTaskData[typeof(ProtossDoorTask).Name].Disable();
+                    }
                 }
             }
         }
