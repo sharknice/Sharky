@@ -93,13 +93,13 @@
                 {
                     if (commander.UnitCalculation.Unit.WeaponCooldown == 0)
                     {
-                        var workerInRange = commander.UnitCalculation.EnemiesInRange.Where(e => e.UnitClassifications.HasFlag(UnitClassification.Worker)).OrderBy(e => e.Unit.Health).FirstOrDefault();
+                        var workerInRange = commander.UnitCalculation.EnemiesInRange.Where(e => e.UnitClassifications.HasFlag(UnitClassification.Worker) && e.FrameLastSeen == frame).OrderBy(e => e.Unit.Health).FirstOrDefault();
                         if (workerInRange != null)
                         {
                             commands.AddRange(commander.Order(frame, Abilities.ATTACK, targetTag: workerInRange.Unit.Tag));
                             continue;
                         }
-                        var otherInRange = commander.UnitCalculation.EnemiesInRange.Where(e => e.Damage > 0).OrderBy(e => e.Unit.Health).FirstOrDefault();
+                        var otherInRange = commander.UnitCalculation.EnemiesInRange.Where(e => e.Damage > 0 && e.FrameLastSeen == frame).OrderBy(e => e.Unit.Health).FirstOrDefault();
                         if (otherInRange != null)
                         {
                             commands.AddRange(commander.Order(frame, Abilities.ATTACK, targetTag: otherInRange.Unit.Tag));

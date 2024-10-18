@@ -11,6 +11,7 @@
         IBuildingBuilder BuildingBuilder;
         IIndividualMicroController IndividualMicroController;
         MapDataService MapDataService;
+        MicroTaskData MicroTaskData;
 
         bool started { get; set; }
 
@@ -32,6 +33,7 @@
             Priority = priority;
             IndividualMicroController = individualMicroController;
             MapDataService = defaultSharkyBot.MapDataService;
+            MicroTaskData = defaultSharkyBot.MicroTaskData;
 
             UnitCommanders = new List<UnitCommander>();
             Enabled = enabled;
@@ -49,22 +51,43 @@
                     return;
                 }
 
-                foreach (var commander in commanders)
+                var workers = commanders.Where(commander => commander.Value.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.Worker));
+                var scouter = workers.FirstOrDefault(commander => !commander.Value.Claimed);
+                if (scouter.Value == null)
                 {
-                    if (!commander.Value.Claimed && commander.Value.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.Worker) && !commander.Value.UnitCalculation.Unit.BuffIds.Any(b => SharkyUnitData.CarryingResourceBuffs.Contains((Buffs)b)))
+                    var available = workers.Where(commander => !commander.Value.UnitCalculation.Unit.BuffIds.Any(b => SharkyUnitData.CarryingResourceBuffs.Contains((Buffs)b)));
+                    var finishedBuilder = available.FirstOrDefault(commander => commander.Value.UnitRole == UnitRole.Build && commander.Value.UnitCalculation.Unit.Orders.Any(o => !o.HasTargetUnitTag));
+                    if (finishedBuilder.Value != null)
                     {
-                        if (commander.Value.UnitCalculation.Unit.Orders.Any(o => !SharkyUnitData.MiningAbilities.Contains((Abilities)o.AbilityId)))
+                        var pos = finishedBuilder.Value.UnitCalculation.Unit.Orders.FirstOrDefault(o => o.TargetWorldSpacePos != null);
+                        if (pos != null)
                         {
-                        }
-                        else
-                        {
-                            commander.Value.Claimed = true;
-                            commander.Value.UnitRole = UnitRole.Scout;
-                            UnitCommanders.Add(commander.Value);
-                            started = true;
-                            return;
+                            var match = finishedBuilder.Value.UnitCalculation.NearbyAllies.Any(a => a.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && a.Unit.Pos.X == pos.TargetWorldSpacePos.X && a.Unit.Pos.Y == pos.TargetWorldSpacePos.Y);
+                            if (match)
+                            {
+                                MicroTaskData[typeof(MiningTask).Name].StealUnit(finishedBuilder.Value);
+                                finishedBuilder.Value.Claimed = true;
+                                finishedBuilder.Value.UnitRole = UnitRole.Scout;
+                                UnitCommanders.Add(finishedBuilder.Value);
+                                started = true;
+                                return;
+                            }
                         }
                     }
+                    if (scouter.Value == null)
+                    {
+                        scouter = available.OrderBy(c => Vector2.DistanceSquared(BaseData.BaseLocations.Skip(1).FirstOrDefault().Location.ToVector2(), c.Value.UnitCalculation.Position)).FirstOrDefault();
+                        MicroTaskData[typeof(MiningTask).Name].StealUnit(scouter.Value);
+                    }
+                }
+
+                if (scouter.Value != null)
+                {
+                    scouter.Value.Claimed = true;
+                    scouter.Value.UnitRole = UnitRole.Scout;
+                    UnitCommanders.Add(scouter.Value);
+                    started = true;
+                    return;
                 }
             }
         }
@@ -105,23 +128,28 @@
                 {
                     if (BlockAddons && (MacroData.Minerals > 100 || commander.LastAbility == Abilities.BUILD_PYLON) && commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE)
                     {
-                        var buildingWithoutAddon = commander.UnitCalculation.NearbyEnemies.Where(e => (e.Unit.UnitType == (uint)UnitTypes.TERRAN_BARRACKS || e.Unit.UnitType == (uint)UnitTypes.TERRAN_FACTORY || e.Unit.UnitType == (uint)UnitTypes.TERRAN_STARPORT) && !e.Unit.HasAddOnTag && BuildingBuilder.HasRoomForAddon(e.Unit)).OrderBy(e => Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position)).FirstOrDefault();
-                        if (buildingWithoutAddon != null)
+                        var buildingsWithoutAddon = commander.UnitCalculation.NearbyEnemies.Where(e => (e.Unit.UnitType == (uint)UnitTypes.TERRAN_BARRACKS || e.Unit.UnitType == (uint)UnitTypes.TERRAN_FACTORY || e.Unit.UnitType == (uint)UnitTypes.TERRAN_STARPORT) && !e.Unit.HasAddOnTag && BuildingBuilder.HasRoomForAddon(e.Unit)).OrderBy(e => Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position));
+                        if (buildingsWithoutAddon.Count() == 1)
                         {
-                            if (buildingWithoutAddon.Unit.BuildProgress >= .75f || commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit)))
+                            var buildingWithoutAddon = buildingsWithoutAddon.FirstOrDefault();
+                            if (buildingWithoutAddon != null)
                             {
-                                var point = new Point2D { X = buildingWithoutAddon.Unit.Pos.X + 2.5f, Y = buildingWithoutAddon.Unit.Pos.Y - .5f };
-                                if (!BuildingService.BlocksResourceCenter(point.X, point.Y, 1))
+                                if (buildingWithoutAddon.Unit.BuildProgress >= .75f || commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit)))
                                 {
-                                    var wallBlock = commander.Order(frame, Abilities.BUILD_PYLON, point);
-                                    if (wallBlock != null)
+                                    var point = new Point2D { X = buildingWithoutAddon.Unit.Pos.X + 2.5f, Y = buildingWithoutAddon.Unit.Pos.Y - .5f };
+                                    if (!BuildingService.BlocksResourceCenter(point.X, point.Y, 1))
                                     {
-                                        commands.AddRange(wallBlock);
-                                        continue;
+                                        var wallBlock = commander.Order(frame, Abilities.BUILD_PYLON, point);
+                                        if (wallBlock != null)
+                                        {
+                                            commands.AddRange(wallBlock);
+                                            continue;
+                                        }
                                     }
                                 }
                             }
                         }
+
                     }
 
                     if (commander.UnitCalculation.Unit.Shield < 5)
