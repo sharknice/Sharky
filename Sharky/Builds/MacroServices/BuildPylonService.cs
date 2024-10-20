@@ -128,15 +128,20 @@
         {
             var commands = new List<SC2Action>();
 
-            if (defensivePointLastFailFrame < MacroData.Frame - 100)
+            if (defensivePointLastFailFrame < MacroData.Frame - 100 && MacroData.ProtossMacroData.DesiredPylonsAtDefensivePoint > 0)
             {
                 var unitData = SharkyUnitData.BuildingData[UnitTypes.PROTOSS_PYLON];
 
                 var orderedBuildings = ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability));
                 var height = MapDataService.MapHeight(TargetingData.ForwardDefensePoint);
-                if (ActiveUnitData.SelfUnits.Count(u => u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && Vector2.DistanceSquared(u.Value.Position, new Vector2(TargetingData.ForwardDefensePoint.X, TargetingData.ForwardDefensePoint.Y)) < MacroData.DefensiveBuildingMineralLineMaximumDistance * MacroData.DefensiveBuildingMineralLineMaximumDistance && MapDataService.MapHeight(u.Value.Position) == height) + orderedBuildings < MacroData.ProtossMacroData.DesiredPylonsAtDefensivePoint)
+                var maxDistance = MacroData.DefensiveBuildingMineralLineMaximumDistance;
+                if (BaseData.BaseLocations.Any(b => b.Location.X == TargetingData.ForwardDefensePoint.X && b.Location.Y == TargetingData.ForwardDefensePoint.Y)) 
                 {
-                    var command = BuildPylon(TargetingData.ForwardDefensePoint, true, MacroData.DefensiveBuildingMineralLineMaximumDistance);
+                    maxDistance = 15;
+                }
+                if (ActiveUnitData.SelfUnits.Count(u => u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && Vector2.DistanceSquared(u.Value.Position, new Vector2(TargetingData.ForwardDefensePoint.X, TargetingData.ForwardDefensePoint.Y)) < maxDistance * maxDistance && MapDataService.MapHeight(u.Value.Position) == height) + orderedBuildings < MacroData.ProtossMacroData.DesiredPylonsAtDefensivePoint)
+                {
+                    var command = BuildPylon(TargetingData.ForwardDefensePoint, true, maxDistance);
                     if (command != null)
                     {
                         commands.AddRange(command);
