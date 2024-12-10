@@ -8,5 +8,6 @@
         bool Detected { get; }
         int FirstActiveFrame { get; }
         int LastActiveFrame { get; }
+        int ActiveFrames();
     }
 }

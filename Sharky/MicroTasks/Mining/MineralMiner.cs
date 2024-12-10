@@ -39,6 +39,7 @@
                             actions.AddRange(GatherMinerals(frame, miningInfo, mineralVector, worker, workerVector, selfBase.MineralFields));
                         }
                     }
+                    miningInfo.Workers.RemoveAll(w => w.UnitRole != UnitRole.Minerals);
                 }
             }
 

@@ -2,10 +2,10 @@
 {
     public class TargetingService
     {
-        ActiveUnitData ActiveUnitData;
-        MapDataService MapDataService;
+        protected ActiveUnitData ActiveUnitData;
+        protected MapDataService MapDataService;
         BaseData BaseData;
-        TargetingData TargetingData;
+        protected TargetingData TargetingData;
 
         int EnemyBuildingCount = 0;
 

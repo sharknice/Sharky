@@ -31,9 +31,9 @@
 
                 if (commander.UnitCalculation.EnemiesInRange.Any(e => e.Unit.Tag == bestTarget.Unit.Tag) && bestTarget.Unit.DisplayType == DisplayType.Visible && MapDataService.SelfVisible(bestTarget.Unit.Pos) && bestTarget.FrameLastSeen == frame)
                 {
-                    bestTarget.IncomingDamage += GetDamage(commander.UnitCalculation.Weapons, bestTarget.Unit, bestTarget.UnitTypeData);
                     if (WeaponReady(commander, frame))
                     {
+                        bestTarget.IncomingDamage += GetDamage(commander.UnitCalculation.Weapons, bestTarget.Unit, bestTarget.UnitTypeData);
                         action = commander.Order(frame, Abilities.ATTACK, null, bestTarget.Unit.Tag);
                     }
                     else
@@ -63,7 +63,7 @@
                 }
             }
 
-            return false;
+            return base.AttackBestTargetInRange(commander, target, bestTarget, frame, out action);
         }
 
         protected override bool AvoidTargettedDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
@@ -140,6 +140,11 @@
             }
 
             return base.AvoidDamage(commander, target, defensivePoint, frame, out action);
+        }
+
+        public override bool WeaponReady(UnitCommander commander, int frame)
+        {
+            return commander.UnitCalculation.Unit.WeaponCooldown is < 2 or >= 26;
         }
 
 

@@ -35,6 +35,7 @@
         public bool AllowSplit { get; set; }
         public bool DeathBallMode { get; set; }
         public bool DeathBallClearCreep { get; set; }
+        public bool ClaimAllUnits {  get; set; }
 
         bool BaseUnderAttack { get; set; }
 
@@ -71,6 +72,7 @@
 
             AllowSplitWhileKill = true;
             AllowSplit = true;
+            ClaimAllUnits = false;
         }
 
         public override void ResetClaimedUnits()
@@ -150,7 +152,7 @@
             {
                 if (!commander.Value.Claimed)
                 {
-                    if (commander.Value.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) || commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_ADEPTPHASESHIFT || commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_DISRUPTORPHASED)
+                    if (ClaimAllUnits || commander.Value.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) || commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_ADEPTPHASESHIFT || commander.Value.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_DISRUPTORPHASED)
                     {
                         CameraManager.SetCamera(commander.Value.UnitCalculation.Position);
 
@@ -312,6 +314,12 @@
             if (DeathBallMode)
             {
                 attackingEnemies = attackingEnemies.Where(e => e.Damage > 0 && e.EnemiesInRange.Any(u => ActiveUnitData.Commanders.ContainsKey(u.Unit.Tag) && ActiveUnitData.Commanders[u.Unit.Tag].UnitRole != UnitRole.Proxy) && !e.Unit.IsHallucination && e.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELING && e.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELINGZEALOT && e.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELINGMARINE && e.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELINGMARINESHIELD && e.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELINGZERGLING && e.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELINGZERGLINGWINGS);
+            }
+
+            if (AttackData.OnlyDefendOnHighGround)
+            {
+                var height = MapDataService.MapHeight(TargetingData.MainDefensePoint);
+                attackingEnemies = attackingEnemies.Where(e => MapDataService.MapHeight(e.Position) == height || e.EnemiesInRange.Any(a => MapDataService.MapHeight(a.Position) == height));
             }
 
             var attackPoint = TargetingData.AttackPoint;
@@ -546,14 +554,21 @@
                 }
                 else
                 {
-                    var cleanupActions = EnemyCleanupService.CleanupEnemies(supportUnits, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame);
-                    if (cleanupActions != null)
+                    if (AttackData.OnlyDefendOnHighGround)
                     {
-                        actions.AddRange(cleanupActions);
+                        actions.AddRange(MicroController.Retreat(supportUnits, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame));
                     }
                     else
                     {
-                        actions.AddRange(MicroController.Retreat(supportUnits, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame));
+                        var cleanupActions = EnemyCleanupService.CleanupEnemies(supportUnits, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame);
+                        if (cleanupActions != null)
+                        {
+                            actions.AddRange(cleanupActions);
+                        }
+                        else
+                        {
+                            actions.AddRange(MicroController.Retreat(supportUnits, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame));
+                        }
                     }
                 }
                 foreach (var subTask in SubTasks.Where(t => t.Value.Enabled).OrderBy(t => t.Value.Priority))

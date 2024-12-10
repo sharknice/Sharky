@@ -21,7 +21,7 @@
             var chatFolder = Directory.GetCurrentDirectory() + "/StaticData/chat/type";
             if (Directory.Exists(chatFolder))
             {
-                foreach (var fileName in Directory.GetFiles(chatFolder))
+                foreach (var fileName in Directory.GetFiles(chatFolder).Where(f => f.EndsWith(".json")))
                 {
                     using (StreamReader file = File.OpenText(fileName))
                     {
@@ -42,7 +42,7 @@
             var chatFolder = Directory.GetCurrentDirectory() + "/StaticData/chat/default";
             if (Directory.Exists(chatFolder))
             {
-                foreach (var fileName in Directory.GetFiles(chatFolder))
+                foreach (var fileName in Directory.GetFiles(chatFolder).Where(f => f.EndsWith(".json")))
                 {
                     using (StreamReader file = File.OpenText(fileName))
                     {

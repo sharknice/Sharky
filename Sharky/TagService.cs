@@ -109,7 +109,7 @@
             }
 
             tag = tag.ToLower();
-            tag = new string(tag.Select(c => (char.IsLetterOrDigit(c) || c == '-') ? c : '_').ToArray());
+            tag = new string(tag.Select(c => (char.IsLetterOrDigit(c) || c == '-' || c == ':' || c == ' ') ? c : '_').ToArray());
 
             if (ignoreDuplicateCheck || !TagsUsed.Contains(tag))
             {

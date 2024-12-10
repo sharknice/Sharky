@@ -9,6 +9,10 @@
         public bool BlockWall { get; set; }
         public bool BlockAddons { get; set; }
         public bool RecallProbe { get; set; }
+        public bool ChaseWorkers { get; set; }
+        public bool BodyBlockExpansion { get; set; }
+        public bool BodyBlockUntilDeath { get; set; }
+
         public bool ScoutEntireAreaBeforeAttacking { get; set; }
         public bool OnlyBlockOnce { get; set; }
         protected bool BlockedOnce = false;
@@ -83,6 +87,8 @@
             RecallProbe = false;
             OnlyBlockOnce = false;
             ScoutEntireAreaBeforeAttacking = true;
+            ChaseWorkers = false;
+            BodyBlockExpansion = false;
             IndividualMicroController = individualMicroController;
         }
 
@@ -157,7 +163,7 @@
 
             foreach (var commander in UnitCommanders)
             {
-                if (BlockedOnce && Vector2.Distance(commander.UnitCalculation.Position, mainVector) < 50)
+                if (BlockExpansion && Vector2.Distance(commander.UnitCalculation.Position, mainVector) < 50)
                 {
                     foreach (var pylon in commander.UnitCalculation.NearbyAllies.Where(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON))
                     {
@@ -187,6 +193,17 @@
                     continue;
                 }
 
+                var expansion = BaseData.EnemyBaseLocations.Skip(1).FirstOrDefault();
+
+                if (BodyBlockExpansion && BodyBlockUntilDeath && CanBodyBlockExpansion(commander, expansion))
+                {
+                    if (CanBodyBlockExpansion(commander, expansion))
+                    {
+                        BodyBlockExpansionWithProbe(frame, commands, commander, expansion);
+                        continue;
+                    }
+                }
+
                 if (commander.UnitCalculation.Unit.ShieldMax > 5 && (commander.UnitCalculation.Unit.Shield < 5 || (commander.UnitCalculation.Unit.Shield < commander.UnitCalculation.Unit.ShieldMax && commander.UnitCalculation.EnemiesInRangeOf.Count(e => !e.UnitClassifications.HasFlag(UnitClassification.Worker)) > 0)))
                 {
                     if (MineralWalker.MineralWalkNoWhere(commander, frame, out List<SC2Action> mineralWalk))
@@ -199,6 +216,15 @@
                 if (TryRecallProbe(commander, frame, commands, disable))
                 {
                     continue;
+                }
+
+                if (BodyBlockExpansion && CanBodyBlockExpansion(commander, expansion))
+                {
+                    if (CanBodyBlockExpansion(commander, expansion))
+                    {
+                        BodyBlockExpansionWithProbe(frame, commands, commander, expansion);
+                        continue;
+                    }
                 }
 
 
@@ -255,7 +281,6 @@
                         continue;
                     }
 
-                    var expansion = BaseData.EnemyBaseLocations.Skip(1).FirstOrDefault();
                     if (expansion != null)
                     {
                         if (BlockExpansion || (BlockLiftedExpansion && UnitCountService.EquivalentEnemyTypeCount(UnitTypes.TERRAN_COMMANDCENTER) > 1))
@@ -357,6 +382,16 @@
                 if (frame % 50 == 0)
                 {
                     CameraManager.SetCamera(commander.UnitCalculation.Position);
+                }
+
+                if (ChaseWorkers)
+                {
+                    var closestWorker = commander.UnitCalculation.NearbyEnemies.Where(e => e.UnitClassifications.HasFlag(UnitClassification.Worker)).OrderBy(e => Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+                    if (closestWorker != null)
+                    {
+                        commands.AddRange(commander.Order(frame, Abilities.ATTACK, targetTag: closestWorker.Unit.Tag));
+                        continue;
+                    }
                 }
 
                 var points = ScoutPoints.Where(p => Vector2.DistanceSquared(p.ToVector2(), commander.UnitCalculation.Position) < 170 || Vector2.DistanceSquared(p.ToVector2(), mainVector) < 170).OrderBy(p => MapDataService.LastFrameVisibility(p)).ThenBy(p => Vector2.DistanceSquared(p.ToVector2(), mainVector)).ThenBy(p => Vector2.DistanceSquared(commander.UnitCalculation.Position, p.ToVector2()));
@@ -501,6 +536,45 @@
             return commands;
         }
 
+        private void BodyBlockExpansionWithProbe(int frame, List<SC2Action> commands, UnitCommander commander, BaseLocation expansion)
+        {
+            var zergling = commander.UnitCalculation.NearbyEnemies.Where(e => e.Unit.UnitType == (uint)UnitTypes.ZERG_ZERGLING).OrderBy(e => Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+            var drone = commander.UnitCalculation.NearbyEnemies.Where(e => e.Unit.UnitType == (uint)UnitTypes.ZERG_DRONE).OrderBy(e => Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+            if (!commander.UnitCalculation.EnemiesInRangeOf.Any() && zergling != null && drone != null)
+            {
+                var zd = Vector2.Distance(zergling.Position, commander.UnitCalculation.Position);
+                var dd = Vector2.Distance(drone.Position, commander.UnitCalculation.Position);
+                var lingToDrone = Vector2.Distance(drone.Position, zergling.Position);
+                if (dd < zd && lingToDrone < zd) // safer just standing still, ling will block expansion trying to get to probe
+                {
+                    if (Vector2.Distance(commander.UnitCalculation.Position, expansion.Location.ToVector2()) > 2f)
+                    {
+                        commands.AddRange(commander.Order(frame, Abilities.MOVE, expansion.Location));
+                    }
+                    else
+                    {
+                        var away = Vector2.Lerp(commander.UnitCalculation.Position, zergling.Position, -1);
+                        commands.AddRange(commander.Order(frame, Abilities.MOVE, away.ToPoint2D()));
+                    }
+                }
+            }
+
+            var angle = CalculateStartAngle(expansion.Location.ToVector2(), commander.UnitCalculation.Position);
+            var clockWise = true;
+            if (commander.UnitCalculation.Unit.Facing < angle)
+            {
+                clockWise = false;
+            }
+            var nextPoint = CalculateNextCirclePoint(expansion.Location.ToVector2(), 2.75f, 12, angle, clockWise);
+            commands.AddRange(commander.Order(frame, Abilities.MOVE, nextPoint.ToPoint2D()));
+        }
+
+        private bool CanBodyBlockExpansion(UnitCommander commander, BaseLocation expansion)
+        {
+            if (expansion == null) { return false; }
+            return !BaseData.EnemyBases.Any(b => b.Location.X == expansion.Location.X && b.Location.Y == expansion.Location.Y) && (BodyBlockUntilDeath || Vector2.Distance(commander.UnitCalculation.Position, expansion.Location.ToVector2()) < 15);
+        }
+
         protected virtual bool Attack(UnitCommander commander, int frame, List<SC2APIProtocol.Action> commands, Point2D navpoint)
         {
             if (commander.UnitCalculation.Unit.Shield > 15 && commander.UnitCalculation.NearbyEnemies.Any() && (commander.UnitCalculation.NearbyAllies.Any(a => a.UnitClassifications.HasFlag(UnitClassification.ArmyUnit)) || (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.ResourceCenter) && e.Unit.BuildProgress == 1) && commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.Worker)))))
@@ -623,6 +697,27 @@
             }
 
             return false;
+        }
+
+        float CalculateStartAngle(Vector2 baseLocation, Vector2 targetPosition)
+        {
+            var direction = targetPosition - baseLocation;
+            return MathF.Atan2(direction.Y, direction.X);
+        }
+
+        Vector2 CalculateNextCirclePoint(Vector2 baseLocation, float radius, int pointCount, float startAngle, bool clockwise)
+        {
+            var angleIncrement = 2 * MathF.PI / pointCount;
+
+            var angle = startAngle + angleIncrement;
+            if (!clockwise)
+            {
+                angle = startAngle - angleIncrement;
+            }
+
+            var x = baseLocation.X + radius * MathF.Cos(angle);
+            var y = baseLocation.Y + radius * MathF.Sin(angle);
+            return new Vector2(x, y);
         }
     }
 }

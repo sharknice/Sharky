@@ -2,7 +2,7 @@
 {
     public class ProxyData
     {
-        public ProxyData(Point2D location, MacroData macroData, bool enabled = false)
+        public ProxyData(Point2D location, MacroData macroData, bool enabled = false, bool defend = true)
         {
             Location = location;
             Enabled = true;
@@ -40,9 +40,11 @@
             }
 
             Enabled = enabled;
+            DefendProxyLocation = defend;
         }
 
         public bool Enabled { get; set; }
+        public bool DefendProxyLocation { get; set; }
         public Point2D Location { get; set; }
         public float MaximumBuildingDistance { get; set; }
 

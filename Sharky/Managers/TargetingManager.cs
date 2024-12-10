@@ -58,6 +58,12 @@
                 TargetingData.EnemyMainBasePoint = location;
             }
 
+            if (TargetingData.AttackPoint == null)
+            {
+                TargetingData.AttackPoint = new Point2D { X = MapData.MapWidth / 2, Y = MapData.MapHeight / 2 };
+                TargetingData.EnemyMainBasePoint = new Point2D { X = MapData.MapWidth / 2, Y = MapData.MapHeight / 2 };
+            }
+
             foreach (var unit in observation.Observation.RawData.Units.Where(u => u.Alliance == Alliance.Self && SharkyUnitData.UnitData[(UnitTypes)u.UnitType].Attributes.Contains(SC2APIProtocol.Attribute.Structure)))
             {
                 TargetingData.MainDefensePoint = new Point2D { X = unit.Pos.X, Y = unit.Pos.Y };
@@ -73,6 +79,10 @@
                         if (wallPoints != null)
                         {
                             TargetingData.ForwardDefenseWallOffPoints = wallPoints;
+                            var direction = TargetingData.MainDefensePoint.ToVector2() - TargetingData.ForwardDefensePoint.ToVector2();
+                            var normalizedDirection = Vector2.Normalize(direction);
+                            var betterSpot = TargetingData.ForwardDefensePoint.ToVector2() + (normalizedDirection * 3);
+                            TargetingData.ForwardDefensePoint = betterSpot.ToPoint2D();
                         }
                     }
                 }
@@ -321,7 +331,7 @@
                 baseCount = BaseData.SelfBases.Count();
 
                 var target = TargetingData.AttackPoint.ToVector2();
-                var closest = ActiveUnitData.Commanders.Values.Where(u => u.UnitRole != UnitRole.BlockExpansion && u.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.DefensiveStructure) || u.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.ResourceCenter)).OrderBy(u => Vector2.DistanceSquared(u.UnitCalculation.Position, target)).FirstOrDefault();
+                var closest = ActiveUnitData.Commanders.Values.Where(u => u.UnitRole != UnitRole.BlockExpansion && u.UnitRole != UnitRole.DoNotDefend && u.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.DefensiveStructure) || u.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.ResourceCenter)).OrderBy(u => Vector2.DistanceSquared(u.UnitCalculation.Position, target)).FirstOrDefault();
                 if (closest != null)
                 {
                     TargetingData.ForwardDefensePoint = closest.UnitCalculation.Position.ToPoint2D();
@@ -329,7 +339,7 @@
             }
             foreach (var task in MacroData.Proxies)
             {
-                if (task.Value.Enabled)
+                if (task.Value.Enabled && task.Value.DefendProxyLocation)
                 {
                     TargetingData.ForwardDefensePoint = task.Value.Location;
                 }

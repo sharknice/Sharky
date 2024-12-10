@@ -102,6 +102,7 @@
                             }
                         }
                     }
+                    miningInfo.Workers.RemoveAll(w => w.UnitRole != UnitRole.Gas);
                 }
             }
 

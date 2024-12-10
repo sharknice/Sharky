@@ -64,6 +64,11 @@
             }
         }
 
+        public int ActiveFrames()
+        {
+            return LastActiveFrame - FirstActiveFrame;
+        }
+
         protected void DetectedChat()
         {
             if (SharkyOptions.TagOptions.EnemyStrategyTagsEnabled)

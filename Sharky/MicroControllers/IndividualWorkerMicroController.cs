@@ -25,8 +25,6 @@
 
             if (PreOffenseOrder(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
 
-            if (AvoidTargettedOneHitKills(commander, target, defensivePoint, frame, out action)) { return action; }
-
             if (OffensiveAbility(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
 
             if (MicroPriority == MicroPriority.StayOutOfRange)

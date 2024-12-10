@@ -66,13 +66,19 @@ namespace Sharky.Builds.MacroServices
                 {
                     if (unit.Value > 0)
                     {
+                        var maxDistance = MacroData.DefensiveBuildingMaximumDistance;
+                        if (BaseData.BaseLocations.Any(b => b.Location.X == TargetingData.ForwardDefensePoint.X && b.Location.Y == TargetingData.ForwardDefensePoint.Y))
+                        {
+                            maxDistance = 25;
+                        }
+
                         var unitData = SharkyUnitData.BuildingData[unit.Key];
-                        var matchedBuildings = ActiveUnitData.SelfUnits.Where(u => u.Value.Unit.UnitType == (uint)unit.Key && Vector2.DistanceSquared(u.Value.Position, new Vector2(TargetingData.ForwardDefensePoint.X, TargetingData.ForwardDefensePoint.Y)) < MacroData.DefensiveBuildingMaximumDistance * MacroData.DefensiveBuildingMaximumDistance && MapDataService.MapHeight(u.Value.Position) == height);
+                        var matchedBuildings = ActiveUnitData.SelfUnits.Where(u => u.Value.Unit.UnitType == (uint)unit.Key && Vector2.DistanceSquared(u.Value.Position, new Vector2(TargetingData.ForwardDefensePoint.X, TargetingData.ForwardDefensePoint.Y)) < maxDistance * maxDistance && MapDataService.MapHeight(u.Value.Position) == height);
                         int builtCount = GetBuildingCount(matchedBuildings, unit.Key);
 
                         if (builtCount + ActiveUnitData.Commanders.Values.Count(c => c.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.Worker) && c.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)unitData.Ability)) < unit.Value)
                         {
-                            var command = BuildingBuilder.BuildBuilding(MacroData, unit.Key, unitData, TargetingData.ForwardDefensePoint, false, MacroData.DefensiveBuildingMaximumDistance, wallOffType: BuildOptions.WallOffType, requireSameHeight: true);
+                            var command = BuildingBuilder.BuildBuilding(MacroData, unit.Key, unitData, TargetingData.ForwardDefensePoint, false, maxDistance, wallOffType: BuildOptions.WallOffType, requireSameHeight: true);
                             if (command != null)
                             {
                                 commands.AddRange(command);

@@ -51,6 +51,7 @@
         Chase,
         SaveEnergy,
         Cancel,
-        Save
+        Save,
+        DoNotDefend
     }
 }

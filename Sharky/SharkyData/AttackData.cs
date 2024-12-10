@@ -21,6 +21,7 @@
         public int RequiredMineralBank { get; set; }
         public bool AttackWhenOverwhelm { get; set; }
         public bool GroupUpEnabled { get; set; }
+        public bool OnlyDefendOnHighGround { get; set; }
 
         /// <summary>
         /// if minerals exceed this amount attack no matter what

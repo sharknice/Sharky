@@ -12,6 +12,7 @@
         int LastForceFieldFrame;
 
         Point2D ForceFieldPoint;
+        Point2D SentryPoint;
 
         public ForceFieldRampTask(TargetingData targetingData, ActiveUnitData activeUnitData, MapData mapData, WallService wallService, MapDataService mapDataService, bool enabled, float priority)
         {
@@ -44,9 +45,6 @@
         {
             var commands = new List<SC2APIProtocol.Action>();
 
-            // if forcefield there move to defensive spot
-            // TODO: if enemy ground army units on lower ground than force field location, force field ramp, (not for massive or adept shades though)
-
             SetForceFieldSpot(frame);
 
             var forceField = ActiveUnitData.NeutralUnits.FirstOrDefault(u => u.Value.Unit.UnitType == (uint)UnitTypes.NEUTRAL_FORCEFIELD && Vector2.DistanceSquared(new Vector2(ForceFieldPoint.X, ForceFieldPoint.Y), u.Value.Position) < 1).Value;
@@ -73,9 +71,9 @@
                     }
                 }
 
-                if (Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(TargetingData.ForwardDefensePoint.X, TargetingData.ForwardDefensePoint.Y)) > 9)
+                if (SentryPoint != null && Vector2.DistanceSquared(commander.UnitCalculation.Position, SentryPoint.ToVector2()) > 2)
                 {
-                    var action = commander.Order(frame, Abilities.MOVE, TargetingData.ForwardDefensePoint);
+                    var action = commander.Order(frame, Abilities.MOVE, SentryPoint);
                     if (action != null)
                     {
                         commands.AddRange(action);
@@ -99,6 +97,14 @@
                     if (data != null && data.RampCenter != null)
                     {
                         ForceFieldPoint = data.RampCenter;
+                        if (data.RampBottom != null)
+                        {
+                            ForceFieldPoint = data.RampBottom;
+                        }
+                        var direction = baseLocation.ToVector2() - ForceFieldPoint.ToVector2();
+                        var normalizedDirection = Vector2.Normalize(direction);
+                        var sentrySpot = ForceFieldPoint.ToVector2() + (normalizedDirection * 9);
+                        SentryPoint = sentrySpot.ToPoint2D();
                         return;
                     }
                 }
@@ -111,6 +117,14 @@
                 }
 
                 ForceFieldPoint = TargetingData.ForwardDefensePoint;
+            }
+
+            if (SentryPoint == null)
+            {
+                var direction = TargetingData.SelfMainBasePoint.ToVector2() - ForceFieldPoint.ToVector2();
+                var normalizedDirection = Vector2.Normalize(direction);
+                var sentrySpot = ForceFieldPoint.ToVector2() + (normalizedDirection * 9);
+                SentryPoint = sentrySpot.ToPoint2D();
             }
         }
     }

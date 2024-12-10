@@ -202,7 +202,7 @@
             var dictionary = new Dictionary<string, BaseLocationData>();
             var folder = GetGneratedBaseDataFolder();
             Directory.CreateDirectory(folder);
-            foreach (var fileName in Directory.GetFiles(folder))
+            foreach (var fileName in Directory.GetFiles(folder).Where(f => f.EndsWith(".json")))
             {
                 using (StreamReader file = File.OpenText(fileName))
                 {
@@ -395,7 +395,7 @@
         {
             if (BaseData.EnemyBases.Count() != UnitCountService.EquivalentEnemyTypeCount(UnitTypes.PROTOSS_NEXUS) + UnitCountService.EquivalentEnemyTypeCount(UnitTypes.TERRAN_COMMANDCENTER) + UnitCountService.EquivalentEnemyTypeCount(UnitTypes.ZERG_HATCHERY))
             {
-                var resourceCenters = ActiveUnitData.EnemyUnits.Values.Where(u => u.UnitClassifications.HasFlag(UnitClassification.ResourceCenter));
+                var resourceCenters = ActiveUnitData.EnemyUnits.Values.Where(u => u.UnitClassifications.HasFlag(UnitClassification.ResourceCenter) && !u.Unit.IsFlying);
                 BaseData.EnemyBases = BaseData.BaseLocations.Where(b => resourceCenters.Any(r => Vector2.DistanceSquared(r.Position, new Vector2(b.Location.X, b.Location.Y)) < 25)).ToList();
                 foreach (var enemyBase in BaseData.EnemyBases)
                 {
@@ -473,7 +473,6 @@
                 }
                 distance--;
             }
-            
         }
 
         void DetermineFinalLocation(BaseLocation baseLocation, List<Unit> gasses)

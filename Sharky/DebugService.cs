@@ -157,6 +157,20 @@
             }
         }
 
+        public void KillFriendlyUnits(UnitTypes unitType, int quantity)
+        {
+            var tags = ActiveUnitData.SelfUnits.Where(u => u.Value.Unit.UnitType == (uint)unitType).Take(quantity).Select(u => u.Key);
+            if (tags.Any())
+            {
+                var command = new DebugKillUnit();
+                command.Tag.AddRange(tags);
+                SpawnRequest.Debug.Debug.Add(new DebugCommand()
+                {
+                    KillUnit = command,
+                });
+            }
+        }
+
         public void KillEnemyUnits(UnitTypes unitType)
         {
             var tags = ActiveUnitData.EnemyUnits.Where(u => u.Value.Unit.UnitType == (uint)unitType).Select(u => u.Key);

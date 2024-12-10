@@ -13,5 +13,6 @@
         public List<Point2D> Bunkers { get; set; }
         public List<Point2D> FullDepotWall { get; set; }
         public Point2D RampCenter { get; set; }
+        public Point2D RampBottom { get; set; }
     }
 }

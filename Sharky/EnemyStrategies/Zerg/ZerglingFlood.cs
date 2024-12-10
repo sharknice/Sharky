@@ -12,12 +12,20 @@
             var elapsedTime = FrameToTimeConverter.GetTime(frame);
 
             if (elapsedTime.TotalMinutes > 6)
+            {
                 return false;
+            }
+
+            if (UnitCountService.EquivalentEnemyTypeCount(UnitTypes.ZERG_HATCHERY) > 2)
+            {
+                return false;
+            }
 
             bool enemytech = UnitCountService.EquivalentEnemyTypeCount(UnitTypes.ZERG_BANELINGNEST) > 0 || UnitCountService.EquivalentEnemyTypeCount(UnitTypes.ZERG_LAIR) > 0 || UnitCountService.EquivalentEnemyTypeCount(UnitTypes.ZERG_ROACHWARREN) > 0;
-
             if (enemytech && lingCount < 8)
+            {
                 return false;
+            }
 
             return lingCount > 6;
         }

@@ -96,7 +96,12 @@
         {
             foreach (var unit in UnitCommanders)
             {
-                debugService.DebugUnitText(unit.UnitCalculation, $"{CommanderDebugText ?? GetType().Name.Replace("Task", "", StringComparison.InvariantCultureIgnoreCase)}, {unit.UnitRole}", CommanderDebugColor ?? debugService.DefaultMicroTaskColor);
+                var cooldown = "";
+                if (unit.UnitCalculation.Unit.HasWeaponCooldown)
+                {
+                    cooldown = ",  " + unit.UnitCalculation.Unit.WeaponCooldown.ToString();
+                }
+                debugService.DebugUnitText(unit.UnitCalculation, $"{CommanderDebugText ?? GetType().Name.Replace("Task", "", StringComparison.InvariantCultureIgnoreCase)}, {unit.UnitRole}{cooldown}", CommanderDebugColor ?? debugService.DefaultMicroTaskColor);
             }
         }
     }

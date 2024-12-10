@@ -54,6 +54,16 @@
                         preventBuildingLanding = true;
                         foreach (var flyingBuilding in flyingBuildings)
                         {
+                            var closestPreventBuildingLand = commanders.FirstOrDefault(c => c.Value.UnitRole == UnitRole.PreventBuildingLand && c.Value.LastOrderFrame != frame && c.Value.UnitCalculation.NearbyEnemies.OrderBy(e => Vector2.DistanceSquared(e.Position, c.Value.UnitCalculation.Position)).FirstOrDefault(e => e.Unit.IsFlying) != null && c.Value.UnitCalculation.NearbyEnemies.OrderBy(e => Vector2.DistanceSquared(e.Position, c.Value.UnitCalculation.Position)).FirstOrDefault(e => e.Unit.IsFlying).Unit.Tag == flyingBuilding.Unit.Tag);
+                            if (closestPreventBuildingLand.Value != null)
+                            {
+                                var action = closestPreventBuildingLand.Value.Order(frame, Abilities.MOVE, new SC2APIProtocol.Point2D { X = flyingBuilding.Position.X, Y = flyingBuilding.Position.Y }, allowSpam: true);
+                                if (action != null)
+                                {
+                                    actions.AddRange(action);
+                                }
+                                continue;
+                            }
                             var closestDefender = commanders.OrderBy(d => Vector2.DistanceSquared(d.Value.UnitCalculation.Position, flyingBuilding.Position)).FirstOrDefault();
                             if (closestDefender.Value != null)
                             {
@@ -155,7 +165,7 @@
                             else
                             {
                                 var baseVector = new Vector2(selfBase.Location.X, selfBase.Location.Y);
-                                var enemyBuildings = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Where(u => u.Attributes.Contains(SC2APIProtocol.Attribute.Structure)).OrderByDescending(u => u.Unit.BuildProgress).ThenBy(u => Vector2.DistanceSquared(u.Position, baseVector));
+                                var enemyBuildings = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Where(u => u.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && !u.Unit.IsFlying).OrderByDescending(u => u.Unit.BuildProgress).ThenBy(u => Vector2.DistanceSquared(u.Position, baseVector));
                                 desiredWorkers = (enemyBuildings.Count() * 4) + workers.Count();
 
                                 var enemy = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Where(u => !u.Unit.IsFlying).OrderBy(u => Vector2.DistanceSquared(u.Position, new Vector2(selfBase.Location.X, selfBase.Location.Y))).FirstOrDefault();
@@ -303,6 +313,17 @@
                 foreach (var commander in unitCommanders.Where(c => c.UnitRole == UnitRole.PreventBuildingLand))
                 {
                     commander.UnitRole = UnitRole.None;
+                }
+            }
+            else
+            {
+                while (unitCommanders.Count(c => c.UnitRole == UnitRole.PreventBuildingLand) > 3)
+                {
+                    foreach (var commander in unitCommanders.Where(c => c.UnitRole == UnitRole.PreventBuildingLand))
+                    {
+                        commander.UnitRole = UnitRole.None;
+                        break;
+                    }
                 }
             }
 

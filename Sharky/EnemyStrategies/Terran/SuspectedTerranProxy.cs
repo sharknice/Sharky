@@ -4,11 +4,13 @@
     {
         MapDataService MapDataService;
         TargetingData TargetingData;
+        BaseData BaseData;
 
         public SuspectedTerranProxy(DefaultSharkyBot defaultSharkyBot) : base(defaultSharkyBot) 
         {
             MapDataService = defaultSharkyBot.MapDataService;
             TargetingData= defaultSharkyBot.TargetingData;
+            BaseData = defaultSharkyBot.BaseData;
         }
 
         protected override bool Detect(int frame)
@@ -28,9 +30,12 @@
             {
                 if (UnitCountService.EquivalentEnemyTypeCount(UnitTypes.TERRAN_BARRACKS) < 1)
                 {
-                    if (UnitCountService.EquivalentEnemyTypeCount(UnitTypes.TERRAN_SUPPLYDEPOT) + UnitCountService.EnemyCount(UnitTypes.TERRAN_REFINERY) > 0)
+                    if (BaseData.EnemyBaseLocations.FirstOrDefault()?.VespeneGeysers?.FirstOrDefault() == null || (MapDataService.LastFrameVisibility(BaseData.EnemyBaseLocations.FirstOrDefault().VespeneGeysers.FirstOrDefault().Pos.ToPoint2D()) > 100 && MapDataService.LastFrameVisibility(BaseData.EnemyBaseLocations.FirstOrDefault().VespeneGeysers.LastOrDefault().Pos.ToPoint2D()) > 100))
                     {
-                        return true;
+                        if (UnitCountService.EquivalentEnemyTypeCount(UnitTypes.TERRAN_SUPPLYDEPOT) + UnitCountService.EnemyCount(UnitTypes.TERRAN_REFINERY) > 0)
+                        {
+                            return true;
+                        }
                     }
                 }
             }

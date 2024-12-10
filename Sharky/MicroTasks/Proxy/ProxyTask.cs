@@ -14,7 +14,6 @@ namespace Sharky.MicroTasks
         public List<DesiredUnitsClaim> DesiredDefendingUnitsClaims { get; set; }
 
         public string ProxyName { get; set; }
-
         bool started { get; set; }
 
         public ProxyTask(DefaultSharkyBot defaultSharkyBot, bool enabled, float priority, string proxyName, IIndividualMicroController individualMicroController, int desiredWorkers = 1)
@@ -148,6 +147,19 @@ namespace Sharky.MicroTasks
             {
                 commander.UnitRole = UnitRole.Proxy;
             }
+
+            if (!MacroData.Proxies[ProxyName].DefendProxyLocation && Vector2.Distance(MacroData.Proxies[ProxyName].Location.ToVector2(), commander.UnitCalculation.Position) < 5)
+            {
+                if (MacroData.Proxies[ProxyName].DesiredPylons > 0)
+                {
+                    var pylons = commander.UnitCalculation.NearbyAllies.Where(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON);
+                    foreach(var pylon in pylons)
+                    {
+                        ActiveUnitData.Commanders[pylon.Unit.Tag].UnitRole = UnitRole.DoNotDefend;
+                    }
+                }
+            }
+
             if (commander.UnitCalculation.EnemiesInRangeOfAvoid.Any())
             {
                 var action = IndividualMicroController.Retreat(commander, MacroData.Proxies[ProxyName].Location, null, frame);
@@ -156,7 +168,7 @@ namespace Sharky.MicroTasks
                     commands.AddRange(action);
                 }
             }
-            else if (Vector2.DistanceSquared(new Vector2(MacroData.Proxies[ProxyName].Location.X, MacroData.Proxies[ProxyName].Location.Y), commander.UnitCalculation.Position) > MacroData.Proxies[ProxyName].MaximumBuildingDistance)
+            else if (Vector2.DistanceSquared(MacroData.Proxies[ProxyName].Location.ToVector2(), commander.UnitCalculation.Position) > MacroData.Proxies[ProxyName].MaximumBuildingDistance)
             {
                 if (commander.UnitCalculation.NearbyEnemies.Any(e => e.DamageGround))
                 {

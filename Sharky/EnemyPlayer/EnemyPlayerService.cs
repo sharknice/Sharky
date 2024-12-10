@@ -107,7 +107,7 @@
             var enemies = new List<EnemyPlayer>();
             if (Directory.Exists(enemyFolder))
             {
-                foreach (var fileName in Directory.GetFiles(enemyFolder))
+                foreach (var fileName in Directory.GetFiles(enemyFolder).Where(f => f.EndsWith(".json")))
                 {
                     using (StreamReader file = File.OpenText(fileName))
                     {
@@ -130,7 +130,7 @@
             var games = new List<Game>();
             if (Directory.Exists(gameFolder))
             {
-                foreach (var fileName in Directory.GetFiles(gameFolder))
+                foreach (var fileName in Directory.GetFiles(gameFolder).Where(f => f.EndsWith(".json")))
                 {
                     using (StreamReader file = File.OpenText(fileName))
                     {

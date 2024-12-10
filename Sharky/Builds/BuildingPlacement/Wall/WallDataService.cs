@@ -34,7 +34,7 @@
             var wallFolder = Directory.GetCurrentDirectory() + "/StaticData/wall/" + folder;
             if (Directory.Exists(wallFolder))
             {
-                foreach (var fileName in Directory.GetFiles(wallFolder))
+                foreach (var fileName in Directory.GetFiles(wallFolder).Where(f => f.EndsWith(".json")))
                 {
                     using (StreamReader file = File.OpenText(fileName))
                     {
@@ -53,7 +53,7 @@
             var dictionary = new Dictionary<string, List<WallData>>();
             var wallFolder = GetGneratedWallDataFolder();
             Directory.CreateDirectory(wallFolder);
-            foreach (var fileName in Directory.GetFiles(wallFolder))
+            foreach (var fileName in Directory.GetFiles(wallFolder).Where(f => f.EndsWith(".json")))
             {
                 using (StreamReader file = File.OpenText(fileName))
                 {
@@ -262,6 +262,10 @@
                             {
                                 data.RampCenter = new Point2D { X = baseX + 3, Y = baseY + 1 };
                             }
+                            if (data.RampBottom == null)
+                            {
+                                data.RampBottom = new Point2D { X = baseX + 5, Y = baseY - 1 };
+                            }
 
                             if (data.Pylons == null)
                             {
@@ -308,6 +312,10 @@
                             if (data.RampCenter == null)
                             {
                                 data.RampCenter = new Point2D { X = baseX + 2f, Y = baseY };
+                            }
+                            if (data.RampBottom == null)
+                            {
+                                data.RampBottom = new Point2D { X = baseX + 4f, Y = baseY + 2 };
                             }
 
                             if (data.Pylons == null)
@@ -359,6 +367,10 @@
                             {
                                 data.RampCenter = new Point2D { X = baseX - 3.5f, Y = baseY + .5f };
                             }
+                            if (data.RampBottom == null)
+                            {
+                                data.RampBottom = new Point2D { X = baseX - 5.5f, Y = baseY +- 1.5f };
+                            }
 
                             if (data.Pylons == null)
                             {
@@ -398,6 +410,10 @@
                             if (data.RampCenter == null)
                             {
                                 data.RampCenter = new Point2D { X = baseX - 2, Y = baseY };
+                            }
+                            if (data.RampBottom == null)
+                            {
+                                data.RampBottom = new Point2D { X = baseX - 4, Y = baseY + 2 };
                             }
                             if (data.Depots == null)
                             {

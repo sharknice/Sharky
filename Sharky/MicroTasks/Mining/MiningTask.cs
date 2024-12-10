@@ -662,5 +662,14 @@ namespace Sharky.MicroTasks
             }
             UnitCommanders.Remove(commander);
         }
+
+        public override void PrintReport(int frame)
+        {
+            base.PrintReport(frame);
+            foreach(var commander in UnitCommanders)
+            {
+                Console.WriteLine(commander.UnitRole);
+            }
+        }
     }
 }

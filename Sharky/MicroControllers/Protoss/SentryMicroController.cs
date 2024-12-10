@@ -54,7 +54,7 @@
                 return false;
             }
 
-            if (commander.UnitCalculation.NearbyEnemies.Count(e => e.Range > 1 && e.FrameLastSeen == frame && e.EnemiesInRange.Any()) > 5)
+            if (commander.UnitCalculation.NearbyEnemies.Count(e => e.Range > 2.5f && e.FrameLastSeen == frame && e.EnemiesInRange.Any()) > 5)
             {
                 CameraManager.SetCamera(commander.UnitCalculation.Position);
                 action = commander.Order(frame, Abilities.EFFECT_GUARDIANSHIELD);
