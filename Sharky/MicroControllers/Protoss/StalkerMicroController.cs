@@ -66,7 +66,7 @@
             return base.AttackBestTargetInRange(commander, target, bestTarget, frame, out action);
         }
 
-        protected override bool AvoidTargettedDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
+        protected override bool AvoidTargetedDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -98,7 +98,7 @@
                 return false;
             }
 
-            return base.AvoidTargettedDamage(commander, target, defensivePoint, frame, out action);
+            return base.AvoidTargetedDamage(commander, target, defensivePoint, frame, out action);
         }
 
         protected override bool AvoidDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action) // TODO: use unit speed to dynamically adjust AvoidDamageDistance

@@ -70,13 +70,13 @@
             return false;
         }
 
-        protected override bool AvoidTargettedDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
+        protected override bool AvoidTargetedDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
             if (Detected(commander))
             {
-                return base.AvoidTargettedDamage(commander, target, defensivePoint, frame, out action);
+                return base.AvoidTargetedDamage(commander, target, defensivePoint, frame, out action);
             }
             return false;
         }
@@ -108,7 +108,7 @@
                 if (FollowPath(commander, frame, out action)) { return action; }
             }
 
-            if (AvoidTargettedDamage(commander, target, defensivePoint, frame, out action))
+            if (AvoidTargetedDamage(commander, target, defensivePoint, frame, out action))
             {
                 return action;
             }

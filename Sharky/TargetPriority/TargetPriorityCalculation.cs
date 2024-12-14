@@ -8,5 +8,7 @@
         public float AirWinnability { get; set; }
         public float GroundWinnability { get; set; }
         public int FrameCalculated { get; set; }
+        public Formation GroundFormation { get; set; }
+        public Formation AirFormation { get; set; }
     }
 }

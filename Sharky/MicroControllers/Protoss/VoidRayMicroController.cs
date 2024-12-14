@@ -14,7 +14,7 @@
             return true;
         }
 
-        protected override bool AvoidTargettedDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
+        protected override bool AvoidTargetedDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -32,7 +32,7 @@
                 return false;
             }
 
-            return base.AvoidTargettedDamage(commander, target, defensivePoint, frame, out action);
+            return base.AvoidTargetedDamage(commander, target, defensivePoint, frame, out action);
         }
 
         public override bool OffensiveAbility(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
@@ -189,7 +189,7 @@
                 if (FollowPath(commander, frame, out action)) { return action; }
             }
 
-            if (AvoidTargettedDamage(commander, target, defensivePoint, frame, out action))
+            if (AvoidTargetedDamage(commander, target, defensivePoint, frame, out action))
             {
                 return action;
             }
@@ -215,7 +215,7 @@
 
             if (SpecialCaseMove(commander, target, defensivePoint, null, bestTarget, Formation.Normal, frame, out action)) { return action; }
             if (PreOffenseOrder(commander, target, defensivePoint, null, bestTarget, frame, out action)) { return action; }
-            if (AvoidTargettedOneHitKills(commander, target, defensivePoint, frame, out action)) { return action; }
+            if (AvoidTargetedOneHitKills(commander, target, defensivePoint, frame, out action)) { return action; }
             if (OffensiveAbility(commander, target, defensivePoint, null, bestTarget, frame, out action)) { return action; }
 
             if (WeaponReady(commander, frame))

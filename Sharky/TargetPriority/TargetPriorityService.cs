@@ -133,6 +133,46 @@
                 calculation.OverallWinnability = calculation.GroundWinnability;
             }
 
+            var airSplashers = airAttackingEnemies.Any(e => SharkyUnitData.AirSplashDamagers.Contains((UnitTypes)e.Unit.UnitType)) || enemies.Any(e => e.Unit.Energy >= 70 && (e.Unit.UnitType == (uint)UnitTypes.ZERG_INFESTOR || e.Unit.UnitType == (uint)UnitTypes.ZERG_INFESTORBURROWED || e.Unit.UnitType == (uint)UnitTypes.PROTOSS_HIGHTEMPLAR));
+            if (airSplashers)
+            {
+                calculation.AirFormation = Formation.Loose;
+            }
+            else if (enemies.Any(e => e.Unit.UnitType == (uint)UnitTypes.ZERG_INFESTOR || e.Unit.UnitType == (uint)UnitTypes.ZERG_INFESTORBURROWED || e.Unit.UnitType == (uint)UnitTypes.PROTOSS_HIGHTEMPLAR || e.Unit.UnitType == (uint)UnitTypes.ZERG_VIPER))
+            {
+                calculation.AirFormation = Formation.Normal;
+            }
+            else
+            {
+                calculation.AirFormation = Formation.Tight;
+            }
+
+            var enemyLingCount = groundAttackingEnemies.Count(e => e.Unit.UnitType == (uint)UnitTypes.ZERG_ZERGLING);
+            var groundSplashers = groundAttackingEnemies.Any(e => SharkyUnitData.GroundSplashDamagers.Contains((UnitTypes)e.Unit.UnitType)) || enemies.Any(e => e.Unit.Energy >= 70 && (e.Unit.UnitType == (uint)UnitTypes.ZERG_INFESTOR || e.Unit.UnitType == (uint)UnitTypes.ZERG_INFESTORBURROWED || e.Unit.UnitType == (uint)UnitTypes.PROTOSS_HIGHTEMPLAR));
+            if (groundSplashers)
+            {
+                if (enemyLingCount > groundAttackingEnemies.Count() / 2)
+                {
+                    calculation.GroundFormation = Formation.Normal;
+                }
+                else
+                {
+                    calculation.GroundFormation = Formation.Loose;
+                }
+            }
+            else if (enemies.Any(e => e.Unit.UnitType == (uint)UnitTypes.ZERG_INFESTOR || e.Unit.UnitType == (uint)UnitTypes.ZERG_INFESTORBURROWED || e.Unit.UnitType == (uint)UnitTypes.PROTOSS_HIGHTEMPLAR))
+            {
+                calculation.GroundFormation = Formation.Normal;
+            }
+            else if (enemyLingCount > groundAttackingEnemies.Count() / 2)
+            {
+                calculation.GroundFormation = Formation.Tight;
+            }
+            else
+            {
+                calculation.GroundFormation = Formation.Normal;
+            }
+
             if (calculation.OverallWinnability < 1 && calculation.AirWinnability < 1 && calculation.GroundWinnability < 1)
             {
                 if (enemyHps > enemyDps && groundAttackingEnemies.Count(u => u.Unit.UnitType == (uint)UnitTypes.TERRAN_SCV) > 2)

@@ -169,37 +169,7 @@ namespace Sharky.Managers
 
             var repairers = observation.Observation.RawData.Units.Where(u => u.UnitType == (uint)UnitTypes.TERRAN_SCV || u.UnitType == (uint)UnitTypes.TERRAN_MULE);
 
-            //Parallel.ForEach(observation.Observation.RawData.Units, (unit) =>
-            //{
-            //    if (unit.Alliance == Alliance.Enemy)
-            //    {
-            //        var repairingUnitCount = repairers.Where(u => u.Alliance == Alliance.Enemy && Vector2.DistanceSquared(new Vector2(u.Pos.X, u.Pos.Y), new Vector2(unit.Pos.X, unit.Pos.Y)) < (1.0 + u.Radius + unit.Radius) * (0.1 + u.Radius + unit.Radius)).Count();
-            //        var attack = new UnitCalculation(unit, repairingUnitCount, SharkyUnitData, SharkyOptions, UnitDataService, frame);
-            //        if (ActiveUnitData.EnemyUnits.TryGetValue(unit.Tag, out UnitCalculation existing))
-            //        {
-            //            attack.SetPreviousUnit(existing, existing.FrameLastSeen);
-            //        }
-            //        ActiveUnitData.EnemyUnits[unit.Tag] = attack;
-            //    }
-            //    else if (unit.Alliance == Alliance.Self)
-            //    {
-            //        var attack = new UnitCalculation(unit, 0, SharkyUnitData, SharkyOptions, UnitDataService, frame);
-            //        if (ActiveUnitData.SelfUnits.TryGetValue(unit.Tag, out UnitCalculation existing))
-            //        {
-            //            attack.SetPreviousUnit(existing, existing.FrameLastSeen);
-            //        }
-            //        ActiveUnitData.SelfUnits[unit.Tag] = attack;
-            //    }
-            //    else if (unit.Alliance == Alliance.Neutral)
-            //    {
-            //        var attack = new UnitCalculation(unit, 0, SharkyUnitData, SharkyOptions, UnitDataService, frame);
-            //        if (ActiveUnitData.NeutralUnits.TryGetValue(unit.Tag, out UnitCalculation existing))
-            //        {
-            //            attack.SetPreviousUnit(existing, existing.FrameLastSeen);
-            //        }
-            //        ActiveUnitData.NeutralUnits[unit.Tag] = attack;
-            //    }
-            //});
+            bool freshEnemyArchon = false;
 
             foreach (var unit in observation.Observation.RawData.Units)
             {
@@ -210,6 +180,10 @@ namespace Sharky.Managers
                     if (ActiveUnitData.EnemyUnits.TryGetValue(unit.Tag, out UnitCalculation existing))
                     {
                         attack.SetPreviousUnit(existing, existing.FrameLastSeen);
+                    }
+                    else if (unit.UnitType == (uint)UnitTypes.PROTOSS_ARCHON)
+                    {
+                        freshEnemyArchon = true;
                     }
                     ActiveUnitData.EnemyUnits[unit.Tag] = attack;
                 }
@@ -265,7 +239,7 @@ namespace Sharky.Managers
             }
 
             var beforeFiveMinutes = frame < SharkyOptions.FramesPerSecond * 60 * 5;
-            foreach (var enemy in ActiveUnitData.EnemyUnits.Select(e => e.Value).ToList()) // if we can see this area of the map and the unit isn't there anymore remove it (we just remove it because visible units will get re-added below)
+            foreach (var enemy in ActiveUnitData.EnemyUnits.Values.ToList()) // if we can see this area of the map and the unit isn't there anymore remove it (we just remove it because visible units will get re-added below)
             {
                 if (enemy.FrameLastSeen != frame && MapDataService.SelfVisible(enemy.Unit.Pos))
                 {
@@ -276,12 +250,13 @@ namespace Sharky.Managers
                     }
                     ActiveUnitData.EnemyUnits.Remove(enemy.Unit.Tag, out UnitCalculation removed);
                 }
-                else if (beforeFiveMinutes)
+                else if (MapDataService.OutOfBounds(enemy.Unit.Pos))
                 {
-                    if (enemy.Unit.UnitType == (uint)UnitTypes.PROTOSS_COLOSSUS || enemy.Unit.UnitType == (uint)UnitTypes.PROTOSS_ARCHON)
-                    {
-                        enemy.Unit.IsHallucination = true;
-                    }
+                    ActiveUnitData.EnemyUnits.Remove(enemy.Unit.Tag, out UnitCalculation removed);
+                }
+                if (freshEnemyArchon && enemy.Unit.UnitType == (uint)UnitTypes.PROTOSS_HIGHTEMPLAR && enemy.FrameLastSeen != frame)
+                {
+                    ActiveUnitData.EnemyUnits.Remove(enemy.Unit.Tag, out UnitCalculation removed);
                 }
             }
 
@@ -461,6 +436,25 @@ namespace Sharky.Managers
                     if (enemyAttack.Key != u.Unit.Tag)
                         enemyAttack.Value.NearbyAllies.Add(u);
                 });
+                if (enemyAttack.Value.FrameFirstSeen == frame && enemyAttack.Value.PreviousUnitCalculation == null)
+                {
+                    if (enemyAttack.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_COLOSSUS)
+                    {
+                        var sentry = enemyAttack.Value.NearbyAllies.FirstOrDefault(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_SENTRY && e.PreviousUnit != null && e.PreviousUnit.Energy - 73 > e.Unit.Energy);
+                        if (sentry != null)
+                        {
+                            enemyAttack.Value.Unit.IsHallucination = true;
+                        }
+                    }
+                    else if (enemyAttack.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_ARCHON)
+                    {
+                        var sentry = enemyAttack.Value.NearbyAllies.FirstOrDefault(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_SENTRY && e.PreviousUnit != null && e.PreviousUnit.Energy - 73 > e.Unit.Energy);
+                        if (sentry != null)
+                        {
+                            enemyAttack.Value.Unit.IsHallucination = true;
+                        }
+                    }
+                }
             }
 
             if (TargetPriorityCalculationFrame + 10 < frame)
@@ -477,7 +471,7 @@ namespace Sharky.Managers
                         }
                     }
 
-                    //selfUnit.Value.Attackers = GetTargettedAttacks(selfUnit.Value).ToList();
+                    //selfUnit.Value.Attackers = GetTargetedAttacks(selfUnit.Value).ToList();
                     //selfUnit.Value.EnemiesThreateningDamage = GetEnemiesThreateningDamage(selfUnit.Value);
                 }
                 TargetPriorityCalculationFrame = frame;

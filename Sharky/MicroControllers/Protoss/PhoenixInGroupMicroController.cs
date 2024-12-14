@@ -417,7 +417,7 @@
 
             var bestTarget = GetBestTarget(commander, defensivePoint, frame);
 
-            if (AvoidTargettedOneHitKills(commander, defensivePoint, defensivePoint, frame, out action)) { return action; }
+            if (AvoidTargetedOneHitKills(commander, defensivePoint, defensivePoint, frame, out action)) { return action; }
 
             // do not do offensive ability, just run
 

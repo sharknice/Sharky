@@ -8,7 +8,7 @@
 
         }
 
-        protected override bool AvoidTargettedDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
+        protected override bool AvoidTargetedDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -17,7 +17,7 @@
                 return false;
             }
 
-            return base.AvoidTargettedDamage(commander, target, defensivePoint, frame, out action);
+            return base.AvoidTargetedDamage(commander, target, defensivePoint, frame, out action);
         }
 
         public override bool WeaponReady(UnitCommander commander, int frame)
@@ -36,7 +36,11 @@
                 {
                     if (Vector2.DistanceSquared(splashedEnemy.Position, enemyAttack.Position) < (splashedEnemy.Unit.Radius + splashRadius) * (splashedEnemy.Unit.Radius + splashRadius))
                     {
-                        dpsReduction += splashedEnemy.Dps / TimeToKill(weapon, splashedEnemy.Unit, SharkyUnitData.UnitData[(UnitTypes)splashedEnemy.Unit.UnitType]);
+                        var dps = GetDps(splashedEnemy);
+                        if (dps > 0)
+                        {
+                            dpsReduction += dps / TimeToKill(weapon, splashedEnemy.Unit, SharkyUnitData.UnitData[(UnitTypes)splashedEnemy.Unit.UnitType]);
+                        }
                     }
                 }
                 dpsReductions[enemyAttack.Unit.Tag] = dpsReduction;

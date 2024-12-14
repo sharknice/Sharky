@@ -364,6 +364,21 @@
         {
             if (FrameLastSeen == frame) { return; }
 
+            if (previous.Unit.IsHallucination)
+            {
+                Unit.IsHallucination = true;
+                Damage = 0;
+                Dps = 0;
+                if (Weapon != null)
+                {
+                    Weapon.Damage = 0;
+                    foreach (var weapon in Weapons)
+                    {
+                        weapon.Damage = 0;
+                    }
+                }
+            }
+
             TargetPriorityCalculation = previous.TargetPriorityCalculation;
             PreviousUnit = previous.Unit;
             PreviousUnitCalculation = previous;

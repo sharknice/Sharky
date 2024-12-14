@@ -143,14 +143,14 @@
                 return false;
             }
 
-            if (!WeaponReady(commander, frame)) 
+            if (!WeaponReady(commander, frame) && !commander.UnitCalculation.TargetPriorityCalculation.Overwhelm) 
             { 
                 if (commander.UnitCalculation.Unit.ShieldMax > 0 && commander.UnitCalculation.Unit.Shield < 1)
                 {
                     return false;
                 }
 
-                if (AvoidTargettedDamage(commander, target, defensivePoint, frame, out action))
+                if (AvoidTargetedDamage(commander, target, defensivePoint, frame, out action))
                 {
                     return true;
                 }
@@ -302,12 +302,12 @@
                 return action;
             }
 
-            if (AvoidTargettedOneHitKills(commander, target, defensivePoint, frame, out action))
+            if (AvoidTargetedOneHitKills(commander, target, defensivePoint, frame, out action))
             {
                 return action;
             }
 
-            if (AvoidTargettedDamage(commander, target, defensivePoint, frame, out action))
+            if (AvoidTargetedDamage(commander, target, defensivePoint, frame, out action))
             {
                 return action;
             }
@@ -340,7 +340,7 @@
 
             if (PreOffenseOrder(commander, defensivePoint, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
 
-            if (AvoidTargettedOneHitKills(commander, defensivePoint, defensivePoint, frame, out action)) { return action; }
+            if (AvoidTargetedOneHitKills(commander, defensivePoint, defensivePoint, frame, out action)) { return action; }
 
             if (OffensiveAbility(commander, defensivePoint, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
 
@@ -446,12 +446,12 @@
                 return action;
             }
 
-            if (AvoidTargettedOneHitKills(commander, target, defensivePoint, frame, out action))
+            if (AvoidTargetedOneHitKills(commander, target, defensivePoint, frame, out action))
             {
                 return action;
             }
 
-            if (AvoidTargettedDamage(commander, target, defensivePoint, frame, out action))
+            if (AvoidTargetedDamage(commander, target, defensivePoint, frame, out action))
             {
                 return action;
             }
@@ -481,12 +481,51 @@
 
             if (SpecialCaseMove(commander, target, defensivePoint, groupCenter, bestTarget, formation, frame, out action)) { return true; }
 
-            if (!(formation == Formation.Loose && commander.UnitCalculation.NearbyAllies.Count > 5))
+            if (!commander.UnitCalculation.TargetPriorityCalculation.Overwhelm && !(formation == Formation.Loose && commander.UnitCalculation.NearbyAllies.Count > 5))
             {
                 if (MoveAway(commander, target, defensivePoint, frame, out action)) { return true; }
             }
 
+            if (MoveFromBeingClosest(commander, target, defensivePoint, groupCenter, bestTarget, formation, frame, out action)) { return true; }
+
             return NavigateToTarget(commander, target, groupCenter, bestTarget, formation, frame, out action);
+        }
+
+        public virtual bool MoveFromBeingClosest(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, Formation formation, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
+
+            if (commander.UnitCalculation.Unit.Shield > 0 || commander.UnitCalculation.Unit.IsHallucination) { return false; }
+            if (bestTarget != null)
+            {
+                if (commander.UnitCalculation.UnitTypeData.MovementSpeed < bestTarget.UnitTypeData.MovementSpeed || commander.UnitCalculation.Range < bestTarget.Range) { return false; }
+            }
+
+            var attack = commander.UnitCalculation.EnemiesInRangeOf.OrderBy(e => Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position) - (e.Range * e.Range)).FirstOrDefault();
+            if (attack != null)
+            {
+                var closestAllies = attack.EnemiesInRange.OrderBy(e => Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position));
+                var closestAlly = closestAllies.FirstOrDefault();
+                if (closestAlly != null && closestAlly.Unit.Tag == commander.UnitCalculation.Unit.Tag)
+                {
+                    var nextClosest = closestAllies.Skip(1).FirstOrDefault();
+                    if (nextClosest != null && nextClosest.Unit.Tag != commander.UnitCalculation.Unit.Tag) 
+                    {
+                        var hp = commander.UnitCalculation.Unit.Health + commander.UnitCalculation.Unit.Shield;
+                        if (closestAllies.Any(a => a.Unit.Health + a.Unit.Shield > hp))
+                        {
+                            var avoidPoint = GetGroundAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, attack.Unit.Pos, target, defensivePoint, attack.Range + attack.Unit.Radius + commander.UnitCalculation.Unit.Radius + AvoidDamageDistance);
+                            if (avoidPoint != null)
+                            {
+                                action = commander.Order(frame, Abilities.MOVE, avoidPoint);
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return false;
         }
 
         public virtual bool SpecialCaseMove(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, Formation formation, int frame, out List<SC2APIProtocol.Action> action)
@@ -800,9 +839,16 @@
                 }
 
                 Point2D attackPoint;
-                if (MicroPriority == MicroPriority.AttackForward || commander.UnitCalculation.Unit.IsHallucination || (formation == Formation.Loose && commander.UnitCalculation.NearbyAllies.Count >= 5))
+                if (commander.UnitCalculation.TargetPriorityCalculation.Overwhelm || MicroPriority == MicroPriority.AttackForward || commander.UnitCalculation.Unit.IsHallucination || (formation == Formation.Loose && commander.UnitCalculation.NearbyAllies.Count >= 5))
                 {
-                    attackPoint = new Point2D { X = bestTarget.Position.X, Y = bestTarget.Position.Y };
+                    if (!commander.UnitCalculation.Unit.IsFlying && !bestTarget.Unit.IsFlying)
+                    {
+                        attackPoint = GetSurroundPoint(commander, bestTarget);
+                    }
+                    else
+                    {
+                        attackPoint = new Point2D { X = bestTarget.Position.X, Y = bestTarget.Position.Y };
+                    }
                 }
                 else if (commander.UnitCalculation.Range - 2 > bestTarget.Range && commander.UnitCalculation.UnitTypeData.MovementSpeed >= bestTarget.UnitTypeData.MovementSpeed)
                 {
@@ -918,7 +964,7 @@
 
             if (formation == Formation.Tight && commander.UnitCalculation.NearbyEnemies.Any())
             {
-                var vectors = commander.UnitCalculation.NearbyAllies.Where(a => (!a.Unit.IsFlying && !commander.UnitCalculation.Unit.IsFlying && a.UnitClassifications.HasFlag(UnitClassification.ArmyUnit)) || (commander.UnitCalculation.Unit.IsFlying && a.Unit.UnitType == commander.UnitCalculation.Unit.UnitType)).Where(a => Vector2.DistanceSquared(a.Position, commander.UnitCalculation.Position) < GroupUpDistance * GroupUpDistance).Select(u => u.Position);
+                var vectors = commander.UnitCalculation.NearbyAllies.Where(a => a.Unit.IsFlying == commander.UnitCalculation.Unit.IsFlying && a.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) && a.Unit.EnergyMax == 0 && a.Damage > 0).Where(a => Vector2.DistanceSquared(a.Position, commander.UnitCalculation.Position) < GroupUpDistance * GroupUpDistance).Select(u => u.Position);
                 if (vectors.Any())
                 {
                     var max = 1f;
@@ -946,7 +992,7 @@
 
             if (commander.UnitCalculation.TargetPriorityCalculation.Overwhelm || MicroPriority == MicroPriority.AttackForward || commander.UnitCalculation.Unit.IsHallucination)
             {
-                if (AvoidTargettedDamage(commander, target, defensivePoint, frame, out action)) { return true; }
+                if (AvoidTargetedDamage(commander, target, defensivePoint, frame, out action)) { return true; }
 
                 if (commander.UnitCalculation.Unit.ShieldMax > 0 && commander.UnitCalculation.Unit.Shield < 25 && AvoidDamage(commander, target, defensivePoint, frame, out action)) // TODO: this only works for protoss, if we want it to work for zerg and terran it needs to change
                 {
@@ -957,7 +1003,7 @@
             {
                 if (WorkerEscapeSurround(commander, target, defensivePoint, frame, out action)) { return true; }
 
-                if (AvoidTargettedDamage(commander, target, defensivePoint, frame, out action))
+                if (AvoidTargetedDamage(commander, target, defensivePoint, frame, out action))
                 {
                     return true;
                 }
@@ -1872,6 +1918,11 @@
             action = null;
             if (bestTarget != null)
             {
+                if (bestTarget.Unit.IsHallucination && commander.UnitCalculation.NearbyEnemies.Any(e => !e.Unit.IsHallucination))
+                {
+                    return false;
+                }
+
                 if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.KillWorkers && !bestTarget.UnitClassifications.HasFlag(UnitClassification.Worker) && bestTarget.Attributes.Contains(SC2APIProtocol.Attribute.Structure))
                 {
                     if (bestTarget.Repairers.Any())
@@ -1892,7 +1943,7 @@
                 {
                     if (WeaponReady(commander, frame))
                     {
-                        bestTarget.IncomingDamage += GetDamage(commander.UnitCalculation.Weapons, bestTarget.Unit, bestTarget.UnitTypeData);
+                        bestTarget.IncomingDamage += GetDamage(commander.UnitCalculation.Weapons, bestTarget.Unit, bestTarget.UnitTypeData);                      
                         if (commander.UnitRole == UnitRole.Leader) { CameraManager.SetCamera(commander.UnitCalculation.Position, bestTarget.Position); }
                         action = commander.Order(frame, Abilities.ATTACK, null, bestTarget.Unit.Tag);
                         commander.LastInRangeAttackFrame = frame;
@@ -1909,6 +1960,11 @@
                     var bestInRange = GetBestTargetFromList(commander, commander.UnitCalculation.EnemiesInRange.Where(e => e.FrameLastSeen == frame && e.Unit.UnitType != (uint)UnitTypes.PROTOSS_INTERCEPTOR), null);
                     if (bestInRange != null)
                     {
+                        if (bestInRange.Unit.IsHallucination && commander.UnitCalculation.NearbyEnemies.Any(e => !e.Unit.IsHallucination))
+                        {
+                            return false;
+                        }
+
                         if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.KillWorkers && !bestInRange.UnitClassifications.HasFlag(UnitClassification.Worker) && bestInRange.Attributes.Contains(SC2APIProtocol.Attribute.Structure))
                         {
                             if (bestInRange.Repairers.Any())
@@ -2272,9 +2328,54 @@
 
         protected virtual UnitCalculation GetBestDpsReduction(UnitCommander commander, Weapon weapon, IEnumerable<UnitCalculation> primaryTargets, IEnumerable<UnitCalculation> secondaryTargets)
         {
-            var bestDpsReduction = primaryTargets.OrderByDescending(enemy => enemy.Dps / TimeToKill(weapon, enemy.Unit, enemy.UnitTypeData)).ThenBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+            var bestDpsReduction = primaryTargets.OrderByDescending(enemy => GetDps(enemy) / TimeToKill(weapon, enemy.Unit, enemy.UnitTypeData)).ThenBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position)).FirstOrDefault();
 
             return bestDpsReduction;
+        }
+
+        protected float GetDps(UnitCalculation unitCalculation)
+        {
+            if (unitCalculation.Unit.IsHallucination) { return 0; }
+            if (unitCalculation.Unit.Energy >= 75)
+            {
+                if (unitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_HIGHTEMPLAR || unitCalculation.Unit.UnitType == (uint)UnitTypes.ZERG_INFESTOR || unitCalculation.Unit.UnitType == (uint)UnitTypes.ZERG_INFESTORBURROWED)
+                {
+                    var splashes = unitCalculation.NearbyEnemies.Count;
+                    if (splashes > 10)
+                    {
+                        splashes = 10;
+                    }
+                    return splashes * 80;
+                }
+                if (unitCalculation.Unit.UnitType == (uint)UnitTypes.ZERG_VIPER)
+                {
+                    return 20;
+                }
+            }
+
+            var weapon = unitCalculation.Weapon;
+            if (weapon != null && weapon.DamageBonus.Any())
+            {
+                var damage = weapon.Damage;
+                var bonusDamage = 0f;
+
+                foreach(var bonus in weapon.DamageBonus)
+                {
+                    if (unitCalculation.NearbyEnemies.Any(e => e.Attributes.Contains(bonus.Attribute)))
+                    {
+                        bonusDamage += bonus.Bonus;
+                    }
+                }
+
+                var speed = weapon.Speed;
+                if (speed == 0)
+                {
+                    return 0;
+                }
+                return (damage + bonusDamage) / weapon.Speed;
+            }
+
+            return unitCalculation.Dps;
         }
 
         protected float TimeToKill(Weapon weapon, Unit unit, UnitTypeData unitTypeData)
@@ -2361,46 +2462,16 @@
 
         public virtual Formation GetDesiredFormation(UnitCommander commander)
         {
+            if (commander.UnitCalculation.TargetPriorityCalculation == null)
+            {
+                return Formation.Normal;
+            }
+
             if (commander.UnitCalculation.Unit.IsFlying)
             {
-                if (MapDataService.GetCells(commander.UnitCalculation.Unit.Pos.X, commander.UnitCalculation.Unit.Pos.Y, 5).Any(e => e.EnemyAirSplashDpsInRange > 0))
-                {
-                    return Formation.Loose;
-                }
-                else
-                {
-                    if (commander.UnitCalculation.NearbyAllies.Any(a => a.Unit.UnitType == commander.UnitCalculation.Unit.UnitType))
-                    {
-                        return Formation.Tight;
-                    }
-                    return Formation.Normal;
-                }
+                return commander.UnitCalculation.TargetPriorityCalculation.AirFormation;
             }
-
-            var splashDps = MapDataService.EnemyGroundSplashDpsInRange(commander.UnitCalculation.Unit.Pos);
-            var zerglingDps = 0f;
-            if (EnemyData.EnemyRace == Race.Zerg)
-            {
-                if (splashDps == 0 && commander.UnitCalculation.NearbyEnemies.Any(e => e.Unit.UnitType == (uint)UnitTypes.ZERG_ZERGLING || e.Unit.UnitType == (uint)UnitTypes.ZERG_ZERGLINGBURROWED))
-                {
-                    zerglingDps = 10f;
-                }
-                else
-                {
-                    zerglingDps = commander.UnitCalculation.NearbyEnemies.Where(e => e.Unit.UnitType == (uint)UnitTypes.ZERG_ZERGLING || e.Unit.UnitType == (uint)UnitTypes.ZERG_ZERGLINGBURROWED).Sum(e => e.Dps);
-                }
-            }
-
-            if (zerglingDps > splashDps)
-            {
-                return Formation.Tight;
-            }
-            if (splashDps > 0)
-            {
-                return Formation.Loose;
-            }
-
-            return Formation.Normal;
+            return commander.UnitCalculation.TargetPriorityCalculation.GroundFormation;
         }
 
         protected virtual bool WorkerEscapeSurround(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
@@ -2427,7 +2498,7 @@
             return false;
         }
 
-        public virtual bool AvoidTargettedOneHitKills(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
+        public virtual bool AvoidTargetedOneHitKills(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
             var attack = commander.UnitCalculation.Attackers.Where(a => a.Damage > commander.UnitCalculation.Unit.Health + commander.UnitCalculation.Unit.Shield).OrderBy(e => Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position) - (e.Range * e.Range)).FirstOrDefault();
@@ -2466,7 +2537,7 @@
             return false;
         }
 
-        protected virtual bool AvoidTargettedDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
+        protected virtual bool AvoidTargetedDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
             if ((MicroPriority == MicroPriority.AttackForward || commander.UnitCalculation.Unit.IsHallucination) && commander.UnitCalculation.Unit.Health > commander.UnitCalculation.Unit.HealthMax / 4.0) { return false; }
@@ -2837,6 +2908,7 @@
 
         protected virtual bool AttackersFilter(UnitCommander commander, UnitCalculation enemyAttack)
         {
+            if (commander.UnitCalculation.Unit.IsHallucination && enemyAttack.Unit.IsHallucination) { return false; }
             if (AvoidedUnitTypes.Contains((UnitTypes)enemyAttack.Unit.UnitType) || enemyAttack.Unit.BuffIds.Contains((uint)Buffs.ORACLESTASISTRAPTARGET))
             {
                 return false;
@@ -3013,7 +3085,7 @@
                 {
                     if (WorkerEscapeSurround(commander, target, defensivePoint, frame, out action)) { return true; }
 
-                    if (AvoidTargettedDamage(commander, target, defensivePoint, frame, out action))
+                    if (AvoidTargetedDamage(commander, target, defensivePoint, frame, out action))
                     {
                         return true;
                     }
@@ -3274,7 +3346,7 @@
                 if (FollowPath(commander, frame, out action)) { return action; }
             }
 
-            if (AvoidTargettedDamage(commander, target, defensivePoint, frame, out action))
+            if (AvoidTargetedDamage(commander, target, defensivePoint, frame, out action))
             {
                 return action;
             }
@@ -3475,7 +3547,7 @@
 
 
 
-            if (AvoidTargettedDamage(commander, target, defensivePoint, frame, out action))
+            if (AvoidTargetedDamage(commander, target, defensivePoint, frame, out action))
             {
                 return action;
             }

@@ -2,7 +2,7 @@
 {
     public interface IManager
     {
-        bool NeverSkip { get; }
+        bool NeverSkip { get; set; }
         bool SkipFrame { get; set; }
         double LongestFrame { get; set; }
         double TotalFrameTime { get; set; }

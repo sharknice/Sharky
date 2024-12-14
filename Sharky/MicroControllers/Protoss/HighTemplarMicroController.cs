@@ -62,7 +62,7 @@
             return false;
         }
 
-        bool Merge(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
+        protected virtual bool Merge(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
             if (commander.UnitCalculation.Unit.Energy > 40 || commander.UnitCalculation.NearbyEnemies.Count() == 0)

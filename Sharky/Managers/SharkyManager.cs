@@ -5,7 +5,7 @@
         public virtual double TotalFrameTime { get; set; }
         public virtual double LongestFrame { get; set; }
         public virtual bool SkipFrame { get; set; }
-        public virtual bool NeverSkip { protected set { } get { return false; } }
+        public virtual bool NeverSkip { get; set; } = false;
 
         public virtual void OnStart(ResponseGameInfo gameInfo, ResponseData data, ResponsePing pingResponse, ResponseObservation observation, uint playerId, string opponentId)
         {

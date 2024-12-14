@@ -108,7 +108,7 @@
 
             if (PreOffenseOrder(commander, target, defensivePoint, null, bestTarget, frame, out action)) { return action; }
 
-            if (AvoidTargettedOneHitKills(commander, target, defensivePoint, frame, out action)) { return action; }
+            if (AvoidTargetedOneHitKills(commander, target, defensivePoint, frame, out action)) { return action; }
 
             if (OffensiveAbility(commander, target, defensivePoint, null, bestTarget, frame, out action)) { return action; }
 

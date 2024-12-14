@@ -92,7 +92,7 @@
 
             if (commander.UnitCalculation.Unit.Shield < commander.UnitCalculation.Unit.ShieldMax / 2)
             {
-                if (AvoidTargettedDamage(commander, target, defensivePoint, frame, out action))
+                if (AvoidTargetedDamage(commander, target, defensivePoint, frame, out action))
                 {
                     return true;
                 }

@@ -216,6 +216,15 @@
             return MapData.Map[(int)point.X,(int)point.Y].InSelfVision;
         }
 
+        public bool OutOfBounds(Point point)
+        {
+            if (point == null || point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
+            {
+                return true;
+            }
+            return false;
+        }
+
         public int Visibility(Point2D point)
         {
             if (point == null || point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
