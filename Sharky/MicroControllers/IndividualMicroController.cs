@@ -2471,6 +2471,19 @@
             {
                 return commander.UnitCalculation.TargetPriorityCalculation.AirFormation;
             }
+
+            if (commander.UnitCalculation.TargetPriorityCalculation.GroundFormation == Formation.Loose)
+            {
+                var longestRangeSplash = commander.UnitCalculation.NearbyEnemies.Where(e => SharkyUnitData.GroundSplashDamagers.Contains((UnitTypes)e.Unit.UnitType)).OrderBy(e => Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position) - (e.Range * e.Range)).FirstOrDefault();
+                if (longestRangeSplash != null)
+                {
+                    if (commander.UnitCalculation.Range >  longestRangeSplash.Range)
+                    {
+                        return Formation.Normal;
+                    }
+                }
+            }
+
             return commander.UnitCalculation.TargetPriorityCalculation.GroundFormation;
         }
 
