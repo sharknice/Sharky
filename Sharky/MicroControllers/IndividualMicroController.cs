@@ -173,6 +173,8 @@
         {
             action = null;
 
+            if (bestTarget == null) { return false; }
+
             var rangeDistance = commander.UnitCalculation.Range + commander.UnitCalculation.Unit.Radius + bestTarget.Unit.Radius;
             var actualDistance = Vector2.Distance(commander.UnitCalculation.Position, bestTarget.Position);
             var gap = actualDistance - rangeDistance;

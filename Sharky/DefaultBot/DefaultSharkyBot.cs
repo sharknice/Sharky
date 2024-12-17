@@ -360,6 +360,7 @@
             var vikingLandedMicroController = new VikingLandedMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
             var bansheeMicroController = new BansheeMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
             var battleCruiserMicroController = new BattleCruiserMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
+            var ghostMicroController = new GhostMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
             var ravenMicroController = new RavenMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
             var medivacMicroController = new MedivacMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
             var widowMineMicroController = new WidowMineMicroController(this, SharkySimplePathFinder, MicroPriority.LiveAndAttack, false);
@@ -433,6 +434,7 @@
                 { UnitTypes.TERRAN_VIKINGASSAULT, vikingLandedMicroController },
                 { UnitTypes.TERRAN_BANSHEE, bansheeMicroController },
                 { UnitTypes.TERRAN_BATTLECRUISER, battleCruiserMicroController },
+                { UnitTypes.TERRAN_GHOST, ghostMicroController },
                 { UnitTypes.TERRAN_RAVEN, ravenMicroController },
                 { UnitTypes.TERRAN_MEDIVAC, medivacMicroController },
                 { UnitTypes.TERRAN_WIDOWMINE, widowMineMicroController },

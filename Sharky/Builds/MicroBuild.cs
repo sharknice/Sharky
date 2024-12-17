@@ -60,10 +60,30 @@
 
         public virtual void OnRoundEnd()
         {
+            ActiveUnitData.EnemyUnits.Clear();
+            ActiveUnitData.SelfUnits.Clear();
+            ActiveUnitData.Commanders.Clear();
         }
 
         public virtual void OnRoundStart()
         {
+            var keysToRemove = ActiveUnitData.Commanders.Where(kvp => kvp.Value.UnitCalculation.FrameLastSeen != MacroData.Frame).Select(kvp => kvp.Key).ToList();
+            foreach (var key in keysToRemove)
+            {
+                ActiveUnitData.Commanders.Remove(key);
+            }
+
+            keysToRemove = ActiveUnitData.SelfUnits.Where(kvp => kvp.Value.FrameLastSeen != MacroData.Frame).Select(kvp => kvp.Key).ToList();
+            foreach (var key in keysToRemove)
+            {
+                ActiveUnitData.SelfUnits.Remove(key);
+            }
+
+            keysToRemove = ActiveUnitData.EnemyUnits.Where(kvp => kvp.Value.FrameLastSeen != MacroData.Frame).Select(kvp => kvp.Key).ToList();
+            foreach (var key in keysToRemove)
+            {
+                ActiveUnitData.EnemyUnits.Remove(key);
+            }
         }
 
         private void PrintResult()

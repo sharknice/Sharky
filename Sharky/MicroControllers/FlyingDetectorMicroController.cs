@@ -90,6 +90,8 @@
         {
             action = null;
 
+            if (OffensiveAbility(commander, target, defensivePoint, groupCenter, null, frame, out action)) { return true; }
+
             if (commander.UnitCalculation.Unit.Shield < commander.UnitCalculation.Unit.ShieldMax / 2)
             {
                 if (AvoidTargetedDamage(commander, target, defensivePoint, frame, out action))

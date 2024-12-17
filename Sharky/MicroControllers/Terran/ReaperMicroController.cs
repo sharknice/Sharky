@@ -4,14 +4,14 @@
     {
         float Kd8Charge;
 
+        int LastChargeFrame = -1000;
+
         public ReaperMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled)
             : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled)
         {
             AvoidDamageDistance = 5;
             Kd8Charge = 5;
         }
-
-        // TODO: use offensiveability when retreating
 
         public override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
@@ -50,7 +50,10 @@
 
             if (commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.EFFECT_KD8CHARGE)) { return true; }
 
-            if (commander.UnitCalculation.NearbyAllies.Any(a => a.Unit.UnitType == (uint)UnitTypes.TERRAN_KD8CHARGE)) { return false; } // don't spam them all at once
+            if (LastChargeFrame + 10 > frame)
+            {
+                return false;
+            }
 
             if (bestTarget != null && bestTarget.Unit.Tag != commander.UnitCalculation.Unit.Tag && bestTarget.FrameLastSeen == frame && !bestTarget.Attributes.Contains(SC2Attribute.Structure) && commander.AbilityOffCooldown(Abilities.EFFECT_KD8CHARGE, frame, SharkyOptions.FramesPerSecond, SharkyUnitData))
             {
@@ -59,6 +62,7 @@
                 if (distanceSqaured <= 100)
                 {
                     var enemyPosition = new Point2D { X = bestTarget.Unit.Pos.X, Y = bestTarget.Unit.Pos.Y };
+                    if (commander.UnitCalculation.NearbyAllies.Any(a => a.Unit.UnitType == (uint)UnitTypes.TERRAN_KD8CHARGE && Vector2.Distance(bestTarget.Position, a.Position) < 4)) { return false; } // don't spam them all at once
                     if (bestTarget.Velocity > 0)
                     {
                         var futurePosition = bestTarget.Position + (bestTarget.AverageVector * (bestTarget.AverageVelocity * SharkyOptions.FramesPerSecond));
@@ -66,6 +70,7 @@
                         {
                             var interceptionPoint = new Point2D { X = futurePosition.X, Y = futurePosition.Y };
                             action = commander.Order(frame, Abilities.EFFECT_KD8CHARGE, interceptionPoint);
+                            LastChargeFrame = frame;
                             return true;
                         }
                     }
@@ -75,6 +80,7 @@
                         var point = new Point2D { X = bestTarget.Position.X, Y = bestTarget.Position.Y };
                         CameraManager.SetCamera(point);
                         action = commander.Order(frame, Abilities.EFFECT_KD8CHARGE, point);
+                        LastChargeFrame = frame;
                         return true;
                     }
                 }

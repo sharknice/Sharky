@@ -8,8 +8,6 @@
 
         }
 
-        // TODO: when retreating or defending if near own base need to seige up instead of attacking while unseiged
-
         public override List<SC2APIProtocol.Action> Idle(UnitCommander commander, Point2D defensivePoint, int frame)
         {
             if (MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos) >= MapDataService.MapHeight(defensivePoint))
@@ -39,12 +37,23 @@
                 return false; 
             }
 
-            var enemiesInSiegeRange = commander.UnitCalculation.NearbyEnemies.Take(25).Where(e => !e.Unit.IsFlying && 
+            if (!commander.UnitCalculation.NearbyAllies.Any(a => a.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED) && commander.UnitCalculation.NearbyAllies.Any(a => a.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANK))
+            {
+                if (commander.UnitCalculation.NearbyEnemies.Any(e => (e.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED || e.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANK) && Vector2.Distance(e.Position, commander.UnitCalculation.Position) < 16))
+                {
+                    CameraManager.SetCamera(commander.UnitCalculation.Position);
+                    TagService.TagAbility("siege");
+                    action = commander.Order(frame, Abilities.MORPH_SIEGEMODE);
+                    return true;
+                }
+            }
+
+            var enemiesInSiegeRange = commander.UnitCalculation.NearbyEnemies.Where(e => !e.Unit.IsFlying && 
                 (e.Damage > 0 || Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position) < 12 * 12) && // get a little bit closer to buildings
                 Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position) <= (13 + e.Unit.Radius + commander.UnitCalculation.Unit.Radius) * (13 + e.Unit.Radius + commander.UnitCalculation.Unit.Radius));
-            if (enemiesInSiegeRange.Any(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED) || enemiesInSiegeRange.Sum(e => e.Unit.Health + e.Unit.Shield) > 50)
+            if (enemiesInSiegeRange.Any(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED || e.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANK) || enemiesInSiegeRange.Sum(e => e.Unit.Health + e.Unit.Shield) > 50)
             {
-                var enemiesTooClose = commander.UnitCalculation.NearbyEnemies.Take(25).Where(e => !e.Unit.IsFlying && e.Damage > 0 &&
+                var enemiesTooClose = commander.UnitCalculation.NearbyEnemies.Where(e => !e.Unit.IsFlying && e.Damage > 0 &&
                     Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position) <= (2 + e.Unit.Radius + commander.UnitCalculation.Unit.Radius) * (2 + e.Unit.Radius + commander.UnitCalculation.Unit.Radius));
 
                 if (enemiesTooClose.Count() > enemiesInSiegeRange.Count() - enemiesTooClose.Count()) { return false; }
@@ -56,6 +65,33 @@
             }
             
             return false;
+        }
+
+        public override List<SC2APIProtocol.Action> Support(UnitCommander commander, IEnumerable<UnitCommander> supportTargets, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
+        {
+            List<SC2APIProtocol.Action> action = null;
+            if (commander.UnitCalculation.Loaded) { return action; }
+
+            var unitToSupport = GetSupportTarget(commander, supportTargets, target, defensivePoint);
+
+            if (unitToSupport == null)
+            {
+                return Attack(commander, target, defensivePoint, groupCenter, frame);
+            }
+
+            if (unitToSupport.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED && !unitToSupport.UnitCalculation.EnemiesInRange.Any() && !unitToSupport.UnitCalculation.EnemiesInRangeOf.Any() && !commander.UnitCalculation.EnemiesInRange.Any() && !commander.UnitCalculation.EnemiesInRangeOf.Any())
+            {
+                var closestEnemy = unitToSupport.UnitCalculation.NearbyEnemies.OrderBy(e => Vector2.DistanceSquared(e.Position, unitToSupport.UnitCalculation.Position)).FirstOrDefault();
+                if (closestEnemy != null)
+                {
+                    if (Vector2.Distance(commander.UnitCalculation.Position, closestEnemy.Position) > Vector2.Distance(unitToSupport.UnitCalculation.Position, closestEnemy.Position))
+                    {
+                        return commander.Order(frame, Abilities.MOVE, target);
+                    }
+                }
+            }
+
+            return base.Support(commander, supportTargets, target, defensivePoint, groupCenter, frame);
         }
     }
 }

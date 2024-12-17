@@ -1,4 +1,6 @@
-﻿namespace Sharky.MicroControllers.Terran
+﻿using System;
+
+namespace Sharky.MicroControllers.Terran
 {
     public class StimableMicroController : IndividualMicroController
     {
@@ -61,7 +63,7 @@
                     return false;
                 }
 
-                if (commander.UnitCalculation.EnemiesInRange.Sum(e => e.Unit.Health + e.Unit.Shield) > 100) // stim if more than 100 hitpoints in range
+                if (commander.UnitCalculation.EnemiesInRange.Where(e => !e.Unit.IsHallucination).Sum(e => e.Unit.Health + e.Unit.Shield) > 100) // stim if more than 100 hitpoints in range
                 {
                     CameraManager.SetCamera(commander.UnitCalculation.Position);
                     TagService.TagAbility("stim");
@@ -116,10 +118,30 @@
 
             if (SpecialCaseMove(commander, target, defensivePoint, groupCenter, bestTarget, formation, frame, out action)) { return true; }
 
+            var closest = commander.UnitCalculation.EnemiesInRange.OrderBy(e => Vector2.Distance(e.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+            if (closest != null && closest.Damage > 0 && closest.Range < 2)
+            {
+                var avoidPoint = GetPositionFromRange(commander, closest.Unit.Pos, commander.UnitCalculation.Unit.Pos, commander.UnitCalculation.Range);
+                if (MapDataService.MapHeight(avoidPoint) != MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos) || MapDataService.MapHeight(avoidPoint) != MapDataService.MapHeight(closest.Unit.Pos))
+                {
+                    return false;
+                }
+                action = commander.Order(frame, Abilities.MOVE, avoidPoint);
+                return true;
+            }
+
             if (bestTarget != null && Stiming(commander))
             {
-                if (MoveToAttackTarget(commander, bestTarget, formation, frame, out action)) { return true; }
-                return NavigateToTarget(commander, target, groupCenter, bestTarget, formation, frame, out action);
+                var meleeThreat = commander.UnitCalculation.EnemiesInRangeOfAvoid.Any(e => e.Range < 2);
+                if (!meleeThreat)
+                {
+                    if (MoveToAttackTarget(commander, bestTarget, formation, frame, out action)) { return true; }
+                    return NavigateToTarget(commander, target, groupCenter, bestTarget, formation, frame, out action);
+                }
+                else
+                {
+                    if (AvoidDamage(commander, target, defensivePoint, frame, out action)) { return true; }
+                }
             }
 
             if (!(formation == Formation.Loose && commander.UnitCalculation.NearbyAllies.Count() > 5))

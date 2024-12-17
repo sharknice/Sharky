@@ -1,4 +1,6 @@
-﻿namespace Sharky.MicroControllers.Terran
+﻿using static SC2APIProtocol.AbilityData.Types;
+
+namespace Sharky.MicroControllers.Terran
 {
     public class HellionMicroController : IndividualMicroController
     {
@@ -97,12 +99,12 @@
             return MoveToTarget(commander, target, frame);
         }
 
-        protected Point2D GetBestAttackPosition(UnitCommander commander, IEnumerable<UnitCalculation> primaryTargets, int frame)
+        protected LineSegment GetBestAttackLine(UnitCommander commander, IEnumerable<UnitCalculation> primaryTargets, int frame)
         {
             var weapon = UnitDataService.GetWeapon(commander.UnitCalculation.Unit);
             float splashRadius = 0.15f - commander.UnitCalculation.Unit.Radius;
 
-            var attackPositions = new Dictionary<Point2D, (int, float)>();
+            var attackPositions = new Dictionary<LineSegment, (int, float)>();
             foreach (var enemy in primaryTargets)
             {
                 var startDamage = GetDamage(commander.UnitCalculation.Weapons, enemy.Unit, enemy.UnitTypeData);
@@ -111,14 +113,17 @@
                 {
                     startKills = 1;
                 }
-                attackPositions[enemy.Unit.Pos.ToPoint2D()] = (startKills, startDamage);
+                attackPositions[new LineSegment { Start = enemy.Position, End = enemy.Position }] = (startKills, startDamage);
 
                 var potentialTargets = enemy.NearbyAllies.Where(e => e.FrameLastSeen == frame && Vector2.Distance(enemy.Position, e.Position) < 6.65f - enemy.Unit.Radius);
                 foreach (var otherEnemy in potentialTargets)
                 {
                     var start = enemy.Position;
                     var end = GetPositionFromRange(enemy.Position.X, enemy.Position.Y, otherEnemy.Position.X, otherEnemy.Position.Y, 6.65f - commander.UnitCalculation.Unit.Radius);
-                    var attackLine = new LineSegment { Start = enemy.Position, End = new Vector2(end.X, end.Y) };
+                    var attackLine = new LineSegment { Start = enemy.Position, End = end.ToVector2() };
+
+                    var direction = Vector2.Normalize(attackLine.Start - attackLine.End);
+                    attackLine.Start += direction * 1;
 
                     var damage = startDamage;
                     var kills = startKills;
@@ -136,13 +141,62 @@
                         }
                     }
 
-                    var attackPosition = GetPositionFromRange(end.X, end.Y, enemy.Position.X, enemy.Position.Y, 6.65f);
-                    attackPositions[attackPosition] = (kills, damage);
+                    attackPositions[attackLine] = (kills, damage);
                 }
-
             }
 
-            return attackPositions.OrderByDescending(x => x.Value.Item1).ThenByDescending(x => x.Value.Item2).ThenBy(x => Vector2.DistanceSquared(x.Key.ToVector2(), commander.UnitCalculation.Position)).FirstOrDefault().Key;
+            var best = attackPositions.OrderByDescending(x => x.Value.Item1).ThenByDescending(x => x.Value.Item2).ThenBy(x => Vector2.DistanceSquared(x.Key.Start, commander.UnitCalculation.Position)).FirstOrDefault();
+            DebugService.DrawLine(best.Key.Start.ToPoint(commander.UnitCalculation.Unit.Pos.Z), best.Key.End.ToPoint(commander.UnitCalculation.Unit.Pos.Z), new Color { R = 250, B = 165, G = 1 });
+            return best.Key;
+        }
+
+        protected Point2D GetBestAttackPosition(UnitCommander commander, IEnumerable<UnitCalculation> primaryTargets, int frame)
+        {
+            var best = GetBestAttackLine(commander, primaryTargets, frame);
+            return best.Start.ToPoint2D();
+        }
+
+        public override bool MoveToAttackOnCooldown(UnitCommander commander, UnitCalculation bestTarget, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            var targets = commander.UnitCalculation.NearbyEnemies.Where(e => DamageService.CanDamage(commander.UnitCalculation, e));
+            if (targets.Any())
+            {
+                var bestLine = GetBestAttackLine(commander, targets, frame);
+                var bestSpot = bestLine.Start.ToPoint2D();
+
+                if (MapDataService.EnemyGroundDpsInRange(bestSpot) == 0 && MapDataService.PathWalkable(bestSpot))
+                {
+                    action = commander.Order(frame, Abilities.MOVE, bestSpot);
+                    return true;
+                }
+
+                var direction = Vector2.Normalize(bestLine.Start - bestLine.End);
+
+                var danger = MapDataService.EnemyGroundDpsInRange(commander.UnitCalculation.Position.ToPoint2D());
+                var saferStart = bestLine.Start;
+                if (commander.UnitCalculation.EnemiesInRangeOfAvoid.Any())
+                {
+                    var extension = 1f;
+                    while (extension < 12f)
+                    {
+                        saferStart = bestLine.Start + (direction * extension);
+                        var spotDanger = MapDataService.EnemyGroundDpsInRange(saferStart.ToPoint2D());
+                        if (spotDanger == 0 && MapDataService.PathWalkable(saferStart))
+                        {
+                            action = commander.Order(frame, Abilities.MOVE, saferStart.ToPoint2D());
+                            return true;
+                        }
+                        extension++;
+                    }
+                }
+            }
+
+            if (AttackIfCooldownDistanceClose(commander, bestTarget, target, defensivePoint, frame, out action))
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }

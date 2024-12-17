@@ -22,12 +22,12 @@
         {
             action = null;
 
-            if (!commander.AutoCastToggled)
-            {
-                action = commander.ToggleAutoCast(Abilities.EFFECT_LOCKON);
-                commander.AutoCastToggled = true;
-                return true;
-            }
+            //if (!commander.AutoCastToggled)
+            //{
+            //    action = commander.ToggleAutoCast(Abilities.EFFECT_LOCKON);
+            //    commander.AutoCastToggled = true;
+            //    return true;
+            //}
 
             if (commander.CommanderState == CommanderState.MaintainLockon)
             {
@@ -114,27 +114,27 @@
         {
             action = null;
 
-            if (frame == LastLockOnFrame) { return false; }
-            if (commander.LastLockOn == null || (frame - commander.LastLockOn.EndFrame) > (4.3 * SharkyOptions.FramesPerSecond))
-            {
-                if (bestTarget != null && bestTarget.FrameLastSeen == frame && bestTarget.Unit.Tag != commander.UnitCalculation.Unit.Tag && MapDataService.SelfVisible(bestTarget.Unit.Pos))
-                {
-                    if (Vector2.DistanceSquared(bestTarget.Position, commander.UnitCalculation.Position) <= 49)
-                    {
-                        TagService.TagAbility("lockon");
-                        CameraManager.SetCamera(bestTarget.Position);
-                        action = commander.Order(frame, Abilities.EFFECT_LOCKON, targetTag: bestTarget.Unit.Tag);
-                        LastLockOnFrame = frame;
-                        commander.LastLockOn = new LockOnData { StartFrame = frame, Tag = bestTarget.Unit.Tag, EndFrame = frame + (int)(14.3 * SharkyOptions.FramesPerSecond) };
-                        return true;
-                    }
-                    else
-                    {
-                        action = commander.Order(frame, Abilities.ATTACK, targetTag: bestTarget.Unit.Tag);
-                        return true;
-                    }
-                }
-            }
+            //if (frame == LastLockOnFrame) { return false; }
+            //if (commander.LastLockOn == null || (frame - commander.LastLockOn.EndFrame) > (4.3 * SharkyOptions.FramesPerSecond))
+            //{
+            //    if (bestTarget != null && bestTarget.FrameLastSeen == frame && bestTarget.Unit.Tag != commander.UnitCalculation.Unit.Tag && MapDataService.SelfVisible(bestTarget.Unit.Pos))
+            //    {
+            //        if (Vector2.DistanceSquared(bestTarget.Position, commander.UnitCalculation.Position) <= 49)
+            //        {
+            //            TagService.TagAbility("lockon");
+            //            CameraManager.SetCamera(bestTarget.Position);
+            //            action = commander.Order(frame, Abilities.EFFECT_LOCKON, targetTag: bestTarget.Unit.Tag);
+            //            LastLockOnFrame = frame;
+            //            commander.LastLockOn = new LockOnData { StartFrame = frame, Tag = bestTarget.Unit.Tag, EndFrame = frame + (int)(14.3 * SharkyOptions.FramesPerSecond) };
+            //            return true;
+            //        }
+            //        else
+            //        {
+            //            action = commander.Order(frame, Abilities.ATTACK, targetTag: bestTarget.Unit.Tag);
+            //            return true;
+            //        }
+            //    }
+            //}
             
             return false;
         }

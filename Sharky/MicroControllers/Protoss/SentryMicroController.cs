@@ -2,10 +2,12 @@
 {
     public class SentryMicroController : IndividualMicroController
     {
+        int LastGuardianShieldActivationFrame { get; set; }
+
         public SentryMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled)
             : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled)
         {
-
+            LastGuardianShieldActivationFrame = -1000;
         }
 
         public override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
@@ -14,6 +16,15 @@
 
             if (OffensiveAbility(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action)) { return true; }
 
+            if (commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.GUARDIANSHIELD) && commander.UnitCalculation.Unit.Shield > 0)
+            {
+                var unshielded = commander.UnitCalculation.NearbyAllies.Where(a => !a.Unit.BuffIds.Contains((uint)Buffs.GUARDIANSHIELD) && a.EnemiesInRangeOf.Any(e => e.Range > 2)).OrderBy(a => Vector2.DistanceSquared(a.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+                if (unshielded != null)
+                {
+                    action = commander.Order(frame, Abilities.MOVE, unshielded.Position.ToPoint2D());
+                    return true;
+                }
+            }
             if (commander.UnitCalculation.Unit.Shield < 20)
             {
                 if (AvoidDamage(commander, target, defensivePoint, frame, out action))
@@ -54,10 +65,16 @@
                 return false;
             }
 
-            if (commander.UnitCalculation.NearbyEnemies.Count(e => e.Range > 2.5f && e.FrameLastSeen == frame && e.EnemiesInRange.Any()) > 5)
+            if (LastGuardianShieldActivationFrame + 10 > frame)
+            {
+                return false;
+            }
+
+            if (commander.UnitCalculation.NearbyEnemies.Count(e => e.Range > 2.5f && e.FrameLastSeen == frame && e.EnemiesInRange.Any(a => !a.Unit.BuffIds.Contains((uint)Buffs.GUARDIANSHIELD))) > 5)
             {
                 CameraManager.SetCamera(commander.UnitCalculation.Position);
                 action = commander.Order(frame, Abilities.EFFECT_GUARDIANSHIELD);
+                LastGuardianShieldActivationFrame = frame;
                 return true;
             }
             return false;

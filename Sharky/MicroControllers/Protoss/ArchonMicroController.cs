@@ -8,6 +8,47 @@
 
         }
 
+        public override List<SC2Action> Attack(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
+        {
+            if (commander.UnitCalculation.Unit.IsOnScreen)
+            {
+                var breakpoint = true;
+            }
+
+            List<SC2Action> action = null;
+            if (commander.UnitCalculation.Loaded || commander.UnitCalculation.Unit.BuildProgress < 1) { return action; }
+
+            if (commander.UnitCalculation.EnemiesInRange.Any(e => e.Damage > 0) || commander.UnitCalculation.EnemiesInRangeOf.Any())
+            {
+                return commander.Order(frame, Abilities.ATTACK, target);
+            }
+
+            return base.Attack(commander, target, defensivePoint, groupCenter, frame);
+        }
+
+        public override bool ContinueInRangeAttack(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
+            return false;
+        }
+
+        public override bool AttackBestTargetInRange(UnitCommander commander, Point2D target, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
+            if (bestTarget != null && commander.UnitCalculation.EnemiesInRange.Any())
+            {
+                if (bestTarget.Unit.IsHallucination && commander.UnitCalculation.NearbyEnemies.Any(e => !e.Unit.IsHallucination))
+                {
+                    return false;
+                }
+
+                action = commander.Order(frame, Abilities.ATTACK, bestTarget.Position.ToPoint2D());
+                return true;
+            }
+
+            return false;
+        }
+
         protected override bool AvoidTargetedDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
@@ -17,12 +58,34 @@
                 return false;
             }
 
+            if (commander.UnitCalculation.EnemiesInRangeOf.Any(e => e.Range > 2))
+            {
+                return false;
+            }
+
             return base.AvoidTargetedDamage(commander, target, defensivePoint, frame, out action);
+        }
+
+        protected override bool AvoidDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
+
+            if (commander.UnitCalculation.Unit.Shield > 0)
+            {
+                return false;
+            }
+
+            if (commander.UnitCalculation.EnemiesInRangeOf.Any(e => e.Range > 2))
+            {
+                return false;
+            }
+
+            return base.AvoidDamage(commander, target, defensivePoint, frame, out action);
         }
 
         public override bool WeaponReady(UnitCommander commander, int frame)
         {
-            return commander.UnitCalculation.Unit.WeaponCooldown < 5;
+            return true;
         }
 
         protected override UnitCalculation GetBestDpsReduction(UnitCommander commander, Weapon weapon, IEnumerable<UnitCalculation> primaryTargets, IEnumerable<UnitCalculation> secondaryTargets)
