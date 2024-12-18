@@ -157,7 +157,7 @@
         bool Storm(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
-            if (commander.UnitCalculation.Unit.Energy < 75 || !SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.PSISTORMTECH))
+            if (commander.UnitCalculation.Unit.Energy < 75 || (!SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.PSISTORMTECH) && !commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.NEURALPARASITE)))
             {
                 return false;
             }

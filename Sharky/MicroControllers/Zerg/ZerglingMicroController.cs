@@ -23,124 +23,6 @@
             return false;
         }
 
-        public override UnitCalculation GetBestTarget(UnitCommander commander, Point2D target, int frame)
-        {
-            var existingAttackOrder = commander.UnitCalculation.Unit.Orders.Where(o => o.AbilityId == (uint)Abilities.ATTACK || o.AbilityId == (uint)Abilities.ATTACK_ATTACK).FirstOrDefault();
-
-            var range = commander.UnitCalculation.Range;
-
-            var attacks = commander.UnitCalculation.EnemiesInRange.Where(u => u.Unit.DisplayType == DisplayType.Visible); // units that are in range right now
-
-            UnitCalculation bestAttack = null;
-            if (attacks.Any())
-            {
-                var oneShotKills = attacks.Where(a => a.Unit.Health + a.Unit.Shield < GetDamage(commander.UnitCalculation.Weapons, a.Unit, a.UnitTypeData) && !a.Unit.BuffIds.Contains((uint)Buffs.IMMORTALOVERLOAD));
-                if (oneShotKills.Any())
-                {
-                    if (existingAttackOrder != null)
-                    {
-                        var existing = oneShotKills.FirstOrDefault(o => o.Unit.Tag == existingAttackOrder.TargetUnitTag);
-                        if (existing != null)
-                        {
-                            return existing; // just keep attacking the same unit
-                        }
-                    }
-
-                    var oneShotKill = GetBestTargetFromList(commander, oneShotKills, existingAttackOrder);
-                    if (oneShotKill != null)
-                    {
-                        return oneShotKill;
-                    }
-                    else
-                    {
-                        commander.BestTarget = oneShotKills.OrderBy(o => o.Dps).FirstOrDefault();
-                        return commander.BestTarget;
-                    }
-                }
-
-                bestAttack = GetBestTargetFromList(commander, attacks, existingAttackOrder);
-                if (bestAttack != null && (bestAttack.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) || bestAttack.UnitClassifications.HasFlag(UnitClassification.DefensiveStructure) || (bestAttack.UnitClassifications.HasFlag(UnitClassification.Worker) && bestAttack.EnemiesInRange.Any(e => e.Unit.Tag == commander.UnitCalculation.Unit.Tag))))
-                {
-                    commander.BestTarget = bestAttack;
-                    return bestAttack;
-                }
-            }
-
-            attacks = commander.UnitCalculation.NearbyEnemies.Where(enemyAttack => enemyAttack.Unit.DisplayType == DisplayType.Visible && !AvoidedUnitTypes.Contains((UnitTypes)enemyAttack.Unit.UnitType) && DamageService.CanDamage(commander.UnitCalculation, enemyAttack) && !InRange(enemyAttack.Position, commander.UnitCalculation.Position, range + enemyAttack.Unit.Radius + commander.UnitCalculation.Unit.Radius));
-
-            var safeAttacks = attacks.Where(a => a.Damage < commander.UnitCalculation.Unit.Health);
-            if (safeAttacks.Any())
-            {
-                var bestOutOfRangeAttack = GetBestTargetFromList(commander, safeAttacks, existingAttackOrder);
-                if (bestOutOfRangeAttack != null && (bestOutOfRangeAttack.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) || bestOutOfRangeAttack.UnitClassifications.HasFlag(UnitClassification.DefensiveStructure)))
-                {
-                    commander.BestTarget = bestOutOfRangeAttack;
-                    return bestOutOfRangeAttack;
-                }
-                if (bestAttack == null)
-                {
-                    bestAttack = bestOutOfRangeAttack;
-                }
-            }
-
-            if (commander.UnitCalculation.Unit.Health < 6)
-            {
-                return null;
-            }
-
-            if (attacks.Any())
-            {
-                var bestOutOfRangeAttack = GetBestTargetFromList(commander, attacks, existingAttackOrder);
-                if (bestOutOfRangeAttack != null && (bestOutOfRangeAttack.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) || bestOutOfRangeAttack.UnitClassifications.HasFlag(UnitClassification.DefensiveStructure)))
-                {
-                    var movementSpeed = GetMovementSpeed(commander);
-                    if (bestOutOfRangeAttack.Unit.UnitType == (uint)UnitTypes.TERRAN_REAPER && movementSpeed < bestOutOfRangeAttack.UnitTypeData.MovementSpeed)
-                    {
-                        if (commander.UnitCalculation.NearbyAllies.Any(a => a.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) && Vector2.DistanceSquared(a.Position, bestOutOfRangeAttack.Position) < Vector2.DistanceSquared(commander.UnitCalculation.Position, bestOutOfRangeAttack.Position)))
-                        {
-                            bestOutOfRangeAttack = GetBestTargetFromList(commander, attacks.Where(a => a.UnitTypeData.MovementSpeed <= movementSpeed), existingAttackOrder);
-                        }
-                    }
-
-                    commander.BestTarget = bestOutOfRangeAttack;
-                    return bestOutOfRangeAttack;
-                }
-                if (bestAttack == null)
-                {
-                    bestAttack = bestOutOfRangeAttack;
-                }
-            }
-
-            if (!MapDataService.SelfVisible(target)) // if enemy main is unexplored, march to enemy main
-            {
-                var fakeMainBase = new Unit(commander.UnitCalculation.Unit);
-                fakeMainBase.Pos = new Point { X = target.X, Y = target.Y, Z = 1 };
-                fakeMainBase.Alliance = Alliance.Enemy;
-                return new UnitCalculation(fakeMainBase, new List<Unit>(), SharkyUnitData, SharkyOptions, UnitDataService, MapDataService.IsOnCreep(fakeMainBase.Pos), frame);
-            }
-            var unitsNearEnemyMain = ActiveUnitData.EnemyUnits.Values.Where(e => !AvoidedUnitTypes.Contains((UnitTypes)e.Unit.UnitType) && e.Unit.UnitType != (uint)UnitTypes.ZERG_LARVA && InRange(new Vector2(target.X, target.Y), e.Position, 20));
-            if (unitsNearEnemyMain.Any() && InRange(new Vector2(target.X, target.Y), commander.UnitCalculation.Position, 100))
-            {
-                attacks = unitsNearEnemyMain.Where(enemyAttack => enemyAttack.Unit.DisplayType == DisplayType.Visible && DamageService.CanDamage(commander.UnitCalculation, enemyAttack)); // enemies in the main enemy base
-                if (attacks.Any())
-                {
-                    var bestMainAttack = GetBestTargetFromList(commander, attacks, existingAttackOrder);
-                    if (bestMainAttack != null && (bestMainAttack.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) || bestMainAttack.UnitClassifications.HasFlag(UnitClassification.DefensiveStructure) || bestMainAttack.UnitClassifications.HasFlag(UnitClassification.Worker)))
-                    {
-                        commander.BestTarget = bestMainAttack;
-                        return bestMainAttack;
-                    }
-                    if (bestAttack == null)
-                    {
-                        bestAttack = bestMainAttack;
-                    }
-                }
-            }
-
-            commander.BestTarget = bestAttack;
-            return bestAttack;
-        }
-
         public override float GetMovementSpeed(UnitCommander commander)
         {
             if (SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.ZERGLINGMOVEMENTSPEED))
@@ -178,6 +60,18 @@
             }
 
             return base.Scout(commander, target, defensivePoint, frame, prioritizeVision);
+        }
+
+        protected override bool AttackersFilter(UnitCommander commander, UnitCalculation enemyAttack)
+        {
+            if (enemyAttack.Unit.IsHallucination) { return false; }
+            return base.AttackersFilter(commander, enemyAttack);
+        }
+
+        protected override bool GroundAttackersFilter(UnitCommander commander, UnitCalculation enemyAttack)
+        {
+            if (enemyAttack.Unit.IsHallucination) { return false; }
+            return base.GroundAttackersFilter(commander, enemyAttack);
         }
     }
 }

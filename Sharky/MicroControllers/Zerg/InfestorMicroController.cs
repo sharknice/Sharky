@@ -2,8 +2,8 @@
 {
     public class InfestorMicroController : IndividualMicroController
     {
-        private int lastFungalFrame = 0;
-        private int lastNeuralFrame = 0;
+        private int lastFungalFrame = -1000;
+        private int lastNeuralFrame = -1000;
         //private int lastShroudFrame = 0;
 
         private Dictionary<UnitTypes, int> GroundNeuralPriorities = new()
@@ -100,8 +100,8 @@
                 return false;
             }
 
-            var targets = commander.UnitCalculation.NearbyEnemies.Take(25).Where(enemyUnit =>
-                                InRange(enemyUnit.Position, commander.UnitCalculation.Position, range + enemyUnit.Unit.Radius + commander.UnitCalculation.Unit.Radius));
+            var targets = commander.UnitCalculation.NearbyEnemies.Where(enemyUnit =>
+                                InRange(enemyUnit.Position, commander.UnitCalculation.Position, range + enemyUnit.Unit.Radius + commander.UnitCalculation.Unit.Radius) && !enemyUnit.Unit.IsHallucination);
 
             if (targets.Any())
             {
@@ -230,7 +230,12 @@
                 return false;
             }
 
-            if (lastFungalFrame >= frame - 10)
+            if (commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.EFFECT_FUNGALGROWTH)) {
+                lastFungalFrame = frame;
+                return true; 
+            }
+
+            if (lastFungalFrame >= frame - 25)
             {
                 return false;
             }
@@ -238,7 +243,7 @@
             var attacks = new List<UnitCalculation>();
             var center = commander.UnitCalculation.Position;
 
-            foreach (var enemyAttack in commander.UnitCalculation.NearbyEnemies.Take(25))
+            foreach (var enemyAttack in commander.UnitCalculation.NearbyEnemies)
             {
                 if (enemyAttack.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELING && !enemyAttack.Attributes.Contains(SC2Attribute.Structure) && !enemyAttack.Unit.BuffIds.Contains((uint)Buffs.FUNGALGROWTH) &&
                     InRange(enemyAttack.Position, commander.UnitCalculation.Position, 10 + enemyAttack.Unit.Radius + commander.UnitCalculation.Unit.Radius))

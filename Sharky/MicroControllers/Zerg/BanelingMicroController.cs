@@ -129,7 +129,7 @@
 
             var range = commander.UnitCalculation.Range;
 
-            var attacks = commander.UnitCalculation.NearbyEnemies.Take(25).Where(u => AttackersFilter(commander, u));
+            var attacks = commander.UnitCalculation.NearbyEnemies.Where(u => AttackersFilter(commander, u));
 
             if (attacks.Any())
             {
@@ -152,6 +152,7 @@
 
         protected override bool AttackersFilter(UnitCommander commander, UnitCalculation enemyAttack)
         {
+            if (enemyAttack.Unit.IsHallucination) { return false; }
             if (enemyAttack.Unit.IsFlying || enemyAttack.Unit.UnitType == (uint)UnitTypes.ZERG_EGG)
             { 
                 return false; 
@@ -229,6 +230,12 @@
                 speed *= 1.3f;
             }
             return speed;
+        }
+
+        protected override bool GroundAttackersFilter(UnitCommander commander, UnitCalculation enemyAttack)
+        {
+            if (enemyAttack.Unit.IsHallucination) { return false; }
+            return base.GroundAttackersFilter(commander, enemyAttack);
         }
     }
 }

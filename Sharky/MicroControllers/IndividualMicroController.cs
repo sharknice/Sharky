@@ -490,6 +490,20 @@
 
             if (MoveFromBeingClosest(commander, target, defensivePoint, groupCenter, bestTarget, formation, frame, out action)) { return true; }
 
+            var closest = commander.UnitCalculation.EnemiesInRange.Where(e => DamageService.CanDamage(e, commander.UnitCalculation)).OrderBy(e => Vector2.Distance(e.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+            if (closest != null && closest.Damage > 0 && closest.Range < commander.UnitCalculation.Range && (closest.UnitTypeData.MovementSpeed <= commander.UnitCalculation.UnitTypeData.MovementSpeed || closest.Unit.UnitType == (uint)UnitTypes.PROTOSS_ARCHON))
+            {
+                var avoidPoint = GetPositionFromRange(commander, closest.Unit.Pos, commander.UnitCalculation.Unit.Pos, commander.UnitCalculation.Range);
+                if (MapDataService.MapHeight(avoidPoint) != MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos) || MapDataService.MapHeight(avoidPoint) != MapDataService.MapHeight(closest.Unit.Pos))
+                {
+                }
+                else
+                {
+                    action = commander.Order(frame, Abilities.MOVE, avoidPoint);
+                    return true;
+                }
+            }
+
             return NavigateToTarget(commander, target, groupCenter, bestTarget, formation, frame, out action);
         }
 
@@ -1739,7 +1753,8 @@
                     }
                     else
                     {
-                        if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.KillWorkers)
+                        var closestEnemy = commander.UnitCalculation.NearbyEnemies.OrderBy(e => Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+                        if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.KillWorkers || closestEnemy.Unit.IsHallucination)
                         {
                             action = MoveToTarget(commander, enemyPosition, frame);
                         }
@@ -2913,6 +2928,7 @@
 
         protected virtual bool GroundAttackersFilter(UnitCommander commander, UnitCalculation enemyAttack)
         {
+            if (commander.UnitCalculation.Unit.IsHallucination && enemyAttack.Unit.IsHallucination) { return false; }
             if (PredictedHealth(enemyAttack) <= 0 || AvoidedUnitTypes.Contains((UnitTypes)enemyAttack.Unit.UnitType))
             {
                 return false;
@@ -2941,6 +2957,7 @@
 
         protected virtual bool AirAttackersFilter(UnitCommander commander, UnitCalculation enemyAttack)
         {
+            if (commander.UnitCalculation.Unit.IsHallucination && enemyAttack.Unit.IsHallucination) { return false; }
             if (PredictedHealth(enemyAttack) <= 0 || AvoidedUnitTypes.Contains((UnitTypes)enemyAttack.Unit.UnitType))
             {
                 return false;

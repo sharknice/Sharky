@@ -108,7 +108,7 @@
                     enemyAttack.Unit.UnitType != (uint)UnitTypes.TERRAN_NUKE &&
                     enemyAttack.Unit.UnitType != (uint)UnitTypes.ZERG_PARASITICBOMBDUMMY &&
                     !enemyAttack.Unit.IsHallucination &&
-                    InRange(enemyAttack.Position, commander.UnitCalculation.Position, 9 + enemyAttack.Unit.Radius + commander.UnitCalculation.Unit.Radius) && MapDataService.SelfVisible(enemyAttack.Unit.Pos))
+                    InRange(enemyAttack.Position, commander.UnitCalculation.Position, 9 + enemyAttack.Unit.Radius + commander.UnitCalculation.Unit.Radius) && (MapDataService.SelfVisible(enemyAttack.Unit.Pos) || !MapDataService.SelfVisible(commander.UnitCalculation.Unit.Pos)))
                 {
                     attacks.Add(enemyAttack);
                 }
