@@ -101,7 +101,7 @@
             }
 
             var targets = commander.UnitCalculation.NearbyEnemies.Where(enemyUnit =>
-                                InRange(enemyUnit.Position, commander.UnitCalculation.Position, range + enemyUnit.Unit.Radius + commander.UnitCalculation.Unit.Radius) && !enemyUnit.Unit.IsHallucination);
+                                InRange(enemyUnit.Position, commander.UnitCalculation.Position, range + enemyUnit.Unit.Radius + commander.UnitCalculation.Unit.Radius) && !enemyUnit.Unit.IsHallucination && enemyUnit.Unit.BuildProgress == 1);
 
             if (targets.Any())
             {
@@ -230,7 +230,7 @@
                 return false;
             }
 
-            if (commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.EFFECT_FUNGALGROWTH)) {
+            if (commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.EFFECT_FUNGALGROWTH) || (commander.LastAbility == Abilities.EFFECT_FUNGALGROWTH && commander.LastOrderFrame >= frame - 2)) {
                 lastFungalFrame = frame;
                 return true; 
             }

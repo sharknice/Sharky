@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <LangVersion>10.0</LangVersion>
     <Authors>Sharknice</Authors>
     <Description>The Sharky Framework.  A StarCraft 2 API framework for creating StarCraft 2 bots</Description>

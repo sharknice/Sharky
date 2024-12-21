@@ -2,6 +2,8 @@
 {
     public class SiegeTankMicroController : IndividualMicroController
     {
+        int LastLeapFromSiegeFrame = -1000;
+
         public SiegeTankMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled)
             : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled)
         {
@@ -37,15 +39,14 @@
                 return false; 
             }
 
-            if (!commander.UnitCalculation.NearbyAllies.Any(a => a.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED) && commander.UnitCalculation.NearbyAllies.Any(a => a.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANK))
+            // leap frog toward enemies
+            if (LastLeapFromSiegeFrame + 120 < frame && commander.UnitCalculation.NearbyEnemies.Any(e => !e.Unit.IsFlying && !e.Attributes.Contains(SC2APIProtocol.Attribute.Structure)) && commander.UnitCalculation.NearbyAllies.Any(a => a.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANK) && !commander.UnitCalculation.NearbyAllies.Any(a => a.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED))
             {
-                if (commander.UnitCalculation.NearbyEnemies.Any(e => (e.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED || e.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANK) && Vector2.Distance(e.Position, commander.UnitCalculation.Position) < 16))
-                {
-                    CameraManager.SetCamera(commander.UnitCalculation.Position);
-                    TagService.TagAbility("siege");
-                    action = commander.Order(frame, Abilities.MORPH_SIEGEMODE);
-                    return true;
-                }
+                CameraManager.SetCamera(commander.UnitCalculation.Position);
+                TagService.TagAbility("siege");
+                action = commander.Order(frame, Abilities.MORPH_SIEGEMODE);
+                LastLeapFromSiegeFrame = frame;
+                return true;
             }
 
             var enemiesInSiegeRange = commander.UnitCalculation.NearbyEnemies.Where(e => !e.Unit.IsFlying && 
@@ -86,7 +87,23 @@
                 {
                     if (Vector2.Distance(commander.UnitCalculation.Position, closestEnemy.Position) > Vector2.Distance(unitToSupport.UnitCalculation.Position, closestEnemy.Position))
                     {
-                        return commander.Order(frame, Abilities.MOVE, target);
+                        return commander.Order(frame, Abilities.MOVE, closestEnemy.Position.ToPoint2D());
+                    }
+                }
+            }
+
+            if (unitToSupport.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED && !commander.UnitCalculation.EnemiesInRange.Any() && !commander.UnitCalculation.EnemiesInRangeOf.Any() && !unitToSupport.UnitCalculation.EnemiesInRangeOf.Any())
+            {
+                if (OffensiveAbility(commander, target, defensivePoint, groupCenter, null, frame, out action)) { return action; }
+                if (Vector2.Distance(commander.UnitCalculation.Position, target.ToVector2()) > Vector2.Distance(unitToSupport.UnitCalculation.Position, target.ToVector2()))
+                {
+                    var closestEnemy = unitToSupport.UnitCalculation.NearbyEnemies.OrderBy(e => Vector2.DistanceSquared(e.Position, unitToSupport.UnitCalculation.Position)).FirstOrDefault();
+                    if (closestEnemy != null)
+                    {
+                        if (Vector2.Distance(commander.UnitCalculation.Position, closestEnemy.Position) > Vector2.Distance(unitToSupport.UnitCalculation.Position, closestEnemy.Position))
+                        {
+                            return commander.Order(frame, Abilities.MOVE, closestEnemy.Position.ToPoint2D());
+                        }
                     }
                 }
             }

@@ -75,9 +75,14 @@
         {
             action = null;
 
+            if (commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.ANTIARMORMISSILE) || (commander.LastAbility == Abilities.ANTIARMORMISSILE && commander.LastOrderFrame >= frame - 2))
+            {
+                return true;
+            }
+
             if (commander.UnitCalculation.Unit.Energy >= 75 && LastAntiArmorCastFrame + 25 < frame)
             {
-                var best = commander.UnitCalculation.NearbyEnemies.Where(e => !e.Unit.IsHallucination && e.Damage > 0 && !e.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && Vector2.Distance(commander.UnitCalculation.Position, e.Position) < 100)
+                var best = commander.UnitCalculation.NearbyEnemies.Where(e => !e.Unit.IsHallucination && e.Damage > 0 && !e.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && Vector2.Distance(commander.UnitCalculation.Position, e.Position) < 11)
                     .OrderByDescending(e =>  e.NearbyAllies.Count(a => Vector2.Distance(e.Position, a.Position) <= AntiArmorMissileRadius)).FirstOrDefault();
 
                 if (best != null && best.NearbyAllies.Count(a => Vector2.Distance(best.Position, a.Position) <= AntiArmorMissileRadius) - best.NearbyEnemies.Count(a => Vector2.Distance(best.Position, a.Position) <= AntiArmorMissileRadius) >= hitThreshold)

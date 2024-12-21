@@ -1,6 +1,4 @@
-﻿using static SC2APIProtocol.AbilityData.Types;
-
-namespace Sharky.MicroControllers.Terran
+﻿namespace Sharky.MicroControllers.Terran
 {
     public class HellionMicroController : IndividualMicroController
     {

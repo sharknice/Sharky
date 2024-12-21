@@ -15,7 +15,7 @@ namespace Sharky.Managers
         BaseData BaseData;
         EnemyData EnemyData;
 
-        float NearbyDistance = 18;
+        float NearbyDistance = 30;
         float AvoidRange = 1;
 
         ActiveUnitData ActiveUnitData;

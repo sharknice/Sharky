@@ -2,12 +2,11 @@
 {
     public class SiegeTankSiegedMicroController : IndividualMicroController
     {
-        int LastUnseigeFrame;
+        int LastUnseigeFrame = -1000;
 
         public SiegeTankSiegedMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled)
             : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled)
         {
-            LastUnseigeFrame = 0;
         }
 
         public override List<SC2APIProtocol.Action> Attack(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
@@ -61,12 +60,12 @@
         {
             action = null;
 
-            if (LastUnseigeFrame == frame)
+            if (LastUnseigeFrame + 120 > frame)
             {
                 return false; // don't unseige more than one tank at a time
             }
 
-            if (commander.UnitRole == UnitRole.Leader)
+            if (commander.UnitRole == UnitRole.Leader && LastUnseigeFrame + 500 > frame)
             {
                 if (!commander.UnitCalculation.EnemiesInRange.Any(e => e.FrameLastSeen > frame - 25))
                 {
@@ -92,9 +91,14 @@
                 }
             }
 
+            if (commander.UnitCalculation.NearbyEnemies.Any(e => e.FrameLastSeen == frame && !e.Unit.IsFlying && e.DamageGround && e.PreviousUnitCalculation != null && Vector2.DistanceSquared(e.PreviousUnitCalculation.Position, commander.UnitCalculation.Position) > Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position)))
+            {
+                return false;
+            }
+
             if (commander.UnitCalculation.EnemiesInRange.Count(e => e.Damage > 0 || Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position) < commander.UnitCalculation.Range * commander.UnitCalculation.Range) == 0) // get a little bit closer to buildings
             {
-                if (commander.UnitCalculation.NearbyEnemies.Take(25).Any(e => Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position) < Vector2.DistanceSquared(new Vector2(e.PreviousUnit.Pos.X, e.PreviousUnit.Pos.Y), commander.UnitCalculation.Position)))
+                if (commander.UnitCalculation.NearbyEnemies.Any(e => Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position) < Vector2.DistanceSquared(new Vector2(e.PreviousUnit.Pos.X, e.PreviousUnit.Pos.Y), commander.UnitCalculation.Position)))
                 {
                     return false;
                 }

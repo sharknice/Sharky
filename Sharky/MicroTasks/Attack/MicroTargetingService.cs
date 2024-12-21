@@ -3,9 +3,12 @@
     public class MicroTargetingService : TargetingService
     {
         AreaService AreaService;
+        MacroData MacroData;
+
         public MicroTargetingService(DefaultSharkyBot defaultSharkyBot) : base(defaultSharkyBot.ActiveUnitData, defaultSharkyBot.MapDataService, defaultSharkyBot.BaseData, defaultSharkyBot.TargetingData)
         {
             AreaService = defaultSharkyBot.AreaService;
+            MacroData = defaultSharkyBot.MacroData;
         }
 
         public Point2D GetMicroAttackPoint(Point2D attackPoint)
@@ -20,7 +23,7 @@
             if (armyPoint != null)
             {
                 var vector = armyPoint.ToVector2();
-                var closestEnemy = ActiveUnitData.EnemyUnits.Values.Where(e => !e.Unit.IsHallucination).OrderBy(e => Vector2.DistanceSquared(vector, e.Position)).FirstOrDefault();
+                var closestEnemy = ActiveUnitData.EnemyUnits.Values.Where(e => !e.Unit.IsHallucination && e.FrameLastSeen == MacroData.Frame).OrderBy(e => Vector2.DistanceSquared(vector, e.Position)).FirstOrDefault();
                 if (closestEnemy != null)
                 {
                     return closestEnemy.Position.ToPoint2D();
