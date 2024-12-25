@@ -107,6 +107,17 @@
                 PathWalkable(point.X - radius, point.Y - radius);
         }
 
+        public bool PathWalkable(Vector2 point, int radius)
+        {
+            return PathWalkable(point.X, point.Y) &&
+                PathWalkable(point.X - radius, point.Y) &&
+                PathWalkable(point.X + radius, point.Y) &&
+                PathWalkable(point.X, point.Y - radius) &&
+                PathWalkable(point.X, point.Y + radius) &&
+                PathWalkable(point.X + radius, point.Y + radius) &&
+                PathWalkable(point.X - radius, point.Y - radius);
+        }
+
         public bool AnyPathWalkable(Point point, int radius)
         {
             return PathWalkable(point.X, point.Y) ||
@@ -219,6 +230,24 @@
         public bool OutOfBounds(Point point)
         {
             if (point == null || point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public bool OutOfBounds(Point2D point)
+        {
+            if (point == null || point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public bool OutOfBounds(Vector2 point)
+        {
+            if (point.X < 0 || point.Y < 0 || point.X >= MapData.MapWidth || point.Y >= MapData.MapHeight)
             {
                 return true;
             }

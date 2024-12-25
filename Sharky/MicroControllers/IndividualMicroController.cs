@@ -971,9 +971,15 @@
                 {
                     if (Vector2.DistanceSquared(commander.UnitCalculation.Position, closestAlly.Position) < (LooseFormationDistance * LooseFormationDistance))
                     {
-                        var avoidPoint = GetPositionFromRange(commander, closestAlly.Unit.Pos, commander.UnitCalculation.Unit.Pos, LooseFormationDistance + .5f);
-                        action = commander.Order(frame, Abilities.MOVE, avoidPoint);
-                        return true;
+                        if (Vector2.DistanceSquared(commander.UnitCalculation.Position, target.ToVector2()) > Vector2.DistanceSquared(closestAlly.Position, target.ToVector2()))
+                        {
+                            var avoidPoint = GetPositionFromRange(commander, closestAlly.Unit.Pos, commander.UnitCalculation.Unit.Pos, LooseFormationDistance + .5f);
+                            if ((commander.UnitCalculation.Unit.IsFlying && !MapDataService.OutOfBounds(avoidPoint)) || MapDataService.PathWalkable(avoidPoint))
+                            {
+                                action = commander.Order(frame, Abilities.MOVE, avoidPoint);
+                                return true;
+                            }
+                        }
                     }
                 }
             }
