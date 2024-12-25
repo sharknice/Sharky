@@ -43,12 +43,12 @@
         {
             action = null;
 
+            if (commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.EFFECT_KD8CHARGE)) { return true; }
+
             if (WeaponReady(commander, frame) && bestTarget != null && commander.UnitCalculation.EnemiesInRange.Any(e => e.Unit.Tag == bestTarget.Unit.Tag))
             {
                 return false;
             }
-
-            if (commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.EFFECT_KD8CHARGE)) { return true; }
 
             if (LastChargeFrame + 10 > frame)
             {

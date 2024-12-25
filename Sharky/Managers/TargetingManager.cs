@@ -332,7 +332,7 @@
 
                 var target = TargetingData.AttackPoint.ToVector2();
                 var closest = ActiveUnitData.Commanders.Values.Where(u => u.UnitRole != UnitRole.BlockExpansion && u.UnitRole != UnitRole.DoNotDefend && u.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.DefensiveStructure) || u.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.ResourceCenter)).OrderBy(u => Vector2.DistanceSquared(u.UnitCalculation.Position, target)).FirstOrDefault();
-                if (closest != null)
+                if (closest != null && (closest.UnitCalculation.Position.X != BaseData.BaseLocations.FirstOrDefault().Location.X && closest.UnitCalculation.Position.Y != BaseData.BaseLocations.FirstOrDefault().Location.Y))
                 {
                     TargetingData.ForwardDefensePoint = closest.UnitCalculation.Position.ToPoint2D();
                 }

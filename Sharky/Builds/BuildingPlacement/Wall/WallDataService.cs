@@ -95,7 +95,7 @@
             AddTerranWallData(mapName, wallData);
             AddPartialWallData(mapName, wallData);
             AddBlockWallData(mapName, wallData);
-            AddCalcultedWallData(wallData);
+            AddCalcultedWallData(wallData, mapName);
             stopwatch.Stop();
             Console.WriteLine($"Calculating wall data in {stopwatch.ElapsedMilliseconds} ms");
             SaveGeneratedMapWallData(mapName, wallData);
@@ -194,7 +194,7 @@
             }
         }
 
-        public void AddCalcultedWallData(List<WallData> wallData)
+        public void AddCalcultedWallData(List<WallData> wallData, string mapName)
         {
             var oppositeBase = BaseData.EnemyBaseLocations.FirstOrDefault();
             var oppositeLocation = new Point2D { X = oppositeBase.Location.X + 4, Y = oppositeBase.Location.Y + 4 };
@@ -204,7 +204,7 @@
                 var data = wallData.FirstOrDefault(d => d.BasePosition.X == baseLocation.Location.X && d.BasePosition.Y == baseLocation.Location.Y);
                 wallData.Remove(data);
                 if (data == null) { data = new WallData { BasePosition = baseLocation.Location }; }
-                data = AddCalculatedWallDataForBase(baseLocation, oppositeLocation, data);
+                data = AddCalculatedWallDataForBase(baseLocation, oppositeLocation, data, mapName);
                 wallData.Add(data);
             }
 
@@ -216,12 +216,12 @@
                 var data = wallData.FirstOrDefault(d => d.BasePosition.X == baseLocation.Location.X && d.BasePosition.Y == baseLocation.Location.Y);
                 wallData.Remove(data);
                 if (data == null) { data = new WallData { BasePosition = baseLocation.Location }; }
-                data = AddCalculatedWallDataForBase(baseLocation, oppositeLocation, data);
+                data = AddCalculatedWallDataForBase(baseLocation, oppositeLocation, data, mapName);
                 wallData.Add(data);
             }
         }
 
-        private WallData AddCalculatedWallDataForBase(BaseLocation baseLocation, Point2D oppositeLocation, WallData data)
+        private WallData AddCalculatedWallDataForBase(BaseLocation baseLocation, Point2D oppositeLocation, WallData data, string mapName)
         {
             var location = new Point2D { X = baseLocation.Location.X + 4, Y = baseLocation.Location.Y + 4 };
             var chokePoints = ChokePointsService.GetChokePoints(location, oppositeLocation, 0);
@@ -241,6 +241,11 @@
                             // start at left side of the top of the ramp
                             var baseX = wallPoints.OrderBy(w => w.X).First().X;
                             var baseY = wallPoints.OrderBy(w => w.X).First().Y;
+
+                            if (mapName.ToLower().Contains("automaton"))
+                            {
+                                baseX = baseX + 1;
+                            }
 
                             if (data.FullDepotWall == null)
                             {
@@ -402,6 +407,12 @@
                             // TODO: set these numbers based on this orderd position, also need to do it for terran wall
                             var baseX = wallPoints.OrderByDescending(w => w.X).First().X;
                             var baseY = wallPoints.OrderByDescending(w => w.X).First().Y;
+
+                            if (mapName.ToLower().Contains("automaton"))
+                            {
+                                baseX = baseX - 2f;
+                                baseY = baseY - 1;
+                            }
 
                             if (data.FullDepotWall == null)
                             {

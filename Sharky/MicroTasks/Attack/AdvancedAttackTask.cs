@@ -33,6 +33,7 @@
         public bool OnlyDefendBuildings { get; set; }
         public bool AllowSplitWhileKill { get; set; }
         public bool AllowSplit { get; set; }
+        public bool AllowSplitForWorkers { get; set; }
         public bool DeathBallMode { get; set; }
         public bool DeathBallClearCreep { get; set; }
         public bool ClaimAllUnits {  get; set; }
@@ -72,6 +73,7 @@
 
             AllowSplitWhileKill = true;
             AllowSplit = true;
+            AllowSplitForWorkers = true;
             ClaimAllUnits = false;
         }
 
@@ -320,6 +322,11 @@
             {
                 var height = MapDataService.MapHeight(TargetingData.MainDefensePoint);
                 attackingEnemies = attackingEnemies.Where(e => MapDataService.MapHeight(e.Position) == height || e.EnemiesInRange.Any(a => MapDataService.MapHeight(a.Position) == height));
+            }
+
+            if (!AllowSplitForWorkers)
+            {
+                attackingEnemies = attackingEnemies.Where(e => !e.UnitClassifications.HasFlag(UnitClassification.Worker));
             }
 
             var attackPoint = TargetingData.AttackPoint;

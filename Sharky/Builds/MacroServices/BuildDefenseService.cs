@@ -1,6 +1,4 @@
-﻿using Sharky.Builds.BuildingPlacement;
-
-namespace Sharky.Builds.MacroServices
+﻿namespace Sharky.Builds.MacroServices
 {
     public class BuildDefenseService
     {
