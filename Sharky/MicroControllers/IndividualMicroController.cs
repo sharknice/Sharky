@@ -964,7 +964,7 @@
                 return false;
             }
 
-            if (formation == Formation.Loose)
+            if (formation == Formation.Loose && !((commander.UnitCalculation.EnemiesInRangeOf.Any() || commander.UnitCalculation.EnemiesInRange.Any()) && WeaponReady(commander, frame)))
             {
                 var closestAlly = commander.UnitCalculation.NearbyAllies.OrderBy(a => Vector2.DistanceSquared(commander.UnitCalculation.Position, a.Position)).FirstOrDefault();
                 if (closestAlly != null)

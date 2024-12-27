@@ -73,5 +73,81 @@
             if (enemyAttack.Unit.IsHallucination) { return false; }
             return base.GroundAttackersFilter(commander, enemyAttack);
         }
+
+        bool BonusDamageToSelf(UnitCommander commander, UnitCalculation enemy)
+        {
+            if (enemy.DamageGround && enemy.Weapon != null && enemy.Weapon.DamageBonus.Any(b => b.Attribute == SC2APIProtocol.Attribute.Light))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        protected override UnitCalculation GetBestTargetFromListWinGround(UnitCommander commander, IEnumerable<UnitCalculation> attacks, UnitOrder existingAttackOrder, Weapon weapon)
+        {
+            var groundAttackers = attacks.Where(u => u.DamageGround && u.Unit.UnitType != (uint)UnitTypes.ZERG_BROODLING && (!u.UnitClassifications.HasFlag(UnitClassification.Worker) || u.EnemiesInRange.Any(e => e.Unit.Tag == commander.UnitCalculation.Unit.Tag)) && GroundAttackersFilter(commander, u)).Where(e => !BonusDamageToSelf(commander, e));
+            if (groundAttackers.Any())
+            {
+                var bestDpsReduction = GetBestDpsReduction(commander, weapon, groundAttackers, attacks);
+
+                if (existingAttackOrder != null && bestDpsReduction != null)
+                {
+                    var existingReduction = groundAttackers.Where(o => o.Unit.Tag == existingAttackOrder.TargetUnitTag).FirstOrDefault();
+                    if (existingReduction == null && commander.BestTarget != null)
+                    {
+                        existingReduction = groundAttackers.FirstOrDefault(o => o.Unit.Tag == commander.BestTarget.Unit.Tag);
+                    }
+                    if (existingReduction != null)
+                    {
+                        var existing = existingReduction.Dps / TimeToKill(weapon, existingReduction.Unit, existingReduction.UnitTypeData);
+                        var best = bestDpsReduction.Dps / TimeToKill(weapon, bestDpsReduction.Unit, bestDpsReduction.UnitTypeData);
+                        if (existing * 1.25 > best)
+                        {
+                            return existingReduction; // just keep attacking the same unit
+                        }
+                    }
+                }
+
+                if (bestDpsReduction != null)
+                {
+                    return bestDpsReduction;
+                }
+            }
+
+            return base.GetBestTargetFromListWinGround(commander, attacks, existingAttackOrder, weapon);
+        }
+
+        protected override UnitCalculation GetBestTargetFromListThreats(UnitCommander commander, IEnumerable<UnitCalculation> attacks, UnitOrder existingAttackOrder, Weapon weapon, IEnumerable<UnitCalculation> threats)
+        {
+            var specificThreats = threats.Where(e => !BonusDamageToSelf(commander, e));
+            var bestDpsReduction = GetBestDpsReduction(commander, weapon, specificThreats, attacks);
+            if (existingAttackOrder != null && bestDpsReduction != null)
+            {
+                var existingReduction = threats.Where(o => o.Unit.Tag == existingAttackOrder.TargetUnitTag).FirstOrDefault();
+                if (commander.BestTarget != null)
+                {
+                    var existing = threats.FirstOrDefault(o => o.Unit.Tag == commander.BestTarget.Unit.Tag);
+                    if (existing != null)
+                    {
+                        existingReduction = existing;
+                    }
+                }
+                if (existingReduction != null)
+                {
+                    var existing = existingReduction.Dps / TimeToKill(weapon, existingReduction.Unit, existingReduction.UnitTypeData);
+                    var best = bestDpsReduction.Dps / TimeToKill(weapon, bestDpsReduction.Unit, bestDpsReduction.UnitTypeData);
+                    if (existing * 1.25 > best)
+                    {
+                        return existingReduction; // just keep attacking the same unit
+                    }
+                }
+            }
+            if (bestDpsReduction != null)
+            {
+                return bestDpsReduction;
+            }
+
+            return base.GetBestTargetFromListThreats(commander, attacks, existingAttackOrder, weapon, threats);
+        }
     }
 }

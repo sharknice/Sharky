@@ -47,6 +47,12 @@
 
         public override bool OffensiveAbility(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
+            if (commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.EFFECT_GHOSTSNIPE) || commander.LastAbility == Abilities.EFFECT_GHOSTSNIPE && commander.LastOrderFrame + 10 > frame)
+            {
+                action = null;
+                return true;
+            }
+
             if (EMP(commander, frame, out action))
             {
                 TagService.TagAbility("EMP");
@@ -121,14 +127,15 @@
         bool Snipe(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
-            if (commander.UnitCalculation.Unit.Energy < 50)
-            {
-                return false;
-            }
 
             if (commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.EFFECT_GHOSTSNIPE) || commander.LastAbility == Abilities.EFFECT_GHOSTSNIPE && commander.LastOrderFrame + 10 > frame)
             {
                 return true;
+            }
+
+            if (commander.UnitCalculation.Unit.Energy < 50)
+            {
+                return false;
             }
 
             if (LastSnipeFrame + 10 > frame && LastEmpFrame + 10 > frame)
@@ -137,7 +144,7 @@
             }
 
             var vector = commander.UnitCalculation.Position;
-            var enemiesInRange = commander.UnitCalculation.NearbyEnemies.Where(e => e.Unit.Energy >= 50 && e.Attributes.Contains(SC2APIProtocol.Attribute.Biological) && e.FrameLastSeen == frame && Vector2.Distance(e.Position, vector) <= SnipeRange).OrderByDescending(e => e.Unit.Energy).ThenBy(e => Vector2.DistanceSquared(e.Position, vector));
+            var enemiesInRange = commander.UnitCalculation.NearbyEnemies.Where(e => e.Attributes.Contains(SC2APIProtocol.Attribute.Biological) && e.FrameLastSeen == frame && Vector2.Distance(e.Position, vector) <= SnipeRange + commander.UnitCalculation.Unit.Radius + e.Unit.Radius).OrderByDescending(e => e.Unit.Energy).ThenBy(e => Vector2.DistanceSquared(e.Position, vector));
 
             foreach (var enemy in enemiesInRange)
             {
@@ -161,6 +168,17 @@
                 }
             }
 
+            if (commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.NEURALPARASITE))
+            {
+                var enemy = enemiesInRange.FirstOrDefault();
+                if (enemy != null)
+                {
+                    LastSnipeFrame = frame;
+                    CameraManager.SetCamera(enemy.Position);
+                    action = commander.Order(frame, Abilities.EFFECT_GHOSTSNIPE, targetTag: enemy.Unit.Tag);
+                    return true;
+                }
+            }
             return false;
         }
     }

@@ -44,9 +44,21 @@
         {
         }
 
+        protected override bool DealWithSiegedTanks(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2Action> action)
+        {
+            action = null;
+            return false;
+        }
+
         public override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
+
+            if (commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.EFFECT_FUNGALGROWTH) || (commander.LastAbility == Abilities.EFFECT_FUNGALGROWTH && commander.LastOrderFrame >= frame - 2))
+            {
+                lastFungalFrame = frame;
+                return true;
+            }
 
             if (SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.BURROW))
             {
@@ -245,8 +257,7 @@
 
             foreach (var enemyAttack in commander.UnitCalculation.NearbyEnemies)
             {
-                if (enemyAttack.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELING && !enemyAttack.Attributes.Contains(SC2Attribute.Structure) && !enemyAttack.Unit.BuffIds.Contains((uint)Buffs.FUNGALGROWTH) &&
-                    InRange(enemyAttack.Position, commander.UnitCalculation.Position, 10 + enemyAttack.Unit.Radius + commander.UnitCalculation.Unit.Radius))
+                if (enemyAttack.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELING && !enemyAttack.Attributes.Contains(SC2Attribute.Structure) && !enemyAttack.Unit.BuffIds.Contains((uint)Buffs.FUNGALGROWTH))
                 {
                     attacks.Add(enemyAttack);
                 }
@@ -311,20 +322,23 @@
         {
             action = null;
 
-            if (NeuralAbility(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action))
-            {
-                TagService.TagAbility("neural");
-                return true;
-            }
             if (FungalAbility(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action))
             {
                 TagService.TagAbility("fungal");
                 return true;
             }
-            if (ShroudAbility(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action))
+            if (lastFungalFrame < frame - 25)
             {
-                TagService.TagAbility("shroud");
-                return true;
+                if (NeuralAbility(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action))
+                {
+                    TagService.TagAbility("neural");
+                    return true;
+                }
+                if (ShroudAbility(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action))
+                {
+                    TagService.TagAbility("shroud");
+                    return true;
+                }
             }
 
             return false;
