@@ -68,5 +68,39 @@ namespace Sharky.MicroControllers.Terran
 
             return base.GetBestTarget(commander, target, frame);
         }
+
+        public override bool Move(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, Formation formation, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
+            if (!commander.UnitCalculation.TargetPriorityCalculation.Overwhelm && MicroPriority != MicroPriority.AttackForward && (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.Retreat || commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.FullRetreat))
+            {
+                if (Retreat(commander, target, defensivePoint, frame, out action)) { return true; }
+            }
+
+            if (SpecialCaseMove(commander, target, defensivePoint, groupCenter, bestTarget, formation, frame, out action)) { return true; }
+
+            if (!(commander.UnitCalculation.TargetPriorityCalculation.Overwhelm && !SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.PUNISHERGRENADES)) && !(formation == Formation.Loose && commander.UnitCalculation.NearbyAllies.Count > 5))
+            {
+                if (MoveAway(commander, target, defensivePoint, frame, out action)) { return true; }
+            }
+
+            if (MoveFromBeingClosest(commander, target, defensivePoint, groupCenter, bestTarget, formation, frame, out action)) { return true; }
+
+            var closest = commander.UnitCalculation.EnemiesInRange.Where(e => DamageService.CanDamage(e, commander.UnitCalculation)).OrderBy(e => Vector2.Distance(e.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+            if (closest != null && closest.Damage > 0 && closest.Range < commander.UnitCalculation.Range && (closest.UnitTypeData.MovementSpeed <= commander.UnitCalculation.UnitTypeData.MovementSpeed || closest.Unit.UnitType == (uint)UnitTypes.PROTOSS_ARCHON))
+            {
+                var avoidPoint = GetPositionFromRange(commander, closest.Unit.Pos, commander.UnitCalculation.Unit.Pos, commander.UnitCalculation.Range);
+                if (MapDataService.MapHeight(avoidPoint) != MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos) || MapDataService.MapHeight(avoidPoint) != MapDataService.MapHeight(closest.Unit.Pos))
+                {
+                }
+                else
+                {
+                    action = commander.Order(frame, Abilities.MOVE, avoidPoint);
+                    return true;
+                }
+            }
+
+            return NavigateToTarget(commander, target, groupCenter, bestTarget, formation, frame, out action);
+        }
     }
 }
