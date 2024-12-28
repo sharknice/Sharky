@@ -4,7 +4,6 @@
     {
         private int lastFungalFrame = -1000;
         private int lastNeuralFrame = -1000;
-        //private int lastShroudFrame = 0;
 
         private Dictionary<UnitTypes, int> GroundNeuralPriorities = new()
             {
@@ -56,8 +55,11 @@
 
             if (commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.EFFECT_FUNGALGROWTH) || (commander.LastAbility == Abilities.EFFECT_FUNGALGROWTH && commander.LastOrderFrame >= frame - 2))
             {
-                lastFungalFrame = frame;
-                return true;
+                if (FungalAbility(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action))
+                {
+                    TagService.TagAbility("fungal");
+                    return true;
+                }
             }
 
             if (SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.BURROW))
@@ -154,83 +156,6 @@
             action = null;
             // todo: implement this
             return false;
-
-            //int range = 9;
-
-            //if (commander.UnitCalculation.Unit.Energy < 75)
-            //{
-            //    return false;
-            //}
-
-            //if (lastShroudFrame >= frame - 10)
-            //{
-            //    return false;
-            //}
-
-            //var attacks = new List<UnitCalculation>();
-            //var center = commander.UnitCalculation.Position;
-
-            //foreach (var enemyAttack in commander.UnitCalculation.NearbyEnemies.Take(25))
-            //{
-            //    if (enemyAttack.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELING && !enemyAttack.Attributes.Contains(SC2Attribute.Structure) && !enemyAttack.Unit.BuffIds.Contains((uint)Buffs.FUNGALGROWTH) &&
-            //        InRange(enemyAttack.Position, commander.UnitCalculation.Position, 10 + enemyAttack.Unit.Radius + commander.UnitCalculation.Unit.Radius))
-            //    {
-            //        attacks.Add(enemyAttack);
-            //    }
-            //}
-
-            //if (attacks.Count > 0)
-            //{
-            //    var victims = attacks.OrderByDescending(u => u.Dps);
-            //    if (victims.Any())
-            //    {
-            //        var bestAttack = GetBestAttack(commander.UnitCalculation, victims, attacks);
-            //        if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.WinAir)
-            //        {
-            //            var airAttackers = victims.Where(u => u.DamageAir);
-            //            if (airAttackers.Any())
-            //            {
-            //                var air = GetBestAttack(commander.UnitCalculation, airAttackers, attacks);
-            //                if (air != null)
-            //                {
-            //                    bestAttack = air;
-            //                }
-            //            }
-            //        }
-            //        else if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.WinGround)
-            //        {
-            //            var groundAttackers = victims.Where(u => u.DamageGround);
-            //            if (groundAttackers.Any())
-            //            {
-            //                var ground = GetBestAttack(commander.UnitCalculation, groundAttackers, attacks);
-            //                if (ground != null)
-            //                {
-            //                    bestAttack = ground;
-            //                }
-            //            }
-            //        }
-            //        else
-            //        {
-            //            if (victims.Any())
-            //            {
-            //                var any = GetBestAttack(commander.UnitCalculation, victims, attacks);
-            //                if (any != null)
-            //                {
-            //                    bestAttack = any;
-            //                }
-            //            }
-            //        }
-
-            //        if (bestAttack != null)
-            //        {
-            //            action = commander.Order(frame, Abilities.EFFECT_FUNGALGROWTH, bestAttack);
-            //            lastShroudFrame = frame;
-            //            return true;
-            //        }
-            //    }
-            //}
-
-            //return false;
         }
 
         protected bool FungalAbility(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2Action> action)
@@ -242,14 +167,11 @@
                 return false;
             }
 
-            if (commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.EFFECT_FUNGALGROWTH) || (commander.LastAbility == Abilities.EFFECT_FUNGALGROWTH && commander.LastOrderFrame >= frame - 2)) {
-                lastFungalFrame = frame;
-                return true; 
-            }
-
-            if (lastFungalFrame >= frame - 25)
-            {
-                return false;
+            if (!(commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.EFFECT_FUNGALGROWTH) || (commander.LastAbility == Abilities.EFFECT_FUNGALGROWTH && commander.LastOrderFrame >= frame - 2))) {
+                if (lastFungalFrame >= frame - 25)
+                {
+                    return false;
+                }
             }
 
             var attacks = new List<UnitCalculation>();

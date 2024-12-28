@@ -80,14 +80,6 @@
                 {
                     return true;
                 }
-
-                if (commander.UnitCalculation.Unit.Shield < 1)
-                {
-                    if (Retreat(commander, target, defensivePoint, frame, out action))
-                    {
-                        return true;
-                    }
-                }
             }
 
             var unitToSupport = GetSupportTarget(commander, target, defensivePoint, supportableUnits);

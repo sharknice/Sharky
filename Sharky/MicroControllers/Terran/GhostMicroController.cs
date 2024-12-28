@@ -1,4 +1,7 @@
-﻿namespace Sharky.MicroControllers.Terran
+﻿
+using Roy_T.AStar.Primitives;
+
+namespace Sharky.MicroControllers.Terran
 {
     public class GhostMicroController : IndividualMicroController
     {
@@ -179,6 +182,36 @@
                     return true;
                 }
             }
+            return false;
+        }
+
+        protected override Point2D GetSupportSpot(UnitCommander commander, UnitCalculation unitToSupport, Point2D target, Point2D defensivePoint)
+        {
+            var nearestEnemy = unitToSupport.NearbyEnemies.OrderBy(e => Vector2.DistanceSquared(e.Position, unitToSupport.Position)).FirstOrDefault();
+            if (nearestEnemy != null)
+            {
+                var direction = nearestEnemy.Position - unitToSupport.Position;
+                var normalizedDirection = Vector2.Normalize(direction);
+                var offset = normalizedDirection * 2f;
+                var supportPoint = unitToSupport.Position + offset;
+
+                if (MapDataService.MapHeight(supportPoint) != MapDataService.MapHeight(unitToSupport.Unit.Pos))
+                {
+                    return unitToSupport.Position.ToPoint2D();
+                }
+
+                if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.Retreat)
+                {
+                    commander.UnitCalculation.TargetPriorityCalculation.TargetPriority = TargetPriority.Attack;
+                }
+
+                return supportPoint.ToPoint2D();
+            }
+            return unitToSupport.Position.ToPoint2D();
+        }
+
+        protected override bool CloseEnoughToSupportUnit(float distanceSquredToSupportUnit, UnitCommander unitToSupport)
+        {
             return false;
         }
     }

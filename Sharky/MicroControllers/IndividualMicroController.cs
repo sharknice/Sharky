@@ -3093,7 +3093,7 @@
                 bestTarget = null;
             }
 
-            if (distanceSquredToSupportUnit < 25 && !unitToSupport.UnitCalculation.Unit.IsFlying)
+            if (CloseEnoughToSupportUnit(distanceSquredToSupportUnit, unitToSupport))
             {
                 return new List<SC2APIProtocol.Action>(); // don't crowd the support unit
             }
@@ -3102,6 +3102,11 @@
 
             if (AvoidDeceleration(commander, supportPoint, true, frame, out action)) { return action; }
             return commander.Order(frame, Abilities.ATTACK, supportPoint);
+        }
+
+        protected virtual bool CloseEnoughToSupportUnit(float distanceSquredToSupportUnit, UnitCommander unitToSupport)
+        {
+            return distanceSquredToSupportUnit < 25 && !unitToSupport.UnitCalculation.Unit.IsFlying;
         }
 
         protected virtual bool ShouldStayOutOfRange(UnitCommander commander, int frame)
