@@ -229,6 +229,7 @@
 
         void UnclaimScvs(int desiredScvs, int claimedScvs)
         {
+            if (ClaimAllUnits) { return; }
             if (claimedScvs > desiredScvs || !AttackData.Attacking && !UnitCommanders.Any(c => c.UnitCalculation.Unit.Health < c.UnitCalculation.Unit.HealthMax && c.UnitCalculation.Attributes.Contains(SC2Attribute.Mechanical)) || MacroData.Minerals == 0)
             {
                 var scv = UnitCommanders.FirstOrDefault(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_SCV);

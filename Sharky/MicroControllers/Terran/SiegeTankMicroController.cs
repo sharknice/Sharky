@@ -64,7 +64,22 @@
                 action = commander.Order(frame, Abilities.MORPH_SIEGEMODE);
                 return true;
             }
-            
+
+            var closestEnemy = commander.UnitCalculation.NearbyEnemies.Where(e => !e.Unit.IsFlying && e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit)).OrderBy(e => Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+            if (closestEnemy != null)
+            {
+                if (closestEnemy.PreviousUnitCalculation != null)
+                {
+                    if (Vector2.DistanceSquared(commander.UnitCalculation.Position, closestEnemy.PreviousUnitCalculation.Position) > Vector2.DistanceSquared(commander.UnitCalculation.Position, closestEnemy.Position))
+                    {
+                        CameraManager.SetCamera(commander.UnitCalculation.Position);
+                        TagService.TagAbility("siege");
+                        action = commander.Order(frame, Abilities.MORPH_SIEGEMODE);
+                        return true;
+                    }
+                }
+            }
+
             return false;
         }
 
@@ -80,14 +95,32 @@
                 return Attack(commander, target, defensivePoint, groupCenter, frame);
             }
 
+
             if (unitToSupport.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED && !unitToSupport.UnitCalculation.EnemiesInRange.Any() && !unitToSupport.UnitCalculation.EnemiesInRangeOf.Any() && !commander.UnitCalculation.EnemiesInRange.Any() && !commander.UnitCalculation.EnemiesInRangeOf.Any())
             {
-                var closestEnemy = unitToSupport.UnitCalculation.NearbyEnemies.OrderBy(e => Vector2.DistanceSquared(e.Position, unitToSupport.UnitCalculation.Position)).FirstOrDefault();
+                var closestEnemy = unitToSupport.UnitCalculation.NearbyEnemies.Where(e => !e.Unit.IsFlying && e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit)).OrderBy(e => Vector2.DistanceSquared(e.Position, unitToSupport.UnitCalculation.Position)).FirstOrDefault();
                 if (closestEnemy != null)
                 {
-                    if (Vector2.Distance(commander.UnitCalculation.Position, closestEnemy.Position) > Vector2.Distance(unitToSupport.UnitCalculation.Position, closestEnemy.Position))
+                    if (closestEnemy.PreviousUnitCalculation != null)
+                    {
+                        if (Vector2.DistanceSquared(commander.UnitCalculation.Position, closestEnemy.PreviousUnitCalculation.Position) > Vector2.DistanceSquared(commander.UnitCalculation.Position, closestEnemy.Position))
+                        {
+                            CameraManager.SetCamera(commander.UnitCalculation.Position);
+                            TagService.TagAbility("siege");
+                            action = commander.Order(frame, Abilities.MORPH_SIEGEMODE);
+                            return action;
+                        }
+                    }
+                    if (Vector2.Distance(commander.UnitCalculation.Position, closestEnemy.Position) + 2 > Vector2.Distance(unitToSupport.UnitCalculation.Position, closestEnemy.Position))
                     {
                         return commander.Order(frame, Abilities.MOVE, closestEnemy.Position.ToPoint2D());
+                    }
+                    else
+                    {
+                        CameraManager.SetCamera(commander.UnitCalculation.Position);
+                        TagService.TagAbility("siege");
+                        action = commander.Order(frame, Abilities.MORPH_SIEGEMODE);
+                        return action;
                     }
                 }
             }
@@ -109,6 +142,15 @@
             }
 
             return base.Support(commander, supportTargets, target, defensivePoint, groupCenter, frame);
+        }
+
+        protected override bool CloseEnoughToSupportUnit(float distanceSquredToSupportUnit, UnitCommander unitToSupport)
+        {
+            if (unitToSupport.UnitCalculation.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED)
+            {
+                return false;
+            }
+            return base.CloseEnoughToSupportUnit(distanceSquredToSupportUnit, unitToSupport);
         }
     }
 }
