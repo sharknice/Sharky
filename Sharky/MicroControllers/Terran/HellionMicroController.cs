@@ -156,6 +156,14 @@
 
         public override bool MoveToAttackOnCooldown(UnitCommander commander, UnitCalculation bestTarget, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
+            if (bestTarget != null)
+            {
+                if (bestTarget.Unit.UnitType == (uint)UnitTypes.TERRAN_HELLION)
+                {
+                    action = null;
+                    return false;
+                }
+            }
             var targets = commander.UnitCalculation.NearbyEnemies.Where(e => DamageService.CanDamage(commander.UnitCalculation, e));
             if (targets.Any())
             {

@@ -11,34 +11,40 @@
             : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled)
         {
             AvoidDamageDistance = 2f; // TODO: may need to turn off autolock on
-            LastLockOnFrame = -1;
+            LastLockOnFrame = -1000;
 
             TargetPriorityList = new List<UnitTypes> {
                 UnitTypes.PROTOSS_WARPPRISM, UnitTypes.PROTOSS_WARPPRISMPHASING, UnitTypes.TERRAN_MEDIVAC, UnitTypes.ZERG_OVERLORDTRANSPORT
             };
         }
 
+        public override bool ContinueInRangeAttack(UnitCommander commander, int frame, out List<SC2Action> action)
+        {
+            action = null;
+            return false;
+        }
+
         public override bool PreOffenseOrder(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
-            //if (!commander.AutoCastToggled)
-            //{
-            //    action = commander.ToggleAutoCast(Abilities.EFFECT_LOCKON);
-            //    commander.AutoCastToggled = true;
-            //    return true;
-            //}
+            if (!commander.AutoCastToggled)
+            {
+                action = commander.ToggleAutoCast(Abilities.EFFECT_LOCKON);
+                commander.AutoCastToggled = true;
+                return true;
+            }
 
             if (commander.CommanderState == CommanderState.MaintainLockon)
             {
                 var enemy = commander.UnitCalculation.NearbyEnemies.FirstOrDefault(e => e.Unit.Tag == commander.LastLockOn.Tag);
                 if (enemy != null)
                 {
-                    var range = 10f; // stay in sight range
-                    if (enemy.EnemiesInRangeOf.Count() > 1)
-                    {
-                        range = 14f; // other friendlies spotting
-                    }
+                    var range = 9f; // stay in sight range
+                    //if (enemy.EnemiesInRangeOf.Count() > 1)
+                    //{
+                    //    range = 14f; // other friendlies spotting
+                    //}
 
                     // if already within range, avoid damage
                     if (Vector2.DistanceSquared(commander.UnitCalculation.Position, enemy.Position) < range * range)
@@ -69,13 +75,13 @@
         {
             action = null;
 
-            var attacks = commander.UnitCalculation.EnemiesThreateningDamage;
+            var attacks = commander.UnitCalculation.EnemiesInRangeOfAvoid;
 
             if (attacks.Count > 0)
             {
                 var attack = attacks.OrderBy(e => Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position) - (e.Range * e.Range)).FirstOrDefault();  // enemies that are closest to being outranged
 
-                if (commander.UnitCalculation.Range < range && commander.UnitCalculation.UnitTypeData.MovementSpeed <= attack.UnitTypeData.MovementSpeed)
+                if (range < attack.Range && commander.UnitCalculation.UnitTypeData.MovementSpeed <= attack.UnitTypeData.MovementSpeed)
                 {
                     return false; // if we can't get out of range before we attack again don't bother running away
                 }
@@ -114,28 +120,28 @@
         {
             action = null;
 
-            //if (frame == LastLockOnFrame) { return false; }
-            //if (commander.LastLockOn == null || (frame - commander.LastLockOn.EndFrame) > (4.3 * SharkyOptions.FramesPerSecond))
-            //{
-            //    if (bestTarget != null && bestTarget.FrameLastSeen == frame && bestTarget.Unit.Tag != commander.UnitCalculation.Unit.Tag && MapDataService.SelfVisible(bestTarget.Unit.Pos))
-            //    {
-            //        if (Vector2.DistanceSquared(bestTarget.Position, commander.UnitCalculation.Position) <= 49)
-            //        {
-            //            TagService.TagAbility("lockon");
-            //            CameraManager.SetCamera(bestTarget.Position);
-            //            action = commander.Order(frame, Abilities.EFFECT_LOCKON, targetTag: bestTarget.Unit.Tag);
-            //            LastLockOnFrame = frame;
-            //            commander.LastLockOn = new LockOnData { StartFrame = frame, Tag = bestTarget.Unit.Tag, EndFrame = frame + (int)(14.3 * SharkyOptions.FramesPerSecond) };
-            //            return true;
-            //        }
-            //        else
-            //        {
-            //            action = commander.Order(frame, Abilities.ATTACK, targetTag: bestTarget.Unit.Tag);
-            //            return true;
-            //        }
-            //    }
-            //}
-            
+            if (frame == LastLockOnFrame) { return false; }
+            if (commander.LastLockOn == null || (frame - commander.LastLockOn.EndFrame) > (4.3 * SharkyOptions.FramesPerSecond))
+            {
+                if (bestTarget != null && bestTarget.FrameLastSeen == frame && bestTarget.Unit.Tag != commander.UnitCalculation.Unit.Tag)
+                {
+                    if (Vector2.DistanceSquared(bestTarget.Position, commander.UnitCalculation.Position) <= 49)
+                    {
+                        TagService.TagAbility("lockon");
+                        CameraManager.SetCamera(bestTarget.Position);
+                        action = commander.Order(frame, Abilities.EFFECT_LOCKON, targetTag: bestTarget.Unit.Tag);
+                        LastLockOnFrame = frame;
+                        commander.LastLockOn = new LockOnData { StartFrame = frame, Tag = bestTarget.Unit.Tag, EndFrame = frame + (int)(14.3 * SharkyOptions.FramesPerSecond) };
+                        return true;
+                    }
+                    else
+                    {
+                        action = commander.Order(frame, Abilities.MOVE, bestTarget.Position.ToPoint2D());
+                        return true;
+                    }
+                }
+            }
+
             return false;
         }
 

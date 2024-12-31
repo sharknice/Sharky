@@ -12,6 +12,7 @@
         public bool ChaseWorkers { get; set; }
         public bool BodyBlockExpansion { get; set; }
         public bool BodyBlockUntilDeath { get; set; }
+        public bool PrioritizeExpansion { get; set; }
 
         public bool ScoutEntireAreaBeforeAttacking { get; set; }
         public bool OnlyBlockOnce { get; set; }
@@ -89,6 +90,7 @@
             ScoutEntireAreaBeforeAttacking = true;
             ChaseWorkers = false;
             BodyBlockExpansion = false;
+            PrioritizeExpansion = false;
             IndividualMicroController = individualMicroController;
         }
 
@@ -382,6 +384,15 @@
                 if (frame % 50 == 0)
                 {
                     CameraManager.SetCamera(commander.UnitCalculation.Position);
+                }
+
+                if (PrioritizeExpansion)
+                {
+                    if (MapDataService.LastFrameVisibility(expansion.Location) + (15 * SharkyOptions.FramesPerSecond) < frame)
+                    {
+                        commands.AddRange(commander.Order(frame, Abilities.MOVE, expansion.Location));
+                        continue;
+                    }
                 }
 
                 if (ChaseWorkers)

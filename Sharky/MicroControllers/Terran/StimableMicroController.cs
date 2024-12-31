@@ -14,6 +14,15 @@ namespace Sharky.MicroControllers.Terran
         {
             if (GetOutOfBunker(commander, target, frame, out List<SC2Action> action)) { return action; }
             if (OffensiveAbility(commander, target, defensivePoint, groupCenter, null, frame, out action)) { return action; }
+
+            if (SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.STIMPACK) && !Stiming(commander))
+            {
+                if (commander.UnitCalculation.TargetPriorityCalculation.Overwhelm && commander.UnitCalculation.NearbyEnemies.Where(e => !e.Unit.IsHallucination && e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) && !e.Unit.IsFlying).Sum(e => e.Unit.Health + e.Unit.Shield) > 100)
+                {
+                    DoStim(commander, frame, out action);
+                    return action;
+                }
+            }
             if (commander.UnitCalculation.TargetPriorityCalculation.OverallWinnability < 1 && GetInBunker(commander, target, frame, out action)) { return action; }
             return base.Attack(commander, target, defensivePoint, groupCenter, frame);
         }
@@ -65,14 +74,19 @@ namespace Sharky.MicroControllers.Terran
 
                 if (commander.UnitCalculation.EnemiesInRange.Where(e => !e.Unit.IsHallucination).Sum(e => e.Unit.Health + e.Unit.Shield) > 100) // stim if more than 100 hitpoints in range
                 {
-                    CameraManager.SetCamera(commander.UnitCalculation.Position);
-                    TagService.TagAbility("stim");
-                    action = commander.Order(frame, Abilities.EFFECT_STIM);
-                    return true;
+                    return DoStim(commander, frame, out action);
                 }
             }
 
             return false;
+        }
+
+        protected bool DoStim(UnitCommander commander, int frame, out List<SC2Action> action)
+        {
+            CameraManager.SetCamera(commander.UnitCalculation.Position);
+            TagService.TagAbility("stim");
+            action = commander.Order(frame, Abilities.EFFECT_STIM);
+            return true;
         }
 
         protected override bool GetInBunker(UnitCommander commander, Point2D target, int frame, out List<SC2APIProtocol.Action> action)
@@ -144,7 +158,7 @@ namespace Sharky.MicroControllers.Terran
                 }
             }
 
-            if (!(formation == Formation.Loose && commander.UnitCalculation.NearbyAllies.Count() > 5))
+            if (!commander.UnitCalculation.TargetPriorityCalculation.Overwhelm && !(formation == Formation.Loose && commander.UnitCalculation.NearbyAllies.Count > 5))
             {
                 if (MoveAway(commander, target, defensivePoint, frame, out action)) { return true; }
             }
@@ -173,6 +187,14 @@ namespace Sharky.MicroControllers.Terran
                 {
                     action = commander.Order(frame, Abilities.MOVE, attackPoint);
                     return true;
+                }
+            }
+
+            if (bestTarget != null && !Stiming(commander) && SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.STIMPACK))
+            {
+                if (commander.UnitCalculation.NearbyEnemies.Sum(e => e.Unit.Health + e.Unit.Shield) > 500)
+                {
+                    return DoStim(commander, frame, out action);
                 }
             }
 

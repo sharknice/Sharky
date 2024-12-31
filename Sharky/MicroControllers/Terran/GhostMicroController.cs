@@ -1,6 +1,4 @@
 ﻿
-using Roy_T.AStar.Primitives;
-
 namespace Sharky.MicroControllers.Terran
 {
     public class GhostMicroController : IndividualMicroController
@@ -79,13 +77,13 @@ namespace Sharky.MicroControllers.Terran
                 return false;
             }
 
-
-            if (commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.EFFECT_EMP) || commander.LastAbility == Abilities.EFFECT_EMP && commander.LastOrderFrame + 10 > frame)
+            var emping = false;
+            if (commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.EFFECT_EMP) || commander.LastAbility == Abilities.EFFECT_EMP && commander.LastOrderFrame + 2 > frame)
             {
-                return true;
+                emping = true;
             }
 
-            if (LastEmpFrame + 10 > frame)
+            if (!emping && LastEmpFrame + 10 > frame)
             {
                 return false;
             }
@@ -97,17 +95,11 @@ namespace Sharky.MicroControllers.Terran
             {
                 if (enemy.Unit.Energy >= 75 || enemy.Unit.UnitType == (uint)UnitTypes.PROTOSS_HIGHTEMPLAR)
                 {
-                    LastEmpFrame = frame;
-                    CameraManager.SetCamera(enemy.Position);
-                    action = commander.Order(frame, Abilities.EFFECT_EMP, enemy.Position.ToPoint2D());
-                    return true;
+                    return DoEmp(commander, frame, out action, enemy);
                 }
                 if (enemy.NearbyAllies.Any(a => Vector2.Distance(a.Position, enemy.Position) <= EmpRadius && (a.Unit.Energy > 25 || a.Unit.Shield > 75)))
                 {
-                    LastEmpFrame = frame;
-                    CameraManager.SetCamera(enemy.Position);
-                    action = commander.Order(frame, Abilities.EFFECT_EMP, enemy.Position.ToPoint2D());
-                    return true;
+                    return DoEmp(commander, frame, out action, enemy);
                 }
             }
 
@@ -117,14 +109,32 @@ namespace Sharky.MicroControllers.Terran
             {
                 if (enemy.NearbyAllies.Where(a => Vector2.Distance(a.Position, enemy.Position) <= EmpRadius).Sum(e => Math.Max(e.Unit.Shield, 100f)) > 500)
                 {
-                    LastEmpFrame = frame;
-                    CameraManager.SetCamera(enemy.Position);
-                    action = commander.Order(frame, Abilities.EFFECT_EMP, enemy.Position.ToPoint2D());
-                    return true;
+                    return DoEmp(commander, frame, out action, enemy);
                 }
             }
 
             return false;
+        }
+
+        private bool DoEmp(UnitCommander commander, int frame, out List<SC2Action> action, UnitCalculation enemy)
+        {
+            LastEmpFrame = frame;
+            CameraManager.SetCamera(enemy.Position);
+            action = commander.Order(frame, Abilities.EFFECT_EMP, GetEmpPosition(commander, enemy, frame));
+            return true;
+        }
+
+        Point2D GetEmpPosition(UnitCommander commander, UnitCalculation enemy, int frame)
+        {
+            if (enemy.PreviousUnitCalculation == null)
+            {
+                return enemy.Position.ToPoint2D();
+            }
+
+            var velocity = enemy.Position - enemy.PreviousUnitCalculation.Position;
+            var futurePosition = enemy.Position + (velocity * 10);
+
+            return futurePosition.ToPoint2D();
         }
 
         bool Snipe(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
@@ -153,10 +163,7 @@ namespace Sharky.MicroControllers.Terran
             {
                 if (enemy.Unit.Energy >= 75 || enemy.Unit.UnitType == (uint)UnitTypes.PROTOSS_HIGHTEMPLAR || enemy.Unit.UnitType == (uint)UnitTypes.ZERG_INFESTOR || enemy.Unit.UnitType == (uint)UnitTypes.ZERG_INFESTORBURROWED)
                 {
-                    LastSnipeFrame = frame;
-                    CameraManager.SetCamera(enemy.Position);
-                    action = commander.Order(frame, Abilities.EFFECT_GHOSTSNIPE, targetTag: enemy.Unit.Tag);
-                    return true;
+                    return DoSnipe(commander, frame, out action, enemy);
                 }
             }
 
@@ -164,10 +171,7 @@ namespace Sharky.MicroControllers.Terran
             {
                 if (enemy.Unit.Health > 100)
                 {
-                    LastSnipeFrame = frame;
-                    CameraManager.SetCamera(enemy.Position);
-                    action = commander.Order(frame, Abilities.EFFECT_GHOSTSNIPE, targetTag: enemy.Unit.Tag);
-                    return true;
+                    return DoSnipe(commander, frame, out action, enemy);
                 }
             }
 
@@ -176,13 +180,18 @@ namespace Sharky.MicroControllers.Terran
                 var enemy = enemiesInRange.FirstOrDefault();
                 if (enemy != null)
                 {
-                    LastSnipeFrame = frame;
-                    CameraManager.SetCamera(enemy.Position);
-                    action = commander.Order(frame, Abilities.EFFECT_GHOSTSNIPE, targetTag: enemy.Unit.Tag);
-                    return true;
+                    return DoSnipe(commander, frame, out action, enemy);
                 }
             }
             return false;
+        }
+
+        private bool DoSnipe(UnitCommander commander, int frame, out List<SC2Action> action, UnitCalculation enemy)
+        {
+            LastSnipeFrame = frame;
+            CameraManager.SetCamera(enemy.Position);
+            action = commander.Order(frame, Abilities.EFFECT_GHOSTSNIPE, targetTag: enemy.Unit.Tag);
+            return true;
         }
 
         protected override Point2D GetSupportSpot(UnitCommander commander, UnitCalculation unitToSupport, Point2D target, Point2D defensivePoint)

@@ -13,7 +13,7 @@
         MapDataService MapDataService;
         MicroTaskData MicroTaskData;
 
-        bool started { get; set; }
+        public bool Started { get; set; }
 
         public bool BlockAddons { get; set; }
 
@@ -45,7 +45,7 @@
         {
             if (UnitCommanders.Count() == 0)
             {
-                if (started)
+                if (Started)
                 {
                     Disable();
                     return;
@@ -69,7 +69,7 @@
                                 finishedBuilder.Value.Claimed = true;
                                 finishedBuilder.Value.UnitRole = UnitRole.Scout;
                                 UnitCommanders.Add(finishedBuilder.Value);
-                                started = true;
+                                Started = true;
                                 return;
                             }
                         }
@@ -86,7 +86,7 @@
                     scouter.Value.Claimed = true;
                     scouter.Value.UnitRole = UnitRole.Scout;
                     UnitCommanders.Add(scouter.Value);
-                    started = true;
+                    Started = true;
                     return;
                 }
             }
@@ -97,7 +97,7 @@
             commander.Claimed = true;
             commander.UnitRole = UnitRole.Scout;
             UnitCommanders.Add(commander);
-            started = true;
+            Started = true;
             return;
         }
 
