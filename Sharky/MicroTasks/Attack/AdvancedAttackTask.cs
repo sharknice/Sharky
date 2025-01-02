@@ -37,7 +37,6 @@
         public bool DeathBallMode { get; set; }
         public bool DeathBallClearCreep { get; set; }
         public bool ClaimAllUnits {  get; set; }
-
         bool BaseUnderAttack { get; set; }
 
         public AdvancedAttackTask(DefaultSharkyBot defaultSharkyBot, EnemyCleanupService enemyCleanupService, List<UnitTypes> mainAttackerTypes, float priority, bool enabled = true)

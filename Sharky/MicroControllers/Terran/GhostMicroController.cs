@@ -199,9 +199,15 @@ namespace Sharky.MicroControllers.Terran
             var nearestEnemy = unitToSupport.NearbyEnemies.OrderBy(e => Vector2.DistanceSquared(e.Position, unitToSupport.Position)).FirstOrDefault();
             if (nearestEnemy != null)
             {
+                var distance = 4f;
+                if (commander.UnitCalculation.Unit.Energy < 50 || !commander.UnitCalculation.NearbyEnemies.Any(e => e.Unit.Energy >= 50))
+                {
+                    distance = 0;
+                }
+
                 var direction = nearestEnemy.Position - unitToSupport.Position;
                 var normalizedDirection = Vector2.Normalize(direction);
-                var offset = normalizedDirection * 2f;
+                var offset = normalizedDirection * 4f;
                 var supportPoint = unitToSupport.Position + offset;
 
                 if (MapDataService.MapHeight(supportPoint) != MapDataService.MapHeight(unitToSupport.Unit.Pos))

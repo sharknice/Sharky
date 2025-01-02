@@ -494,13 +494,24 @@
             if (closest != null && closest.Damage > 0 && closest.Range < commander.UnitCalculation.Range && (closest.UnitTypeData.MovementSpeed <= commander.UnitCalculation.UnitTypeData.MovementSpeed || closest.Unit.UnitType == (uint)UnitTypes.PROTOSS_ARCHON))
             {
                 var avoidPoint = GetPositionFromRange(commander, closest.Unit.Pos, commander.UnitCalculation.Unit.Pos, commander.UnitCalculation.Range);
-                if (MapDataService.MapHeight(avoidPoint) != MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos) || MapDataService.MapHeight(avoidPoint) != MapDataService.MapHeight(closest.Unit.Pos))
+                if (commander.UnitCalculation.Unit.IsFlying)
                 {
+                    if (MapDataService.PathFlyable(avoidPoint))
+                    {
+                        action = commander.Order(frame, Abilities.MOVE, avoidPoint);
+                        return true;
+                    }
                 }
                 else
                 {
-                    action = commander.Order(frame, Abilities.MOVE, avoidPoint);
-                    return true;
+                    if (MapDataService.MapHeight(avoidPoint) != MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos) || MapDataService.MapHeight(avoidPoint) != MapDataService.MapHeight(closest.Unit.Pos))
+                    {
+                    }
+                    else if (MapDataService.PathWalkable(avoidPoint, (int)Math.Ceiling(commander.UnitCalculation.Unit.Radius)))
+                    {
+                        action = commander.Order(frame, Abilities.MOVE, avoidPoint);
+                        return true;
+                    }
                 }
             }
 
@@ -2017,7 +2028,8 @@
 
         protected virtual UnitCalculation GetBestTargetFromListKillDetection(UnitCommander commander, IEnumerable<UnitCalculation> attacks, UnitOrder existingAttackOrder)
         {
-            var detectingEnemies = attacks.Where(u => SharkyUnitData.DetectionTypes.Contains((UnitTypes)u.Unit.UnitType)).OrderBy(u => u.Unit.Health).ThenBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position));
+            var targetSpot = GetTargetFromPosition(commander);
+            var detectingEnemies = attacks.Where(u => SharkyUnitData.DetectionTypes.Contains((UnitTypes)u.Unit.UnitType)).OrderBy(u => u.Unit.Health).ThenBy(u => Vector2.DistanceSquared(u.Position, targetSpot));
             if (existingAttackOrder != null)
             {
                 var existing = detectingEnemies.FirstOrDefault(u => u.Unit.Tag == existingAttackOrder.TargetUnitTag);
@@ -2066,9 +2078,22 @@
             return null;
         }
 
+        protected virtual Vector2 GetTargetFromPosition(UnitCommander commander)
+        {
+            var targetSpot = commander.UnitCalculation.Position;
+            var attack = commander.UnitCalculation.NearbyEnemies.Where(e => DamageService.CanDamage(e, commander.UnitCalculation) && e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) && !e.Unit.BuffIds.Contains((uint)Buffs.ORACLESTASISTRAPTARGET)).OrderBy(e => Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position) - (e.Range * e.Range)).FirstOrDefault();
+            if (attack != null)
+            {
+                var distance = Vector2.Distance(commander.UnitCalculation.Position, attack.Position);
+                targetSpot = Vector2.Lerp(commander.UnitCalculation.Position, attack.Position, -.5f);
+            }
+            return targetSpot;
+        }
+
         protected virtual UnitCalculation GetBestTargetFromListKillWorkers(UnitCommander commander, IEnumerable<UnitCalculation> attacks, UnitOrder existingAttackOrder)
         {
-            var scvs = attacks.Where(u => u.UnitClassifications.HasFlag(UnitClassification.Worker)).OrderBy(u => u.Unit.Health).ThenBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position));
+            var targetSpot = GetTargetFromPosition(commander);
+            var scvs = attacks.Where(u => u.UnitClassifications.HasFlag(UnitClassification.Worker)).OrderBy(u => u.Unit.Health).ThenBy(e => Vector2.DistanceSquared(e.Position, targetSpot));
             if (existingAttackOrder != null)
             {
                 var existing = scvs.FirstOrDefault(u => u.Unit.Tag == existingAttackOrder.TargetUnitTag);
@@ -2104,7 +2129,8 @@
 
         protected virtual UnitCalculation GetBestTargetFromListKillBunker(UnitCommander commander, IEnumerable<UnitCalculation> attacks, UnitOrder existingAttackOrder)
         {
-            var bunkers = attacks.Where(u => u.Unit.UnitType == (uint)UnitTypes.TERRAN_BUNKER).OrderBy(u => u.Unit.Health).ThenBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position));
+            var targetSpot = GetTargetFromPosition(commander);
+            var bunkers = attacks.Where(u => u.Unit.UnitType == (uint)UnitTypes.TERRAN_BUNKER).OrderBy(u => u.Unit.Health).ThenBy(u => Vector2.DistanceSquared(u.Position, targetSpot));
 
             if (existingAttackOrder != null)
             {
@@ -2323,7 +2349,8 @@
 
         protected UnitCalculation GetBestBuildingTarget(IEnumerable<UnitCalculation> attacks, UnitCommander commander)
         {
-            var orderedAttacks = attacks.Where(enemy => enemy.Unit.UnitType != (uint)UnitTypes.ZERG_LARVA && enemy.Unit.UnitType != (uint)UnitTypes.ZERG_BROODLING && enemy.Unit.UnitType != (uint)UnitTypes.ZERG_EGG && GroundAttackersFilter(commander, enemy)).OrderBy(enemy => (UnitTypes)enemy.Unit.UnitType, new UnitTypeTargetPriority()).ThenBy(enemy => PredictedHealth(enemy)).ThenBy(enemy => Vector2.DistanceSquared(enemy.Position, commander.UnitCalculation.Position));
+            var targetSpot = GetTargetFromPosition(commander);
+            var orderedAttacks = attacks.Where(enemy => enemy.Unit.UnitType != (uint)UnitTypes.ZERG_LARVA && enemy.Unit.UnitType != (uint)UnitTypes.ZERG_BROODLING && enemy.Unit.UnitType != (uint)UnitTypes.ZERG_EGG && GroundAttackersFilter(commander, enemy)).OrderBy(enemy => (UnitTypes)enemy.Unit.UnitType, new UnitTypeTargetPriority()).ThenBy(enemy => PredictedHealth(enemy)).ThenBy(enemy => Vector2.DistanceSquared(enemy.Position, targetSpot));
             var pylon = orderedAttacks.FirstOrDefault(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON);
             if (pylon != null)
             {
@@ -2351,7 +2378,8 @@
 
         protected virtual UnitCalculation GetBestDpsReduction(UnitCommander commander, Weapon weapon, IEnumerable<UnitCalculation> primaryTargets, IEnumerable<UnitCalculation> secondaryTargets)
         {
-            var bestDpsReduction = primaryTargets.OrderByDescending(enemy => GetDps(enemy) / TimeToKill(weapon, enemy.Unit, enemy.UnitTypeData)).ThenBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+            var targetSpot = GetTargetFromPosition(commander);
+            var bestDpsReduction = primaryTargets.OrderByDescending(enemy => GetDps(enemy) / TimeToKill(weapon, enemy.Unit, enemy.UnitTypeData)).ThenBy(u => Vector2.DistanceSquared(u.Position, targetSpot)).FirstOrDefault();
 
             return bestDpsReduction;
         }

@@ -11,6 +11,7 @@
 
         public bool TargetMainFirst { get; set; }
         public bool AvoidEnemyMain { get; set; }
+        public bool NoBuildingsGameType { get; set; } = false;
 
         public TargetingService(ActiveUnitData activeUnitData, MapDataService mapDataService, BaseData baseData, TargetingData targetingData)
         {
@@ -21,7 +22,7 @@
             TargetMainFirst = false;
         }
 
-        public Point2D UpdateAttackPoint(Point2D armyPoint, Point2D attackPoint)
+        public virtual Point2D UpdateAttackPoint(Point2D armyPoint, Point2D attackPoint)
         {
             if (TargetMainFirst && (BaseData.EnemyBases.Any(e => e.Location.X == TargetingData.EnemyMainBasePoint.X && e.Location.Y == TargetingData.EnemyMainBasePoint.Y) || MapDataService.LastFrameVisibility(TargetingData.EnemyMainBasePoint) < 1))
             {
@@ -67,7 +68,7 @@
                 }
             }
 
-            if (currentEnemyBuildingCount == 0 && MapDataService.SelfVisible(attackPoint) && MapDataService.Visibility(TargetingData.EnemyMainBasePoint) > 0)
+            if (!NoBuildingsGameType && currentEnemyBuildingCount == 0 && MapDataService.SelfVisible(attackPoint) && MapDataService.Visibility(TargetingData.EnemyMainBasePoint) > 0)
             {
                 // can't find enemy base, choose a random base location
                 TargetingData.HiddenEnemyBase = true;

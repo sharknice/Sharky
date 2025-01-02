@@ -9,6 +9,12 @@
         {
             AreaService = defaultSharkyBot.AreaService;
             MacroData = defaultSharkyBot.MacroData;
+            NoBuildingsGameType = true;
+        }
+
+        public override Point2D UpdateAttackPoint(Point2D armyPoint, Point2D attackPoint)
+        {
+            return GetMicroAttackPoint(attackPoint);
         }
 
         public Point2D GetMicroAttackPoint(Point2D attackPoint)
@@ -48,7 +54,7 @@
                 var closestEnemy = ActiveUnitData.EnemyUnits.Values.OrderBy(e => Vector2.DistanceSquared(vector, e.Position)).FirstOrDefault();
                 if (closestEnemy != null)
                 {
-                    var walkableArea = AreaService.GetAllArea(defensePoint).Where(p => MapDataService.PathWalkable(p));
+                    var walkableArea = AreaService.GetAllArea(defensePoint).Where(p => MapDataService.PathWalkable(p, 2));
                     var safestPosition = walkableArea.Where(p => IsCloserToFriendly(p, ActiveUnitData.SelfUnits.Values, ActiveUnitData.EnemyUnits.Values)).OrderByDescending(p => GetMinDistance(p.ToVector2(), ActiveUnitData.EnemyUnits.Values)).FirstOrDefault();
                     if (safestPosition != null)
                     {

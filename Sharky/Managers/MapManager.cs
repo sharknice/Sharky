@@ -11,6 +11,8 @@
         private int LastUpdateFrame;
         private readonly int FramesPerUpdate;
 
+        public bool FullVisionMode { get; set; } = false;
+
         public MapManager(MapData mapData, ActiveUnitData activeUnitData, SharkyOptions sharkyOptions, SharkyUnitData sharkyUnitData, DebugService debugService, WallDataService wallDataService)
         {
             MapData = mapData;
@@ -61,26 +63,6 @@
             UpdateInEnemyVision();
             UpdateNumberOfAllies((int)observation.Observation.GameLoop);
             UpdatePathBlocked();
-
-            //var buildings = shark.EnemyAttacks.Where(e => UnitTypes.BuildingTypes.Contains(e.Value.Unit.UnitType)).Select(e => e.Value).Concat(shark.AllyAttacks.Where(e => UnitTypes.BuildingTypes.Contains(e.Value.Unit.UnitType)).Select(e => e.Value));
-            //var currentBuildingCount = buildings.Count();
-            //if (LastBuildingCount != currentBuildingCount)
-            //{
-            //    MapData.UpdateBuildingGrid(buildings, observation.Observation.RawData.Units.Where(u => UnitTypes.MineralFields.Contains(u.UnitType) || UnitTypes.GasGeysers.Contains(u.UnitType) || u.Alliance == Alliance.Neutral));
-            //}
-            //LastBuildingCount = currentBuildingCount;
-
-            //var currentVisibleEnemyUnitCount = observation.Observation.RawData.Units.Where(u => u.Alliance == Alliance.Enemy).Count();
-            //if (LastVisibleEnemyUnitCount != currentVisibleEnemyUnitCount)
-            //{
-            //    MapData.UpdateGroundDamageGrid(shark.EnemyAttacks.Where(e => e.Value.DamageGround).Select(e => e.Value));
-            //    MapData.UpdateEnemyVisionGroundGrid(shark.EnemyAttacks.Values);
-            //    MapData.UpdateEnemyVisionGrid(shark.EnemyAttacks.Values);
-            //    MapData.UpdateAirDamageGrid(shark.EnemyAttacks.Where(e => e.Value.DamageAir).Select(e => e.Value));
-            //}
-            //LastVisibleEnemyUnitCount = currentVisibleEnemyUnitCount;
-
-
 
             return null;
         }
@@ -310,6 +292,18 @@
 
         void UpdateInEnemyVision()
         {
+            if (FullVisionMode)
+            {
+                for (var x = 0; x < MapData.MapWidth; x++)
+                {
+                    for (var y = 0; y < MapData.MapHeight; y++)
+                    {
+                        MapData.Map[x, y].InEnemyVision = true;
+                    }
+                }
+                return;
+            }
+
             for (var x = 0; x < MapData.MapWidth; x++)
             {
                 for (var y = 0; y < MapData.MapHeight; y++)
@@ -391,6 +385,20 @@
 
         void UpdateVisibility(ImageData visiblilityMap, int frame)
         {
+            if (FullVisionMode)
+            {
+                for (var x = 0; x < visiblilityMap.Size.X; x++)
+                {
+                    for (var y = 0; y < visiblilityMap.Size.Y; y++)
+                    {
+                        MapData.Map[x, y].InSelfVision = true;
+                        MapData.Map[x, y].Visibility = 2;// 2 is fully visible
+                        MapData.Map[x, y].LastFrameVisibility = frame;
+                    }
+                }
+                return;
+            }
+
             for (var x = 0; x < visiblilityMap.Size.X; x++)
             {
                 for (var y = 0; y < visiblilityMap.Size.Y; y++)
