@@ -325,6 +325,17 @@
             await Run(bot, playerId, opponentID, botName);
         }
 
+        public async Task RunLastLinuxVersionSinglePlayer(ISharkyBot bot, string map, Race myRace, Race opponentRace, Difficulty opponentDifficulty, AIBuild aIBuild, int randomSeed = -1, string opponentID = "test", bool realTime = false, string botName = "bot")
+        {
+            readSettings();
+            starcraftExe = Regex.Replace(starcraftExe, @"Base\d+", "Base76052");
+            StartSC2Instance(5678);
+            await Connect(5678);
+            await CreateGame(map, opponentRace, opponentDifficulty, aIBuild, randomSeed, realTime);
+            var playerId = await JoinGame(myRace);
+            await Run(bot, playerId, opponentID, botName);
+        }
+
         public async Task RunLadder(ISharkyBot bot, Race myRace, int gamePort, int startPort, String opponentID, string botName = "", string address = "127.0.0.1")
         {
             Console.WriteLine($"Connecting to {address}:{gamePort}");

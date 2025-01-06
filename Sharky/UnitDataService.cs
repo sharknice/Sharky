@@ -93,7 +93,7 @@
             }
             if (unitType == UnitTypes.PROTOSS_CARRIER)
             {
-                return new Weapon { Attacks = 16, Damage = 5, Range = 14, Type = Weapon.Types.TargetType.Any, Speed = 2.14f };
+                return new Weapon { Attacks = 16, Damage = 5, Range = 8, Type = Weapon.Types.TargetType.Any, Speed = 2.14f };
             }
             if (unitType == UnitTypes.ZERG_BANELING || unitType == UnitTypes.ZERG_BANELINGBURROWED)
             {

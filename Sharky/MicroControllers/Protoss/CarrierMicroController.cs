@@ -22,7 +22,7 @@ namespace Sharky.MicroControllers.Protoss
                 return Attack(commander, target, defensivePoint, groupCenter, frame);
             }
 
-            if (commander.UnitCalculation.NearbyEnemies.Count(e => e.FrameLastSeen == frame) == 0 || Vector2.DistanceSquared(commander.UnitCalculation.Position, unitToSupport.UnitCalculation.Position) > 9)
+            if (!commander.UnitCalculation.NearbyEnemies.Any(e => e.FrameLastSeen == frame) || Vector2.Distance(commander.UnitCalculation.Position, unitToSupport.UnitCalculation.Position) > 5)
             {
                 return commander.Order(frame, Abilities.MOVE, new Point2D { X = unitToSupport.UnitCalculation.Position.X, Y = unitToSupport.UnitCalculation.Position.Y });          
             }

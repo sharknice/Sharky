@@ -246,5 +246,10 @@
         {
             return Retreat(commanders, defensivePoint, groupCenter, frame);
         }
+
+        public List<SC2Action> Defend(IEnumerable<UnitCommander> commanders, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
+        {
+            return Attack(commanders, target, defensivePoint, groupCenter, frame);
+        }
     }
 }

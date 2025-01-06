@@ -164,5 +164,42 @@
         {
             return Retreat(commanders, defensivePoint, groupCenter, frame);
         }
+
+        public List<SC2Action> Defend(IEnumerable<UnitCommander> commanders, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
+        {
+            var actions = new List<SC2Action>();
+            var stopwatch = new Stopwatch();
+
+            foreach (var commander in commanders)
+            {
+                if (commander.SkipFrame)
+                {
+                    commander.SkipFrame = false;
+                    continue;
+                }
+                stopwatch.Restart();
+                List<SC2Action> action;
+
+                if (MicroData.IndividualMicroControllers.TryGetValue((UnitTypes)commander.UnitCalculation.Unit.UnitType, out var individualMicroController))
+                {
+                    action = individualMicroController.Defend(commander, target, defensivePoint, groupCenter, frame);
+                }
+                else
+                {
+                    action = MicroData.IndividualMicroController.Defend(commander, target, defensivePoint, groupCenter, frame);
+                }
+
+                if (action != null)
+                {
+                    actions.AddRange(action);
+                }
+                var timeTaken = stopwatch.ElapsedMilliseconds;
+                if (timeTaken > 1)
+                {
+                    commander.SkipFrame = true;
+                }
+            }
+            return actions;
+        }
     }
 }

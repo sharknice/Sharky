@@ -40,6 +40,7 @@
         /// The shade for an adept, etc.
         /// </summary>
         public UnitCalculation ChildUnitCalculation { get; set; }
+        public List<UnitCalculation> ChildUnitCalculations { get; set; }
 
         Dictionary<Abilities, int> AbilityOrderTimes;
         public Dictionary<ulong, int> LoadTimes;
@@ -51,6 +52,7 @@
             UnitCalculation = unitCalculation;
 
             ParentUnitCalculation = null;
+            ChildUnitCalculations = new List<UnitCalculation>();
             BestTarget = null;
             Claimed = false;
 

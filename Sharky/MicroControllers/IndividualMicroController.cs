@@ -129,6 +129,57 @@
             return commander.Order(frame, Abilities.ATTACK, target);
         }
 
+        public virtual List<SC2Action> Defend(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
+        {
+            if (commander.UnitCalculation.Unit.IsOnScreen)
+            {
+                var breakpoint = true;
+            }
+
+            List<SC2Action> action = null;
+            if (commander.UnitCalculation.Loaded || commander.UnitCalculation.Unit.BuildProgress < 1) { return action; }
+
+            var formation = GetDesiredFormation(commander);
+            var bestTarget = GetBestTarget(commander, target, frame);
+
+            UpdateState(commander, target, defensivePoint, groupCenter, bestTarget, formation, frame);
+
+            if (ContinueInRangeAttack(commander, frame, out action)) { return action; }
+
+            if (GroupUpBasedOnState(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
+
+            if (SpecialCaseMove(commander, target, defensivePoint, groupCenter, bestTarget, formation, frame, out action)) { return action; }
+
+            if (PreOffenseOrder(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
+
+            if (OffensiveAbility(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
+
+            if (TargetEnemyMainFirst && MapDataService.LastFrameVisibility(TargetingData.EnemyMainBasePoint) < 5 * 60 * SharkyOptions.FramesPerSecond)
+            {
+                target = TargetingData.EnemyMainBasePoint;
+            }
+
+            if (WeaponReady(commander, frame))
+            {
+                if (AttackBestTargetInRange(commander, target, bestTarget, frame, out action)) { return action; }
+                if (GetInFormation(commander, formation, target, bestTarget, frame, out action)) { return action; }
+                if (ShouldStayOutOfRange(commander, frame))
+                {
+                    if (AvoidDamageList(commander, target, defensivePoint, commander.UnitCalculation.EnemiesInRangeOfAvoid, frame, true, out action)) { return action; }
+                }
+                if (AttackBestTarget(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
+            }
+
+            if (AvoidDamageList(commander, target, defensivePoint, commander.UnitCalculation.EnemiesInRangeOfAvoid, frame, true, out action)) { return action; }
+
+            if (MoveToAttackOnCooldown(commander, bestTarget, target, defensivePoint, frame, out action)) { return action; }
+
+            if (Move(commander, target, defensivePoint, groupCenter, bestTarget, formation, frame, out action)) { return action; }
+
+            if (AvoidDeceleration(commander, target, true, frame, out action)) { return action; }
+            return commander.Order(frame, Abilities.ATTACK, target);
+        }
+
         public virtual bool MoveToAttackOnCooldown(UnitCommander commander, UnitCalculation bestTarget, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
@@ -3099,7 +3150,7 @@
 
             bool weaponReady = WeaponReady(commander, frame);
 
-            if (weaponReady && commander.UnitCalculation.EnemiesInRange.Any() || (bestTarget != null && bestTarget.EnemiesInRange.Any(e => supportTargets.Any(s => s.UnitCalculation.Unit.Tag == e.Unit.Tag))))
+            if (weaponReady && (commander.UnitCalculation.EnemiesInRange.Any() || (bestTarget != null && bestTarget.EnemiesInRange.Any(e => supportTargets.Any(s => s.UnitCalculation.Unit.Tag == e.Unit.Tag)))))
             {
                 if (AttackBestTarget(commander, supportPoint, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
             }

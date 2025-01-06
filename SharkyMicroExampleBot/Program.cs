@@ -5,18 +5,21 @@ using Sharky.MicroTasks;
 using SC2APIProtocol;
 using Sharky.MicroControllers;
 using Sharky.Builds;
+using Sharky.Managers;
 
 Console.WriteLine("Hello, Micro AI Arena!");
 
 var gameConnection = new GameConnection();
 var defaultSharkyBot = new DefaultSharkyBot(gameConnection);
 
+defaultSharkyBot.TargetingService = new MicroTargetingService(defaultSharkyBot);
 defaultSharkyBot.MicroController = new AdvancedMicroController(defaultSharkyBot);
 var advancedAttackTask = new AdvancedAttackTask(defaultSharkyBot, new EnemyCleanupService(defaultSharkyBot.MicroController, defaultSharkyBot.DamageService), new List<UnitTypes>(), 2f, true);
 advancedAttackTask.ClaimAllUnits = true;
 defaultSharkyBot.MicroTaskData[typeof(AttackTask).Name] = advancedAttackTask;
 defaultSharkyBot.MicroTaskData[typeof(MiningTask).Name].Disable();
 defaultSharkyBot.EnemyData.EnemyStrategies.Clear();
+((MapManager)defaultSharkyBot.Managers.FirstOrDefault(m => m.GetType() == typeof(MapManager))).FullVisionMode = true;
 
 var microBuild = new MicroBuild(defaultSharkyBot);
 var protossBuilds = new Dictionary<string, ISharkyBuild> { [microBuild.Name()] = microBuild };
@@ -38,7 +41,7 @@ var bot = defaultSharkyBot.CreateBot(defaultSharkyBot.Managers, defaultSharkyBot
 var myRace = Race.Random;
 if (args.Length == 0)
 {
-    gameConnection.RunSinglePlayer(bot, @"Tier2MicroAIArena_v2.SC2Map", myRace, Race.Random, Difficulty.VeryHard, AIBuild.Rush, 0, realTime: false).Wait();
+    gameConnection.RunSinglePlayer(bot, @"Tier2MicroAIArena_v4.SC2Map", myRace, Race.Random, Difficulty.VeryHard, AIBuild.Rush, realTime: false).Wait();
 }
 else
 {

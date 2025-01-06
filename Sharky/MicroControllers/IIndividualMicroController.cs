@@ -3,6 +3,7 @@
     public interface IIndividualMicroController
     {
         List<SC2Action> Attack(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame);
+        List<SC2Action> Defend(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame);
         List<SC2Action> Retreat(UnitCommander commander, Point2D defensivePoint, Point2D groupCenter, int frame);
         List<SC2Action> Support(UnitCommander commander, IEnumerable<UnitCommander> supportTargets, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame);
         List<SC2Action> Idle(UnitCommander commander, Point2D defensivePoint, int frame);

@@ -1,4 +1,5 @@
-﻿using Sharky.Algorithm;
+﻿using SC2APIProtocol;
+using Sharky.Algorithm;
 
 namespace Sharky.Managers
 {
@@ -122,6 +123,10 @@ namespace Sharky.Managers
                         ActiveUnitData.DeadUnits.Add(unit.Key);
                         ActiveUnitData.SelfDeaths--;
                     }
+                }
+                foreach (var carrier in ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_CARRIER))
+                {
+                    carrier.ChildUnitCalculations.RemoveAll(c => !observation.Observation.RawData.Units.Any(u => u.Tag == c.Unit.Tag));
                 }
             }
             else if (EnemyData.SelfRace == Race.Terran)
@@ -362,6 +367,10 @@ namespace Sharky.Managers
                     if (parent != null && ActiveUnitData.Commanders.ContainsKey(parent.Unit.Tag))
                     {
                         ActiveUnitData.Commanders[parent.Unit.Tag].ChildUnitCalculation = ActiveUnitData.Commanders[allyAttack.Value.Unit.Tag].UnitCalculation;
+                        if (!ActiveUnitData.Commanders[parent.Unit.Tag].ChildUnitCalculations.Any(c => c.Unit.Tag == allyAttack.Value.Unit.Tag))
+                        {
+                            ActiveUnitData.Commanders[parent.Unit.Tag].ChildUnitCalculations.Add(ActiveUnitData.Commanders[allyAttack.Value.Unit.Tag].UnitCalculation);
+                        }
                     }
                 }
 
@@ -627,6 +636,16 @@ namespace Sharky.Managers
             }
             if (commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_INTERCEPTOR)
             {
+                foreach (var carrier in commander.UnitCalculation.NearbyAllies.Where(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_CARRIER))
+                {
+                    if (ActiveUnitData.Commanders.ContainsKey(carrier.Unit.Tag))
+                    {
+                        if (ActiveUnitData.Commanders[carrier.Unit.Tag].ChildUnitCalculations.Any(c => c.Unit.Tag == commander.UnitCalculation.Unit.Tag))
+                        {
+                            return carrier;
+                        }
+                    }
+                }
                 var closestCarrier = commander.UnitCalculation.NearbyAllies.Where(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_CARRIER).OrderBy(a => Vector2.DistanceSquared(a.Position, commander.UnitCalculation.Position)).FirstOrDefault();
                 if (closestCarrier != null)
                 {

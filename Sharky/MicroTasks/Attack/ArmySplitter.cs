@@ -64,7 +64,7 @@
                     var leaders = split.SelfGroup.Where(c => c.UnitRole == UnitRole.Leader);
                     if (leaders.Any())
                     {
-                        actions.AddRange(MicroController.Attack(leaders, split.EnemyGroup.FirstOrDefault().Position.ToPoint2D(), TargetingData.ForwardDefensePoint, groupPoint, frame));
+                        actions.AddRange(MicroController.Defend(leaders, split.EnemyGroup.FirstOrDefault().Position.ToPoint2D(), TargetingData.ForwardDefensePoint, groupPoint, frame));
                         var others = split.SelfGroup.Where(c => c.UnitRole != UnitRole.Leader);
                         if (others.Any())
                         {
@@ -75,7 +75,7 @@
                     }
                     else
                     {
-                        actions.AddRange(MicroController.Attack(split.SelfGroup, split.EnemyGroup.FirstOrDefault().Position.ToPoint2D(), TargetingData.ForwardDefensePoint, groupPoint, frame));
+                        actions.AddRange(MicroController.Defend(split.SelfGroup, split.EnemyGroup.FirstOrDefault().Position.ToPoint2D(), TargetingData.ForwardDefensePoint, groupPoint, frame));
                     }
 
                     winnableDefense = true;
