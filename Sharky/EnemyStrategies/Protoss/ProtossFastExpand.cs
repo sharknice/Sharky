@@ -15,7 +15,7 @@
 
             if (frame < SharkyOptions.FramesPerSecond * 3 * 60)
             {
-                if (ActiveUnitData.EnemyUnits.Values.Any(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS && e.Unit.Pos.X != TargetingData.EnemyMainBasePoint.X && e.Unit.Pos.Y != TargetingData.EnemyMainBasePoint.Y))
+                if (ActiveUnitData.EnemyUnits.Values.Any(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS && (e.Unit.Pos.X != TargetingData.EnemyMainBasePoint.X || e.Unit.Pos.Y != TargetingData.EnemyMainBasePoint.Y)))
                 {
                     return true;
                 }

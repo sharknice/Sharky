@@ -20,6 +20,19 @@
                 }
             }
 
+            var baneling = commander.UnitCalculation.EnemiesInRangeOfAvoid.Where(e => e.Unit.UnitType == (uint)UnitTypes.ZERG_BANELING).OrderBy(e => Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+            if (baneling != null)
+            {
+                var distance = Vector2.DistanceSquared(commander.UnitCalculation.Position, baneling.Position);
+                var closerLing = baneling.NearbyEnemies.Where(e => e.Unit.UnitType == (uint)UnitTypes.ZERG_ZERGLING).Any(e => Vector2.DistanceSquared(baneling.Position, e.Position) < distance);
+                if (closerLing)
+                {
+                    var avoidPoint = GetGroundAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, baneling.Unit.Pos, target, defensivePoint, 5);
+                    action = commander.Order(frame, Abilities.MOVE, avoidPoint);
+                    return true;
+                }
+            }
+
             return false;
         }
 
