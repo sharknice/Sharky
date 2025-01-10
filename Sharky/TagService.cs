@@ -222,6 +222,9 @@
 
         public void TagVersion()
         {
+            if (!SharkyOptions.TagOptions.VersionTagsEnabled)
+                return;
+
             Tag($"v_{VersionService.BuildDate.ToString("yyyy-MM-dd__HH-mm-ss")}", allowAppendTime: false);
         }
 

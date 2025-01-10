@@ -43,9 +43,9 @@
                     return true;
                 }
 
-                if (WeaponReady(commander, frame) && commander.UnitCalculation.TargetPriorityCalculation.Overwhelm)
+                if (WeaponReady(commander, frame) && commander.UnitCalculation.TargetPriorityCalculation.Overwhelm && commander.UnitCalculation.TargetPriorityCalculation.GroundWinnability > 5)
                 {
-                    var blinkReady = SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.BLINKTECH) && commander.AbilityOffCooldown(Abilities.EFFECT_BLINK_STALKER, frame, SharkyOptions.FramesPerSecond, SharkyUnitData) && !commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.FUNGALGROWTH);
+                    var blinkReady = GetBlinkReady(commander, frame);
                     if (blinkReady && bestTarget.FrameLastSeen == frame)
                     {
                         // only blink if can see all around unit, don't blink when entire army is hidden behind first unit
@@ -66,11 +66,11 @@
             return base.AttackBestTargetInRange(commander, target, bestTarget, frame, out action);
         }
 
-        protected override bool AvoidTargetedDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
+        protected override bool AvoidTargetedDamage(UnitCommander commander, Point2D target, UnitCalculation bestTarget, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
-            var blinkReady = SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.BLINKTECH) && commander.AbilityOffCooldown(Abilities.EFFECT_BLINK_STALKER, frame, SharkyOptions.FramesPerSecond, SharkyUnitData) && !commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.FUNGALGROWTH);
+            var blinkReady = GetBlinkReady(commander, frame);
             if (blinkReady)
             {
                 if (commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.LOCKON))
@@ -98,14 +98,19 @@
                 return false;
             }
 
-            return base.AvoidTargetedDamage(commander, target, defensivePoint, frame, out action);
+            return base.AvoidTargetedDamage(commander, target, bestTarget, defensivePoint, frame, out action);
         }
 
-        protected override bool AvoidDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action) // TODO: use unit speed to dynamically adjust AvoidDamageDistance
+        protected bool GetBlinkReady(UnitCommander commander, int frame)
+        {
+            return SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.BLINKTECH) && commander.AbilityOffCooldown(Abilities.EFFECT_BLINK_STALKER, frame, SharkyOptions.FramesPerSecond, SharkyUnitData) && !commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.FUNGALGROWTH);
+        }
+
+        protected override bool AvoidDamage(UnitCommander commander, Point2D target, UnitCalculation bestTarget, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action) // TODO: use unit speed to dynamically adjust AvoidDamageDistance
         {
             action = null;
 
-            var blinkReady = SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.BLINKTECH) && commander.AbilityOffCooldown(Abilities.EFFECT_BLINK_STALKER, frame, SharkyOptions.FramesPerSecond, SharkyUnitData) && !commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.FUNGALGROWTH);
+            var blinkReady = GetBlinkReady(commander, frame);
             if (blinkReady && commander.UnitCalculation.Unit.Shield < 10)
             {
                 var attacks = new List<UnitCalculation>();
@@ -139,7 +144,7 @@
                 return false;
             }
 
-            return base.AvoidDamage(commander, target, defensivePoint, frame, out action);
+            return base.AvoidDamage(commander, target, bestTarget, defensivePoint, frame, out action);
         }
 
         public override bool WeaponReady(UnitCommander commander, int frame)
@@ -154,7 +159,7 @@
 
             if (commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.LOCKON))
             {
-                var blinkReady = SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.BLINKTECH) && commander.AbilityOffCooldown(Abilities.EFFECT_BLINK_STALKER, frame, SharkyOptions.FramesPerSecond, SharkyUnitData) && !commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.FUNGALGROWTH);
+                var blinkReady = GetBlinkReady(commander, frame);
                 if (blinkReady)
                 {
                     var cyclone = commander.UnitCalculation.NearbyEnemies.Where(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_CYCLONE).OrderBy(e => Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position)).FirstOrDefault();

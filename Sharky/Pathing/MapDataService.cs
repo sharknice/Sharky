@@ -394,9 +394,27 @@
             return MapData.Map[(int)point.X, (int)point.Y].EnemyAirDpsInRange;
         }
 
-        public float EnemyAirDpsInRange(float x, float y)
+        public float EnemyAirDpsInRange(float X, float Y)
         {
-            return EnemyAirDpsInRange(new Point2D { X = x, Y = y });
+            if (X < 0 || Y < 0 || X >= MapData.MapWidth || Y >= MapData.MapHeight)
+            {
+                return 0;
+            }
+
+            return MapData.Map[(int)X, (int)Y].EnemyAirDpsInRange;
+        }
+
+        public float EnemyAirDpsInRange(float X, float Y, float radius)
+        {
+            var max = 0f;
+            max = Math.Max(max, EnemyAirDpsInRange(X, Y));
+            max = Math.Max(max, EnemyAirDpsInRange(X - radius, Y));
+            max = Math.Max(max, EnemyAirDpsInRange(X + radius, Y));
+            max = Math.Max(max, EnemyAirDpsInRange(X, Y - radius));
+            max = Math.Max(max, EnemyAirDpsInRange(X, Y + radius));
+            max = Math.Max(max, EnemyAirDpsInRange(X + radius, Y + radius));
+            max = Math.Max(max, EnemyAirDpsInRange(X - radius, Y - radius));
+            return max;
         }
 
         public float EnemyAirDpsInRange(Point2D point)
@@ -433,6 +451,29 @@
                 return 0;
             }
             return MapData.Map[(int)point.X,(int)point.Y].EnemyGroundDpsInRange;
+        }
+
+        public float EnemyGroundDpsInRange(float X, float Y)
+        {
+            if (X < 0 || Y < 0 || X >= MapData.MapWidth || Y >= MapData.MapHeight)
+            {
+                return 0;
+            }
+
+            return MapData.Map[(int)X, (int)Y].EnemyGroundDpsInRange;
+        }
+
+        public float EnemyGroundDpsInRange(float X, float Y, float radius)
+        {
+            var max = 0f;
+            max = Math.Max(max, EnemyGroundDpsInRange(X, Y));
+            max = Math.Max(max, EnemyGroundDpsInRange(X - radius, Y));
+            max = Math.Max(max, EnemyGroundDpsInRange(X + radius, Y));
+            max = Math.Max(max, EnemyGroundDpsInRange(X, Y - radius));
+            max = Math.Max(max, EnemyGroundDpsInRange(X, Y + radius));
+            max = Math.Max(max, EnemyGroundDpsInRange(X + radius, Y + radius));
+            max = Math.Max(max, EnemyGroundDpsInRange(X - radius, Y - radius));
+            return max;
         }
 
         public int LastFrameAlliesTouched(Point2D point)

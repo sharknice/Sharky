@@ -50,7 +50,7 @@
             if (WeaponReady(commander, frame))
             {
                 if (AttackBestTargetInRange(commander, target, bestTarget, frame, out action)) { return action; }
-                if (AvoidDeathWhenWeaponReady(commander, target, defensivePoint, frame, out action)) { return action; }            
+                if (AvoidDeathWhenWeaponReady(commander, target, bestTarget, defensivePoint, frame, out action)) { return action; }            
                 if (AttackBestTargetOutOfRange(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
             }
 
@@ -64,19 +64,19 @@
             return commander.Order(frame, Abilities.ATTACK, target);
         }
 
-        protected bool AvoidDeathWhenWeaponReady(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
+        protected bool AvoidDeathWhenWeaponReady(UnitCommander commander, Point2D target, UnitCalculation bestTarget, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
             if (commander.UnitCalculation.Unit.ShieldMax > 0)
             {
                 if (commander.UnitCalculation.Unit.Shield < 10)
                 {
-                    if (AvoidDamage(commander, target, defensivePoint, frame, out action)) { return true; }
+                    if (AvoidDamage(commander, target, bestTarget, defensivePoint, frame, out action)) { return true; }
                 }
             }
             else if (commander.UnitCalculation.Unit.Health < 10)
             {
-                if (AvoidDamage(commander, target, defensivePoint, frame, out action)) { return true; }
+                if (AvoidDamage(commander, target, bestTarget, defensivePoint, frame, out action)) { return true; }
             }
             
             return false;
@@ -175,7 +175,7 @@
 
             if (commander.UnitCalculation.Unit.Health + commander.UnitCalculation.Unit.Shield < 6 && !(WeaponReady(commander, frame) && commander.UnitCalculation.EnemiesInRange.Any()))
             {
-                if (AvoidDamage(commander, target, defensivePoint, frame, out action))
+                if (AvoidDamage(commander, target, bestTarget, defensivePoint, frame, out action))
                 {
                     return true;
                 }
@@ -260,7 +260,7 @@
             return bestAttack;
         }
 
-        protected override bool AvoidDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
+        protected override bool AvoidDamage(UnitCommander commander, Point2D target, UnitCalculation bestTarget, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 

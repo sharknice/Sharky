@@ -14,7 +14,7 @@
             return true;
         }
 
-        protected override bool AvoidTargetedDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
+        protected override bool AvoidTargetedDamage(UnitCommander commander, Point2D target, UnitCalculation bestTarget, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -32,7 +32,7 @@
                 return false;
             }
 
-            return base.AvoidTargetedDamage(commander, target, defensivePoint, frame, out action);
+            return base.AvoidTargetedDamage(commander, target, bestTarget, defensivePoint, frame, out action);
         }
 
         public override bool OffensiveAbility(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
@@ -189,12 +189,12 @@
                 if (FollowPath(commander, frame, out action)) { return action; }
             }
 
-            if (AvoidTargetedDamage(commander, target, defensivePoint, frame, out action))
+            if (AvoidTargetedDamage(commander, target, null, defensivePoint, frame, out action))
             {
                 return action;
             }
 
-            if (AvoidDamage(commander, target, defensivePoint, frame, out action))
+            if (AvoidDamage(commander, target, null, defensivePoint, frame, out action))
             {
                 return action;
             }
@@ -226,7 +226,7 @@
                 }
                 if (bestTarget != null && bestTarget.UnitClassifications.HasFlag(UnitClassification.Worker))
                 {
-                    if (ShouldStayOutOfRange(commander, frame) && AvoidAllDamage(commander, target, defensivePoint, frame, out action)) { return action; }
+                    if (ShouldStayOutOfRange(commander, frame) && AvoidAllDamage(commander, target, bestTarget, defensivePoint, frame, out action)) { return action; }
 
                     if (AttackBestTarget(commander, target, defensivePoint, null, bestTarget, frame, out action)) { return action; }
                 }
@@ -234,8 +234,8 @@
 
             if (!commander.UnitCalculation.TargetPriorityCalculation.Overwhelm)
             {
-                if (AvoidEnemiesThreateningDamage(commander, target, defensivePoint, frame, true, out action)) { return action; }
-                if (AvoidArmyEnemies(commander, target, defensivePoint, frame, true, out action)) { return action; }
+                if (AvoidEnemiesThreateningDamage(commander, target, bestTarget, defensivePoint, frame, true, out action)) { return action; }
+                if (AvoidArmyEnemies(commander, target, bestTarget, defensivePoint, frame, true, out action)) { return action; }
             }
 
             return commander.Order(frame, Abilities.ATTACK, target);

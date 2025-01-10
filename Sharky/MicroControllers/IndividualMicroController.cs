@@ -111,14 +111,14 @@
                 if (GetInFormation(commander, formation, target, bestTarget, frame, out action)) { return action; }
                 if (ShouldStayOutOfRange(commander, frame))
                 {
-                    if (AvoidDamageList(commander, target, defensivePoint, commander.UnitCalculation.EnemiesInRangeOfAvoid, frame, true, out action)) { return action; }
+                    if (AvoidDamageList(commander, target, bestTarget, defensivePoint, commander.UnitCalculation.EnemiesInRangeOfAvoid, frame, true, out action)) { return action; }
                 }
                 if (AttackBestTarget(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
             }
 
             if (ShouldStayOutOfRange(commander, frame))
             {
-                if (AvoidDamageList(commander, target, defensivePoint, commander.UnitCalculation.EnemiesInRangeOfAvoid, frame, true, out action)) { return action; }
+                if (AvoidDamageList(commander, target, bestTarget, defensivePoint, commander.UnitCalculation.EnemiesInRangeOfAvoid, frame, true, out action)) { return action; }
             }
 
             if (MoveToAttackOnCooldown(commander, bestTarget, target, defensivePoint, frame, out action)) { return action; }
@@ -165,12 +165,12 @@
                 if (GetInFormation(commander, formation, target, bestTarget, frame, out action)) { return action; }
                 if (ShouldStayOutOfRange(commander, frame))
                 {
-                    if (AvoidDamageList(commander, target, defensivePoint, commander.UnitCalculation.EnemiesInRangeOfAvoid, frame, true, out action)) { return action; }
+                    if (AvoidDamageList(commander, target, bestTarget, defensivePoint, commander.UnitCalculation.EnemiesInRangeOfAvoid, frame, true, out action)) { return action; }
                 }
                 if (AttackBestTarget(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
             }
 
-            if (AvoidDamageList(commander, target, defensivePoint, commander.UnitCalculation.EnemiesInRangeOfAvoid, frame, true, out action)) { return action; }
+            if (AvoidDamageList(commander, target, bestTarget, defensivePoint, commander.UnitCalculation.EnemiesInRangeOfAvoid, frame, true, out action)) { return action; }
 
             if (MoveToAttackOnCooldown(commander, bestTarget, target, defensivePoint, frame, out action)) { return action; }
 
@@ -201,12 +201,12 @@
                     return false;
                 }
 
-                if (AvoidTargetedDamage(commander, target, defensivePoint, frame, out action))
+                if (AvoidTargetedDamage(commander, target, bestTarget, defensivePoint, frame, out action))
                 {
                     return true;
                 }
 
-                if (commander.UnitCalculation.Unit.ShieldMax > 0 && commander.UnitCalculation.Unit.Shield < 25 && commander.BestTarget != null && commander.UnitCalculation.Range > bestTarget.Range && AvoidDamage(commander, target, defensivePoint, frame, out action)) // TODO: this only works for protoss, if we want it to work for zerg and terran it needs to change
+                if (commander.UnitCalculation.Unit.ShieldMax > 0 && commander.UnitCalculation.Unit.Shield < 25 && commander.BestTarget != null && commander.UnitCalculation.Range > bestTarget.Range && AvoidDamage(commander, target, bestTarget, defensivePoint, frame, out action)) // TODO: this only works for protoss, if we want it to work for zerg and terran it needs to change
                 {
                     return true;
                 }
@@ -286,7 +286,7 @@
             }
 
             if (SpecialCaseRetreat(commander, target, defensivePoint, frame, out action)) { return action; }
-            if (MoveAway(commander, target, defensivePoint, frame, out action)) { return action; }
+            if (MoveAway(commander, target, bestTarget, defensivePoint, frame, out action)) { return action; }
 
             if (AvoidPointlessDamage(commander, target, defensivePoint, formation, frame, out action)) { return action; }
 
@@ -304,7 +304,7 @@
                 if (safe && AttackBestTarget(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
             }
 
-            if (AvoidAllDamage(commander, target, defensivePoint, frame, out action)) { return action; }
+            if (AvoidAllDamage(commander, target, bestTarget, defensivePoint, frame, out action)) { return action; }
             if (Move(commander, target, defensivePoint, groupCenter, bestTarget, formation, frame, out action)) { return action; }
 
             if (AvoidDeceleration(commander, target, true, frame, out action)) { return action; }
@@ -360,12 +360,12 @@
                 return action;
             }
 
-            if (AvoidTargetedDamage(commander, target, defensivePoint, frame, out action))
+            if (AvoidTargetedDamage(commander, target, null, defensivePoint, frame, out action))
             {
                 return action;
             }
 
-            if (AvoidDamage(commander, target, defensivePoint, frame, out action))
+            if (AvoidDamage(commander, target, null, defensivePoint, frame, out action))
             {
                 return action;
             }
@@ -504,12 +504,12 @@
                 return action;
             }
 
-            if (AvoidTargetedDamage(commander, target, defensivePoint, frame, out action))
+            if (AvoidTargetedDamage(commander, target, bestTarget, defensivePoint, frame, out action))
             {
                 return action;
             }
 
-            if (AvoidDamage(commander, target, defensivePoint, frame, out action))
+            if (AvoidDamage(commander, target, bestTarget, defensivePoint, frame, out action))
             {
                 return action;
             }
@@ -536,7 +536,7 @@
 
             if (!commander.UnitCalculation.TargetPriorityCalculation.Overwhelm && !(formation == Formation.Loose && commander.UnitCalculation.NearbyAllies.Count > 5))
             {
-                if (MoveAway(commander, target, defensivePoint, frame, out action)) { return true; }
+                if (MoveAway(commander, target, bestTarget, defensivePoint, frame, out action)) { return true; }
             }
 
             if (MoveFromBeingClosest(commander, target, defensivePoint, groupCenter, bestTarget, formation, frame, out action)) { return true; }
@@ -592,6 +592,13 @@
                         var hp = commander.UnitCalculation.Unit.Health + commander.UnitCalculation.Unit.Shield;
                         if (closestAllies.Any(a => a.Unit.Health + a.Unit.Shield > hp))
                         {
+                            var desiredPosition = GetLeastDamageSpot(commander, bestTarget, attack.Range + attack.Unit.Radius + commander.UnitCalculation.Unit.Radius + AvoidDamageDistance, AvoidDamageDistance);
+                            if (desiredPosition != null)
+                            {
+                                action = commander.Order(frame, Abilities.MOVE, desiredPosition);
+                                return true;
+                            }
+
                             var avoidPoint = GetGroundAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, attack.Unit.Pos, target, defensivePoint, attack.Range + attack.Unit.Radius + commander.UnitCalculation.Unit.Radius + AvoidDamageDistance);
                             if (avoidPoint != null)
                             {
@@ -609,7 +616,7 @@
         public virtual bool SpecialCaseMove(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, Formation formation, int frame, out List<SC2APIProtocol.Action> action)
         {
             if (GetUnstuck(commander, target, defensivePoint, frame, out action)) { return true; }
-            if (DealWithInterferenceMatrix(commander, target, defensivePoint, frame, out action)) { return true; }
+            if (DealWithInterferenceMatrix(commander, target, bestTarget, defensivePoint, frame, out action)) { return true; }
             if (DealWithParasiticBomb(commander, target, defensivePoint, frame, out action)) { return true; }
             if (AvoidPurificationNovas(commander, target, defensivePoint, frame, out action)) { return true; }
 
@@ -1070,15 +1077,15 @@
             return false;
         }
 
-        protected virtual bool MoveAway(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
+        protected virtual bool MoveAway(UnitCommander commander, Point2D target, UnitCalculation bestTarget, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
             if (commander.UnitCalculation.TargetPriorityCalculation.Overwhelm || MicroPriority == MicroPriority.AttackForward || commander.UnitCalculation.Unit.IsHallucination)
             {
-                if (AvoidTargetedDamage(commander, target, defensivePoint, frame, out action)) { return true; }
+                if (AvoidTargetedDamage(commander, target, bestTarget, defensivePoint, frame, out action)) { return true; }
 
-                if (commander.UnitCalculation.Unit.ShieldMax > 0 && commander.UnitCalculation.Unit.Shield < 25 && AvoidDamage(commander, target, defensivePoint, frame, out action)) // TODO: this only works for protoss, if we want it to work for zerg and terran it needs to change
+                if (commander.UnitCalculation.Unit.ShieldMax > 0 && commander.UnitCalculation.Unit.Shield < 25 && AvoidDamage(commander, target, bestTarget, defensivePoint, frame, out action)) // TODO: this only works for protoss, if we want it to work for zerg and terran it needs to change
                 {
                     return true;
                 }
@@ -1087,12 +1094,12 @@
             {
                 if (WorkerEscapeSurround(commander, target, defensivePoint, frame, out action)) { return true; }
 
-                if (AvoidTargetedDamage(commander, target, defensivePoint, frame, out action))
+                if (AvoidTargetedDamage(commander, target, bestTarget, defensivePoint, frame, out action))
                 {
                     return true;
                 }
 
-                if (AvoidDamage(commander, target, defensivePoint, frame, out action))
+                if (AvoidDamage(commander, target, bestTarget, defensivePoint, frame, out action))
                 {
                     return true;
                 }
@@ -1174,30 +1181,29 @@
             return false;
         }
 
-        protected virtual bool AvoidAllDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action) // TODO: use unit speed to dynamically adjust AvoidDamageDistance
+        protected virtual bool AvoidAllDamage(UnitCommander commander, Point2D target, UnitCalculation bestTarget, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action) // TODO: use unit speed to dynamically adjust AvoidDamageDistance
         {
             action = null;
 
-            if (AvoidEnemiesThreateningDamage(commander, target, defensivePoint, frame, true, out action)) { return true; }
-            if (AvoidArmyEnemies(commander, target, defensivePoint, frame, true, out action)) { return true; }
-            if (AvoidNearbyEnemies(commander, target, defensivePoint, frame, true, out action)) { return true; }
+            if (AvoidEnemiesThreateningDamage(commander, target, bestTarget, defensivePoint, frame, true, out action)) { return true; }
+            if (AvoidArmyEnemies(commander, target, bestTarget, defensivePoint, frame, true, out action)) { return true; }
+            if (AvoidNearbyEnemies(commander, target, bestTarget, defensivePoint, frame, true, out action)) { return true; }
 
             return false;
         }
 
-        protected virtual bool AvoidDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action) // TODO: use unit speed to dynamically adjust AvoidDamageDistance
+        protected virtual bool AvoidDamage(UnitCommander commander, Point2D target, UnitCalculation bestTarget, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action) // TODO: use unit speed to dynamically adjust AvoidDamageDistance
         {
             action = null;
 
-            if (AvoidEnemiesThreateningDamage(commander, target, defensivePoint, frame, false, out action)) { return true; }
+            if (AvoidEnemiesThreateningDamage(commander, target, bestTarget, defensivePoint, frame, false, out action)) { return true; }
 
             if (MaintainRange(commander, defensivePoint, frame, out action)) { return true; }
 
             return false;
         }
 
-
-        public virtual bool AvoidDamageList(UnitCommander commander, Point2D target, Point2D defensivePoint, IEnumerable<UnitCalculation> attacks, int frame, bool alwaysRun, out List<SC2APIProtocol.Action> action) // TODO: use unit speed to dynamically adjust AvoidDamageDistance
+        public virtual bool AvoidDamageList(UnitCommander commander, Point2D target, UnitCalculation bestTarget, Point2D defensivePoint, IEnumerable<UnitCalculation> attacks, int frame, bool alwaysRun, out List<SC2APIProtocol.Action> action) // TODO: use unit speed to dynamically adjust AvoidDamageDistance
         {
             action = null;
 
@@ -1213,6 +1219,13 @@
                 if (!alwaysRun && commander.UnitCalculation.Range < range && commander.UnitCalculation.UnitTypeData.MovementSpeed <= attack.UnitTypeData.MovementSpeed)
                 {
                     return false; // if we can't get out of range before we attack again don't bother running away
+                }
+
+                var desiredPosition = GetLeastDamageSpot(commander, bestTarget, attack.Range + attack.Unit.Radius + commander.UnitCalculation.Unit.Radius + AvoidDamageDistance, AvoidDamageDistance);
+                if (desiredPosition != null)
+                {
+                    action = commander.Order(frame, Abilities.MOVE, desiredPosition);
+                    return true;
                 }
 
                 if (commander.RetreatPathFrame + 1 < frame)
@@ -1255,32 +1268,32 @@
             return false;
         }
 
-        protected virtual bool AvoidEnemiesThreateningDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, bool alwaysRun, out List<SC2APIProtocol.Action> action) // TODO: use unit speed to dynamically adjust AvoidDamageDistance
+        protected virtual bool AvoidEnemiesThreateningDamage(UnitCommander commander, Point2D target, UnitCalculation bestTarget, Point2D defensivePoint, int frame, bool alwaysRun, out List<SC2APIProtocol.Action> action) // TODO: use unit speed to dynamically adjust AvoidDamageDistance
         {
             action = null;
 
             var attacks = commander.UnitCalculation.EnemiesThreateningDamage.Where(e => e.FrameLastSeen > frame - 5);
-            if (AvoidDamageList(commander, target, defensivePoint, attacks, frame, alwaysRun, out action)) { return true; }
+            if (AvoidDamageList(commander, target, bestTarget, defensivePoint, attacks, frame, alwaysRun, out action)) { return true; }
 
             return false;
         }
 
-        protected virtual bool AvoidArmyEnemies(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, bool alwaysRun, out List<SC2APIProtocol.Action> action) // TODO: use unit speed to dynamically adjust AvoidDamageDistance
+        protected virtual bool AvoidArmyEnemies(UnitCommander commander, Point2D target, UnitCalculation bestTarget, Point2D defensivePoint, int frame, bool alwaysRun, out List<SC2APIProtocol.Action> action) // TODO: use unit speed to dynamically adjust AvoidDamageDistance
         {
             action = null;
 
             var attacks = commander.UnitCalculation.NearbyEnemies.Where(e => e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) && DamageService.CanDamage(e, commander.UnitCalculation));
-            if (AvoidDamageList(commander, target, defensivePoint, attacks, frame, alwaysRun, out action)) { return true; }
+            if (AvoidDamageList(commander, target, bestTarget, defensivePoint, attacks, frame, alwaysRun, out action)) { return true; }
 
             return false;
         }
 
-        protected virtual bool AvoidNearbyEnemies(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, bool alwaysRun, out List<SC2APIProtocol.Action> action) // TODO: use unit speed to dynamically adjust AvoidDamageDistance
+        protected virtual bool AvoidNearbyEnemies(UnitCommander commander, Point2D target, UnitCalculation bestTarget, Point2D defensivePoint, int frame, bool alwaysRun, out List<SC2APIProtocol.Action> action) // TODO: use unit speed to dynamically adjust AvoidDamageDistance
         {
             action = null;
 
             var attacks = commander.UnitCalculation.NearbyEnemies.Where(e => DamageService.CanDamage(e, commander.UnitCalculation));
-            if (AvoidDamageList(commander, target, defensivePoint, attacks, frame, alwaysRun, out action)) { return true; }
+            if (AvoidDamageList(commander, target, bestTarget, defensivePoint, attacks, frame, alwaysRun, out action)) { return true; }
 
             return false;
         }
@@ -2652,7 +2665,7 @@
             return false;
         }
 
-        protected virtual bool AvoidTargetedDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
+        protected virtual bool AvoidTargetedDamage(UnitCommander commander, Point2D target, UnitCalculation bestTarget, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
             if ((MicroPriority == MicroPriority.AttackForward || commander.UnitCalculation.Unit.IsHallucination) && commander.UnitCalculation.Unit.Health > commander.UnitCalculation.Unit.HealthMax / 4.0) { return false; }
@@ -2676,12 +2689,12 @@
             return false;
         }
 
-        protected virtual bool DealWithInterferenceMatrix(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
+        protected virtual bool DealWithInterferenceMatrix(UnitCommander commander, Point2D target, UnitCalculation bestTarget, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
             if (!commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.INTERFERENCEMATRIX)) { return false; }
 
-            return AvoidAllDamage(commander, target, defensivePoint, frame, out action);
+            return AvoidAllDamage(commander, target, bestTarget, defensivePoint, frame, out action);
         }
 
         protected virtual bool DealWithParasiticBomb(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
@@ -3145,7 +3158,7 @@
             if (ShouldStayOutOfRange(commander, frame))
             {
                 if (SpecialCaseRetreat(commander, supportPoint, defensivePoint, frame, out action)) { return action; }
-                if (MoveAway(commander, supportPoint, defensivePoint, frame, out action)) { return action; }
+                if (MoveAway(commander, supportPoint, bestTarget, defensivePoint, frame, out action)) { return action; }
             }
 
             bool weaponReady = WeaponReady(commander, frame);
@@ -3157,7 +3170,7 @@
 
             if (AvoidPointlessDamage(commander, target, defensivePoint, formation, frame, out action)) { return action; }
 
-            if (DoNotSuicide(commander, supportPoint, defensivePoint, frame, out action)) { return action; }
+            if (DoNotSuicide(commander, supportPoint, bestTarget, defensivePoint, frame, out action)) { return action; }
 
             var distanceSquredToSupportUnit = Vector2.DistanceSquared(unitToSupport.UnitCalculation.Position, commander.UnitCalculation.Position);
             // don't initiate the attack, just defend yourself and the support target
@@ -3193,7 +3206,7 @@
             return MicroPriority == MicroPriority.StayOutOfRange;
         }
 
-        protected virtual bool DoNotSuicide(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
+        protected virtual bool DoNotSuicide(UnitCommander commander, Point2D target, UnitCalculation bestTarget, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -3207,12 +3220,12 @@
                 {
                     if (WorkerEscapeSurround(commander, target, defensivePoint, frame, out action)) { return true; }
 
-                    if (AvoidTargetedDamage(commander, target, defensivePoint, frame, out action))
+                    if (AvoidTargetedDamage(commander, target, bestTarget, defensivePoint, frame, out action))
                     {
                         return true;
                     }
 
-                    if (AvoidDamage(commander, target, defensivePoint, frame, out action))
+                    if (AvoidDamage(commander, target, bestTarget, defensivePoint, frame, out action))
                     {
                         return true;
                     }
@@ -3356,14 +3369,14 @@
                 }
                 if (bestTarget != null && bestTarget.UnitClassifications.HasFlag(UnitClassification.Worker))
                 {
-                    if (ShouldStayOutOfRange(commander, frame) && AvoidAllDamage(commander, target, defensivePoint, frame, out action)) { return action; }
+                    if (ShouldStayOutOfRange(commander, frame) && AvoidAllDamage(commander, target, bestTarget, defensivePoint, frame, out action)) { return action; }
 
                     if (AttackBestTarget(commander, target, defensivePoint, null, bestTarget, frame, out action)) { return action; }
                 }
             }
 
-            if (AvoidEnemiesThreateningDamage(commander, target, defensivePoint, frame, true, out action)) { return action; }
-            if (AvoidArmyEnemies(commander, target, defensivePoint, frame, true, out action)) { return action; }
+            if (AvoidEnemiesThreateningDamage(commander, target, bestTarget, defensivePoint, frame, true, out action)) { return action; }
+            if (AvoidArmyEnemies(commander, target, bestTarget, defensivePoint, frame, true, out action)) { return action; }
 
             var formation = GetDesiredFormation(commander);
             if (Move(commander, target, defensivePoint, null, bestTarget, formation, frame, out action)) { return action; }
@@ -3468,12 +3481,12 @@
                 if (FollowPath(commander, frame, out action)) { return action; }
             }
 
-            if (AvoidTargetedDamage(commander, target, defensivePoint, frame, out action))
+            if (AvoidTargetedDamage(commander, target, null, defensivePoint, frame, out action))
             {
                 return action;
             }
 
-            if (AvoidDamage(commander, target, defensivePoint, frame, out action))
+            if (AvoidDamage(commander, target, null, defensivePoint, frame, out action))
             {
                 return action;
             }
@@ -3574,7 +3587,7 @@
             var outOfAreaAvoids = commander.UnitCalculation.EnemiesThreateningDamage.Where(e => !area.Any(point => Vector2.DistanceSquared(e.Position, point.ToVector2()) < commander.UnitCalculation.Range * commander.UnitCalculation.Range));
             if (outOfAreaAvoids.Any())
             {
-                if (AvoidDamageList(commander, target, target, outOfAreaAvoids, frame, false, out action)) { return action; }
+                if (AvoidDamageList(commander, target, bestTarget, target, outOfAreaAvoids, frame, false, out action)) { return action; }
             }
 
             if (MoveToAttackOnCooldown(commander, bestTarget, target, defensivePoint, frame, out action)) { return action; } // TODO: within area
@@ -3669,12 +3682,12 @@
 
 
 
-            if (AvoidTargetedDamage(commander, target, defensivePoint, frame, out action))
+            if (AvoidTargetedDamage(commander, target, null, defensivePoint, frame, out action))
             {
                 return action;
             }
 
-            if (AvoidDamage(commander, target, defensivePoint, frame, out action))
+            if (AvoidDamage(commander, target, null, defensivePoint, frame, out action))
             {
                 return action;
             }
@@ -3682,6 +3695,32 @@
             NavigateToTarget(commander, target, groupCenter, null, Formation.Normal, frame, out action);
 
             return action;
+        }
+
+        protected virtual Point2D GetLeastDamageSpot(UnitCommander commander, UnitCalculation bestTarget, float range, float avoidDamageDistance)
+        {
+            var desiredPosition = commander.UnitCalculation.Position;
+            if (bestTarget != null)
+            {
+                desiredPosition = bestTarget.Position;
+            }
+            MapCell best;
+            if (!commander.UnitCalculation.Unit.IsFlying)
+            {
+                var cells = MapDataService.GetCells(commander.UnitCalculation.Position.X, commander.UnitCalculation.Position.Y, range).Where(c => c.Walkable);
+                best = cells.OrderBy(c => MapDataService.EnemyGroundDpsInRange(c.X, c.Y, avoidDamageDistance)).ThenBy(c => Vector2.DistanceSquared(new Vector2(c.X, c.Y), desiredPosition)).ThenBy(c => Vector2.DistanceSquared(new Vector2(c.X, c.Y), commander.UnitCalculation.Position)).FirstOrDefault();
+            }
+            else
+            {
+                var cells = MapDataService.GetCells(commander.UnitCalculation.Position.X, commander.UnitCalculation.Position.Y, range);
+                best = cells.OrderBy(c => MapDataService.EnemyAirDpsInRange(c.X, c.Y, avoidDamageDistance)).ThenBy(c => Vector2.DistanceSquared(new Vector2(c.X, c.Y), desiredPosition)).ThenBy(c => Vector2.DistanceSquared(new Vector2(c.X, c.Y), commander.UnitCalculation.Position)).FirstOrDefault();
+            }
+
+            if (best != null)
+            {
+                return new Point2D { X = best.X, Y = best.Y };
+            }
+            return null;
         }
     }
 }

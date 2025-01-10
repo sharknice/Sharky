@@ -86,7 +86,7 @@
             if (Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(target.X, target.Y)) < 16)
             {
                 if (SpecialCaseMove(commander, target, defensivePoint, null, bestTarget, Formation.Normal, frame, out action)) { return action; }
-                if (AvoidAllDamage(commander, target, defensivePoint, frame, out action)) { return action; }
+                if (AvoidAllDamage(commander, target, bestTarget, defensivePoint, frame, out action)) { return action; }
             }
 
             NavigateToTarget(commander, target, groupCenter, null, Formation.Normal, frame, out action);

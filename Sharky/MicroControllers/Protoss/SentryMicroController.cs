@@ -27,7 +27,7 @@
             }
             if (commander.UnitCalculation.Unit.Shield < 20)
             {
-                if (AvoidDamage(commander, target, defensivePoint, frame, out action))
+                if (AvoidDamage(commander, target, bestTarget, defensivePoint, frame, out action))
                 {
                     return true;
                 }

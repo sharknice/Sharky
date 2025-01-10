@@ -21,7 +21,7 @@
                 return true; 
             }
 
-            if (AvoidDamage(commander, target, defensivePoint, frame, out action))
+            if (AvoidDamage(commander, target, bestTarget, defensivePoint, frame, out action))
             {
                 return true;
             }

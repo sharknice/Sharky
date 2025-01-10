@@ -154,13 +154,13 @@ namespace Sharky.MicroControllers.Terran
                 }
                 else
                 {
-                    if (AvoidDamage(commander, target, defensivePoint, frame, out action)) { return true; }
+                    if (AvoidDamage(commander, target, bestTarget, defensivePoint, frame, out action)) { return true; }
                 }
             }
 
             if (!commander.UnitCalculation.TargetPriorityCalculation.Overwhelm && !(formation == Formation.Loose && commander.UnitCalculation.NearbyAllies.Count > 5))
             {
-                if (MoveAway(commander, target, defensivePoint, frame, out action)) { return true; }
+                if (MoveAway(commander, target, bestTarget, defensivePoint, frame, out action)) { return true; }
             }
 
             return NavigateToTarget(commander, target, groupCenter, bestTarget, formation, frame, out action);

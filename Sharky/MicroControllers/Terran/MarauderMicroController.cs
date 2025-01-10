@@ -81,7 +81,7 @@ namespace Sharky.MicroControllers.Terran
 
             if (!(commander.UnitCalculation.TargetPriorityCalculation.Overwhelm && !SharkyUnitData.ResearchedUpgrades.Contains((uint)Upgrades.PUNISHERGRENADES)) && !(formation == Formation.Loose && commander.UnitCalculation.NearbyAllies.Count > 5))
             {
-                if (MoveAway(commander, target, defensivePoint, frame, out action)) { return true; }
+                if (MoveAway(commander, target, bestTarget, defensivePoint, frame, out action)) { return true; }
             }
 
             if (MoveFromBeingClosest(commander, target, defensivePoint, groupCenter, bestTarget, formation, frame, out action)) { return true; }

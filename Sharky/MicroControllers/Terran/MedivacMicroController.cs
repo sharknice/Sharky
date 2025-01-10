@@ -71,12 +71,12 @@
 
             if (commander.UnitCalculation.Unit.Health < commander.UnitCalculation.Unit.HealthMax / 2)
             {
-                if (AvoidTargetedDamage(commander, target, defensivePoint, frame, out action))
+                if (AvoidTargetedDamage(commander, target, null, defensivePoint, frame, out action))
                 {
                     return true;
                 }
 
-                if (AvoidDamage(commander, target, defensivePoint, frame, out action))
+                if (AvoidDamage(commander, target, null, defensivePoint, frame, out action))
                 {
                     return true;
                 }

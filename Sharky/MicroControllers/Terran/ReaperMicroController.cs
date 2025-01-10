@@ -19,7 +19,7 @@
 
             if (commander.UnitCalculation.Unit.Health < 10 || (commander.UnitCalculation.Unit.Health < 30 && commander.UnitCalculation.NearbyEnemies.Any(e => e.DamageGround && e.Damage > commander.UnitCalculation.Unit.Health)) || commander.UnitCalculation.EnemiesInRangeOfAvoid.Any(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_MARAUDER))
             {
-                if (AvoidDamage(commander, target, defensivePoint, frame, out action))
+                if (AvoidDamage(commander, target, bestTarget, defensivePoint, frame, out action))
                 {
                     return true;
                 }
@@ -129,14 +129,14 @@
             {
                 if (attack)
                 {
-                    if (AvoidDamage(commander, target, defensivePoint, frame, out action))
+                    if (AvoidDamage(commander, target, bestTarget, defensivePoint, frame, out action))
                     {
                         return action;
                     }
                 }
                 else
                 {
-                    if (AvoidEnemiesThreateningDamage(commander, target, defensivePoint, frame, true, out action))
+                    if (AvoidEnemiesThreateningDamage(commander, target, null, defensivePoint, frame, true, out action))
                     {
                         return action;
                     }

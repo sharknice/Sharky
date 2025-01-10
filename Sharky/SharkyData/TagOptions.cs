@@ -10,5 +10,6 @@
         public bool EnemyStrategyTagsEnabled { get; set; } = true;
         public bool TagsAllChat { get; set; } = true;
         public bool TagTime { get; set; } = true;
+        public bool VersionTagsEnabled { get; set; } = true;
     }
 }

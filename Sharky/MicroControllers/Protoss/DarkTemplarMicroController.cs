@@ -70,24 +70,24 @@
             return false;
         }
 
-        protected override bool AvoidTargetedDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
+        protected override bool AvoidTargetedDamage(UnitCommander commander, Point2D target, UnitCalculation bestTarget, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
             if (Detected(commander))
             {
-                return base.AvoidTargetedDamage(commander, target, defensivePoint, frame, out action);
+                return base.AvoidTargetedDamage(commander, target, bestTarget, defensivePoint, frame, out action);
             }
             return false;
         }
 
-        protected override bool AvoidDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action) // TODO: use unit speed to dynamically adjust AvoidDamageDistance
+        protected override bool AvoidDamage(UnitCommander commander, Point2D target, UnitCalculation bestTarget, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action) // TODO: use unit speed to dynamically adjust AvoidDamageDistance
         {
             action = null;
 
             if (Detected(commander))
             {
-                return base.AvoidDamage(commander, target, defensivePoint, frame, out action);
+                return base.AvoidDamage(commander, target, bestTarget, defensivePoint, frame, out action);
             }
 
             return false;
@@ -108,12 +108,12 @@
                 if (FollowPath(commander, frame, out action)) { return action; }
             }
 
-            if (AvoidTargetedDamage(commander, target, defensivePoint, frame, out action))
+            if (AvoidTargetedDamage(commander, target, null, defensivePoint, frame, out action))
             {
                 return action;
             }
 
-            if (AvoidDamage(commander, target, defensivePoint, frame, out action))
+            if (AvoidDamage(commander, target, null, defensivePoint, frame, out action))
             {
                 return action;
             }

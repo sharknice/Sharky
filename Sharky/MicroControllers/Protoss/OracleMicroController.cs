@@ -44,12 +44,12 @@
                 }
             }
 
-            if (AvoidTargetedDamage(commander, target, defensivePoint, frame, out action))
+            if (AvoidTargetedDamage(commander, target, bestTarget, defensivePoint, frame, out action))
             {
                 return true;
             }
 
-            if (AvoidDamage(commander, target, defensivePoint, frame, out action))
+            if (AvoidDamage(commander, target, bestTarget, defensivePoint, frame, out action))
             {
                 return true;
             }
@@ -364,12 +364,12 @@
                     return commander.Order(frame, Abilities.MOVE, spot);
                 }
 
-                if (AvoidTargetedDamage(commander, target, defensivePoint, frame, out action))
+                if (AvoidTargetedDamage(commander, target, null, defensivePoint, frame, out action))
                 {
                     return action;
                 }
 
-                if (AvoidDamage(commander, target, defensivePoint, frame, out action))
+                if (AvoidDamage(commander, target, null, defensivePoint, frame, out action))
                 {
                     return action;
                 }

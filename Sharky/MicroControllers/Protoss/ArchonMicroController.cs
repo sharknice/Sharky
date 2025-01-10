@@ -49,7 +49,7 @@
             return false;
         }
 
-        protected override bool AvoidTargetedDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
+        protected override bool AvoidTargetedDamage(UnitCommander commander, Point2D target, UnitCalculation bestTarget, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -63,10 +63,10 @@
                 return false;
             }
 
-            return base.AvoidTargetedDamage(commander, target, defensivePoint, frame, out action);
+            return base.AvoidTargetedDamage(commander, target, bestTarget, defensivePoint, frame, out action);
         }
 
-        protected override bool AvoidDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
+        protected override bool AvoidDamage(UnitCommander commander, Point2D target, UnitCalculation bestTarget, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 
@@ -80,7 +80,7 @@
                 return false;
             }
 
-            return base.AvoidDamage(commander, target, defensivePoint, frame, out action);
+            return base.AvoidDamage(commander, target, bestTarget, defensivePoint, frame, out action);
         }
 
         public override bool WeaponReady(UnitCommander commander, int frame)

@@ -198,14 +198,14 @@
             return primaryTargets.FirstOrDefault(t => t.Unit.Tag == best);
         }
 
-        protected override bool AvoidDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
+        protected override bool AvoidDamage(UnitCommander commander, Point2D target, UnitCalculation bestTarget, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
             if (commander.UnitCalculation.EnemiesThreateningDamage.Count() > 1)
             {
                 return false;
             }
-            return base.AvoidDamage(commander, target, defensivePoint, frame, out action);
+            return base.AvoidDamage(commander, target, bestTarget, defensivePoint, frame, out action);
         }
 
         public override bool Retreat(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)

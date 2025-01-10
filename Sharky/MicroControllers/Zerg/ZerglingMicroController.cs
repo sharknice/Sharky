@@ -14,7 +14,7 @@
 
             if (commander.UnitCalculation.Unit.Health < 6 && bestTarget == null)
             {
-                if (AvoidDamage(commander, target, defensivePoint, frame, out action))
+                if (AvoidDamage(commander, target, bestTarget, defensivePoint, frame, out action))
                 {
                     return true;
                 }
@@ -31,6 +31,25 @@
                     action = commander.Order(frame, Abilities.MOVE, avoidPoint);
                     return true;
                 }
+            }
+
+            return false;
+        }
+
+        protected override bool AvoidTargetedDamage(UnitCommander commander, Point2D target, UnitCalculation bestTarget, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
+            if (commander.UnitCalculation.Unit.IsHallucination || WeaponReady(commander, frame)) { return false; }
+            var attack = commander.UnitCalculation.EnemiesInRangeOfAvoid.Where(e => e.Unit.UnitType == (uint)UnitTypes.ZERG_ZERGLING || e.Unit.UnitType == (uint)UnitTypes.PROTOSS_ZEALOT).OrderBy(e => Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position) - (e.Range * e.Range)).FirstOrDefault();
+            if (attack != null)
+            {
+                if (attack.EnemiesInRange.Any(e => e.Unit.Health < commander.UnitCalculation.Unit.Health))
+                {
+                    return false;
+                }
+                var avoidPoint = GetGroundAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, attack.Unit.Pos, target, defensivePoint, 4);
+                action = commander.Order(frame, Abilities.MOVE, avoidPoint);
+                return true;
             }
 
             return false;

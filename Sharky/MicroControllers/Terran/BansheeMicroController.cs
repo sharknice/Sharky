@@ -42,8 +42,8 @@
 
             if (PreOffenseOrder(commander, target, defensivePoint, null, null, frame, out action)) { return action; }
 
-            if (AvoidTargetedDamage(commander, target, defensivePoint, frame, out action)) { return action; }
-            if (AvoidEnemiesThreateningDamage(commander, target, defensivePoint, frame, false, out action)) { return action; }
+            if (AvoidTargetedDamage(commander, target, null, defensivePoint, frame, out action)) { return action; }
+            if (AvoidEnemiesThreateningDamage(commander, target, null, defensivePoint, frame, false, out action)) { return action; }
 
             NavigateToTarget(commander, target, groupCenter, null, Formation.Normal, frame, out action);
 
