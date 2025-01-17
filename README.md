@@ -3,13 +3,14 @@ A C# framework for developing StarCraft 2 AI bots
 
 The goal of Sharky is to provide a framework that handles all the complex setup and mundane details of creating a bot so you can focus on the fun stuff like builds, strategies, and micro.  
 
-You can clone it and use it directly in your solution (recomended), or install it to your project via the nuget package 'Sharky' (not updated as frequently)
+You can clone it and use it directly in your solution (recommended), or install it to your project via the nuget package 'Sharky' (not updated as frequently)
 
-There are example bots included in the Sharky source, and another example using the nuget package [here](https://github.com/sharknice/SharkyExampleBot)
+There are example bots included in the Sharky source.
 
 And a video tutorial here https://www.youtube.com/watch?v=2Tf0jLTJQME
 
 Make sure you have the ladder maps installed. Download them here https://aiarena.net/wiki/maps/ and then put them in your C:\Program Files (x86)\StarCraft II\maps folder.
+If using the machine learning map [StalkerTrainingMillion.SC2Map](StalkerTrainingMillion.SC2Map), also put that in your  maps folder.
 
 ## Features
 - Works with every race, Terran, Protoss, Zerg, and Random
