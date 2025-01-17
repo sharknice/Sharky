@@ -6,6 +6,7 @@
         ActiveUnitData ActiveUnitData;
         SharkyUnitData SharkyUnitData;
         CameraManager CameraManager;
+        EnemyData EnemyData;
 
         public UpgradeResearcher(DefaultSharkyBot defaultSharkyBot)
         {
@@ -13,6 +14,7 @@
             ActiveUnitData = defaultSharkyBot.ActiveUnitData;
             SharkyUnitData = defaultSharkyBot.SharkyUnitData;
             CameraManager = defaultSharkyBot.CameraManager;
+            EnemyData = defaultSharkyBot.EnemyData;
         }
 
         public List<SC2Action> ResearchUpgrades()
@@ -28,6 +30,10 @@
                     if (!ActiveUnitData.Commanders.Any(c => upgradeData.ProducingUnits.Contains((UnitTypes)c.Value.UnitCalculation.Unit.UnitType) && c.Value.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (int)upgradeData.Ability)))
                     {
                         var building = ActiveUnitData.Commanders.Where(c => upgradeData.ProducingUnits.Contains((UnitTypes)c.Value.UnitCalculation.Unit.UnitType) && !c.Value.UnitCalculation.Unit.IsActive && c.Value.UnitCalculation.Unit.BuildProgress == 1 && c.Value.LastOrderFrame != MacroData.Frame);
+                        if (EnemyData.SelfRace == Race.Protoss)
+                        {
+                            building = building.Where(p => p.Value.UnitCalculation.Unit.IsPowered);
+                        }
                         if (building.Any())
                         {
                             if (upgradeData.Minerals <= MacroData.Minerals && upgradeData.Gas <= MacroData.VespeneGas)

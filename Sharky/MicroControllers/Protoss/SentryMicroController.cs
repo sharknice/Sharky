@@ -48,6 +48,12 @@
                 return true;
             }
 
+            if (ForceField(commander, frame, out action))
+            {
+                TagService.TagAbility("forcefield");
+                return true;
+            }
+
             if (Hallucinate(commander, frame, out action))
             {
                 TagService.TagAbility("hallucinate");
@@ -105,6 +111,12 @@
                 action = commander.Order(frame, Abilities.HALLUCINATION_ARCHON);
                 return true;
             }
+            return false;
+        }        
+        
+        protected virtual bool ForceField(UnitCommander commander, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
             return false;
         }
 

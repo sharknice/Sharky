@@ -58,6 +58,14 @@
                     {
                         var producers = ActiveUnitData.Commanders.Where(c => unitData.ProducingUnits.Contains((UnitTypes)c.Value.UnitCalculation.Unit.UnitType) && (!c.Value.UnitCalculation.Unit.IsActive || !c.Value.UnitCalculation.Attributes.Contains(SC2Attribute.Structure)) && c.Value.UnitCalculation.Unit.BuildProgress == 1 && c.Value.WarpInOffCooldown(MacroData.Frame, SharkyOptions.FramesPerSecond, SharkyUnitData)).Select(x => x.Value);
 
+                        if (EnemyData.SelfRace == Race.Protoss)
+                        {
+                            if (!unitData.ProducingUnits.Contains(UnitTypes.PROTOSS_NEXUS))
+                            {
+                                producers = producers.Where(p => p.UnitCalculation.Unit.IsPowered);
+                            }
+                        }
+
                         if (unitData.ProducingUnits.Contains(UnitTypes.TERRAN_BARRACKS) || unitData.ProducingUnits.Contains(UnitTypes.TERRAN_FACTORY) || unitData.ProducingUnits.Contains(UnitTypes.TERRAN_STARPORT))
                         {
                             if (unitData.RequiresTechLab)

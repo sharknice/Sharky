@@ -178,6 +178,17 @@
             if (DefaultSharkyBot.AttackData.UseAttackDataManager)
             {
                 Console.WriteLine($"Attacking: {DefaultSharkyBot.AttackData.Attacking}");
+                Console.WriteLine($"AttackData.AttackTrigger: {DefaultSharkyBot.AttackData.AttackTrigger}");
+                Console.WriteLine($"AttackData.RetreatTrigger: {DefaultSharkyBot.AttackData.RetreatTrigger}");
+                Console.WriteLine($"AttackData.AttackWhenMaxedOut: {DefaultSharkyBot.AttackData.AttackWhenMaxedOut}");
+                Console.WriteLine($"AttackData.AttackWhenOverwhelm: {DefaultSharkyBot.AttackData.AttackWhenOverwhelm}");
+                Console.WriteLine($"AttackData.RequireMaxOut: {DefaultSharkyBot.AttackData.RequireMaxOut}");
+                Console.WriteLine($"AttackData.RequireBank: {DefaultSharkyBot.AttackData.RequireBank}");
+                if (DefaultSharkyBot.AttackData.RequireBank)
+                {
+                    Console.WriteLine($"AttackData.RequiredMineralBank: {DefaultSharkyBot.AttackData.RequiredMineralBank}");
+                    Console.WriteLine($"AttackData.RequiredVespeneBank: {DefaultSharkyBot.AttackData.RequiredVespeneBank}");
+                }
             }
             if (DefaultSharkyBot.TargetingData.AttackState != MicroTasks.Attack.AttackState.None)
             {
