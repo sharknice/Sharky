@@ -57,6 +57,17 @@
 
                 if (distanceSqaured <= ShadowStrikeRange * ShadowStrikeRange && distanceSqaured > 9)
                 {
+                    if (MapDataService.InEnemyDetection(commander.UnitCalculation.Position.ToPoint2D()))
+                    {
+                        if (!commander.UnitCalculation.EnemiesInRangeOf.Any() && MapDataService.InEnemyDetection(bestTarget.Unit.Pos))
+                        {
+                            return false;
+                        }
+                    }
+                    else if (MapDataService.InEnemyDetection(bestTarget.Unit.Pos))
+                    {
+                        return false;
+                    }
                     var x = bestTarget.Unit.Radius * Math.Cos(bestTarget.Unit.Facing);
                     var y = bestTarget.Unit.Radius * Math.Sin(bestTarget.Unit.Facing);
                     var blinkPoint = new Point2D { X = bestTarget.Unit.Pos.X + (float)x, Y = bestTarget.Unit.Pos.Y - (float)y };

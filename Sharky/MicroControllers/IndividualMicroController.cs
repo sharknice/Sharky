@@ -560,8 +560,13 @@
                     }
                     else if (MapDataService.PathWalkable(avoidPoint, (int)Math.Ceiling(commander.UnitCalculation.Unit.Radius)))
                     {
-                        action = commander.Order(frame, Abilities.MOVE, avoidPoint);
-                        return true;
+                        var forceFields = ActiveUnitData.NeutralUnits.Values.Where(u => u.Unit.UnitType == (uint)UnitTypes.NEUTRAL_FORCEFIELD);
+                        var distance = Vector2.DistanceSquared(closest.Position, commander.UnitCalculation.Position);
+                        if (!forceFields.Any(f => Vector2.DistanceSquared(f.Position, commander.UnitCalculation.Position) < distance))
+                        {
+                            action = commander.Order(frame, Abilities.MOVE, avoidPoint);
+                            return true;
+                        }
                     }
                 }
             }
