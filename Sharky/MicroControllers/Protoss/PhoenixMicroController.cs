@@ -89,7 +89,7 @@
                 return false;
             }
 
-            var bestGravitonTarget = GetBestGravitonBeamTarget(commander, target);
+            var bestGravitonTarget = GetBestGravitonBeamTarget(commander, target, frame);
             if (bestGravitonTarget != null && bestGravitonTarget.FrameLastSeen + 1 >= frame)
             {
                 TagService.TagAbility("graviton");
@@ -101,13 +101,13 @@
             return false;
         }
 
-        UnitCalculation GetBestGravitonBeamTarget(UnitCommander commander, Point2D target)
+        protected virtual UnitCalculation GetBestGravitonBeamTarget(UnitCommander commander, Point2D target, int frame)
         {
             var existingOrder = commander.UnitCalculation.Unit.Orders.Where(o => o.AbilityId == (uint)Abilities.EFFECT_GRAVITONBEAM).FirstOrDefault();
 
             var range = 4;
 
-            var attacks = commander.UnitCalculation.NearbyEnemies.Where(u => u.Unit.DisplayType != DisplayType.Hidden && !u.Unit.IsFlying && !u.Attributes.Contains(SC2APIProtocol.Attribute.Massive) && !u.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && !u.Unit.BuffIds.Contains((uint)Buffs.GRAVITONBEAM)
+            var attacks = commander.UnitCalculation.NearbyEnemies.Where(u => u.FrameLastSeen == frame && u.Unit.DisplayType != DisplayType.Hidden && !u.Unit.IsFlying && !u.Attributes.Contains(SC2APIProtocol.Attribute.Massive) && !u.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && !u.Unit.BuffIds.Contains((uint)Buffs.GRAVITONBEAM)
                 && (u.EnemiesInRange.Count() > 1 || (u.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED || u.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANK || u.Unit.UnitType == (uint)UnitTypes.TERRAN_CYCLONE || u.Unit.UnitType == (uint)UnitTypes.PROTOSS_IMMORTAL || u.Unit.UnitType == (uint)UnitTypes.PROTOSS_DISRUPTOR) && u.EnemiesInRange.Any()));
 
             if (attacks.Any())
@@ -119,7 +119,7 @@
                 }
             }
 
-            attacks =commander.UnitCalculation.EnemiesInRange.Where(u => u.Unit.DisplayType != DisplayType.Hidden && !u.Unit.IsFlying && !u.Attributes.Contains(SC2APIProtocol.Attribute.Massive) && !u.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && !u.Unit.BuffIds.Contains((uint)Buffs.GRAVITONBEAM) && InRange(u.Position, commander.UnitCalculation.Position, range)
+            attacks = commander.UnitCalculation.EnemiesInRange.Where(u => u.FrameLastSeen == frame && u.Unit.DisplayType != DisplayType.Hidden && !u.Unit.IsFlying && !u.Attributes.Contains(SC2APIProtocol.Attribute.Massive) && !u.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && !u.Unit.BuffIds.Contains((uint)Buffs.GRAVITONBEAM) && InRange(u.Position, commander.UnitCalculation.Position, range)
                 && u.EnemiesInRange.Count() > 1); // units that are in range right now
 
             if (attacks.Any())
@@ -131,7 +131,7 @@
                 }
             }
 
-            attacks = commander.UnitCalculation.NearbyEnemies.Where(u => u.Unit.DisplayType != DisplayType.Hidden && !u.Unit.IsFlying && !u.Attributes.Contains(SC2APIProtocol.Attribute.Massive) && !u.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && !u.Unit.BuffIds.Contains((uint)Buffs.GRAVITONBEAM) && !InRange(u.Position, commander.UnitCalculation.Position, range)
+            attacks = commander.UnitCalculation.NearbyEnemies.Where(u => u.FrameLastSeen == frame && u.Unit.DisplayType != DisplayType.Hidden && !u.Unit.IsFlying && !u.Attributes.Contains(SC2APIProtocol.Attribute.Massive) && !u.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && !u.Unit.BuffIds.Contains((uint)Buffs.GRAVITONBEAM) && !InRange(u.Position, commander.UnitCalculation.Position, range)
                 && u.EnemiesInRange.Count() > 1); // units that are not in range right now
 
             if (attacks.Any())
@@ -143,9 +143,9 @@
                 }
             }
 
-            if (!commander.UnitCalculation.NearbyEnemies.Any(e => e.DamageAir) && commander.UnitCalculation.NearbyAllies.Any(a => a.DamageAir))
+            if (!commander.UnitCalculation.NearbyEnemies.Any(e => e.DamageAir && e.FrameLastSeen == frame) && commander.UnitCalculation.NearbyAllies.Any(a => a.DamageAir))
             {
-                attacks = commander.UnitCalculation.NearbyEnemies.Where(u => u.Unit.DisplayType != DisplayType.Hidden && !u.Unit.IsFlying && !u.Attributes.Contains(SC2APIProtocol.Attribute.Massive) && !u.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && !u.Unit.BuffIds.Contains((uint)Buffs.GRAVITONBEAM));
+                attacks = commander.UnitCalculation.NearbyEnemies.Where(u => u.FrameLastSeen == frame && u.Unit.DisplayType != DisplayType.Hidden && !u.Unit.IsFlying && !u.Attributes.Contains(SC2APIProtocol.Attribute.Massive) && !u.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && !u.Unit.BuffIds.Contains((uint)Buffs.GRAVITONBEAM));
                 if (attacks.Any())
                 {
                     var bestSafeLift = GetBestTargetFromList(commander, attacks, existingOrder);
