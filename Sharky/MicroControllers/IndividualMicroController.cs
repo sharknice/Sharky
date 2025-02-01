@@ -3270,7 +3270,7 @@
             return supportPoint;
         }
 
-        protected virtual UnitCalculation GetBestTarget(UnitCommander commander, UnitCommander unitToSupport, Point2D target, int frame)
+        public virtual UnitCalculation GetBestTarget(UnitCommander commander, UnitCommander unitToSupport, Point2D target, int frame)
         {
             var existingAttackOrder = commander.UnitCalculation.Unit.Orders.FirstOrDefault(o => o.AbilityId == (uint)Abilities.ATTACK || o.AbilityId == (uint)Abilities.ATTACK_ATTACK);
 

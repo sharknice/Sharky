@@ -16,14 +16,17 @@
 
             if (MapDataService.MapData.PathData == null) { return null; }
 
-            var startPaths = MapDataService.MapData.PathData.Where(data => data.Path.Any(p => Vector2.DistanceSquared(p, start) <= 25 && MapDataService.MapHeight(p) == startHeight) && data.Path.Any(p => Vector2.DistanceSquared(p, end) <= 25 && MapDataService.MapHeight(p) == endHeight));
-            var best = startPaths.FirstOrDefault();
+            var best = MapDataService.MapData.PathData.FirstOrDefault(data => data.Path.Any(p => Vector2.DistanceSquared(p, start) <= 25 && MapDataService.MapHeight(p) == startHeight) && data.Path.Any(p => Vector2.DistanceSquared(p, end) <= 25 && MapDataService.MapHeight(p) == endHeight));
             if (best == null)
             {
-                best = startPaths.FirstOrDefault(data => data.Path.Any(p => Vector2.DistanceSquared(p, end) <= 50 && MapDataService.MapHeight(p) == endHeight));
+                best = MapDataService.MapData.PathData.FirstOrDefault(data => data.Path.Any(p => Vector2.DistanceSquared(p, start) <= 50) && data.Path.Any(p => Vector2.DistanceSquared(p, end) <= 50));
                 if (best == null)
                 {
-                    return null;
+                    best = MapDataService.MapData.PathData.FirstOrDefault(data => data.Path.Any(p => Vector2.DistanceSquared(p, start) <= 100) && data.Path.Any(p => Vector2.DistanceSquared(p, end) <= 100));
+                    if (best == null)
+                    {
+                        return null;
+                    }
                 }
             }
 

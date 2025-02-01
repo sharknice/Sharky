@@ -34,6 +34,12 @@
     <None Update="StaticData\opponents\12PoolBot.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="StaticData\opponents\One-Test.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="StaticData\opponents\Apidae.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="StaticData\opponents\Bombshaker.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
