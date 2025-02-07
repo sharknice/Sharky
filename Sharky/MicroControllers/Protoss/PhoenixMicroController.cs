@@ -112,6 +112,10 @@
 
             if (attacks.Any())
             {
+                if (attacks.Count(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE) >= 3)
+                {
+                    attacks = attacks.Where(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE);
+                }
                 var bestAttack = GetBestTargetFromList(commander, attacks, existingOrder);
                 if (bestAttack != null)
                 {
@@ -124,6 +128,10 @@
 
             if (attacks.Any())
             {
+                if (attacks.Count(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE) >= 3)
+                {
+                    attacks = attacks.Where(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE);
+                }
                 var bestAttack = GetBestTargetFromList(commander, attacks, existingOrder);
                 if (bestAttack != null)
                 {
@@ -136,6 +144,10 @@
 
             if (attacks.Any())
             {
+                if (attacks.Count(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE) >= 3)
+                {
+                    attacks = attacks.Where(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE);
+                }
                 var bestOutOfRangeAttack = GetBestTargetFromList(commander, attacks, existingOrder);
                 if (bestOutOfRangeAttack != null)
                 {
@@ -148,6 +160,10 @@
                 attacks = commander.UnitCalculation.NearbyEnemies.Where(u => u.FrameLastSeen == frame && u.Unit.DisplayType != DisplayType.Hidden && !u.Unit.IsFlying && !u.Attributes.Contains(SC2APIProtocol.Attribute.Massive) && !u.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && !u.Unit.BuffIds.Contains((uint)Buffs.GRAVITONBEAM));
                 if (attacks.Any())
                 {
+                    if (attacks.Count(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE) >= 3)
+                    {
+                        attacks = attacks.Where(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE);
+                    }
                     var bestSafeLift = GetBestTargetFromList(commander, attacks, existingOrder);
                     if (bestSafeLift != null)
                     {
