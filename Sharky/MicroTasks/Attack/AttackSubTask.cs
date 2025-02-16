@@ -13,6 +13,11 @@
         {
             return MicroController.Attack(UnitCommanders, attackPoint, defensePoint, armyPoint, frame);
         }
+        
+        public virtual IEnumerable<SC2Action> Defend(Point2D target, Point2D defensePoint, Point2D armyPoint, int frame)
+        {
+            return MicroController.Defend(UnitCommanders, target, defensePoint, armyPoint, frame);
+        }
 
         public virtual void ClaimUnitsFromParent(IEnumerable<UnitCommander> commanders)
         {

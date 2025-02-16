@@ -1222,7 +1222,7 @@
                 }
 
                 var desiredPosition = GetLeastDamageSpot(commander, bestTarget, attack.Range + attack.Unit.Radius + commander.UnitCalculation.Unit.Radius + AvoidDamageDistance, AvoidDamageDistance);
-                if (desiredPosition != null)
+                if (desiredPosition != null && Vector2.Distance(attack.Position, desiredPosition.ToVector2()) > attack.Range + attack.Unit.Radius + commander.UnitCalculation.Unit.Radius + AvoidDamageDistance)
                 {
                     action = commander.Order(frame, Abilities.MOVE, desiredPosition);
                     return true;

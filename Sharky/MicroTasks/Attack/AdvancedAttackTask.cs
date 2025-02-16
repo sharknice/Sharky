@@ -423,7 +423,6 @@
             }
             stopwatch.Restart();
 
-
             if (MainUnits.Any(m => !m.UnitCalculation.Loaded))
             {
                 OrderMainUnitsWithSupportUnits(frame, actions, MainUnits, SupportUnits.Where(u => !splitUnits.Contains(u)), attackPoint);
@@ -522,7 +521,7 @@
                 actions.AddRange(MicroController.Attack(supportUnits, attackPoint, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame));
                 foreach (var subTask in SubTasks.Where(t => t.Value.Enabled).OrderBy(t => t.Value.Priority))
                 {
-                    actions.AddRange(subTask.Value.Attack(attackPoint, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame));
+                    actions.AddRange(subTask.Value.Defend(attackPoint, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame));
                 }
             }
             else if (AttackData.Attacking)
@@ -778,6 +777,12 @@
             foreach (var unit in MainUnits)
             {
                 Console.WriteLine($"{unit.UnitCalculation.Unit.UnitType} {unit.UnitCalculation.Unit.Tag}");
+            }
+
+            System.Console.WriteLine($"    SubAttackTasks:");
+            foreach (var subAttackTask in SubTasks.Where(t => t.Value.Enabled))
+            {
+                subAttackTask.Value.PrintReport(frame);
             }
 
             if (DefenseArmySplitter.ArmySplits == null) { return; }
