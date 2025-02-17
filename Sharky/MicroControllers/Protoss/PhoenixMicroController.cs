@@ -101,7 +101,7 @@
             return false;
         }
 
-        UnitCalculation GetBestGravitonBeamTarget(UnitCommander commander, Point2D target)
+        protected UnitCalculation GetBestGravitonBeamTarget(UnitCommander commander, Point2D target)
         {
             var existingOrder = commander.UnitCalculation.Unit.Orders.Where(o => o.AbilityId == (uint)Abilities.EFFECT_GRAVITONBEAM).FirstOrDefault();
 

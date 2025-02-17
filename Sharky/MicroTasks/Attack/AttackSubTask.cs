@@ -63,7 +63,7 @@
             }
         }
 
-        public IEnumerable<SC2Action> Contain(Point2D attackPoint, Point2D defensePoint, Point2D armyPoint, int frame)
+        public virtual IEnumerable<SC2Action> Contain(Point2D attackPoint, Point2D defensePoint, Point2D armyPoint, int frame)
         {
             return Retreat(defensePoint, armyPoint, frame);
         }
