@@ -89,7 +89,7 @@
                 return false;
             }
 
-            var bestGravitonTarget = GetBestGravitonBeamTarget(commander, target);
+            var bestGravitonTarget = GetBestGravitonBeamTarget(commander, target, defensivePoint);
             if (bestGravitonTarget != null && bestGravitonTarget.FrameLastSeen + 1 >= frame)
             {
                 TagService.TagAbility("graviton");
@@ -101,7 +101,7 @@
             return false;
         }
 
-        protected UnitCalculation GetBestGravitonBeamTarget(UnitCommander commander, Point2D target)
+        protected virtual UnitCalculation GetBestGravitonBeamTarget(UnitCommander commander, Point2D target, Point2D defensivePoint)
         {
             var existingOrder = commander.UnitCalculation.Unit.Orders.Where(o => o.AbilityId == (uint)Abilities.EFFECT_GRAVITONBEAM).FirstOrDefault();
 

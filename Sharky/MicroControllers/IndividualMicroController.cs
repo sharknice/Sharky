@@ -400,7 +400,7 @@
             if (DoFreeDamage(commander, defensivePoint, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
 
             // TODO: setup a concave above the ramp if there is a ramp, get earch grid point on high ground, make sure at least one unit on each point
-            if (commander.UnitCalculation.NearbyEnemies.Any() || Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(defensivePoint.X, defensivePoint.Y)) > 25 || MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos) < MapDataService.MapHeight(defensivePoint))
+            if (commander.UnitCalculation.NearbyEnemies.Any(e => e.FrameLastSeen + 100 > frame) || Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(defensivePoint.X, defensivePoint.Y)) > 25 || MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos) < MapDataService.MapHeight(defensivePoint))
             {
                 if (Retreat(commander, defensivePoint, defensivePoint, frame, out action)) { return action; }
                 return MoveToTarget(commander, defensivePoint, frame);
@@ -1920,6 +1920,12 @@
                 return commander.Order(frame, Abilities.MOVE, target);
             }
 
+            var mineralBlocker = ActiveUnitData.NeutralUnits.Values.FirstOrDefault(m => m.FrameLastSeen == frame && m.Unit.DisplayType == DisplayType.Visible && m.Unit.MineralContents == 5 && Vector2.Distance(m.Position, commander.UnitCalculation.Position) < 10);
+            if (mineralBlocker != null)
+            {
+                return commander.Order(frame, Abilities.MOVE, target);  
+            }
+
             var moveTo = GetNextPointToTarget(commander, target, frame);
             return commander.Order(frame, Abilities.MOVE, moveTo);
         }
@@ -2329,6 +2335,8 @@
 
         public virtual UnitCalculation GetBestTargetFromList(UnitCommander commander, IEnumerable<UnitCalculation> attacks, UnitOrder existingAttackOrder)
         {
+            if (!attacks.Any()) { return null; }
+
             if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.KillDetection)
             {
                 var enemy = GetBestTargetFromListKillDetection(commander, attacks, existingAttackOrder);

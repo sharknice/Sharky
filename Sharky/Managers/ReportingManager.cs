@@ -192,7 +192,7 @@
             }
             if (DefaultSharkyBot.TargetingData.AttackState != MicroTasks.Attack.AttackState.None)
             {
-                Console.WriteLine($"Attack State: {DefaultSharkyBot.TargetingData.AttackState}");
+                Console.WriteLine($"Attack State:{DefaultSharkyBot.TargetingData.AttackState}: {DefaultSharkyBot.TargetingData.AttackStateDescription}");
             }
 
             CheckCommanders();

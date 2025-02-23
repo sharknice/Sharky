@@ -7,6 +7,7 @@
         EnemyData EnemyData;
         MicroTaskData MicroTaskData;
         RequirementService RequirementService;
+        SharkyOptions SharkyOptions;
 
         int LastClaimFrame;
 
@@ -17,6 +18,7 @@
             TargetingData = defaultSharkyBot.TargetingData;
             MicroTaskData = defaultSharkyBot.MicroTaskData;
             RequirementService = defaultSharkyBot.RequirementService;
+            SharkyOptions = defaultSharkyBot.SharkyOptions;
 
            Priority = priority;
 
@@ -49,6 +51,11 @@
             var enemyCannons = ActiveUnitData.EnemyUnits.Values.Where(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_PHOTONCANNON && !e.NearbyAllies.Any(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS)).OrderBy(c => Vector2.DistanceSquared(new Vector2(TargetingData.SelfMainBasePoint.X, TargetingData.SelfMainBasePoint.Y), c.Position)).Where(c => Vector2.DistanceSquared(new Vector2(TargetingData.SelfMainBasePoint.X, TargetingData.SelfMainBasePoint.Y), c.Position) < 2500);
             var enemyPylons = ActiveUnitData.EnemyUnits.Values.Where(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && !e.NearbyAllies.Any(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS) && !e.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit))).OrderBy(c => Vector2.DistanceSquared(new Vector2(TargetingData.SelfMainBasePoint.X, TargetingData.SelfMainBasePoint.Y), c.Position)).Where(c => Vector2.DistanceSquared(new Vector2(TargetingData.SelfMainBasePoint.X, TargetingData.SelfMainBasePoint.Y), c.Position) < 2500);
 
+            if (frame < SharkyOptions.FramesPerSecond * 65)
+            {
+                enemyPylons = enemyPylons.Where(b => b.Unit.BuildProgress == 1); // way too early, probably a fake to bait workers
+            }
+
             if (!enemyCannons.Any(e => e.Unit.BuildProgress == 1 && e.Unit.Shield > 5) && (enemyPylons.Any() || enemyCannons.Any(e => e.Unit.BuildProgress < 1 || e.Unit.Shield <= 5)))
             {
                 foreach (var enemyCannon in enemyCannons)
@@ -62,7 +69,7 @@
                 {
                     commands.AddRange(DefendAgainstCannon(enemyPylon, frame));
                 }
-                foreach (var commander in UnitCommanders.Where(c => !c.UnitCalculation.Unit.Orders.Any() && c.LastOrderFrame < frame - 3))
+                foreach (var commander in UnitCommanders.Where(c => !c.UnitCalculation.Unit.Orders.Any() || c.LastOrderFrame + 10 > frame))
                 {
                     var enemy = enemyCannons.FirstOrDefault();
                     if (enemy == null)
@@ -100,7 +107,7 @@
                         commands.AddRange(action);
                     }
                 }
-                var needed = 4 - unUsedCommanders.Count();
+                var needed = 4 - UnitCommanders.Count();
 
                 if (needed > 0)
                 {
@@ -113,7 +120,7 @@
 
         private void ClaimDefender(UnitCalculation enemyCannon, int frame)
         {
-            if (LastClaimFrame > frame - 3 || UnitCommanders.Count() > 9) { return; }
+            if (LastClaimFrame + 3 > frame || UnitCommanders.Count() > 9) { return; }
 
             var worker = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.Worker) && 
                 (c.UnitRole == UnitRole.Minerals || c.UnitRole == UnitRole.Gas) && 

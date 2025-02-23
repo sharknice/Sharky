@@ -13,6 +13,7 @@
         public ChokePoints ChokePoints { get; set; }
         public WallOffBasePosition WallOffBasePosition { get; set; }
         public AttackState AttackState { get; set; }
+        public string AttackStateDescription { get; set; } = string.Empty;
         public List<UnitCalculation> WallBuildings { get; set; }
         public Point2D NaturalFrontScoutPoint;
         public Vector2 EnemyArmyCenter;
