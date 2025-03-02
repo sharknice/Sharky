@@ -49,7 +49,7 @@
             var commands = new List<SC2APIProtocol.Action>();
 
             var enemyCannons = ActiveUnitData.EnemyUnits.Values.Where(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_PHOTONCANNON && !e.NearbyAllies.Any(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS)).OrderBy(c => Vector2.DistanceSquared(new Vector2(TargetingData.SelfMainBasePoint.X, TargetingData.SelfMainBasePoint.Y), c.Position)).Where(c => Vector2.DistanceSquared(new Vector2(TargetingData.SelfMainBasePoint.X, TargetingData.SelfMainBasePoint.Y), c.Position) < 2500);
-            var enemyPylons = ActiveUnitData.EnemyUnits.Values.Where(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && !e.NearbyAllies.Any(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS) && !e.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit))).OrderBy(c => Vector2.DistanceSquared(new Vector2(TargetingData.SelfMainBasePoint.X, TargetingData.SelfMainBasePoint.Y), c.Position)).Where(c => Vector2.DistanceSquared(new Vector2(TargetingData.SelfMainBasePoint.X, TargetingData.SelfMainBasePoint.Y), c.Position) < 2500);
+            var enemyPylons = ActiveUnitData.EnemyUnits.Values.Where(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && !e.NearbyAllies.Any(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS) && !e.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit))).OrderBy(c => Vector2.DistanceSquared(new Vector2(TargetingData.SelfMainBasePoint.X, TargetingData.SelfMainBasePoint.Y), c.Position)).Where(c => Vector2.Distance(new Vector2(TargetingData.SelfMainBasePoint.X, TargetingData.SelfMainBasePoint.Y), c.Position) < 25);
 
             if (frame < SharkyOptions.FramesPerSecond * 65)
             {

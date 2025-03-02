@@ -318,7 +318,7 @@
                         var wallData = MapData.WallData.FirstOrDefault(b => b.BasePosition.X == closestBase.Location.X && b.BasePosition.Y == closestBase.Location.Y);
                         if (wallData != null && wallData.Door != null)
                         {
-                            var angle = Math.Atan2(wallData.Door.Y - TargetingData.SelfMainBasePoint.Y, TargetingData.SelfMainBasePoint.X - wallData.Door.X);
+                            var angle = Math.Atan2(wallData.Door.Y - closestBase.Location.Y, closestBase.Location.X - wallData.Door.X);
                             TargetingData.ForwardDefensePoint = new Point2D { X = wallData.Door.X + (float)(2 * Math.Cos(angle)), Y = wallData.Door.Y - (float)(2 * Math.Sin(angle)) };
                         }
                     }
@@ -348,7 +348,6 @@
 
         float GetDistance(BaseLocation baseLocation)
         {
-            // TODO: make sure this works and fixes the Stargazers trying to defend the pocket instead of front base
             if (MapData.PathData.Count > 1)
             {
                 var path = AttackPathingService.GetNearestPath(baseLocation.Location.ToVector2(), TargetingData.AttackPoint.ToVector2());
@@ -357,7 +356,11 @@
                     path = AttackPathingService.GetNearestPath(baseLocation.Location.ToVector2(), TargetingData.EnemyMainBasePoint.ToVector2());
                     if (path?.Path == null || path.Path.Count < 2)
                     {
-                        return 10000;
+                        path = AttackPathingService.GetNearestPath(baseLocation.Location.ToVector2(), BaseData.EnemyNaturalBase.Location.ToVector2());
+                        if (path?.Path == null || path.Path.Count < 2)
+                        {
+                            return 10000;
+                        }
                     }
                 }
                 return path.Path.Count;

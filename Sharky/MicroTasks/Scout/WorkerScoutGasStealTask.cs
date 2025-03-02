@@ -13,6 +13,7 @@
         public bool BodyBlockExpansion { get; set; }
         public bool BodyBlockUntilDeath { get; set; }
         public bool PrioritizeExpansion { get; set; }
+        public bool OnlyExpansions { get; set; }
 
         public bool ScoutEntireAreaBeforeAttacking { get; set; }
         public bool OnlyBlockOnce { get; set; }
@@ -220,15 +221,10 @@
                     continue;
                 }
 
-                if (BodyBlockExpansion && CanBodyBlockExpansion(commander, expansion))
+                if (TryBodyBlockExpansion(commander, frame, commands, expansion))
                 {
-                    if (CanBodyBlockExpansion(commander, expansion))
-                    {
-                        BodyBlockExpansionWithProbe(frame, commands, commander, expansion);
-                        continue;
-                    }
+                    continue;
                 }
-
 
                 if (StealGas && MacroData.Minerals >= 75 && commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE)
                 {
@@ -375,7 +371,14 @@
                         if (enemy != null)
                         {
                             CameraManager.SetCamera(enemy.Position);
-                            commands.AddRange(commander.Order(frame, Abilities.ATTACK, targetTag: enemy.Unit.Tag));
+                            if (enemy.FrameLastSeen == frame)
+                            {
+                                commands.AddRange(commander.Order(frame, Abilities.ATTACK, targetTag: enemy.Unit.Tag));
+                            }
+                            else
+                            {
+                                commands.AddRange(commander.Order(frame, Abilities.ATTACK, enemy.Position.ToPoint2D()));
+                            }
                             continue;
                         }
                     }
@@ -386,9 +389,9 @@
                     CameraManager.SetCamera(commander.UnitCalculation.Position);
                 }
 
-                if (PrioritizeExpansion)
+                if (PrioritizeExpansion || OnlyExpansions)
                 {
-                    if (MapDataService.LastFrameVisibility(expansion.Location) + (15 * SharkyOptions.FramesPerSecond) < frame)
+                    if (OnlyExpansions || MapDataService.LastFrameVisibility(expansion.Location) + (15 * SharkyOptions.FramesPerSecond) < frame)
                     {
                         commands.AddRange(commander.Order(frame, Abilities.MOVE, expansion.Location));
                         continue;
@@ -400,7 +403,27 @@
                     var closestWorker = commander.UnitCalculation.NearbyEnemies.Where(e => e.UnitClassifications.HasFlag(UnitClassification.Worker)).OrderBy(e => Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position)).FirstOrDefault();
                     if (closestWorker != null)
                     {
-                        commands.AddRange(commander.Order(frame, Abilities.ATTACK, targetTag: closestWorker.Unit.Tag));
+                        var probes = commander.UnitCalculation.NearbyEnemies.Where(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE && e.FrameLastSeen == frame);
+                        var pylons = commander.UnitCalculation.NearbyEnemies.Where(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON);
+                        if (probes.Count() > 1 && pylons.Count() == 1)
+                        {
+                            var pylon = pylons.OrderBy(e => Vector2.Distance(e.Position, commander.UnitCalculation.Position)).FirstOrDefault(e => !e.NearbyAllies.Any(a => a.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && a.Unit.BuildProgress == 1));
+                            if (pylon != null)
+                            {
+                                var closestProbe = probes.OrderBy(e => Vector2.Distance(e.Position, pylon.Position)).FirstOrDefault();
+                                commands.AddRange(commander.Order(frame, Abilities.ATTACK, targetTag: closestProbe.Unit.Tag));
+                                continue;
+                            }
+                        }
+
+                        if (closestWorker.FrameLastSeen == frame)
+                        {
+                            commands.AddRange(commander.Order(frame, Abilities.ATTACK, targetTag: closestWorker.Unit.Tag));
+                        }
+                        else
+                        {
+                            commands.AddRange(commander.Order(frame, Abilities.ATTACK, closestWorker.Position.ToPoint2D()));
+                        }
                         continue;
                     }
                 }
@@ -461,7 +484,14 @@
                         var target = commander.UnitCalculation.EnemiesInRange.Where(e => e.UnitClassifications.HasFlag(UnitClassification.Worker)).OrderBy(e => e.SimulatedHitpoints).ThenBy(e => Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position)).FirstOrDefault();
                         if (target != null)
                         {
-                            commands.AddRange(commander.Order(frame, Abilities.ATTACK, targetTag: target.Unit.Tag));
+                            if (target.FrameLastSeen == frame)
+                            {
+                                commands.AddRange(commander.Order(frame, Abilities.ATTACK, targetTag: target.Unit.Tag));
+                            }
+                            else
+                            {
+                                commands.AddRange(commander.Order(frame, Abilities.ATTACK, target.Position.ToPoint2D()));
+                            }
                             return commands;
                         }
                     }
@@ -547,7 +577,20 @@
             return commands;
         }
 
-        private void BodyBlockExpansionWithProbe(int frame, List<SC2Action> commands, UnitCommander commander, BaseLocation expansion)
+        protected virtual bool TryBodyBlockExpansion(UnitCommander commander, int frame, List<SC2Action> commands, BaseLocation expansion)
+        {
+            if (BodyBlockExpansion && CanBodyBlockExpansion(commander, expansion))
+            {
+                if (CanBodyBlockExpansion(commander, expansion))
+                {
+                    BodyBlockExpansionWithProbe(frame, commands, commander, expansion);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        protected void BodyBlockExpansionWithProbe(int frame, List<SC2Action> commands, UnitCommander commander, BaseLocation expansion)
         {
             var zergling = commander.UnitCalculation.NearbyEnemies.Where(e => e.Unit.UnitType == (uint)UnitTypes.ZERG_ZERGLING).OrderBy(e => Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position)).FirstOrDefault();
             var drone = commander.UnitCalculation.NearbyEnemies.Where(e => e.Unit.UnitType == (uint)UnitTypes.ZERG_DRONE).OrderBy(e => Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position)).FirstOrDefault();
@@ -580,7 +623,7 @@
             commands.AddRange(commander.Order(frame, Abilities.MOVE, nextPoint.ToPoint2D()));
         }
 
-        private bool CanBodyBlockExpansion(UnitCommander commander, BaseLocation expansion)
+        protected bool CanBodyBlockExpansion(UnitCommander commander, BaseLocation expansion)
         {
             if (expansion == null) { return false; }
             return !BaseData.EnemyBases.Any(b => b.Location.X == expansion.Location.X && b.Location.Y == expansion.Location.Y) && (BodyBlockUntilDeath || Vector2.Distance(commander.UnitCalculation.Position, expansion.Location.ToVector2()) < 15);

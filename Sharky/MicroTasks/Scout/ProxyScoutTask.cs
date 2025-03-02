@@ -12,10 +12,12 @@
         IIndividualMicroController IndividualMicroController;
         MapDataService MapDataService;
         MicroTaskData MicroTaskData;
+        ActiveUnitData ActiveUnitData;
 
         public bool Started { get; set; }
 
         public bool BlockAddons { get; set; }
+        public bool PylonPylons { get; set; }
 
         List<Point2D> ScoutLocations { get; set; }
         int ScoutLocationIndex { get; set; }
@@ -34,11 +36,13 @@
             IndividualMicroController = individualMicroController;
             MapDataService = defaultSharkyBot.MapDataService;
             MicroTaskData = defaultSharkyBot.MicroTaskData;
+            ActiveUnitData = defaultSharkyBot.ActiveUnitData;
 
             UnitCommanders = new List<UnitCommander>();
             Enabled = enabled;
             LateGame = false;
             BlockAddons = false;
+            PylonPylons = false;
         }
 
         public override void ClaimUnits(Dictionary<ulong, UnitCommander> commanders)
@@ -77,7 +81,13 @@
                     if (scouter.Value == null)
                     {
                         scouter = available.OrderBy(c => Vector2.DistanceSquared(BaseData.BaseLocations.Skip(1).FirstOrDefault().Location.ToVector2(), c.Value.UnitCalculation.Position)).FirstOrDefault();
-                        MicroTaskData[typeof(MiningTask).Name].StealUnit(scouter.Value);
+                        foreach (var task in MicroTaskData)
+                        {
+                            if (task.Value.UnitCommanders != null && task.Value.UnitCommanders.Any(c => c.UnitCalculation.Unit.Tag == scouter.Value.UnitCalculation.Unit.Tag))
+                            {
+                                task.Value.StealUnit(scouter.Value);
+                            }
+                        }
                     }
                 }
 
@@ -120,56 +130,129 @@
 
             var commands = new List<SC2APIProtocol.Action>();
 
+            var enemyProxies = ActiveUnitData.EnemyUnits.Values.Where(e => e.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && Vector2.DistanceSquared(e.Position, TargetingData.SelfMainBasePoint.ToVector2()) < Vector2.DistanceSquared(e.Position, TargetingData.EnemyMainBasePoint.ToVector2()));
+
             foreach (var commander in UnitCommanders)
             {
                 if (commander.UnitRole != UnitRole.Scout) { commander.UnitRole = UnitRole.Scout; }
 
                 if (commander.UnitCalculation.NearbyEnemies.Any(e => e.FrameLastSeen == frame && (e.UnitClassifications.HasFlag(UnitClassification.Worker) || e.Attributes.Contains(SC2Attribute.Structure))) && commander.UnitCalculation.NearbyEnemies.Count() < 5)
                 {
-                    if (BlockAddons && (MacroData.Minerals > 100 || commander.LastAbility == Abilities.BUILD_PYLON) && commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE)
+                    if ((BlockAddons || PylonPylons) && (MacroData.Minerals > 100 || commander.LastAbility == Abilities.BUILD_PYLON) && commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE)
                     {
-                        var buildingsWithoutAddon = commander.UnitCalculation.NearbyEnemies.Where(e => (e.Unit.UnitType == (uint)UnitTypes.TERRAN_BARRACKS || e.Unit.UnitType == (uint)UnitTypes.TERRAN_FACTORY || e.Unit.UnitType == (uint)UnitTypes.TERRAN_STARPORT) && !e.Unit.HasAddOnTag && BuildingBuilder.HasRoomForAddon(e.Unit)).OrderBy(e => Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position));
-                        if (buildingsWithoutAddon.Count() == 1)
+                        if (BlockAddons)
                         {
-                            var buildingWithoutAddon = buildingsWithoutAddon.FirstOrDefault();
-                            if (buildingWithoutAddon != null)
+                            var buildingsWithoutAddon = commander.UnitCalculation.NearbyEnemies.Where(e => (e.Unit.UnitType == (uint)UnitTypes.TERRAN_BARRACKS || e.Unit.UnitType == (uint)UnitTypes.TERRAN_FACTORY || e.Unit.UnitType == (uint)UnitTypes.TERRAN_STARPORT) && !e.Unit.HasAddOnTag && BuildingBuilder.HasRoomForAddon(e.Unit)).OrderBy(e => Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position));
+                            if (buildingsWithoutAddon.Count() == 1)
                             {
-                                if (buildingWithoutAddon.Unit.BuildProgress >= .75f || commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit)))
+                                var buildingWithoutAddon = buildingsWithoutAddon.FirstOrDefault();
+                                if (buildingWithoutAddon != null)
                                 {
-                                    var point = new Point2D { X = buildingWithoutAddon.Unit.Pos.X + 2.5f, Y = buildingWithoutAddon.Unit.Pos.Y - .5f };
-                                    if (!BuildingService.BlocksResourceCenter(point.X, point.Y, 1))
+                                    if (buildingWithoutAddon.Unit.BuildProgress >= .75f || commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit)))
                                     {
-                                        var wallBlock = commander.Order(frame, Abilities.BUILD_PYLON, point);
-                                        if (wallBlock != null)
+                                        var point = new Point2D { X = buildingWithoutAddon.Unit.Pos.X + 2.5f, Y = buildingWithoutAddon.Unit.Pos.Y - .5f };
+                                        if (!BuildingService.BlocksResourceCenter(point.X, point.Y, 1))
                                         {
-                                            commands.AddRange(wallBlock);
-                                            continue;
+                                            var wallBlock = commander.Order(frame, Abilities.BUILD_PYLON, point);
+                                            if (wallBlock != null)
+                                            {
+                                                commands.AddRange(wallBlock);
+                                                continue;
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
-
+                        if (PylonPylons)
+                        {
+                            var pylonsWithoutBuilding = commander.UnitCalculation.NearbyEnemies.Where(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && !e.NearbyAllies.Any(a => a.Attributes.Contains(SC2APIProtocol.Attribute.Structure)) && !e.NearbyEnemies.Any(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && Vector2.Distance(e.Position, a.Position) < 6)).OrderBy(e => Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position));
+                            if (pylonsWithoutBuilding.Count() == 1)
+                            {
+                                var pylonWithoutBuilding = pylonsWithoutBuilding.FirstOrDefault();
+                                if (pylonWithoutBuilding != null)
+                                {
+                                    if (!commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit)))
+                                    {
+                                        var point = new Point2D { X = pylonWithoutBuilding.Unit.Pos.X + 2f, Y = pylonWithoutBuilding.Unit.Pos.Y };
+                                        if (!BuildingService.BlocksResourceCenter(point.X, point.Y, 1))
+                                        {
+                                            var wallBlock = commander.Order(frame, Abilities.BUILD_PYLON, point);
+                                            if (wallBlock != null)
+                                            {
+                                                commands.AddRange(wallBlock);
+                                                continue;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
 
                     if (commander.UnitCalculation.Unit.Shield < 5)
                     {
-                        if (commander.UnitCalculation.NearbyEnemies.Count(e => e.DamageGround) > 0)
+                        if (commander.UnitCalculation.NearbyEnemies.Count(e => e.DamageGround) == 1)
                         {
-                            var threat = commander.UnitCalculation.EnemiesThreateningDamage.FirstOrDefault();
-                            if (threat != null)
+                            var threat = commander.UnitCalculation.NearbyEnemies.FirstOrDefault(e => e.DamageGround);
+                            if (threat.Unit.Health + threat.Unit.Shield > commander.UnitCalculation.Unit.Health + commander.UnitCalculation.Unit.Health)
                             {
-                                if (threat.SimulatedHitpoints > commander.UnitCalculation.SimulatedHitpoints)
+                                var bait = IndividualMicroController.Retreat(commander, TargetingData.ForwardDefensePoint, null, frame);
+                                if (bait != null)
                                 {
-                                    var bait = IndividualMicroController.Retreat(commander, TargetingData.ForwardDefensePoint, null, frame);
-                                    if (bait != null)
+                                    commands.AddRange(bait);
+                                }
+                                continue;
+                            }
+                        }
+                        else if (commander.UnitCalculation.NearbyEnemies.Any(e => e.DamageGround))
+                        {
+                            var bait = IndividualMicroController.Retreat(commander, TargetingData.ForwardDefensePoint, null, frame);
+                            if (bait != null)
+                            {
+                                commands.AddRange(bait);
+                            }
+                            continue;
+                        }                     
+                    }
+
+                    var probes = commander.UnitCalculation.NearbyEnemies.Where(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE && e.FrameLastSeen == frame);
+                    if (probes.Count() > 1)
+                    {
+                        var pylon = commander.UnitCalculation.NearbyEnemies.Where(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON).OrderBy(e => Vector2.Distance(e.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+                        if (pylon != null)
+                        {
+                            var closestProbe = probes.OrderBy(e => Vector2.Distance(e.Position, pylon.Position)).FirstOrDefault();
+                            commands.AddRange(commander.Order(frame, Abilities.ATTACK, targetTag: closestProbe.Unit.Tag));
+                            continue;
+                        }
+                    }
+
+                    if (enemyProxies.Any())
+                    {
+                        var closest = enemyProxies.OrderBy(e => Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+                        if (closest != null)
+                        {
+                            if (closest.FrameLastSeen != frame || Vector2.Distance(commander.UnitCalculation.Position, closest.Position) > 15)
+                            {
+                                if (commander.UnitCalculation.NearbyEnemies.Any(e => e.FrameLastSeen == frame))
+                                {
+                                    var paction = IndividualMicroController.Scout(commander, closest.Position.ToPoint2D(), TargetingData.ForwardDefensePoint, frame);
+                                    if (paction != null)
                                     {
-                                        commands.AddRange(bait);
+                                        commands.AddRange(paction);
                                     }
-                                    continue;
+                                }
+                                else
+                                {
+                                    var paction = commander.Order(frame, Abilities.MOVE, closest.Position.ToPoint2D());
+                                    if (paction != null)
+                                    {
+                                        commands.AddRange(paction);
+                                    }
                                 }
                             }
-                        }                     
+                        }
                     }
 
                     var enemy = commander.UnitCalculation.NearbyEnemies.FirstOrDefault();
@@ -179,6 +262,29 @@
                         commands.AddRange(action);
                     }
                     continue;
+                }
+                else if (enemyProxies.Any())
+                {
+                    var closest = enemyProxies.OrderBy(e => Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+                    if (closest != null)
+                    {
+                        if (commander.UnitCalculation.NearbyEnemies.Any(e => e.FrameLastSeen == frame))
+                        {
+                            var action = IndividualMicroController.Scout(commander, closest.Position.ToPoint2D(), TargetingData.ForwardDefensePoint, frame);
+                            if (action != null)
+                            {
+                                commands.AddRange(action);
+                            }
+                        }
+                        else
+                        {
+                            var action = commander.Order(frame, Abilities.MOVE, closest.Position.ToPoint2D());
+                            if (action != null)
+                            {
+                                commands.AddRange(action);
+                            }
+                        }
+                    }
                 }
                 else if (Vector2.DistanceSquared(new Vector2(ScoutLocations[ScoutLocationIndex].X, ScoutLocations[ScoutLocationIndex].Y), commander.UnitCalculation.Position) < 4)
                 {

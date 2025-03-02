@@ -17,12 +17,19 @@
                 return false;
             }
 
-            if (UnitCountService.EnemyCount(UnitTypes.PROTOSS_CYBERNETICSCORE) > 0)
+            if (UnitCountService.EnemyHas(new List<UnitTypes> { UnitTypes.PROTOSS_CYBERNETICSCORE, UnitTypes.PROTOSS_ASSIMILATOR }))
             {
+                Expired = true;
                 return false;
             }
 
-            if (UnitCountService.EnemyCount(UnitTypes.PROTOSS_ZEALOT) >= 3 && frame < SharkyOptions.FramesPerSecond * 3 * 60)
+            if (frame > SharkyOptions.FramesPerSecond * 3 * 60)
+            {
+                Expired = true;
+                return false;
+            }
+
+            if ((UnitCountService.EnemyCount(UnitTypes.PROTOSS_ZEALOT) >= 3 || UnitCountService.EnemyCount(UnitTypes.PROTOSS_GATEWAY) >= 3) && frame < SharkyOptions.FramesPerSecond * 3 * 60)
             {
                 return true;
             }

@@ -18,11 +18,25 @@
 
                 if (builders.Any())
                 {
-                    return commander.Order(frame, Abilities.ATTACK, null, builders.First().Unit.Tag);
+                    if (builders.First().FrameLastSeen == frame)
+                    {
+                        return commander.Order(frame, Abilities.ATTACK, null, builders.First().Unit.Tag);
+                    }
+                    else
+                    {
+                        return commander.Order(frame, Abilities.ATTACK, builders.First().Position.ToPoint2D());
+                    }
                 }
 
                 var enemyWorker = enemyWorkers.OrderBy(e => e.Unit.Health).First();
-                return commander.Order(frame, Abilities.ATTACK, null, enemyWorker.Unit.Tag);
+                if (enemyWorker.FrameLastSeen == frame)
+                {
+                    return commander.Order(frame, Abilities.ATTACK, null, enemyWorker.Unit.Tag);
+                }
+                else
+                {
+                    return commander.Order(frame, Abilities.ATTACK, enemyWorker.Position.ToPoint2D());
+                }
             }
             var enemyBuildings = commander.UnitCalculation.NearbyEnemies.Take(25).Where(u => u.Attributes.Contains(SC2Attribute.Structure)).OrderBy(b => b.Unit.Health);
             if (enemyBuildings.Any())
@@ -30,9 +44,23 @@
                 var pylon = enemyBuildings.Where(b => b.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON).FirstOrDefault();
                 if (pylon != null)
                 {
-                    return commander.Order(frame, Abilities.ATTACK, null, pylon.Unit.Tag);
+                    if (pylon.FrameLastSeen == frame)
+                    {
+                        return commander.Order(frame, Abilities.ATTACK, null, pylon.Unit.Tag);
+                    }
+                    else
+                    {
+                        return commander.Order(frame, Abilities.ATTACK, pylon.Position.ToPoint2D());
+                    }
                 }
-                return commander.Order(frame, Abilities.ATTACK, null, enemyBuildings.First().Unit.Tag);
+                if (enemyBuildings.First().FrameLastSeen == frame)
+                {
+                    return commander.Order(frame, Abilities.ATTACK, null, enemyBuildings.First().Unit.Tag);
+                }
+                else
+                {
+                    return commander.Order(frame, Abilities.ATTACK, enemyBuildings.First().Position.ToPoint2D());
+                }
             }
 
             return commander.Order(frame, Abilities.ATTACK, target);
