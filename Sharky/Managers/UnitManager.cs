@@ -1,5 +1,4 @@
-﻿using SC2APIProtocol;
-using Sharky.Algorithm;
+﻿using Sharky.Algorithm;
 
 namespace Sharky.Managers
 {
@@ -646,7 +645,7 @@ namespace Sharky.Managers
                         }
                     }
                 }
-                var closestCarrier = commander.UnitCalculation.NearbyAllies.Where(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_CARRIER).OrderBy(a => Vector2.DistanceSquared(a.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+                var closestCarrier = commander.UnitCalculation.NearbyAllies.Where(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_CARRIER && ActiveUnitData.Commanders[a.Unit.Tag].ChildUnitCalculations.Count() < 8).OrderBy(a => Vector2.DistanceSquared(a.Position, commander.UnitCalculation.Position)).FirstOrDefault();
                 if (closestCarrier != null)
                 {
                     return closestCarrier;

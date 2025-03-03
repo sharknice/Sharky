@@ -99,7 +99,11 @@
                 var cooldown = "";
                 if (unit.UnitCalculation.Unit.HasWeaponCooldown)
                 {
-                    cooldown = ",  " + unit.UnitCalculation.Unit.WeaponCooldown.ToString();
+                    cooldown = ", " + unit.UnitCalculation.Unit.WeaponCooldown.ToString();
+                }
+                if (unit.ChildUnitCalculations.Any())
+                {
+                    cooldown += ", " + unit.ChildUnitCalculations.Count().ToString();
                 }
                 debugService.DebugUnitText(unit.UnitCalculation, $"{CommanderDebugText ?? GetType().Name.Replace("Task", "", StringComparison.InvariantCultureIgnoreCase)}, {unit.UnitRole}{cooldown}", CommanderDebugColor ?? debugService.DefaultMicroTaskColor);
             }
