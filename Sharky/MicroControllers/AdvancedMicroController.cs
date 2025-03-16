@@ -4,15 +4,15 @@ namespace Sharky.MicroControllers
 {
     public class AdvancedMicroController : IMicroController
     {
-        float GroupUpDistanceSquared;
-        float GroupUpCompletedDistanceSquared;
+        protected float GroupUpDistanceSquared;
+        protected float GroupUpCompletedDistanceSquared;
 
-        MicroData MicroData;
-        SharkyOptions SharkyOptions;
-        MapDataService MapDataService;
+        protected MicroData MicroData;
+        protected SharkyOptions SharkyOptions;
+        protected MapDataService MapDataService;
 
-        ConcaveService ConcaveService;
-        ConcaveGroupData ConcaveGroupData;
+        protected ConcaveService ConcaveService;
+        protected ConcaveGroupData ConcaveGroupData;
 
         public bool GroupingEnabled { get; set; }
 
@@ -91,7 +91,7 @@ namespace Sharky.MicroControllers
             return actions;
         }
 
-        public List<SC2APIProtocol.Action> Retreat(IEnumerable<UnitCommander> commanders, Point2D defensivePoint, Point2D groupCenter, int frame)
+        public virtual List<SC2APIProtocol.Action> Retreat(IEnumerable<UnitCommander> commanders, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
             var actions = new List<SC2APIProtocol.Action>();
             Vector2 groupVector = Vector2.Zero;
@@ -119,7 +119,7 @@ namespace Sharky.MicroControllers
             return actions;
         }
 
-        private List<SC2Action> RetreatWithCommander(Point2D defensivePoint, Point2D groupCenter, int frame, UnitCommander commander)
+        protected List<SC2Action> RetreatWithCommander(Point2D defensivePoint, Point2D groupCenter, int frame, UnitCommander commander)
         {
             if (MicroData.IndividualMicroControllers.TryGetValue((UnitTypes)commander.UnitCalculation.Unit.UnitType, out var individualMicroController))
             {
@@ -152,7 +152,7 @@ namespace Sharky.MicroControllers
             return actions;
         }
 
-        public List<SC2APIProtocol.Action> Support(IEnumerable<UnitCommander> commanders, IEnumerable<UnitCommander> supportTargets, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
+        public virtual List<SC2APIProtocol.Action> Support(IEnumerable<UnitCommander> commanders, IEnumerable<UnitCommander> supportTargets, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
             var actions = new List<SC2APIProtocol.Action>();
 
@@ -219,7 +219,7 @@ namespace Sharky.MicroControllers
             return actions;
         }
 
-        void SetState(UnitCommander commander, Vector2 groupVector, int groupThreshold, int centerHeight)
+        protected void SetState(UnitCommander commander, Vector2 groupVector, int groupThreshold, int centerHeight)
         {
             if (!GroupingEnabled) { return; }
 
@@ -335,7 +335,7 @@ namespace Sharky.MicroControllers
             return Retreat(commanders, defensivePoint, groupCenter, frame);
         }
 
-        private List<SC2Action> ContainWithCommander(Point2D defensivePoint, Point2D groupCenter, int frame, List<SC2Action> actions, UnitCommander commander, Point2D assignedPosition)
+        protected List<SC2Action> ContainWithCommander(Point2D defensivePoint, Point2D groupCenter, int frame, List<SC2Action> actions, UnitCommander commander, Point2D assignedPosition)
         {
             if (MicroData.IndividualMicroControllers.TryGetValue((UnitTypes)commander.UnitCalculation.Unit.UnitType, out var individualMicroController))
             {
@@ -347,7 +347,7 @@ namespace Sharky.MicroControllers
             }
         }
 
-        private bool ConcaveGood(ConcaveGroupData concaveGroupData)
+        protected bool ConcaveGood(ConcaveGroupData concaveGroupData)
         {
             if (concaveGroupData.GroundConcavePoints == null || concaveGroupData.AirConcavePoints == null || concaveGroupData.HybridConcavePoints == null) { return false; }
 
@@ -370,7 +370,7 @@ namespace Sharky.MicroControllers
             return true;
         }
 
-        private void UpdateConcave(IEnumerable<UnitCommander> commanders, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
+        protected void UpdateConcave(IEnumerable<UnitCommander> commanders, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
             ConcaveGroupData.UnitCommanders = commanders.ToList();
 

@@ -1,4 +1,6 @@
-﻿namespace Sharky.Managers
+﻿using Sharky.Extensions;
+
+namespace Sharky.Managers
 {
     public class TargetingManager : SharkyManager
     {
@@ -83,6 +85,11 @@
                             var normalizedDirection = Vector2.Normalize(direction);
                             var betterSpot = TargetingData.ForwardDefensePoint.ToVector2() + (normalizedDirection * 3);
                             TargetingData.ForwardDefensePoint = betterSpot.ToPoint2D();
+                        }
+                        var highGroundDefensivePoints = ChokePointService.GetHighGroundDefensivePoints(chokePoints);
+                        if (highGroundDefensivePoints != null)
+                        {
+                            TargetingData.ForwardDefenseHighGroundPoints = highGroundDefensivePoints;
                         }
                     }
                 }
@@ -305,6 +312,11 @@
                             {
                                 TargetingData.ForwardDefenseWallOffPoints = wallPoints;
                             }
+                            var highGroundDefensivePoints = ChokePointService.GetHighGroundDefensivePoints(chokePoints);
+                            if (highGroundDefensivePoints != null)
+                            {
+                                TargetingData.ForwardDefenseHighGroundPoints = highGroundDefensivePoints;
+                            }
                         }
                     }
                     else
@@ -334,7 +346,10 @@
                 var closest = ActiveUnitData.Commanders.Values.Where(u => u.UnitRole != UnitRole.BlockExpansion && u.UnitRole != UnitRole.DoNotDefend && u.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.DefensiveStructure) || u.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.ResourceCenter)).OrderBy(u => Vector2.DistanceSquared(u.UnitCalculation.Position, target)).FirstOrDefault();
                 if (closest != null && (closest.UnitCalculation.Position.X != BaseData.BaseLocations.FirstOrDefault().Location.X && closest.UnitCalculation.Position.Y != BaseData.BaseLocations.FirstOrDefault().Location.Y))
                 {
-                    TargetingData.ForwardDefensePoint = closest.UnitCalculation.Position.ToPoint2D();
+                    if (closestBase == null || BaseData.SelfBases.Count > 2 || (Vector2.Distance(closestBase.Location.ToVector2(), closest.UnitCalculation.Position) < Vector2.Distance(BaseData.BaseLocations.FirstOrDefault().Location.ToVector2(), closest.UnitCalculation.Position)))
+                    {
+                        TargetingData.ForwardDefensePoint = closest.UnitCalculation.Position.ToPoint2D();
+                    }
                 }
             }
             foreach (var task in MacroData.Proxies)
@@ -359,7 +374,11 @@
                         path = AttackPathingService.GetNearestPath(baseLocation.Location.ToVector2(), BaseData.EnemyNaturalBase.Location.ToVector2());
                         if (path?.Path == null || path.Path.Count < 2)
                         {
-                            return 10000;
+                            path = AttackPathingService.GetNearestPath(baseLocation.Location.ToVector2() + Vector2.Normalize(TargetingData.AttackPoint.ToVector2() - baseLocation.Location.ToVector2()) * 5f, TargetingData.AttackPoint.ToVector2());
+                            if (path?.Path == null || path.Path.Count < 2)
+                            {
+                                return 10000;
+                            }
                         }
                     }
                 }

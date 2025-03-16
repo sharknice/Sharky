@@ -72,10 +72,13 @@
                 {
                     if (Vector2.DistanceSquared(commander.UnitCalculation.Position, closestEnemy.PreviousUnitCalculation.Position) > Vector2.DistanceSquared(commander.UnitCalculation.Position, closestEnemy.Position))
                     {
-                        CameraManager.SetCamera(commander.UnitCalculation.Position);
-                        TagService.TagAbility("siege");
-                        action = commander.Order(frame, Abilities.MORPH_SIEGEMODE);
-                        return true;
+                        if (Vector2.Distance(closestEnemy.Position, commander.UnitCalculation.Position) < 25)
+                        {
+                            CameraManager.SetCamera(commander.UnitCalculation.Position);
+                            TagService.TagAbility("siege");
+                            action = commander.Order(frame, Abilities.MORPH_SIEGEMODE);
+                            return true;
+                        }
                     }
                 }
             }

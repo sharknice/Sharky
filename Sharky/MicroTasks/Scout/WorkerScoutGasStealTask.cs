@@ -393,6 +393,11 @@
                 {
                     if (OnlyExpansions || MapDataService.LastFrameVisibility(expansion.Location) + (15 * SharkyOptions.FramesPerSecond) < frame)
                     {
+                        if (Vector2.Distance(commander.UnitCalculation.Position, expansion.Location.ToVector2()) < 5)
+                        {
+                            BodyBlockExpansionWithProbe(frame, commands, commander, expansion);
+                            continue;
+                        }
                         commands.AddRange(commander.Order(frame, Abilities.MOVE, expansion.Location));
                         continue;
                     }
@@ -619,7 +624,12 @@
             {
                 clockWise = false;
             }
-            var nextPoint = CalculateNextCirclePoint(expansion.Location.ToVector2(), 2.75f, 12, angle, clockWise);
+            var radius = 2.75f;
+            if (EnemyData.EnemyRace == Race.Protoss)
+            {
+                radius = 2f;
+            }
+            var nextPoint = CalculateNextCirclePoint(expansion.Location.ToVector2(), radius, 12, angle, clockWise);
             commands.AddRange(commander.Order(frame, Abilities.MOVE, nextPoint.ToPoint2D()));
         }
 

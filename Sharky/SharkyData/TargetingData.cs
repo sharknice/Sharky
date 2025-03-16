@@ -10,6 +10,7 @@
         public Point2D EnemyMainBasePoint { get; set; }
         public bool HiddenEnemyBase { get; set; }
         public List<Point2D> ForwardDefenseWallOffPoints { get; set; }
+        public List<Point2D> ForwardDefenseHighGroundPoints { get; set; }
         public ChokePoints ChokePoints { get; set; }
         public WallOffBasePosition WallOffBasePosition { get; set; }
         public AttackState AttackState { get; set; }

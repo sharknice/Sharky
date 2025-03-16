@@ -158,6 +158,14 @@
 
         public override List<SC2APIProtocol.Action> Support(UnitCommander commander, IEnumerable<UnitCommander> supportTargets, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
+            var supportTarget = supportTargets.FirstOrDefault();
+            if (supportTarget != null)
+            {
+                if (!commander.UnitCalculation.EnemiesInRange.Any() && Vector2.Distance(commander.UnitCalculation.Position, supportTarget.UnitCalculation.Position) > 15)
+                {
+                    return commander.Order(frame, Abilities.MORPH_UNSIEGE);
+                }
+            }
             return Attack(commander, target, defensivePoint, groupCenter, frame);
         }
 

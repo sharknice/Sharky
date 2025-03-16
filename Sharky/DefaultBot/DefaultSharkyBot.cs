@@ -587,6 +587,7 @@
                 [nameof(TwoBase)] = new TwoBase(this),
 
                 [nameof(AdeptRush)] = new AdeptRush(this),
+                [nameof(BlinkStalkers)] = new BlinkStalkers(this),
                 [nameof(CannonRush)] = new CannonRush(this),
                 [nameof(EnemyStrategies.Protoss.FourGate)] = new EnemyStrategies.Protoss.FourGate(this),
                 [nameof(ProtossFastExpand)] = new ProtossFastExpand(this),

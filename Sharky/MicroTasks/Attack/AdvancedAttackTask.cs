@@ -354,12 +354,36 @@
                         var baseUnderAttack = ActiveUnitData.SelfUnits.Values.Where(a => (a.UnitClassifications.HasFlag(UnitClassification.DefensiveStructure) && a.EnemiesInRangeOf.Any()) || (a.UnitClassifications.HasFlag(UnitClassification.ResourceCenter) && a.NearbyEnemies.Any(e => e.Damage > 0)));
                         if (baseUnderAttack.Any())
                         {
-                            attackPoint = baseUnderAttack.OrderBy(e => Vector2.DistanceSquared(e.Position, armyVector)).FirstOrDefault().Position.ToPoint2D();
+                            var underAttackPoint = baseUnderAttack.OrderBy(e => Vector2.DistanceSquared(e.Position, armyVector)).FirstOrDefault().Position.ToPoint2D();
+
+                            if (TargetingService.TargetMainFirst)
+                            {
+                                if (Vector2.Distance(underAttackPoint.ToVector2(), attackPoint.ToVector2()) < Vector2.Distance(AttackData.ArmyPoint.ToVector2(), attackPoint.ToVector2()))
+                                {
+                                    attackPoint = underAttackPoint;
+                                }
+                            }
+                            else
+                            {
+                                attackPoint = underAttackPoint;
+                            }
                             BaseUnderAttack = true;
                         }
                         else
                         {
-                            attackPoint = closerEnemies.OrderBy(e => Vector2.DistanceSquared(e.Position, armyVector)).FirstOrDefault().Position.ToPoint2D();
+                            var underAttackPoint = closerEnemies.OrderBy(e => Vector2.DistanceSquared(e.Position, armyVector)).FirstOrDefault().Position.ToPoint2D();
+
+                            if (TargetingService.TargetMainFirst)
+                            {
+                                if (Vector2.Distance(underAttackPoint.ToVector2(), attackPoint.ToVector2()) < Vector2.Distance(AttackData.ArmyPoint.ToVector2(), attackPoint.ToVector2()))
+                                {
+                                    attackPoint = underAttackPoint;
+                                }
+                            }
+                            else
+                            {
+                                attackPoint = underAttackPoint;
+                            }
                         }
                         if (stopwatch.ElapsedMilliseconds > 100)
                         {

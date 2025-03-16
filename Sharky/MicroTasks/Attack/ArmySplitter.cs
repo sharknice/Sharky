@@ -95,17 +95,17 @@
                     var shieldBattery = ActiveUnitData.SelfUnits.Values.Where(u => ((u.Unit.UnitType == (uint)UnitTypes.PROTOSS_SHIELDBATTERY && u.Unit.Energy > 5) || (u.Unit.UnitType == (uint)UnitTypes.PROTOSS_PHOTONCANNON && u.Unit.Shield > 5)) && u.Unit.IsPowered && u.Unit.BuildProgress == 1).OrderBy(u => Vector2.DistanceSquared(u.Position, defensiveVector)).FirstOrDefault();
                     if (shieldBattery != null)
                     {
-                        actions.AddRange(MicroController.Retreat(AvailableCommanders, shieldBattery.Position.ToPoint2D(), groupPoint, frame));
+                        actions.AddRange(MicroController.Defend(AvailableCommanders, shieldBattery.Position.ToPoint2D(), shieldBattery.Position.ToPoint2D(), groupPoint, frame));
                     }
                     else
                     {
                         if (EnemyData.SelfRace == Race.Terran && TerranWallService != null && TerranWallService.MainWallComplete())
                         {
-                            actions.AddRange(MicroController.Retreat(AvailableCommanders, TargetingData.ForwardDefensePoint, groupPoint, frame));
+                            actions.AddRange(MicroController.Defend(AvailableCommanders, TargetingData.ForwardDefensePoint, TargetingData.ForwardDefensePoint, groupPoint, frame));
                         }
                         else
                         {
-                            actions.AddRange(MicroController.Retreat(AvailableCommanders, TargetingData.MainDefensePoint, groupPoint, frame));
+                            actions.AddRange(MicroController.Defend(AvailableCommanders, TargetingData.MainDefensePoint, TargetingData.ForwardDefensePoint, groupPoint, frame));
                         }
                     }                 
                 }

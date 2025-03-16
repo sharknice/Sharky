@@ -159,6 +159,15 @@
                 target = TargetingData.EnemyMainBasePoint;
             }
 
+            if (DefendBehindWall(commander, defensivePoint, defensivePoint, frame, out action)) 
+            { 
+                return action; 
+            }
+            if (DefendOnHighGround(commander, defensivePoint, defensivePoint, frame, out action)) 
+            { 
+                return action; 
+            }
+
             if (WeaponReady(commander, frame))
             {
                 if (AttackBestTargetInRange(commander, target, bestTarget, frame, out action)) { return action; }
@@ -449,6 +458,23 @@
             return false;
         }
 
+        protected virtual bool DefendOnHighGround(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
+
+            if (MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos) >= MapDataService.MapHeight(defensivePoint)) { return false; }
+            if (WeaponReady(commander, frame) && commander.UnitCalculation.EnemiesInRange.Any()) { return false; }
+            if (commander.UnitCalculation.TargetPriorityCalculation.OverallWinnability > 1000 && commander.UnitCalculation.NearbyEnemies.Any(e => e.FrameLastSeen == frame)) { return false; }
+
+            if (Vector2.Distance(commander.UnitCalculation.Position, defensivePoint.ToVector2()) < 15)
+            {
+                action = commander.Order(frame, Abilities.MOVE, defensivePoint);
+                return true;
+            } 
+
+            return false;
+        }
+
         protected virtual bool DoFreeDamage(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
@@ -468,11 +494,11 @@
                 }
             }
 
-            if (!commander.UnitCalculation.EnemiesThreateningDamage.Any())
+            if (!commander.UnitCalculation.EnemiesThreateningDamage.Any() && !commander.UnitCalculation.EnemiesInRangeOfAvoid.Any())
             {
                 if (!commander.UnitCalculation.NearbyEnemies.Any(e => DamageService.CanDamage(e, commander.UnitCalculation) && (e.UnitTypeData.MovementSpeed >= commander.UnitCalculation.UnitTypeData.MovementSpeed || e.Range >= commander.UnitCalculation.Range)))
                 {
-                    if (commander.UnitCalculation.NearbyEnemies.Any(e => DamageService.CanDamage(commander.UnitCalculation, e) && e.FrameLastSeen == frame && e.Unit.DisplayType == DisplayType.Visible))
+                    if (commander.UnitCalculation.EnemiesInRange.Any() || commander.UnitCalculation.NearbyEnemies.Any(e => DamageService.CanDamage(commander.UnitCalculation, e) && e.FrameLastSeen == frame && e.Unit.DisplayType == DisplayType.Visible && Vector2.Distance(e.Position, commander.UnitCalculation.Position) < 12))
                     {
                         if (AttackBestTarget(commander, target, defensivePoint, target, bestTarget, frame, out action))
                         {
@@ -1359,8 +1385,9 @@
             if (closestEnemy != null)
             {
                 if (DefendBehindWall(commander, defensivePoint, defensivePoint, frame, out action)) { return true; }
+                if (DefendOnHighGround(commander, defensivePoint, defensivePoint, frame, out action)) { return true; }
 
-                if (commander.UnitCalculation.NearbyEnemies.All(e => e.Range < commander.UnitCalculation.Range && e.UnitTypeData.MovementSpeed < commander.UnitCalculation.UnitTypeData.MovementSpeed))
+                if (Vector2.Distance(commander.UnitCalculation.Position, defensivePoint.ToVector2()) < 12 && commander.UnitCalculation.NearbyEnemies.All(e => e.Range < commander.UnitCalculation.Range && e.UnitTypeData.MovementSpeed < commander.UnitCalculation.UnitTypeData.MovementSpeed))
                 {
                     if (MapDataService.SelfVisible(closestEnemy.Unit.Pos))
                     {
@@ -1401,6 +1428,15 @@
 
                 if (FollowPath(commander, frame, out action)) { return true; }
             }
+
+            var marked = commander.UnitCalculation.NearbyAllies.FirstOrDefault(a => ActiveUnitData.Commanders.ContainsKey(a.Unit.Tag) && ActiveUnitData.Commanders[a.Unit.Tag].UnitRole == UnitRole.Die);
+            if (marked != null)
+            {
+                action = commander.Order(frame, Abilities.ATTACK, targetTag: marked.Unit.Tag);
+                return true;
+            }
+
+            if (DefendOnHighGround(commander, defensivePoint, defensivePoint, frame, out action)) { return true; }
 
             action = MoveToTarget(commander, defensivePoint, frame);
             return true;
@@ -2229,7 +2265,7 @@
 
         protected virtual UnitCalculation GetBestTargetFromListWinAir(UnitCommander commander, IEnumerable<UnitCalculation> attacks, UnitOrder existingAttackOrder, Weapon weapon)
         {
-            var airAttackers = attacks.Where(u => u.DamageAir && AirAttackersFilter(commander, u));
+            var airAttackers = attacks.Where(u => (u.DamageAir || u.Unit.EnergyMax > 50) && AirAttackersFilter(commander, u));
 
             if (airAttackers.Any())
             {

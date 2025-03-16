@@ -80,7 +80,7 @@
                     if (!ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyAllies.Any(a => a.UnitClassifications.HasFlag(UnitClassification.ArmyUnit)) && (ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.Worker) || e.Attributes.Contains(SC2APIProtocol.Attribute.Structure))))
                     {
                         var enemyGroundDamage = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Take(25).Where(e => e.DamageGround).Sum(e => e.Damage);
-                        var nearbyWorkers = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyAllies.Take(25).Where(a => a.UnitClassifications.HasFlag(UnitClassification.Worker));
+                        var nearbyWorkers = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyAllies.Where(a => a.UnitClassifications.HasFlag(UnitClassification.Worker));
                         var commanders = ActiveUnitData.Commanders.Where(c => nearbyWorkers.Any(w => w.Unit.Tag == c.Key));
                         if (!commanders.Any()) { continue; }
 
@@ -237,7 +237,7 @@
                                     var defenders = commanders.Where(c => c.Value.UnitRole == UnitRole.Defend);
                                     foreach (var defender in defenders)
                                     {
-                                        var action = WorkerMicroController.Attack(defender.Value, selfBase.Location, selfBase.MineralLineLocation, null, frame);
+                                        var action = defender.Value.Order(frame, Abilities.ATTACK, enemy.Position.ToPoint2D());
                                         if (action != null)
                                         {
                                             actions.AddRange(action);

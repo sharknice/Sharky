@@ -216,6 +216,40 @@
             return wallPoints.Distinct().OrderBy(p => p.X).ThenBy(p => p.Y).ToList();
         }
 
+        public List<Point2D> GetHighGroundDefensivePoints(List<Point2D> chokePoints)
+        {
+            var highPoints = GetWallOffPoints(chokePoints);
+            var topCenter = new Vector2 { X = highPoints.Average(p => p.X), Y = highPoints.Average(p => p.Y) };
+            var cells = MapDataService.GetCells(topCenter.X, topCenter.Y, 5);
+            var ramp = cells.Where(c => MapDataService.PathWalkable(c.X, c.Y) && !MapDataService.PathBuildable(c.X, c.Y, c.X, c.Y)).Select(c => new Vector2(c.X, c.Y));
+            var midCenter = new Vector2 { X = ramp.Average(p => p.X), Y = ramp.Average(p => p.Y) };
+            var direction = Vector2.Normalize(topCenter - midCenter);
+
+            var adjustedPoints = new List<Point2D>();
+            foreach (var point in highPoints)
+            {
+                var unitDirection = Vector2.Normalize(point.ToVector2() - midCenter);
+                var adjusted = point.ToVector2() + unitDirection * 3f;
+                if (MapDataService.PathWalkable(adjusted.X, adjusted.Y))
+                {
+                    adjustedPoints.Add(adjusted.ToPoint2D());
+                }
+                else
+                {
+                    adjusted = point.ToVector2() + direction * 3f;
+                    if (MapDataService.PathWalkable(adjusted.X, adjusted.Y))
+                    {
+                        adjustedPoints.Add(adjusted.ToPoint2D());
+                    }
+                    else
+                    {
+                        adjustedPoints.Add(point);
+                    }
+                }
+            }
+            return adjustedPoints;
+        }
+
         private bool TouchingHigherPoint(int x, int y, int startHeight)
         {
             if (MapDataService.MapHeight(x, y + 1) > startHeight && MapDataService.PathWalkable(x, y + 1))
