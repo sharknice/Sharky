@@ -146,8 +146,11 @@ namespace Sharky.Managers
                 {
                     if (!removedEnemy.Unit.IsHallucination)
                     {
-                        ActiveUnitData.EnemyDeaths++;
-                        ActiveUnitData.EnemyResourcesLost += (int)removedEnemy.UnitTypeData.MineralCost + (int)removedEnemy.UnitTypeData.VespeneCost;
+                        if (removedEnemy.Unit.UnitType != (uint)UnitTypes.PROTOSS_PHOENIX || removedEnemy.NearbyAllies.Any(a => a.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) && Vector2.Distance(a.Position, removedEnemy.Position) < 15)) // a solo phoenix was probably a hallucination
+                        {
+                            ActiveUnitData.EnemyDeaths++;
+                            ActiveUnitData.EnemyResourcesLost += (int)removedEnemy.UnitTypeData.MineralCost + (int)removedEnemy.UnitTypeData.VespeneCost;
+                        }
                     }
                 }
                 if (ActiveUnitData.SelfUnits.Remove(tag, out UnitCalculation removedAlly))

@@ -37,5 +37,6 @@
         public bool ApiChatEnabled { get; set; }
         public bool ApiChatOnlyUpdateEnabled { get; set; }
         public bool ControlCamera { get; set; }
+        public bool DrawGrid { get; set; } = false;
     }
 }

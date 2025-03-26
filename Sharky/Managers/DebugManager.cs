@@ -336,6 +336,13 @@
                     return;
                 }
 
+                match = Regex.Match(chatReceived.Message.ToLower(), @"show grid");
+                if (match.Success)
+                {
+                    SharkyOptions.DrawGrid = !SharkyOptions.DrawGrid;
+                    return;
+                }
+
                 match = Regex.Match(chatReceived.Message.ToLower(), @"camera (\d+\.?\d*) (\d+\.?\d*)");
                 if (match.Success)
                 {

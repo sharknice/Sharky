@@ -14,12 +14,12 @@
         public int RetreatPathFrame { get; set; }
         public List<Vector2> RetreatPath { get; set; }
         public int RetreatPathIndex { get; set; }
-        public int LastOrderFrame { get; private set; }
+        public int LastOrderFrame { get; set; }
         public int FrameFirstSeen { get; private set; }
 
         public bool SkipFrame { get; set; }
 
-        public Abilities LastAbility { get; private set; }
+        public Abilities LastAbility { get; set; }
         public Point2D LastTargetLocation { get; private set; }
         public ulong LastTargetTag { get; private set; }
         public int LastInRangeAttackFrame { get; set; }

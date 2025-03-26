@@ -7,6 +7,7 @@
         SharkyUnitData SharkyUnitData;
         DebugService DebugService;
         WallDataService WallDataService;
+        SharkyOptions SharkyOptions;
 
         private int LastUpdateFrame;
         private readonly int FramesPerUpdate;
@@ -20,6 +21,7 @@
             SharkyUnitData = sharkyUnitData;
             DebugService = debugService;
             WallDataService = wallDataService;
+            SharkyOptions = sharkyOptions;
 
             FramesPerUpdate = 5;
             LastUpdateFrame = -100;
@@ -49,7 +51,10 @@
 
         public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
         {
-            //DrawGrid(observation.Observation.RawData.Player.Camera);
+            if (SharkyOptions.DrawGrid)
+            {
+                DrawGrid(observation.Observation.RawData.Player.Camera);
+            }
             //DrawPaths();
 
             if (FramesPerUpdate > observation.Observation.GameLoop - LastUpdateFrame) { return null; }
