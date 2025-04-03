@@ -159,7 +159,7 @@
 
         public void KillFriendlyUnits(UnitTypes unitType, int quantity)
         {
-            var tags = ActiveUnitData.SelfUnits.Where(u => u.Value.Unit.UnitType == (uint)unitType).Take(quantity).Select(u => u.Key);
+            var tags = ActiveUnitData.SelfUnits.Where(u => u.Value.Unit.UnitType == (uint)unitType).OrderByDescending(u => u.Value.Unit.IsOnScreen).ThenBy(u => u.Value.Unit.BuildProgress).Take(quantity).Select(u => u.Key);
             if (tags.Any())
             {
                 var command = new DebugKillUnit();

@@ -1,8 +1,10 @@
-﻿namespace Sharky.MicroTasks.Attack
+﻿using Sharky.Extensions;
+
+namespace Sharky.MicroTasks.Attack
 {
     public class AdvancedAttackTask : MicroTask, IAttackTask
     {
-        AttackData AttackData;
+        protected AttackData AttackData;
         TargetingData TargetingData;
         ActiveUnitData ActiveUnitData;
         MicroTaskData MicroTaskData;
@@ -12,7 +14,7 @@
 
         IMicroController MicroController;
 
-        TargetingService TargetingService;
+        protected TargetingService TargetingService;
         EnemyCleanupService EnemyCleanupService;
         UnitCountService UnitCountService;
 
@@ -111,7 +113,7 @@
         {
             if (MainAttackers.Any() && !MainUnits.Any())
             {
-                var possible = UnitCommanders.Where(commander => MainAttackers.Contains((UnitTypes)commander.UnitCalculation.Unit.UnitType));
+                var possible = UnitCommanders.Where(commander => MainAttackers.Contains((UnitTypes)commander.UnitCalculation.Unit.UnitType) && Vector2.Distance(commander.UnitCalculation.Position, AttackData.ArmyPoint.ToVector2()) < 6);
                 if (AttackData.ArmyPoint != null && possible.Any())
                 {
                     var best = possible.OrderBy(c => Vector2.DistanceSquared(c.UnitCalculation.Position, AttackData.ArmyPoint.ToVector2())).FirstOrDefault();
@@ -129,7 +131,7 @@
                     {
                         if (!commander.Value.Claimed)
                         {
-                            if (MainAttackers.Contains((UnitTypes)commander.Value.UnitCalculation.Unit.UnitType) && !commander.Value.UnitCalculation.Unit.IsHallucination)
+                            if (MainAttackers.Contains((UnitTypes)commander.Value.UnitCalculation.Unit.UnitType) && !commander.Value.UnitCalculation.Unit.IsHallucination && Vector2.Distance(commander.Value.UnitCalculation.Position, AttackData.ArmyPoint.ToVector2()) < 6)
                             {
                                 commander.Value.Claimed = true;
                                 UnitCommanders.Add(commander.Value);
@@ -167,7 +169,7 @@
                             SupportUnits.Add(commander.Value);
                             NextLeader = commander.Value;
                         }
-                        else if (!MainUnits.Any() && MainAttackers.Contains((UnitTypes)commander.Value.UnitCalculation.Unit.UnitType) && !commander.Value.UnitCalculation.Unit.IsHallucination)
+                        else if (!MainUnits.Any() && MainAttackers.Contains((UnitTypes)commander.Value.UnitCalculation.Unit.UnitType) && !commander.Value.UnitCalculation.Unit.IsHallucination && Vector2.Distance(commander.Value.UnitCalculation.Position, AttackData.ArmyPoint.ToVector2()) < 6)
                         {
                             commander.Value.UnitRole = UnitRole.Leader;
                             MainUnits.Add(commander.Value);
@@ -477,7 +479,7 @@
                 }
                 else
                 {
-                    if (Vector2.DistanceSquared(NextLeader.UnitCalculation.Position, currentLeader.UnitCalculation.Position) < 36)
+                    if (Vector2.Distance(NextLeader.UnitCalculation.Position, AttackData.ArmyPoint.ToVector2()) < 6)
                     {
                         SwapLeader(currentLeader);
                     }
@@ -523,7 +525,7 @@
             {
                 foreach (var mainType in MainAttackers)
                 {
-                    var mainUnit = SupportUnits.FirstOrDefault(commander => (UnitTypes)commander.UnitCalculation.Unit.UnitType == mainType && !commander.UnitCalculation.Unit.IsHallucination);
+                    var mainUnit = SupportUnits.FirstOrDefault(commander => (UnitTypes)commander.UnitCalculation.Unit.UnitType == mainType && !commander.UnitCalculation.Unit.IsHallucination && Vector2.Distance(commander.UnitCalculation.Position, AttackData.ArmyPoint.ToVector2()) < 6);
                     if (mainUnit != null)
                     {
                         SupportUnits.Remove(mainUnit);
@@ -532,7 +534,6 @@
                         break;
                     }
                 }
-
             }
         }
 

@@ -13,11 +13,13 @@
         MapDataService MapDataService;
         MicroTaskData MicroTaskData;
         ActiveUnitData ActiveUnitData;
+        RequirementService RequirementService;
 
         public bool Started { get; set; }
 
         public bool BlockAddons { get; set; }
         public bool PylonPylons { get; set; }
+        public bool BuildCannon { get; set; }
 
         List<Point2D> ScoutLocations { get; set; }
         int ScoutLocationIndex { get; set; }
@@ -37,6 +39,7 @@
             MapDataService = defaultSharkyBot.MapDataService;
             MicroTaskData = defaultSharkyBot.MicroTaskData;
             ActiveUnitData = defaultSharkyBot.ActiveUnitData;
+            RequirementService = defaultSharkyBot.RequirementService;
 
             UnitCommanders = new List<UnitCommander>();
             Enabled = enabled;
@@ -138,7 +141,7 @@
 
                 if (commander.UnitCalculation.NearbyEnemies.Any(e => e.FrameLastSeen == frame && (e.UnitClassifications.HasFlag(UnitClassification.Worker) || e.Attributes.Contains(SC2Attribute.Structure))) && commander.UnitCalculation.NearbyEnemies.Count() < 5)
                 {
-                    if ((BlockAddons || PylonPylons) && (MacroData.Minerals > 100 || commander.LastAbility == Abilities.BUILD_PYLON) && commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE)
+                    if ((BlockAddons || PylonPylons) && (MacroData.Minerals >= 100 || commander.LastAbility == Abilities.BUILD_PYLON) && commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE)
                     {
                         if (BlockAddons)
                         {
@@ -187,6 +190,36 @@
                                     }
                                 }
                             }
+                        }
+                    }
+                    if (BuildCannon)
+                    {
+                        if (RequirementService.HaveCompleted(UnitTypes.PROTOSS_FORGE))
+                        {
+                            if (commander.LastAbility == Abilities.BUILD_PHOTONCANNON && commander.LastOrderFrame + 100 > frame)
+                            {
+                                continue;
+                            }
+
+                            if (MacroData.Minerals >= 150)
+                            {
+                                var pylon = commander.UnitCalculation.NearbyAllies.FirstOrDefault(e => e.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && e.Unit.BuildProgress == 1 && e.NearbyEnemies.Any(a => a.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && Vector2.Distance(a.Position, e.Position) < 6));
+                                if (pylon != null)
+                                {
+                                    if (pylon.NearbyEnemies.Count(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_PHOTONCANNON && Vector2.Distance(a.Position, pylon.Position) < 8) < 2)
+                                    {
+                                        var command = BuildingBuilder.BuildBuilding(MacroData, UnitTypes.PROTOSS_PHOTONCANNON, SharkyUnitData.BuildingData[UnitTypes.PROTOSS_PHOTONCANNON], pylon.Position.ToPoint2D(), true, 8, UnitCommanders);
+                                        if (command != null)
+                                        {
+                                            commander.LastOrderFrame = frame;
+                                            commander.LastAbility = Abilities.BUILD_PHOTONCANNON;
+                                            commands.AddRange(command);
+                                            continue;
+                                        }
+                                    }
+                                }
+                            }
+
                         }
                     }
 
