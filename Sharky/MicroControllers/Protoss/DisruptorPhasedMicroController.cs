@@ -192,5 +192,10 @@
         {
             return Attack(commander, target, defensivePoint, null, frame);
         }
+
+        public override List<SC2Action> Defend(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, int frame)
+        {
+            return Attack(commander, target, defensivePoint, null, frame);
+        }
     }
 }

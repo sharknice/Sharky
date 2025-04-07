@@ -157,6 +157,11 @@
         {
             action = null;
 
+            if (!commander.UnitCalculation.NearbyAllies.Any(a => Vector2.Distance(a.Position, commander.UnitCalculation.Position) < 6))
+            {
+                return false;
+            }
+
             var range = 9f;
             if (commander.UnitRole == UnitRole.Harass)
             {
