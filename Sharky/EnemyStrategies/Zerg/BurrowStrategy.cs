@@ -12,7 +12,7 @@
         {
             if (EnemyData.EnemyRace != Race.Zerg) { return false; }
 
-            if (ActiveUnitData.EnemyUnits.Any(e => SharkyUnitData.BurrowedUnits.Contains((UnitTypes)e.Value.Unit.UnitType)))
+            if (ActiveUnitData.EnemyUnits.Any(e => SharkyUnitData.BurrowedUnits.Contains((UnitTypes)e.Value.Unit.UnitType) && e.Value.Unit.UnitType != (uint)UnitTypes.ZERG_CREEPTUMORBURROWED))
             {
                 return true;
             }

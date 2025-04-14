@@ -10,7 +10,7 @@
         CameraManager CameraManager;
         BaseData BaseData;
         float OverchargeRangeSquared = 144;
-        float RestoreRangeSquared = 36;
+        float RestoreRange = 6;
 
         public NexusManager(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, ChronoData chronoData, EnemyData enemyData, TagService tagService, CameraManager cameraManager, BaseData baseData)
         {
@@ -87,7 +87,7 @@
             {
                 foreach (var shieldBattery in nexus.UnitCalculation.NearbyAllies.Where(u => u.Unit.UnitType == (uint)UnitTypes.PROTOSS_SHIELDBATTERY && u.Unit.BuildProgress == 1 && Vector2.DistanceSquared(nexus.UnitCalculation.Position, u.Position) < OverchargeRangeSquared).OrderBy(u => u.Unit.Energy))
                 {
-                    if (shieldBattery.NearbyAllies.Any(a => a.Unit.BuildProgress == 1 && a.EnemiesInRangeOf.Any() && a.Unit.Shield < 5 && Vector2.DistanceSquared(shieldBattery.Position, a.Position) < RestoreRangeSquared))
+                    if (shieldBattery.NearbyAllies.Any(a => a.Unit.BuildProgress == 1 && a.EnemiesInRangeOf.Any() && a.Unit.Shield < 5 && Vector2.Distance(shieldBattery.Position, a.Position) <= RestoreRange + a.Unit.Radius))
                     {
                         CameraManager.SetCamera(shieldBattery.Position);
                         return nexus.Order(frame, Abilities.BATTERYOVERCHARGE, null, shieldBattery.Unit.Tag);

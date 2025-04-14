@@ -169,8 +169,8 @@
                                 desiredWorkers = (enemyBuildings.Count() * 4) + workers.Count();
 
                                 var enemy = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Where(u => !u.Unit.IsFlying).OrderBy(u => Vector2.DistanceSquared(u.Position, new Vector2(selfBase.Location.X, selfBase.Location.Y))).FirstOrDefault();
-                                if (enemyBuildings.Any() && !enemyBuildings.Any(u => u.Unit.UnitType == (uint)UnitTypes.PROTOSS_PHOTONCANNON && u.Unit.Shield == u.Unit.ShieldMax && u.Unit.BuildProgress == 1))
-                                { // TODO: test this
+                                if (enemyBuildings.Any() && !enemyBuildings.Any(u => (u.Unit.UnitType == (uint)UnitTypes.PROTOSS_PHOTONCANNON || u.Unit.UnitType == (uint)UnitTypes.ZERG_SPINECRAWLER) && u.Unit.Shield == u.Unit.ShieldMax && u.Unit.BuildProgress == 1))
+                                {
                                     while (commanders.Count(c => c.Value.UnitRole == UnitRole.Defend) < desiredWorkers && commanders.Count(c => c.Value.UnitRole == UnitRole.Defend) < commanders.Count())
                                     {
                                         var commander = commanders.FirstOrDefault(c => c.Value.UnitRole != UnitRole.Defend && c.Value.UnitRole != UnitRole.PreventGasSteal).Value;

@@ -9,6 +9,7 @@
         MicroTaskData MicroTaskData;
         ActiveUnitData ActiveUnitData;
         BuildingService BuildingService;
+        MapDataService MapDataService;
 
         IMicroController MicroController;
 
@@ -35,6 +36,7 @@
             MicroTaskData = defaultSharkyBot.MicroTaskData;
             ActiveUnitData = defaultSharkyBot.ActiveUnitData;
             BuildingService = defaultSharkyBot.BuildingService;
+            MapDataService = defaultSharkyBot.MapDataService;
 
             MicroController = defaultSharkyBot.MicroController;
 
@@ -93,7 +95,18 @@
 
                 foreach (var nonDetector in nonDetectors)
                 {
-                    if (nonDetector.UnitCalculation.EnemiesThreateningDamage.Any() || Vector2.DistanceSquared(nonDetector.UnitCalculation.Position, vector) < 33)
+                    if (nonDetector.UnitCalculation.Unit.ShieldMax > 0 && nonDetector.UnitCalculation.Unit.Shield == 0)
+                    {
+                        actions.AddRange(MicroController.Retreat(new List<UnitCommander> { nonDetector }, TargetingData.ForwardDefensePoint, null, frame));
+                        continue;
+                    }
+                    var creepTumor = nonDetector.UnitCalculation.NearbyEnemies.Where(e => (e.Unit.UnitType == (uint)UnitTypes.ZERG_CREEPTUMORBURROWED || (uint)UnitTypes.ZERG_CREEPTUMOR == e.Unit.UnitType) && e.Unit.DisplayType == DisplayType.Visible).OrderBy(e => Vector2.Distance(e.Position, vector)).FirstOrDefault();
+                    if (!nonDetector.UnitCalculation.EnemiesInRangeOfAvoid.Any() && creepTumor != null)
+                    {
+                        actions.AddRange(nonDetector.Order(frame, Abilities.ATTACK, creepTumor.Position.ToPoint2D()));
+                        continue;
+                    }
+                    else if (nonDetector.UnitCalculation.EnemiesThreateningDamage.Any() || Vector2.DistanceSquared(nonDetector.UnitCalculation.Position, vector) < 33)
                     {
                         actions.AddRange(MicroController.Attack(new List<UnitCommander> { nonDetector }, NextBaseLocation, TargetingData.ForwardDefensePoint, NextBaseLocation, frame));
                     }
@@ -130,6 +143,22 @@
                                     actions.AddRange(detector.Order(frame, Abilities.BEHAVIOR_PULSARBEAMON));
                                     continue;
                                 }
+                            }
+                        }
+
+                        if (Vector2.Distance(detector.UnitCalculation.Position, vector) < 7 && !detector.UnitCalculation.EnemiesInRangeOfAvoid.Any())
+                        {
+                            var creepTumor = detector.UnitCalculation.NearbyEnemies.Where(e => e.Unit.UnitType == (uint)UnitTypes.ZERG_CREEPTUMORBURROWED || (uint)UnitTypes.ZERG_CREEPTUMOR == e.Unit.UnitType).OrderBy(e => Vector2.Distance(e.Position, vector)).FirstOrDefault();
+                            if (creepTumor != null)
+                            {
+                                actions.AddRange(detector.Order(frame, Abilities.MOVE, creepTumor.Position.ToPoint2D()));
+                                continue;
+                            }
+                            var cell = MapDataService.GetCells(NextBaseLocation.X, NextBaseLocation.Y, 5).Where(c => MapDataService.IsOnCreep(new Point2D { X = c.X, Y = c.Y })).OrderByDescending(c => Vector2.Distance(new Vector2(c.X, c.Y), vector)).FirstOrDefault();
+                            if (cell != null)
+                            {
+                                actions.AddRange(detector.Order(frame, Abilities.MOVE, new Point2D { X = cell.X, Y = cell.Y }));
+                                continue;
                             }
                         }
 
@@ -320,7 +349,7 @@
         {
             foreach (var tag in deadUnits)
             {
-                UnitCommanders.RemoveAll(c => c.UnitCalculation.Unit.Tag == tag);
+                Deaths += UnitCommanders.RemoveAll(c => c.UnitCalculation.Unit.Tag == tag);
             }
         }
     }

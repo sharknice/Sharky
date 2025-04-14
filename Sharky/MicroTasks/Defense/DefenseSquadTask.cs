@@ -18,6 +18,7 @@
         public bool OnlyDefendMain { get; set; }
         public bool GroupAtMain { get; set; }
         public bool AlwaysFillBunkers { get; set; }
+        public bool OnlyDefendInRange { get; set; } = false;
 
         List<UnitCommander> WorkerDefenders { get; set; }
 
@@ -95,13 +96,21 @@
 
             FillBunkers(frame, actions);
 
-            var structures = ActiveUnitData.SelfUnits.Where(u => u.Value.Attributes.Contains(SC2Attribute.Structure));
+            var structures = ActiveUnitData.SelfUnits.Where(u => u.Value.Attributes.Contains(SC2Attribute.Structure) && u.Value.Unit.UnitType != (uint)UnitTypes.PROTOSS_ORACLESTASISTRAP);
             if (OnlyDefendMain)
             {
                 var vector = new Vector2(TargetingData.SelfMainBasePoint.X, TargetingData.SelfMainBasePoint.Y);
                 structures = structures.Where(u => Vector2.DistanceSquared(u.Value.Position, vector) < 400);
             }
-            var attackingEnemies = structures.SelectMany(u => u.Value.NearbyEnemies).Distinct().Where(e => ActiveUnitData.EnemyUnits.ContainsKey(e.Unit.Tag));
+            IEnumerable<UnitCalculation> attackingEnemies;
+            if (OnlyDefendInRange)
+            {
+                attackingEnemies = structures.SelectMany(u => u.Value.EnemiesInRangeOf).Distinct().Where(e => ActiveUnitData.EnemyUnits.ContainsKey(e.Unit.Tag));
+            }
+            else
+            {
+                attackingEnemies = structures.SelectMany(u => u.Value.NearbyEnemies.Where(e => Vector2.Distance(e.Position, u.Value.Position) < 15)).Distinct().Where(e => ActiveUnitData.EnemyUnits.ContainsKey(e.Unit.Tag));
+            }
             if (attackingEnemies.Any())
             {
                 if (UnitCommanders.Count() == 0)

@@ -1,6 +1,4 @@
-﻿using Sharky.Extensions;
-
-namespace Sharky.Managers
+﻿namespace Sharky.Managers
 {
     public class TargetingManager : SharkyManager
     {

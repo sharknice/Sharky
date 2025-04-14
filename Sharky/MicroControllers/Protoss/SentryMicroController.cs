@@ -18,9 +18,13 @@
 
             if (commander.UnitCalculation.Unit.BuffIds.Contains((uint)Buffs.GUARDIANSHIELD) && commander.UnitCalculation.Unit.Shield > 0)
             {
-                var unshielded = commander.UnitCalculation.NearbyAllies.Where(a => !a.Unit.BuffIds.Contains((uint)Buffs.GUARDIANSHIELD) && a.EnemiesInRangeOf.Any(e => e.Range > 2)).OrderBy(a => Vector2.DistanceSquared(a.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+                var unshielded = commander.UnitCalculation.NearbyAllies.Where(a => a.Unit.UnitType != (uint)UnitTypes.PROTOSS_INTERCEPTOR && !a.Unit.BuffIds.Contains((uint)Buffs.GUARDIANSHIELD) && a.EnemiesInRangeOf.Any(e => e.Range > 2)).OrderBy(a => Vector2.DistanceSquared(a.Position, commander.UnitCalculation.Position)).FirstOrDefault();
                 if (unshielded != null)
                 {
+                    if (commander.UnitCalculation.NearbyAllies.Count(e => e.Unit.BuffIds.Contains((uint)Buffs.GUARDIANSHIELD)) > 10)
+                    {
+                        return false;
+                    }
                     action = commander.Order(frame, Abilities.MOVE, unshielded.Position.ToPoint2D());
                     return true;
                 }
@@ -33,6 +37,12 @@
                 }
             }
 
+            return false;
+        }
+
+        public override bool MaintainRange(UnitCommander commander, Point2D defensivePoint, int frame, out List<SC2Action> action)
+        {
+            action = null;
             return false;
         }
 

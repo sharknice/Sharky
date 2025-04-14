@@ -1,6 +1,4 @@
-﻿using Sharky.Extensions;
-
-namespace Sharky.MicroTasks.Attack
+﻿namespace Sharky.MicroTasks.Attack
 {
     public class AdvancedAttackTask : MicroTask, IAttackTask
     {
@@ -305,7 +303,8 @@ namespace Sharky.MicroTasks.Attack
             TargetingData.AttackPoint = TargetingService.UpdateAttackPoint(AttackData.ArmyPoint, TargetingData.AttackPoint);
 
             var attackingEnemies = ActiveUnitData.EnemyUnits.Values.Where(e => e.FrameLastSeen > frame - 100 &&
-                    (e.NearbyEnemies.Any(u => u.Attributes.Contains(SC2Attribute.Structure) && u.Unit.UnitType != (uint)UnitTypes.ZERG_CREEPTUMORBURROWED && u.Unit.UnitType != (uint)UnitTypes.ZERG_CREEPTUMOR && u.Unit.UnitType != (uint)UnitTypes.TERRAN_KD8CHARGE && u.Unit.UnitType != (uint)UnitTypes.PROTOSS_ORACLESTASISTRAP && u.UnitTypeData.Attributes.Contains(SC2Attribute.Structure)) ||
+                    (e.NearbyEnemies.Any(u => Vector2.Distance(u.Position, e.Position) < 15 &&
+                    u.Attributes.Contains(SC2Attribute.Structure) && u.Unit.UnitType != (uint)UnitTypes.ZERG_CREEPTUMORBURROWED && u.Unit.UnitType != (uint)UnitTypes.ZERG_CREEPTUMOR && u.Unit.UnitType != (uint)UnitTypes.TERRAN_KD8CHARGE && u.Unit.UnitType != (uint)UnitTypes.PROTOSS_ORACLESTASISTRAP && u.UnitTypeData.Attributes.Contains(SC2Attribute.Structure)) ||
                     (e.TargetPriorityCalculation.OverallWinnability < .5f && EnemyAttackers.Any(ea => ea.Unit.Tag == e.Unit.Tag))
                 ) && (e.NearbyEnemies.Count(b => b.Attributes.Contains(SC2Attribute.Structure)) >= e.NearbyAllies.Count(b => b.Attributes.Contains(SC2Attribute.Structure)))
             );
@@ -632,10 +631,10 @@ namespace Sharky.MicroTasks.Attack
                         leader = UnitCommanders.FirstOrDefault();
                     }
 
-                    if (leader != null)
-                    {
-                        return leader.UnitCalculation.TargetPriorityCalculation.Overwhelm;
-                    }
+                    //if (leader != null)
+                    //{
+                    //    return leader.UnitCalculation.TargetPriorityCalculation.Overwhelm;
+                    //}
                     return true;
                 }
             }
@@ -655,7 +654,7 @@ namespace Sharky.MicroTasks.Attack
 
             if (DeathBallDefending(attackPoint))
             {
-                actions.AddRange(MicroController.Attack(mainUnits, attackPoint, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame));
+                actions.AddRange(MicroController.Defend(mainUnits, attackPoint, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame));
                 actions.AddRange(MicroController.Support(supportUnits, mainUnits, supportAttackPoint, TargetingData.ForwardDefensePoint, supportAttackPoint, frame));
                 foreach (var subTask in SubTasks.Where(t => t.Value.Enabled).OrderBy(t => t.Value.Priority))
                 {

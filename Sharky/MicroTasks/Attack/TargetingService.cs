@@ -28,6 +28,15 @@
             {
                 return TargetingData.EnemyMainBasePoint;
             }
+            if (MapDataService.SelfVisible(attackPoint))
+            {
+                var visibleBuildings = ActiveUnitData.EnemyUnits.Values.Where(e => e.Unit.DisplayType == DisplayType.Visible && e.UnitTypeData.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && !e.Unit.IsFlying && e.Unit.UnitType != (uint)UnitTypes.ZERG_CREEPTUMOR && e.Unit.UnitType != (uint)UnitTypes.ZERG_CREEPTUMORBURROWED && e.Unit.UnitType != (uint)UnitTypes.ZERG_CREEPTUMORQUEEN && e.Unit.UnitType != (uint)UnitTypes.TERRAN_KD8CHARGE);
+                var closest = visibleBuildings.OrderBy(b => Vector2.Distance(b.Position, attackPoint.ToVector2())).FirstOrDefault();
+                if (closest != null && Vector2.Distance(closest.Position, attackPoint.ToVector2()) < 12)
+                {
+                    return closest.Position.ToPoint2D();
+                }
+            }
 
             var enemyBuildings = ActiveUnitData.EnemyUnits.Where(e => e.Value.UnitTypeData.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && !e.Value.Unit.IsFlying && e.Value.Unit.UnitType != (uint)UnitTypes.ZERG_CREEPTUMOR && e.Value.Unit.UnitType != (uint)UnitTypes.ZERG_CREEPTUMORBURROWED && e.Value.Unit.UnitType != (uint)UnitTypes.ZERG_CREEPTUMORQUEEN && e.Value.Unit.UnitType != (uint)UnitTypes.TERRAN_KD8CHARGE);
             var currentEnemyBuildingCount = enemyBuildings.Count();
