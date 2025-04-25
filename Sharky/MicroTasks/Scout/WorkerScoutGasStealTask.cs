@@ -197,6 +197,14 @@
                 }
 
                 var expansion = BaseData.EnemyBaseLocations.Skip(1).FirstOrDefault();
+                if (BaseData.EnemyBases.Count > 1)
+                {
+                    expansion = BaseData.EnemyBaseLocations.FirstOrDefault(l => !BaseData.EnemyBases.Any(b => b.Location.X == l.Location.X && b.Location.Y == l.Location.Y));
+                    if (expansion == null)
+                    {
+                        expansion = BaseData.EnemyBaseLocations.Skip(1).FirstOrDefault();
+                    }
+                }
 
                 if (BodyBlockExpansion && BodyBlockUntilDeath && CanBodyBlockExpansion(commander, expansion))
                 {
@@ -389,9 +397,9 @@
                     CameraManager.SetCamera(commander.UnitCalculation.Position);
                 }
 
-                if (PrioritizeExpansion || OnlyExpansions)
+                if (PrioritizeExpansion)
                 {
-                    if (OnlyExpansions || MapDataService.LastFrameVisibility(expansion.Location) + (15 * SharkyOptions.FramesPerSecond) < frame)
+                    if (MapDataService.LastFrameVisibility(expansion.Location) + (15 * SharkyOptions.FramesPerSecond) < frame)
                     {
                         if (Vector2.Distance(commander.UnitCalculation.Position, expansion.Location.ToVector2()) < 5)
                         {
@@ -400,6 +408,52 @@
                         }
                         commands.AddRange(commander.Order(frame, Abilities.MOVE, expansion.Location));
                         continue;
+                    }
+                }
+                if (OnlyExpansions)
+                {
+                    if (BaseData.EnemyBases.Count < 2)
+                    {
+                        if (MapDataService.LastFrameVisibility(expansion.Location) + (15 * SharkyOptions.FramesPerSecond) < frame)
+                        {
+                            if (Vector2.Distance(commander.UnitCalculation.Position, expansion.Location.ToVector2()) < 5)
+                            {
+                                BodyBlockExpansionWithProbe(frame, commands, commander, expansion);
+                                continue;
+                            }
+                            commands.AddRange(commander.Order(frame, Abilities.MOVE, expansion.Location));
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        var expansions = BaseData.EnemyBaseLocations.Where(l => !BaseData.EnemyBases.Any(b => b.Location.X == l.Location.X && b.Location.Y == l.Location.Y)).Take(2);
+                        bool tookAction = false;
+                        foreach (var extraExpansions in expansions)
+                        {
+                            if (MapDataService.LastFrameVisibility(extraExpansions.Location) + (15 * SharkyOptions.FramesPerSecond) < frame || commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.Worker) && Vector2.Distance(e.Position, extraExpansions.Location.ToVector2()) < 5))
+                            {
+                                if (Vector2.Distance(commander.UnitCalculation.Position, extraExpansions.Location.ToVector2()) < 5)
+                                {
+                                    BodyBlockExpansionWithProbe(frame, commands, commander, extraExpansions);
+                                    tookAction = true;
+                                    continue;
+                                }
+                                commands.AddRange(commander.Order(frame, Abilities.MOVE, extraExpansions.Location));
+                                tookAction = true;
+                                continue;
+                            }
+                        }
+                        if (tookAction) { continue; }
+                    }
+                    if ((commander.UnitCalculation.Unit.Shield < commander.UnitCalculation.Unit.ShieldMax && commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) && e.FrameLastSeen == frame && Vector2.Distance(commander.UnitCalculation.Position, e.Position) < 15)) ||
+                        commander.UnitCalculation.EnemiesInRangeOfAvoid.Any())
+                    {
+                        if (MineralWalker.MineralWalkNoWhere(commander, frame, out List<SC2Action> mineralWalk))
+                        {
+                            commands.AddRange(mineralWalk);
+                            continue;
+                        }
                     }
                 }
 
