@@ -185,6 +185,20 @@
             }
         }
 
+        public void KillAllEnemyUnits()
+        {
+            var tags = ActiveUnitData.EnemyUnits.Select(u => u.Key);
+            if (tags.Any())
+            {
+                var command = new DebugKillUnit();
+                command.Tag.AddRange(tags);
+                SpawnRequest.Debug.Debug.Add(new DebugCommand()
+                {
+                    KillUnit = command,
+                });
+            }
+        }
+
         public void KillEnemyUnits(UnitTypes unitType)
         {
             var tags = ActiveUnitData.EnemyUnits.Where(u => u.Value.Unit.UnitType == (uint)unitType).Select(u => u.Key);
@@ -197,6 +211,12 @@
                     KillUnit = command,
                 });
             }
+        }
+
+        public void KillAlllUnits()
+        {
+            KillAllEnemyUnits();
+            KillAllFriendlyUnits();
         }
 
         public void RemoveUnit(ulong tag)

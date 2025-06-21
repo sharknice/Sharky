@@ -2,7 +2,7 @@
 {
     public class GameConnection
     {
-        ProtobufProxy Proxy = new ProtobufProxy();
+        protected ProtobufProxy Proxy = new ProtobufProxy();
         string address = "127.0.0.1";
 
         string starcraftExe;
@@ -69,7 +69,7 @@
             var response = await Proxy.SendRequest(request);
         }
 
-        private void readSettings()
+        protected void readSettings()
         {
             var myDocuments = Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
             var executeInfo = FilePath.Combine(myDocuments, "Starcraft II", "ExecuteInfo.txt");
@@ -266,11 +266,6 @@
                 actions = actions.Where(action => action?.ActionRaw?.UnitCommand?.UnitTags == null ||
                     (action?.ActionRaw?.UnitCommand?.UnitTags != null &&
                     !action.ActionRaw.UnitCommand.UnitTags.Any(tag => !observation.Observation.RawData.Units.Any(u => u.Tag == tag))));
-                var removedActions = generatedActions - actions.Count();
-                if (removedActions > 0)
-                {
-                    // Console.WriteLine($"Removed {removedActions} actions for units that are not controllable");
-                }
 
                 var filteredActions = new List<SC2APIProtocol.Action>();
                 var tags = new List<ulong>();
@@ -282,10 +277,6 @@
                         {
                             filteredActions.Add(action);
                             tags.AddRange(action.ActionRaw.UnitCommand.UnitTags);
-                        }
-                        else
-                        {
-                            // Console.WriteLine($"{observation.Observation.GameLoop} Removed conflicting order {action.ActionRaw.UnitCommand.AbilityId} for tags {string.Join(" ", action.ActionRaw.UnitCommand.UnitTags)}");
                         }
                     }
                     else
