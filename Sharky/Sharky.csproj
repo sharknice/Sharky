@@ -3,22 +3,32 @@
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <LangVersion>10.0</LangVersion>
-    <Authors>Sharknice</Authors>
-    <Description>The Sharky Framework.  A StarCraft 2 API framework for creating StarCraft 2 bots</Description>
+    <Authors>realsharknice</Authors>
+    <Description>The Sharky Framework.  A StarCraft 2 API framework for creating StarCraft 2 bots and AI agents</Description>
     <PackageProjectUrl>https://github.com/sharknice/Sharky</PackageProjectUrl>
-    <PackageTags>StarCraft, SC2, SC2AI, bot</PackageTags>
-    <Version>1.0.8</Version>
+    <PackageTags>StarCraft, SC2, SC2AI, bot, AI, agent</PackageTags>
+    <Version>1.1.0</Version>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <AssemblyVersion>1.0.8.0</AssemblyVersion>
-    <FileVersion>1.0.8.0</FileVersion>
-    <PackageReleaseNotes>improved worker defense</PackageReleaseNotes>
+    <AssemblyVersion>1.1.0.0</AssemblyVersion>
+    <FileVersion>1.1.0.0</FileVersion>
+    <PackageReleaseNotes>updating to the latest version of sharky</PackageReleaseNotes>
 	<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 	<Deterministic>false</Deterministic>
+	<PackageId>SharkySC2</PackageId>
+	<Title>Sharky</Title>
+	<PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <Optimize>False</Optimize>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
