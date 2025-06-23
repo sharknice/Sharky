@@ -121,11 +121,12 @@
             }
             else
             {
-                var endX = (float)(Range * Math.Sin(unit.Facing + (Math.PI / 2)));
-                var endY = (float)(Range * Math.Cos(unit.Facing + (Math.PI / 2)));
+                var range = Range + unit.Radius;
+                var endX = (float)(range * Math.Sin(unit.Facing + (Math.PI / 2)));
+                var endY = (float)(range * Math.Cos(unit.Facing + (Math.PI / 2)));
                 End = new Vector2(endX + unit.Pos.X, unit.Pos.Y - endY);
-                var endFiveX = (float)((Range + 5) * Math.Sin(unit.Facing + (Math.PI / 2)));
-                var endFiveY = (float)((Range + 5) * Math.Cos(unit.Facing + (Math.PI / 2)));
+                var endFiveX = (float)((range + 5) * Math.Sin(unit.Facing + (Math.PI / 2)));
+                var endFiveY = (float)((range + 5) * Math.Cos(unit.Facing + (Math.PI / 2)));
                 EndPlusFive = new Vector2(endFiveX + unit.Pos.X, unit.Pos.Y - endFiveY);
             }
 
