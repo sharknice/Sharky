@@ -6,6 +6,8 @@
         EnemyAggressivityService EnemyAggressivityService;
         DebugService DebugService;
 
+        public bool ShowDebugText { get; set; } = true;
+
         public EnemyStrategyManager(DefaultSharkyBot defaultSharkyBot)
         {
             EnemyData = defaultSharkyBot.EnemyData;
@@ -24,7 +26,10 @@
 
             EnemyAggressivityService.Update(frame);
 
-            DebugService.DrawText($"Enemy aggression {EnemyData.EnemyAggressivityData.ArmyAggressivity}");
+            if (ShowDebugText)
+            {
+                DebugService.DrawText($"Enemy aggression {EnemyData.EnemyAggressivityData.ArmyAggressivity}");
+            }
 
             return new List<SC2Action>();
         }

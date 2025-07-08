@@ -68,7 +68,6 @@
             if (SharkyOptions.Debug)
             {
                 DrawRequest.Debug.Debug[0].Draw.Text.Add(new DebugText() { Size = size, Color = color, Text = text, WorldPos = pos });
-                
             }
         }
 

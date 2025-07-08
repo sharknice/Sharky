@@ -560,6 +560,11 @@
 
             if (SpecialCaseMove(commander, target, defensivePoint, groupCenter, bestTarget, formation, frame, out action)) { return true; }
 
+            if (formation == Formation.Flank && !commander.UnitCalculation.EnemiesInRangeOf.Any())
+            {
+                if (Flank(commander, target, defensivePoint, groupCenter, bestTarget, formation, frame, out action)) { return true; }
+            }
+
             if (!commander.UnitCalculation.TargetPriorityCalculation.Overwhelm && !(formation == Formation.Loose && commander.UnitCalculation.NearbyAllies.Count > 5))
             {
                 if (MoveAway(commander, target, bestTarget, defensivePoint, frame, out action)) { return true; }
@@ -568,7 +573,7 @@
             if (MoveFromBeingClosest(commander, target, defensivePoint, groupCenter, bestTarget, formation, frame, out action)) { return true; }
 
             var closest = commander.UnitCalculation.EnemiesInRange.Where(e => DamageService.CanDamage(e, commander.UnitCalculation)).OrderBy(e => Vector2.Distance(e.Position, commander.UnitCalculation.Position)).FirstOrDefault();
-            if (closest != null && closest.Damage > 0 && closest.Range < commander.UnitCalculation.Range && (closest.UnitTypeData.MovementSpeed <= commander.UnitCalculation.UnitTypeData.MovementSpeed || closest.Unit.UnitType == (uint)UnitTypes.PROTOSS_ARCHON))
+            if (MicroPriority != MicroPriority.AttackForward && closest != null && closest.Damage > 0 && closest.Range < commander.UnitCalculation.Range && (closest.UnitTypeData.MovementSpeed <= commander.UnitCalculation.UnitTypeData.MovementSpeed || closest.Unit.UnitType == (uint)UnitTypes.PROTOSS_ARCHON))
             {
                 var avoidPoint = GetPositionFromRange(commander, closest.Unit.Pos, commander.UnitCalculation.Unit.Pos, commander.UnitCalculation.Range);
                 if (commander.UnitCalculation.Unit.IsFlying)
@@ -593,6 +598,25 @@
             }
 
             return NavigateToTarget(commander, target, groupCenter, bestTarget, formation, frame, out action);
+        }
+
+        private bool Flank(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, Formation formation, int frame, out List<SC2Action> action)
+        {
+            action = null;
+
+            if (commander.UnitCalculation.Unit.IsHallucination) { return false; }
+
+            if (bestTarget == null) { return false; }
+
+            var area = MapDataService.GetCells(bestTarget.Position.X, bestTarget.Position.Y, commander.UnitCalculation.Range + commander.UnitCalculation.Unit.Radius + bestTarget.Unit.Radius);
+            var ordered = area.Where(p => p.Walkable).OrderBy(p => p.EnemyGroundDpsInRange).ThenBy(p => Vector2.Distance(new Vector2(p.X, p.Y), commander.UnitCalculation.Position)).FirstOrDefault();
+            if (ordered != null)
+            {
+                action = commander.Order(frame, Abilities.MOVE, new Point2D { X = ordered.X, Y = ordered.Y });
+                return true;
+            }
+
+            return false;
         }
 
         public virtual bool MoveFromBeingClosest(UnitCommander commander, Point2D target, Point2D defensivePoint, Point2D groupCenter, UnitCalculation bestTarget, Formation formation, int frame, out List<SC2APIProtocol.Action> action)

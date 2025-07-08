@@ -6,6 +6,6 @@
         LiveAndAttack,
         StayOutOfRange,
         JustLive,
-        NavigateToLocation,
+        NavigateToLocation
     }
 }

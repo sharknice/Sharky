@@ -5,6 +5,7 @@
         Normal,
         Tight,
         Loose,
-        Arc
+        Arc,
+        Flank
     }
 }

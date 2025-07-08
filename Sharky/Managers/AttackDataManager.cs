@@ -12,6 +12,8 @@
 
         DebugService DebugService;
 
+        public bool ShowDebugText { get; set; } = true;
+
         public AttackDataManager(AttackData attackData, ActiveUnitData activeUnitData, IMicroTask attackTask, TargetPriorityService targetPriorityService, TargetingData targetingData, MacroData macroData, BaseData baseData, DebugService debugService)
         {
             AttackData = attackData;
@@ -41,21 +43,30 @@
             if (MacroData.FoodUsed > 185)
             {
                 AttackData.Attacking = true;
-                DebugService.DrawText("Attacking: > 185 supply");
+                if (ShowDebugText)
+                {
+                    DebugService.DrawText("Attacking: > 185 supply");
+                }
                 return null;
             }
 
             if (ActiveUnitData.SelfUnits.Count(u => u.Value.UnitClassifications.HasFlag(UnitClassification.Worker)) == 0)
             {
                 AttackData.Attacking = true;
-                DebugService.DrawText("Attacking: no workers");
+                if (ShowDebugText)
+                {
+                    DebugService.DrawText("Attacking: no workers");
+                }
                 return null;
             }
 
             if (ActiveUnitData.SelfUnits.Count(u => u.Value.UnitClassifications.HasFlag(UnitClassification.ResourceCenter)) == 0)
             {
                 AttackData.Attacking = true;
-                DebugService.DrawText("Attacking: not mining minerals");
+                if (ShowDebugText)
+                {
+                    DebugService.DrawText("Attacking: not mining minerals");
+                }
                 return null;
             }
 
@@ -63,7 +74,10 @@
             if (!BaseData.SelfBases.Any(b => b.MineralMiningInfo.Any(m => m.Workers.Any())))
             {
                 AttackData.Attacking = true;
-                DebugService.DrawText("Attacking: no base");
+                if (ShowDebugText)
+                {
+                    DebugService.DrawText("Attacking: no base");
+                }
                 return null;
             }
 
@@ -74,7 +88,10 @@
                 {
                     AttackData.TargetPriorityCalculation.OverallWinnability = 0;
                 }
-                DebugService.DrawText("Not Attacking: no attacking army");
+                if (ShowDebugText)
+                {
+                    DebugService.DrawText("Not Attacking: no attacking army");
+                }
                 return null;
             }
 
@@ -87,7 +104,10 @@
                 var priority = TargetPriorityService.CalculateTargetPriority(AttackTask.UnitCommanders.Select(c => c.UnitCalculation), ActiveUnitData.EnemyUnits.Values.Where(e => e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit)));
                 AttackData.TargetPriorityCalculation = priority;
                 AttackData.Attacking = true;
-                DebugService.DrawText("Attacking: no enemy army defending");
+                if (ShowDebugText)
+                {
+                    DebugService.DrawText("Attacking: no enemy army defending");
+                }
                 return null;
             }
 
@@ -103,12 +123,18 @@
             if (targetPriority.OverallWinnability >= overallTrigger || targetPriority.GroundWinnability > 2 || targetPriority.AirWinnability > 2)
             {
                 AttackData.Attacking = true;
-                DebugService.DrawText($"Attacking: O:{targetPriority.OverallWinnability:0.00}, G:{targetPriority.GroundWinnability:0.00}, A:{targetPriority.AirWinnability:0.00}");
+                if (ShowDebugText)
+                {
+                    DebugService.DrawText($"Attacking: O:{targetPriority.OverallWinnability:0.00}, G:{targetPriority.GroundWinnability:0.00}, A:{targetPriority.AirWinnability:0.00}");
+                }
             }
             else
             {
                 AttackData.Attacking = false;
-                DebugService.DrawText($"Not Attacking: O:{targetPriority.OverallWinnability:0.00}, G:{targetPriority.GroundWinnability:0.00}, A:{targetPriority.AirWinnability:0.00}");
+                if (ShowDebugText)
+                {
+                    DebugService.DrawText($"Not Attacking: O:{targetPriority.OverallWinnability:0.00}, G:{targetPriority.GroundWinnability:0.00}, A:{targetPriority.AirWinnability:0.00}");
+                }
             }
 
             return null;

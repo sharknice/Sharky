@@ -32,6 +32,8 @@
         EnemyData EnemyData;
         BaseData BaseData;
 
+        public bool ShowBuildText { get; set; } = true;
+
         public BuildManager(DefaultSharkyBot defaultSharkyBot)
         {
             BuildChoices = defaultSharkyBot.BuildChoices;
@@ -127,8 +129,11 @@
 
         public override IEnumerable<SC2Action> OnFrame(ResponseObservation observation)
         {
-            DebugService.DrawText("Build: " + CurrentBuild.Name());
-            DebugService.DrawText("Sequence: " + string.Join(", ", BuildSequence));
+            if (ShowBuildText)
+            {
+                DebugService.DrawText("Build: " + CurrentBuild.Name());
+                DebugService.DrawText("Sequence: " + string.Join(", ", BuildSequence));
+            }
 
             var frame = (int)observation.Observation.GameLoop;
 
