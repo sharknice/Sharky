@@ -11,6 +11,7 @@
         public bool Enabled { get; protected set; }
         public double LongestFrame { get; set; }
         public double TotalFrameTime { get; set; }
+        public bool LogEnable { get; set; } = true;
 
         public virtual void ClaimUnits(Dictionary<ulong, UnitCommander> commanders)
         {
@@ -49,15 +50,19 @@
         {
             if (Enabled) { return; }
             Enabled = true;
-            Console.WriteLine($"Enable {GetType().Name}");
+            if (LogEnable) { Console.WriteLine($"Enable {GetType().Name}"); }  
         }
 
         public virtual void Disable()
         {
             if (!Enabled) { return; }
 
-            Console.WriteLine($"Disable {GetType().Name}");
-            PrintReport(1);
+            if (LogEnable) 
+            { 
+                Console.WriteLine($"Disable {GetType().Name}");
+                PrintReport(1);
+            }
+
             ResetClaimedUnits();
             Enabled = false;         
         }

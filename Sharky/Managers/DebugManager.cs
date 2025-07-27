@@ -365,6 +365,13 @@
                     SharkyOptions.ControlCamera = !SharkyOptions.ControlCamera;
                 }
 
+                match = Regex.Match(chatReceived.Message.ToLower(), "kill all units");
+                if (match.Success)
+                {
+                    DebugService.KillAlllUnits();
+                    return;
+                }
+
                 match = Regex.Match(chatReceived.Message.ToLower(), "kill friendly (.*)");
                 if (match.Success)
                 {
