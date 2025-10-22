@@ -332,6 +332,12 @@
     <None Update="StaticData\pathing\WaterfallAIE.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="StaticData\wall\partial\persephone.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="StaticData\wall\partial\pylon.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="StaticData\wall\partial\torches.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

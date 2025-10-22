@@ -111,6 +111,13 @@
                     LastEnergyRechargeFrame = frame;
                     return nexus.Order(frame, Abilities.ENERYGYRECHARGE, null, energyUnit.Unit.Tag);
                 }
+
+                foreach (var energyUnit in nexus.UnitCalculation.NearbyAllies.Where(u => u.Unit.UnitType == (uint)UnitTypes.PROTOSS_SHIELDBATTERY && u.Unit.BuildProgress == 1 && u.Unit.Energy < 5 && u.Unit.Shield > 0 && Vector2.DistanceSquared(nexus.UnitCalculation.Position, u.Position) < EnergyRechargeRangeSquared).OrderBy(u => u.Unit.Energy).ThenBy(u => u.Unit.Shield).ThenBy(u => u.Unit.Health))
+                {
+                    CameraManager.SetCamera(energyUnit.Position);
+                    LastEnergyRechargeFrame = frame;
+                    return nexus.Order(frame, Abilities.ENERYGYRECHARGE, null, energyUnit.Unit.Tag);
+                }
             }
 
             return null;
