@@ -1,0 +1,117 @@
+// playable offset: 14,14
+[
+  {
+    "BasePosition": {
+      "X": 103.5,
+      "Y": 14.5
+    },
+    "WallSegments": [
+      {
+        "Position": {
+          "X": 98.5,
+          "Y": 23.5
+        },
+        "Size": 3
+      },
+      {
+        "Position": {
+          "X": 94.5,
+          "Y": 19.5
+        },
+        "Size": 3
+      },
+      {
+        "Position": {
+          "X": 99,
+          "Y": 17
+        },
+        "Size": 2
+      },
+      {
+        "Position": {
+          "X": 101,
+          "Y": 18
+        },
+        "Size": 2
+      },
+      {
+        "Position": {
+          "X": 103,
+          "Y": 19
+        },
+        "Size": 2
+      }
+    ],
+    "Pylons": [
+      {
+        "X": 98,
+        "Y": 21
+      }
+    ],
+    "Door": {
+      "X": 96.62,
+      "Y": 20.84
+    },
+    "Block": {
+      "X": 97,
+      "Y": 19
+    }
+  },
+  {
+    "BasePosition": {
+      "X": 14.5,
+      "Y": 103.5
+    },
+    "WallSegments": [
+      {
+        "Position": {
+          "X": 23.5,
+          "Y": 98.5
+        },
+        "Size": 3
+      },
+      {
+        "Position": {
+          "X": 19.5,
+          "Y": 94.5
+        },
+        "Size": 3
+      },
+      {
+        "Position": {
+          "X": 17,
+          "Y": 99
+        },
+        "Size": 2
+      },
+      {
+        "Position": {
+          "X": 18,
+          "Y": 101
+        },
+        "Size": 2
+      },
+      {
+        "Position": {
+          "X": 19,
+          "Y": 103
+        },
+        "Size": 2
+      }
+    ],
+    "Pylons": [
+      {
+        "X": 21,
+        "Y": 98
+      }
+    ],
+    "Door": {
+      "X": 20.84,
+      "Y": 96.62
+    },
+    "Block": {
+      "X": 19,
+      "Y": 97
+    }
+  }
+]

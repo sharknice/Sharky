@@ -9,10 +9,12 @@
         TagService TagService;
         CameraManager CameraManager;
         BaseData BaseData;
-        float OverchargeRangeSquared = 144;
+        SharkyOptions SharkyOptions;
+        float EnergyRechargeRangeSquared = 144;
         float RestoreRange = 6;
+        int LastEnergyRechargeFrame = 0;
 
-        public NexusManager(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, ChronoData chronoData, EnemyData enemyData, TagService tagService, CameraManager cameraManager, BaseData baseData)
+        public NexusManager(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, ChronoData chronoData, EnemyData enemyData, TagService tagService, CameraManager cameraManager, BaseData baseData, SharkyOptions sharkyOptions)
         {
             ActiveUnitData = activeUnitData;
             SharkyUnitData = sharkyUnitData;
@@ -21,6 +23,7 @@
             TagService = tagService;
             CameraManager = cameraManager;
             BaseData = baseData;
+            SharkyOptions = sharkyOptions;
         }
 
         public override IEnumerable<SC2Action> OnFrame(ResponseObservation observation)
@@ -35,10 +38,10 @@
             var nexuses = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS && c.UnitCalculation.Unit.BuildProgress == 1).OrderByDescending(c => c.UnitCalculation.Unit.Energy);
             foreach (var nexus in nexuses)
             {
-                var action = Overcharge(nexus, (int)observation.Observation.GameLoop);
+                var action = EnerygyRecharge(nexus, (int)observation.Observation.GameLoop);
                 if (action != null)
                 {
-                    TagService.TagAbility("overcharge");
+                    TagService.TagAbility("enerygyrecharge");
                     actions.AddRange(action);
                 }
                 else
@@ -81,11 +84,47 @@
             return actions;
         }
 
+        public bool EnergyRechargeOffCooldown(int frame)
+        {
+            if (LastEnergyRechargeFrame > 0)
+            {
+                if ((frame - LastEnergyRechargeFrame) / SharkyOptions.FramesPerSecond <= SharkyUnitData.AbilityCooldownTimes[Abilities.ENERYGYRECHARGE])
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        List<SC2Action> EnerygyRecharge(UnitCommander nexus, int frame)
+        {
+            if (nexus.UnitCalculation.Unit.Energy >= 50)
+            {
+                if (!EnergyRechargeOffCooldown(frame))
+                {
+                    return null;
+                }
+
+                foreach (var energyUnit in nexus.UnitCalculation.NearbyAllies.Where(u => (u.Unit.UnitType == (uint)UnitTypes.PROTOSS_HIGHTEMPLAR || u.Unit.UnitType == (uint)UnitTypes.PROTOSS_ORACLE || u.Unit.UnitType == (uint)UnitTypes.PROTOSS_SENTRY) && u.Unit.BuildProgress == 1 && u.Unit.Energy < u.Unit.EnergyMax - 75 && Vector2.DistanceSquared(nexus.UnitCalculation.Position, u.Position) < EnergyRechargeRangeSquared).OrderBy(u => u.Unit.Energy).ThenBy(u => u.Unit.Shield).ThenBy(u=> u.Unit.Health))
+                {
+                    CameraManager.SetCamera(energyUnit.Position);
+                    LastEnergyRechargeFrame = frame;
+                    return nexus.Order(frame, Abilities.ENERYGYRECHARGE, null, energyUnit.Unit.Tag);
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// This ability has been removed from StarCraft 2
+        /// leaving it here in case they bring it back
+        /// </summary>
         List<SC2Action> Overcharge(UnitCommander nexus, int frame)
         {
             if (nexus.UnitCalculation.Unit.Energy >= 50)
             {
-                foreach (var shieldBattery in nexus.UnitCalculation.NearbyAllies.Where(u => u.Unit.UnitType == (uint)UnitTypes.PROTOSS_SHIELDBATTERY && u.Unit.BuildProgress == 1 && Vector2.DistanceSquared(nexus.UnitCalculation.Position, u.Position) < OverchargeRangeSquared).OrderBy(u => u.Unit.Energy))
+                foreach (var shieldBattery in nexus.UnitCalculation.NearbyAllies.Where(u => u.Unit.UnitType == (uint)UnitTypes.PROTOSS_SHIELDBATTERY && u.Unit.BuildProgress == 1 && Vector2.DistanceSquared(nexus.UnitCalculation.Position, u.Position) < EnergyRechargeRangeSquared).OrderBy(u => u.Unit.Energy))
                 {
                     if (shieldBattery.NearbyAllies.Any(a => a.Unit.BuildProgress == 1 && a.EnemiesInRangeOf.Any() && a.Unit.Shield < 5 && Vector2.Distance(shieldBattery.Position, a.Position) <= RestoreRange + a.Unit.Radius))
                     {

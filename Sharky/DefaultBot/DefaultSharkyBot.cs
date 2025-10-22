@@ -279,7 +279,7 @@
             BuildDefenseService = new BuildDefenseService(MacroData, BuildingBuilder, SharkyUnitData, ActiveUnitData, BaseData, TargetingData, BuildOptions, BuildingService, MapDataService, WallService);
 
             ChronoData = new ChronoData();
-            NexusManager = new NexusManager(ActiveUnitData, SharkyUnitData, ChronoData, EnemyData, TagService, CameraManager, BaseData);
+            NexusManager = new NexusManager(ActiveUnitData, SharkyUnitData, ChronoData, EnemyData, TagService, CameraManager, BaseData, SharkyOptions);
             Managers.Add(NexusManager);
             ShieldBatteryManager = new ShieldBatteryManager(ActiveUnitData, EnemyData);
             Managers.Add(ShieldBatteryManager);

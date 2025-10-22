@@ -2939,7 +2939,7 @@
 
             var lockOnRange = 7;
             var enemyCyclones = commander.UnitCalculation.NearbyEnemies.Where(u => u.Unit.UnitType == (uint)UnitTypes.TERRAN_CYCLONE && InRange(commander.UnitCalculation.Position, u.Position, commander.UnitCalculation.Unit.Radius + lockOnRange));
-            if (enemyCyclones.Any() && MicroPriority != MicroPriority.StayOutOfRange && (commander.UnitCalculation.TargetPriorityCalculation.AirWinnability > 1 || commander.UnitCalculation.TargetPriorityCalculation.GroundWinnability > 1))
+            if (enemyCyclones.Any() && commander.UnitCalculation.NearbyEnemies.Count(u => u.Unit.UnitType == (uint)UnitTypes.TERRAN_CYCLONE) == 1 && MicroPriority != MicroPriority.StayOutOfRange && (commander.UnitCalculation.TargetPriorityCalculation.AirWinnability > 1 || commander.UnitCalculation.TargetPriorityCalculation.GroundWinnability > 1))
             {
                 var cycloneDps = enemyCyclones.Sum(e => e.Dps);
                 var otherDps = commander.UnitCalculation.NearbyEnemies.Where(u => u.Unit.UnitType != (uint)UnitTypes.TERRAN_CYCLONE && InRange(commander.UnitCalculation.Position, u.Position, commander.UnitCalculation.Unit.Radius + lockOnRange)).Sum(e => e.Dps);

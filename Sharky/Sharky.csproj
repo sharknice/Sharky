@@ -332,6 +332,18 @@
     <None Update="StaticData\pathing\WaterfallAIE.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="StaticData\wall\partial\torches.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="StaticData\wall\partial\ley.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="StaticData\wall\partial\ultralove.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="StaticData\wall\partial\magannatha.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="StaticData\wall\partial\thunderbird.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
