@@ -4,6 +4,7 @@
     {
         ActiveUnitData ActiveUnitData;
         EnemyData EnemyData;
+        MicroTaskData MicroTaskData;
         MineralWalker MineralWalker;
         MapDataService MapDataService;
 
@@ -13,6 +14,7 @@
         {
             ActiveUnitData = defaultSharkyBot.ActiveUnitData;
             EnemyData = defaultSharkyBot.EnemyData;
+            MicroTaskData = defaultSharkyBot.MicroTaskData;
             MineralWalker = defaultSharkyBot.MineralWalker;
             MapDataService = defaultSharkyBot.MapDataService;
 
@@ -58,6 +60,8 @@
                 ClaimDefenders();
             }
 
+            bool disable = false;
+
             foreach (var commander in UnitCommanders)
             {
                 var healthRequired = 15;
@@ -82,6 +86,18 @@
                         commands.AddRange(action);
                     }
                 }
+
+                if (commander.UnitCalculation.NearbyEnemies.Count(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_REAPER) > 1)
+                {
+                    disable = true;
+                }
+            }
+
+            if (disable)
+            {
+                var miningTask = (MiningTask)MicroTaskData[typeof(MiningTask).Name];
+                miningTask.MiningDefenseService.IgnoredThreatTypes.Remove(UnitTypes.TERRAN_REAPER);
+                Disable();
             }
 
             return commands;

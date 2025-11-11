@@ -1,6 +1,4 @@
-﻿using Sharky.Extensions;
-
-namespace Sharky.MicroTasks
+﻿namespace Sharky.MicroTasks
 {
     public class PermanentWallOffTask: WallOffTask
     {
@@ -8,13 +6,15 @@ namespace Sharky.MicroTasks
         public bool ToggleMiningDefense { get; set; } = false;
         bool ShieldBatteryExists;
         protected MicroTaskData MicroTaskData;
+        RequirementService RequirementService;
 
-        public PermanentWallOffTask(SharkyUnitData sharkyUnitData, ActiveUnitData activeUnitData, MicroTaskData microTaskData, MacroData macroData, MapData mapData, WallService wallService, ChatService chatService, bool enabled, float priority)
+        public PermanentWallOffTask(SharkyUnitData sharkyUnitData, ActiveUnitData activeUnitData, MicroTaskData microTaskData, MacroData macroData, MapData mapData, WallService wallService, ChatService chatService, RequirementService requirementService, bool enabled, float priority)
             : base(sharkyUnitData, activeUnitData, macroData, mapData, wallService, chatService, enabled, priority)
         {
             ShieldBatteryExists = false;
             UsePylon = false;
             MicroTaskData = microTaskData;
+            RequirementService = requirementService;
         }
 
         public override void ClaimUnits(Dictionary<ulong, UnitCommander> commanders)
@@ -43,7 +43,7 @@ namespace Sharky.MicroTasks
             }
             base.Disable();
         }
-
+         
         public override IEnumerable<SC2APIProtocol.Action> PerformActions(int frame)
         {
             GetWallData();
@@ -100,8 +100,9 @@ namespace Sharky.MicroTasks
                         if (MacroData.Minerals >= 100)
                         {
                             var ability = Abilities.BUILD_SHIELDBATTERY;
-                            if (UsePylon == true)
+                            if (UsePylon == true || !RequirementService.HaveCompleted(UnitTypes.PROTOSS_CYBERNETICSCORE))
                             {
+                                UsePylon = true;
                                 ability = Abilities.BUILD_PYLON;
                             }
                             var probeCommand = probe.Order(frame, ability, WallData.Block, allowSpam: true);

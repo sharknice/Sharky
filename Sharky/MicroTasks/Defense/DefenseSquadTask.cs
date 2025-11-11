@@ -48,8 +48,6 @@
             OnlyDefendMain = false;
             GroupAtMain = false;
             AlwaysFillBunkers = true;
-
-            Enabled = true;
         }
 
         public override void ClaimUnits(Dictionary<ulong, UnitCommander> commanders)

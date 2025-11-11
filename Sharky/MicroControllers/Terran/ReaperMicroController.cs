@@ -2,9 +2,9 @@
 {
     public class ReaperMicroController : IndividualMicroController
     {
-        float Kd8Charge;
+        protected float Kd8Charge;
 
-        int LastChargeFrame = -1000;
+        protected int LastChargeFrame = -1000;
 
         public ReaperMicroController(DefaultSharkyBot defaultSharkyBot, IPathFinder sharkyPathFinder, MicroPriority microPriority, bool groupUpEnabled)
             : base(defaultSharkyBot, sharkyPathFinder, microPriority, groupUpEnabled)
@@ -50,7 +50,7 @@
                 return false;
             }
 
-            if (LastChargeFrame + 10 > frame)
+            if (LastChargeFrame + 30 > frame)
             {
                 return false;
             }

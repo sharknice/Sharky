@@ -286,6 +286,10 @@
                 {
                     closestBase = BaseData.BaseLocations.FirstOrDefault(b => b.Location.X == TargetingData.NaturalBasePoint.X && b.Location.Y == TargetingData.NaturalBasePoint.Y);
                 }
+                else if (resourceCenters.Count() == 2 && resourceCenters.Any(r => r.Position.X == TargetingData.NaturalBasePoint.X && r.Position.Y == TargetingData.NaturalBasePoint.Y))
+                {
+                    closestBase = BaseData.BaseLocations.FirstOrDefault(b => b.Location.X == TargetingData.NaturalBasePoint.X && b.Location.Y == TargetingData.NaturalBasePoint.Y);
+                }
                 if (closestBase != null)
                 {
                     TargetingData.MainDefensePoint = closestBase.MineralLineLocation;

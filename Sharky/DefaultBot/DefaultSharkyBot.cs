@@ -473,7 +473,7 @@
             var hallucinationScoutTask = new HallucinationScoutTask(TargetingData, BaseData, MicroTaskData, false, .5f);
             var hallucinationScoutEmptyBasesTask = new HallucinationScoutEmptyBasesTask(this, false, .51f);
             var wallOffTask = new WallOffTask(SharkyUnitData, ActiveUnitData, MacroData, MapData, WallService, ChatService, false, .25f);
-            var permanentWallOffTask = new PermanentWallOffTask(SharkyUnitData, ActiveUnitData, MicroTaskData, MacroData, MapData, WallService, ChatService, false, .25f);
+            var permanentWallOffTask = new PermanentWallOffTask(SharkyUnitData, ActiveUnitData, MicroTaskData, MacroData, MapData, WallService, ChatService, RequirementService, false, .25f);
             var fullPylonWallOffTask = new FullPylonWallOffTask(this, false, .25f);
             var destroyWallOffTask = new DestroyWallOffTask(ActiveUnitData, false, .25f);
             var prePositionBuilderTask = new PrePositionBuilderTask(this, .25f);
@@ -497,6 +497,7 @@
             var zealotHarassTask = new ZealotHarassTask(this, false, 0.5f, zealotMicroController);
             var clearFutureExpansionTask = new ClearFutureExpansionTask(this, new List<DesiredUnitsClaim>(), -0.1f, false);
             var bunkerReadyToRepairTask = new BunkerReadyToRepairTask(this, workerDefenseMicroController, false, 0.1f);
+            var squadPerBaseTask = new SquadPerBaseTask(this, new List<DesiredUnitsClaim>(), 0.1f, false);
 
             MicroTaskData[defenseSquadTask.GetType().Name] = defenseSquadTask;
             MicroTaskData[workerScoutGasStealTask.GetType().Name] = workerScoutGasStealTask;
@@ -548,6 +549,7 @@
             MicroTaskData[clearFutureExpansionTask.GetType().Name] = clearFutureExpansionTask;
             MicroTaskData[changelingScout.GetType().Name] = changelingScout;
             MicroTaskData[bunkerReadyToRepairTask.GetType().Name] = bunkerReadyToRepairTask;
+            MicroTaskData[squadPerBaseTask.GetType().Name] = squadPerBaseTask;
 
             MicroManager = new MicroManager(ActiveUnitData, MicroTaskData, SharkyOptions, DebugService);
             Managers.Add(MicroManager);
@@ -591,6 +593,7 @@
                 [nameof(CannonRush)] = new CannonRush(this),
                 [nameof(EnemyStrategies.Protoss.FourGate)] = new EnemyStrategies.Protoss.FourGate(this),
                 [nameof(ProtossFastExpand)] = new ProtossFastExpand(this),
+                [nameof(ProxyNexus)] = new ProxyNexus(this),
                 [nameof(ProxyRobo)] = new ProxyRobo(this),
                 [nameof(ProxyStargate)] = new ProxyStargate(this),
                 [nameof(ProxyShieldBattery)] = new ProxyShieldBattery(this),
@@ -613,6 +616,7 @@
                 [nameof(BansheeRush)] = new BansheeRush(this),
                 [nameof(ProxyMaurauders)] = new ProxyMaurauders(this),
                 [nameof(SuspectedTerranProxy)] = new SuspectedTerranProxy(this),
+                [nameof(TerranMech)] = new TerranMech(this),
 
                 [nameof(ZerglingFlood)] = new ZerglingFlood(this),
                 [nameof(EarlyPool)] = new EarlyPool(this),

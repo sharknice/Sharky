@@ -36,7 +36,14 @@
         public List<SC2APIProtocol.Action> DealWithEnemies(int frame, List<UnitCommander> unitCommanders)
         {
             var actions = new List<SC2APIProtocol.Action>();
-            if (!Enabled) { return actions; }
+            if (!Enabled) 
+            { 
+                foreach (var commander in unitCommanders.Where(c => c.UnitRole == UnitRole.Defend))
+                {
+                    commander.UnitRole = UnitRole.None;
+                }
+                return actions; 
+            }
 
             bool workerRushActive = false;
             bool preventGasSteal = false;
@@ -77,7 +84,7 @@
                         }
                     }
 
-                    if (!ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyAllies.Any(a => a.UnitClassifications.HasFlag(UnitClassification.ArmyUnit)) && (ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.Worker) || e.Attributes.Contains(SC2APIProtocol.Attribute.Structure))))
+                    if (!ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyAllies.Any(a => a.UnitClassifications.HasFlag(UnitClassification.ArmyUnit)) && (ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Any(e => !IgnoredThreatTypes.Contains((UnitTypes)e.Unit.UnitType) && (e.UnitClassifications.HasFlag(UnitClassification.Worker) || e.Attributes.Contains(SC2APIProtocol.Attribute.Structure)))))
                     {
                         var enemyGroundDamage = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Take(25).Where(e => e.DamageGround).Sum(e => e.Damage);
                         var nearbyWorkers = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyAllies.Where(a => a.UnitClassifications.HasFlag(UnitClassification.Worker));
@@ -92,7 +99,7 @@
 
                             desiredWorkers = 1;
 
-                            if (workers.Count(w => w.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE) > 0 && workers.Count(w => w.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE) < 4)
+                            if (!combatUnits.Any() && workers.Count(w => w.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE) > 0 && workers.Count(w => w.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE) < 4)
                             {
                                 var takenGases = selfBase.GasMiningInfo.Select(i => i.ResourceUnit);
                                 var openGeysers = BaseData.BaseLocations.SelectMany(b => b.VespeneGeysers).Where(g => g.VespeneContents > 0 && !takenGases.Any(t => t.Pos.X == g.Pos.X && t.Pos.Y == g.Pos.Y));
@@ -164,11 +171,17 @@
                             }
                             else
                             {
+                                var workersPerBuilding = 4;
                                 var baseVector = new Vector2(selfBase.Location.X, selfBase.Location.Y);
                                 var enemyBuildings = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Where(u => u.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && !u.Unit.IsFlying && !IgnoredThreatTypes.Contains((UnitTypes)u.Unit.UnitType)).OrderByDescending(u => u.Unit.BuildProgress).ThenBy(u => Vector2.DistanceSquared(u.Position, baseVector));
                                 desiredWorkers = (enemyBuildings.Count() * 4) + workers.Count();
+                                if (enemyBuildings.Any(b => b.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS && b.Unit.BuildProgress < 1))
+                                {
+                                    desiredWorkers += 3;
+                                    workersPerBuilding += 3;
+                                }
 
-                                var enemy = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Where(u => !u.Unit.IsFlying).OrderBy(u => Vector2.DistanceSquared(u.Position, new Vector2(selfBase.Location.X, selfBase.Location.Y))).FirstOrDefault();
+                                var enemy = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Where(u => !u.Unit.IsFlying && !IgnoredThreatTypes.Contains((UnitTypes)u.Unit.UnitType)).OrderBy(u => Vector2.DistanceSquared(u.Position, new Vector2(selfBase.Location.X, selfBase.Location.Y))).FirstOrDefault();
                                 if (enemyBuildings.Any() && !enemyBuildings.Any(u => (u.Unit.UnitType == (uint)UnitTypes.PROTOSS_PHOTONCANNON || u.Unit.UnitType == (uint)UnitTypes.ZERG_SPINECRAWLER) && u.Unit.Shield == u.Unit.ShieldMax && u.Unit.BuildProgress == 1))
                                 {
                                     while (commanders.Count(c => c.Value.UnitRole == UnitRole.Defend) < desiredWorkers && commanders.Count(c => c.Value.UnitRole == UnitRole.Defend) < commanders.Count())
@@ -187,7 +200,7 @@
                                     var sentWorkers = new List<ulong>();
                                     foreach (var enemyBuilding in enemyBuildings)
                                     {
-                                        var closestDefenders = defenders.Where(d => !sentWorkers.Contains(d.Key)).OrderBy(d => Vector2.DistanceSquared(d.Value.UnitCalculation.Position, enemyBuilding.Position)).Take(4); // attack each building with 4 workers
+                                        var closestDefenders = defenders.Where(d => !sentWorkers.Contains(d.Key)).OrderBy(d => Vector2.DistanceSquared(d.Value.UnitCalculation.Position, enemyBuilding.Position)).Take(workersPerBuilding);
                                         foreach (var defender in closestDefenders)
                                         {
                                             var action = defender.Value.Order(frame, Abilities.ATTACK, null, enemyBuilding.Unit.Tag);
@@ -366,23 +379,26 @@
                             continue;
                         }
 
-                        if (commander.UnitCalculation.Unit.Health + commander.UnitCalculation.Unit.Shield <= (commander.UnitCalculation.EnemiesThreateningDamage.First().Damage * 2) || commander.UnitCalculation.UnitTypeData.MovementSpeed < commander.UnitCalculation.EnemiesThreateningDamage.First().UnitTypeData.MovementSpeed)
+                        var enemy = commander.UnitCalculation.EnemiesThreateningDamage.FirstOrDefault();
+
+                        if (enemy != null &&
+                            (enemy.Unit.UnitType == (uint)UnitTypes.PROTOSS_ZEALOT ||
+                            enemy.Unit.UnitType == (uint)UnitTypes.ZERG_ZERGLING ||
+                            commander.UnitCalculation.Unit.Health + commander.UnitCalculation.Unit.Shield <= (enemy.Damage * 2) || 
+                            commander.UnitCalculation.UnitTypeData.MovementSpeed < enemy.UnitTypeData.MovementSpeed))
                         {
-                            var enemy = commander.UnitCalculation.EnemiesThreateningDamage.FirstOrDefault();
-                            if (enemy != null)
+                            var closestFriendlyArmy = commander.UnitCalculation.NearbyAllies.Where(u => (u.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) || u.UnitClassifications.HasFlag(UnitClassification.DefensiveStructure)) && DamageService.CanDamage(u, enemy)).OrderBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+                            if (closestFriendlyArmy != null)
                             {
-                                var closestFriendlyArmy = commander.UnitCalculation.NearbyAllies.Take(25).Where(u => (u.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) || u.UnitClassifications.HasFlag(UnitClassification.DefensiveStructure)) && DamageService.CanDamage(u, enemy)).OrderBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position)).FirstOrDefault();
-                                if (closestFriendlyArmy != null)
+                                var saveAction = commander.Order(frame, Abilities.MOVE, targetTag: closestFriendlyArmy.Unit.Tag);
+                                commander.UnitRole = UnitRole.Defend;
+                                if (saveAction != null)
                                 {
-                                    var saveAction = commander.Order(frame, Abilities.MOVE, targetTag: closestFriendlyArmy.Unit.Tag);
-                                    commander.UnitRole = UnitRole.Defend;
-                                    if (saveAction != null)
-                                    {
-                                        actions.AddRange(saveAction);
-                                    }
-                                    continue;
+                                    actions.AddRange(saveAction);
                                 }
+                                continue;
                             }
+                            
                             if (commander.UnitRole == UnitRole.Minerals || commander.UnitRole == UnitRole.Gas)
                             {
                                 commander.UnitRole = UnitRole.Defend;

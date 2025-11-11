@@ -62,7 +62,7 @@
 
         public override bool WeaponReady(UnitCommander commander, int frame)
         {
-            return commander.UnitCalculation.Unit.WeaponCooldown < 5 || commander.UnitCalculation.Unit.WeaponCooldown > 15; // a zealot has 2 attacks, so we do this because after one attack the cooldown starts over instead of both
+            return commander.UnitCalculation.Unit.WeaponCooldown < 5 || commander.UnitCalculation.Unit.WeaponCooldown > 14; // a zealot has 2 attacks, so we do this because after one attack the cooldown starts over instead of both
         }
 
         public override UnitCalculation GetBestTarget(UnitCommander commander, Point2D target, int frame)

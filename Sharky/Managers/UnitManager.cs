@@ -16,7 +16,7 @@ namespace Sharky.Managers
         EnemyData EnemyData;
 
         float NearbyDistance = 30;
-        float AvoidRange = 1;
+        float AvoidRange = 1.5f;
 
         ActiveUnitData ActiveUnitData;
 
@@ -591,6 +591,10 @@ namespace Sharky.Managers
                     if (weapon != null && weapon.HasSpeed)
                     {
                         fireTime = weapon.Speed / 10f; // TODO: need to get the actual fire times for weapons
+                    }
+                    if (unitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE)
+                    {
+                        fireTime = .5f;
                     }
                     var distance = Vector2.Distance(unitCalculation.Position, enemyAttack.Position);
                     if (enemyAttack.Unit.UnitType == (uint)UnitTypes.TERRAN_SIEGETANKSIEGED && distance < 2)

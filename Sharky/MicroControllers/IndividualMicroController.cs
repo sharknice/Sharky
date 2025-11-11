@@ -462,6 +462,7 @@
         {
             action = null;
 
+            if (commander.UnitCalculation.TargetPriorityCalculation.Overwhelm) { return false; }
             if (MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos) >= MapDataService.MapHeight(defensivePoint)) { return false; }
             if (WeaponReady(commander, frame) && commander.UnitCalculation.EnemiesInRange.Any()) { return false; }
             if (commander.UnitCalculation.TargetPriorityCalculation.OverallWinnability > 1000 && commander.UnitCalculation.NearbyEnemies.Any(e => e.FrameLastSeen == frame)) { return false; }
