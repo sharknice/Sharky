@@ -110,6 +110,14 @@
             {
                 BaseData.BaseLocations.RemoveAll(b => b.Location.X == 72.5f && b.Location.Y == 14.5f); // unreachable base unless rocks are destroyed
             }
+            if (gameInfo.MapName.ToLower().Contains("torches"))
+            {
+                // unreachable base unless blocking minerals are mined out
+                BaseData.BaseLocations.RemoveAll(b => b.Location.X == 100.5f && b.Location.Y == 45.5f);
+                BaseData.BaseLocations.RemoveAll(b => b.Location.X == 108.5f && b.Location.Y == 78.5f);
+                BaseData.BaseLocations.RemoveAll(b => b.Location.X == 110.5f && b.Location.Y == 44.5f);
+                BaseData.BaseLocations.RemoveAll(b => b.Location.X == 100.5f && b.Location.Y == 98.5f);
+            }
 
             var startingUnit = observation.Observation.RawData.Units.FirstOrDefault(u => u.Alliance == Alliance.Self && SharkyUnitData.ResourceCenterTypes.Contains((UnitTypes)u.UnitType));
             var enemystartingLocation = gameInfo.StartRaw.StartLocations.LastOrDefault();

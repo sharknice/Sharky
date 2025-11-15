@@ -275,7 +275,7 @@
             ZergProducerSelector = new ZergProducerSelector(this);
 
             Morpher = new Morpher(ActiveUnitData, TargetingData);
-            BuildPylonService = new BuildPylonService(MacroData, BuildingBuilder, SharkyUnitData, ActiveUnitData, BaseData, TargetingData, BuildingService, MapDataService);
+            BuildPylonService = new BuildPylonService(MacroData, BuildingBuilder, SharkyUnitData, ActiveUnitData, BaseData, TargetingData, BuildingService, MapDataService, BuildOptions);
             BuildDefenseService = new BuildDefenseService(MacroData, BuildingBuilder, SharkyUnitData, ActiveUnitData, BaseData, TargetingData, BuildOptions, BuildingService, MapDataService, WallService);
 
             ChronoData = new ChronoData();

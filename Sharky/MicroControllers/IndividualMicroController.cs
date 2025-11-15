@@ -176,12 +176,18 @@
                 {
                     if (AvoidDamageList(commander, target, bestTarget, defensivePoint, commander.UnitCalculation.EnemiesInRangeOfAvoid, frame, true, out action)) { return action; }
                 }
-                if (AttackBestTarget(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
+                if (commander.UnitCalculation.EnemiesInRange.Any() || Vector2.Distance(commander.UnitCalculation.Position, target.ToVector2()) < 15)
+                {
+                    if (AttackBestTarget(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
+                }
             }
 
             if (AvoidDamageList(commander, target, bestTarget, defensivePoint, commander.UnitCalculation.EnemiesInRangeOfAvoid, frame, true, out action)) { return action; }
 
-            if (MoveToAttackOnCooldown(commander, bestTarget, target, defensivePoint, frame, out action)) { return action; }
+            if (Vector2.Distance(commander.UnitCalculation.Position, target.ToVector2()) < 15)
+            {
+                if (MoveToAttackOnCooldown(commander, bestTarget, target, defensivePoint, frame, out action)) { return action; }
+            }
 
             if (Move(commander, target, defensivePoint, groupCenter, bestTarget, formation, frame, out action)) { return action; }
 

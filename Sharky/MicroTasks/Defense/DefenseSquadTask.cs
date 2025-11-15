@@ -127,6 +127,22 @@
                         commander.UnitCalculation.TargetPriorityCalculation.TargetPriority = TargetPriority.Attack;
                     }
                 }
+
+                if (attackingEnemies.All(e => e.Unit.Cloak == CloakState.Cloaked && !e.NearbyEnemies.Any(a => a.UnitClassifications.HasFlag(UnitClassification.Detector) || a.UnitClassifications.HasFlag(UnitClassification.DetectionCaster))))
+                {
+                    if (!UnitCommanders.Any(c => c.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.Detector) || c.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.DetectionCaster)))
+                    {
+                        var defensePoint = TargetingData.ForwardDefensePoint;
+                        if (OnlyDefendMain || GroupAtMain)
+                        {
+                            defensePoint = TargetingData.SelfMainBasePoint;
+                        }
+                        actions = MicroController.Retreat(UnitCommanders, defensePoint, null, frame);
+                        stopwatch.Stop();
+                        lastFrameTime = stopwatch.ElapsedMilliseconds;
+                        return actions;
+                    }
+                }
                 actions.AddRange(ArmySplitter.SplitArmy(frame, attackingEnemies, TargetingData.MainDefensePoint, UnitCommanders, true, true));
                 stopwatch.Stop();
                 lastFrameTime = stopwatch.ElapsedMilliseconds;

@@ -79,12 +79,33 @@
             }
         }
 
-        public Point2D FindPylonPlacement(Point2D reference, float maxDistance, float minimumMineralProximinity = 2, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.None, bool requireVision = false, bool allowBlockBase = false)
+        public Point2D FindPylonPrePlacement(Point2D target)
+        {
+            var position = FindPylonPlacement(target, 50, preplacment: true);
+            if (position != null)
+            {
+                if (LastLocations.Count > 0 && LastLocations.Last().X == position.X && LastLocations.Last().Y == position.Y)
+                {
+                    LastLocations.RemoveAt(LastLocations.Count - 1);
+                }
+            }
+            return position;
+        }
+
+        public Point2D FindPylonPlacement(Point2D reference, float maxDistance, float minimumMineralProximinity = 2, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.None, bool requireVision = false, bool allowBlockBase = false, bool preplacment = false)
         {
             if (!allowBlockBase)
             {
-                var spot = ProtossPylonGridPlacement.FindPlacement(reference, maxDistance, minimumMineralProximinity);
-                if (spot != null) { return spot; }
+                if (preplacment)
+                {
+                    var spot = ProtossPylonGridPlacement.FindPrePlacement(reference, maxDistance, minimumMineralProximinity);
+                    if (spot != null) { return spot; }
+                }
+                else
+                {
+                    var spot = ProtossPylonGridPlacement.FindPlacement(reference, maxDistance, minimumMineralProximinity);
+                    if (spot != null) { return spot; }
+                }
             }
 
             var selfBase = BaseData.BaseLocations.FirstOrDefault(b => (b.Location.X == reference.X && b.Location.Y == reference.Y) && !(b.Location.X == TargetingData.SelfMainBasePoint.X && b.Location.Y == TargetingData.SelfMainBasePoint.Y) && !(b.Location.X == TargetingData.NaturalBasePoint.X && b.Location.Y == TargetingData.NaturalBasePoint.Y));

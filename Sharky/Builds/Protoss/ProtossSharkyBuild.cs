@@ -10,7 +10,7 @@
         protected EnemyData EnemyData;
         BaseData BaseData;
 
-        ProtossPylonGridPlacement ProtossPylonGridPlacement;
+        ProtossBuildingPlacement ProtossBuildingPlacement;
 
         public ProtossSharkyBuild(DefaultSharkyBot defaultSharkyBot, ICounterTransitioner counterTransitioner)
             : base(defaultSharkyBot)
@@ -22,7 +22,7 @@
             BaseData = defaultSharkyBot.BaseData;
             CounterTransitioner = counterTransitioner;
 
-            ProtossPylonGridPlacement = defaultSharkyBot.ProtossPylonGridPlacement;
+            ProtossBuildingPlacement = (ProtossBuildingPlacement)defaultSharkyBot.ProtossBuildingPlacement;
         }
 
         public override List<string> CounterTransition(int frame)
@@ -104,7 +104,7 @@
         {
             if (BuildOptions.WallOffType == WallOffType.None)
             {
-                var position = ProtossPylonGridPlacement.FindPrePlacement(BaseData.BaseLocations.FirstOrDefault().Location, 50, 50);
+                var position = ProtossBuildingPlacement.FindPylonPrePlacement(BaseData.BaseLocations.FirstOrDefault().Location);
                 if (position != null) { return position; }
             }
             return TargetingData.ForwardDefensePoint;

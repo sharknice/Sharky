@@ -61,7 +61,7 @@
                                     return commands;
                                 }
                             }
-                            if (!pylon.NearbyEnemies.Any(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_HELLION || e.Unit.UnitType == (uint)UnitTypes.TERRAN_HELLIONTANK) && pylon.NearbyEnemies.Any(e => !e.Unit.IsFlying))
+                            if (!pylon.NearbyEnemies.Any(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_HELLION || e.Unit.UnitType == (uint)UnitTypes.TERRAN_HELLIONTANK || e.Unit.UnitType == (uint)UnitTypes.TERRAN_REAPER) && pylon.NearbyEnemies.Any(e => !e.Unit.IsFlying))
                             {
                                 var action = idleWarpGate.Order(frame, Abilities.TRAINWARP_ZEALOT, location);
                                 if (action != null)

@@ -29,6 +29,7 @@
             var hasGround = enemyGroup.Any(e => !e.Unit.IsFlying);
             var hasAir = enemyGroup.Any(e => e.Unit.IsFlying);
             var cloakable = enemyGroup.Any(e => e.UnitClassifications.HasFlag(UnitClassification.Cloakable));
+            var allCloaked = enemyGroup.All(e => e.Unit.Cloak == CloakState.Cloaked && !e.NearbyEnemies.Any(a => a.UnitClassifications.HasFlag(UnitClassification.Detector)));
 
             var counterGroup = new List<UnitCommander>();
 
@@ -44,6 +45,11 @@
                         return counterGroup;
                     }
                 }
+            }
+
+            if (EnemyData.SelfRace != Race.Terran && allCloaked && !counterGroup.Any(c => c.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.Detector) || c.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.DetectionCaster)))
+            {
+                return new List<UnitCommander>();
             }
 
             var finalTargetPriority = TargetPriorityService.CalculateTargetPriority(counterGroup.Select(c => c.UnitCalculation), enemyGroup);

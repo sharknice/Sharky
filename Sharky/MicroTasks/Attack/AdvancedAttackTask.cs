@@ -393,7 +393,8 @@
                     }
                     else
                     {
-                        actions = DefenseArmySplitter.SplitArmy(frame, closerEnemies, attackPoint, MainUnits.Concat(SupportUnits), defendToDeath);
+                        var useEverything = Vector2.Distance(closerEnemies.FirstOrDefault().Position, TargetingData.ForwardDefensePoint.ToVector2()) < 10;
+                        actions = DefenseArmySplitter.SplitArmy(frame, closerEnemies, attackPoint, MainUnits.Concat(SupportUnits), defendToDeath, useEverything);
                         if (stopwatch.ElapsedMilliseconds > 100)
                         {
                             System.Console.WriteLine($"AdvancedAttackTask closerenemies splitarmy {stopwatch.ElapsedMilliseconds}");

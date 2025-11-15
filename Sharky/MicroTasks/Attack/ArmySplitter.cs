@@ -89,7 +89,7 @@
                 {
                     actions.AddRange(MicroController.Attack(AvailableCommanders, attackPoint, TargetingData.ForwardDefensePoint, groupPoint, frame));
                 }
-                else
+                else if (useEverything)
                 {
                     var defensiveVector = new Vector2(TargetingData.ForwardDefensePoint.X, TargetingData.ForwardDefensePoint.Y);
                     var shieldBattery = ActiveUnitData.SelfUnits.Values.Where(u => ((u.Unit.UnitType == (uint)UnitTypes.PROTOSS_SHIELDBATTERY && u.Unit.Energy > 5) || (u.Unit.UnitType == (uint)UnitTypes.PROTOSS_PHOTONCANNON && u.Unit.Shield > 5)) && u.Unit.IsPowered && u.Unit.BuildProgress == 1).OrderBy(u => Vector2.DistanceSquared(u.Position, defensiveVector)).FirstOrDefault();

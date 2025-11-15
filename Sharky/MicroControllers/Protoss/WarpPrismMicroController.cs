@@ -46,6 +46,14 @@
 
             if (commander.UnitCalculation.Unit.Shield < commander.UnitCalculation.Unit.ShieldMax / 2)
             {
+                if (commander.UnitCalculation.Unit.Passengers.Any() && commander.UnitCalculation.EnemiesInRangeOfAvoid.Any() && commander.UnitCalculation.Unit.Shield + commander.UnitCalculation.Unit.Health < 50)
+                {
+                    if (UnloadUnits(commander, defensivePoint, frame, out action))
+                    {
+                        return true;
+                    }
+                }
+
                 if (AvoidTargetedDamage(commander, target, null, defensivePoint, frame, out action))
                 {
                     return true;

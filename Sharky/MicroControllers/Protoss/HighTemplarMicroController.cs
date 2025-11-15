@@ -75,7 +75,12 @@
                 return true;
             }
 
-            var otherHighTemplar = commander.UnitCalculation.NearbyAllies.Take(25).Where(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_HIGHTEMPLAR && a.Unit.Energy <= 40);
+            if (commander.UnitCalculation.NearbyAllies.Any(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_WARPPRISM && a.Unit.CargoSpaceTaken < a.Unit.CargoSpaceMax))
+            {
+                return false;
+            }
+
+            var otherHighTemplar = commander.UnitCalculation.NearbyAllies.Where(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_HIGHTEMPLAR && a.Unit.Energy <= 40);
 
             if (otherHighTemplar.Any())
             {
@@ -162,14 +167,19 @@
                 return false;
             }
 
+            if (commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.EFFECT_PSISTORM) && !commander.UnitCalculation.EnemiesThreateningDamage.Any())
+            {
+                return true;
+            }
+
+            if (lastStormFrame >= frame - 5)
+            {
+                return false;
+            }
+
             if (!commander.UnitCalculation.Unit.Orders.Any(o => o.AbilityId == (uint)Abilities.EFFECT_PSISTORM) && !commander.UnitCalculation.EnemiesThreateningDamage.Any())
             {
                 if (!commander.AbilityOffCooldown(Abilities.EFFECT_PSISTORM, frame, SharkyOptions.FramesPerSecond, SharkyUnitData))
-                {
-                    return false;
-                }
-
-                if (lastStormFrame >= frame - 5)
                 {
                     return false;
                 }

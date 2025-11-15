@@ -1,4 +1,6 @@
-﻿namespace Sharky.Builds.MacroServices
+﻿using Sharky.Extensions;
+
+namespace Sharky.Builds.MacroServices
 {
     public class BuildPylonService
     {
@@ -10,10 +12,11 @@
         TargetingData TargetingData;
         BuildingService BuildingService;
         MapDataService MapDataService;
+        BuildOptions BuildOptions;
 
         int defensivePointLastFailFrame;
 
-        public BuildPylonService(MacroData macroData, IBuildingBuilder buildingBuilder, SharkyUnitData sharkyUnitData, ActiveUnitData activeUnitData, BaseData baseData, TargetingData targetingData, BuildingService buildingService, MapDataService mapDataService)
+        public BuildPylonService(MacroData macroData, IBuildingBuilder buildingBuilder, SharkyUnitData sharkyUnitData, ActiveUnitData activeUnitData, BaseData baseData, TargetingData targetingData, BuildingService buildingService, MapDataService mapDataService, BuildOptions buildOptions)
         {
             MacroData = macroData;
             BuildingBuilder = buildingBuilder;
@@ -23,14 +26,15 @@
             TargetingData = targetingData;
             BuildingService = buildingService;
             MapDataService = mapDataService;
+            BuildOptions = buildOptions;
 
             defensivePointLastFailFrame = 0;
         }
 
-        public List<SC2APIProtocol.Action> BuildPylon(Point2D location, bool ignoreMineralProximity = false, float maxDistance = 50, bool allowBlockBase = false, bool requireSameHeight = false)
+        public List<SC2APIProtocol.Action> BuildPylon(Point2D location, bool ignoreMineralProximity = false, float maxDistance = 50, bool allowBlockBase = false, bool requireSameHeight = false, WallOffType wallOffType = WallOffType.None)
         {
             var unitData = SharkyUnitData.BuildingData[UnitTypes.PROTOSS_PYLON];
-            return BuildingBuilder.BuildBuilding(MacroData, UnitTypes.PROTOSS_PYLON, unitData, location, ignoreMineralProximity, maxDistance, allowBlockBase: allowBlockBase, requireSameHeight: requireSameHeight);
+            return BuildingBuilder.BuildBuilding(MacroData, UnitTypes.PROTOSS_PYLON, unitData, location, ignoreMineralProximity, maxDistance, allowBlockBase: allowBlockBase, requireSameHeight: requireSameHeight, wallOffType: wallOffType);
         }
 
         public IEnumerable<SC2APIProtocol.Action> BuildPylonsAtEveryBase()
@@ -141,7 +145,12 @@
                 }
                 if (ActiveUnitData.SelfUnits.Count(u => u.Value.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && Vector2.DistanceSquared(u.Value.Position, new Vector2(TargetingData.ForwardDefensePoint.X, TargetingData.ForwardDefensePoint.Y)) < maxDistance * maxDistance && MapDataService.MapHeight(u.Value.Position) == height) + orderedBuildings < MacroData.ProtossMacroData.DesiredPylonsAtDefensivePoint)
                 {
-                    var command = BuildPylon(TargetingData.ForwardDefensePoint, true, maxDistance);
+                    var wallOffType = WallOffType.None;
+                    if (BuildOptions.WallOffType != WallOffType.None && TargetingData.WallOffBasePosition == WallOffBasePosition.Natural && Vector2.Distance(TargetingData.ForwardDefensePoint.ToVector2(), TargetingData.NaturalBasePoint.ToVector2()) < maxDistance)
+                    {
+                        wallOffType = BuildOptions.WallOffType;
+                    }
+                    var command = BuildPylon(TargetingData.ForwardDefensePoint, true, maxDistance, wallOffType: wallOffType);
                     if (command != null)
                     {
                         commands.AddRange(command);
