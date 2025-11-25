@@ -41,7 +41,7 @@ var bot = defaultSharkyBot.CreateBot(defaultSharkyBot.Managers, defaultSharkyBot
 var myRace = Race.Random;
 if (args.Length == 0)
 {
-    gameConnection.RunSinglePlayer(bot, @"Tier2MicroAIArena_v4.SC2Map", myRace, Race.Random, Difficulty.VeryHard, AIBuild.Rush, realTime: false).Wait();
+    gameConnection.RunSinglePlayer(bot, @"Tier2MicroAIArena_v6.SC2Map", myRace, Race.Random, Difficulty.VeryHard, AIBuild.Rush, realTime: false).Wait();
 }
 else
 {
