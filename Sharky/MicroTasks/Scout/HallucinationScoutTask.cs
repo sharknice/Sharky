@@ -10,6 +10,7 @@
         public bool StealSentryFromAttackTask { get; set; }
         protected List<Point2D> ScoutLocations { get; set; }
         protected int ScoutLocationIndex { get; set; }
+        public bool ScoutMainFirst { get; set; } = false;
 
         public HallucinationScoutTask(TargetingData targetingData, BaseData baseData, MicroTaskData microTaskData, bool enabled, float priority)
         {
@@ -161,6 +162,10 @@
             foreach (var baseLocation in BaseData.BaseLocations.OrderBy(b => Vector2.DistanceSquared(new Vector2(TargetingData.EnemyMainBasePoint.X, TargetingData.EnemyMainBasePoint.Y), new Vector2(b.Location.X, b.Location.Y))).Take(4).Reverse())
             {
                 ScoutLocations.Add(baseLocation.MineralLineLocation);
+            }
+            if (ScoutMainFirst)
+            {
+                ScoutLocations.Reverse();
             }
             ScoutLocationIndex = 0;
         }

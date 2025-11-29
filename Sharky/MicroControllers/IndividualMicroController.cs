@@ -116,6 +116,11 @@
                 if (AttackBestTarget(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
             }
 
+            if (commander.UnitCalculation.Unit.IsHallucination)
+            {
+                return commander.Order(frame, Abilities.ATTACK, target);
+            }
+
             if (ShouldStayOutOfRange(commander, frame))
             {
                 if (AvoidDamageList(commander, target, bestTarget, defensivePoint, commander.UnitCalculation.EnemiesInRangeOfAvoid, frame, true, out action)) { return action; }
@@ -180,6 +185,12 @@
                 {
                     if (AttackBestTarget(commander, target, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
                 }
+            }
+
+            if (commander.UnitCalculation.Unit.IsHallucination)
+            {
+                if (AttackBestTarget(commander, defensivePoint, defensivePoint, groupCenter, null, frame, out action)) { return action; }
+                return commander.Order(frame, Abilities.ATTACK, target);
             }
 
             if (AvoidDamageList(commander, target, bestTarget, defensivePoint, commander.UnitCalculation.EnemiesInRangeOfAvoid, frame, true, out action)) { return action; }
@@ -331,6 +342,10 @@
             List<SC2APIProtocol.Action> action = null;
             if (commander.UnitCalculation.Loaded) { return action; }
             UpdateState(commander, defensivePoint, defensivePoint, null, null, Formation.Normal, frame);
+            if (commander.UnitCalculation.Unit.IsHallucination)
+            {
+                return commander.Order(frame, Abilities.ATTACK, defensivePoint);
+            }
             if (GetInBunker(commander, defensivePoint, frame, out action)) { return action; }
             if (RechargeShieldsAtBattery(commander, defensivePoint, defensivePoint, frame, out action)) { return action; }
             if (HoldStillForRepair(commander, frame, out action)) { return action; }
@@ -414,6 +429,12 @@
 
             if (DoFreeDamage(commander, defensivePoint, defensivePoint, groupCenter, bestTarget, frame, out action)) { return action; }
 
+            if (commander.UnitCalculation.Unit.IsHallucination)
+            {
+                if (AttackBestTarget(commander, defensivePoint, defensivePoint, groupCenter, null, frame, out action)) { return action; }
+                return commander.Order(frame, Abilities.ATTACK, defensivePoint);
+            }
+
             // TODO: setup a concave above the ramp if there is a ramp, get earch grid point on high ground, make sure at least one unit on each point
             if (commander.UnitCalculation.NearbyEnemies.Any(e => e.FrameLastSeen + 100 > frame) || Vector2.DistanceSquared(commander.UnitCalculation.Position, new Vector2(defensivePoint.X, defensivePoint.Y)) > 25 || MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos) < MapDataService.MapHeight(defensivePoint))
             {
@@ -430,7 +451,7 @@
         {
             action = null;
 
-            if (commander.UnitCalculation.Range < 3 || !commander.UnitCalculation.NearbyEnemies.Any() || !WeaponReady(commander, frame)) { return false; }
+            if (commander.UnitCalculation.Range < 3 || !commander.UnitCalculation.NearbyEnemies.Any() || !WeaponReady(commander, frame) || commander.UnitCalculation.Unit.IsHallucination) { return false; }
 
             var closestWall = commander.UnitCalculation.NearbyAllies.Where(a => TargetingData.WallBuildings.Any(w => w.Unit.Tag == a.Unit.Tag)).OrderBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position)).FirstOrDefault();
             if (closestWall != null)
@@ -468,7 +489,7 @@
         {
             action = null;
 
-            if (commander.UnitCalculation.TargetPriorityCalculation.Overwhelm) { return false; }
+            if (commander.UnitCalculation.TargetPriorityCalculation.Overwhelm || commander.UnitCalculation.Unit.IsHallucination) { return false; }
             if (MapDataService.MapHeight(commander.UnitCalculation.Unit.Pos) >= MapDataService.MapHeight(defensivePoint)) { return false; }
             if (WeaponReady(commander, frame) && commander.UnitCalculation.EnemiesInRange.Any()) { return false; }
             if (commander.UnitCalculation.TargetPriorityCalculation.OverallWinnability > 1000 && commander.UnitCalculation.NearbyEnemies.Any(e => e.FrameLastSeen == frame)) { return false; }
@@ -3278,6 +3299,7 @@
 
         protected virtual bool ShouldStayOutOfRange(UnitCommander commander, int frame)
         {
+            if (commander.UnitCalculation.Unit.IsHallucination) { return false; }
             return MicroPriority == MicroPriority.StayOutOfRange;
         }
 
