@@ -40,7 +40,7 @@
                     counterGroup.Add(commander);
 
                     var targetPriority = TargetPriorityService.CalculateTargetPriority(counterGroup.Select(c => c.UnitCalculation), enemyGroup);
-                    if (targetPriority.Overwhelm || (targetPriority.AirWinnability > 1 && targetPriority.GroundWinnability > 1))
+                    if ((!cloakable || counterGroup.Any(a => a.UnitCalculation.UnitClassifications.HasFlag(UnitClassification.Detector))) && (targetPriority.Overwhelm || (targetPriority.AirWinnability > 1 && targetPriority.GroundWinnability > 1)))
                     {
                         return counterGroup;
                     }

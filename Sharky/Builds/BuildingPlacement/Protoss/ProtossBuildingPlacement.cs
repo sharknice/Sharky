@@ -103,6 +103,12 @@
                 }
                 else
                 {
+                    var unpowered = ActiveUnitData.SelfUnits.Values.Where(b => !b.Unit.IsPowered && b.Unit.BuildProgress == 1 && b.Attributes.Contains(SC2Attribute.Structure) && b.Unit.UnitType != (uint)UnitTypes.PROTOSS_NEXUS && b.Unit.UnitType != (uint)UnitTypes.PROTOSS_PYLON && b.Unit.UnitType != (uint)UnitTypes.PROTOSS_ASSIMILATOR && b.Unit.UnitType != (uint)UnitTypes.PROTOSS_ASSIMILATORRICH && b.Unit.UnitType != (uint)UnitTypes.PROTOSS_ORACLESTASISTRAP && !b.EnemiesInRangeOf.Any()).OrderBy(b => Vector2.DistanceSquared(b.Position, reference.ToVector2())).FirstOrDefault();
+                    if (unpowered != null && Vector2.Distance(reference.ToVector2(), unpowered.Position) <= maxDistance)
+                    {
+                        reference = unpowered.Position.ToPoint2D();
+                        maxDistance = 6;
+                    }
                     var spot = ProtossPylonGridPlacement.FindPlacement(reference, maxDistance, minimumMineralProximinity);
                     if (spot != null) { return spot; }
                 }
@@ -128,7 +134,7 @@
             var radius = 1f;
 
             // start at 12 o'clock then rotate around 12 times, increase radius by 1 until it's more than maxDistance
-            while (radius < maxDistance / 2.0)
+            while (radius < maxDistance)
             {
                 var fullCircle = Math.PI * 2;
                 var sliceSize = fullCircle / (8.0 + radius);

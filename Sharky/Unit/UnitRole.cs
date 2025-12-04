@@ -52,6 +52,7 @@
         SaveEnergy,
         Cancel,
         Save,
-        DoNotDefend
+        DoNotDefend,
+        RecallMe
     }
 }
