@@ -116,6 +116,7 @@
                 BaseData.BaseLocations.RemoveAll(b => b.Location.X == 100.5f && b.Location.Y == 45.5f);
                 BaseData.BaseLocations.RemoveAll(b => b.Location.X == 108.5f && b.Location.Y == 78.5f);
                 BaseData.BaseLocations.RemoveAll(b => b.Location.X == 110.5f && b.Location.Y == 44.5f);
+                BaseData.BaseLocations.RemoveAll(b => b.Location.X == 110.5f && b.Location.Y == 99.5f);
                 BaseData.BaseLocations.RemoveAll(b => b.Location.X == 100.5f && b.Location.Y == 98.5f);
             }
 
