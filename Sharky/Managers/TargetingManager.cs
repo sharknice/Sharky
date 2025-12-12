@@ -338,7 +338,7 @@
                     }
                 }
                 var farthestBase = ordered.LastOrDefault();
-                if (farthestBase != null)
+                if (farthestBase != null && !ordered.Any(b => b.Location.X == TargetingData.SelfMainBasePoint.X && b.Location.Y == TargetingData.SelfMainBasePoint.Y))
                 {
                     TargetingData.SelfMainBasePoint = farthestBase.Location;
                 }

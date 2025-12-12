@@ -118,6 +118,7 @@
                 BaseData.BaseLocations.RemoveAll(b => b.Location.X == 110.5f && b.Location.Y == 44.5f);
                 BaseData.BaseLocations.RemoveAll(b => b.Location.X == 110.5f && b.Location.Y == 99.5f);
                 BaseData.BaseLocations.RemoveAll(b => b.Location.X == 100.5f && b.Location.Y == 98.5f);
+                BaseData.BaseLocations.RemoveAll(b => b.Location.X == 117.5f && b.Location.Y == 71.5f);
             }
 
             var startingUnit = observation.Observation.RawData.Units.FirstOrDefault(u => u.Alliance == Alliance.Self && SharkyUnitData.ResourceCenterTypes.Contains((UnitTypes)u.UnitType));

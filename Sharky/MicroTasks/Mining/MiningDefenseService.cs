@@ -1,4 +1,6 @@
-﻿namespace Sharky.MicroTasks.Mining
+﻿using Sharky.Extensions;
+
+namespace Sharky.MicroTasks.Mining
 {
     public class MiningDefenseService
     {
@@ -84,7 +86,7 @@
                         }
                     }
 
-                    if (!ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyAllies.Any(a => a.UnitClassifications.HasFlag(UnitClassification.ArmyUnit)) && (ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Any(e => !IgnoredThreatTypes.Contains((UnitTypes)e.Unit.UnitType) && (e.UnitClassifications.HasFlag(UnitClassification.Worker) || (e.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && (e.Unit.BuildProgress < 1 || MapDataService.MapHeight(e.Position) == MapDataService.MapHeight(ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.Position)))))))
+                    if (!ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyAllies.Any(a => a.UnitClassifications.HasFlag(UnitClassification.ArmyUnit)) && (ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Any(e => !IgnoredThreatTypes.Contains((UnitTypes)e.Unit.UnitType) && (e.UnitClassifications.HasFlag(UnitClassification.Worker) || (e.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && (e.Unit.BuildProgress < 1 || ((Vector2.Distance(e.Position, ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.Position) < 15 || (selfBase.Location.X == TargetingData.SelfMainBasePoint.X && selfBase.Location.Y == TargetingData.SelfMainBasePoint.Y)) && MapDataService.MapHeight(e.Position) == MapDataService.MapHeight(ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.Position))))))))
                     {
                         var enemyGroundDamage = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Take(25).Where(e => e.DamageGround).Sum(e => e.Damage);
                         var nearbyWorkers = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyAllies.Where(a => a.UnitClassifications.HasFlag(UnitClassification.Worker));

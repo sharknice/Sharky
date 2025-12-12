@@ -1,6 +1,4 @@
-﻿using Sharky.Extensions;
-
-namespace Sharky.MicroTasks
+﻿namespace Sharky.MicroTasks
 {
     public class MiningTask : MicroTask
     {
