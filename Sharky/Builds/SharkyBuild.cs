@@ -150,6 +150,8 @@
             if (MacroData.Race == Race.Protoss)
             {
                 MacroData.DesiredProductionCounts[UnitTypes.PROTOSS_NEXUS] = 1;
+                MacroData.ProtossMacroData.DesiredPylonsAtEveryMineralLine = 0;
+                MacroData.ProtossMacroData.DesiredPylonsAtEveryBase = 0;
             }
             else if (MacroData.Race == Race.Terran)
             {

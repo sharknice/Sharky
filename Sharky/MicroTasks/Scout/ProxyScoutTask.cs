@@ -354,7 +354,7 @@
         private void GetScoutLocations()
         {
             ScoutLocations = new List<Point2D>();
-            foreach (var baseLocation in BaseData.BaseLocations.Skip(1).Take(4))
+            foreach (var baseLocation in BaseData.BaseLocations.Skip(1).Take(5))
             {
                 ScoutLocations.AddRange(GetPointsForLocation(baseLocation));
             }

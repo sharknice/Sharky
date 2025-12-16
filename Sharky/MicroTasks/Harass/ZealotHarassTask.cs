@@ -58,10 +58,21 @@
             {
                 if (commander.UnitCalculation.EnemiesInRange.Any(e => !e.Attributes.Contains(SC2Attribute.Structure)) || Vector2.DistanceSquared(commander.UnitCalculation.Position, mainVector) < 100)
                 {
-                    var action = ZealotMicroController.HarassWorkers(commander, mainPoint, TargetingData.MainDefensePoint, frame);
-                    if (action != null)
+                    if (commander.UnitCalculation.Unit.Shield + commander.UnitCalculation.Unit.Health < 35)
                     {
-                        commands.AddRange(action);
+                        var action = ZealotMicroController.NavigateToPoint(commander, TargetingData.MainDefensePoint, TargetingData.MainDefensePoint, null, frame);
+                        if (action != null)
+                        {
+                            commands.AddRange(action);
+                        }
+                    }
+                    else
+                    {
+                        var action = ZealotMicroController.HarassWorkers(commander, mainPoint, TargetingData.MainDefensePoint, frame);
+                        if (action != null)
+                        {
+                            commands.AddRange(action);
+                        }
                     }
                 }
                 else
