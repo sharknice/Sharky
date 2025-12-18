@@ -43,9 +43,9 @@
 
             foreach (var effect in SharkyUnitData.Effects)
             {
-                if (effect.EffectId == (uint)Effects.LIBERATIONZONE)
+                if (effect.EffectId == (uint)Effects.LIBERATIONZONE || effect.EffectId == (uint)Effects.LIBERATIONZONET)
                 {
-                    if (Vector2.DistanceSquared(new Vector2(effect.Pos[0].X, effect.Pos[0].Y), commander.UnitCalculation.Position) <= (effect.Radius + commander.UnitCalculation.Unit.Radius) * (effect.Radius + commander.UnitCalculation.Unit.Radius))
+                    if (Vector2.DistanceSquared(new Vector2(effect.Pos[0].X, effect.Pos[0].Y), commander.UnitCalculation.Position) <= (5 + commander.UnitCalculation.Unit.Radius) * (5 + commander.UnitCalculation.Unit.Radius))
                     {
                         action = commander.Order(frame, Abilities.MORPH_UNSIEGE);
                         return true;

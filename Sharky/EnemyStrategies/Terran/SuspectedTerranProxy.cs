@@ -26,6 +26,11 @@
                 return false;
             }
 
+            if (UnitCountService.EnemyHas(UnitTypes.TERRAN_BARRACKS))
+            {
+                return false;
+            }
+
             if (UnitCountService.EquivalentEnemyTypeCount(UnitTypes.TERRAN_COMMANDCENTER) < 2 && MapDataService.SelfVisible(TargetingData.EnemyMainBasePoint))
             {
                 if (UnitCountService.EquivalentEnemyTypeCount(UnitTypes.TERRAN_BARRACKS) < 1)
@@ -37,6 +42,10 @@
                             return true;
                         }
                     }
+                }
+                if (UnitCountService.EnemyHas(UnitTypes.TERRAN_ORBITALCOMMAND))
+                {
+                    return true;
                 }
             }
 

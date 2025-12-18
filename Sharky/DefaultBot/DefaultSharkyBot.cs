@@ -470,7 +470,7 @@
             var hellionHarassTask = new HellionHarassTask(this, false, -.9f, hellionMicroController, reaperHarassMicroController);
             var hellionExpansionScoutTask = new HellionExpansionScoutTask(this, false, -.9f, hellionMicroController, reaperHarassMicroController);
             var siegeTankAtPlanetaryTask = new SiegeTankAtPlanetaryTask(this, siegeTankMicroController, siegeTankSiegedMicroController, false, .5f);
-            var hallucinationScoutTask = new HallucinationScoutTask(TargetingData, BaseData, MicroTaskData, false, .5f);
+            var hallucinationScoutTask = new HallucinationScoutTask(TargetingData, BaseData, MicroTaskData, CameraManager, false, .5f);
             var hallucinationScoutEmptyBasesTask = new HallucinationScoutEmptyBasesTask(this, false, .51f);
             var wallOffTask = new WallOffTask(SharkyUnitData, ActiveUnitData, MacroData, MapData, WallService, ChatService, false, .25f);
             var permanentWallOffTask = new PermanentWallOffTask(SharkyUnitData, ActiveUnitData, MicroTaskData, MacroData, MapData, WallService, ChatService, RequirementService, false, .25f);

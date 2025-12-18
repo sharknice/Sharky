@@ -5,7 +5,7 @@
         protected ActiveUnitData ActiveUnitData;
 
         public HallucinationScoutEmptyBasesTask(DefaultSharkyBot defaultSharkyBot, bool enabled, float priority)
-            : base(defaultSharkyBot.TargetingData, defaultSharkyBot.BaseData, defaultSharkyBot.MicroTaskData, enabled, priority)
+            : base(defaultSharkyBot.TargetingData, defaultSharkyBot.BaseData, defaultSharkyBot.MicroTaskData, defaultSharkyBot.CameraManager, enabled, priority)
         {
             ActiveUnitData = defaultSharkyBot.ActiveUnitData;
         }

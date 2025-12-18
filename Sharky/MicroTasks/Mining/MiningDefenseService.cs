@@ -1,4 +1,8 @@
-﻿using Sharky.Extensions;
+﻿using Roy_T.AStar.Primitives;
+using Sharky.Extensions;
+using System;
+using System.ComponentModel.Design;
+using static SC2APIProtocol.AbilityData.Types;
 
 namespace Sharky.MicroTasks.Mining
 {
@@ -13,6 +17,9 @@ namespace Sharky.MicroTasks.Mining
         TargetingData TargetingData;
         MineralWalker MineralWalker;
         EnemyData EnemyData;
+        SharkyUnitData SharkyUnitData;
+
+        bool EnemyBuildingInProgress = false;
 
         /// <summary>
         /// enemies workers will not deal with in this service, because they are handled in another MicroTask.
@@ -32,6 +39,8 @@ namespace Sharky.MicroTasks.Mining
             TargetingData = defaultSharkyBot.TargetingData;
             MineralWalker = defaultSharkyBot.MineralWalker;
             EnemyData = defaultSharkyBot.EnemyData;
+            SharkyUnitData = defaultSharkyBot.SharkyUnitData;
+
             Enabled = true;
         }
 
@@ -50,15 +59,47 @@ namespace Sharky.MicroTasks.Mining
             bool workerRushActive = false;
             bool preventGasSteal = false;
             bool preventBuildingLanding = false;
+            bool stopInProgressBuilding = false;
+
+            foreach (var effect in SharkyUnitData.Effects)
+            {
+                if (effect.EffectId == (uint)Effects.LIBERATIONZONE || effect.EffectId == (uint)Effects.LIBERATIONZONET)
+                {
+                    foreach (var commander in unitCommanders)
+                    {
+                        if (Vector2.Distance(effect.Pos[0].ToVector2(), commander.UnitCalculation.Position) <= 7)
+                        {
+                            commander.UnitRole = UnitRole.Defend;
+
+                            var angle = Math.Atan2(effect.Pos[0].Y - commander.UnitCalculation.Position.Y, commander.UnitCalculation.Position.X - effect.Pos[0].X);
+                            var x = 2 * Math.Cos(angle);
+                            var y = 2 * Math.Sin(angle);
+                            var avoidPoint = new Point2D { X = commander.UnitCalculation.Position.X + (float)x, Y = commander.UnitCalculation.Position.Y - (float)y };
+                            if (MapDataService.AnyPathWalkable(avoidPoint, 1))
+                            {
+                                var action = commander.Order(frame, Abilities.MOVE, avoidPoint);
+                                actions.AddRange(action);
+                            }
+                            else
+                            {
+                                var action = Run(frame, new List<UnitCommander> { commander }, BaseData.BaseLocations.FirstOrDefault());
+                                actions.AddRange(action);
+                            }
+                        }
+                    }
+                }
+            }
 
             foreach (var selfBase in BaseData.SelfBases)
             {
-                if (selfBase.ResourceCenter != null && ActiveUnitData.Commanders.ContainsKey(selfBase.ResourceCenter.Tag) && ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Any(e => !IgnoredThreatTypes.Contains((UnitTypes)e.Unit.UnitType)))
+                var baseUnitCalculation = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation;
+
+                if (selfBase.ResourceCenter != null && ActiveUnitData.Commanders.ContainsKey(selfBase.ResourceCenter.Tag) && baseUnitCalculation.NearbyEnemies.Any(e => !IgnoredThreatTypes.Contains((UnitTypes)e.Unit.UnitType)))
                 {
-                    var flyingBuildings = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Where(u => u.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && u.Unit.IsFlying);
+                    var flyingBuildings = baseUnitCalculation.NearbyEnemies.Where(u => u.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && u.Unit.IsFlying);
                     if (flyingBuildings.Any())
                     {
-                        var nearbyWorkers = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyAllies.Where(a => a.UnitClassifications.HasFlag(UnitClassification.Worker));
+                        var nearbyWorkers = baseUnitCalculation.NearbyAllies.Where(a => a.UnitClassifications.HasFlag(UnitClassification.Worker));
                         var commanders = ActiveUnitData.Commanders.Where(c => nearbyWorkers.Any(w => w.Unit.Tag == c.Key));
                         preventBuildingLanding = true;
                         foreach (var flyingBuilding in flyingBuildings)
@@ -86,18 +127,27 @@ namespace Sharky.MicroTasks.Mining
                         }
                     }
 
-                    if (!ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyAllies.Any(a => a.UnitClassifications.HasFlag(UnitClassification.ArmyUnit)) && (ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Any(e => !IgnoredThreatTypes.Contains((UnitTypes)e.Unit.UnitType) && (e.UnitClassifications.HasFlag(UnitClassification.Worker) || (e.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && ((e.Unit.BuildProgress < 1 && !e.NearbyAllies.Any(ea => ea.Unit.BuildProgress == 1 && ea.Attributes.Contains(SC2APIProtocol.Attribute.Structure))) || ((Vector2.Distance(e.Position, ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.Position) < 15 || (selfBase.Location.X == TargetingData.SelfMainBasePoint.X && selfBase.Location.Y == TargetingData.SelfMainBasePoint.Y)) && MapDataService.MapHeight(e.Position) == MapDataService.MapHeight(ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.Position))))))))
+                    var noFriendlyArmy = !baseUnitCalculation.NearbyAllies.Any(a => a.UnitClassifications.HasFlag(UnitClassification.ArmyUnit));
+                    var mainBase = baseUnitCalculation.Unit.Pos.X == TargetingData.SelfMainBasePoint.X && baseUnitCalculation.Unit.Pos.Y == TargetingData.SelfMainBasePoint.Y;
+                    var enemies = baseUnitCalculation.NearbyEnemies.Where(e => !IgnoredThreatTypes.Contains((UnitTypes)e.Unit.UnitType));
+                    var threatEnemies = enemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.Worker) || 
+                                        ((e.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && (e.Unit.BuildProgress < 1 && !e.NearbyAllies.Any(ea => ea.Unit.BuildProgress == 1 && ea.Attributes.Contains(SC2APIProtocol.Attribute.Structure))) || 
+                                        ((mainBase && Vector2.Distance(e.Position, baseUnitCalculation.Position) < 15 && MapDataService.MapHeight(e.Position) == MapDataService.MapHeight(baseUnitCalculation.Position))))));
+                    var nearMain = mainBase;
+                    if (noFriendlyArmy && threatEnemies)
                     {
-                        var enemyGroundDamage = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Take(25).Where(e => e.DamageGround).Sum(e => e.Damage);
-                        var nearbyWorkers = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyAllies.Where(a => a.UnitClassifications.HasFlag(UnitClassification.Worker));
+                        EnemyBuildingInProgress = true;
+                        stopInProgressBuilding = true;
+                        var enemyGroundDamage = baseUnitCalculation.NearbyEnemies.Take(25).Where(e => e.DamageGround).Sum(e => e.Damage);
+                        var nearbyWorkers = baseUnitCalculation.NearbyAllies.Where(a => a.UnitClassifications.HasFlag(UnitClassification.Worker));
                         var commanders = ActiveUnitData.Commanders.Where(c => nearbyWorkers.Any(w => w.Unit.Tag == c.Key));
                         if (!commanders.Any()) { continue; }
 
-                        if (ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyAllies.Where(e => e.DamageGround || e.UnitClassifications.HasFlag(UnitClassification.Worker)).Sum(e => e.Damage) > enemyGroundDamage || BaseData.SelfBases.Count() == 1)
+                        if (baseUnitCalculation.NearbyAllies.Where(e => e.DamageGround || e.UnitClassifications.HasFlag(UnitClassification.Worker)).Sum(e => e.Damage) > enemyGroundDamage || BaseData.SelfBases.Count() == 1)
                         {
                             int desiredWorkers = 0;
-                            var combatUnits = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Take(25).Where(u => u.UnitClassifications.HasFlag(UnitClassification.ArmyUnit));
-                            var workers = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Take(25).Where(u => u.UnitClassifications.HasFlag(UnitClassification.Worker));
+                            var combatUnits = baseUnitCalculation.NearbyEnemies.Take(25).Where(u => u.UnitClassifications.HasFlag(UnitClassification.ArmyUnit));
+                            var workers = baseUnitCalculation.NearbyEnemies.Take(25).Where(u => u.UnitClassifications.HasFlag(UnitClassification.Worker));
 
                             desiredWorkers = 1;
 
@@ -143,7 +193,7 @@ namespace Sharky.MicroTasks.Mining
                                 desiredWorkers = commanders.Count();
                             }
 
-                            if (ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Where(u => !u.Unit.IsFlying).Count() > 8)
+                            if (baseUnitCalculation.NearbyEnemies.Where(u => !u.Unit.IsFlying).Count() > 8)
                             {
                                 DebugService.DrawText("--------------Defending Worker Rush-------------");
                                 workerRushActive = true;
@@ -175,7 +225,7 @@ namespace Sharky.MicroTasks.Mining
                             {
                                 var workersPerBuilding = 4;
                                 var baseVector = new Vector2(selfBase.Location.X, selfBase.Location.Y);
-                                var enemyBuildings = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Where(u => u.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && !u.Unit.IsFlying && !IgnoredThreatTypes.Contains((UnitTypes)u.Unit.UnitType)).OrderByDescending(u => u.Unit.BuildProgress).ThenBy(u => Vector2.DistanceSquared(u.Position, baseVector));
+                                var enemyBuildings = baseUnitCalculation.NearbyEnemies.Where(u => u.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && !u.Unit.IsFlying && !IgnoredThreatTypes.Contains((UnitTypes)u.Unit.UnitType)).OrderByDescending(u => u.Unit.BuildProgress).ThenBy(u => Vector2.DistanceSquared(u.Position, baseVector));
                                 desiredWorkers = (enemyBuildings.Count() * 4) + workers.Count();
                                 if (enemyBuildings.Any(b => b.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS && b.Unit.BuildProgress < 1))
                                 {
@@ -183,7 +233,7 @@ namespace Sharky.MicroTasks.Mining
                                     workersPerBuilding += 3;
                                 }
 
-                                var enemy = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation.NearbyEnemies.Where(u => !u.Unit.IsFlying && !IgnoredThreatTypes.Contains((UnitTypes)u.Unit.UnitType)).OrderBy(u => Vector2.DistanceSquared(u.Position, new Vector2(selfBase.Location.X, selfBase.Location.Y))).FirstOrDefault();
+                                var enemy = baseUnitCalculation.NearbyEnemies.Where(u => !u.Unit.IsFlying && !IgnoredThreatTypes.Contains((UnitTypes)u.Unit.UnitType)).OrderBy(u => Vector2.DistanceSquared(u.Position, new Vector2(selfBase.Location.X, selfBase.Location.Y))).FirstOrDefault();
                                 if (enemyBuildings.Any() && !enemyBuildings.Any(u => (u.Unit.UnitType == (uint)UnitTypes.PROTOSS_PHOTONCANNON || u.Unit.UnitType == (uint)UnitTypes.ZERG_SPINECRAWLER) && u.Unit.Shield == u.Unit.ShieldMax && u.Unit.BuildProgress == 1))
                                 {
                                     while (commanders.Count(c => c.Value.UnitRole == UnitRole.Defend) < desiredWorkers && commanders.Count(c => c.Value.UnitRole == UnitRole.Defend) < commanders.Count())
@@ -305,6 +355,14 @@ namespace Sharky.MicroTasks.Mining
                 }
             }
 
+            if (!stopInProgressBuilding && EnemyBuildingInProgress)
+            {
+                EnemyBuildingInProgress = false;
+                foreach (var commander in unitCommanders.Where(u => u.UnitRole == UnitRole.Defend))
+                {
+                    commander.UnitRole = UnitRole.None;
+                }
+            }
             if (!workerRushActive)
             {
                 foreach (var commander in unitCommanders.Where(u => u.UnitRole == UnitRole.Attack))

@@ -1,10 +1,13 @@
-﻿namespace Sharky.MicroTasks
+﻿using static SC2APIProtocol.AbilityData.Types;
+
+namespace Sharky.MicroTasks
 {
     public class HallucinationScoutTask : MicroTask
     {
         protected TargetingData TargetingData;
         protected BaseData BaseData;
         protected MicroTaskData MicroTaskData;
+        protected CameraManager CameraManager;
 
         bool started { get; set; }
         public bool StealSentryFromAttackTask { get; set; }
@@ -12,11 +15,12 @@
         protected int ScoutLocationIndex { get; set; }
         public bool ScoutMainFirst { get; set; } = false;
 
-        public HallucinationScoutTask(TargetingData targetingData, BaseData baseData, MicroTaskData microTaskData, bool enabled, float priority)
+        public HallucinationScoutTask(TargetingData targetingData, BaseData baseData, MicroTaskData microTaskData, CameraManager cameraManager, bool enabled, float priority)
         {
             TargetingData = targetingData;
             BaseData = baseData;
             MicroTaskData = microTaskData;
+            CameraManager = cameraManager;
             Priority = priority;
 
             UnitCommanders = new List<UnitCommander>();
@@ -97,6 +101,7 @@
                         {
                             commands.AddRange(action);
                         }
+                        CameraManager.SetCamera(commander.UnitCalculation.Unit.Pos);
                     }
                     else
                     {
@@ -123,6 +128,7 @@
                         }
                         if (Vector2.DistanceSquared(new Vector2(ScoutLocations[ScoutLocationIndex].X, ScoutLocations[ScoutLocationIndex].Y), commander.UnitCalculation.Position) < 2)
                         {
+                            CameraManager.SetCamera(commander.UnitCalculation.Unit.Pos);
                             ScoutLocationIndex++;
                             if (ScoutLocationIndex >= ScoutLocations.Count())
                             {

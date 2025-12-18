@@ -56,23 +56,20 @@
 
             foreach (var commander in UnitCommanders)
             {
-                if (commander.UnitCalculation.EnemiesInRange.Any(e => !e.Attributes.Contains(SC2Attribute.Structure)) || Vector2.DistanceSquared(commander.UnitCalculation.Position, mainVector) < 100)
+                if (commander.UnitCalculation.Unit.Shield + commander.UnitCalculation.Unit.Health < 25 && Vector2.DistanceSquared(commander.UnitCalculation.Position, mainVector) < 500 && commander.UnitCalculation.EnemiesInRangeOfAvoid.Any())
                 {
-                    if (commander.UnitCalculation.Unit.Shield + commander.UnitCalculation.Unit.Health < 35)
+                    var action = commander.Order(frame, Abilities.MOVE, TargetingData.MainDefensePoint);
+                    if (action != null)
                     {
-                        var action = ZealotMicroController.NavigateToPoint(commander, TargetingData.MainDefensePoint, TargetingData.MainDefensePoint, null, frame);
-                        if (action != null)
-                        {
-                            commands.AddRange(action);
-                        }
+                        commands.AddRange(action);
                     }
-                    else
+                }
+                else if (commander.UnitCalculation.EnemiesInRange.Any(e => !e.Attributes.Contains(SC2Attribute.Structure)) || Vector2.DistanceSquared(commander.UnitCalculation.Position, mainVector) < 100)
+                {
+                    var action = ZealotMicroController.HarassWorkers(commander, mainPoint, TargetingData.MainDefensePoint, frame);
+                    if (action != null)
                     {
-                        var action = ZealotMicroController.HarassWorkers(commander, mainPoint, TargetingData.MainDefensePoint, frame);
-                        if (action != null)
-                        {
-                            commands.AddRange(action);
-                        }
+                        commands.AddRange(action);
                     }
                 }
                 else

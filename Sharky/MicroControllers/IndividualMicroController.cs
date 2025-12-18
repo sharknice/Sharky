@@ -193,7 +193,10 @@
                 return commander.Order(frame, Abilities.ATTACK, target);
             }
 
-            if (AvoidDamageList(commander, target, bestTarget, defensivePoint, commander.UnitCalculation.EnemiesInRangeOfAvoid, frame, true, out action)) { return action; }
+            if (!commander.UnitCalculation.TargetPriorityCalculation.Overwhelm || commander.UnitCalculation.Unit.Shield < commander.UnitCalculation.Unit.ShieldMax / 2 || commander.UnitCalculation.EnemiesInRangeOfAvoid.Any(e => e.EnemiesInRange.Count() == 1))
+            {
+                if (AvoidDamageList(commander, target, bestTarget, defensivePoint, commander.UnitCalculation.EnemiesInRangeOfAvoid, frame, true, out action)) { return action; }
+            }
 
             if (Vector2.Distance(commander.UnitCalculation.Position, target.ToVector2()) < 15)
             {
@@ -2918,16 +2921,17 @@
         {
             action = null;
             if (commander.UnitCalculation.Unit.IsFlying) { return false; }
+            if (WeaponReady(commander, frame) && commander.UnitCalculation.DamageAir) { return false; }
 
             foreach (var effect in SharkyUnitData.Effects)
             {
-                if (effect.EffectId == (uint)Effects.LIBERATIONZONE)
+                if (effect.EffectId == (uint)Effects.LIBERATIONZONE || effect.EffectId == (uint)Effects.LIBERATIONZONET)
                 {
-                    if (Vector2.DistanceSquared(new Vector2(effect.Pos[0].X, effect.Pos[0].Y), commander.UnitCalculation.Position) <= (effect.Radius + commander.UnitCalculation.Unit.Radius + .5) * (effect.Radius + commander.UnitCalculation.Unit.Radius + .5) )
+                    if (Vector2.Distance(effect.Pos[0].ToVector2(), commander.UnitCalculation.Position) < 5)
                     {
                         Point2D avoidPoint;
 
-                        avoidPoint = GetGroundAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, new Point { X = effect.Pos[0].X, Y = effect.Pos[0].Y, Z = 1 }, target, defensivePoint, effect.Radius + commander.UnitCalculation.Unit.Radius + .5f);
+                        avoidPoint = GetGroundAvoidPoint(commander, commander.UnitCalculation.Unit.Pos, new Point { X = effect.Pos[0].X, Y = effect.Pos[0].Y, Z = 1 }, target, defensivePoint, 1);
 
                         action = commander.Order(frame, Abilities.MOVE, avoidPoint);
                         return true;

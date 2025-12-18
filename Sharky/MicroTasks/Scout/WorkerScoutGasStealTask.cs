@@ -226,6 +226,7 @@
 
                 if (TryRecallProbe(commander, frame, commands, disable))
                 {
+                    disable = true;
                     continue;
                 }
 
