@@ -1,10 +1,4 @@
-﻿using Roy_T.AStar.Primitives;
-using Sharky.Extensions;
-using System;
-using System.ComponentModel.Design;
-using static SC2APIProtocol.AbilityData.Types;
-
-namespace Sharky.MicroTasks.Mining
+﻿namespace Sharky.MicroTasks.Mining
 {
     public class MiningDefenseService
     {

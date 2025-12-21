@@ -711,6 +711,8 @@
 
             if (DealWithSiegedTanks(commander, target, defensivePoint, frame, out action)) { return true; }
 
+            if (DealWithWidowMines(commander, target, defensivePoint, frame, out action)) { return true; }
+
             if (AvoidReaperCharges(commander, target, defensivePoint, frame, out action)) { return true; }
 
             if (RechargeShieldsAtBattery(commander, target, defensivePoint, frame, out action)) { return true; }
@@ -3055,6 +3057,43 @@
             {
                 var closestSiegePosition = enemySiegedTanks.OrderBy(u => Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position)).FirstOrDefault();
                 action = commander.Order(frame, Abilities.MOVE, new Point2D { X = closestSiegePosition.Unit.Pos.X, Y = closestSiegePosition.Unit.Pos.Y });
+                return true;
+            }
+
+            return false;
+        }
+
+        protected virtual bool DealWithWidowMines(UnitCommander commander, Point2D target, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
+        {
+            action = null;
+
+            if (commander.UnitCalculation.Weapon == null || commander.UnitCalculation.Weapon.Range < 6) { return false; }
+
+            var widowMine = commander.UnitCalculation.NearbyEnemies.Where(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_WIDOWMINEBURROWED && Vector2.Distance(e.Position, commander.UnitCalculation.Position) <= 7).OrderBy(e => Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position)).FirstOrDefault();
+            if (widowMine == null) { return false; }
+
+            if (commander.UnitCalculation.Unit.IsHallucination)
+            {
+                action = commander.Order(frame, Abilities.MOVE, widowMine.Position.ToPoint2D());
+                return true;
+            }
+
+            if (!WeaponReady(commander, frame) || widowMine.Unit.DisplayType != DisplayType.Visible)
+            {
+                var avoidPoint = commander.UnitCalculation.Position + (Vector2.Normalize(commander.UnitCalculation.Position - widowMine.Position) * 2);
+                    //GetPositionFromRange(commander, commander.UnitCalculation.Unit.Pos, widowMine.Unit.Pos, 8);
+                if (!commander.UnitCalculation.Unit.IsFlying && !MapDataService.PathWalkable(avoidPoint.ToPoint()))
+                {
+                    return GetInFormation(commander, Formation.Loose, target, null, frame, out action);
+                }
+
+                action = commander.Order(frame, Abilities.MOVE, avoidPoint.ToPoint2D());
+                return true;
+            }
+
+            if (commander.UnitCalculation.DamageGround)
+            {
+                action = commander.Order(frame, Abilities.ATTACK, targetTag: widowMine.Unit.Tag);
                 return true;
             }
 
