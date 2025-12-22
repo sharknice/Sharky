@@ -8,7 +8,7 @@
         {
             if (EnemyData.EnemyRace != SC2APIProtocol.Race.Terran) { return false; }
 
-            if (frame > SharkyOptions.FramesPerSecond * 2 * 60 || UnitCountService.EquivalentEnemyTypeCount(UnitTypes.TERRAN_FACTORY) > 0 || UnitCountService.EquivalentEnemyTypeCount(UnitTypes.TERRAN_STARPORT) > 0)
+            if (frame > SharkyOptions.FramesPerSecond * 2 * 60 || UnitCountService.EquivalentEnemyTypeCount(UnitTypes.TERRAN_FACTORY) > 0 || UnitCountService.EquivalentEnemyTypeCount(UnitTypes.TERRAN_STARPORT) > 0 || UnitCountService.EquivalentEnemyTypeCount(UnitTypes.TERRAN_COMMANDCENTER) > 1)
             {
                 return false;
             }

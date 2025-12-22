@@ -86,6 +86,8 @@
 
             foreach (var selfBase in BaseData.SelfBases)
             {
+                if (selfBase.ResourceCenter == null || !ActiveUnitData.Commanders.ContainsKey(selfBase.ResourceCenter.Tag)) { continue; }
+
                 var baseUnitCalculation = ActiveUnitData.Commanders[selfBase.ResourceCenter.Tag].UnitCalculation;
 
                 if (selfBase.ResourceCenter != null && ActiveUnitData.Commanders.ContainsKey(selfBase.ResourceCenter.Tag) && baseUnitCalculation.NearbyEnemies.Any(e => !IgnoredThreatTypes.Contains((UnitTypes)e.Unit.UnitType)))
@@ -126,7 +128,7 @@
                     var enemies = baseUnitCalculation.NearbyEnemies.Where(e => !IgnoredThreatTypes.Contains((UnitTypes)e.Unit.UnitType));
                     var threatEnemies = enemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.Worker) || 
                                         ((e.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && (e.Unit.BuildProgress < 1 && !e.NearbyAllies.Any(ea => ea.Unit.BuildProgress == 1 && ea.Attributes.Contains(SC2APIProtocol.Attribute.Structure))) || 
-                                        ((mainBase && Vector2.Distance(e.Position, baseUnitCalculation.Position) < 15 && MapDataService.MapHeight(e.Position) == MapDataService.MapHeight(baseUnitCalculation.Position))))));
+                                        ((mainBase && Vector2.Distance(e.Position, baseUnitCalculation.Position) < 15 && MapDataService.MapHeight(e.Position) == MapDataService.MapHeight(baseUnitCalculation.Position) && !e.NearbyAllies.Any(ea => ea.UnitClassifications.HasFlag(UnitClassification.ArmyUnit)))))));
                     var nearMain = mainBase;
                     if (noFriendlyArmy && threatEnemies)
                     {
