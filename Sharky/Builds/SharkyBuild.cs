@@ -82,6 +82,16 @@
         { 
         }
 
+        protected virtual void SetStartBuildAttackSettings()
+        {
+            AttackData.UseAttackDataManager = true;
+            AttackData.AttackTrigger = 1.5f;
+            AttackData.RetreatTrigger = 1f;
+            AttackData.AttackWhenMaxedOut = true;
+            AttackData.AttackWhenOverwhelm = true;
+            AttackData.RequireMaxOut = false;
+        }
+
         public virtual void StartBuild(int frame)
         {
             Console.WriteLine($"{frame} {FrameToTimeConverter.GetTime(frame)} Build: {Name()}");
@@ -105,12 +115,7 @@
             BuildOptions.StrictWorkersPerGasCount = 3;
             BuildOptions.MaxActiveGasCount = 8;
 
-            AttackData.UseAttackDataManager = true;
-            AttackData.AttackTrigger = 1.5f;
-            AttackData.RetreatTrigger = 1f;
-            AttackData.AttackWhenMaxedOut = true;
-            AttackData.AttackWhenOverwhelm = true;
-            AttackData.RequireMaxOut = false;
+            SetStartBuildAttackSettings();
 
             ResetBuild();
 
