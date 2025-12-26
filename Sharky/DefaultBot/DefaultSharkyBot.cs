@@ -217,7 +217,7 @@
             DamageService = new DamageService();
             BuildingService = new BuildingService(MapData, ActiveUnitData, TargetingData, BaseData, SharkyUnitData);
 
-            UnitManager = new UnitManager(ActiveUnitData, SharkyUnitData, BaseData, EnemyData, SharkyOptions, TargetPriorityService, CollisionCalculator, MapDataService, DebugService, DamageService, UnitDataService);
+            UnitManager = new UnitManager(ActiveUnitData, SharkyUnitData, BaseData, EnemyData, SharkyOptions, TargetPriorityService, CollisionCalculator, MapDataService, DebugService, DamageService, UnitDataService, TargetingData);
             Managers.Add(UnitManager);
 
             HttpClient = new HttpClient();

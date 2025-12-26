@@ -14,6 +14,7 @@ namespace Sharky.Managers
         UnitDataService UnitDataService;
         BaseData BaseData;
         EnemyData EnemyData;
+        TargetingData TargetingData;
 
         float NearbyDistance = 30;
         float AvoidRange = 1.5f;
@@ -23,7 +24,7 @@ namespace Sharky.Managers
         int TargetPriorityCalculationFrame;
 
 
-        public UnitManager(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, BaseData baseData, EnemyData enemyData, SharkyOptions sharkyOptions, TargetPriorityService targetPriorityService, CollisionCalculator collisionCalculator, MapDataService mapDataService, DebugService debugService, DamageService damageService, UnitDataService unitDataService)
+        public UnitManager(ActiveUnitData activeUnitData, SharkyUnitData sharkyUnitData, BaseData baseData, EnemyData enemyData, SharkyOptions sharkyOptions, TargetPriorityService targetPriorityService, CollisionCalculator collisionCalculator, MapDataService mapDataService, DebugService debugService, DamageService damageService, UnitDataService unitDataService, TargetingData targetingData)
         {
             ActiveUnitData = activeUnitData;
 
@@ -37,7 +38,7 @@ namespace Sharky.Managers
             DamageService = damageService;
             UnitDataService = unitDataService;
             EnemyData = enemyData;
-
+            TargetingData = targetingData;
 
             TargetPriorityCalculationFrame = 0;
         }
@@ -246,6 +247,8 @@ namespace Sharky.Managers
             }
 
             var beforeFiveMinutes = frame < SharkyOptions.FramesPerSecond * 60 * 5;
+            var enemyMain = TargetingData.EnemyMainBasePoint ?? new Point2D { X = 0, Y = 0 };
+            var enemyMainVisible = MapDataService.SelfVisible(enemyMain);
             foreach (var enemy in ActiveUnitData.EnemyUnits.Values.ToList()) // if we can see this area of the map and the unit isn't there anymore remove it (we just remove it because visible units will get re-added below)
             {
                 if (enemy.FrameLastSeen != frame && MapDataService.SelfVisible(enemy.Unit.Pos))
@@ -255,7 +258,16 @@ namespace Sharky.Managers
                         enemy.Unit.DisplayType = DisplayType.Hidden;
                         continue; // it's still there but it's burrowed so we can't see it
                     }
-                    ActiveUnitData.EnemyUnits.Remove(enemy.Unit.Tag, out UnitCalculation removed);
+                    if (enemyMainVisible)
+                    {
+                        ActiveUnitData.EnemyUnits.Remove(enemy.Unit.Tag, out UnitCalculation removed);
+                    }
+                    else
+                    {
+                        // it probably retreated
+                        ActiveUnitData.EnemyUnits[enemy.Unit.Tag].Position = enemyMain.ToVector2();
+                        ActiveUnitData.EnemyUnits[enemy.Unit.Tag].Unit.Pos = enemyMain.ToPoint();
+                    }
                 }
                 else if (MapDataService.OutOfBounds(enemy.Unit.Pos))
                 {
