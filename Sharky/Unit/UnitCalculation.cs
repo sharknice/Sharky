@@ -232,7 +232,7 @@
 
             }
             else if (Damage > 0 || unit.EnergyMax > 0 || unit.CargoSpaceMax > 0 || sharkyUnitData.DetectionTypes.Contains((UnitTypes)unit.UnitType) ||
-                unit.UnitType == (uint)UnitTypes.ZERG_SWARMHOSTBURROWEDMP || unit.UnitType == (uint)UnitTypes.ZERG_SWARMHOSTMP || unit.UnitType == (uint)UnitTypes.PROTOSS_DISRUPTOR || unit.UnitType == (uint)UnitTypes.PROTOSS_DISRUPTORPHASED)
+                unit.UnitType == (uint)UnitTypes.ZERG_SWARMHOSTBURROWEDMP || unit.UnitType == (uint)UnitTypes.ZERG_SWARMHOSTMP || unit.UnitType == (uint)UnitTypes.PROTOSS_DISRUPTOR || unit.UnitType == (uint)UnitTypes.PROTOSS_DISRUPTORPHASED || unit.UnitType == (uint)UnitTypes.PROTOSS_ARCHON)
             {
                 UnitClassifications |= (UnitClassification.ArmyUnit);
             }

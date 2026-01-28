@@ -158,7 +158,10 @@
             {
                 if (MapDataService.PathWalkable(new Point2D { X = x, Y = y, }, 1) && !BuildingService.Blocked(x, y, .75f, 0f) && !BuildingService.BlockedByUnits(x, y, .75f, powerSource) && Powered(powerSource, x, y))
                 {
-                    return new Point2D { X = x, Y = y };
+                    if (MapDataService.EnemyGroundDpsInRange(x, y) == 0)
+                    {
+                        return new Point2D { X = x, Y = y };
+                    }
                 }
             }
 

@@ -8,6 +8,7 @@
         void ClaimUnits(Dictionary<ulong, UnitCommander> commanders);
         IEnumerable<SC2Action> PerformActions(int frame);
         void ResetClaimedUnits();
+        void ResetClaimedUnits(UnitTypes unitType);
         List<UnitCommander> ResetNonEssentialClaims();
         void Enable();
         void Disable();

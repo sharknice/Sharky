@@ -133,8 +133,9 @@
                             {
                                 commander.Value.Claimed = true;
                                 UnitCommanders.Add(commander.Value);
-                                commander.Value.UnitRole = UnitRole.Leader;
-                                MainUnits.Add(commander.Value);
+                                commander.Value.UnitRole = UnitRole.NextLeader;
+                                SupportUnits.Add(commander.Value);
+                                NextLeader = commander.Value;
                                 break;
                             }
                         }
@@ -319,7 +320,7 @@
                 attackingEnemies = attackingEnemies.Where(e => e.Damage > 0 && e.EnemiesInRange.Any(u => ActiveUnitData.Commanders.ContainsKey(u.Unit.Tag) && ActiveUnitData.Commanders[u.Unit.Tag].UnitRole != UnitRole.Proxy) && !e.Unit.IsHallucination && e.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELING && e.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELINGZEALOT && e.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELINGMARINE && e.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELINGMARINESHIELD && e.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELINGZERGLING && e.Unit.UnitType != (uint)UnitTypes.ZERG_CHANGELINGZERGLINGWINGS);
             }
 
-            if (AttackData.OnlyDefendOnHighGround)
+            if (AttackData.OnlyDefendOnHighGround && (AttackData.TargetPriorityCalculation == null || !AttackData.TargetPriorityCalculation.Overwhelm))
             {
                 var height = MapDataService.MapHeight(TargetingData.MainDefensePoint);
                 attackingEnemies = attackingEnemies.Where(e => MapDataService.MapHeight(e.Position) == height || e.EnemiesInRange.Any(a => MapDataService.MapHeight(a.Position) == height));
@@ -413,7 +414,7 @@
                         stopwatch.Restart();
 
                         RemoveTemporaryUnits();
-                        UpdateEnemyAttackers(frame, attackingEnemies);
+                        UpdateEnemyAttackers(frame, closerEnemies);
                         return actions;
                     }
                 }
@@ -510,7 +511,8 @@
             }
             else
             {
-                EnemyAttackers = attackingEnemies.Where(e => e.FrameLastSeen > frame - 100 && (e.EnemiesInRangeOf.Any() || e.EnemiesInRange.Any())).ToList();
+                var mainHeight = MapDataService.MapHeight(TargetingData.SelfMainBasePoint);
+                EnemyAttackers = attackingEnemies.Where(e => e.FrameLastSeen > frame - 100 && (e.EnemiesInRangeOf.Any() || e.EnemiesInRange.Any() || Vector2.Distance(e.Position, TargetingData.SelfMainBasePoint.ToVector2()) < 15 && MapDataService.MapHeight(e.Position) == mainHeight)).ToList();
             }
         }
 
@@ -585,7 +587,7 @@
                 }
                 else
                 {
-                    if (AttackData.OnlyDefendOnHighGround)
+                    if (AttackData.OnlyDefendOnHighGround && (AttackData.TargetPriorityCalculation == null || !AttackData.TargetPriorityCalculation.Overwhelm))
                     {
                         actions.AddRange(MicroController.Retreat(supportUnits, TargetingData.ForwardDefensePoint, AttackData.ArmyPoint, frame));
                     }
@@ -768,6 +770,10 @@
         {
             foreach (var tag in deadUnits)
             {
+                foreach (var commander in UnitCommanders.Where(c => c.UnitCalculation.Unit.Tag == tag))
+                {
+                    commander.Claimed = false;
+                }
                 UnitCommanders.RemoveAll(c => c.UnitCalculation.Unit.Tag == tag);
                 SupportUnits.RemoveAll(c => c.UnitCalculation.Unit.Tag == tag);
                 MainUnits.RemoveAll(c => c.UnitCalculation.Unit.Tag == tag);

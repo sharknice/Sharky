@@ -44,6 +44,7 @@
         Hide,
         Regroup,
         BlockExpansion,
+        BlockAddon,
         Leader,
         NextLeader,
         Disband,

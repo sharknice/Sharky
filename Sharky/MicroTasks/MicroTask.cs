@@ -33,6 +33,16 @@
             UnitCommanders = new List<UnitCommander>();
         }
 
+        public virtual void ResetClaimedUnits(UnitTypes unitType)
+        {
+            foreach (var commander in UnitCommanders.Where(u => u.UnitCalculation.Unit.UnitType == (uint)unitType))
+            {
+                commander.Claimed = false;
+                commander.UnitRole = UnitRole.None;
+            }
+            UnitCommanders.RemoveAll(u => u.UnitCalculation.Unit.UnitType == (uint)unitType);
+        }
+
         public virtual List<UnitCommander> ResetNonEssentialClaims()
         {
             var unlcaimed = new List<UnitCommander>();
@@ -71,6 +81,10 @@
         {
             foreach (var tag in deadUnits)
             {
+                foreach (var commander in UnitCommanders.Where(c => c.UnitCalculation.Unit.Tag == tag))
+                {
+                    commander.Claimed = false;
+                }
                 Deaths += UnitCommanders.RemoveAll(c => c.UnitCalculation.Unit.Tag == tag);
             }
         }

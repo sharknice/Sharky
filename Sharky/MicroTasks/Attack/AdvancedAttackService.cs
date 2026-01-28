@@ -58,6 +58,12 @@ namespace Sharky.MicroTasks.Attack
             return false;
         }
 
+        public void UpdateTargetPriority()
+        {
+            var targetPriority = CalculateTargetPriority();
+            AttackData.TargetPriorityCalculation = targetPriority;
+        }
+
         void UpdateState()
         {
             var targetPriority = CalculateTargetPriority();

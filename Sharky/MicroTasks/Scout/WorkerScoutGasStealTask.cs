@@ -366,7 +366,14 @@
                     var liftedBuilding = commander.UnitCalculation.NearbyEnemies.Where(e => e.Attributes.Contains(SC2APIProtocol.Attribute.Structure) && e.Unit.IsFlying).OrderBy(e => Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position)).FirstOrDefault();
                     if (liftedBuilding != null)
                     {
-                        commands.AddRange(commander.Order(frame, Abilities.MOVE, new Point2D { X = liftedBuilding.Position.X, Y = liftedBuilding.Position.Y }));
+                        if (Vector2.Distance(commander.UnitCalculation.Position, liftedBuilding.Position) < .5f)
+                        {
+                            commands.AddRange(commander.Order(frame, Abilities.ATTACK, new Point2D { X = liftedBuilding.Position.X, Y = liftedBuilding.Position.Y }));
+                        }
+                        else
+                        {
+                            commands.AddRange(commander.Order(frame, Abilities.MOVE, new Point2D { X = liftedBuilding.Position.X, Y = liftedBuilding.Position.Y }));
+                        }
                         continue;
                     }
 
@@ -696,6 +703,7 @@
 
         protected virtual bool Attack(UnitCommander commander, int frame, List<SC2APIProtocol.Action> commands, Point2D navpoint)
         {
+            if (commander.UnitCalculation.NearbyEnemies.Count(e => e.Unit.UnitType == (uint)UnitTypes.TERRAN_REFINERY) == 1) { return false; } // scout for a second refinery first
             if (commander.UnitCalculation.Unit.Shield > 15 && commander.UnitCalculation.NearbyEnemies.Any() && (commander.UnitCalculation.NearbyAllies.Any(a => a.UnitClassifications.HasFlag(UnitClassification.ArmyUnit)) || (commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.ResourceCenter) && e.Unit.BuildProgress == 1) && commander.UnitCalculation.NearbyEnemies.Any(e => e.UnitClassifications.HasFlag(UnitClassification.Worker)))))
             {
                 if (!ScoutEntireAreaBeforeAttacking || ScoutPoints.All(p => MapDataService.LastFrameVisibility(p) > 100 || MapDataService.PathBlocked(p.ToVector2())))

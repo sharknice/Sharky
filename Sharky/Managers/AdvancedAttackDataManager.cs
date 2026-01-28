@@ -22,6 +22,11 @@
 
         public override IEnumerable<SC2APIProtocol.Action> OnFrame(ResponseObservation observation)
         {
+            if (!AttackData.UseAttackDataManager)
+            {
+                AdvancedAttackService.UpdateTargetPriority();
+            }
+
             if (AttackData.UseAttackDataManager)
             {
                 AttackData.Attacking = AdvancedAttackService.Attack();

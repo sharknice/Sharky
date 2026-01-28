@@ -21,6 +21,8 @@
         public bool PylonPylons { get; set; }
         public bool BuildCannon { get; set; }
 
+        Point2D BlockSpot { get; set; }
+
         List<Point2D> ScoutLocations { get; set; }
         int ScoutLocationIndex { get; set; }
         bool LateGame;
@@ -139,13 +141,21 @@
             {
                 if (commander.UnitRole != UnitRole.Scout) { commander.UnitRole = UnitRole.Scout; }
 
+                if (BlockSpot != null)
+                {
+                    var blockingPylon = commander.UnitCalculation.NearbyAllies.FirstOrDefault(p => p.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && Vector2.Distance(p.Position, BlockSpot.ToVector2()) < 2);
+                    if (blockingPylon != null)
+                    {
+                        ActiveUnitData.Commanders[blockingPylon.Unit.Tag].UnitRole = UnitRole.BlockAddon;
+                    }
+                }
                 if (commander.UnitCalculation.NearbyEnemies.Any(e => e.FrameLastSeen == frame && (e.UnitClassifications.HasFlag(UnitClassification.Worker) || e.Attributes.Contains(SC2Attribute.Structure))) && commander.UnitCalculation.NearbyEnemies.Count() < 5)
                 {
                     if ((BlockAddons || PylonPylons) && (MacroData.Minerals >= 100 || commander.LastAbility == Abilities.BUILD_PYLON) && commander.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE)
                     {
                         if (BlockAddons)
                         {
-                            var buildingsWithoutAddon = commander.UnitCalculation.NearbyEnemies.Where(e => (e.Unit.UnitType == (uint)UnitTypes.TERRAN_BARRACKS || e.Unit.UnitType == (uint)UnitTypes.TERRAN_FACTORY || e.Unit.UnitType == (uint)UnitTypes.TERRAN_STARPORT) && !e.Unit.HasAddOnTag && BuildingBuilder.HasRoomForAddon(e.Unit)).OrderBy(e => Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position));
+                            var buildingsWithoutAddon = commander.UnitCalculation.NearbyEnemies.Where(e => (e.Unit.UnitType == (uint)UnitTypes.TERRAN_BARRACKS || e.Unit.UnitType == (uint)UnitTypes.TERRAN_FACTORY || e.Unit.UnitType == (uint)UnitTypes.TERRAN_STARPORT) && !e.Unit.HasAddOnTag && !e.Unit.IsActive && BuildingBuilder.HasRoomForAddon(e.Unit)).OrderBy(e => Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position));
                             if (buildingsWithoutAddon.Count() == 1)
                             {
                                 var buildingWithoutAddon = buildingsWithoutAddon.FirstOrDefault();
@@ -159,6 +169,7 @@
                                             var wallBlock = commander.Order(frame, Abilities.BUILD_PYLON, point);
                                             if (wallBlock != null)
                                             {
+                                                BlockSpot = point;
                                                 commands.AddRange(wallBlock);
                                                 continue;
                                             }

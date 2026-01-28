@@ -132,6 +132,10 @@
         {
             foreach (var tag in deadUnits)
             {
+                foreach (var commander in UnitCommanders.Where(c => c.UnitCalculation.Unit.Tag == tag))
+                {
+                    commander.Claimed = false;
+                }
                 UnitCommanders.RemoveAll(c => c.UnitCalculation.Unit.Tag == tag);
                 foreach (var squad in BaseSquads)
                 {

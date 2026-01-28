@@ -237,6 +237,7 @@
         public override List<SC2APIProtocol.Action> Retreat(UnitCommander commander, Point2D defensivePoint, Point2D groupCenter, int frame)
         {
             List<SC2Action> actions = null;
+            if (commander.UnitCalculation.Loaded) { return actions; }
             if (OffensiveAbility(commander, defensivePoint, defensivePoint, groupCenter, null, frame, out actions))
             {
                 return actions;

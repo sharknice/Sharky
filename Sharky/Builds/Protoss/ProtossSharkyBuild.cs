@@ -73,7 +73,7 @@
 
         protected void SendProbeForEarlyFirstPylon(int frame)
         {
-            if (MacroData.FoodUsed == 13 && MacroData.Minerals > 44 && UnitCountService.Count(UnitTypes.PROTOSS_PYLON) == 0)
+            if (MacroData.FoodUsed == 14 && UnitCountService.Count(UnitTypes.PROTOSS_PYLON) == 0)
             {
                 PrePositionBuilderTask.SendBuilder(GetPylonPosition(), frame);
             }

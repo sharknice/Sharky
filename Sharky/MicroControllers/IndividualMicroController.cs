@@ -510,7 +510,7 @@
         {
             action = null;
 
-            if (AttackData.OnlyDefendOnHighGround)
+            if (AttackData.OnlyDefendOnHighGround && (AttackData.TargetPriorityCalculation == null || !AttackData.TargetPriorityCalculation.Overwhelm))
             {
                 if (bestTarget != null)
                 {
@@ -1299,7 +1299,7 @@
                     range = attack.Range;
                 }
 
-                if (!alwaysRun && commander.UnitCalculation.Range < range && commander.UnitCalculation.UnitTypeData.MovementSpeed <= attack.UnitTypeData.MovementSpeed)
+                if (!alwaysRun && commander.UnitCalculation.Range < range && commander.UnitCalculation.UnitTypeData.MovementSpeed <= attack.UnitTypeData.MovementSpeed && commander.UnitCalculation.Damage > 0)
                 {
                     return false; // if we can't get out of range before we attack again don't bother running away
                 }
@@ -2983,6 +2983,14 @@
                     var closestCyclone = enemyCyclones.OrderBy(e => Vector2.DistanceSquared(commander.UnitCalculation.Position, e.Position)).FirstOrDefault(e => e.FrameLastSeen == frame);
                     if (closestCyclone != null)
                     {
+                        if (!commander.UnitCalculation.EnemiesInRange.Any(e => e.Unit.Tag == closestCyclone.Unit.Tag))
+                        {
+                            if (Vector2.Distance(commander.UnitCalculation.Position, target.ToVector2()) > 15 && Vector2.Distance(commander.UnitCalculation.Position, defensivePoint.ToVector2()) > 15)
+                            {
+                                return false;
+                            }
+                        }
+
                         action = commander.Order(frame, Abilities.ATTACK, null, closestCyclone.Unit.Tag);
                         return true;
                     }
@@ -3049,8 +3057,13 @@
             }
 
             var estimatedSiegeDps = siegedCount * 75;
-
-            var otherEnemyAttacks = commander.UnitCalculation.EnemiesInRangeOf.Where(u => u.Unit.UnitType != (uint)UnitTypes.TERRAN_SIEGETANKSIEGED);
+            var furthestTank = 200f;
+            if (enemySiegedTanks.Any())
+            {
+                var furthest = enemySiegedTanks.OrderBy(e => Vector2.DistanceSquared(e.Position, commander.UnitCalculation.Position)).LastOrDefault();
+                furthestTank = Vector2.DistanceSquared(furthest.Position, commander.UnitCalculation.Position);
+            }
+            var otherEnemyAttacks = commander.UnitCalculation.NearbyEnemies.Where(u => u.Unit.UnitType != (uint)UnitTypes.TERRAN_SIEGETANKSIEGED && u.DamageGround && Vector2.DistanceSquared(u.Position, commander.UnitCalculation.Position) < furthestTank);
             var otherDps = otherEnemyAttacks.Sum(e => e.Dps);
 
             if (commander.UnitCalculation.Unit.IsHallucination || estimatedSiegeDps > otherDps)

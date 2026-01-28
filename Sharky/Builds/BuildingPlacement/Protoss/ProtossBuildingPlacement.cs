@@ -75,7 +75,12 @@
             }
             else
             {
-                return FindProductionPlacement(target, size, maxDistance, mineralProximity, wallOffType, requireVision, allowBlockBase, requireSameHeight);
+                var allowNexusTouch = true;
+                if (unitType == UnitTypes.PROTOSS_ROBOTICSFACILITY) 
+                { 
+                    allowNexusTouch = false; 
+                }
+                return FindProductionPlacement(target, size, maxDistance, mineralProximity, wallOffType, requireVision, allowBlockBase, requireSameHeight, allowNexusTouch);
             }
         }
 
@@ -193,11 +198,11 @@
             return false;
         }
 
-        public Point2D FindProductionPlacement(Point2D target, float size, float maxDistance, float minimumMineralProximinity = 2, WallOffType wallOffType = WallOffType.None, bool requireVision = false, bool allowBlockBase = true, bool requireSameHeight = false)
+        public Point2D FindProductionPlacement(Point2D target, float size, float maxDistance, float minimumMineralProximinity = 2, WallOffType wallOffType = WallOffType.None, bool requireVision = false, bool allowBlockBase = true, bool requireSameHeight = false, bool allowNexusTouch = true)
         {
             if (!allowBlockBase && size == 3)
             {
-                var spot = ProtossProductionGridPlacement.FindPlacement(target, size, maxDistance, minimumMineralProximinity);
+                var spot = ProtossProductionGridPlacement.FindPlacement(target, size, maxDistance, minimumMineralProximinity, allowNexusTouch);
                 if (spot != null) { return spot; }
             }
 
@@ -231,7 +236,7 @@
             var startHeight = MapDataService.MapHeight(target);
 
             var targetVector = new Vector2(target.X, target.Y);
-            var powerSources = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && c.UnitCalculation.Unit.BuildProgress == 1).OrderBy(c => Vector2.DistanceSquared(c.UnitCalculation.Position, targetVector));
+            var powerSources = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && c.UnitCalculation.Unit.BuildProgress == 1 && c.UnitRole != UnitRole.BlockAddon).OrderBy(c => Vector2.DistanceSquared(c.UnitCalculation.Position, targetVector));
             foreach (var powerSource in powerSources)
             {
                 if (Vector2.DistanceSquared(new Vector2(target.X, target.Y), powerSource.UnitCalculation.Position) > (maxDistance + 8) * (maxDistance + 8)) 
@@ -286,7 +291,7 @@
                             tooClose = true;
                         }
 
-                        if (!allowBlockBase && BaseData.BaseLocations.Any(b => Vector2.DistanceSquared(new Vector2(b.Location.X, b.Location.Y), vector) < 25))
+                        if (!tooClose && !allowBlockBase && BaseData.BaseLocations.Any(b => Vector2.DistanceSquared(new Vector2(b.Location.X, b.Location.Y), vector) < 25))
                         {
                             tooClose = true;
                         }
@@ -337,7 +342,7 @@
             {
                 return null;
             }
-            return FindProductionPlacementTryHarder(target, size, maxDistance, minimumMineralProximinity, allowBlockBase);
+            return FindProductionPlacementTryHarder(target, size, maxDistance, minimumMineralProximinity, allowBlockBase, allowNexusTouch);
         }
 
         bool BlocksWall(Vector2 vector)
@@ -357,7 +362,7 @@
             return false;
         }
 
-        Point2D FindProductionPlacementTryHarder(Point2D target, float size, float maxDistance, float minimumMineralProximinity, bool allowBlockBase)
+        Point2D FindProductionPlacementTryHarder(Point2D target, float size, float maxDistance, float minimumMineralProximinity, bool allowBlockBase, bool allowNexusTouch)
         {
             var targetVector = new Vector2(target.X, target.Y);
             var powerSources = ActiveUnitData.Commanders.Values.Where(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && c.UnitCalculation.Unit.BuildProgress == 1).OrderBy(c => Vector2.DistanceSquared(c.UnitCalculation.Position, targetVector));
@@ -415,12 +420,17 @@
                             tooClose = true;
                         }
 
-                        if (!allowBlockBase && BuildingService.BlocksResourceCenter(x, y, size/2f))
+                        if (!tooClose && !allowBlockBase && BuildingService.BlocksResourceCenter(x, y, size/2f))
                         {
                             tooClose = true;
                         }
 
-                        if (BuildingService.Blocked(point.X, point.Y, size / 2.0f, 0))
+                        if (!tooClose && BuildingService.Blocked(point.X, point.Y, size / 2.0f, 0))
+                        {
+                            tooClose = true;
+                        }
+
+                        if (!tooClose && !allowNexusTouch && ActiveUnitData.SelfUnits.Values.Any(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS && Vector2.Distance(a.Position, vector) < 6))
                         {
                             tooClose = true;
                         }

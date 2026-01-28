@@ -48,6 +48,10 @@
         {
             foreach (var tag in deadUnits)
             {
+                foreach (var commander in UnitCommanders.Where(c => c.UnitCalculation.Unit.Tag == tag))
+                {
+                    commander.Claimed = false;
+                }
                 if (UnitCommanders.RemoveAll(c => c.UnitCalculation.Unit.Tag == tag) > 0)
                 {
                     Deaths++;

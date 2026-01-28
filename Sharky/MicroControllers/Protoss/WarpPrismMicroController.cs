@@ -310,7 +310,7 @@
             return new Point2D { X = target.X + (float)x, Y = target.Y - (float)y };
         }
 
-        bool UnloadUnits(UnitCommander commander, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
+        protected bool UnloadUnits(UnitCommander commander, Point2D defensivePoint, int frame, out List<SC2APIProtocol.Action> action)
         {
             action = null;
 

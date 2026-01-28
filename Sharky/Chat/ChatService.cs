@@ -79,7 +79,7 @@
         public async void SendChatMessages(IEnumerable<string> messages, bool teamChannel = false)
         {
             var typeTime = 0;
-            foreach (var message in messages.ToList())
+            foreach (var message in messages.ToList().Where(m => m.Length > 0))
             {
                 var chatAction = new SC2Action { ActionChat = new ActionChat { Message = message } };
                 if (teamChannel)
@@ -105,7 +105,7 @@
             if (SharkyOptions.Debug)
             {
                 var typeTime = 0;
-                foreach (var message in messages)
+                foreach (var message in messages.Where(m => m.Length > 0))
                 {
                     var chatAction = new SC2Action { ActionChat = new ActionChat { Message = message, Channel = ActionChat.Types.Channel.Team } };
 

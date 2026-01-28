@@ -4,15 +4,17 @@
     {
         BaseData BaseData;
         TargetingData TargetingData;
+        MapDataService MapDataService;
 
         IIndividualMicroController ZealotMicroController;
 
-        bool started { get; set; }
+        public bool Started { get; set; }
 
         public ZealotHarassTask(DefaultSharkyBot defaultSharkyBot, bool enabled, float priority, IIndividualMicroController zealotMicroController)
         {
             BaseData = defaultSharkyBot.BaseData;
             TargetingData = defaultSharkyBot.TargetingData;
+            MapDataService = defaultSharkyBot.MapDataService;
 
             ZealotMicroController = zealotMicroController;
 
@@ -26,7 +28,7 @@
         {
             if (UnitCommanders.Count() == 0)
             {
-                if (started)
+                if (Started)
                 {
                     Disable();
                     return;
@@ -39,7 +41,7 @@
                         commander.Value.Claimed = true;
                         commander.Value.UnitRole = UnitRole.Harass;
                         UnitCommanders.Add(commander.Value);
-                        started = true;
+                        Started = true;
                         return;
                     }
                 }
@@ -54,6 +56,7 @@
             var mainPoint = BaseData.EnemyBaseLocations.FirstOrDefault().MineralLineLocation;
             var mainVector = new Vector2(mainPoint.X, mainPoint.Y);
 
+            // TODO: check if below height of enemy main and ramp is walled off, if so attack wall
             foreach (var commander in UnitCommanders)
             {
                 if (commander.UnitCalculation.Unit.Shield + commander.UnitCalculation.Unit.Health < 25 && Vector2.DistanceSquared(commander.UnitCalculation.Position, mainVector) < 500 && commander.UnitCalculation.EnemiesInRangeOfAvoid.Any())
@@ -64,7 +67,8 @@
                         commands.AddRange(action);
                     }
                 }
-                else if (commander.UnitCalculation.EnemiesInRange.Any(e => !e.Attributes.Contains(SC2Attribute.Structure)) || Vector2.DistanceSquared(commander.UnitCalculation.Position, mainVector) < 100)
+                else if (commander.UnitCalculation.EnemiesInRange.Any(e => !e.Attributes.Contains(SC2Attribute.Structure)) || 
+                    (Vector2.DistanceSquared(commander.UnitCalculation.Position, mainVector) < 16 && MapDataService.MapHeight(commander.UnitCalculation.Position) == MapDataService.MapHeight(mainVector)))
                 {
                     var action = ZealotMicroController.HarassWorkers(commander, mainPoint, TargetingData.MainDefensePoint, frame);
                     if (action != null)
@@ -80,8 +84,6 @@
                         commands.AddRange(action);
                     }
                 }
-
-                
             }
 
             return commands;

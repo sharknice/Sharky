@@ -22,7 +22,7 @@
             LastLocations = new List<Point2D>();
         }
 
-        public Point2D FindPlacement(Point2D target, float size, float maxDistance, float minimumMineralProximinity)
+        public Point2D FindPlacement(Point2D target, float size, float maxDistance, float minimumMineralProximinity, bool allowNexusTouch)
         {
             foreach (var selfBase in BaseData.SelfBases.Take(1))
             {
@@ -41,9 +41,12 @@
                 while (x - xStart < 30)
                 {
                     var point = GetValidPointInColumn(x, size, baseHeight, yStart, selfBase.MineralFields, selfBase.VespeneGeysers, maxDistance, targetVector);
-                    if (closest == null || point != null && Vector2.DistanceSquared(new Vector2(point.X, point.Y), targetVector) < Vector2.DistanceSquared(new Vector2(closest.X, closest.Y), targetVector))
+                    if (point != null && (closest == null || Vector2.DistanceSquared(new Vector2(point.X, point.Y), targetVector) < Vector2.DistanceSquared(new Vector2(closest.X, closest.Y), targetVector)))
                     {
-                        closest = point;
+                        if (allowNexusTouch || !ActiveUnitData.SelfUnits.Values.Any(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS && Vector2.Distance(a.Position, point.ToVector2()) < 6))
+                        {
+                            closest = point;
+                        }
                     }
                     x += 10;
                 }
@@ -51,9 +54,12 @@
                 while (xStart - x < 30)
                 {
                     var point = GetValidPointInColumn(x, size, baseHeight, yStart, selfBase.MineralFields, selfBase.VespeneGeysers, maxDistance, targetVector);
-                    if (closest == null || point != null && Vector2.DistanceSquared(new Vector2(point.X, point.Y), targetVector) < Vector2.DistanceSquared(new Vector2(closest.X, closest.Y), targetVector))
+                    if (point != null && (closest == null || Vector2.DistanceSquared(new Vector2(point.X, point.Y), targetVector) < Vector2.DistanceSquared(new Vector2(closest.X, closest.Y), targetVector)))
                     {
-                        closest = point;
+                        if (allowNexusTouch || !ActiveUnitData.SelfUnits.Values.Any(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_NEXUS && Vector2.Distance(a.Position, point.ToVector2()) < 6))
+                        {
+                            closest = point;
+                        }
                     }
                     x -= 10;
                 }
@@ -151,7 +157,7 @@
                 (vespeneGeysers == null || !vespeneGeysers.Any(m => Vector2.DistanceSquared(new Vector2(m.Pos.X, m.Pos.Y), vector) < 25)) &&
                 BuildingService.RoomBelowAndAbove(x, y, size) && !BlocksWall(vector))
             {
-                if (ActiveUnitData.Commanders.Values.Any(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && c.UnitCalculation.Unit.BuildProgress == 1 && Vector2.DistanceSquared(c.UnitCalculation.Position, vector) < 42.25))
+                if (ActiveUnitData.Commanders.Values.Any(c => c.UnitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && c.UnitCalculation.Unit.BuildProgress == 1 && c.UnitRole != UnitRole.BlockAddon && Vector2.DistanceSquared(c.UnitCalculation.Position, vector) < 42.25))
                 {
                     return new Point2D { X = x, Y = y };
                 }

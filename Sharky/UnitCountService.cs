@@ -58,6 +58,11 @@
             return EquivalentTypeCount(unitType) + BuildingsInProgressCount(unitType);
         }
 
+        public bool BuildingInProgress(UnitTypes unitType)
+        {
+            return EquivalentTypeCount(unitType) > EquivalentTypeCompleted(unitType) || BuildingsInProgressCount(unitType) > 0;
+        }
+
         public int BuildingsInProgressCount(UnitTypes unitType)
         {
             if (SharkyUnitData.BuildingData.ContainsKey(unitType))
