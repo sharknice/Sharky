@@ -37,7 +37,7 @@
                         }
                         if (unitCalculation.Unit.UnitType == (uint)UnitTypes.PROTOSS_PYLON && unitCalculation.Unit.BuildProgress > .9f && unitCalculation.Unit.Shield < 1 && unitCalculation.EnemiesThreateningDamage.Sum(e => e.Damage) >= 25)
                         {
-                            if (unitCalculation.NearbyAllies.Any(c => c.Unit.BuildProgress > .9f && (c.Unit.UnitType == (uint)UnitTypes.PROTOSS_PHOTONCANNON || c.Unit.UnitType == (uint)UnitTypes.PROTOSS_SHIELDBATTERY) && Vector2.DistanceSquared(c.Position, unitCalculation.Position) < 50))
+                            if (unitCalculation.NearbyAllies.Any(c => c.Unit.BuildProgress > .9f && !c.Unit.IsPowered && (c.Unit.UnitType == (uint)UnitTypes.PROTOSS_PHOTONCANNON || c.Unit.UnitType == (uint)UnitTypes.PROTOSS_SHIELDBATTERY) && Vector2.DistanceSquared(c.Position, unitCalculation.Position) < 50))
                             {
                                 continue;
                             }

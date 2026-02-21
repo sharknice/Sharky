@@ -482,7 +482,7 @@
             var hellbatMorphTask = new HellbatMorphTask(this, false, 0.5f);
             var salvageMainBunkerTask = new SalvageMainBunkerTask(this, false, 0.5f);
             var nexusRecallTask = new NexusRecallTask(this, false, 0.5f);
-            var forceFieldRampTask = new ForceFieldRampTask(TargetingData, ActiveUnitData, MapData, WallService, MapDataService, false, 0.5f);
+            var forceFieldRampTask = new ForceFieldRampTask(TargetingData, ActiveUnitData, MapData, WallService, MapDataService, false, 0.25f);
             var denyExpansionsTask = new DenyExpansionsTask(this, false, 1.1f);
             var darkTemplarHarassTask = new DarkTemplarHarassTask(BaseData, TargetingData, MapDataService, darkTemplarMicroController, 2, false);
             var defensiveZealotWarpInTask = new DefensiveZealotWarpInTask(this, false, .5f);

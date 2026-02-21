@@ -77,7 +77,7 @@
             }
 
             var workers = commander.UnitCalculation.NearbyEnemies.Where(e => e.UnitClassifications.HasFlag(UnitClassification.Worker));
-            if (commander.UnitCalculation.Unit.WeaponCooldown < 15 && workers.Any())
+            if ((commander.UnitCalculation.Unit.WeaponCooldown < 15 || commander.UnitCalculation.Unit.Health == commander.UnitCalculation.Unit.HealthMax || !commander.UnitCalculation.EnemiesInRangeOfAvoid.Any(e => e.UnitClassifications.HasFlag(UnitClassification.ArmyUnit) || e.UnitClassifications.HasFlag(UnitClassification.DefensiveStructure))) && workers.Any())
             {
                 var bestAttackPosition = GetBestAttackPosition(commander, workers, frame);                
                 return commander.Order(frame, Abilities.MOVE, bestAttackPosition);

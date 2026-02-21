@@ -260,6 +260,17 @@
                     }
                     continue;
                 }
+
+                if (commander.UnitCalculation.NearbyEnemies.Any(e => e.Unit.IsFlying && e.DamageGround && e.FrameLastSeen == frame && Vector2.Distance(e.Position, commander.UnitCalculation.Position) < 15))
+                {
+                    var action = HellionMicroController.Retreat(commander, TargetingData.MainDefensePoint, null, frame);
+                    if (action != null)
+                    {
+                        commands.AddRange(action);
+                    }
+                    continue;
+                }
+
                 // go straight to mineral line, ignoring enemies
                 if (Vector2.DistanceSquared(commander.UnitCalculation.Position, AttackPoint.ToVector2()) > 100)
                 {
