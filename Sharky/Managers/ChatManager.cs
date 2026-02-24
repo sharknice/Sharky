@@ -98,6 +98,7 @@
             if (LastFrameTime != 0)
             {
                 RuntimeFrameRate = 1000.0 / (DateTimeOffset.Now.ToUnixTimeMilliseconds() - LastFrameTime);
+                if (RuntimeFrameRate < 0) { RuntimeFrameRate = 0; }
                 ActiveChatData.TimeModulation = RuntimeFrameRate / SharkyOptions.FramesPerSecond;
             }
             LastFrameTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();

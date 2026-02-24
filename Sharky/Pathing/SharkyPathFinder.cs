@@ -50,6 +50,7 @@
         public List<Vector2> GetSafeGroundPath(float startX, float startY, float endX, float endY, int frame)
         {
             var grid = GetGroundDamageGrid(frame);
+            if (grid == null) { return new List<Vector2>(); }
             var path = GetPath(grid, startX, startY, endX, endY);
             if (!path.Any())
             {
@@ -167,6 +168,7 @@
                 var cellSize = new Size(Distance.FromMeters(1), Distance.FromMeters(1));
                 var traversalVelocity = Velocity.FromMetersPerSecond(1);
                 GroundDamageGrid = Grid.CreateGridWithLateralAndDiagonalConnections(gridSize, cellSize, traversalVelocity);
+                if (GroundDamageGrid == null) { return null; }
                 for (var x = 0; x < MapData.MapWidth; x++)
                 {
                     for (var y = 0; y < MapData.MapHeight; y++)
