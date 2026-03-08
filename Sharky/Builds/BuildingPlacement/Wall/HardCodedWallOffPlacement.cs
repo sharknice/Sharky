@@ -35,7 +35,7 @@
             if (baseLocation == null) { return null; }
 
             WallData wallData = null;
-            if (wallOffType == WallOffType.Partial)
+            if (wallOffType == WallOffType.Partial || wallOffType == WallOffType.Full)
             {
                 wallData = MapData.WallData.FirstOrDefault(b => b.BasePosition.X == baseLocation.X && b.BasePosition.Y == baseLocation.Y);
                 if (wallData == null) { return null; }
