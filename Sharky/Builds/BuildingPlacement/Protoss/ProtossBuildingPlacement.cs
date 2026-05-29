@@ -314,7 +314,7 @@
                                     {
                                         if (!requireSameHeight || MapDataService.MapHeight(point) == startHeight)
                                         {
-                                            if (!LastLocations.Any(l => l.X == x && l.Y == y))
+                                            if (!LastLocations.Contains(point))
                                             {
                                                 DebugService.DrawSphere(new Point { X = point.X, Y = point.Y, Z = 12 });
 
