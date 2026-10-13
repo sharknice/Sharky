@@ -55,7 +55,7 @@
                     }               
                 }
 
-                if (nexus.UnitRole != UnitRole.Defend && nexus.UnitCalculation.NearbyAllies.Any(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_SHIELDBATTERY && Vector2.DistanceSquared(nexus.UnitCalculation.Position, a.Position) <= 64))
+                if (nexus.UnitRole != UnitRole.Defend && nexus.UnitCalculation.NearbyAllies.Any(a => a.Unit.UnitType == (uint)UnitTypes.PROTOSS_SHIELDBATTERY && Vector2.DistanceSquared(nexus.UnitCalculation.Position, a.Position) <= 64 && a.Unit.BuildProgress > .75f))
                 {
                     nexus.UnitRole = UnitRole.Defend;
                 }

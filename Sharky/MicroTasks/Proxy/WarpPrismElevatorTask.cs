@@ -417,6 +417,13 @@
             if (DefensiveLocation == null)
             {
                 DefensiveLocation = ProxyLocationService.GetCliffProxyLocation();
+                if (DefensiveLocation == null)
+                {
+                    Console.WriteLine("Exception: No Cliff Proxy Location Found, ProxyLocationService.GetCliffProxyLocation() returned null");
+                    ChatService.SendChatMessage("tag:exception");
+                    Disable();
+                    return;
+                }
                 TargetLocation = TargetingData.EnemyMainBasePoint;
                 DropArea = AreaService.GetTargetArea(TargetLocation);
 

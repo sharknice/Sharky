@@ -510,6 +510,8 @@
         {
             action = null;
 
+            if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority == TargetPriority.FullRetreat) { return false; }
+
             if (AttackData.OnlyDefendOnHighGround && (AttackData.TargetPriorityCalculation == null || !AttackData.TargetPriorityCalculation.Overwhelm))
             {
                 if (bestTarget != null)
@@ -1420,9 +1422,9 @@
         {
             action = null;
 
-            if (commander.UnitCalculation.EnemiesInRange.Any() && WeaponReady(commander, frame) && !SharkyUnitData.NoWeaponCooldownTypes.Contains((UnitTypes)commander.UnitCalculation.Unit.UnitType)) // keep shooting as you retreat
+            if (commander.UnitCalculation.TargetPriorityCalculation.TargetPriority != TargetPriority.FullRetreat && commander.UnitCalculation.EnemiesInRange.Any() && WeaponReady(commander, frame) && !SharkyUnitData.NoWeaponCooldownTypes.Contains((UnitTypes)commander.UnitCalculation.Unit.UnitType)) // keep shooting as you retreat
             {
-                var bestTarget = GetBestTarget(commander, target, frame);
+                var bestTarget = GetBestTargetFromList(commander, commander.UnitCalculation.EnemiesInRange, null);
                 if (bestTarget != null && MapDataService.SelfVisible(bestTarget.Unit.Pos) && bestTarget.FrameLastSeen == frame)
                 {
                     action = commander.Order(frame, Abilities.ATTACK, null, bestTarget.Unit.Tag);
@@ -1469,6 +1471,17 @@
                     }
                 }
 
+                // TODO: if need to retreat down ramp just move direct
+                if (defensivePoint.Distance(commander.UnitCalculation.Position.ToPoint2D()) > 20)
+                {
+                    var badChokes = TargetingData.ChokePoints.Bad.Any(b => Vector2.DistanceSquared(b.Center, commander.UnitCalculation.Position) < 100);
+                    if (badChokes)
+                    {
+                        action = commander.Order(frame, Abilities.MOVE, defensivePoint);
+                        return true;
+                    }
+                }
+
                 if (commander.RetreatPathFrame + 2 < frame || commander.RetreatPathIndex >= commander.RetreatPath.Count)
                 {
                     if (commander.UnitCalculation.Unit.IsFlying)
@@ -1481,6 +1494,17 @@
                     }
                     commander.RetreatPathFrame = frame;
                     commander.RetreatPathIndex = 1;
+                }
+
+                // do not retreat closer to the enemy
+                if (closestEnemy != null && commander.RetreatPath.Any() && commander.RetreatPathIndex < commander.RetreatPath.Count)
+                {
+                    var point = commander.RetreatPath[commander.RetreatPathIndex];
+                    if (Vector2.DistanceSquared(closestEnemy.Position, point) < Vector2.DistanceSquared(commander.UnitCalculation.Position, closestEnemy.Position))
+                    {
+                        action = commander.Order(frame, Abilities.MOVE, defensivePoint);
+                        return true;
+                    }
                 }
 
                 if (FollowPath(commander, frame, out action)) { return true; }

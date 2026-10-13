@@ -195,7 +195,7 @@
                                 workerRushActive = true;
                                 while (commanders.Count(c => c.Value.UnitRole == UnitRole.Defend) < desiredWorkers)
                                 {
-                                    var commander = commanders.FirstOrDefault(c => c.Value.UnitRole != UnitRole.Defend && c.Value.UnitRole != UnitRole.PreventGasSteal).Value;
+                                    var commander = commanders.FirstOrDefault(c => c.Value.UnitRole != UnitRole.Defend && c.Value.UnitRole != UnitRole.PreventGasSteal && c.Value.UnitRole != UnitRole.Build).Value;
                                     if (commander != null)
                                     {
                                         commander.UnitRole = UnitRole.Defend;

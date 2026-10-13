@@ -41,6 +41,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="StaticData\opponents\WilldZergBot.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="StaticData\opponents\12PoolBot.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

@@ -551,7 +551,7 @@
             MicroTaskData[bunkerReadyToRepairTask.GetType().Name] = bunkerReadyToRepairTask;
             MicroTaskData[squadPerBaseTask.GetType().Name] = squadPerBaseTask;
 
-            MicroManager = new MicroManager(ActiveUnitData, MicroTaskData, SharkyOptions, DebugService);
+            MicroManager = new MicroManager(ActiveUnitData, MicroTaskData, SharkyOptions, DebugService, MacroData);
             Managers.Add(MicroManager);
 
             AttackDataManager = new AttackDataManager(AttackData, ActiveUnitData, attackTask, TargetPriorityService, TargetingData, MacroData, BaseData, DebugService);

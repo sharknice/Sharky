@@ -6,13 +6,15 @@
         MicroTaskData MicroTaskData;
         SharkyOptions SharkyOptions;
         DebugService DebugService;
+        MacroData MacroData;
 
-        public MicroManager(ActiveUnitData activeUnitData, MicroTaskData microTaskData, SharkyOptions sharkyOptions, DebugService debugService)
+        public MicroManager(ActiveUnitData activeUnitData, MicroTaskData microTaskData, SharkyOptions sharkyOptions, DebugService debugService, MacroData macroData)
         {
             ActiveUnitData = activeUnitData;
             MicroTaskData = microTaskData;
             SharkyOptions = sharkyOptions;
             DebugService = debugService;
+            MacroData = macroData;
         }
 
         public override bool NeverSkip { get => true; }
@@ -20,6 +22,7 @@
         public override IEnumerable<SC2Action> OnFrame(ResponseObservation observation)
         {
             var frame = (int)observation.Observation.GameLoop;
+            MacroData.Frame = frame;
 
             var actions = new List<SC2Action>();
             foreach (var microTask in MicroTaskData.Values.Where(m => m.Enabled).OrderBy(m => m.Priority))

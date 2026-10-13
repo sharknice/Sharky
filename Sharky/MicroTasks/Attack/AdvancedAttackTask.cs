@@ -3,23 +3,23 @@
     public class AdvancedAttackTask : MicroTask, IAttackTask
     {
         protected AttackData AttackData;
-        TargetingData TargetingData;
-        ActiveUnitData ActiveUnitData;
-        MicroTaskData MicroTaskData;
-        MacroData MacroData;
-        SharkyUnitData SharkyUnitData;
-        EnemyData EnemyData;
+        protected TargetingData TargetingData;
+        protected ActiveUnitData ActiveUnitData;
+        protected MicroTaskData MicroTaskData;
+        protected MacroData MacroData;
+        protected SharkyUnitData SharkyUnitData;
+        protected EnemyData EnemyData;
 
-        IMicroController MicroController;
+        protected IMicroController MicroController;
 
         protected TargetingService TargetingService;
-        EnemyCleanupService EnemyCleanupService;
-        UnitCountService UnitCountService;
+        protected EnemyCleanupService EnemyCleanupService;
+        protected UnitCountService UnitCountService;
 
-        ArmySplitter DefenseArmySplitter;
-        ArmySplitter AttackArmySplitter;
-        CameraManager CameraManager;
-        MapDataService MapDataService;
+        protected ArmySplitter DefenseArmySplitter;
+        protected ArmySplitter AttackArmySplitter;
+        protected CameraManager CameraManager;
+        protected MapDataService MapDataService;
 
         public List<UnitTypes> MainAttackers { get; set; }
         public List<UnitCommander> MainUnits { get; set; }
@@ -539,7 +539,7 @@
             }
         }
 
-        private void OrderSupportUnitsWithoutMainUnits(int frame, List<SC2Action> actions, IEnumerable<UnitCommander> supportUnits, Point2D attackPoint)
+        protected virtual void OrderSupportUnitsWithoutMainUnits(int frame, List<SC2Action> actions, IEnumerable<UnitCommander> supportUnits, Point2D attackPoint)
         {
             var stopwatch = Stopwatch.StartNew();
 
@@ -617,7 +617,7 @@
             }
         }
 
-        private bool DeathBallDefending(Point2D attackPoint)
+        protected bool DeathBallDefending(Point2D attackPoint)
         {
             if (DeathBallMode)
             {

@@ -46,7 +46,7 @@
                 TagService.TagUpgrades(SharkyUnitData);
             }
 
-            if (SharkyOptions.Debug)
+            if (SharkyOptions.Debug && observation.Observation?.RawData != null)
             {
                 if (SharkyOptions.DebugMicroTaskUnits)
                 {
