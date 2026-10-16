@@ -41,6 +41,18 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="StaticData\opponents\PhantomBot.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="StaticData\opponents\JimmyBotP.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="StaticData\opponents\WickedBot.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="StaticData\opponents\GPT.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="StaticData\opponents\WilldZergBot.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

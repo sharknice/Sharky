@@ -331,7 +331,7 @@
         {
             Console.WriteLine($"Connecting to {address}:{gamePort}");
             await Connect(gamePort, address);
-            var playerId = await JoinGameLadder(myRace, startPort, botName);
+            var playerId = await JoinGameLadder(myRace, startPort, botName, address);
             await Run(bot, playerId, opponentID, botName);
         }
 
