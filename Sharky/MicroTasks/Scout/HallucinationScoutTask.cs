@@ -1,6 +1,4 @@
-﻿using static SC2APIProtocol.AbilityData.Types;
-
-namespace Sharky.MicroTasks
+﻿namespace Sharky.MicroTasks
 {
     public class HallucinationScoutTask : MicroTask
     {

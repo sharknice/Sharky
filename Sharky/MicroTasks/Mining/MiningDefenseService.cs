@@ -84,6 +84,8 @@
                 }
             }
 
+            var enemyTagsDealtWith = new List<ulong>();
+
             foreach (var selfBase in BaseData.SelfBases)
             {
                 if (selfBase.ResourceCenter == null || !ActiveUnitData.Commanders.ContainsKey(selfBase.ResourceCenter.Tag)) { continue; }
@@ -150,7 +152,7 @@
                             if (!combatUnits.Any() && workers.Count(w => w.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE) > 0 && workers.Count(w => w.Unit.UnitType == (uint)UnitTypes.PROTOSS_PROBE) < 4)
                             {
                                 var takenGases = selfBase.GasMiningInfo.Select(i => i.ResourceUnit);
-                                var openGeysers = BaseData.BaseLocations.SelectMany(b => b.VespeneGeysers).Where(g => g.VespeneContents > 0 && !takenGases.Any(t => t.Pos.X == g.Pos.X && t.Pos.Y == g.Pos.Y));
+                                var openGeysers = selfBase.VespeneGeysers.Where(g => g.VespeneContents > 0 && !takenGases.Any(t => t.Pos.X == g.Pos.X && t.Pos.Y == g.Pos.Y));
                                 foreach (var gas in openGeysers)
                                 {
                                     foreach (var worker in workers)
@@ -158,7 +160,11 @@
                                         if (Vector2.DistanceSquared(new Vector2(gas.Pos.X, gas.Pos.Y), worker.Position) < 64)
                                         {
                                             preventGasSteal = true; // If enemy probe looking at empty gas send closest worker to touch that gas and prevent a steal
-                                            var closestDefender = commanders.OrderBy(d => Vector2.DistanceSquared(d.Value.UnitCalculation.Position, new Vector2(gas.Pos.X, gas.Pos.Y))).FirstOrDefault();
+                                            var closestDefender = commanders.FirstOrDefault(c => c.Value.UnitRole == UnitRole.PreventGasSteal && c.Value.UnitCalculation.Position.Distance(gas.Pos.ToVector2()) < 5);
+                                            if (closestDefender.Value == null)
+                                            {
+                                                closestDefender = commanders.OrderBy(d => Vector2.DistanceSquared(d.Value.UnitCalculation.Position, new Vector2(gas.Pos.X, gas.Pos.Y))).FirstOrDefault();
+                                            }
                                             if (Vector2.DistanceSquared(closestDefender.Value.UnitCalculation.Position, new Vector2(gas.Pos.X, gas.Pos.Y)) < 25)
                                             {
                                                 closestDefender.Value.UnitRole = UnitRole.PreventGasSteal;
@@ -229,7 +235,7 @@
                                     workersPerBuilding += 3;
                                 }
 
-                                var enemy = baseUnitCalculation.NearbyEnemies.Where(u => !u.Unit.IsFlying && !IgnoredThreatTypes.Contains((UnitTypes)u.Unit.UnitType)).OrderBy(u => Vector2.DistanceSquared(u.Position, new Vector2(selfBase.Location.X, selfBase.Location.Y))).FirstOrDefault();
+                                var enemy = baseUnitCalculation.NearbyEnemies.Where(u => !u.Unit.IsFlying && !IgnoredThreatTypes.Contains((UnitTypes)u.Unit.UnitType) && !enemyTagsDealtWith.Contains(u.Unit.Tag)).OrderBy(u => Vector2.DistanceSquared(u.Position, new Vector2(selfBase.Location.X, selfBase.Location.Y))).FirstOrDefault();
                                 if (enemyBuildings.Any() && !enemyBuildings.Any(u => (u.Unit.UnitType == (uint)UnitTypes.PROTOSS_PHOTONCANNON || u.Unit.UnitType == (uint)UnitTypes.ZERG_SPINECRAWLER) && u.Unit.Shield == u.Unit.ShieldMax && u.Unit.BuildProgress == 1))
                                 {
                                     while (commanders.Count(c => c.Value.UnitRole == UnitRole.Defend) < desiredWorkers && commanders.Count(c => c.Value.UnitRole == UnitRole.Defend) < commanders.Count())
@@ -282,12 +288,18 @@
                                 }
                                 else if (enemy != null)
                                 {
+                                    if (enemy.NearbyEnemies.Any(a => a.Position.Distance(enemy.Position) < 3 && ActiveUnitData.Commanders[a.Unit.Tag].LastAbility == Abilities.ATTACK))
+                                    {
+                                        continue;
+                                    }
+                                    
                                     while (commanders.Count(c => c.Value.UnitRole == UnitRole.Defend) < desiredWorkers && commanders.Count(c => c.Value.UnitRole == UnitRole.Defend) < commanders.Count())
                                     {
-                                        var commander = commanders.FirstOrDefault(c => c.Value.UnitRole != UnitRole.Defend && c.Value.UnitRole != UnitRole.PreventGasSteal && c.Value.UnitRole != UnitRole.Build && c.Value.UnitRole != UnitRole.Wall).Value;
-                                        if (commander != null)
+                                        var commander = commanders.Where(c => c.Value.UnitRole != UnitRole.Defend && c.Value.UnitRole != UnitRole.PreventGasSteal && c.Value.UnitRole != UnitRole.Build && c.Value.UnitRole != UnitRole.Wall).OrderBy(c => c.Value.UnitCalculation.Position.DistanceSquared(enemy.Position)).FirstOrDefault();
+                                        if (commander.Value != null)
                                         {
-                                            commander.UnitRole = UnitRole.Defend;
+                                            enemyTagsDealtWith.Add(enemy.Unit.Tag);
+                                            commander.Value.UnitRole = UnitRole.Defend;
                                         }
                                         else
                                         {

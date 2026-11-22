@@ -48,7 +48,8 @@
 
         protected bool started { get; set; }
 
-        UnitCalculation Pylon { get; set; }
+        protected UnitCalculation Pylon { get; set; }
+        public bool TriedToBlockWall { get; protected set; }
 
         List<Vector2> Path = new List<Vector2>();
         int PathFrame = 0;
@@ -85,6 +86,7 @@
             BlockLiftedExpansion = false;
             HidePylonInBase = false;
             BlockWall = false;
+            TriedToBlockWall = false;
             BlockAddons = false;
             RecallProbe = false;
             OnlyBlockOnce = false;
@@ -285,6 +287,7 @@
 
                     if (TryBlockWall(enemyBase, commands, commander, frame))
                     {
+                        TriedToBlockWall = true;
                         continue;
                     }
 

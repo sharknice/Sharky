@@ -64,7 +64,7 @@
                 var scouter = workers.FirstOrDefault(commander => !commander.Value.Claimed);
                 if (scouter.Value == null)
                 {
-                    var available = workers.Where(commander => !commander.Value.UnitCalculation.Unit.BuffIds.Any(b => SharkyUnitData.CarryingResourceBuffs.Contains((Buffs)b)));
+                    var available = workers.Where(commander => !commander.Value.UnitCalculation.Unit.BuffIds.Any(b => SharkyUnitData.CarryingResourceBuffs.Contains((Buffs)b)) && commander.Value.UnitRole != UnitRole.Scout);
                     var finishedBuilder = available.FirstOrDefault(commander => commander.Value.UnitRole == UnitRole.Build && commander.Value.UnitCalculation.Unit.Orders.Any(o => !o.HasTargetUnitTag));
                     if (finishedBuilder.Value != null)
                     {
@@ -83,7 +83,7 @@
                             }
                         }
                     }
-                    if (scouter.Value == null)
+                    if (scouter.Value == null && BaseData.BaseLocations.FirstOrDefault() != null)
                     {
                         scouter = available.OrderBy(c => Vector2.DistanceSquared(BaseData.BaseLocations.Skip(1).FirstOrDefault().Location.ToVector2(), c.Value.UnitCalculation.Position)).FirstOrDefault();
                         foreach (var task in MicroTaskData)

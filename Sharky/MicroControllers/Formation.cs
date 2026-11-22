@@ -6,6 +6,7 @@
         Tight,
         Loose,
         Arc,
-        Flank
+        Flank,
+        FlankTogether
     }
 }
